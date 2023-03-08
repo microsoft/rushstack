@@ -24,8 +24,8 @@ type IWebpackConfigJsExport =
   | ((env: IWebpackConfigFunctionEnv) => Promise<webpack.Configuration | webpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
-const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
-const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
+const WEBPACK_CONFIG_FILENAME_REGEX: RegExp = /^webpack.config\.(cjs|js|mjs)$/;
+const WEBPACK_DEV_CONFIG_FILENAME_REGEX: RegExp = /^webpack.dev.config\.(cjs|js|mjs)$/;
 
 export class WebpackConfigurationLoader {
   public static async tryLoadWebpackConfigAsync(
@@ -36,6 +36,8 @@ export class WebpackConfigurationLoader {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
+    const WEBPACK_CONFIG_FILENAME: string = findWebpackConfig(buildFolder, WEBPACK_CONFIG_FILENAME_REGEX);
+    const WEBPACK_DEV_CONFIG_FILENAME: string = findWebpackConfig(buildFolder, WEBPACK_CONFIG_FILENAME_REGEX);
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
@@ -90,5 +92,18 @@ export class WebpackConfigurationLoader {
     } else {
       return undefined;
     }
+  }
+}
+
+function findWebpackConfig(buildFolder: string, configurationRegExp: RegExp): string {
+  try {
+    const configs = FileSystem.readFolderItemNames(buildFolder).filter((config) => configurationRegExp.test);
+
+    if (configs.length > 1) {
+      throw new Error(`Error: Found more than one matching webpack configuration file.`);
+    }
+    return configs[0];
+  } catch (e) {
+    throw new Error(`Error finding webpack configuration: ${e}`);
   }
 }
