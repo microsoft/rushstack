@@ -71,6 +71,11 @@ describe(calculateShortestPath.name, () => {
 
     const result3: ITestOperation[] = calculateShortestPath(graph.get('a')!, graph.get('f')!);
     expect(result3.map((x) => x.name)).toMatchSnapshot('with multiple shortcuts');
+
+    graph.get('a')!.consumers.add(graph.get('f')!);
+
+    const result4: ITestOperation[] = calculateShortestPath(graph.get('a')!, graph.get('a')!);
+    expect(result4.map((x) => x.name)).toMatchSnapshot('with multiple shortcuts (circular)');
   });
 });
 
@@ -96,10 +101,27 @@ describe(calculateCriticalPathLength.name, () => {
       })
     );
 
+    const lengths: Record<string, number> = {};
+
     for (const [name, node] of graph1) {
       const criticalPathLength: number = calculateCriticalPathLength(node, new Set());
-      expect(criticalPathLength).toMatchSnapshot(name);
+      lengths[name] = criticalPathLength;
     }
+    expect(lengths).toMatchSnapshot();
+  });
+
+  it('reports circularities', () => {
+    const graph1: Map<string, ITestOperation> = createGraph([
+      ['a', 'b'],
+      ['b', 'c'],
+      ['c', 'b'],
+      ['c', 'd'],
+      ['d', 'e']
+    ]);
+
+    expect(() => {
+      calculateCriticalPathLength(graph1.get('e')!, new Set());
+    }).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -127,8 +149,11 @@ describe(calculateCriticalPathLengths.name, () => {
 
     calculateCriticalPathLengths(graph1.values());
 
+    const lengths: Record<string, number | undefined> = {};
+
     for (const [name, node] of graph1) {
-      expect(node.criticalPathLength).toMatchSnapshot(name);
+      lengths[name] = node.criticalPathLength;
     }
+    expect(lengths).toMatchSnapshot();
   });
 });

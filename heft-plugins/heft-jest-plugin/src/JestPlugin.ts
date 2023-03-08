@@ -303,7 +303,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       const { default: originalRunJest } = runJestModule;
       const runJest: typeof originalRunJest = (params: IRunJestParams): Promise<void> => {
         if (!this._executing) {
-          setTimeout(requestRun, 100);
+          requestRun();
         }
 
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {

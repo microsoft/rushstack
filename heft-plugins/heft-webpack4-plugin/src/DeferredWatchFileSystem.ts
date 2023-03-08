@@ -88,9 +88,9 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
 
     const { files, dirs, missing, changes, removals, callback } = state;
 
-    const aggregatedChanges: ReadonlySet<string> = this.watcher!.aggregatedChanges;
-    const aggregatedRemovals: ReadonlySet<string> = this.watcher!.aggregatedRemovals;
+    const { changes: aggregatedChanges, removals: aggregatedRemovals } = this.watcher!.getAggregated();
 
+    // Webpack 4 treats changes as a superset of removals
     for (const removal of aggregatedRemovals) {
       changes.add(removal);
       removals.add(removal);

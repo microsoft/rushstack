@@ -109,8 +109,8 @@ export interface IHeftTaskHooks {
   readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
 
   /**
-   * If provided, the `registerFileOperations` hook is called immediately after the first time either `run`
-   * or `runIncremental` has been invoked successfully to provide the plugin an opportunity to request
+   * If provided, the `registerFileOperations` hook is called exactly once before the first time either
+   * `run` or `runIncremental` would be invoked to provide the plugin an opportunity to request
    * dynamic file copy or deletion operations.
    */
   readonly registerFileOperations: AsyncSeriesWaterfallHook<IHeftTaskFileOperations>;

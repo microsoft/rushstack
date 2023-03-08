@@ -101,6 +101,7 @@ export class TaskOperationRunner implements IOperationRunner {
       });
 
       for (const copyOperation of fileOperations.copyOperations) {
+        // Consolidate fileExtensions, includeGlobs, excludeGlobs
         normalizeFileSelectionSpecifier(copyOperation);
       }
 
@@ -112,7 +113,7 @@ export class TaskOperationRunner implements IOperationRunner {
     const getWatchFileSystemAdapter = (): WatchFileSystemAdapter => {
       if (!watchFileSystemAdapter) {
         watchFileSystemAdapter = this._watchFileSystemAdapter ||= new WatchFileSystemAdapter();
-        watchFileSystemAdapter.prepare();
+        watchFileSystemAdapter.setBaseline();
       }
       return watchFileSystemAdapter;
     };

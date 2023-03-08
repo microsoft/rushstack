@@ -19,6 +19,13 @@ interface IWatchState {
   callback: WatchCallback;
 }
 
+interface ITimeEntry {
+  timestamp: number;
+  safeTime: number;
+}
+
+type IRawFileSystemMap = Map<string, ITimeEntry>;
+
 interface ITimeInfoEntries {
   fileTimeInfoEntries: FileSystemMap;
   contextTimeInfoEntries: FileSystemMap;
@@ -50,16 +57,25 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
     const { changes, removals, callback } = state;
 
-    if (changes.size > 0) {
-      const fs: InputFileSystem = this.inputFileSystem;
-      if (fs.purge) {
-        for (const removal of removals) {
-          fs.purge(removal);
-        }
-        for (const change of changes) {
-          fs.purge(change);
-        }
+    // Force flush the aggregation callback
+    const { changes: newChanges, removals: newRemovals } = this.watcher!.getAggregated();
+
+    // Webpack 5 treats changes and removals as separate things
+    if (newRemovals) {
+      for (const removal of newRemovals) {
+        changes.delete(removal);
+        removals.add(removal);
       }
+    }
+    if (newChanges) {
+      for (const change of newChanges) {
+        removals.delete(change);
+        changes.add(change);
+      }
+    }
+
+    if (changes.size > 0 || removals.size > 0) {
+      this._purge(removals, changes);
 
       const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
 
@@ -98,10 +114,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
     this.watcher.on('aggregated', (newChanges: Set<string>, newRemovals: Set<string>) => {
       for (const change of newChanges) {
+        removals.delete(change);
         changes.add(change);
       }
       for (const removal of newRemovals) {
-        changes.add(removal);
+        changes.delete(removal);
         removals.add(removal);
       }
 
@@ -132,25 +149,13 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         }
       },
       getInfo: () => {
-        const removals: Set<string> | undefined = this.watcher?.aggregatedRemovals;
-        const changes: Set<string> | undefined = this.watcher?.aggregatedChanges;
-        const fs: InputFileSystem = this.inputFileSystem;
-        if (fs.purge) {
-          if (removals) {
-            for (const item of removals) {
-              fs.purge(item);
-            }
-          }
-          if (changes) {
-            for (const item of changes) {
-              fs.purge(item);
-            }
-          }
-        }
+        const newRemovals: Set<string> | undefined = this.watcher?.aggregatedRemovals;
+        const newChanges: Set<string> | undefined = this.watcher?.aggregatedChanges;
+        this._purge(newRemovals, newChanges);
         const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
         return {
-          changes: changes!,
-          removals: removals!,
+          changes: newChanges!,
+          removals: newRemovals!,
           fileTimeInfoEntries,
           contextTimeInfoEntries
         };
@@ -167,14 +172,26 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
   }
 
   private _fetchTimeInfo(): ITimeInfoEntries {
-    const fileTimeInfoEntries: FileSystemMap = new Map();
-    const contextTimeInfoEntries: FileSystemMap = new Map();
-    this.watcher?.collectTimeInfoEntries(
-      // @ts-expect-error Bad typings in webpack / watchpack
-      fileTimeInfoEntries,
-      contextTimeInfoEntries
-    );
+    const fileTimeInfoEntries: IRawFileSystemMap = new Map();
+    const contextTimeInfoEntries: IRawFileSystemMap = new Map();
+    this.watcher?.collectTimeInfoEntries(fileTimeInfoEntries, contextTimeInfoEntries);
     return { fileTimeInfoEntries, contextTimeInfoEntries };
+  }
+
+  private _purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
+    const fs: InputFileSystem = this.inputFileSystem;
+    if (fs.purge) {
+      if (removals) {
+        for (const removal of removals) {
+          fs.purge(removal);
+        }
+      }
+      if (changes) {
+        for (const change of changes) {
+          fs.purge(change);
+        }
+      }
+    }
   }
 }
 

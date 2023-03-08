@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/node-core-library';
+import { InternalError, ITerminal } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../utilities/Stopwatch';
 import type {
@@ -250,11 +250,18 @@ export class Operation implements IOperationStates {
                 // the runner hangs on to an old copy of the callback.
                 this._runPending = true;
                 return;
-              default:
+
+              case OperationStatus.Blocked:
+              case OperationStatus.Cancelled:
+              case OperationStatus.Failure:
+              case OperationStatus.NoOp:
+              case OperationStatus.Success:
                 // The requestRun callback is assumed to remain constant
                 // throughout the lifetime of the process, so it is safe
                 // to capture here.
                 return requestRun();
+              default:
+                throw new InternalError(`Unexpected status: ${this.state?.status}`);
             }
           }
         : undefined

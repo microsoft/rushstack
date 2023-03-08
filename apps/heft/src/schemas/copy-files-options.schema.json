@@ -15,13 +15,25 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["sourcePath", "destinationFolders"],
+        "anyOf": [
+          {
+            "required": ["sourcePath"]
+          },
+          {
+            "required": ["includeGlobs"]
+          },
+          {
+            "required": ["fileExtensions"]
+          }
+        ],
+
+        "required": ["destinationFolders"],
 
         "properties": {
           "sourcePath": {
             "title": "Source Path",
             "type": "string",
-            "description": "The target folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be copied. To copy a single file, set \"includeGlobs\" to an array containing the exact name of the file.",
+            "description": "The target folder, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be copied. To copy a single file, set \"includeGlobs\" to an array containing the exact name of the file. If this parameter is not provided, defaults to the project root.",
             "pattern": "[^\\\\]"
           },
 
@@ -68,13 +80,13 @@
           "flatten": {
             "title": "Flatten",
             "type": "boolean",
-            "description": "Normally, when files are selected under a child folder, a corresponding folder will be created in the destination folder.  Specify flatten=true to discard the source path and copy all matching files to the same folder.  If two files have the same name an error will be reported. The default value is false."
+            "description": "Normally, copying will preserve the path relative to \"sourcePath\" under the destination folder (e.g. if \"sourcePath\" is \"src/test\" and \"destinationFolders\" is [\"out\"], \"src/test/a/b/c.txt\" will be copied to \"out/a/b/c.txt\").  Specify \"flatten=true\" to discard path information and keep only the filename (e.g. \"out/c.txt\".  If two files have the same name an error will be reported. The default value is false."
           },
 
           "hardlink": {
             "title": "Hardlink",
             "type": "boolean",
-            "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster.  The default value is false.  NOTE: This may cause unexpected behavior if a tool modifies the link. If the \"sourcePath\" is a folder, the contained directory structure will be re-created and all files will be individually hardlinked.  This means that folders will be new filesystem entities and will have separate folder metadata, while the contained files will maintain normal hardlink behavior.  This is done since folders do not have a cross-platform equivalent of a hardlink, and since file symlinks provide fundamentally different functionality in comparison to hardlinks."
+            "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster.  The default value is false.  NOTE: This may cause unexpected behavior if a tool modifies the link. The contained directory structure will be re-created and all files will be individually hardlinked.  This means that folders will be new filesystem entities and will have separate folder metadata, while the contained files will maintain normal hardlink behavior.  This is done since folders do not have a cross-platform equivalent of a hardlink, and since file symlinks provide fundamentally different functionality in comparison to hardlinks."
           }
         }
       }

@@ -32,21 +32,27 @@ export interface IWatchedFileState {
  */
 export interface IWatchFileSystemAdapter extends FileSystemAdapter {
   /**
-   * Prepares for incoming glob requests.
+   * Prepares for incoming glob requests. Any file changed after this method is called
+   * will trigger teh watch callback in the next invocation.
    * File mtimes will be recorded at this time for any files that do not receive explicit
    * stat() or lstat() calls.
    */
-  prepare(): void;
+  setBaseline(): void;
   /**
    * Watches all files that have been accessed since `prepare()` was called.
    * Clears the tracked file lists.
    */
   watch(onChange: () => void): void;
   /**
-   * Tells the adapter to track the specified file as used.
-   * Returns an object containing data about the state of said file.
+   * Tells the adapter to track the specified file (or folder) as used.
+   * Returns an object containing data about the state of said file (or folder).
    */
-  getFileStateAndTrack(filePath: string): IWatchedFileState;
+  getStateAndTrack(filePath: string): IWatchedFileState;
+}
+
+interface ITimeEntry {
+  timestamp: number;
+  safeTime: number;
 }
 
 /**
@@ -62,7 +68,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
 
   private _lastFiles: Map<string, number> | undefined;
   private _lastQueryTime: number | undefined;
-  private _times: Map<string, { timestamp: number; safeTime: number }> | undefined;
+  private _times: Map<string, ITimeEntry> | undefined;
 
   /** { @inheritdoc fs.readdirSync } */
   public readdirSync: ReaddirSynchronousMethod = ((filePath: string, options?: IReaddirOptions) => {
@@ -175,7 +181,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   /**
    * @inheritdoc
    */
-  public prepare(): void {
+  public setBaseline(): void {
     this._lastQueryTime = Date.now();
 
     if (this._watcher) {
@@ -218,7 +224,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   /**
    * @inheritdoc
    */
-  public getFileStateAndTrack(filePath: string): IWatchedFileState {
+  public getStateAndTrack(filePath: string): IWatchedFileState {
     if (!this._lastFiles || !this._times) {
       return {
         changed: true
@@ -227,7 +233,9 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
 
     const normalizedSourcePath: string = path.normalize(filePath);
     const oldTime: number | undefined = this._lastFiles.get(normalizedSourcePath);
-    const newTime: number | undefined = this._times.get(normalizedSourcePath)?.timestamp || 0;
+    const newTimeEntry: ITimeEntry | undefined = this._times.get(normalizedSourcePath);
+    const newTime: number | undefined =
+      (newTimeEntry && (newTimeEntry.timestamp ?? newTimeEntry.safeTime)) || 0;
     this._files.set(normalizedSourcePath, newTime);
 
     return {

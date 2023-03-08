@@ -195,7 +195,7 @@ function* _resolveCopyOperationPaths(
   for (const copyOperation of copyOperations) {
     yield {
       ...copyOperation,
-      sourcePath: resolvePath(copyOperation.sourcePath),
+      sourcePath: resolvePath(copyOperation.sourcePath ?? '.'),
       destinationFolders: copyOperation.destinationFolders.map(resolvePath)
     };
   }
@@ -212,7 +212,6 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     taskSession.hooks.registerFileOperations.tap(
       PLUGIN_NAME,
       (operations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
-        // TODO: Remove transformation once improved heft-config-file is used to resolve paths
         for (const operation of _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations)) {
           operations.copyOperations.add(operation);
         }

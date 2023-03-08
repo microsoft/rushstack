@@ -104,7 +104,7 @@ function* _resolveDeleteOperationPaths(
   for (const deleteOperation of deleteOperations) {
     yield {
       ...deleteOperation,
-      sourcePath: path.resolve(heftConfiguration.buildFolderPath, deleteOperation.sourcePath)
+      sourcePath: path.resolve(heftConfiguration.buildFolderPath, deleteOperation.sourcePath ?? '.')
     };
   }
 }
@@ -120,7 +120,6 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     taskSession.hooks.registerFileOperations.tap(
       PLUGIN_NAME,
       (fileOperations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
-        // TODO: Remove transform once improved heft-config-file is used
         for (const deleteOperation of _resolveDeleteOperationPaths(
           heftConfiguration,
           pluginOptions.deleteOperations
