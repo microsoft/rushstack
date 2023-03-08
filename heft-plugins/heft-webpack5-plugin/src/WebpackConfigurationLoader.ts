@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { type FolderItem, FileSystem } from '@rushstack/node-core-library';
 import type * as webpack from 'webpack';
 import type { IBuildStageProperties, ScopedLogger } from '@rushstack/heft';
 
@@ -24,8 +24,13 @@ type IWebpackConfigJsExport =
   | ((env: IWebpackConfigFunctionEnv) => Promise<webpack.Configuration | webpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
-const WEBPACK_CONFIG_FILENAME_REGEX: RegExp = /^webpack.config\.(cjs|js|mjs)$/;
-const WEBPACK_DEV_CONFIG_FILENAME_REGEX: RegExp = /^webpack.dev.config\.(cjs|js|mjs)$/;
+interface IWebpackConfigFileNames {
+  dev: string;
+  prod: string;
+}
+
+const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
+const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
 
 export class WebpackConfigurationLoader {
   public static async tryLoadWebpackConfigAsync(
@@ -36,28 +41,32 @@ export class WebpackConfigurationLoader {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
-    const WEBPACK_CONFIG_FILENAME: string = findWebpackConfig(buildFolder, WEBPACK_CONFIG_FILENAME_REGEX);
-    const WEBPACK_DEV_CONFIG_FILENAME: string = findWebpackConfig(buildFolder, WEBPACK_CONFIG_FILENAME_REGEX);
+    const webpackConfigFileNames: IWebpackConfigFileNames | undefined = await findWebpackConfigAsync(
+      buildFolder
+    );
+    const webpackDevConfigFilename: string | undefined = webpackConfigFileNames.dev;
+    const webpackConfigFilename: string | undefined = webpackConfigFileNames.prod;
+
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
       if (buildProperties.serveMode) {
         logger.terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${WEBPACK_DEV_CONFIG_FILENAME}".`
+          `Attempting to load webpack configuration from "${webpackDevConfigFilename}".`
         );
         webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
           buildFolder,
-          WEBPACK_DEV_CONFIG_FILENAME
+          webpackDevConfigFilename
         );
       }
 
       if (!webpackConfigJs) {
         logger.terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${WEBPACK_CONFIG_FILENAME}".`
+          `Attempting to load webpack configuration from "${webpackConfigFilename}".`
         );
         webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
           buildFolder,
-          WEBPACK_CONFIG_FILENAME
+          webpackConfigFilename
         );
       }
     } catch (error) {
@@ -95,16 +104,26 @@ export class WebpackConfigurationLoader {
   }
 }
 
-function findWebpackConfig(buildFolder: string, configurationRegExp: RegExp): string {
+async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConfigFileNames> {
   try {
-    const configs = FileSystem.readFolderItemNames(buildFolder).filter((config) =>
-      configurationRegExp.test(config)
-    );
-
-    if (configs.length > 1) {
-      throw new Error(`Error: Found more than one matching webpack configuration file.`);
+    const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(buildFolder);
+    const dev: string[] = [];
+    const prod: string[] = [];
+    for (let folderItem of folderItems) {
+      if (folderItem.isFile() && folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
+        dev.push(folderItem.name);
+      } else if (folderItem.isFile() && folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
+        prod.push(folderItem.name);
+      }
     }
-    return configs[0];
+
+    if (dev.length > 1 || prod.length > 1) {
+      throw new Error(`Error: Found more than one matching webpack configuration files.`);
+    }
+    return {
+      dev: dev[0] ?? WEBPACK_DEV_CONFIG_FILENAME,
+      prod: prod[0] ?? WEBPACK_CONFIG_FILENAME
+    };
   } catch (e) {
     throw new Error(`Error finding webpack configuration: ${e}`);
   }
