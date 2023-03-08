@@ -38,7 +38,7 @@ export function calculateShortestPath<T extends ISortableOperation<T>>(
   let finalParent: T | undefined;
 
   // Run a breadth-first search to find the shortest path between the start and end operations
-  for (const [operation] of parents) {
+  outer: for (const [operation] of parents) {
     for (const consumer of operation.consumers) {
       // Since this is a breadth-first traversal, the first encountered path to a given node
       // will be tied for shortest, so only the first encountered path needs to be tracked
@@ -48,7 +48,7 @@ export function calculateShortestPath<T extends ISortableOperation<T>>(
 
       if (consumer === startOperation) {
         finalParent = operation;
-        break;
+        break outer;
       }
     }
   }

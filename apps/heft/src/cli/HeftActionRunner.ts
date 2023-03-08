@@ -474,6 +474,8 @@ export class HeftActionRunner {
               operations
             );
             consumingPhaseOperation.addDependency(taskOperation);
+            // This is purely to simplify the reported graph for phase circularities
+            consumingPhaseOperation.addDependency(phaseOperation);
           }
         }
       }
