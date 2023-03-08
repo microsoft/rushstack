@@ -25,12 +25,9 @@ type IWebpackConfigJsExport =
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
 interface IWebpackConfigFileNames {
-  dev: string;
-  prod: string;
+  dev: string | undefined;
+  prod: string | undefined;
 }
-
-const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
-const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
 
 export class WebpackConfigurationLoader {
   public static async tryLoadWebpackConfigAsync(
@@ -41,16 +38,14 @@ export class WebpackConfigurationLoader {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
-    const webpackConfigFileNames: IWebpackConfigFileNames | undefined = await findWebpackConfigAsync(
-      buildFolder
-    );
-    const webpackDevConfigFilename: string | undefined = webpackConfigFileNames.dev;
-    const webpackConfigFilename: string | undefined = webpackConfigFileNames.prod;
+    const webpackConfigFiles: IWebpackConfigFileNames | undefined = await findWebpackConfigAsync(buildFolder);
+    const webpackDevConfigFilename: string | undefined = webpackConfigFiles.dev;
+    const webpackConfigFilename: string | undefined = webpackConfigFiles.prod;
 
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
-      if (buildProperties.serveMode) {
+      if (buildProperties.serveMode && webpackDevConfigFilename) {
         logger.terminal.writeVerboseLine(
           `Attempting to load webpack configuration from "${webpackDevConfigFilename}".`
         );
@@ -60,7 +55,7 @@ export class WebpackConfigurationLoader {
         );
       }
 
-      if (!webpackConfigJs) {
+      if (!webpackConfigJs && webpackConfigFilename) {
         logger.terminal.writeVerboseLine(
           `Attempting to load webpack configuration from "${webpackConfigFilename}".`
         );
@@ -109,7 +104,8 @@ async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConf
     const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(buildFolder);
     const dev: string[] = [];
     const prod: string[] = [];
-    for (let folderItem of folderItems) {
+
+    for (const folderItem of folderItems) {
       if (folderItem.isFile() && folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
         dev.push(folderItem.name);
       } else if (folderItem.isFile() && folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
@@ -121,8 +117,8 @@ async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConf
       throw new Error(`Error: Found more than one matching webpack configuration files.`);
     }
     return {
-      dev: dev[0] ?? WEBPACK_DEV_CONFIG_FILENAME,
-      prod: prod[0] ?? WEBPACK_CONFIG_FILENAME
+      dev: dev[0],
+      prod: prod[0]
     };
   } catch (e) {
     throw new Error(`Error finding webpack configuration: ${e}`);
