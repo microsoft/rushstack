@@ -45,7 +45,6 @@ Array [
 exports[`calculateShortestPath returns the shortest path: with multiple shortcuts (circular) 1`] = `
 Array [
   "a",
-  "b",
   "c",
   "f",
   "a",
@@ -55,7 +54,6 @@ Array [
 exports[`calculateShortestPath returns the shortest path: with multiple shortcuts 1`] = `
 Array [
   "a",
-  "b",
   "c",
   "f",
 ]
@@ -64,7 +62,6 @@ Array [
 exports[`calculateShortestPath returns the shortest path: with shortcut 1`] = `
 Array [
   "a",
-  "b",
   "c",
   "d",
   "e",
