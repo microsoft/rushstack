@@ -4,7 +4,9 @@
 // Load the Jest patches before anything else loads
 import './patches/jestWorkerPatch';
 
+import type { EventEmitter } from 'events';
 import * as path from 'path';
+
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
@@ -34,15 +36,23 @@ import { jestResolve } from './JestUtils';
 import { TerminalWritableStream } from './TerminalWritableStream';
 
 interface IRunJestParams {
+  globalConfig: {
+    // The `seed` property is one of the few values that gets passed as-is from the argv into
+    // the final globalConfig object. Use as a back-channel for passing the JestPlugin instance.
+    seed: JestPlugin | number | undefined;
+    findRelatedTests?: boolean;
+    nonFlagArgs?: string[];
+    onlyChanged: boolean;
+  };
   onComplete: (result: AggregatedResult) => void;
 }
 
 interface IJestWatch {
   (
-    initialGlobalConfig: unknown,
+    initialGlobalConfig: { seed: JestPlugin },
     contexts: unknown,
     outputStream: NodeJS.WriteStream,
-    hasteMapInstances: unknown,
+    hasteMapInstances: EventEmitter[],
     stdin: NodeJS.ReadStream | undefined,
     hooks: unknown,
     filter: unknown
@@ -117,6 +127,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private _jestPromise: Promise<unknown> | undefined;
   private _pendingTestRuns: Set<IPendingTestRun> = new Set();
   private _executing: boolean = false;
+
+  private _jestOutputStream: TerminalWritableStream | undefined;
+  private _changedFiles: Set<string> = new Set();
+  private _requestRun!: () => void;
 
   /**
    * Setup the hooks and custom CLI options for the Jest plugin.
@@ -256,12 +270,14 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const terminal: ITerminal = logger.terminal;
 
     const pendingTestRuns: Set<IPendingTestRun> = this._pendingTestRuns;
+    this._requestRun = requestRun;
 
     if (!this._jestPromise) {
       // Monkey-patch Jest's watch mode so that we can orchestrate it.
       const jestCoreDir: string = path.dirname(require.resolve('@jest/core'));
 
       const wrappedStdOut: TerminalWritableStream = new TerminalWritableStream(terminal);
+      this._jestOutputStream = wrappedStdOut;
 
       // Shim watch so that we can intercept the output stream
       const watchModulePath: string = path.resolve(jestCoreDir, 'watch.js');
@@ -270,19 +286,37 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       } = require(watchModulePath);
       const { default: originalWatch } = watchModule;
 
-      const watch: IJestWatch = (
-        initialGlobalConfig: unknown,
+      const watch: IJestWatch = function patchedWatch(
+        this: void,
+        initialGlobalConfig: { seed: JestPlugin },
         contexts: unknown,
         outputStream: NodeJS.WriteStream,
-        hasteMapInstances: unknown,
+        hasteMapInstances: EventEmitter[],
         stdin: NodeJS.ReadStream | undefined,
         hooks: unknown,
         filter: unknown
-      ) => {
+      ): Promise<void> {
+        // The `seed` property is one of the few values that gets passed as-is from the argv into
+        // the final globalConfig object. Use as a back-channel for passing the JestPlugin instance.
+        const host: JestPlugin = initialGlobalConfig.seed;
+        if (!(host instanceof JestPlugin)) {
+          throw new Error(`Patched Jest expected JestPlugin in argv.seed`);
+        }
+
+        // Listen to the haste maps directly to get the list of touched files
+        hasteMapInstances.forEach((hasteMap: EventEmitter, index: number) => {
+          hasteMap.on('change', ({ eventsQueue }: { eventsQueue: { filePath: string }[] }) => {
+            for (const file of eventsQueue) {
+              // Record all changed files for the next test run
+              host._changedFiles.add(file.filePath);
+            }
+          });
+        });
+
         return originalWatch(
           initialGlobalConfig,
           contexts,
-          wrappedStdOut as unknown as NodeJS.WriteStream,
+          host._jestOutputStream as unknown as NodeJS.WriteStream,
           hasteMapInstances,
           stdin,
           hooks,
@@ -301,18 +335,43 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         default: (params: IRunJestParams) => Promise<void>;
       } = require(runJestModulePath);
       const { default: originalRunJest } = runJestModule;
-      const runJest: typeof originalRunJest = (params: IRunJestParams): Promise<void> => {
-        if (!this._executing) {
-          requestRun();
+      const runJest: typeof originalRunJest = function patchedRunJest(
+        this: void,
+        params: IRunJestParams
+      ): Promise<void> {
+        const host: JestPlugin | number | undefined = params.globalConfig.seed;
+        if (!host || !(host instanceof JestPlugin)) {
+          throw new Error(`Patched Jest expected JestPlugin in argv.seed`);
+        }
+
+        if (!host._executing) {
+          host._requestRun();
         }
 
         return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-          pendingTestRuns.add(async (): Promise<AggregatedResult | undefined> => {
+          host._pendingTestRuns.add(async (): Promise<AggregatedResult | undefined> => {
             let result: AggregatedResult | undefined;
             const { onComplete } = params;
+
+            const findRelatedTests: boolean = params.globalConfig.onlyChanged && host._changedFiles.size > 0;
+
+            const globalConfig: IRunJestParams['globalConfig'] = {
+              ...params.globalConfig,
+              // Use the knowledge of changed files to implement the "onlyChanged" behavior via
+              // findRelatedTests and the list of changed files
+              findRelatedTests,
+              nonFlagArgs: findRelatedTests ? Array.from(host._changedFiles) : undefined,
+              // Turn the seed back into a number for Jest itself.
+              seed: Math.floor((2 ** 32 - 1) * Math.random() - 2 ** 31),
+              // This property can only be true when the files are tracked directly by Git
+              // Since we run tests on compiled files, this is not the case.
+              onlyChanged: false
+            };
+
             try {
               await originalRunJest({
                 ...params,
+                globalConfig,
                 onComplete: (testResults: AggregatedResult) => {
                   result = testResults;
                   onComplete(testResults);
@@ -377,6 +436,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         } else {
           terminal.writeLine(`No tests were executed.`);
         }
+      }
+
+      if (!logger.hasErrors) {
+        // If we ran tests and they succeeded, consider the files to no longer be changed.
+        // This might be overly-permissive, but there isn't a great way to identify if the changes
+        // are no longer relevant, unfortunately.
+        this._changedFiles.clear();
       }
       this._executing = false;
     } else {
@@ -451,6 +517,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       maxWorkers: options.maxWorkers,
 
       passWithNoTests: options.passWithNoTests,
+
+      // This is one of the few values that gets forwarded through the parser as-is
+      // By passing the JestPlugin instance here, we can avoid global state binding
+      seed: watch ? (this as unknown as number) : undefined,
 
       $0: process.argv0,
       _: [],
