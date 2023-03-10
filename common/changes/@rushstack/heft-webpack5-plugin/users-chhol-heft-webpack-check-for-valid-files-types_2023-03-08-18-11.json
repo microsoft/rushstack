@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-webpack5-plugin",
-      "comment": "adds support to find any valid webpack config file type",
+      "comment": "Add support for `.cjs` and `.mjs` file extensions for webpack config files, in addition to the `.js` file extension.",
       "type": "minor"
     }
   ],

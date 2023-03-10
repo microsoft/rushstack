@@ -106,16 +106,21 @@ async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConf
     const prod: string[] = [];
 
     for (const folderItem of folderItems) {
-      if (folderItem.isFile() && folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
-        dev.push(folderItem.name);
-      } else if (folderItem.isFile() && folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
-        prod.push(folderItem.name);
+      if (folderItem.isFile()) {
+        if (folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
+          dev.push(folderItem.name);
+        } else if (folderItem.isFile() && folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
+          prod.push(folderItem.name);
+        }
       }
     }
 
-    if (dev.length > 1 || prod.length > 1) {
-      throw new Error(`Error: Found more than one matching webpack configuration files.`);
+    if (dev.length > 1) {
+      throw new Error(`Error: Found more than one dev webpack configuration file.`);
+    } else if (prod.length > 1) {
+      throw new Error(`Error: Found more than one non-dev webpack configuration file.`);
     }
+
     return {
       dev: dev[0],
       prod: prod[0]
