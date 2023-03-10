@@ -109,7 +109,7 @@ async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConf
       if (folderItem.isFile()) {
         if (folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
           dev.push(folderItem.name);
-        } else if (folderItem.isFile() && folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
+        } else if (folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
           prod.push(folderItem.name);
         }
       }
