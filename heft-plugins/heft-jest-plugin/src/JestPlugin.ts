@@ -298,7 +298,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         argv: Config.Argv,
         projectPaths: string[]
       ): Promise<IReadConfigsResult> {
-        const host: JestPlugin | undefined = (argv as IWithJestPlugin)[jestPluginSymbol];
+        const host: JestPlugin | undefined = JestPlugin.getJestPlugin(argv);
         const result: IReadConfigsResult = await originalReadConfigs(argv, projectPaths);
         // Forward the JestPlugin instance from argv.
         const extendedGlobalConfig: Config.GlobalConfig & IWithJestPlugin = Object.freeze({

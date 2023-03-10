@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { performance } from 'perf_hooks';
-import { createInterface, type Interface } from 'readline';
+import { createInterface, type Interface as ReadlineInterface } from 'readline';
 import os from 'os';
 
 import {
@@ -267,7 +267,7 @@ export class HeftActionRunner {
     // less gracefully if pressed a second time.
     const cliCancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
     const cliCancellationToken: CancellationToken = cliCancellationTokenSource.token;
-    const cli: Interface = createInterface(process.stdin, undefined, undefined, true);
+    const cli: ReadlineInterface = createInterface(process.stdin, undefined, undefined, true);
     let forceTerminate: boolean = false;
     cli.on('SIGINT', () => {
       cli.close();
@@ -275,6 +275,10 @@ export class HeftActionRunner {
       if (forceTerminate) {
         terminal.writeErrorLine(`Forcibly terminating.`);
         process.exit(1);
+      } else {
+        terminal.writeLine(
+          Colors.yellow(Colors.bold(`Canceling build... Press Ctrl+C again to forcibly terminate.`))
+        );
       }
 
       forceTerminate = true;
