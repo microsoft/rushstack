@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.0",
+      "date": "Sat, 11 Mar 2023 01:24:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for `.cjs` and `.mjs` file extensions for webpack config files, in addition to the `.js` file extension."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.73",
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.73",
       "date": "Fri, 10 Feb 2023 01:18:51 GMT",
