@@ -54,6 +54,9 @@ jobs:
         with:
           node-version: ${{ matrix.NodeVersion }}
 
+      - name: Set cache environment variables
+        uses: gigara/rush-cache@v2
+
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
         working-directory: repo-a
