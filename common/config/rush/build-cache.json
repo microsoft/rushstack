@@ -15,9 +15,12 @@
   /**
    * (Required) Choose where project build outputs will be cached.
    *
-   * Possible values: "local-only", "azure-blob-storage", "amazon-s3"
+   * Possible default values: "local-only", "azure-blob-storage", "amazon-s3"
+   *
+   * github-action-build-cache is a custom provider for GitHub Actions. It uses the
+   * @gigara/rush-github-action-build-cache-plugin plugin
    */
-  "cacheProvider": "local-only",
+  "cacheProvider": "github-action-build-cache",
 
   /**
    * Setting this property overrides the cache entry ID.  If this property is set, it must contain
