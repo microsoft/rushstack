@@ -739,6 +739,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "watchpack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "webpack",
       "allowedCategories": [ "libraries", "tests" ]
     },

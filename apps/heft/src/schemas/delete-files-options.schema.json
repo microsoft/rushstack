@@ -15,7 +15,17 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["sourcePath"],
+        "anyOf": [
+          {
+            "required": ["sourcePath"]
+          },
+          {
+            "required": ["includeGlobs"]
+          },
+          {
+            "required": ["fileExtensions"]
+          }
+        ],
 
         "properties": {
           "sourcePath": {

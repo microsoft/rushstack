@@ -1,3 +1,15 @@
 {
-  "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json"
+  "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
+
+  "testMatch": ["<rootDir>/lib/**/*.test.cjs"],
+
+  "collectCoverageFrom": [
+    "lib/**/*.cjs",
+    "!lib/**/*.d.ts",
+    "!lib/**/*.test.cjs",
+    "!lib/**/test/**",
+    "!lib/**/__tests__/**",
+    "!lib/**/__fixtures__/**",
+    "!lib/**/__mocks__/**"
+  ]
 }

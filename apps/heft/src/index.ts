@@ -3,23 +3,23 @@
 
 export {
   HeftConfiguration,
-  IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
+  type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 
-export { IRigPackageResolver } from './configuration/RigPackageResolver';
+export type { IRigPackageResolver } from './configuration/RigPackageResolver';
 
-export { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
+export type { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
 
 export {
   CancellationTokenSource,
   CancellationToken,
-  ICancellationTokenSourceOptions,
-  ICancellationTokenOptions as _ICancellationTokenOptions
+  type ICancellationTokenSourceOptions,
+  type ICancellationTokenOptions as _ICancellationTokenOptions
 } from './pluginFramework/CancellationToken';
 
-export { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
+export type { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
 
-export {
+export type {
   IHeftLifecycleSession,
   IHeftLifecycleHooks,
   IHeftLifecycleCleanHookOptions,
@@ -27,30 +27,32 @@ export {
   IHeftLifecycleToolFinishHookOptions
 } from './pluginFramework/HeftLifecycleSession';
 
-export {
+export type {
   IHeftTaskSession,
   IHeftTaskHooks,
+  IHeftTaskFileOperations,
   IHeftTaskRunHookOptions,
-  IHeftTaskRunIncrementalHookOptions,
-  IChangedFileState
+  IHeftTaskRunIncrementalHookOptions
 } from './pluginFramework/HeftTaskSession';
 
-export { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFilesPlugin';
+export type { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFilesPlugin';
 
-export { IDeleteOperation } from './plugins/DeleteFilesPlugin';
+export type { IDeleteOperation } from './plugins/DeleteFilesPlugin';
 
-export { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
+export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
 
-export { IFileSelectionSpecifier, IGlobOptions, GlobFn } from './plugins/FileGlobSpecifier';
+export type { IFileSelectionSpecifier, IGlobOptions, GlobFn, WatchGlobFn } from './plugins/FileGlobSpecifier';
+
+export type { IWatchedFileState } from './utilities/WatchFileSystemAdapter';
 
 export {
-  IHeftRecordMetricsHookOptions,
-  IMetricsData,
-  IPerformanceData as _IPerformanceData,
+  type IHeftRecordMetricsHookOptions,
+  type IMetricsData,
+  type IPerformanceData as _IPerformanceData,
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
 
-export { IScopedLogger } from './pluginFramework/logging/ScopedLogger';
+export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 
 // Re-export types required to use custom command-line parameters
 export type {

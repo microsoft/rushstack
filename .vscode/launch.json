@@ -27,15 +27,15 @@
 			"name": "Debug Selected Test File (Heft)",
 			"cwd": "${fileDirname}",
 			"runtimeArgs": [
+				"--nolazy",
 				"--inspect-brk",
 				"${workspaceFolder}/apps/heft/lib/start.js",
 				"--debug",
-				"test",
-				"--test-path-pattern",
-				"${fileBasenameNoExtension}"
+				"test-watch"
 			],
 			"skipFiles": ["<node_internals>/**"],
 			"outFiles": [],
+			"sourceMaps": true,
 			"console": "integratedTerminal",
 			"internalConsoleOptions": "neverOpen"
 		},

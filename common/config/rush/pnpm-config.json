@@ -156,5 +156,12 @@
         "lodash": "~4.17.15"
       }
     }
+  },
+
+  // Remove once no longer on an RC branch
+  // This is needed to allow the RC version of Heft to satisfy peerDependencies on the
+  // normal version and vice-versa
+  "globalPeerDependencyRules": {
+    "allowAny": ["@rushstack/heft"]
   }
 }

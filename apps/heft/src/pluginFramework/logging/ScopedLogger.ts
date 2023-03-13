@@ -24,6 +24,11 @@ export interface IScopedLogger {
   readonly terminal: ITerminal;
 
   /**
+   * Indicates if the logger has emitted any errors.
+   */
+  readonly hasErrors: boolean;
+
+  /**
    * Call this function to emit an error to the heft runtime.
    */
   emitError(error: Error): void;
@@ -32,6 +37,11 @@ export interface IScopedLogger {
    * Call this function to emit an warning to the heft runtime.
    */
   emitWarning(warning: Error): void;
+
+  /**
+   * Reset the errors and warnings for this scoped logger.
+   */
+  resetErrorsAndWarnings(): void;
 }
 
 export interface IScopedLoggerOptions {
@@ -80,6 +90,13 @@ export class ScopedLogger implements IScopedLogger {
   }
 
   /**
+   * {@inheritdoc IScopedLogger.hasErrors}
+   */
+  public get hasErrors(): boolean {
+    return this._errors.length > 0;
+  }
+
+  /**
    * {@inheritdoc IScopedLogger.emitError}
    */
   public emitError(error: Error): void {
@@ -102,7 +119,7 @@ export class ScopedLogger implements IScopedLogger {
   }
 
   /**
-   * Reset the errors and warnings for this scoped logger.
+   * {@inheritdoc IScopedLogger.resetErrorsAndWarnings}
    */
   public resetErrorsAndWarnings(): void {
     this._errors = [];

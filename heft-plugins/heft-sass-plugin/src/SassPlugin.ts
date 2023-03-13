@@ -8,7 +8,8 @@ import type {
   IHeftPlugin,
   IScopedLogger,
   IHeftTaskRunHookOptions,
-  IHeftTaskRunIncrementalHookOptions
+  IHeftTaskRunIncrementalHookOptions,
+  IWatchedFileState
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
@@ -70,7 +71,7 @@ export default class SassPlugin implements IHeftPlugin {
     let changedRelativeFilePaths: string[] | undefined;
     if (runIncrementalOptions) {
       changedRelativeFilePaths = [];
-      const relativeFilePaths: string[] = await runIncrementalOptions.globChangedFilesAsync(
+      const relativeFilePaths: Map<string, IWatchedFileState> = await runIncrementalOptions.watchGlobAsync(
         sassProcessor.inputFileGlob,
         {
           cwd: sassProcessor.sourceFolderPath,
@@ -78,13 +79,13 @@ export default class SassPlugin implements IHeftPlugin {
           absolute: false
         }
       );
-      for (const relativeFilePath of relativeFilePaths) {
-        // We only care about modified files, not deleted files.
-        const absoluteFilePath: string = `${sassProcessor.sourceFolderPath}/${relativeFilePath}`;
-        if (runIncrementalOptions.changedFiles.get(absoluteFilePath)?.version !== undefined) {
-          changedRelativeFilePaths.push(relativeFilePath);
+
+      for (const [relativePath, { changed }] of relativeFilePaths) {
+        if (changed) {
+          changedRelativeFilePaths.push(relativePath);
         }
       }
+
       if (changedRelativeFilePaths.length === 0) {
         return;
       }

@@ -17,7 +17,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.13.0",
-    "@types/jest": "27.4.0",
+    "@types/jest": "29.2.5",
     "eslint": "~8.7.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",

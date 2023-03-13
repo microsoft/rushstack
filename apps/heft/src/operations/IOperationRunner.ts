@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/node-core-library';
-
 import type { OperationStatus } from './OperationStatus';
-import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import type { OperationError } from './OperationError';
+
+import type { CancellationToken } from '../pluginFramework/CancellationToken';
+import type { Stopwatch } from '../utilities/Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -12,8 +13,36 @@ import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
  * @beta
  */
 export interface IOperationRunnerContext {
-  terminal: ITerminal;
-  loggingManager: LoggingManager;
+  /**
+   * A cancellation token for the overarching execution. Runners should do their best to gracefully abort
+   * as soon as possible if the cancellation token is canceled.
+   */
+  cancellationToken: CancellationToken;
+
+  /**
+   * If this is the first time this operation has been executed.
+   */
+  isFirstRun: boolean;
+
+  /**
+   * A callback to the overarching orchestrator to request that the operation be invoked again.
+   * Used in watch mode to signal that inputs have changed.
+   */
+  requestRun?: () => void;
+}
+
+/**
+ *
+ */
+export interface IOperationState {
+  status: OperationStatus;
+  error: OperationError | undefined;
+  stopwatch: Stopwatch;
+}
+
+export interface IOperationStates {
+  readonly state: Readonly<IOperationState> | undefined;
+  readonly lastState: Readonly<IOperationState> | undefined;
 }
 
 /**
