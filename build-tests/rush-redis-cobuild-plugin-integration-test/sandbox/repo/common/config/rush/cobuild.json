@@ -7,6 +7,8 @@
 
   /**
    * (Required) EXPERIMENTAL - Set this to true to enable the cobuild feature.
+   * RUSH_COBUILD_CONTEXT_ID should always be specified as an environment variable with an non-empty string,
+   * otherwise the cobuild feature will be disabled.
    */
   "cobuildEnabled": true,
 
@@ -17,9 +19,4 @@
    * For example, @rushstack/rush-redis-cobuild-plugin registers the "redis" lock provider.
    */
   "cobuildLockProvider": "redis"
-
-  /**
-   * Setting this property overrides the cobuild context ID.
-   */
-  // "cobuildContextIdPattern": ""
 }

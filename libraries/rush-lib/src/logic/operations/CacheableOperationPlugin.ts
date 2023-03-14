@@ -320,28 +320,25 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
             context.error = undefined;
           }
-          const cacheId: string | undefined = cobuildLock.projectBuildCache.cacheId;
-          const contextId: string = cobuildLock.cobuildConfiguration.contextId;
+          const { cacheId, contextId } = cobuildLock.cobuildContext;
 
-          if (cacheId) {
-            const finalCacheId: string =
-              status === OperationStatus.Failure ? `${cacheId}-${contextId}-failed` : cacheId;
-            switch (status) {
-              case OperationStatus.SuccessWithWarning:
-              case OperationStatus.Success:
-              case OperationStatus.Failure: {
-                const currentStatus: ICobuildCompletedState['status'] = status;
-                setCompletedStatePromiseFunction = () => {
-                  return cobuildLock?.setCompletedStateAsync({
-                    status: currentStatus,
-                    cacheId: finalCacheId
-                  });
-                };
-                setCacheEntryPromise = cobuildLock.projectBuildCache.trySetCacheEntryAsync(
-                  terminal,
-                  finalCacheId
-                );
-              }
+          const finalCacheId: string =
+            status === OperationStatus.Failure ? `${cacheId}-${contextId}-failed` : cacheId;
+          switch (status) {
+            case OperationStatus.SuccessWithWarning:
+            case OperationStatus.Success:
+            case OperationStatus.Failure: {
+              const currentStatus: ICobuildCompletedState['status'] = status;
+              setCompletedStatePromiseFunction = () => {
+                return cobuildLock?.setCompletedStateAsync({
+                  status: currentStatus,
+                  cacheId: finalCacheId
+                });
+              };
+              setCacheEntryPromise = cobuildLock.projectBuildCache.trySetCacheEntryAsync(
+                terminal,
+                finalCacheId
+              );
             }
           }
         }

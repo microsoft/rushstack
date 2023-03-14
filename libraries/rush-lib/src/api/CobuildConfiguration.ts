@@ -16,17 +16,14 @@ import { RushConstants } from '../logic/RushConstants';
 
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
-import { CobuildContextId, GetCobuildContextIdFunction } from '../logic/cobuild/CobuildContextId';
 
 export interface ICobuildJson {
   cobuildEnabled: boolean;
   cobuildLockProvider: string;
-  cobuildContextIdPattern?: string;
 }
 
 export interface ICobuildConfigurationOptions {
   cobuildJson: ICobuildJson;
-  getCobuildContextId: GetCobuildContextIdFunction;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
 }
@@ -42,24 +39,30 @@ export class CobuildConfiguration {
   /**
    * Indicates whether the cobuild feature is enabled.
    * Typically it is enabled in the cobuild.json config file.
+   *
+   * Note: The orchestrator (or local users) should always have to opt into running with cobuilds by
+   * providing a cobuild context id. Even if cobuilds are "enabled" as a feature, they don't
+   * actually turn on for that particular build unless the cobuild context id is provided as an
+   * non-empty string.
    */
   public readonly cobuildEnabled: boolean;
   /**
-   * Method to calculate the cobuild context id
+   * Cobuild context id
+   *
+   * @remark
+   * The cobuild feature won't be enabled until the context id is provided as an non-empty string.
    */
-  public readonly cobuildContextId: string;
+  public readonly cobuildContextId: string | undefined;
   public readonly cobuildLockProvider: ICobuildLockProvider;
 
   private constructor(options: ICobuildConfigurationOptions) {
-    this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? options.cobuildJson.cobuildEnabled;
+    const { cobuildJson } = options;
 
-    const { cobuildJson, getCobuildContextId } = options;
-
-    this.cobuildContextId =
-      EnvironmentConfiguration.cobuildContextId ??
-      getCobuildContextId({
-        environment: process.env
-      });
+    this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
+    this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
+    if (!this.cobuildContextId) {
+      this.cobuildEnabled = false;
+    }
 
     const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
       options.rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
@@ -100,25 +103,14 @@ export class CobuildConfiguration {
       CobuildConfiguration._jsonSchema
     );
 
-    let getCobuildContextId: GetCobuildContextIdFunction;
-    try {
-      getCobuildContextId = CobuildContextId.parsePattern(cobuildJson.cobuildContextIdPattern);
-    } catch (e) {
-      terminal.writeErrorLine(
-        `Error parsing cobuild context id pattern "${cobuildJson.cobuildContextIdPattern}": ${e}`
-      );
-      throw new AlreadyReportedError();
-    }
-
     return new CobuildConfiguration({
       cobuildJson,
-      getCobuildContextId,
       rushConfiguration,
       rushSession
     });
   }
 
-  public get contextId(): string {
+  public get contextId(): string | undefined {
     return this.cobuildContextId;
   }
 

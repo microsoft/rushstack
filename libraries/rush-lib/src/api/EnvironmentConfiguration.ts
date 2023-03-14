@@ -155,8 +155,7 @@ export enum EnvironmentVariableNames {
   RUSH_COBUILD_ENABLED = 'RUSH_COBUILD_ENABLED',
 
   /**
-   * Setting this environment variable overrides the value of `cobuildContextId` calculated by
-   * `cobuildContextIdPattern` in the `cobuild.json` configuration file.
+   * Setting this environment variable opt into running with cobuilds.
    *
    * @remarks
    * If there is no cobuild configured, then this environment variable is ignored.

@@ -37,7 +37,10 @@
       "command": "node ../../lib/runRush.js --debug cobuild --parallelism 1 --verbose",
       "problemMatcher": [],
       "options": {
-        "cwd": "${workspaceFolder}/sandbox/repo"
+        "cwd": "${workspaceFolder}/sandbox/repo",
+        "env": {
+          "RUSH_COBUILD_CONTEXT_ID": "integration-test"
+        }
       },
       "presentation": {
         "echo": true,
@@ -55,7 +58,10 @@
       "command": "node ../../lib/runRush.js --debug cobuild --parallelism 1 --verbose",
       "problemMatcher": [],
       "options": {
-        "cwd": "${workspaceFolder}/sandbox/repo"
+        "cwd": "${workspaceFolder}/sandbox/repo",
+        "env": {
+          "RUSH_COBUILD_CONTEXT_ID": "integration-test"
+        }
       },
       "presentation": {
         "echo": true,

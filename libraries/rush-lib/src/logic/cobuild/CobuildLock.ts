@@ -38,6 +38,11 @@ export class CobuildLock {
       throw new InternalError(`Cache id is require for cobuild lock`);
     }
 
+    if (!contextId) {
+      // This should never happen
+      throw new InternalError(`Cobuild context id is require for cobuild lock`);
+    }
+
     this._cobuildContext = {
       contextId,
       cacheId,
