@@ -19,8 +19,8 @@ export class AsyncOperationQueue
   private readonly _queue: OperationExecutionRecord[];
   private readonly _pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
   private readonly _totalOperations: number;
+  private readonly _completedOperations: Set<OperationExecutionRecord>;
 
-  private _completedOperations: number;
   private _isDone: boolean;
 
   /**
@@ -35,7 +35,7 @@ export class AsyncOperationQueue
     this._pendingIterators = [];
     this._totalOperations = this._queue.length;
     this._isDone = false;
-    this._completedOperations = 0;
+    this._completedOperations = new Set<OperationExecutionRecord>();
   }
 
   /**
@@ -60,9 +60,9 @@ export class AsyncOperationQueue
    * Set a callback to be invoked when one operation is completed.
    * If all operations are completed, set the queue to done, resolve all pending iterators in next cycle.
    */
-  public complete(): void {
-    this._completedOperations++;
-    if (this._completedOperations === this._totalOperations) {
+  public complete(record: OperationExecutionRecord): void {
+    this._completedOperations.add(record);
+    if (this._completedOperations.size === this._totalOperations) {
       this._isDone = true;
     }
   }

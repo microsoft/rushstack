@@ -248,7 +248,7 @@ export class OperationExecutionManager {
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
         for (const blockedRecord of blockedQueue) {
           if (blockedRecord.status === OperationStatus.Ready) {
-            executionQueue.complete();
+            executionQueue.complete(blockedRecord);
             this._completedOperations++;
 
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
@@ -347,7 +347,7 @@ export class OperationExecutionManager {
 
     if (record.status !== OperationStatus.RemoteExecuting) {
       // If the operation was not remote, then we can notify queue that it is complete
-      executionQueue.complete();
+      executionQueue.complete(record);
     }
   }
 }
