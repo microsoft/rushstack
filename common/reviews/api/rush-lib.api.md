@@ -494,6 +494,14 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     useWorkspaces?: boolean;
 }
 
+// @public (undocumented)
+export interface IPrefixMatch<TItem> {
+    // (undocumented)
+    index: number;
+    // (undocumented)
+    value: TItem;
+}
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -609,6 +617,7 @@ export class LookupByPath<TItem> {
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
+    findChildPathAndIndex(childPath: string): IPrefixMatch<TItem> | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
     setItem(serializedPath: string, value: TItem): this;

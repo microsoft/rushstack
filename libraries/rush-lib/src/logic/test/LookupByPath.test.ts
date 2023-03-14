@@ -101,3 +101,36 @@ describe(LookupByPath.prototype.findChildPath.name, () => {
     expect(tree.findChildPathFromSegments(['foo', 'bar', 'baz'])).toEqual(1);
   });
 });
+
+describe(LookupByPath.prototype.findChildPathAndIndex.name, () => {
+  it('returns empty for an empty tree', () => {
+    expect(new LookupByPath().findChildPathAndIndex('foo')).toEqual(undefined);
+  });
+  it('returns the matching node for a trivial tree', () => {
+    expect(new LookupByPath([['foo', 1]]).findChildPathAndIndex('foo')).toEqual({ value: 1, index: 3 });
+  });
+  it('returns the matching node for a single-layer tree', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['bar', 2],
+      ['baz', 3]
+    ]);
+
+    expect(tree.findChildPathAndIndex('foo')).toEqual({ value: 1, index: 3 });
+    expect(tree.findChildPathAndIndex('bar')).toEqual({ value: 2, index: 3 });
+    expect(tree.findChildPathAndIndex('baz')).toEqual({ value: 3, index: 3 });
+    expect(tree.findChildPathAndIndex('buzz')).toEqual(undefined);
+  });
+  it('returns the matching parent for multi-layer queries', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['bar', 2],
+      ['baz', 3]
+    ]);
+
+    expect(tree.findChildPathAndIndex('foo/bar')).toEqual({ value: 1, index: 3 });
+    expect(tree.findChildPathAndIndex('bar/baz')).toEqual({ value: 2, index: 3 });
+    expect(tree.findChildPathAndIndex('baz/foo')).toEqual({ value: 3, index: 3 });
+    expect(tree.findChildPathAndIndex('foo/foo')).toEqual({ value: 1, index: 3 });
+  });
+});
