@@ -32,8 +32,10 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
 
     const autoinstaller: Autoinstaller = new Autoinstaller({
       autoinstallerName,
-      rushConfiguration: this.rushConfiguration
+      rushConfiguration: this.rushConfiguration,
+      rushGlobalFolder: this.rushGlobalFolder
     });
+    await autoinstaller.prepareAsync();
     autoinstaller.update();
 
     console.log('\nSuccess.');
