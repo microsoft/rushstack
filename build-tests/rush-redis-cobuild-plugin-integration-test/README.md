@@ -52,7 +52,17 @@ RUSH_COBUILD_ENABLED=0 node ../../lib/runRush.js --debug cobuild
 
 Expected behavior: Cobuild feature is disabled. Build cache was restored successfully.
 
-## Case 2: Cobuild enabled, run one cobuild command only
+## Case 2: Cobuild enabled without specifying RUSH_COBUILD_CONTEXT_ID
+
+Run `rush cobuild` command without specifying cobuild context id.
+
+```sh
+rm -rf common/temp/build-cache && node ../../lib/runRush.js --debug cobuild
+```
+
+Expected behavior: Cobuild feature is disabled. Build cache was restored successfully.
+
+## Case 3: Cobuild enabled, run one cobuild command only
 
 1. Clear redis server
 
@@ -63,19 +73,19 @@ Expected behavior: Cobuild feature is disabled. Build cache was restored success
 2. Run `rush cobuild` command
 
 ```sh
-rm -rf common/temp/build-cache && node ../../lib/runRush.js --debug cobuild
+rm -rf common/temp/build-cache && RUSH_COBUILD_CONTEXT_ID=foo node ../../lib/runRush.js --debug cobuild
 ```
 
 Expected behavior: Cobuild feature is enabled. Run command successfully.
 You can also see cobuild related logs in the terminal.
 
 ```sh
-Get completed state for cobuild:v1::c2df36270ec5faa8ef6497fa7367a476de3e2861:completed: null
-Acquired lock for cobuild:v1::c2df36270ec5faa8ef6497fa7367a476de3e2861:lock: 1, 1 is success
-Set completed state for cobuild:v1::c2df36270ec5faa8ef6497fa7367a476de3e2861:completed: SUCCESS;c2df36270ec5faa8ef6497fa7367a476de3e2861
+Get completed state for cobuild:v1:foo:c2df36270ec5faa8ef6497fa7367a476de3e2861:completed: null
+Acquired lock for cobuild:v1:foo:c2df36270ec5faa8ef6497fa7367a476de3e2861:lock: 1, 1 is success
+Set completed state for cobuild:v1:foo:c2df36270ec5faa8ef6497fa7367a476de3e2861:completed: SUCCESS;c2df36270ec5faa8ef6497fa7367a476de3e2861
 ```
 
-## Case 3: Cobuild enabled, run two cobuild commands in parallel
+## Case 4: Cobuild enabled, run two cobuild commands in parallel
 
 > Note: This test requires Visual Studio Code to be installed.
 
@@ -99,7 +109,7 @@ rm -rf common/temp/build-cache
 
 Expected behavior: Cobuild feature is enabled, cobuild related logs out in both terminals.
 
-## Case 4: Cobuild enabled, run two cobuild commands in parallel, one of them failed
+## Case 5: Cobuild enabled, run two cobuild commands in parallel, one of them failed
 
 > Note: This test requires Visual Studio Code to be installed.
 
