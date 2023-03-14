@@ -26,6 +26,13 @@ export interface IOperationExecutionManagerOptions {
  */
 const ASCII_HEADER_WIDTH: number = 79;
 
+const prioritySort: IOperationSortFunction = (
+  a: OperationExecutionRecord,
+  b: OperationExecutionRecord
+): number => {
+  return a.criticalPathLength! - b.criticalPathLength!;
+};
+
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
  * Initially, and at the end of each task execution, all unblocked tasks
@@ -49,6 +56,7 @@ export class OperationExecutionManager {
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
+  private _executionQueue: AsyncOperationQueue;
 
   public readonly hooks: PhasedOperationHooks = new PhasedOperationHooks();
 
@@ -112,6 +120,12 @@ export class OperationExecutionManager {
         dependencyRecord.consumers.add(consumer);
       }
     }
+
+    const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
+      this._executionRecords.values(),
+      prioritySort
+    );
+    this._executionQueue = executionQueue;
   }
 
   private _streamCollator_onWriterActive = (writer: CollatedWriter | undefined): void => {
@@ -175,28 +189,18 @@ export class OperationExecutionManager {
     this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
-    const prioritySort: IOperationSortFunction = (
-      a: OperationExecutionRecord,
-      b: OperationExecutionRecord
-    ): number => {
-      return a.criticalPathLength! - b.criticalPathLength!;
-    };
-    const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
-      this._executionRecords.values(),
-      prioritySort
-    );
 
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
     const onOperationComplete: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
-      this._onOperationComplete(record, executionQueue);
+      this._onOperationComplete(record);
       await this.hooks.afterExecuteOperation.promise(record);
     };
 
     await Async.forEachAsync(
-      executionQueue,
+      this._executionQueue,
       async (operation: OperationExecutionRecord) => {
         await this.hooks.beforeExecuteOperation.promise(operation);
         await operation.executeAsync(onOperationComplete);
@@ -221,7 +225,7 @@ export class OperationExecutionManager {
   /**
    * Handles the result of the operation and propagates any relevant effects.
    */
-  private _onOperationComplete(record: OperationExecutionRecord, executionQueue: AsyncOperationQueue): void {
+  private _onOperationComplete(record: OperationExecutionRecord): void {
     const { runner, name, status } = record;
 
     const silent: boolean = runner.silent;
@@ -243,7 +247,7 @@ export class OperationExecutionManager {
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
         for (const blockedRecord of blockedQueue) {
           if (blockedRecord.status === OperationStatus.Ready) {
-            executionQueue.complete(blockedRecord);
+            this._executionQueue.complete(blockedRecord);
             this._completedOperations++;
 
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
@@ -325,7 +329,7 @@ export class OperationExecutionManager {
 
     if (record.status !== OperationStatus.RemoteExecuting) {
       // If the operation was not remote, then we can notify queue that it is complete
-      executionQueue.complete(record);
+      this._executionQueue.complete(record);
     }
   }
 }
