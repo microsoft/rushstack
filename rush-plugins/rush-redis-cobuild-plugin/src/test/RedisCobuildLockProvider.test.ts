@@ -49,6 +49,36 @@ describe(RedisCobuildLockProvider.name, () => {
     version: 1
   };
 
+  it('expands options with environment variables', () => {
+    const expectedOptions = {
+      username: 'redisuser',
+      password: 'redis123'
+    };
+    const actualOptions = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(
+      {
+        username: '${REDIS_USERNAME}',
+        password: '${REDIS_PASS}'
+      },
+      {
+        REDIS_USERNAME: 'redisuser',
+        REDIS_PASS: 'redis123'
+      }
+    );
+    expect(actualOptions).toEqual(expectedOptions);
+  });
+
+  it('throws error with missing environment variables', () => {
+    expect(() => {
+      RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(
+        {
+          username: '${REDIS_USERNAME}',
+          password: '${REDIS_PASS}'
+        },
+        {}
+      );
+    }).toThrowErrorMatchingSnapshot();
+  });
+
   it('getLockKey works', () => {
     const subject: RedisCobuildLockProvider = prepareSubject();
     const lockKey: string = subject.getLockKey(context);

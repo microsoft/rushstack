@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import type { ICobuildCompletedState } from '@rushstack/rush-sdk';
 import type { ICobuildContext } from '@rushstack/rush-sdk';
 import type { ICobuildLockProvider } from '@rushstack/rush-sdk';
@@ -25,6 +27,8 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     connectAsync(): Promise<void>;
     // (undocumented)
     disconnectAsync(): Promise<void>;
+    // (undocumented)
+    static expandOptionsWithEnvironmentVariables(options: IRedisCobuildLockProviderOptions, environment?: NodeJS.ProcessEnv): IRedisCobuildLockProviderOptions;
     // (undocumented)
     getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
     getCompletedStateKey(context: ICobuildContext): string;

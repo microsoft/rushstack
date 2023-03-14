@@ -39,13 +39,50 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   private _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
-    this._options = options;
+    this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
     this._terminal = rushSession.getLogger('RedisCobuildLockProvider').terminal;
     try {
       this._redisClient = createClient(this._options);
     } catch (e) {
       throw new Error(`Failed to create redis client: ${e.message}`);
     }
+  }
+
+  public static expandOptionsWithEnvironmentVariables(
+    options: IRedisCobuildLockProviderOptions,
+    environment: NodeJS.ProcessEnv = process.env
+  ): IRedisCobuildLockProviderOptions {
+    const finalOptions: IRedisCobuildLockProviderOptions = { ...options };
+    const missingEnvironmentVariables: Set<string> = new Set<string>();
+    for (const [key, value] of Object.entries(finalOptions)) {
+      if (typeof value === 'string') {
+        const expandedValue: string = value.replace(
+          /\$\{([^\}]+)\}/g,
+          (match: string, variableName: string): string => {
+            const variable: string | undefined =
+              variableName in environment ? environment[variableName] : undefined;
+            if (variable !== undefined) {
+              return variable;
+            } else {
+              missingEnvironmentVariables.add(variableName);
+              return match;
+            }
+          }
+        );
+        (finalOptions as Record<string, string>)[key] = expandedValue;
+      }
+    }
+
+    if (missingEnvironmentVariables.size) {
+      throw new Error(
+        `The "RedisCobuildLockProvider" tries to access missing environment variable${
+          missingEnvironmentVariables.size > 1 ? 's' : ''
+        }: ${Array.from(missingEnvironmentVariables).join(
+          ', '
+        )}\nPlease check the configuration in rush-redis-cobuild-plugin.json file`
+      );
+    }
+    return finalOptions;
   }
 
   public async connectAsync(): Promise<void> {
