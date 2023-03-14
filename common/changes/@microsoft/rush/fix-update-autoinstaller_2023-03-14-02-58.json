@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where running `rush update-autoinstaller` without having run `rush install` or `rush update` first would cause a crash with an unhelpful error message.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

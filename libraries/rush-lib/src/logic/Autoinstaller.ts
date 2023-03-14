@@ -11,7 +11,7 @@ import { PackageName, IParsedPackageNameOrError } from '@rushstack/node-core-lib
 import { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
 import { InstallHelpers } from './installManager/InstallHelpers';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
@@ -19,6 +19,7 @@ import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 interface IAutoinstallerOptions {
   autoinstallerName: string;
   rushConfiguration: RushConfiguration;
+  rushGlobalFolder: RushGlobalFolder;
   restrictConsoleOutput?: boolean;
 }
 
@@ -26,11 +27,13 @@ export class Autoinstaller {
   public readonly name: string;
 
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
   private readonly _restrictConsoleOutput: boolean;
 
   public constructor(options: IAutoinstallerOptions) {
     this.name = options.autoinstallerName;
     this._rushConfiguration = options.rushConfiguration;
+    this._rushGlobalFolder = options.rushGlobalFolder;
     this._restrictConsoleOutput =
       options.restrictConsoleOutput ?? RushCommandLineParser.shouldRestrictConsoleOutput();
 
@@ -75,10 +78,9 @@ export class Autoinstaller {
       );
     }
 
-    const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
     await InstallHelpers.ensureLocalPackageManager(
       this._rushConfiguration,
-      rushGlobalFolder,
+      this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
       this._restrictConsoleOutput
     );
