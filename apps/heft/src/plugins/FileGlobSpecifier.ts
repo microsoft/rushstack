@@ -106,8 +106,8 @@ export async function watchGlobAsync(
   options: IWatchGlobOptions
 ): Promise<Map<string, IWatchedFileState>> {
   const { fs, cwd, absolute } = options;
-  if (!cwd && !absolute) {
-    throw new Error(`"cwd" must be set in the options passed to "watchGlobAsync" if "absolute" is not set`);
+  if (!cwd) {
+    throw new Error(`"cwd" must be set in the options passed to "watchGlobAsync"`);
   }
 
   const rawFiles: string[] = await glob(pattern, options);
@@ -116,7 +116,9 @@ export async function watchGlobAsync(
   await Async.forEachAsync(
     rawFiles,
     async (file: string) => {
-      const state: IWatchedFileState = await fs.getStateAndTrackAsync(path.normalize(file));
+      const state: IWatchedFileState = await fs.getStateAndTrackAsync(
+        absolute ? path.normalize(file) : path.resolve(cwd, file)
+      );
       results.set(file, state);
     },
     {
