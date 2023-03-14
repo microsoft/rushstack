@@ -9,7 +9,7 @@
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
-import type { CollatedWriter } from '@rushstack/stream-collator';
+import { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
@@ -17,9 +17,11 @@ import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
-import type { StdioSummarizer } from '@rushstack/terminal';
+import { StdioSummarizer } from '@rushstack/terminal';
+import { StreamCollator } from '@rushstack/stream-collator';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
+import { TerminalWritable } from '@rushstack/terminal';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -807,6 +809,10 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 export class PhasedCommandHooks {
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
+    // Warning: (ae-forgotten-export) The symbol "OperationExecutionManager" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    readonly operationExecutionManager: AsyncSeriesHook<OperationExecutionManager>;
     readonly waitingForChanges: SyncHook<void>;
 }
 

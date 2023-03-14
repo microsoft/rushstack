@@ -38,6 +38,7 @@ import { OperationResultSummarizerPlugin } from '../../logic/operations/Operatio
 import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -141,6 +142,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     new PhasedOperationPlugin().apply(this.hooks);
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(this.hooks);
+    // Applies the build cache related logic to the selected operations
+    new CacheableOperationPlugin().apply(this.hooks);
 
     if (this._enableParallelism) {
       this._parallelismParameter = this.defineStringParameter({
@@ -508,6 +511,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       operations,
       executionManagerOptions
     );
+    await this.hooks.operationExecutionManager.promise(executionManager);
 
     const { isInitial, isWatch } = options.createOperationsContext;
 

@@ -20,6 +20,8 @@ export interface IOperationExecutionRecordContext {
 
 /**
  * Internal class representing everything about executing an operation
+ *
+ * @internal
  */
 export class OperationExecutionRecord implements IOperationRunnerContext {
   /**
@@ -46,6 +48,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    * operation to execute, the operation with the highest criticalPathLength is chosen.
    *
    * Example:
+   * ```
    *        (0) A
    *             \
    *          (1) B     C (0)         (applications)
@@ -62,6 +65,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    * X has a score of 1, since the only package which depends on it is A
    * Z has a score of 2, since only X depends on it, and X has a score of 1
    * Y has a score of 2, since the chain Y->X->C is longer than Y->C
+   * ```
    *
    * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()
    */
@@ -132,19 +136,19 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.nonCachedDurationMs;
   }
 
-  public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
+  public async executeAsync(onResult: (record: OperationExecutionRecord) => Promise<void>): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
 
     try {
       this.status = await this.runner.executeAsync(this);
       // Delegate global state reporting
-      onResult(this);
+      await onResult(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
       this.error = error;
       // Delegate global state reporting
-      onResult(this);
+      await onResult(this);
     } finally {
       if (this.status !== OperationStatus.RemoteExecuting) {
         this._collatedWriter?.close();

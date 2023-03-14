@@ -11,10 +11,7 @@ import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import { IExecutionResult } from './IOperationExecutionResult';
-import {
-  CacheableOperationRunnerPlugin,
-  IOperationBuildCacheContext
-} from './CacheableOperationRunnerPlugin';
+import { PhasedOperationHooks } from './PhasedOperationHooks';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -36,7 +33,7 @@ const ASCII_HEADER_WIDTH: number = 79;
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _changedProjectsOnly: boolean;
+  public readonly changedProjectsOnly: boolean;
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
@@ -53,13 +50,15 @@ export class OperationExecutionManager {
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
 
+  public readonly hooks: PhasedOperationHooks = new PhasedOperationHooks();
+
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
     const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
-    this._changedProjectsOnly = changedProjectsOnly;
+    this.changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
 
     // TERMINAL PIPELINE:
@@ -189,15 +188,17 @@ export class OperationExecutionManager {
 
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
-    const onOperationComplete: (record: OperationExecutionRecord) => void = (
+    const onOperationComplete: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
       this._onOperationComplete(record, executionQueue);
+      await this.hooks.afterExecuteOperation.promise(record);
     };
 
     await Async.forEachAsync(
       executionQueue,
       async (operation: OperationExecutionRecord) => {
+        await this.hooks.beforeExecuteOperation.promise(operation);
         await operation.executeAsync(onOperationComplete);
       },
       {
@@ -222,12 +223,6 @@ export class OperationExecutionManager {
    */
   private _onOperationComplete(record: OperationExecutionRecord, executionQueue: AsyncOperationQueue): void {
     const { runner, name, status } = record;
-
-    const buildCacheContext: IOperationBuildCacheContext | undefined =
-      CacheableOperationRunnerPlugin.getBuildCacheContextByRunner(runner);
-
-    let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
-    let blockSkip: boolean = !buildCacheContext?.isSkipAllowed;
 
     const silent: boolean = runner.silent;
 
@@ -287,8 +282,6 @@ export class OperationExecutionManager {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
         }
-        // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
-        blockCacheWrite = true;
         break;
       }
 
@@ -308,8 +301,6 @@ export class OperationExecutionManager {
             colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
           );
         }
-        // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
-        blockSkip ||= !this._changedProjectsOnly;
         break;
       }
 
@@ -319,8 +310,6 @@ export class OperationExecutionManager {
             colors.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
           );
         }
-        // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
-        blockSkip ||= !this._changedProjectsOnly;
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
         break;
       }
@@ -328,17 +317,6 @@ export class OperationExecutionManager {
 
     // Apply status changes to direct dependents
     for (const item of record.consumers) {
-      const itemRunnerBuildCacheContext: IOperationBuildCacheContext | undefined =
-        CacheableOperationRunnerPlugin.getBuildCacheContextByRunner(item.runner);
-      if (itemRunnerBuildCacheContext) {
-        if (blockCacheWrite) {
-          itemRunnerBuildCacheContext.isCacheWriteAllowed = false;
-        }
-        if (blockSkip) {
-          itemRunnerBuildCacheContext.isSkipAllowed = false;
-        }
-      }
-
       if (status !== OperationStatus.RemoteExecuting) {
         // Remove this operation from the dependencies, to unblock the scheduler
         item.dependencies.delete(record);

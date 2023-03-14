@@ -11,6 +11,16 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
+/**
+ * A plugin tht interacts with a operation runner
+ */
+export interface IOperationRunnerPlugin {
+  /**
+   * Applies this plugin.
+   */
+  apply(hooks: OperationRunnerHooks): void;
+}
+
 export interface IOperationRunnerBeforeExecuteContext {
   context: IOperationRunnerContext;
   runner: ShellOperationRunner;
@@ -31,7 +41,6 @@ export interface IOperationRunnerBeforeExecuteContext {
 
 export interface IOperationRunnerAfterExecuteContext {
   context: IOperationRunnerContext;
-  runner: ShellOperationRunner;
   terminal: ITerminal;
   /**
    * Exit code of the operation command
@@ -45,7 +54,7 @@ export interface IOperationRunnerAfterExecuteContext {
  * Hooks into the lifecycle of the operation runner
  *
  */
-export class OperationRunnerLifecycleHooks {
+export class OperationRunnerHooks {
   public beforeExecute: AsyncSeriesWaterfallHook<IOperationRunnerBeforeExecuteContext> =
     new AsyncSeriesWaterfallHook<IOperationRunnerBeforeExecuteContext>(
       ['beforeExecuteContext'],

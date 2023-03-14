@@ -12,6 +12,7 @@ import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 import type { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
+import type { OperationExecutionManager } from '../logic/operations/OperationExecutionManager';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -98,6 +99,18 @@ export class PhasedCommandHooks {
    */
   public readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]> =
     new AsyncSeriesHook(['results', 'context']);
+
+  /**
+   * Hook invoked after the operationExecutionManager has been created.
+   * Maybe used to tap into the lifecycle of operation execution process.
+   *
+   * @internal
+   */
+  public readonly operationExecutionManager: AsyncSeriesHook<OperationExecutionManager> =
+    new AsyncSeriesHook<OperationExecutionManager>(
+      ['operationExecutionManager'],
+      'operationExecutionManager'
+    );
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.

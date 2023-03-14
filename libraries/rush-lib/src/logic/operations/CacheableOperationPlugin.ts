@@ -1,36 +1,37 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ColorValue, InternalError, ITerminal, JsonObject } from '@rushstack/node-core-library';
+import { ShellOperationRunner } from './ShellOperationRunner';
+import { OperationStatus } from './OperationStatus';
 import { CobuildLock, ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { OperationStatus } from './OperationStatus';
-import { ColorValue, InternalError, ITerminal, JsonObject } from '@rushstack/node-core-library';
-import { RushConstants } from '../RushConstants';
-import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { PrintUtilities } from '@rushstack/terminal';
+import { RushConstants } from '../RushConstants';
+import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 
-import type { IOperationRunnerPlugin } from './IOperationRunnerPlugin';
+import type { Operation } from './Operation';
+import type { OperationExecutionManager } from './OperationExecutionManager';
+import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import type {
   IOperationRunnerAfterExecuteContext,
-  IOperationRunnerBeforeExecuteContext,
-  OperationRunnerLifecycleHooks
-} from './OperationLifecycle';
-import type { OperationMetadataManager } from './OperationMetadataManager';
+  IOperationRunnerBeforeExecuteContext
+} from './OperationRunnerHooks';
 import type { IOperationRunner } from './IOperationRunner';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type {
+  ICreateOperationsContext,
+  IPhasedCommandPlugin,
+  PhasedCommandHooks
+} from '../../pluginFramework/PhasedCommandHooks';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
-const PLUGIN_NAME: 'CacheableOperationRunnerPlugin' = 'CacheableOperationRunnerPlugin';
-
-export interface ICacheableOperationRunnerPluginOptions {
-  buildCacheConfiguration: BuildCacheConfiguration;
-  cobuildConfiguration: CobuildConfiguration | undefined;
-  isIncrementalBuildAllowed: boolean;
-}
+const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 
 export interface IOperationBuildCacheContext {
   isCacheWriteAllowed: boolean;
@@ -40,49 +41,102 @@ export interface IOperationBuildCacheContext {
   cobuildLock: CobuildLock | undefined;
 }
 
-export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
-  private static _runnerBuildCacheContextMap: Map<IOperationRunner, IOperationBuildCacheContext> = new Map<
+export class CacheableOperationPlugin implements IPhasedCommandPlugin {
+  private _buildCacheContextByOperationRunner: Map<IOperationRunner, IOperationBuildCacheContext> = new Map<
     IOperationRunner,
     IOperationBuildCacheContext
   >();
-  private readonly _buildCacheConfiguration: BuildCacheConfiguration;
-  private readonly _cobuildConfiguration: CobuildConfiguration | undefined;
 
-  public constructor(options: ICacheableOperationRunnerPluginOptions) {
-    this._buildCacheConfiguration = options.buildCacheConfiguration;
-    this._cobuildConfiguration = options.cobuildConfiguration;
+  public apply(hooks: PhasedCommandHooks): void {
+    hooks.createOperations.tapPromise(
+      PLUGIN_NAME,
+      async (operations: Set<Operation>, context: ICreateOperationsContext): Promise<Set<Operation>> => {
+        const { buildCacheConfiguration, isIncrementalBuildAllowed } = context;
+        if (!buildCacheConfiguration) {
+          return operations;
+        }
+
+        for (const operation of operations) {
+          if (operation.runner) {
+            if (operation.runner instanceof ShellOperationRunner) {
+              const buildCacheContext: IOperationBuildCacheContext = {
+                // ShellOperationRunner supports cache writes by default.
+                isCacheWriteAllowed: true,
+                isCacheReadAllowed: isIncrementalBuildAllowed,
+                isSkipAllowed: isIncrementalBuildAllowed,
+                projectBuildCache: undefined,
+                cobuildLock: undefined
+              };
+              // Upstream runners may mutate the property of build cache context for downstream runners
+              this._buildCacheContextByOperationRunner.set(operation.runner, buildCacheContext);
+
+              this._applyOperationRunner(operation.runner, context);
+            }
+          }
+        }
+
+        return operations;
+      }
+    );
+
+    hooks.operationExecutionManager.tap(
+      PLUGIN_NAME,
+      (operationExecutionManager: OperationExecutionManager) => {
+        operationExecutionManager.hooks.afterExecuteOperation.tapPromise(
+          PLUGIN_NAME,
+          async (operation: OperationExecutionRecord): Promise<OperationExecutionRecord> => {
+            const { runner, status, consumers } = operation;
+            const buildCacheContext: IOperationBuildCacheContext | undefined =
+              this._getBuildCacheContextByRunner(runner);
+
+            let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
+            let blockSkip: boolean = !buildCacheContext?.isSkipAllowed;
+
+            switch (status) {
+              case OperationStatus.Skipped: {
+                // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
+                blockCacheWrite = true;
+                break;
+              }
+
+              case OperationStatus.SuccessWithWarning:
+              case OperationStatus.Success: {
+                // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
+                blockSkip ||= !operationExecutionManager.changedProjectsOnly;
+                break;
+              }
+            }
+
+            // Apply status changes to direct dependents
+            for (const item of consumers) {
+              const itemRunnerBuildCacheContext: IOperationBuildCacheContext | undefined =
+                this._getBuildCacheContextByRunner(item.runner);
+              if (itemRunnerBuildCacheContext) {
+                if (blockCacheWrite) {
+                  itemRunnerBuildCacheContext.isCacheWriteAllowed = false;
+                }
+                if (blockSkip) {
+                  itemRunnerBuildCacheContext.isSkipAllowed = false;
+                }
+              }
+            }
+            return operation;
+          }
+        );
+      }
+    );
+
+    hooks.afterExecuteOperations.tapPromise(PLUGIN_NAME, async () => {
+      this._buildCacheContextByOperationRunner.clear();
+    });
   }
 
-  public static getBuildCacheContextByRunner(
-    runner: IOperationRunner
-  ): IOperationBuildCacheContext | undefined {
-    const buildCacheContext: IOperationBuildCacheContext | undefined =
-      CacheableOperationRunnerPlugin._runnerBuildCacheContextMap.get(runner);
-    return buildCacheContext;
-  }
+  private _applyOperationRunner(runner: ShellOperationRunner, context: ICreateOperationsContext): void {
+    const { buildCacheConfiguration, cobuildConfiguration } = context;
+    const { hooks } = runner;
 
-  public static getBuildCacheContextByRunnerOrThrow(runner: IOperationRunner): IOperationBuildCacheContext {
-    const buildCacheContext: IOperationBuildCacheContext | undefined =
-      CacheableOperationRunnerPlugin.getBuildCacheContextByRunner(runner);
-    if (!buildCacheContext) {
-      // This should not happen
-      throw new InternalError(`Build cache context for runner ${runner.name} should be defined`);
-    }
-    return buildCacheContext;
-  }
+    const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
 
-  public static setBuildCacheContextByRunner(
-    runner: IOperationRunner,
-    buildCacheContext: IOperationBuildCacheContext
-  ): void {
-    CacheableOperationRunnerPlugin._runnerBuildCacheContextMap.set(runner, buildCacheContext);
-  }
-
-  public static clearAllBuildCacheContexts(): void {
-    CacheableOperationRunnerPlugin._runnerBuildCacheContextMap.clear();
-  }
-
-  public apply(hooks: OperationRunnerLifecycleHooks): void {
     hooks.beforeExecute.tapPromise(
       PLUGIN_NAME,
       async (beforeExecuteContext: IOperationRunnerBeforeExecuteContext) => {
@@ -108,8 +162,6 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
             // If there is existing early return status, we don't need to do anything
             return earlyReturnStatus;
           }
-          const buildCacheContext: IOperationBuildCacheContext =
-            CacheableOperationRunnerPlugin.getBuildCacheContextByRunnerOrThrow(runner);
 
           if (!projectDeps && buildCacheContext.isSkipAllowed) {
             // To test this code path:
@@ -124,6 +176,7 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
           }
 
           const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
+            buildCacheConfiguration,
             runner,
             rushProject,
             phase,
@@ -135,13 +188,20 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
             trackedProjectFiles,
             operationMetadataManager: context._operationMetadataManager
           });
+          // eslint-disable-next-line require-atomic-updates -- we are mutating the build cache context intentionally
           buildCacheContext.projectBuildCache = projectBuildCache;
 
           // Try to acquire the cobuild lock
           let cobuildLock: CobuildLock | undefined;
-          if (this._cobuildConfiguration?.cobuildEnabled) {
-            cobuildLock = await this._tryGetCobuildLockAsync({ runner, projectBuildCache });
+          if (cobuildConfiguration?.cobuildEnabled) {
+            cobuildLock = await this._tryGetCobuildLockAsync({
+              runner,
+              projectBuildCache,
+              cobuildConfiguration
+            });
           }
+
+          // eslint-disable-next-line require-atomic-updates -- we are mutating the build cache context intentionally
           buildCacheContext.cobuildLock = cobuildLock;
 
           // If possible, we want to skip this operation -- either by restoring it from the
@@ -240,12 +300,10 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
       }
     );
 
-    hooks.afterExecute.tapPromise(
+    runner.hooks.afterExecute.tapPromise(
       PLUGIN_NAME,
       async (afterExecuteContext: IOperationRunnerAfterExecuteContext) => {
-        const { context, runner, terminal, status, taskIsSuccessful } = afterExecuteContext;
-        const buildCacheContext: IOperationBuildCacheContext =
-          CacheableOperationRunnerPlugin.getBuildCacheContextByRunnerOrThrow(runner);
+        const { context, terminal, status, taskIsSuccessful } = afterExecuteContext;
 
         const { cobuildLock, projectBuildCache, isCacheWriteAllowed } = buildCacheContext;
 
@@ -305,7 +363,24 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
     );
   }
 
+  private _getBuildCacheContextByRunner(runner: IOperationRunner): IOperationBuildCacheContext | undefined {
+    const buildCacheContext: IOperationBuildCacheContext | undefined =
+      this._buildCacheContextByOperationRunner.get(runner);
+    return buildCacheContext;
+  }
+
+  private _getBuildCacheContextByRunnerOrThrow(runner: IOperationRunner): IOperationBuildCacheContext {
+    const buildCacheContext: IOperationBuildCacheContext | undefined =
+      this._getBuildCacheContextByRunner(runner);
+    if (!buildCacheContext) {
+      // This should not happen
+      throw new InternalError(`Build cache context for runner ${runner.name} should be defined`);
+    }
+    return buildCacheContext;
+  }
+
   private async _tryGetProjectBuildCacheAsync({
+    buildCacheConfiguration,
     runner,
     rushProject,
     phase,
@@ -317,6 +392,7 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
     trackedProjectFiles,
     operationMetadataManager
   }: {
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
     runner: IOperationRunner;
     rushProject: RushConfigurationProject;
     phase: IPhase;
@@ -328,10 +404,9 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
     trackedProjectFiles: string[] | undefined;
     operationMetadataManager: OperationMetadataManager | undefined;
   }): Promise<ProjectBuildCache | undefined> {
-    const buildCacheContext: IOperationBuildCacheContext =
-      CacheableOperationRunnerPlugin.getBuildCacheContextByRunnerOrThrow(runner);
+    const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
     if (!buildCacheContext.projectBuildCache) {
-      if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
+      if (buildCacheConfiguration && buildCacheConfiguration.buildCacheEnabled) {
         // Disable legacy skip logic if the build cache is in play
         buildCacheContext.isSkipAllowed = false;
 
@@ -390,7 +465,7 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
                 projectOutputFolderNames,
                 additionalProjectOutputFilePaths,
                 additionalContext,
-                buildCacheConfiguration: this._buildCacheConfiguration,
+                buildCacheConfiguration,
                 terminal,
                 command: commandToRun,
                 trackedProjectFiles: trackedProjectFiles,
@@ -412,21 +487,22 @@ export class CacheableOperationRunnerPlugin implements IOperationRunnerPlugin {
   }
 
   private async _tryGetCobuildLockAsync({
+    cobuildConfiguration,
     runner,
     projectBuildCache
   }: {
+    cobuildConfiguration: CobuildConfiguration | undefined;
     runner: IOperationRunner;
     projectBuildCache: ProjectBuildCache | undefined;
   }): Promise<CobuildLock | undefined> {
-    const buildCacheContext: IOperationBuildCacheContext =
-      CacheableOperationRunnerPlugin.getBuildCacheContextByRunnerOrThrow(runner);
+    const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
     if (!buildCacheContext.cobuildLock) {
       buildCacheContext.cobuildLock = undefined;
 
-      if (projectBuildCache && this._cobuildConfiguration && this._cobuildConfiguration.cobuildEnabled) {
+      if (projectBuildCache && cobuildConfiguration && cobuildConfiguration.cobuildEnabled) {
         buildCacheContext.cobuildLock = new CobuildLock({
-          cobuildConfiguration: this._cobuildConfiguration,
-          projectBuildCache: projectBuildCache
+          cobuildConfiguration,
+          projectBuildCache
         });
       }
     }

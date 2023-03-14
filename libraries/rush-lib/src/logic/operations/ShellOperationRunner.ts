@@ -31,8 +31,8 @@ import { PeriodicCallback } from './PeriodicCallback';
 import {
   IOperationRunnerAfterExecuteContext,
   IOperationRunnerBeforeExecuteContext,
-  OperationRunnerLifecycleHooks
-} from './OperationLifecycle';
+  OperationRunnerHooks
+} from './OperationRunnerHooks';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -69,7 +69,7 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
-  public readonly hooks: OperationRunnerLifecycleHooks;
+  public readonly hooks: OperationRunnerHooks;
   public readonly periodicCallback: PeriodicCallback;
 
   private readonly _rushProject: RushConfigurationProject;
@@ -98,7 +98,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._logFilenameIdentifier = phase.logFilenameIdentifier;
     this._selectedPhases = options.selectedPhases;
 
-    this.hooks = new OperationRunnerLifecycleHooks();
+    this.hooks = new OperationRunnerHooks();
     this.periodicCallback = new PeriodicCallback({
       interval: 10 * 1000
     });
@@ -333,7 +333,6 @@ export class ShellOperationRunner implements IOperationRunner {
 
       const afterExecuteContext: IOperationRunnerAfterExecuteContext = {
         context,
-        runner: this,
         terminal,
         exitCode,
         status,

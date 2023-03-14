@@ -42,7 +42,7 @@ describe(AsyncOperationQueue.name, () => {
         consumer.dependencies.delete(operation);
       }
       operation.status = OperationStatus.Success;
-      queue.complete();
+      queue.complete(operation);
     }
 
     expect(actualOrder).toEqual(expectedOrder);
@@ -67,7 +67,7 @@ describe(AsyncOperationQueue.name, () => {
         consumer.dependencies.delete(operation);
       }
       operation.status = OperationStatus.Success;
-      queue.complete();
+      queue.complete(operation);
     }
 
     expect(actualOrder).toEqual(expectedOrder);
@@ -130,7 +130,7 @@ describe(AsyncOperationQueue.name, () => {
 
           --concurrency;
           operation.status = OperationStatus.Success;
-          queue.complete();
+          queue.complete(operation);
         }
       })
     );
@@ -177,7 +177,7 @@ describe(AsyncOperationQueue.name, () => {
         consumer.dependencies.delete(operation);
       }
       operation.status = OperationStatus.Success;
-      queue.complete();
+      queue.complete(operation);
     }
 
     expect(actualOrder).toEqual(expectedOrder);

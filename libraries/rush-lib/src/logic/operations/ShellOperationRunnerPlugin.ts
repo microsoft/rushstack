@@ -13,7 +13,6 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import { Operation } from './Operation';
-import { CacheableOperationRunnerPlugin } from './CacheableOperationRunnerPlugin';
 
 const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -23,9 +22,6 @@ const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     hooks.createOperations.tap(PLUGIN_NAME, createShellOperations);
-    hooks.afterExecuteOperations.tap(PLUGIN_NAME, () => {
-      CacheableOperationRunnerPlugin.clearAllBuildCacheContexts();
-    });
   }
 }
 
@@ -33,14 +29,7 @@ function createShellOperations(
   operations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const {
-    buildCacheConfiguration,
-    cobuildConfiguration,
-    isIncrementalBuildAllowed,
-    phaseSelection: selectedPhases,
-    projectChangeAnalyzer,
-    rushConfiguration
-  } = context;
+  const { phaseSelection: selectedPhases, projectChangeAnalyzer, rushConfiguration } = context;
 
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
@@ -91,22 +80,6 @@ function createShellOperations(
           rushProject: project,
           selectedPhases
         });
-
-        if (buildCacheConfiguration) {
-          new CacheableOperationRunnerPlugin({
-            buildCacheConfiguration,
-            cobuildConfiguration,
-            isIncrementalBuildAllowed
-          }).apply(shellOperationRunner.hooks);
-          CacheableOperationRunnerPlugin.setBuildCacheContextByRunner(shellOperationRunner, {
-            // This runner supports cache writes by default.
-            isCacheWriteAllowed: true,
-            isCacheReadAllowed: isIncrementalBuildAllowed,
-            isSkipAllowed: isIncrementalBuildAllowed,
-            projectBuildCache: undefined,
-            cobuildLock: undefined
-          });
-        }
         operation.runner = shellOperationRunner;
       } else {
         // Empty build script indicates a no-op, so use a no-op runner
