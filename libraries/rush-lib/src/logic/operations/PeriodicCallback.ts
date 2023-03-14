@@ -15,7 +15,7 @@ export interface IPeriodicCallbackOptions {
 export class PeriodicCallback {
   private _callbacks: ICallbackFn[];
   private _interval: number;
-  private _timeoutId: NodeJS.Timeout | undefined;
+  private _intervalId: NodeJS.Timeout | undefined;
   private _isRunning: boolean;
 
   public constructor(options: IPeriodicCallbackOptions) {
@@ -32,24 +32,22 @@ export class PeriodicCallback {
   }
 
   public start(): void {
-    if (this._timeoutId) {
+    if (this._intervalId) {
       throw new Error('Watcher already started');
     }
     if (this._callbacks.length === 0) {
       return;
     }
     this._isRunning = true;
-    this._timeoutId = setTimeout(() => {
+    this._intervalId = setInterval(() => {
       this._callbacks.forEach((callback) => callback());
-      this._timeoutId = undefined;
-      this.start();
     }, this._interval);
   }
 
   public stop(): void {
-    if (this._timeoutId) {
-      clearTimeout(this._timeoutId);
-      this._timeoutId = undefined;
+    if (this._intervalId) {
+      clearInterval(this._intervalId);
+      this._intervalId = undefined;
       this._isRunning = false;
     }
   }
