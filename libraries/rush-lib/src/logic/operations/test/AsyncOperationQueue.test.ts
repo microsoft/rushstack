@@ -4,8 +4,9 @@
 import { Operation } from '../Operation';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
 import { MockOperationRunner } from './MockOperationRunner';
-import { AsyncOperationQueue, IOperationSortFunction } from '../AsyncOperationQueue';
+import { AsyncOperationQueue, IOperationSortFunction, UNASSIGNED_OPERATION } from '../AsyncOperationQueue';
 import { OperationStatus } from '../OperationStatus';
+import { Async } from '@rushstack/node-core-library';
 
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);
@@ -38,6 +39,9 @@ describe(AsyncOperationQueue.name, () => {
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
     for await (const operation of queue) {
       actualOrder.push(operation);
+      if (operation === UNASSIGNED_OPERATION) {
+        continue;
+      }
       for (const consumer of operation.consumers) {
         consumer.dependencies.delete(operation);
       }
@@ -63,6 +67,9 @@ describe(AsyncOperationQueue.name, () => {
     const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, customSort);
     for await (const operation of queue) {
       actualOrder.push(operation);
+      if (operation === UNASSIGNED_OPERATION) {
+        continue;
+      }
       for (const consumer of operation.consumers) {
         consumer.dependencies.delete(operation);
       }
@@ -117,6 +124,9 @@ describe(AsyncOperationQueue.name, () => {
     await Promise.all(
       Array.from({ length: 3 }, async () => {
         for await (const operation of queue) {
+          if (operation === UNASSIGNED_OPERATION) {
+            continue;
+          }
           ++concurrency;
           await Promise.resolve();
 
@@ -163,9 +173,20 @@ describe(AsyncOperationQueue.name, () => {
     const actualOrder: string[] = [];
     let remoteExecuted: boolean = false;
     for await (const operation of queue) {
-      actualOrder.push(operation.name);
+      let record: OperationExecutionRecord | undefined;
+      if (operation === UNASSIGNED_OPERATION) {
+        await Async.sleep(100);
+        record = queue.tryGetRemoteExecutingOperation();
+      } else {
+        record = operation;
+      }
+      if (!record) {
+        continue;
+      }
 
-      if (operation === operations[1]) {
+      actualOrder.push(record.name);
+
+      if (record === operations[1]) {
         if (!remoteExecuted) {
           operations[1].status = OperationStatus.RemoteExecuting;
           // remote executed operation is finished later
@@ -173,13 +194,13 @@ describe(AsyncOperationQueue.name, () => {
           continue;
         }
       }
-      for (const consumer of operation.consumers) {
-        consumer.dependencies.delete(operation);
+      for (const consumer of record.consumers) {
+        consumer.dependencies.delete(record);
       }
-      operation.status = OperationStatus.Success;
-      queue.complete(operation);
+      record.status = OperationStatus.Success;
+      queue.complete(record);
     }
 
     expect(actualOrder).toEqual(expectedOrder);
-  }, 6000);
+  });
 });

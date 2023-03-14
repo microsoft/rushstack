@@ -6,7 +6,12 @@ import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushsta
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async } from '@rushstack/node-core-library';
 
-import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
+import {
+  AsyncOperationQueue,
+  IOperationIteratorResult,
+  IOperationSortFunction,
+  UNASSIGNED_OPERATION
+} from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
@@ -201,9 +206,23 @@ export class OperationExecutionManager {
 
     await Async.forEachAsync(
       this._executionQueue,
-      async (operation: OperationExecutionRecord) => {
-        await this.hooks.beforeExecuteOperation.promise(operation);
-        await operation.executeAsync(onOperationComplete);
+      async (operation: IOperationIteratorResult) => {
+        let record: OperationExecutionRecord | undefined;
+        if (operation === UNASSIGNED_OPERATION) {
+          // Pause for a few time
+          await Async.sleep(5000);
+          record = this._executionQueue.tryGetRemoteExecutingOperation();
+        } else {
+          record = operation;
+        }
+
+        if (!record) {
+          // Fail to assign a operation, start over again
+          return;
+        } else {
+          await this.hooks.beforeExecuteOperation.promise(record);
+          await record.executeAsync(onOperationComplete);
+        }
       },
       {
         concurrency: maxParallelism

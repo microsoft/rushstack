@@ -5,6 +5,16 @@ import { OperationExecutionRecord } from './OperationExecutionRecord';
 import { OperationStatus } from './OperationStatus';
 
 /**
+ * When the queue returns an unassigned operation, it means there is no workable operation at the time,
+ * and the caller has a chance to make a decision synchronously or asynchronously:
+ * 1. Manually invoke `tryGetRemoteExecutingOperation()` to get a remote executing operation.
+ * 2. Or, return in callback or continue the for-loop, which internally invoke `assignOperations()` to assign new operations.
+ */
+export const UNASSIGNED_OPERATION: 'UNASSIGNED_OPERATION' = 'UNASSIGNED_OPERATION';
+
+export type IOperationIteratorResult = OperationExecutionRecord | typeof UNASSIGNED_OPERATION;
+
+/**
  * Implementation of the async iteration protocol for a collection of IOperation objects.
  * The async iterator will wait for an operation to be ready for execution, or terminate if there are no more operations.
  *
@@ -14,10 +24,10 @@ import { OperationStatus } from './OperationStatus';
  * stall until another operations completes.
  */
 export class AsyncOperationQueue
-  implements AsyncIterable<OperationExecutionRecord>, AsyncIterator<OperationExecutionRecord>
+  implements AsyncIterable<IOperationIteratorResult>, AsyncIterator<IOperationIteratorResult>
 {
   private readonly _queue: OperationExecutionRecord[];
-  private readonly _pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
+  private readonly _pendingIterators: ((result: IteratorResult<IOperationIteratorResult>) => void)[];
   private readonly _totalOperations: number;
   private readonly _completedOperations: Set<OperationExecutionRecord>;
 
@@ -42,11 +52,11 @@ export class AsyncOperationQueue
    * For use with `for await (const operation of taskQueue)`
    * @see {AsyncIterator}
    */
-  public next(): Promise<IteratorResult<OperationExecutionRecord>> {
+  public next(): Promise<IteratorResult<IOperationIteratorResult>> {
     const { _pendingIterators: waitingIterators } = this;
 
-    const promise: Promise<IteratorResult<OperationExecutionRecord>> = new Promise(
-      (resolve: (result: IteratorResult<OperationExecutionRecord>) => void) => {
+    const promise: Promise<IteratorResult<IOperationIteratorResult>> = new Promise(
+      (resolve: (result: IteratorResult<IOperationIteratorResult>) => void) => {
         waitingIterators.push(resolve);
       }
     );
@@ -126,34 +136,32 @@ export class AsyncOperationQueue
     }
 
     if (waitingIterators.length > 0) {
-      // Pause for a few time
-      setTimeout(() => {
-        // cycle through the queue again to find the next operation that is executed remotely
-        for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
-          const operation: OperationExecutionRecord = queue[i];
-
-          if (operation.status === OperationStatus.RemoteExecuting) {
-            // try to attempt to get the lock again
-            waitingIterators.shift()!({
-              value: operation,
-              done: false
-            });
-          }
-        }
-
-        if (waitingIterators.length > 0) {
-          // Queue is not empty, but no operations are ready to process, start over
-          this.assignOperations();
-        }
-      }, 5000);
+      // Queue is not empty, but no operations are ready to process, returns a unassigned operation to let caller decide
+      waitingIterators.shift()!({
+        value: UNASSIGNED_OPERATION,
+        done: false
+      });
     }
+  }
+
+  public tryGetRemoteExecutingOperation(): OperationExecutionRecord | undefined {
+    const { _queue: queue } = this;
+    // cycle through the queue to find the next operation that is executed remotely
+    for (let i: number = queue.length - 1; i >= 0; i--) {
+      const operation: OperationExecutionRecord = queue[i];
+
+      if (operation.status === OperationStatus.RemoteExecuting) {
+        return operation;
+      }
+    }
+    return undefined;
   }
 
   /**
    * Returns this queue as an async iterator, such that multiple functions iterating this object concurrently
    * receive distinct iteration results.
    */
-  public [Symbol.asyncIterator](): AsyncIterator<OperationExecutionRecord> {
+  public [Symbol.asyncIterator](): AsyncIterator<IOperationIteratorResult> {
     return this;
   }
 }
