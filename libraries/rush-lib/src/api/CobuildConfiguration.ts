@@ -2,13 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  AlreadyReportedError,
-  FileSystem,
-  ITerminal,
-  JsonFile,
-  JsonSchema
-} from '@rushstack/node-core-library';
+import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import schemaJson from '../schemas/cobuild.schema.json';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
@@ -49,7 +43,7 @@ export class CobuildConfiguration {
   /**
    * Cobuild context id
    *
-   * @remark
+   * @remarks
    * The cobuild feature won't be enabled until the context id is provided as an non-empty string.
    */
   public readonly cobuildContextId: string | undefined;
