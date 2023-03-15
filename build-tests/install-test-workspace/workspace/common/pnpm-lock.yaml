@@ -2103,7 +2103,7 @@ packages:
     hasBin: true
 
   /json-buffer/3.0.0:
-    resolution: {integrity: sha512-CuUqjv0FUZIdXkHPI8MezCnFCdaTAacej1TZYulLoAg1h/PhwkdXFN4V/gzY4g+fMBCOV2xF+rp7t2XD2ns/NQ==}
+    resolution: {integrity: sha1-Wx85evx11ne96Lz8Dkfh+aPZqJg=}
 
   /json-parse-even-better-errors/2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
@@ -3663,7 +3663,7 @@ packages:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.11.9.tgz_@types+node@14.18.36
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.2.tgz_@types+node@14.18.36
-      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz_@types+node@14.18.36
+      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz_@types+node@14.18.36
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.18.tgz
       '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.0.227.tgz_@types+node@14.18.36
       '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.2.tgz_@types+node@14.18.36
@@ -3872,11 +3872,11 @@ packages:
       semver: 7.3.8
       z-schema: 5.0.3
 
-  file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz}
-    id: file:../temp/tarballs/rushstack-package-deps-hash-4.0.8.tgz
+  file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz}
+    id: file:../temp/tarballs/rushstack-package-deps-hash-4.0.9.tgz
     name: '@rushstack/package-deps-hash'
-    version: 4.0.8
+    version: 4.0.9
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.55.2.tgz_@types+node@14.18.36
     transitivePeerDependencies:
