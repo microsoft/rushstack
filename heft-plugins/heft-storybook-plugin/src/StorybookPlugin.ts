@@ -150,7 +150,9 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         return;
       }
 
-      this._staticBuildOutputFolder = build.properties.serveMode ? undefined : options.staticBuildModulePath;
+      this._staticBuildOutputFolder = build.properties.serveMode
+        ? undefined
+        : options.staticBuildOutputFolder;
       const modulePath: string | undefined = build.properties.serveMode
         ? options.startupModulePath
         : options.staticBuildModulePath;

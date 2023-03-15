@@ -38,7 +38,8 @@ export class InitAutoinstallerAction extends BaseRushAction {
 
     const autoinstaller: Autoinstaller = new Autoinstaller({
       autoinstallerName,
-      rushConfiguration: this.rushConfiguration
+      rushConfiguration: this.rushConfiguration,
+      rushGlobalFolder: this.rushGlobalFolder
     });
 
     if (FileSystem.exists(autoinstaller.folderFullPath)) {

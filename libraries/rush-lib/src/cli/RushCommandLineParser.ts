@@ -136,7 +136,8 @@ export class RushCommandLineParser extends CommandLineParser {
       rushConfiguration: this.rushConfiguration,
       terminal: this._terminal,
       builtInPluginConfigurations: this._rushOptions.builtInPluginConfigurations,
-      restrictConsoleOutput: this._restrictConsoleOutput
+      restrictConsoleOutput: this._restrictConsoleOutput,
+      rushGlobalFolder: this.rushGlobalFolder
     });
 
     this._populateActions();

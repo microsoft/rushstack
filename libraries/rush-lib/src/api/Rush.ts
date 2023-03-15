@@ -10,6 +10,8 @@ import {
   PackageJsonLookup
 } from '@rushstack/node-core-library';
 
+import '../utilities/SetRushLibPath';
+
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';

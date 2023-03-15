@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.0.9",
+      "tag": "@rushstack/package-deps-hash_v4.0.9",
+      "date": "Fri, 24 Feb 2023 01:24:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Prevent network calls or maintenance tasks during local Git operations."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.8",
       "tag": "@rushstack/package-deps-hash_v4.0.8",
       "date": "Fri, 10 Feb 2023 01:18:51 GMT",

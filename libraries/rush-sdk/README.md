@@ -10,7 +10,9 @@ The **@rushstack/rush-sdk** package acts as a lightweight proxy for accessing th
 
 2. When authoring unit tests for a Rush plugin, developers should add **@microsoft/rush-lib** to their **package.json** `devDependencies`. In this context, **@rushstack/rush-sdk** will resolve to that instance for testing purposes.
 
-3. For scripts and tools that are designed to be used in a Rush monorepo, in the future **@rushstack/rush-sdk** will automatically invoke **install-run-rush.js** and load the local installation. This ensures that tools load a compatible version of the Rush engine for the given branch. Once this is implemented, **@rushstack/rush-sdk** can replace **@microsoft/rush-lib** entirely as the official API interface, with the latter serving as the underlying implementation.
+3. For projects within a monorepo that use **@rushstack/rush-sdk** during their build process, child processes will inherit the installation of Rush that invoked them. This is communicated using the `_RUSH_LIB_PATH` environment variable.
+
+4. For scripts and tools that are designed to be used in a Rush monorepo, in the future **@rushstack/rush-sdk** will automatically invoke **install-run-rush.js** and load the local installation. This ensures that tools load a compatible version of the Rush engine for the given branch. Once this is implemented, **@rushstack/rush-sdk** can replace **@microsoft/rush-lib** entirely as the official API interface, with the latter serving as the underlying implementation.
 
 The **@rushstack/rush-sdk** API declarations are identical to the corresponding version of **@microsoft/rush-lib**.
 
@@ -42,8 +44,8 @@ Example 2: How to import an internal API:
 // WARNING: INTERNAL APIS MAY CHANGE AT ANY TIME -- USE THIS AT YOUR OWN RISK:
 
 // Important: Since we're calling an internal API, we need to use the unbundled .d.ts files
-// instead of the normal .d.ts rollup
-import { RushConfiguration } from '@rushstack/rush-sdk/lib/';
+// instead of the normal .d.ts rollup, otherwise TypeScript will complain about a type mismatch.
+import { RushConfiguration } from '@rushstack/rush-sdk/lib/index';
 const config = RushConfiguration.loadFromDefaultLocation();
 console.log(config.commonFolder);
 
