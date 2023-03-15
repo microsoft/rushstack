@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@gigara/rush-github-action-build-cache-plugin": "1.0.4"
+    "@gigara/rush-github-action-build-cache-plugin": "1.0.5"
   }
 }
