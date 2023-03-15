@@ -71,7 +71,7 @@ jobs:
       #   working-directory: repo-a
 
       - name: Rush retest (install-run-rush)
-        run: node common/scripts/install-run-rush.js retest --verbose --production
+        run: node common/scripts/install-run-rush.js test --verbose --production
         working-directory: repo-a
 
       - name: Ensure repo README is up-to-date
