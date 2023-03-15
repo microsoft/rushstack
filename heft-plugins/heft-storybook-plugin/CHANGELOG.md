@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Fri, 20 Jan 2023 20:13:16 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2023 20:22:44 GMT and should not be manually modified.
+
+## 0.2.0-rc.4
+Wed, 15 Mar 2023 20:22:44 GMT
+
+### Prerelease Changes
+
+- Fix an issue with `watchGlobAsync`
 
 ## 0.2.0-rc.3
 Fri, 20 Jan 2023 20:13:16 GMT

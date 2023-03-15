@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.12.0-rc.4",
+      "tag": "@rushstack/heft-node-rig_v1.12.0-rc.4",
+      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue with `watchGlobAsync`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.12.0-rc.3",
       "tag": "@rushstack/heft-node-rig_v1.12.0-rc.3",
       "date": "Fri, 20 Jan 2023 20:13:16 GMT",

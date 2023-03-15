@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.2.0-rc.4",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.4",
+      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue with `watchGlobAsync`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0-rc.3",
       "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.3",
       "date": "Fri, 20 Jan 2023 20:13:16 GMT",
