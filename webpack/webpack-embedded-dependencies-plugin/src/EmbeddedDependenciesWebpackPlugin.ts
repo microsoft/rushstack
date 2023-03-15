@@ -1,10 +1,11 @@
 import path from 'path';
-import { sources, Compilation, WebpackError } from 'webpack';
+import { Compilation } from 'webpack';
 import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
-import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
 
-import type { Compiler, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance, WebpackError } from 'webpack';
 import type { IPackageJson } from '@rushstack/node-core-library';
+
+import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
 
 const PLUGIN_NAME: 'EmbeddedDependenciesWebpackPlugin' = 'EmbeddedDependenciesWebpackPlugin';
 const PLUGIN_ERROR_PREFIX: string = '[embedded-dependencies-webpack-plugin]';
@@ -171,6 +172,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    * @param compiler - The webpack compiler instance.
    */
   public apply(compiler: Compiler): void {
+    const { sources } = compiler.webpack;
     // Tap into compilation so we can tap into compilation.hooks.processAssets
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, { normalModuleFactory }) => {
       const thirdPartyPackages: ThirdPartyPackageMap = new Map();
@@ -287,6 +289,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    */
   private _emitWebpackError(compilation: Compilation, errorMessage: string, error: unknown): void {
     let emittedError: WebpackError;
+    const { WebpackError } = compilation.compiler.webpack;
     // If the error is a string, we can just emit it as is with message prefix and error message
     if (typeof error === 'string') {
       emittedError = new WebpackError(`${PLUGIN_ERROR_PREFIX}: ${errorMessage}: ${error}`);
