@@ -1,8 +1,7 @@
 import path from 'path';
-import { Compilation } from 'webpack';
 import { Async, Sort, LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
 
-import type { Compiler, WebpackPluginInstance, WebpackError } from 'webpack';
+import type { Compiler, Compilation, WebpackPluginInstance, WebpackError } from 'webpack';
 import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from './regexpUtils';
@@ -172,7 +171,7 @@ export default class EmbeddedDependenciesWebpackPlugin implements WebpackPluginI
    * @param compiler - The webpack compiler instance.
    */
   public apply(compiler: Compiler): void {
-    const { sources } = compiler.webpack;
+    const { sources, Compilation } = compiler.webpack;
     // Tap into compilation so we can tap into compilation.hooks.processAssets
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, { normalModuleFactory }) => {
       const thirdPartyPackages: ThirdPartyPackageMap = new Map();
