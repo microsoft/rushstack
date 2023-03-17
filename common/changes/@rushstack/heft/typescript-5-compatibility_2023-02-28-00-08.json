@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
