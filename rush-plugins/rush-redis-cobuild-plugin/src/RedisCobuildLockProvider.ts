@@ -24,19 +24,19 @@ import type { ITerminal } from '@rushstack/node-core-library';
  */
 export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {}
 
-const KEY_SEPARATOR: string = ':';
-const COMPLETED_STATE_SEPARATOR: string = ';';
+const KEY_SEPARATOR: ':' = ':';
+const COMPLETED_STATE_SEPARATOR: ';' = ';';
 
 /**
  * @beta
  */
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
   private readonly _options: IRedisCobuildLockProviderOptions;
-  private _terminal: ITerminal;
+  private readonly _terminal: ITerminal;
 
-  private _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
-  private _lockKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
-  private _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
+  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
+  private readonly _lockKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
+  private readonly _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
@@ -59,8 +59,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
         const expandedValue: string = value.replace(
           /\$\{([^\}]+)\}/g,
           (match: string, variableName: string): string => {
-            const variable: string | undefined =
-              variableName in environment ? environment[variableName] : undefined;
+            const variable: string | undefined = environment[variableName];
             if (variable !== undefined) {
               return variable;
             } else {

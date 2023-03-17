@@ -13,7 +13,7 @@ export enum OperationStatus {
   /**
    * The Operation is Queued
    */
-  Queued = 'Queued',
+  Queued = 'QUEUED',
   /**
    * The Operation is currently executing
    */
