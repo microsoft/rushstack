@@ -28,10 +28,6 @@
         "cobuildLockProvider": {
           "description": "Specify the cobuild lock provider to use",
           "type": "string"
-        },
-        "cobuildContextIdPattern": {
-          "type": "string",
-          "description": "Setting this property overrides the cobuild context ID."
         }
       }
     }
