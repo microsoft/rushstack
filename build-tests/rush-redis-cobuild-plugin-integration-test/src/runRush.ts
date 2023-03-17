@@ -34,5 +34,4 @@ async function rushRush(args: string[]): Promise<void> {
   await parser.execute(args).catch(console.error); // CommandLineParser.execute() should never reject the promise
 }
 
-/* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-rushRush(process.argv.slice(2));
+rushRush(process.argv.slice(2)).catch(console.error);
