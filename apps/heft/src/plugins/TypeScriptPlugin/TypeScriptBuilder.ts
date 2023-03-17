@@ -131,6 +131,10 @@ const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
 const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 0;
 
+// symbols for attaching hidden metadata to ts.Program instances.
+const INNER_GET_COMPILER_OPTIONS_SYMBOL: unique symbol = Symbol('getCompilerOptions');
+const INNER_EMIT_SYMBOL: unique symbol = Symbol('emit');
+
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
   private _typescriptVersion!: string;
   private _typescriptParsedVersion!: semver.SemVer;
@@ -414,20 +418,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript
   ): { changedFiles: Set<IExtendedSourceFile> } {
     interface IProgramWithMultiEmit extends TTypescript.Program {
-      __innerGetCompilerOptions?: TTypescript.Program['getCompilerOptions'];
-      __innerEmit?: TTypescript.Program['emit'];
+      // Attach the originals to the Program instance to avoid modifying the same Program twice.
+      // Don't use WeakMap because this Program could theoretically get a { ... } applied to it.
+      [INNER_GET_COMPILER_OPTIONS_SYMBOL]?: TTypescript.Program['getCompilerOptions'];
+      [INNER_EMIT_SYMBOL]?: TTypescript.Program['emit'];
     }
 
     const program: IProgramWithMultiEmit = innerProgram;
 
-    let { __innerEmit: innerEmit, __innerGetCompilerOptions: innerGetCompilerOptions } = program;
+    // Check to see if this Program has already been modified.
+    let { [INNER_EMIT_SYMBOL]: innerEmit, [INNER_GET_COMPILER_OPTIONS_SYMBOL]: innerGetCompilerOptions } =
+      program;
 
     if (!innerGetCompilerOptions) {
-      program.__innerGetCompilerOptions = innerGetCompilerOptions = program.getCompilerOptions;
+      program[INNER_GET_COMPILER_OPTIONS_SYMBOL] = innerGetCompilerOptions = program.getCompilerOptions;
     }
 
     if (!innerEmit) {
-      program.__innerEmit = innerEmit = program.emit;
+      program[INNER_EMIT_SYMBOL] = innerEmit = program.emit;
     }
 
     let foundPrimary: boolean = false;
@@ -474,7 +482,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       customTransformers?: TTypescript.CustomTransformers
     ) => {
       if (emitOnlyDtsFiles) {
-        return program.__innerEmit!(
+        return program[INNER_EMIT_SYMBOL]!(
           targetSourceFile,
           writeFile,
           cancellationToken,
@@ -487,7 +495,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         changedFiles.add(targetSourceFile as IExtendedSourceFile);
       }
 
-      const originalCompilerOptions: TTypescript.CompilerOptions = program.__innerGetCompilerOptions!();
+      const originalCompilerOptions: TTypescript.CompilerOptions =
+        program[INNER_GET_COMPILER_OPTIONS_SYMBOL]!();
 
       let defaultModuleKindResult: TTypescript.EmitResult;
       const diagnostics: TTypescript.Diagnostic[] = [];
@@ -498,7 +507,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           // Need to mutate the compiler options for the `module` field specifically, because emitWorker() captures
           // options in the closure and passes it to `ts.getTransformers()`
           originalCompilerOptions.module = moduleKindToEmit.moduleKind;
-          const flavorResult: TTypescript.EmitResult = program.__innerEmit!(
+          const flavorResult: TTypescript.EmitResult = program[INNER_EMIT_SYMBOL]!(
             targetSourceFile,
             writeFile && wrapWriteFile(writeFile, moduleKindToEmit.jsExtensionOverride),
             cancellationToken,
@@ -507,6 +516,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           );
 
           emitSkipped = emitSkipped || flavorResult.emitSkipped;
+          // Need to aggregate diagnostics because some are impacted by the target module type
           for (const diagnostic of flavorResult.diagnostics) {
             diagnostics.push(diagnostic);
           }
@@ -514,7 +524,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           if (moduleKindToEmit.moduleKind === defaultModuleKind) {
             defaultModuleKindResult = flavorResult;
           }
-          // Should results be aggregated, in case for whatever reason the diagnostics are not the same?
         }
 
         const mergedDiagnostics: readonly TTypescript.Diagnostic[] =
@@ -527,7 +536,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           emitSkipped
         };
       } finally {
-        program.getCompilerOptions = program.__innerGetCompilerOptions!;
+        // Restore the original compiler options and module kind for future calls
+        program.getCompilerOptions = program[INNER_GET_COMPILER_OPTIONS_SYMBOL]!;
         originalCompilerOptions.module = defaultModuleKind;
       }
     };
