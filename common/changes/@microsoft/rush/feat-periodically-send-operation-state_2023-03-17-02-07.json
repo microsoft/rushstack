@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add hooks to PhasedCommandHooks to give user the operation records",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

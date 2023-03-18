@@ -18,6 +18,9 @@ export interface IOperationExecutionManagerOptions {
   parallelism: number;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+
+  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
 }
 
 /**
@@ -44,19 +47,34 @@ export class OperationExecutionManager {
 
   private readonly _terminal: CollatedTerminal;
 
+  private readonly _onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  private readonly _beforeExecuteOperations?: (
+    records: Map<Operation, OperationExecutionRecord>
+  ) => Promise<void>;
+
   // Variables for current status
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _completedOperations: number;
 
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
+    const {
+      quietMode,
+      debugMode,
+      parallelism,
+      changedProjectsOnly,
+      onOperationStatusChanged,
+      beforeExecuteOperations
+    } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
+
+    this._beforeExecuteOperations = beforeExecuteOperations;
+    this._onOperationStatusChanged = onOperationStatusChanged;
 
     // TERMINAL PIPELINE:
     //
@@ -77,6 +95,7 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
+      onOperationStatusChanged,
       debugMode,
       quietMode
     };
@@ -183,6 +202,8 @@ export class OperationExecutionManager {
       prioritySort
     );
 
+    await this._beforeExecuteOperations?.(this._executionRecords);
+
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
     const onOperationComplete: (record: OperationExecutionRecord) => void = (
@@ -250,6 +271,7 @@ export class OperationExecutionManager {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
+            this._onOperationStatusChanged?.(blockedRecord);
 
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);
