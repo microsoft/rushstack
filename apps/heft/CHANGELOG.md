@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
+
+## 0.50.0
+Sat, 18 Mar 2023 00:20:56 GMT
+
+### Minor changes
+
+- Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works.
 
 ## 0.49.7
 Fri, 10 Feb 2023 01:18:50 GMT
