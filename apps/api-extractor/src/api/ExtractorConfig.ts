@@ -210,7 +210,7 @@ export class ExtractorConfig {
     path.join(__dirname, '../schemas/api-extractor-defaults.json')
   );
 
-  private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
+  private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.(c|m)?ts$/i;
 
   /** {@inheritDoc IConfigFile.projectFolder} */
   public readonly projectFolder: string;
