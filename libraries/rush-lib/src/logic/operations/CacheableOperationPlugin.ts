@@ -58,19 +58,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
         for (const operation of operations) {
           if (operation.runner) {
-            if (operation.runner instanceof ShellOperationRunner) {
-              const buildCacheContext: IOperationBuildCacheContext = {
-                // ShellOperationRunner supports cache writes by default.
-                isCacheWriteAllowed: true,
-                isCacheReadAllowed: isIncrementalBuildAllowed,
-                isSkipAllowed: isIncrementalBuildAllowed,
-                projectBuildCache: undefined,
-                cobuildLock: undefined
-              };
-              // Upstream runners may mutate the property of build cache context for downstream runners
-              this._buildCacheContextByOperationRunner.set(operation.runner, buildCacheContext);
+            const buildCacheContext: IOperationBuildCacheContext = {
+              // ShellOperationRunner supports cache writes by default.
+              isCacheWriteAllowed: true,
+              isCacheReadAllowed: isIncrementalBuildAllowed,
+              isSkipAllowed: isIncrementalBuildAllowed,
+              projectBuildCache: undefined,
+              cobuildLock: undefined
+            };
+            // Upstream runners may mutate the property of build cache context for downstream runners
+            this._buildCacheContextByOperationRunner.set(operation.runner, buildCacheContext);
 
-              this._applyOperationRunner(operation.runner, context);
+            if (operation.runner instanceof ShellOperationRunner) {
+              this._applyShellOperationRunner(operation.runner, context);
             }
           }
         }
@@ -131,7 +131,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     });
   }
 
-  private _applyOperationRunner(runner: ShellOperationRunner, context: ICreateOperationsContext): void {
+  private _applyShellOperationRunner(runner: ShellOperationRunner, context: ICreateOperationsContext): void {
     const {
       buildCacheConfiguration,
       cobuildConfiguration,
