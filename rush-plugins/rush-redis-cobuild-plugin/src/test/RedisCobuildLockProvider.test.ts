@@ -51,16 +51,13 @@ describe(RedisCobuildLockProvider.name, () => {
 
   it('expands options with environment variables', () => {
     const expectedOptions = {
-      username: 'redisuser',
       password: 'redis123'
     };
     const actualOptions = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(
       {
-        username: '${REDIS_USERNAME}',
-        password: '${REDIS_PASS}'
+        passwordEnvironmentVariable: 'REDIS_PASS'
       },
       {
-        REDIS_USERNAME: 'redisuser',
         REDIS_PASS: 'redis123'
       }
     );
@@ -71,8 +68,7 @@ describe(RedisCobuildLockProvider.name, () => {
     expect(() => {
       RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(
         {
-          username: '${REDIS_USERNAME}',
-          password: '${REDIS_PASS}'
+          passwordEnvironmentVariable: 'REDIS_PASS'
         },
         {}
       );

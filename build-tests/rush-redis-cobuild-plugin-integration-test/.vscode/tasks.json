@@ -39,7 +39,8 @@
       "options": {
         "cwd": "${workspaceFolder}/sandbox/repo",
         "env": {
-          "RUSH_COBUILD_CONTEXT_ID": "integration-test"
+          "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "REDIS_PASS": "redis123"
         }
       },
       "presentation": {
@@ -60,7 +61,8 @@
       "options": {
         "cwd": "${workspaceFolder}/sandbox/repo",
         "env": {
-          "RUSH_COBUILD_CONTEXT_ID": "integration-test"
+          "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "REDIS_PASS": "redis123"
         }
       },
       "presentation": {

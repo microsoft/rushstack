@@ -46,8 +46,8 @@
       "description": "ACL username",
       "type": "string"
     },
-    "password": {
-      "description": "ACL password",
+    "passwordEnvironmentVariable": {
+      "description": "The environment variable used to get the ACL password",
       "type": "string"
     },
     "name": {

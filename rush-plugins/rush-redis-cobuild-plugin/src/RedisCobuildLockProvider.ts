@@ -22,7 +22,12 @@ import type { ITerminal } from '@rushstack/node-core-library';
  * The redis client options
  * @beta
  */
-export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {}
+export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
+  /**
+   * The environment variable name for the redis password
+   */
+  passwordEnvironmentVariable?: string;
+}
 
 const KEY_SEPARATOR: ':' = ':';
 const COMPLETED_STATE_SEPARATOR: ';' = ';';
@@ -36,7 +41,10 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
   private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
   private readonly _lockKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
-  private readonly _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
+  private readonly _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<
+    ICobuildContext,
+    string
+  >();
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
@@ -54,22 +62,15 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
   ): IRedisCobuildLockProviderOptions {
     const finalOptions: IRedisCobuildLockProviderOptions = { ...options };
     const missingEnvironmentVariables: Set<string> = new Set<string>();
-    for (const [key, value] of Object.entries(finalOptions)) {
-      if (typeof value === 'string') {
-        const expandedValue: string = value.replace(
-          /\$\{([^\}]+)\}/g,
-          (match: string, variableName: string): string => {
-            const variable: string | undefined = environment[variableName];
-            if (variable !== undefined) {
-              return variable;
-            } else {
-              missingEnvironmentVariables.add(variableName);
-              return match;
-            }
-          }
-        );
-        (finalOptions as Record<string, string>)[key] = expandedValue;
+
+    if (finalOptions.passwordEnvironmentVariable) {
+      const password: string | undefined = environment[finalOptions.passwordEnvironmentVariable];
+      if (password !== undefined) {
+        finalOptions.password = password;
+      } else {
+        missingEnvironmentVariables.add(finalOptions.passwordEnvironmentVariable);
       }
+      delete finalOptions.passwordEnvironmentVariable;
     }
 
     if (missingEnvironmentVariables.size) {

@@ -16,6 +16,7 @@ import type { RushSession } from '@rushstack/rush-sdk';
 
 // @beta
 export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
+    passwordEnvironmentVariable?: string;
 }
 
 // @beta (undocumented)

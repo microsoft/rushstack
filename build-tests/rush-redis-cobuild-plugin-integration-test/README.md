@@ -41,13 +41,13 @@ rush update
 ## Case 1: Disable cobuild by setting `RUSH_COBUILD_ENABLED=0`
 
 ```sh
-rm -rf common/temp/build-cache && RUSH_COBUILD_ENABLED=0 node ../../lib/runRush.js --debug cobuild
+rm -rf common/temp/build-cache && RUSH_COBUILD_ENABLED=0 REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
 ```
 
 Expected behavior: Cobuild feature is disabled. Run command successfully.
 
 ```sh
-RUSH_COBUILD_ENABLED=0 node ../../lib/runRush.js --debug cobuild
+RUSH_COBUILD_ENABLED=0 REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
 ```
 
 Expected behavior: Cobuild feature is disabled. Build cache was restored successfully.
@@ -57,7 +57,7 @@ Expected behavior: Cobuild feature is disabled. Build cache was restored success
 Run `rush cobuild` command without specifying cobuild context id.
 
 ```sh
-rm -rf common/temp/build-cache && node ../../lib/runRush.js --debug cobuild
+rm -rf common/temp/build-cache && REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
 ```
 
 Expected behavior: Cobuild feature is disabled. Build cache was restored successfully.
@@ -73,7 +73,7 @@ Expected behavior: Cobuild feature is disabled. Build cache was restored success
 2. Run `rush cobuild` command
 
 ```sh
-rm -rf common/temp/build-cache && RUSH_COBUILD_CONTEXT_ID=foo node ../../lib/runRush.js --debug cobuild
+rm -rf common/temp/build-cache && RUSH_COBUILD_CONTEXT_ID=foo REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
 ```
 
 Expected behavior: Cobuild feature is enabled. Run command successfully.
