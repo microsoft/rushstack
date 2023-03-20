@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add api-extractor support for .d.mts and .d.cts files",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
