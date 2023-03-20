@@ -95,7 +95,7 @@ export class PhasedCommandHooks {
     new AsyncSeriesHook(['records']);
 
   /**
-   * Hook invoked when operation statue changed
+   * Hook invoked when operation status changed
    * Hook is series for stable output.
    */
   public readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]> = new SyncHook(['record']);

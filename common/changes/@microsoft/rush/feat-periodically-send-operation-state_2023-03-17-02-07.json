@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "add hooks to PhasedCommandHooks to give user the operation records",
+      "comment": "Include some more hooks to allow plugins to monitor phased command execution in real-time.",
       "type": "none"
     }
   ],
