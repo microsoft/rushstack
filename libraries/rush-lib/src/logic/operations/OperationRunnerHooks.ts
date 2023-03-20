@@ -9,7 +9,6 @@ import type { OperationStatus } from './OperationStatus';
 import type { IProjectDeps, ShellOperationRunner } from './ShellOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
 /**
  * A plugin tht interacts with a operation runner
@@ -33,8 +32,6 @@ export interface IOperationRunnerBeforeExecuteContext {
   errorLogPath: string;
   rushProject: RushConfigurationProject;
   phase: IPhase;
-  selectedPhases: Iterable<IPhase>;
-  projectChangeAnalyzer: ProjectChangeAnalyzer;
   commandName: string;
   commandToRun: string;
 }

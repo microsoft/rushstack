@@ -736,7 +736,7 @@ export enum OperationStatus {
     Failure = "FAILURE",
     FromCache = "FROM CACHE",
     NoOp = "NO OP",
-    Queued = "Queued",
+    Queued = "QUEUED",
     Ready = "READY",
     RemoteExecuting = "REMOTE EXECUTING",
     Skipped = "SKIPPED",

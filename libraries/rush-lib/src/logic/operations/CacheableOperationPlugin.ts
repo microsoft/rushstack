@@ -132,7 +132,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   }
 
   private _applyOperationRunner(runner: ShellOperationRunner, context: ICreateOperationsContext): void {
-    const { buildCacheConfiguration, cobuildConfiguration } = context;
+    const {
+      buildCacheConfiguration,
+      cobuildConfiguration,
+      phaseSelection: selectedPhases,
+      projectChangeAnalyzer
+    } = context;
     const { hooks } = runner;
 
     const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
@@ -152,8 +157,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             errorLogPath,
             rushProject,
             phase,
-            selectedPhases,
-            projectChangeAnalyzer,
             commandName,
             commandToRun,
             earlyReturnStatus

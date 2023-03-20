@@ -223,8 +223,6 @@ export class ShellOperationRunner implements IOperationRunner {
         errorLogPath: projectLogWritable.errorLogPath,
         rushProject: this._rushProject,
         phase: this._phase,
-        selectedPhases: this._selectedPhases,
-        projectChangeAnalyzer: this._projectChangeAnalyzer,
         commandName: this._commandName,
         commandToRun: this._commandToRun,
         earlyReturnStatus: undefined
