@@ -12,13 +12,11 @@ import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProj
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 
 import type { Operation } from './Operation';
-import type { OperationExecutionManager } from './OperationExecutionManager';
-import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import type {
   IOperationRunnerAfterExecuteContext,
   IOperationRunnerBeforeExecuteContext
 } from './OperationRunnerHooks';
-import type { IOperationRunner } from './IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
   ICreateOperationsContext,
@@ -79,50 +77,44 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       }
     );
 
-    hooks.operationExecutionManager.tap(
+    hooks.afterExecuteOperation.tapPromise(
       PLUGIN_NAME,
-      (operationExecutionManager: OperationExecutionManager) => {
-        operationExecutionManager.hooks.afterExecuteOperation.tapPromise(
-          PLUGIN_NAME,
-          async (operation: OperationExecutionRecord): Promise<OperationExecutionRecord> => {
-            const { runner, status, consumers } = operation;
-            const buildCacheContext: IOperationBuildCacheContext | undefined =
-              this._getBuildCacheContextByRunner(runner);
+      async (runnerContext: IOperationRunnerContext): Promise<void> => {
+        const { runner, status, consumers, changedProjectsOnly } = runnerContext;
+        const buildCacheContext: IOperationBuildCacheContext | undefined =
+          this._getBuildCacheContextByRunner(runner);
 
-            let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
-            let blockSkip: boolean = !buildCacheContext?.isSkipAllowed;
+        let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
+        let blockSkip: boolean = !buildCacheContext?.isSkipAllowed;
 
-            switch (status) {
-              case OperationStatus.Skipped: {
-                // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
-                blockCacheWrite = true;
-                break;
-              }
-
-              case OperationStatus.SuccessWithWarning:
-              case OperationStatus.Success: {
-                // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
-                blockSkip ||= !operationExecutionManager.changedProjectsOnly;
-                break;
-              }
-            }
-
-            // Apply status changes to direct dependents
-            for (const item of consumers) {
-              const itemRunnerBuildCacheContext: IOperationBuildCacheContext | undefined =
-                this._getBuildCacheContextByRunner(item.runner);
-              if (itemRunnerBuildCacheContext) {
-                if (blockCacheWrite) {
-                  itemRunnerBuildCacheContext.isCacheWriteAllowed = false;
-                }
-                if (blockSkip) {
-                  itemRunnerBuildCacheContext.isSkipAllowed = false;
-                }
-              }
-            }
-            return operation;
+        switch (status) {
+          case OperationStatus.Skipped: {
+            // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
+            blockCacheWrite = true;
+            break;
           }
-        );
+
+          case OperationStatus.SuccessWithWarning:
+          case OperationStatus.Success: {
+            // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
+            blockSkip ||= !changedProjectsOnly;
+            break;
+          }
+        }
+
+        // Apply status changes to direct dependents
+        for (const item of consumers) {
+          const itemRunnerBuildCacheContext: IOperationBuildCacheContext | undefined =
+            this._getBuildCacheContextByRunner(item.runner);
+          if (itemRunnerBuildCacheContext) {
+            if (blockCacheWrite) {
+              itemRunnerBuildCacheContext.isCacheWriteAllowed = false;
+            }
+            if (blockSkip) {
+              itemRunnerBuildCacheContext.isSkipAllowed = false;
+            }
+          }
+        }
       }
     );
 

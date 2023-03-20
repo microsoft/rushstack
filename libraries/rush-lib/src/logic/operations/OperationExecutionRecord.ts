@@ -16,6 +16,7 @@ export interface IOperationExecutionRecordContext {
 
   debugMode: boolean;
   quietMode: boolean;
+  changedProjectsOnly: boolean;
 }
 
 /**
@@ -121,6 +122,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public get quietMode(): boolean {
     return this._context.quietMode;
+  }
+
+  public get changedProjectsOnly(): boolean {
+    return this._context.changedProjectsOnly;
   }
 
   public get collatedWriter(): CollatedWriter {

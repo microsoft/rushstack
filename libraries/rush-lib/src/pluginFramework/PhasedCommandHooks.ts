@@ -12,7 +12,7 @@ import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 import type { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
-import type { OperationExecutionManager } from '../logic/operations/OperationExecutionManager';
+import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -101,16 +101,18 @@ export class PhasedCommandHooks {
     new AsyncSeriesHook(['results', 'context']);
 
   /**
-   * Hook invoked after the operationExecutionManager has been created.
-   * Maybe used to tap into the lifecycle of operation execution process.
-   *
-   * @internal
+   * Hook invoked before executing a operation.
    */
-  public readonly operationExecutionManager: AsyncSeriesHook<OperationExecutionManager> =
-    new AsyncSeriesHook<OperationExecutionManager>(
-      ['operationExecutionManager'],
-      'operationExecutionManager'
-    );
+  public readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]> = new AsyncSeriesHook<
+    [IOperationRunnerContext]
+  >(['runnerContext'], 'beforeExecuteOperation');
+
+  /**
+   * Hook invoked after executing a operation.
+   */
+  public readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]> = new AsyncSeriesHook<
+    [IOperationRunnerContext]
+  >(['runnerContext'], 'afterExecuteOperation');
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.

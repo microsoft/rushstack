@@ -39,6 +39,7 @@ import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import type { IOperationRunnerContext } from '../../logic/operations/IOperationRunner';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -352,7 +353,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism,
-      changedProjectsOnly
+      changedProjectsOnly,
+      beforeExecuteOperation: async (record: IOperationRunnerContext) => {
+        await this.hooks.beforeExecuteOperation.promise(record);
+      },
+      afterExecuteOperation: async (record: IOperationRunnerContext) => {
+        await this.hooks.afterExecuteOperation.promise(record);
+      }
     };
 
     const internalOptions: IRunPhasesOptions = {
@@ -511,7 +518,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       operations,
       executionManagerOptions
     );
-    await this.hooks.operationExecutionManager.promise(executionManager);
 
     const { isInitial, isWatch } = options.createOperationsContext;
 

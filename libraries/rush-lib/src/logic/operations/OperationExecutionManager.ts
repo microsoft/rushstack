@@ -16,7 +16,6 @@ import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
 import { IExecutionResult } from './IOperationExecutionResult';
-import { PhasedOperationHooks } from './PhasedOperationHooks';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
@@ -24,6 +23,8 @@ export interface IOperationExecutionManagerOptions {
   parallelism: number;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+  beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
+  afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
 }
 
 /**
@@ -50,6 +51,12 @@ export class OperationExecutionManager {
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
   private readonly _totalOperations: number;
+  private readonly _beforeExecuteOperation:
+    | ((operation: OperationExecutionRecord) => Promise<void>)
+    | undefined;
+  private readonly _afterExecuteOperation:
+    | ((operation: OperationExecutionRecord) => Promise<void>)
+    | undefined;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
@@ -63,16 +70,23 @@ export class OperationExecutionManager {
   private _completedOperations: number;
   private _executionQueue: AsyncOperationQueue;
 
-  public readonly hooks: PhasedOperationHooks = new PhasedOperationHooks();
-
   public constructor(operations: Set<Operation>, options: IOperationExecutionManagerOptions) {
-    const { quietMode, debugMode, parallelism, changedProjectsOnly } = options;
+    const {
+      quietMode,
+      debugMode,
+      parallelism,
+      changedProjectsOnly,
+      beforeExecuteOperation,
+      afterExecuteOperation
+    } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
     this.changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
+    this._beforeExecuteOperation = beforeExecuteOperation;
+    this._afterExecuteOperation = afterExecuteOperation;
 
     // TERMINAL PIPELINE:
     //
@@ -94,7 +108,8 @@ export class OperationExecutionManager {
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
       debugMode,
-      quietMode
+      quietMode,
+      changedProjectsOnly
     };
 
     let totalOperations: number = 0;
@@ -201,7 +216,7 @@ export class OperationExecutionManager {
       record: OperationExecutionRecord
     ) => {
       this._onOperationComplete(record);
-      await this.hooks.afterExecuteOperation.promise(record);
+      await this._afterExecuteOperation?.(record);
     };
 
     await Async.forEachAsync(
@@ -225,7 +240,7 @@ export class OperationExecutionManager {
           // Fail to assign a operation, start over again
           return;
         } else {
-          await this.hooks.beforeExecuteOperation.promise(record);
+          await this._beforeExecuteOperation?.(record);
           await record.executeAsync(onOperationComplete);
         }
       },
