@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.2.20",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.20",
+      "date": "Mon, 20 Mar 2023 20:14:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.19",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.2.19",
       "date": "Sat, 18 Mar 2023 00:20:56 GMT",

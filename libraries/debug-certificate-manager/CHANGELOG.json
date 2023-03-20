@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.19",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.19",
+      "date": "Mon, 20 Mar 2023 20:14:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force certificates with a validity period longer than the expected validity period to be refreshed."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.18",
       "tag": "@rushstack/debug-certificate-manager_v1.2.18",
       "date": "Sat, 18 Mar 2023 00:20:56 GMT",
