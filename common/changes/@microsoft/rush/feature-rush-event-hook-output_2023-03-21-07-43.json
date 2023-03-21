@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "enable event hook scripts output by default",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
