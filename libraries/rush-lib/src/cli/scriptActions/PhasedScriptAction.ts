@@ -28,6 +28,7 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import { Operation } from '../../logic/operations/Operation';
+import { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
@@ -359,6 +360,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       },
       afterExecuteOperation: async (record: IOperationRunnerContext) => {
         await this.hooks.afterExecuteOperation.promise(record);
+      },
+      beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+        await this.hooks.beforeExecuteOperations.promise(records);
+      },
+      onOperationStatusChanged: (record: OperationExecutionRecord) => {
+        this.hooks.onOperationStatusChanged.call(record);
       }
     };
 

@@ -13,6 +13,7 @@ import { OperationMetadataManager } from './OperationMetadataManager';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
+  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
 
   debugMode: boolean;
   quietMode: boolean;
@@ -144,6 +145,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public async executeAsync(onResult: (record: OperationExecutionRecord) => Promise<void>): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
+    this._context.onOperationStatusChanged?.(this);
 
     try {
       this.status = await this.runner.executeAsync(this);
@@ -160,6 +162,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         this.stdioSummarizer.close();
         this.stopwatch.stop();
       }
+      this._context.onOperationStatusChanged?.(this);
     }
   }
 }

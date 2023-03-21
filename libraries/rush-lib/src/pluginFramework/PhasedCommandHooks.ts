@@ -10,7 +10,10 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
-import type { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../logic/operations/IOperationExecutionResult';
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 
@@ -91,6 +94,19 @@ export class PhasedCommandHooks {
    */
   public readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]> =
     new AsyncSeriesWaterfallHook(['operations', 'context'], 'createOperations');
+
+  /**
+   * Hook invoked before operation start
+   * Hook is series for stable output.
+   */
+  public readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]> =
+    new AsyncSeriesHook(['records']);
+
+  /**
+   * Hook invoked when operation status changed
+   * Hook is series for stable output.
+   */
+  public readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]> = new SyncHook(['record']);
 
   /**
    * Hook invoked after executing a set of operations.

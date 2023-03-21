@@ -23,8 +23,11 @@ export interface IOperationExecutionManagerOptions {
   parallelism: number;
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
+
   beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
   afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
+  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
 }
 
 /**
@@ -51,18 +54,19 @@ export class OperationExecutionManager {
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
   private readonly _totalOperations: number;
-  private readonly _beforeExecuteOperation:
-    | ((operation: OperationExecutionRecord) => Promise<void>)
-    | undefined;
-  private readonly _afterExecuteOperation:
-    | ((operation: OperationExecutionRecord) => Promise<void>)
-    | undefined;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
   private readonly _streamCollator: StreamCollator;
 
   private readonly _terminal: CollatedTerminal;
+
+  private readonly _beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
+  private readonly _afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
+  private readonly _onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  private readonly _beforeExecuteOperations?: (
+    records: Map<Operation, OperationExecutionRecord>
+  ) => Promise<void>;
 
   // Variables for current status
   private _hasAnyFailures: boolean;
@@ -77,7 +81,9 @@ export class OperationExecutionManager {
       parallelism,
       changedProjectsOnly,
       beforeExecuteOperation,
-      afterExecuteOperation
+      afterExecuteOperation,
+      onOperationStatusChanged,
+      beforeExecuteOperations
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
@@ -85,8 +91,11 @@ export class OperationExecutionManager {
     this._hasAnyNonAllowedWarnings = false;
     this.changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
+
     this._beforeExecuteOperation = beforeExecuteOperation;
     this._afterExecuteOperation = afterExecuteOperation;
+    this._beforeExecuteOperations = beforeExecuteOperations;
+    this._onOperationStatusChanged = onOperationStatusChanged;
 
     // TERMINAL PIPELINE:
     //
@@ -107,6 +116,7 @@ export class OperationExecutionManager {
     // Convert the developer graph to the mutable execution graph
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
+      onOperationStatusChanged,
       debugMode,
       quietMode,
       changedProjectsOnly
@@ -210,6 +220,8 @@ export class OperationExecutionManager {
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
 
+    await this._beforeExecuteOperations?.(this._executionRecords);
+
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
     const onOperationComplete: (record: OperationExecutionRecord) => Promise<void> = async (
@@ -296,6 +308,7 @@ export class OperationExecutionManager {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
+            this._onOperationStatusChanged?.(blockedRecord);
 
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);

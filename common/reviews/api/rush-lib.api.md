@@ -559,6 +559,14 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @beta
+export interface IPrefixMatch<TItem> {
+    // (undocumented)
+    index: number;
+    // (undocumented)
+    value: TItem;
+}
+
+// @beta
 export interface IRushCommand {
     readonly actionName: string;
 }
@@ -674,6 +682,7 @@ export class LookupByPath<TItem> {
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
     setItem(serializedPath: string, value: TItem): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
@@ -812,7 +821,9 @@ export class PhasedCommandHooks {
     readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
+    readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
+    readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly waitingForChanges: SyncHook<void>;
 }
 
