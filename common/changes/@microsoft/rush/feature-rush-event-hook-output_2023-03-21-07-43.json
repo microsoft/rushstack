@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "enable event hook scripts output by default",
+      "comment": "Update event hook scripts to print their output to the console.",
       "type": "none"
     }
   ],
