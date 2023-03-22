@@ -35,8 +35,12 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
       rushConfiguration: this.rushConfiguration,
       rushGlobalFolder: this.rushGlobalFolder
     });
-    await autoinstaller.prepareAsync();
-    autoinstaller.update();
+
+    // Do not run `autoinstaller.prepareAsync` here. It tries to install the autoinstaller with
+    // --frozen-lockfile or equivalent, which will fail if the autoinstaller's dependencies
+    // have been changed.
+
+    await autoinstaller.updateAsync();
 
     console.log('\nSuccess.');
   }
