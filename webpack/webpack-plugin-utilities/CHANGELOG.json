@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.2.0",
+      "date": "Wed, 22 Mar 2023 20:48:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added Testing.getTestingWebpackCompiler utility function for webpack plugin testing."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.57",
       "tag": "@rushstack/webpack-plugin-utilities_v0.1.57",
       "date": "Sat, 18 Mar 2023 00:20:56 GMT",
