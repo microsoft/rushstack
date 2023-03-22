@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.94.1",
+      "tag": "@microsoft/rush_v5.94.1",
+      "date": "Wed, 22 Mar 2023 20:48:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush plugin autoinstallers would fail to install because the Rush global folder had not yet been initialized."
+          },
+          {
+            "comment": "Fix an issue with `rush update-autoinstaller` where it may fail with an `Cannot install with \"frozen-lockfile\" because pnpm-lock.yaml is not up to date with package.json` error."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.94.0",
       "tag": "@microsoft/rush_v5.94.0",
       "date": "Mon, 20 Mar 2023 20:14:36 GMT",

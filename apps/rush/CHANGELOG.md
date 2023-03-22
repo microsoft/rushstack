@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 20 Mar 2023 20:14:36 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Mar 2023 20:48:48 GMT and should not be manually modified.
+
+## 5.94.1
+Wed, 22 Mar 2023 20:48:48 GMT
+
+### Updates
+
+- Fix an issue where rush plugin autoinstallers would fail to install because the Rush global folder had not yet been initialized.
+- Fix an issue with `rush update-autoinstaller` where it may fail with an `Cannot install with "frozen-lockfile" because pnpm-lock.yaml is not up to date with package.json` error.
 
 ## 5.94.0
 Mon, 20 Mar 2023 20:14:36 GMT
