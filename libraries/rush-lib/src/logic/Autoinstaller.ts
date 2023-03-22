@@ -157,7 +157,14 @@ export class Autoinstaller {
     }
   }
 
-  public update(): void {
+  public async updateAsync(): Promise<void> {
+    await InstallHelpers.ensureLocalPackageManager(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      RushConstants.defaultMaxInstallAttempts,
+      this._restrictConsoleOutput
+    );
+
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
 
     if (!FileSystem.exists(autoinstallerPackageJsonPath)) {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue with `rush update-autoinstaller` where it may fail with an `Cannot install with \"frozen-lockfile\" because pnpm-lock.yaml is not up to date with package.json` error.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
