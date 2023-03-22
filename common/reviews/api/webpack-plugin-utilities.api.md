@@ -4,7 +4,14 @@
 
 ```ts
 
+import type { Configuration } from 'webpack';
+import { IFs } from 'memfs';
+import type { MultiStats } from 'webpack';
+import type { Stats } from 'webpack';
 import type * as Webpack from 'webpack';
+
+// @public
+function getTestingWebpackCompiler(entry: string, additionalConfig?: Configuration, memFs?: IFs): Promise<(Stats | MultiStats) | undefined>;
 
 // @public
 function isWebpack3OrEarlier(compiler: Webpack.Compiler): boolean;
@@ -14,6 +21,13 @@ function isWebpack4(compiler: Webpack.Compiler): boolean;
 
 // @public
 function isWebpack5(compiler: Webpack.Compiler): boolean;
+
+declare namespace Testing {
+    export {
+        getTestingWebpackCompiler
+    }
+}
+export { Testing }
 
 declare namespace VersionDetection {
     export {
