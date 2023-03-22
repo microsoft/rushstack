@@ -66,7 +66,7 @@ export interface IRushCommandLineParserOptions {
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
-  public rushGlobalFolder!: RushGlobalFolder;
+  public rushGlobalFolder: RushGlobalFolder;
   public readonly rushConfiguration!: RushConfiguration;
   public readonly rushSession: RushSession;
   public readonly pluginManager: PluginManager;
@@ -126,6 +126,8 @@ export class RushCommandLineParser extends CommandLineParser {
       alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
       rushConfiguration: this.rushConfiguration
     });
+
+    this.rushGlobalFolder = new RushGlobalFolder();
 
     this.rushSession = new RushSession({
       getIsDebugMode: () => this.isDebug,
@@ -239,8 +241,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     try {
-      this.rushGlobalFolder = new RushGlobalFolder();
-
       // Alphabetical order
       this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));
