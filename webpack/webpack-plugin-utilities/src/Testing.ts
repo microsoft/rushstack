@@ -3,7 +3,6 @@
 
 import { createFsFromVolume, Volume, IFs } from 'memfs';
 import path from 'path';
-import webpack from 'webpack';
 import type { StatsCompilation as WebpackStatsCompilation } from 'webpack';
 import webpackMerge from 'webpack-merge';
 
@@ -60,13 +59,24 @@ import type { MultiStats, Stats, Configuration, Compiler, StatsError } from 'web
  * });
  * ```
  */
-export async function getTestingWebpackCompiler(
+export async function getTestingWebpackCompilerAsync(
   entry: string,
   additionalConfig: Configuration = {},
   memFs: IFs = createFsFromVolume(new Volume())
 ): Promise<(Stats | MultiStats) | undefined> {
+  let webpackModule: typeof import('webpack');
+  try {
+    webpackModule = (await import('webpack')).default;
+  } catch (e) {
+    throw new Error(
+      'Unable to load module "webpack". The @rushstack/webpack-plugin-utilities package declares "webpack" as ' +
+        'an optional peer dependency, but a function was invoked on it that requires webpack. Make sure ' +
+        `the peer dependency on "webpack" is fulfilled. Inner error: ${e}`
+    );
+  }
+
   const compilerOptions: Configuration = webpackMerge(_defaultWebpackConfig(entry), additionalConfig);
-  const compiler: Compiler = webpack(compilerOptions);
+  const compiler: Compiler = webpackModule(compilerOptions);
 
   compiler.outputFileSystem = memFs;
   compiler.outputFileSystem.join = path.join.bind(path);
