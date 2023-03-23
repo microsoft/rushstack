@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-plugin-utilities
 
-This log was last generated on Wed, 22 Mar 2023 20:48:30 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Mar 2023 15:24:08 GMT and should not be manually modified.
+
+## 0.2.1
+Thu, 23 Mar 2023 15:24:08 GMT
+
+### Patches
+
+- Fix an issue where the `Testing` library has a had a hard dependency on `webpack`, but the package declared it as an optional peerDependency.
 
 ## 0.2.0
 Wed, 22 Mar 2023 20:48:30 GMT

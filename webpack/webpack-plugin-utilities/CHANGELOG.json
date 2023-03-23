@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.2.1",
+      "date": "Thu, 23 Mar 2023 15:24:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the `Testing` library has a had a hard dependency on `webpack`, but the package declared it as an optional peerDependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/webpack-plugin-utilities_v0.2.0",
       "date": "Wed, 22 Mar 2023 20:48:30 GMT",
