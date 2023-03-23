@@ -411,6 +411,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private async _runWatchPhases(options: IRunPhasesOptions): Promise<void> {
     const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
+    const phaseOriginal: Set<IPhase> = new Set(this._watchPhases);
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
     const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
@@ -468,6 +469,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         isInitial: false,
         projectChangeAnalyzer: state,
         projectsInUnknownState: changedProjects,
+        phaseOriginal,
         phaseSelection
       };
 
