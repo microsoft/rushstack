@@ -11,7 +11,7 @@ import type { Stats } from 'webpack';
 import type * as Webpack from 'webpack';
 
 // @public
-function getTestingWebpackCompiler(entry: string, additionalConfig?: Configuration, memFs?: IFs): Promise<(Stats | MultiStats) | undefined>;
+function getTestingWebpackCompilerAsync(entry: string, additionalConfig?: Configuration, memFs?: IFs): Promise<(Stats | MultiStats) | undefined>;
 
 // @public
 function isWebpack3OrEarlier(compiler: Webpack.Compiler): boolean;
@@ -24,7 +24,7 @@ function isWebpack5(compiler: Webpack.Compiler): boolean;
 
 declare namespace Testing {
     export {
-        getTestingWebpackCompiler
+        getTestingWebpackCompilerAsync
     }
 }
 export { Testing }
