@@ -5,10 +5,12 @@ import { OperationExecutionRecord } from './OperationExecutionRecord';
 import { OperationStatus } from './OperationStatus';
 
 /**
- * When the queue returns an unassigned operation, it means there is no workable operation at the time,
- * and the caller has a chance to make a decision synchronously or asynchronously:
- * 1. Manually invoke `tryGetRemoteExecutingOperation()` to get a remote executing operation.
- * 2. Or, return in callback or continue the for-loop, which internally invoke `assignOperations()` to assign new operations.
+ * When the queue returns an unassigned operation, it means there is at least one remote executing operation,
+ * at this time, the caller has a chance to make a decision:
+ * 1. Manually invoke `tryGetRemoteExecutingOperation()` to get the remote executing operation.
+ * 2. If there is no remote executing operation available, wait for some time and return in callback, which
+ * internally invoke `assignOperations()` to assign new operations.
+ * NOTE: the caller must wait for some time to avoid busy loop and burn CPU cycles.
  */
 export const UNASSIGNED_OPERATION: 'UNASSIGNED_OPERATION' = 'UNASSIGNED_OPERATION';
 
@@ -136,11 +138,14 @@ export class AsyncOperationQueue
     }
 
     if (waitingIterators.length > 0) {
-      // Queue is not empty, but no operations are ready to process, returns a unassigned operation to let caller decide
-      waitingIterators.shift()!({
-        value: UNASSIGNED_OPERATION,
-        done: false
-      });
+      // returns an unassigned operation to let caller decide when there is at least one
+      // remote executing operation which is not ready to process.
+      if (queue.some((operation) => operation.status === OperationStatus.RemoteExecuting)) {
+        waitingIterators.shift()!({
+          value: UNASSIGNED_OPERATION,
+          done: false
+        });
+      }
     }
   }
 
