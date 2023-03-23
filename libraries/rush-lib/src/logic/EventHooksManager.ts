@@ -34,13 +34,17 @@ export class EventHooksManager {
 
       const stopwatch: Stopwatch = Stopwatch.start();
       console.log('\n' + colors.green(`Executing event hooks for ${Event[event]}`));
+
+      const printEventHooksOutputToConsole =
+        isDebug ||
+        this._rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
       scripts.forEach((script) => {
         try {
           Utilities.executeLifecycleCommand(script, {
             rushConfiguration: this._rushConfiguration,
             workingDirectory: this._rushConfiguration.rushJsonFolder,
             initCwd: this._commonTempFolder,
-            handleOutput: false,
+            handleOutput: !printEventHooksOutputToConsole,
             environmentPathOptions: {
               includeRepoBin: true
             }

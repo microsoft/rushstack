@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update event hook scripts to print their output to the console.",
+      "comment": "Add experiment `printEventHooksOutputToConsole` to allow printing outputs from event hooks to the console.",
       "type": "none"
     }
   ],
