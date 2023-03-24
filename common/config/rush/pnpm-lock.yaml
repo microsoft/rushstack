@@ -1628,6 +1628,29 @@ importers:
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 14.18.36
 
+  ../../heft-plugins/heft-shell-script-plugin:
+    specifiers:
+      '@microsoft/api-extractor': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+      chokidar: ~3.4.0
+      eslint: ~8.7.0
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      chokidar: 3.4.3
+    devDependencies:
+      '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+      eslint: 8.7.0
+
   ../../heft-plugins/heft-storybook-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*

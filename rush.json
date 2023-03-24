@@ -835,6 +835,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-shell-script-plugin",
+      "projectFolder": "heft-plugins/heft-shell-script-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-storybook-plugin",
       "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",

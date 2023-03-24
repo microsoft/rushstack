@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft shell script plugin options",
+  "description": "This schema describes the \"options\" field that can be specified in heft.json when loading \"@chapter/heft-shell-script-plugin\".",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scripts"],
+  "properties": {
+    "scripts": {
+      "title": "Scripts",
+      "description": "Script configurations.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "stage", "command"],
+        "allOf": [
+          {
+            "properties": {
+              "name": { "type": "string" },
+              "stage": {
+                "type": "string",
+                "enum": ["clean", "pre-compile", "compile", "bundle", "post-build", "pre-test", "test"]
+              },
+              "command": { "type": "string" }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "properties": {
+                  "watchGlobs": { "type": "array", "items": { "type": "string" } }
+                }
+              },
+              {
+                "properties": {
+                  "watchGlobs": { "type": "string" }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
