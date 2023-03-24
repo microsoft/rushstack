@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add experiment `printEventHooksOutputToConsole` to allow printing outputs from event hooks to the console.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
