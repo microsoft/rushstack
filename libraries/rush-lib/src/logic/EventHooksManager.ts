@@ -35,7 +35,7 @@ export class EventHooksManager {
       const stopwatch: Stopwatch = Stopwatch.start();
       console.log('\n' + colors.green(`Executing event hooks for ${Event[event]}`));
 
-      const printEventHooksOutputToConsole =
+      const printEventHooksOutputToConsole: boolean | undefined =
         isDebug ||
         this._rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
       scripts.forEach((script) => {
