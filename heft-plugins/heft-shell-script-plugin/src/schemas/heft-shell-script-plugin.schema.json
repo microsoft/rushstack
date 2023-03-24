@@ -33,7 +33,7 @@
               },
               {
                 "properties": {
-                  "watchGlobs": { "type": "string" }
+                  "watchCommand": { "type": "string" }
                 }
               }
             ]
