@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 22 Mar 2023 20:48:48 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Mar 2023 08:53:43 GMT and should not be manually modified.
+
+## 5.95.0
+Fri, 24 Mar 2023 08:53:43 GMT
+
+### Updates
+
+- Add experiment `printEventHooksOutputToConsole` to allow printing outputs from event hooks to the console.
 
 ## 5.94.1
 Wed, 22 Mar 2023 20:48:48 GMT

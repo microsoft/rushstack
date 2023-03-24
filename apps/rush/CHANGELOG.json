@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.95.0",
+      "tag": "@microsoft/rush_v5.95.0",
+      "date": "Fri, 24 Mar 2023 08:53:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add experiment `printEventHooksOutputToConsole` to allow printing outputs from event hooks to the console."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.94.1",
       "tag": "@microsoft/rush_v5.94.1",
       "date": "Wed, 22 Mar 2023 20:48:48 GMT",
