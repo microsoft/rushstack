@@ -40,7 +40,7 @@ jobs:
           const DELIMITER = '## Impacted documentation';
 
           const event = JSON.parse(fs.readFileSync(EVENT_FILE, 'utf8'));
-          const strippedBody = event.pull_request.body.replace(/<!-+(.|\r|\n)+?-+>/g, '');
+          const strippedBody = (event.pull_request.body || '').replace(/<!-+(.|\r|\n)+?-+>/g, '');
           const delimIndex = strippedBody.indexOf(DELIMITER);
 
           if (delimIndex < 0) {
