@@ -9,6 +9,7 @@
 
 import type { IHeftPlugin } from '@rushstack/heft';
 import { IShellScriptPluginOptions, ShellScriptPlugin } from './ShellScriptPlugin';
+import { ShellScript, WatchOptions } from './ShellScript';
 
 /**
  * @public
@@ -16,3 +17,4 @@ import { IShellScriptPluginOptions, ShellScriptPlugin } from './ShellScriptPlugi
 export default new ShellScriptPlugin() as IHeftPlugin<IShellScriptPluginOptions>;
 
 export { IShellScriptPluginOptions };
+export { ShellScript, WatchOptions };

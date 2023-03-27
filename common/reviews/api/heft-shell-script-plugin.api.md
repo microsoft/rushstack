@@ -12,10 +12,22 @@ export default _default;
 
 // @public (undocumented)
 export interface IShellScriptPluginOptions {
-    // Warning: (ae-forgotten-export) The symbol "ShellScript" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     scripts: ShellScript[];
 }
+
+// @public (undocumented)
+export type ShellScript = {
+    name: string;
+    stage: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build' | 'pre-test' | 'test';
+    command: string;
+} & WatchOptions;
+
+// @public (undocumented)
+export type WatchOptions = {
+    watchGlobs: string[];
+} | {
+    watchCommand: string;
+};
 
 ```
