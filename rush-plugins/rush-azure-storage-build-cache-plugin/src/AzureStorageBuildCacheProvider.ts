@@ -43,7 +43,10 @@ export class AzureStorageBuildCacheProvider
   private _containerClient: ContainerClient | undefined;
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
-    super(options);
+    super({
+      credentialUpdateCommandForLogging: `rush ${RushConstants.updateCloudCredentialsCommandName}`,
+      ...options
+    });
 
     this._blobPrefix = options.blobPrefix;
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;

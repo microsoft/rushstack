@@ -6,7 +6,7 @@
 
 A type alias
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type ExampleTypeAlias = Promise<boolean>;

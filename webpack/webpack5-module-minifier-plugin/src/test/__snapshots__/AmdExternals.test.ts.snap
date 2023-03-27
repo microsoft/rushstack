@@ -35,7 +35,7 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "// Begin Asset Hash=f42aafa7963204c463a12f082933bf799ffe3fd0f1f0d97c21edebc823cc70c7
+  "/release/main.js": "// Begin Asset Hash=e27e1ab4650176726943ebe6738ed1d860bdb2fabfb54b39ada68898ca903312
 define([\\"bar\\",\\"baz\\"], (__WEBPACK_EXTERNAL_MODULE__791__, __WEBPACK_EXTERNAL_MODULE__506__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -185,8 +185,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			}
-/******/ 			;
+/******/ 			};
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);

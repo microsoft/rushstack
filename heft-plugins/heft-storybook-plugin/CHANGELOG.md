@@ -1,44 +1,60 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Wed, 15 Mar 2023 20:22:44 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
 
-## 0.2.0-rc.4
-Wed, 15 Mar 2023 20:22:44 GMT
+## 0.2.4
+Sat, 18 Mar 2023 00:20:56 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix an issue with `watchGlobAsync`
+## 0.2.3
+Wed, 22 Feb 2023 16:26:55 GMT
 
-## 0.2.0-rc.3
-Fri, 20 Jan 2023 20:13:16 GMT
+### Patches
 
-### Prerelease Changes
+- Fix an issue where static build output ends up in the wrong folder.
 
-- Fix issues with SASS incremental builds.
-- Add support for TypeScript solution incremental builds.
-- Improve responsiveness of watcher loop.
+## 0.2.2
+Fri, 10 Feb 2023 01:18:51 GMT
 
-## 0.2.0-rc.2
-Fri, 2 Dec 2022 05:28:24 GMT
+_Version update only_
 
-### Prerelease Changes
+## 0.2.1
+Sun, 05 Feb 2023 03:02:02 GMT
 
-- Improve watch mode performance.
-- Improve logging output.
+_Version update only_
 
-## 0.2.0-rc.1
-Fri, 18 Nov 2022 02:34:26 GMT
+## 0.2.0
+Wed, 01 Feb 2023 02:16:34 GMT
 
-### Prerelease Changes
+### Minor changes
 
-- Fix incremental TypeScript compilation.
+- Add support for storybook static build
 
-## 0.2.0-rc.0
-Tue, 15 Nov 2022 22:59:35 GMT
+## 0.1.99
+Mon, 30 Jan 2023 16:22:31 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- General fixes and improvements, in preparation for a general release.
+## 0.1.98
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.1.97
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.1.96
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.1.95
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.1.94
 Tue, 20 Dec 2022 01:18:22 GMT

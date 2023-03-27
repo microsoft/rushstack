@@ -11,7 +11,7 @@
     "build": {
       "cleanFiles": [
         {
-          "sourcePath": "./dist/rush-lib.d.ts"
+          "sourcePath": "lib-shim"
         }
       ],
 
@@ -33,6 +33,16 @@
 
         "typescript": {
           "taskDependencies": ["copy-rush-lib-types"]
+        },
+
+        "generate-stubs": {
+          "taskDependencies": ["typescript"],
+          "taskEvent": {
+            "eventKind": "runScript",
+            "options": {
+              "scriptPath": "./lib-shim/generate-stubs.js"
+            }
+          }
         }
       }
     }

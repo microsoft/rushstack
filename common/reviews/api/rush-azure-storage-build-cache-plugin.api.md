@@ -22,7 +22,7 @@ export abstract class AzureAuthenticationBase {
     // (undocumented)
     protected abstract readonly _credentialNameForCache: string;
     // (undocumented)
-    protected abstract readonly _credentialUpdateCommandForLogging: string | undefined;
+    protected readonly _credentialUpdateCommandForLogging: string | undefined;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
     protected abstract _getCacheIdParts(): string[];
@@ -48,8 +48,6 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
     // (undocumented)
     protected readonly _credentialNameForCache: string;
     // (undocumented)
-    protected readonly _credentialUpdateCommandForLogging: string;
-    // (undocumented)
     protected _getCacheIdParts(): string[];
     // (undocumented)
     protected _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
@@ -70,6 +68,8 @@ export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
 export interface IAzureAuthenticationBaseOptions {
     // (undocumented)
     azureEnvironment?: AzureEnvironmentName;
+    // (undocumented)
+    credentialUpdateCommandForLogging?: string | undefined;
 }
 
 // @public (undocumented)

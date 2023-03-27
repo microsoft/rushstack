@@ -15,6 +15,7 @@ const FRIENDLY_NAME: string = 'debug-certificate-manager Development Certificate
 const MAC_KEYCHAIN: string = '/Library/Keychains/System.keychain';
 const CERTUTIL_EXE_NAME: string = 'certutil';
 const CA_ALT_NAME: string = 'rushstack-certificate-manager.localhost';
+const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
 
 /**
  * The set of names the certificate should be generated for, by default.
@@ -85,6 +86,8 @@ export interface ICertificateGenerationOptions {
   validityInDays?: number;
 }
 
+const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
+
 /**
  * A utility class to handle generating, trusting, and untrustring a debug certificate.
  * Contains two public methods to `ensureCertificate` and `untrustCertificate`.
@@ -139,6 +142,24 @@ export class CertificateManager {
       if (now > notAfter) {
         messages.push(
           `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+        );
+      }
+
+      now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
+      if (notAfter > now) {
+        messages.push(
+          `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
+            `This will be rejected by many browsers.`
+        );
+      }
+
+      if (
+        notBefore.getTime() - notAfter.getTime() >
+        optionsWithDefaults.validityInDays * ONE_DAY_IN_MILLISECONDS
+      ) {
+        messages.push(
+          "The existing development certificate's validity period is longer " +
+            `than ${optionsWithDefaults.validityInDays} days.`
         );
       }
 
@@ -279,9 +300,11 @@ export class CertificateManager {
 
     certificate.serialNumber = CA_SERIAL_NUMBER;
 
-    const now: Date = new Date();
-    certificate.validity.notBefore = now;
-    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+    const notBefore: Date = new Date();
+    const notAfter: Date = new Date(notBefore);
+    notAfter.setUTCDate(notBefore.getUTCDate() + validityInDays);
+    certificate.validity.notBefore = notBefore;
+    certificate.validity.notAfter = notAfter;
 
     const attrs: pki.CertificateField[] = [
       {
@@ -359,9 +382,11 @@ export class CertificateManager {
       forge
     );
 
-    const now: Date = new Date();
-    certificate.validity.notBefore = now;
-    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+    const notBefore: Date = new Date();
+    const notAfter: Date = new Date(notBefore);
+    notAfter.setUTCDate(notBefore.getUTCDate() + validityInDays);
+    certificate.validity.notBefore = notBefore;
+    certificate.validity.notAfter = notAfter;
 
     const subjectAttrs: pki.CertificateField[] = [
       {
@@ -709,6 +734,9 @@ function applyDefaultOptions(
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
-    validityInDays: options?.validityInDays ?? 365
+    validityInDays: Math.min(
+      MAX_CERTIFICATE_VALIDITY_DAYS,
+      options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
+    )
   };
 }

@@ -1,44 +1,60 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Wed, 15 Mar 2023 20:22:44 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
 
-## 0.6.0-rc.4
-Wed, 15 Mar 2023 20:22:44 GMT
+## 0.6.1
+Sat, 18 Mar 2023 00:20:56 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix an issue with `watchGlobAsync`
+## 0.6.0
+Sat, 11 Mar 2023 01:24:51 GMT
 
-## 0.6.0-rc.3
-Fri, 20 Jan 2023 20:13:16 GMT
+### Minor changes
 
-### Prerelease Changes
+- Add support for `.cjs` and `.mjs` file extensions for webpack config files, in addition to the `.js` file extension.
 
-- Fix issues with SASS incremental builds.
-- Add support for TypeScript solution incremental builds.
-- Improve responsiveness of watcher loop.
+## 0.5.73
+Fri, 10 Feb 2023 01:18:51 GMT
 
-## 0.6.0-rc.2
-Fri, 2 Dec 2022 05:28:24 GMT
+_Version update only_
 
-### Prerelease Changes
+## 0.5.72
+Sun, 05 Feb 2023 03:02:02 GMT
 
-- Improve watch mode performance.
-- Improve logging output.
+_Version update only_
 
-## 0.6.0-rc.1
-Fri, 18 Nov 2022 02:34:26 GMT
+## 0.5.71
+Wed, 01 Feb 2023 02:16:34 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix incremental TypeScript compilation.
+## 0.5.70
+Mon, 30 Jan 2023 16:22:31 GMT
 
-## 0.6.0-rc.0
-Tue, 15 Nov 2022 22:59:35 GMT
+_Version update only_
 
-### Prerelease Changes
+## 0.5.69
+Mon, 30 Jan 2023 00:55:44 GMT
 
-- General fixes and improvements, in preparation for a general release.
+_Version update only_
+
+## 0.5.68
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.5.67
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.5.66
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.5.65
 Tue, 20 Dec 2022 01:18:22 GMT

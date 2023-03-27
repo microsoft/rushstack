@@ -10,6 +10,7 @@
 The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
 for large scale TypeScript monorepos.
 
+ [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
 
 ## Documentation Links
 
@@ -90,6 +91,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/webpack/loader-raw-script](./webpack/loader-raw-script/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Floader-raw-script.svg)](https://badge.fury.io/js/%40rushstack%2Floader-raw-script) | [changelog](./webpack/loader-raw-script/CHANGELOG.md) | [@rushstack/loader-raw-script](https://www.npmjs.com/package/@rushstack/loader-raw-script) |
 | [/webpack/preserve-dynamic-require-plugin](./webpack/preserve-dynamic-require-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack-preserve-dynamic-require-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack-preserve-dynamic-require-plugin) | [changelog](./webpack/preserve-dynamic-require-plugin/CHANGELOG.md) | [@rushstack/webpack-preserve-dynamic-require-plugin](https://www.npmjs.com/package/@rushstack/webpack-preserve-dynamic-require-plugin) |
 | [/webpack/set-webpack-public-path-plugin](./webpack/set-webpack-public-path-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fset-webpack-public-path-plugin) | [changelog](./webpack/set-webpack-public-path-plugin/CHANGELOG.md) | [@rushstack/set-webpack-public-path-plugin](https://www.npmjs.com/package/@rushstack/set-webpack-public-path-plugin) |
+| [/webpack/webpack-embedded-dependencies-plugin](./webpack/webpack-embedded-dependencies-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack-embedded-dependencies-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack-embedded-dependencies-plugin) | [changelog](./webpack/webpack-embedded-dependencies-plugin/CHANGELOG.md) | [@rushstack/webpack-embedded-dependencies-plugin](https://www.npmjs.com/package/@rushstack/webpack-embedded-dependencies-plugin) |
 | [/webpack/webpack-plugin-utilities](./webpack/webpack-plugin-utilities/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack-plugin-utilities.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack-plugin-utilities) | [changelog](./webpack/webpack-plugin-utilities/CHANGELOG.md) | [@rushstack/webpack-plugin-utilities](https://www.npmjs.com/package/@rushstack/webpack-plugin-utilities) |
 | [/webpack/webpack4-localization-plugin](./webpack/webpack4-localization-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack4-localization-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack4-localization-plugin) | [changelog](./webpack/webpack4-localization-plugin/CHANGELOG.md) | [@rushstack/webpack4-localization-plugin](https://www.npmjs.com/package/@rushstack/webpack4-localization-plugin) |
 | [/webpack/webpack4-module-minifier-plugin](./webpack/webpack4-module-minifier-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fwebpack4-module-minifier-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fwebpack4-module-minifier-plugin) | [changelog](./webpack/webpack4-module-minifier-plugin/CHANGELOG.md) | [@rushstack/webpack4-module-minifier-plugin](https://www.npmjs.com/package/@rushstack/webpack4-module-minifier-plugin) |
@@ -153,6 +155,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/set-webpack-public-path-plugin-webpack4-test](./build-tests/set-webpack-public-path-plugin-webpack4-test/) | Building this project tests the set-webpack-public-path-plugin using Webpack 4 |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
+| [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
 | [/libraries/rushell](./libraries/rushell/) | Execute shell commands using a consistent syntax on every platform |
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |

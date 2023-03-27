@@ -15,6 +15,21 @@ interface IPathTreeNode<TItem> {
   children: Map<string, IPathTreeNode<TItem>> | undefined;
 }
 
+interface IPrefixEntry {
+  prefix: string;
+  index: number;
+}
+
+/**
+ * Object containing both the matched item and the start index of the remainder of the query.
+ *
+ * @beta
+ */
+export interface IPrefixMatch<TItem> {
+  value: TItem;
+  index: number;
+}
+
 /**
  * This class is used to associate POSIX relative paths, such as those returned by `git` commands,
  * with entities that correspond with ancestor folders, such as Rush Projects.
@@ -24,11 +39,11 @@ interface IPathTreeNode<TItem> {
  * @example
  * ```ts
  * const tree = new LookupByPath([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
- * tree.getNearestAncestor('foo'); // returns 1
- * tree.getNearestAncestor('foo/baz'); // returns 1
- * tree.getNearestAncestor('baz'); // returns undefined
- * tree.getNearestAncestor('foo/bar/baz'); returns 3
- * tree.getNearestAncestor('bar/foo/bar'); returns 2
+ * tree.findChildPath('foo'); // returns 1
+ * tree.findChildPath('foo/baz'); // returns 1
+ * tree.findChildPath('baz'); // returns undefined
+ * tree.findChildPath('foo/bar/baz'); returns 3
+ * tree.findChildPath('bar/foo/bar'); returns 2
  * ```
  * @beta
  */
@@ -72,21 +87,35 @@ export class LookupByPath<TItem> {
    * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
-    if (!serializedPath) {
+    for (const prefixMatch of this._iteratePrefixes(serializedPath, delimiter)) {
+      yield prefixMatch.prefix;
+    }
+  }
+
+  private static *_iteratePrefixes(input: string, delimiter: string = '/'): Iterable<IPrefixEntry> {
+    if (!input) {
       return;
     }
 
-    let nextIndex: number = serializedPath.indexOf(delimiter);
     let previousIndex: number = 0;
-    while (nextIndex >= 0) {
-      yield serializedPath.slice(previousIndex, nextIndex);
+    let nextIndex: number = input.indexOf(delimiter);
 
+    // Leading segments
+    while (nextIndex >= 0) {
+      yield {
+        prefix: input.slice(previousIndex, nextIndex),
+        index: nextIndex
+      };
       previousIndex = nextIndex + 1;
-      nextIndex = serializedPath.indexOf(delimiter, previousIndex);
+      nextIndex = input.indexOf(delimiter, previousIndex);
     }
 
-    if (previousIndex + 1 < serializedPath.length) {
-      yield serializedPath.slice(previousIndex);
+    // Last segment
+    if (previousIndex + 1 < input.length) {
+      yield {
+        prefix: input.slice(previousIndex, input.length),
+        index: input.length
+      };
     }
   }
 
@@ -147,6 +176,24 @@ export class LookupByPath<TItem> {
   }
 
   /**
+   * Searches for the item for which the recorded prefix is the longest matching prefix of `query`.
+   * Obtains both the item and the length of the matched prefix, so that the remainder of the path can be
+   * extracted.
+   *
+   * @returns the found item and the length of the matched prefix, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * tree.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
+   * tree.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
+   * ```
+   */
+  public findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined {
+    return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, this.delimiter));
+  }
+
+  /**
    * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
    * has an associated item.
    *
@@ -171,6 +218,45 @@ export class LookupByPath<TItem> {
         }
         node = child;
         best = node.value ?? best;
+        if (!node.children) {
+          break;
+        }
+      }
+    }
+
+    return best;
+  }
+
+  /**
+   * Iterates through progressively longer prefixes of a given string and returns as soon
+   * as the number of candidate items that match the prefix are 1 or 0.
+   *
+   * If a match is present, returns the matched itme and the length of the matched prefix.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   */
+  private _findLongestPrefixMatch(prefixes: Iterable<IPrefixEntry>): IPrefixMatch<TItem> | undefined {
+    let node: IPathTreeNode<TItem> = this._root;
+    let best: IPrefixMatch<TItem> | undefined = node.value
+      ? {
+          value: node.value,
+          index: 0
+        }
+      : undefined;
+    // Trivial cases
+    if (node.children) {
+      for (const { prefix: hash, index } of prefixes) {
+        const child: IPathTreeNode<TItem> | undefined = node.children.get(hash);
+        if (!child) {
+          break;
+        }
+        node = child;
+        if (node.value !== undefined) {
+          best = {
+            value: node.value,
+            index
+          };
+        }
         if (!node.children) {
           break;
         }

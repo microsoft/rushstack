@@ -1,11 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock(`@rushstack/package-deps-hash`, () => {
+  return {
+    getRepoRoot(dir: string): string {
+      return dir;
+    },
+    getRepoStateAsync(): ReadonlyMap<string, string> {
+      return new Map();
+    },
+    getRepoChangesAsync(): ReadonlyMap<string, string> {
+      return new Map();
+    }
+  };
+});
+
 import './mockRushCommandLineParser';
 
 import * as path from 'path';
 import { FileSystem, JsonFile, Path, PackageJsonLookup } from '@rushstack/node-core-library';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { ITelemetryData } from '../../logic/Telemetry';
@@ -31,7 +45,7 @@ interface IChildProcessModuleMock {
  * Interface definition for a test instance for the RushCommandLineParser.
  */
 interface IParserTestInstance {
-  parser: RushCommandLineParser;
+  parser: RushCommandLineParserType;
   spawnMock: jest.Mock;
 }
 
@@ -66,7 +80,10 @@ const __dirnameInLib: string = getDirnameInLib();
 /**
  * Helper to set up a test instance for RushCommandLineParser.
  */
-function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
+async function getCommandLineParserInstanceAsync(
+  repoName: string,
+  taskName: string
+): Promise<IParserTestInstance> {
   // Run these tests in the /lib folder because some of them require compiled output
   // Point to the test repo folder
   const startPath: string = `${__dirnameInLib}/${repoName}`;
@@ -76,11 +93,13 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   FileSystem.deleteFolder(`${startPath}/a/.rush/temp`);
   FileSystem.deleteFolder(`${startPath}/b/.rush/temp`);
 
+  const { RushCommandLineParser } = await import('../RushCommandLineParser');
+
   // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
   // repo will fail due to contention over the same lock which is kept until the test runner process
   // ends.
-  const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+  const parser: RushCommandLineParserType = new RushCommandLineParser({ cwd: startPath });
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid
@@ -104,8 +123,8 @@ function pathEquals(actual: string, expected: string): void {
 const SPAWN_ARG_ARGS: number = 1;
 const SPAWN_ARG_OPTIONS: number = 2;
 
-describe(RushCommandLineParser.name, () => {
-  describe(RushCommandLineParser.prototype.execute.name, () => {
+describe('RushCommandLineParser', () => {
+  describe('execute', () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -114,7 +133,7 @@ describe(RushCommandLineParser.name, () => {
       describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
-          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+          const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
 
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
@@ -146,7 +165,7 @@ describe(RushCommandLineParser.name, () => {
       describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
-          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
+          const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'rebuild');
 
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
@@ -180,7 +199,7 @@ describe(RushCommandLineParser.name, () => {
       describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
-          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+          const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
 
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
@@ -212,7 +231,7 @@ describe(RushCommandLineParser.name, () => {
       describe("'rebuild' action", () => {
         it(`executes the package's 'rebuild' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
-          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
+          const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'rebuild');
 
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
@@ -246,7 +265,7 @@ describe(RushCommandLineParser.name, () => {
       describe("'build' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideAndDefaultBuildActionRepo';
-          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+          const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -278,7 +297,7 @@ describe(RushCommandLineParser.name, () => {
         it(`executes the package's 'build' script`, async () => {
           // broken
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
-          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
+          const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'rebuild');
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -311,9 +330,9 @@ describe(RushCommandLineParser.name, () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildAsGlobalCommandRepo';
 
-        await expect(() => {
-          getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowErrorMatchingInlineSnapshot(
+        await expect(async () => {
+          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+        }).rejects.toThrowErrorMatchingInlineSnapshot(
           `"command-line.json defines a command \\"build\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
         );
       });
@@ -323,9 +342,9 @@ describe(RushCommandLineParser.name, () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
 
-        await expect(() => {
-          getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowErrorMatchingInlineSnapshot(
+        await expect(async () => {
+          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+        }).rejects.toThrowErrorMatchingInlineSnapshot(
           `"command-line.json defines a command \\"rebuild\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
         );
       });
@@ -335,9 +354,9 @@ describe(RushCommandLineParser.name, () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
 
-        await expect(() => {
-          getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowErrorMatchingInlineSnapshot(
+        await expect(async () => {
+          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+        }).rejects.toThrowErrorMatchingInlineSnapshot(
           `"command-line.json defines a command \\"build\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"build\\"."`
         );
       });
@@ -347,9 +366,9 @@ describe(RushCommandLineParser.name, () => {
       it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
 
-        await expect(() => {
-          getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowErrorMatchingInlineSnapshot(
+        await expect(async () => {
+          await getCommandLineParserInstanceAsync(repoName, 'doesnt-matter');
+        }).rejects.toThrowErrorMatchingInlineSnapshot(
           `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
         );
       });
@@ -358,7 +377,7 @@ describe(RushCommandLineParser.name, () => {
     describe('in repo plugin custom flushTelemetry', () => {
       it('creates a custom telemetry file', async () => {
         const repoName: string = 'tapFlushTelemetryAndRunBuildActionRepo';
-        const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+        const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
         const telemetryFilePath: string = `${instance.parser.rushConfiguration.commonTempFolder}/test-telemetry.json`;
         FileSystem.deleteFile(telemetryFilePath);
 

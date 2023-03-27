@@ -5,7 +5,7 @@ export const displaySpecChanges = (specChanges: Map<string, ISpecChange>, dep: s
     case 'add':
       return '[Added by .pnpmfile.cjs]';
     case 'diff':
-      return '[Changed from {specChanges.get(dep)?.from}]';
+      return `[Changed from ${specChanges.get(dep)?.from}]`;
     case 'remove':
       return '[Deleted by .pnpmfile.cjs]';
     default:

@@ -14,7 +14,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
     "@types/lodash": "4.14.116",
-    "@types/webpack-env": "1.13.0",
+    "@types/webpack-env": "1.18.0",
     "html-webpack-plugin": "~4.5.2",
     "lodash": "~4.17.15",
     "ts-loader": "6.0.0",

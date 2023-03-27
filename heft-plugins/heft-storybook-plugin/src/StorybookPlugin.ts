@@ -6,6 +6,7 @@ import {
   FileSystem,
   Import,
   IParsedPackageNameOrError,
+  JsonSchema,
   PackageName
 } from '@rushstack/node-core-library';
 import type {
@@ -60,20 +61,48 @@ export interface IStorybookPluginOptions {
   storykitPackageName: string;
 
   /**
-   * The module entry point that Heft should use to launch the Storybook toolchain.  Typically it
-   * is the path loaded the `start-storybook` shell script.
+   * The module entry point that Heft serve mode should use to launch the Storybook toolchain.
+   * Typically it is the path loaded the `start-storybook` shell script.
    *
    * @example
    * If you are using `@storybook/react`, then the startup path would be:
    *
    * `"startupModulePath": "@storybook/react/bin/index.js"`
    */
-  startupModulePath: string;
+  startupModulePath?: string;
+
+  /**
+   * The module entry point that Heft non-serve mode should use to launch the Storybook toolchain.
+   * Typically it is the path loaded the `build-storybook` shell script.
+   *
+   * @example
+   * If you are using `@storybook/react`, then the static build path would be:
+   *
+   * `"staticBuildModulePath": "@storybook/react/bin/build.js"`
+   */
+  staticBuildModulePath?: string;
+
+  /**
+   * The customized output dir for storybook static build.
+   * If this is empty, then it will use the storybook default output dir.
+   *
+   * @example
+   * If you want to change the static build output dir to staticBuildDir, then the static build output dir would be:
+   *
+   * `"staticBuildOutputFolder": "newStaticBuildDir"`
+   */
+  staticBuildOutputFolder?: string;
+}
+
+interface IRunStorybookOptions {
+  resolvedModulePath: string;
+  outputFolder: string | undefined;
 }
 
 /** @public */
 export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
   private _logger!: IScopedLogger;
+  private _isServeMode: boolean = false;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -96,6 +125,13 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       );
     }
 
+    if (!options.startupModulePath && !options.staticBuildModulePath) {
+      throw new Error(
+        `The ${taskSession.taskName} task cannot start because the "startupModulePath" and the "staticBuildModulePath"` +
+          ` plugin options were not specified`
+      );
+    }
+
     // Only tap if the --storybook flag is present.
     if (storybookParameter.value) {
       const configureWebpackTap: () => Promise<false> = async () => {
@@ -109,24 +145,34 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack4-plugin',
         WEBPACK4_PLUGIN_NAME,
-        (accessor: IWebpack4PluginAccessor) =>
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
+        (accessor: IWebpack4PluginAccessor) => {
+          // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
+          if (accessor.parameters.isServeMode) {
+            this._isServeMode = true;
+            accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
+          }
+        }
       );
 
       taskSession.requestAccessToPluginByName(
         '@rushstack/heft-webpack5-plugin',
         WEBPACK5_PLUGIN_NAME,
-        (accessor: IWebpack5PluginAccessor) =>
-          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap)
+        (accessor: IWebpack5PluginAccessor) => {
+          // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
+          if (accessor.parameters.isServeMode) {
+            this._isServeMode = true;
+            accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
+          }
+        }
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-        const resolvedStartupModulePath: string = await this._prepareStorybookAsync(
+        const runStorybookOptions: IRunStorybookOptions = await this._prepareStorybookAsync(
           taskSession,
           heftConfiguration,
           options
         );
-        await this._runStorybookAsync(resolvedStartupModulePath);
+        await this._runStorybookAsync(runStorybookOptions);
       });
     }
   }
@@ -135,7 +181,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IStorybookPluginOptions
-  ): Promise<string> {
+  ): Promise<IRunStorybookOptions> {
     const { storykitPackageName, startupModulePath } = options;
     this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
 
@@ -163,18 +209,28 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       );
     }
 
-    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${startupModulePath}"`);
-    let resolvedStartupModulePath: string | undefined;
+    // We only want to specify a different output dir when operating in build mode
+    const outputFolder: string | undefined = this._isServeMode ? undefined : options.staticBuildOutputFolder;
+    const modulePath: string | undefined = this._isServeMode
+      ? options.startupModulePath
+      : options.staticBuildModulePath;
+    if (!modulePath) {
+      this._logger.terminal.writeVerboseLine(
+        'No matching module path option specified in heft.json, so bundling will proceed without Storybook'
+      );
+    }
+
+    this._logger.terminal.writeVerboseLine(`Resolving modulePath "${modulePath}"`);
+    let resolvedModulePath: string;
     try {
-      resolvedStartupModulePath = Import.resolveModule({
-        modulePath: startupModulePath,
+      resolvedModulePath = Import.resolveModule({
+        modulePath: modulePath!,
         baseFolderPath: storykitModuleFolderPath
       });
     } catch (ex) {
       throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
-
-    this._logger.terminal.writeVerboseLine(`Resolved startupModulePath is "${resolvedStartupModulePath}"`);
+    this._logger.terminal.writeVerboseLine(`Resolved modulePath is "${resolvedModulePath}"`);
 
     // Example: "/path/to/my-project/.storybook"
     const dotStorybookFolderPath: string = `${heftConfiguration.buildFolderPath}/.storybook`;
@@ -195,14 +251,24 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
     });
 
-    return resolvedStartupModulePath;
+    return {
+      resolvedModulePath: resolvedModulePath,
+      outputFolder: outputFolder
+    };
   }
 
-  private async _runStorybookAsync(resolvedStartupModulePath: string): Promise<void> {
+  private async _runStorybookAsync(runStorybookOptions: IRunStorybookOptions): Promise<void> {
+    const { resolvedModulePath, outputFolder } = runStorybookOptions;
     this._logger.terminal.writeLine('Starting Storybook...');
-    this._logger.terminal.writeLine(`Launching "${resolvedStartupModulePath}"`);
+    this._logger.terminal.writeLine(`Launching "${resolvedModulePath}"`);
 
-    require(resolvedStartupModulePath);
+    if (outputFolder) {
+      const originalArgv: string[] = process.argv;
+      process.argv.push(`--output-dir=${outputFolder}`);
+      process.argv = originalArgv;
+    }
+
+    require(resolvedModulePath);
 
     this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }

@@ -10,9 +10,6 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-lint-plugin": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*"
+    "@rushstack/rush-sdk": "workspace:*"
   }
 }

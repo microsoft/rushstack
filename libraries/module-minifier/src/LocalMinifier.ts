@@ -44,8 +44,11 @@ export class LocalMinifier implements IModuleMinifier {
         : {}
     };
 
+    const { version: terserVersion } = require('terser/package.json');
+
     this._configHash = createHash('sha256')
       .update(LocalMinifier.name, 'utf8')
+      .update(`terser@${terserVersion}`)
       .update(serialize(terserOptions))
       .digest('base64');
 

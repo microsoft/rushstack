@@ -338,7 +338,7 @@ export class Utilities {
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): string {
-    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
+    const result: child_process.SpawnSyncReturns<string | Buffer> = Utilities._executeCommandInternal(
       command,
       args,
       workingDirectory,
@@ -396,11 +396,8 @@ export class Utilities {
    * @param options - options for how the command should be run
    */
   public static executeLifecycleCommand(command: string, options: ILifecycleCommandOptions): number {
-    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
-      command,
-      child_process.spawnSync,
-      options
-    );
+    const result: child_process.SpawnSyncReturns<string | Buffer> =
+      Utilities._executeLifecycleCommandInternal(command, child_process.spawnSync, options);
 
     if (options.handleOutput) {
       Utilities._processResult(result);
@@ -675,7 +672,7 @@ export class Utilities {
       | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
-  ): child_process.SpawnSyncReturns<Buffer> {
+  ): child_process.SpawnSyncReturns<string | Buffer> {
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
@@ -704,7 +701,7 @@ export class Utilities {
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
-    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
+    let result: child_process.SpawnSyncReturns<string | Buffer> = child_process.spawnSync(
       escapedCommand,
       escapedArgs,
       options
@@ -724,7 +721,7 @@ export class Utilities {
     return result;
   }
 
-  private static _processResult(result: child_process.SpawnSyncReturns<Buffer>): void {
+  private static _processResult(result: child_process.SpawnSyncReturns<string | Buffer>): void {
     if (result.error) {
       result.error.message += '\n' + (result.stderr ? result.stderr.toString() + '\n' : '');
       throw result.error;

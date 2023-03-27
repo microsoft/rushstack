@@ -1,44 +1,53 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Wed, 15 Mar 2023 20:22:44 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
 
-## 1.12.0-rc.4
-Wed, 15 Mar 2023 20:22:44 GMT
+## 1.12.5
+Sat, 18 Mar 2023 00:20:56 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix an issue with `watchGlobAsync`
+## 1.12.4
+Fri, 10 Feb 2023 01:18:50 GMT
 
-## 1.12.0-rc.3
-Fri, 20 Jan 2023 20:13:16 GMT
+_Version update only_
 
-### Prerelease Changes
+## 1.12.3
+Sun, 05 Feb 2023 03:02:02 GMT
 
-- Fix issues with SASS incremental builds.
-- Add support for TypeScript solution incremental builds.
-- Improve responsiveness of watcher loop.
+_Version update only_
 
-## 1.12.0-rc.2
-Fri, 2 Dec 2022 05:28:24 GMT
+## 1.12.2
+Wed, 01 Feb 2023 02:16:34 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Improve watch mode performance.
-- Improve logging output.
+## 1.12.1
+Mon, 30 Jan 2023 16:22:31 GMT
 
-## 1.12.0-rc.1
-Fri, 18 Nov 2022 02:34:26 GMT
+_Version update only_
 
-### Prerelease Changes
+## 1.12.0
+Mon, 30 Jan 2023 00:55:44 GMT
 
-- Fix incremental TypeScript compilation.
+### Minor changes
 
-## 1.12.0-rc.0
-Tue, 15 Nov 2022 22:59:35 GMT
+- Upgrade Jest from `~27.4.2` to `~29.3.1`
 
-### Prerelease Changes
+## 1.11.14
+Thu, 26 Jan 2023 02:55:10 GMT
 
-- General fixes and improvements, in preparation for a general release.
+_Version update only_
+
+## 1.11.13
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 1.11.12
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 1.11.11
 Tue, 20 Dec 2022 01:18:22 GMT

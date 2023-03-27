@@ -1,6 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * Heft is a config-driven toolchain that invokes other popular tools such
+ * as TypeScript, ESLint, Jest, Webpack, and API Extractor. You can use it to build
+ * web applications, Node.js services, command-line tools, libraries, and more.
+ *
+ * @packageDocumentation
+ */
+
 export {
   HeftConfiguration,
   type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions

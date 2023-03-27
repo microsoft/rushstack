@@ -18,7 +18,8 @@ function generateConfiguration(mode, outputFolderName) {
     output: {
       path: path.join(__dirname, outputFolderName),
       filename: '[name]_[contenthash].js',
-      chunkFilename: '[id].[name]_[contenthash].js'
+      chunkFilename: '[id].[name]_[contenthash].js',
+      hashSalt: '2'
     },
     optimization: {
       minimizer: [

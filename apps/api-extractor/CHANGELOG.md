@@ -1,6 +1,40 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+
+## 7.34.4
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 7.34.3
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 7.34.2
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 7.34.1
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 7.34.0
+Wed, 25 Jan 2023 07:26:55 GMT
+
+### Minor changes
+
+- Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)
+
+## 7.33.8
+Wed, 18 Jan 2023 22:44:12 GMT
+
+### Patches
+
+- Use ts.getCheckFlags to fix TS 5.0
 
 ## 7.33.7
 Fri, 09 Dec 2022 16:18:28 GMT

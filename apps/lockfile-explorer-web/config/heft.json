@@ -23,6 +23,11 @@
                   "sourcePath": "lib/stub",
                   "destinationFolders": ["dist"],
                   "fileExtensions": [".js"]
+                },
+                {
+                  "sourcePath": "node_modules/@rushstack/rush-themed-ui/dist",
+                  "destinationFolders": ["dist"],
+                  "fileExtensions": [".js", ".svg", ".css", ".txt"]
                 }
               ]
             }
