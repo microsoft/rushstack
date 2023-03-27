@@ -6,10 +6,16 @@
 
 import type { IHeftPlugin } from '@rushstack/heft';
 
-// Warning: (ae-forgotten-export) The symbol "IShellScriptPluginOptions" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 const _default: IHeftPlugin<IShellScriptPluginOptions>;
 export default _default;
+
+// @public (undocumented)
+export interface IShellScriptPluginOptions {
+    // Warning: (ae-forgotten-export) The symbol "ShellScript" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    scripts: ShellScript[];
+}
 
 ```

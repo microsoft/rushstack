@@ -14,3 +14,5 @@ import { IShellScriptPluginOptions, ShellScriptPlugin } from './ShellScriptPlugi
  * @public
  */
 export default new ShellScriptPlugin() as IHeftPlugin<IShellScriptPluginOptions>;
+
+export { IShellScriptPluginOptions };

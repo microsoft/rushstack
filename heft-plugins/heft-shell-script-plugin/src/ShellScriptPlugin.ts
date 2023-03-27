@@ -7,6 +7,9 @@ import { runShellCommand } from './utils';
 const PLUGIN_NAME: string = 'ShellScriptPlugin';
 const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-shell-script-plugin.schema.json`;
 
+/**
+ * @public
+ */
 export interface IShellScriptPluginOptions {
   scripts: ShellScript[];
 }
