@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix phase command to respect upstream",
+      "comment": "Modify the scheduling behavior of phased commands to schedule only the expressly enumerated phases in all selected projects, adding additional phases only where needed to satisfy dependencies.",
       "type": "none"
     }
   ],
