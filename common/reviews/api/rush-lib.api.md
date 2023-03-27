@@ -263,6 +263,7 @@ export interface ICreateOperationsContext {
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
+    readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;

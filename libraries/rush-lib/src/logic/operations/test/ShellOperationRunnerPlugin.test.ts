@@ -44,8 +44,9 @@ describe(ShellOperationRunnerPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+      'phaseOriginal' | 'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
     > = {
+      phaseOriginal: echoCommand.phases,
       phaseSelection: echoCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
       projectsInUnknownState: new Set(rushConfiguration.projects)
@@ -86,8 +87,9 @@ describe(ShellOperationRunnerPlugin.name, () => {
 
     const fakeCreateOperationsContext: Pick<
       ICreateOperationsContext,
-      'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+      'phaseOriginal' | 'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
     > = {
+      phaseOriginal: echoCommand.phases,
       phaseSelection: echoCommand.phases,
       projectSelection: new Set(rushConfiguration.projects),
       projectsInUnknownState: new Set(rushConfiguration.projects)

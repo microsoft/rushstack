@@ -68,8 +68,9 @@ describe(PhasedOperationPlugin.name, () => {
 
     const context: Pick<
       ICreateOperationsContext,
-      'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+      'phaseOriginal' | 'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
     > = {
+      phaseOriginal: phaseSelection,
       phaseSelection,
       projectSelection,
       projectsInUnknownState: changedProjects
