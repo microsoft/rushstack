@@ -16,13 +16,7 @@
     "_phase:test": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --no-build"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.50.0",
-    "@rushstack/heft-typescript-plugin": "^0.1.0"
-  },
-  "peerDependenciesMeta": {
-    "@rushstack/heft-typescript-plugin": {
-      "optional": true
-    }
+    "@rushstack/heft": "^0.50.0"
   },
   "dependencies": {
     "@jest/core": "~29.3.1",
@@ -41,7 +35,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-legacy": "npm:@rushstack/heft@0.47.0",
     "@rushstack/heft-node-rig": "1.11.14",
-    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "14.18.36",

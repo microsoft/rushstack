@@ -102,32 +102,6 @@
       "type": "string"
     },
 
-    "watchOptions": {
-      "title": "Watch Mode Options",
-      "type": "object",
-      "description": "Global options used by Heft when running in watch mode.",
-      "properties": {
-        "ignoredSourceFileGlobs": {
-          "title": "Ignored Source File Globs",
-          "type": "array",
-          "description": "Glob patterns for source files that should be ignored when watching for changes. Changes to these files will still be detected and recorded by Heft, but will not trigger a rebuild.",
-          "items": {
-            "type": "string",
-            "pattern": "[^\\\\]"
-          }
-        },
-        "forbiddenSourceFileGlobs": {
-          "title": "Forbidden Source File Globs",
-          "type": "array",
-          "description": "Glob patterns for source files that should break the build when watching for changes. Changes to these files will cause Heft to exit with an error. Changes in project \"package.json\" files and \"config\" and \".rush\" folders are always forbidden and do not need to be included in this list.",
-          "items": {
-            "type": "string",
-            "pattern": "[^\\\\]"
-          }
-        }
-      }
-    },
-
     "heftPlugins": {
       "type": "array",
       "description": "List of Heft plugins that are used by a project.",
