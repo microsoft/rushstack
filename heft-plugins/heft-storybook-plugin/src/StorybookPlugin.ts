@@ -6,7 +6,6 @@ import {
   FileSystem,
   Import,
   IParsedPackageNameOrError,
-  JsonSchema,
   PackageName
 } from '@rushstack/node-core-library';
 import type {
@@ -182,7 +181,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     heftConfiguration: HeftConfiguration,
     options: IStorybookPluginOptions
   ): Promise<IRunStorybookOptions> {
-    const { storykitPackageName, startupModulePath } = options;
+    const { storykitPackageName, startupModulePath, staticBuildModulePath, staticBuildOutputFolder } =
+      options;
     this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
 
     // Example: "/path/to/my-project/node_modules/my-storykit"
@@ -210,10 +210,8 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     }
 
     // We only want to specify a different output dir when operating in build mode
-    const outputFolder: string | undefined = this._isServeMode ? undefined : options.staticBuildOutputFolder;
-    const modulePath: string | undefined = this._isServeMode
-      ? options.startupModulePath
-      : options.staticBuildModulePath;
+    const outputFolder: string | undefined = this._isServeMode ? undefined : staticBuildOutputFolder;
+    const modulePath: string | undefined = this._isServeMode ? startupModulePath : staticBuildModulePath;
     if (!modulePath) {
       this._logger.terminal.writeVerboseLine(
         'No matching module path option specified in heft.json, so bundling will proceed without Storybook'
@@ -262,13 +260,18 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger.terminal.writeLine('Starting Storybook...');
     this._logger.terminal.writeLine(`Launching "${resolvedModulePath}"`);
 
+    // Internally, the storybook module uses commander to parse the argv, which contains commands for Heft.
+    // We will clear out the argv, and only add back the arguments that are relevant to Storybook.
+    const originalArgv: string[] = process.argv;
+    process.argv = [process.argv[0], resolvedModulePath];
     if (outputFolder) {
-      const originalArgv: string[] = process.argv;
       process.argv.push(`--output-dir=${outputFolder}`);
-      process.argv = originalArgv;
     }
 
     require(resolvedModulePath);
+
+    // Reset the argv to the original set of args
+    process.argv = originalArgv;
 
     this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }
