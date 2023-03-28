@@ -5,24 +5,9 @@ import * as loader from '..';
 import type { Stats } from 'webpack';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 import getCompiler from './testData/getCompiler';
-import { Path } from '@rushstack/node-core-library';
 
 const MATCH_GENERATED_LOADER_STRING_REGEXP: RegExp = /var\sloader\s\=\srequire\(["'](.+?)["']\)/;
 const MATCH_LOADER_DOT_LOADSTYLES_FUNCTION_ASYNC_VALUE_REGEXP: RegExp = /loader\.loadStyles\(.+?,\s(.+?)\)/;
-
-function getLoadThemedStylesLibPath(stats: Stats): string {
-  // Example:
-  //   var loader = require("C:\\Git\\rushstack\\libraries\\load-themed-styles\\lib\\index.js");
-  const content: string = stats.toJson({ source: true }).modules?.[0].source?.toString() ?? '';
-  const match: RegExpExecArray | null = MATCH_GENERATED_LOADER_STRING_REGEXP.exec(content);
-  // Example:
-  //   C:\\Git\\rushstack\\libraries\\load-themed-styles\\lib\\index.js
-  const escapedPath: string = match?.[1] ?? '';
-  // Example:
-  //   C:\Git\rushstack\libraries\load-themed-styles\lib\index.js
-  const loadThemedStylesLibPath: string = JSON.parse(`"${escapedPath}"`);
-  return loadThemedStylesLibPath;
-}
 
 describe('webpack5-load-themed-style-loader', () => {
   beforeEach(() => {
