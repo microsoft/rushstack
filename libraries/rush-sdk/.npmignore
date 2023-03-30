@@ -27,4 +27,7 @@
 # DO NOT MODIFY THE TEMPLATE ABOVE THIS LINE
 #--------------------------------------------
 
+/lib-shim/**
+!/lib-shim/index.js
+
 # (Add your project-specific overrides here)
