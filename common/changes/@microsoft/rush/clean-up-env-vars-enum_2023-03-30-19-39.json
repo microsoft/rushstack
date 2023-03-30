@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Convert the `EnvironmentVariableNames` from an enum to a const so that its values can be referred to by type.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
