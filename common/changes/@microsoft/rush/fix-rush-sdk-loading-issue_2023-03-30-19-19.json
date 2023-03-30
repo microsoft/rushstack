@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where rush-sdk would fail to load if it was invoked from insdie a Rush process where the version selector's version doesn't match the currently-executing rush-lib version.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
