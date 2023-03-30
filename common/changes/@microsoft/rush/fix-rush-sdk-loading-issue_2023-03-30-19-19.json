@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where rush-sdk would fail to load if it was invoked from insdie a Rush process where the version selector's version doesn't match the currently-executing rush-lib version.",
+      "comment": "Fix an issue where rush-sdk sometimes failed to load if the globally installed Rush version was older than rushVersion in rush.json (GitHub #4039)",
       "type": "none"
     }
   ],
