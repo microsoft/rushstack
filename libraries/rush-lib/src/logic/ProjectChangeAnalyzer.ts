@@ -42,6 +42,15 @@ export interface IGetChangedProjectsOptions {
    * and exclude matched files from change detection.
    */
   enableFiltering: boolean;
+
+  /**
+   * If provided, this array of strings will be interpreted as a list of globs to ignore, for this call
+   * only. This option can be used for customized filtering of project change lists.
+   *
+   * If project filtering is enabled, the provided list will be applied AFTER the individual project's
+   * ignore globs, if any.
+   */
+  ignoreGlobs?: string[];
 }
 
 interface IGitState {
@@ -117,6 +126,7 @@ export class ProjectChangeAnalyzer {
       project,
       unfilteredProjectData,
       rootDir,
+      [],
       terminal
     );
 
@@ -182,11 +192,17 @@ export class ProjectChangeAnalyzer {
     project: RushConfigurationProject,
     unfilteredProjectData: Map<string, T>,
     rootDir: string,
+    additionalIgnoreGlobs: string[],
     terminal: ITerminal
   ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    let ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
     if (!ignoreMatcher) {
-      return unfilteredProjectData;
+      if (additionalIgnoreGlobs.length === 0) {
+        return unfilteredProjectData;
+      } else {
+        ignoreMatcher = ignore();
+        ignoreMatcher.add(additionalIgnoreGlobs);
+      }
     }
 
     const projectKey: string = path.relative(rootDir, project.projectFolder);
@@ -217,6 +233,7 @@ export class ProjectChangeAnalyzer {
     const { _rushConfiguration: rushConfiguration } = this;
 
     const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
+    const ignoreGlobs: string[] = options.ignoreGlobs || [];
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -292,7 +309,7 @@ export class ProjectChangeAnalyzer {
           continue;
         }
 
-        if (enableFiltering) {
+        if (enableFiltering || ignoreGlobs.length > 0) {
           let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
           if (!projectChanges) {
             projectChanges = new Map();
@@ -305,7 +322,7 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    if (enableFiltering) {
+    if (enableFiltering || ignoreGlobs.length > 0) {
       // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
       await Async.forEachAsync(
         changesByProject,
@@ -314,6 +331,7 @@ export class ProjectChangeAnalyzer {
             project,
             projectChanges,
             repoRoot,
+            ignoreGlobs,
             terminal
           );
 
