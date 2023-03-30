@@ -82,15 +82,23 @@ export class ProjectWatcher {
     const previousState: ProjectChangeAnalyzer = initialChangeResult.state;
     const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
 
-    const pathsToWatch: Set<string> = new Set();
+    const pathsToWatch: Map<string, boolean> = new Map();
 
     // Node 12 supports the "recursive" parameter to fs.watch only on win32 and OSX
     // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
 
     if (useNativeRecursiveWatch) {
-      // Watch the entire repository; a single recursive watcher is cheap.
-      pathsToWatch.add(this._repoRoot);
+      // Watch the root non-recursively
+      pathsToWatch.set(repoRoot, false);
+
+      // Watch the rush config folder non-recursively
+      pathsToWatch.set(Path.convertToSlashes(this._rushConfiguration.commonRushConfigFolder), false);
+
+      for (const project of this._projectsToWatch) {
+        // Use recursive watch in individual project folders
+        pathsToWatch.set(Path.convertToSlashes(project.projectFolder), true);
+      }
     } else {
       for (const project of this._projectsToWatch) {
         const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
@@ -101,7 +109,7 @@ export class ProjectWatcher {
         const prefixLength: number = project.projectFolder.length - repoRoot.length - 1;
         // Watch files in the root of the project, or
         for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(projectState.keys(), prefixLength)) {
-          pathsToWatch.add(`${this._repoRoot}/${pathToWatch}`);
+          pathsToWatch.set(`${this._repoRoot}/${pathToWatch}`, true);
         }
       }
     }
@@ -122,12 +130,15 @@ export class ProjectWatcher {
           }
 
           try {
+            this._terminal.writeLine(`Evaluating changes to tracked files...`);
             const result: IProjectChangeResult = await this._computeChanged();
+            this._terminal.writeLine(`Finished analyzing.`);
 
             // Need an async tick to allow for more file system events to be handled
             process.nextTick(() => {
               if (timeout) {
                 // If another file has changed, wait for another pass.
+                this._terminal.writeLine(`More file changes detected, aborting.`);
                 return;
               }
 
@@ -136,6 +147,8 @@ export class ProjectWatcher {
               if (result.changedProjects.size) {
                 terminated = true;
                 resolve(result);
+              } else {
+                this._terminal.writeLine(`No changes detected to tracked files.`);
               }
             });
           } catch (err) {
@@ -145,8 +158,8 @@ export class ProjectWatcher {
           }
         };
 
-        for (const pathToWatch of pathsToWatch) {
-          addWatcher(pathToWatch);
+        for (const [pathToWatch, recursive] of pathsToWatch) {
+          addWatcher(pathToWatch, recursive);
         }
 
         if (onWatchingFiles) {
@@ -162,13 +175,16 @@ export class ProjectWatcher {
           reject(err);
         }
 
-        function addWatcher(watchedPath: string): void {
-          const listener: (event: string, fileName: string) => void = changeListener(watchedPath);
+        function addWatcher(watchedPath: string, recursive: boolean): void {
+          if (watchers.has(watchedPath)) {
+            return;
+          }
+          const listener: (event: string, fileName: string) => void = changeListener(watchedPath, recursive);
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
             {
               encoding: 'utf-8',
-              recursive: useNativeRecursiveWatch
+              recursive: recursive && useNativeRecursiveWatch
             },
             listener
           );
@@ -179,14 +195,18 @@ export class ProjectWatcher {
           });
         }
 
-        function innerListener(root: string, event: string, fileName: string): void {
+        function innerListener(root: string, recursive: boolean, event: string, fileName: string): void {
           try {
             if (terminated) {
               return;
             }
 
+            if (fileName === '.git' || fileName === 'node_modules') {
+              return;
+            }
+
             // Handling for added directories
-            if (!useNativeRecursiveWatch) {
+            if (recursive && !useNativeRecursiveWatch) {
               const decodedName: string = fileName && fileName.toString();
               const normalizedName: string = decodedName && Path.convertToSlashes(decodedName);
               const fullName: string = normalizedName && `${root}/${normalizedName}`;
@@ -195,7 +215,7 @@ export class ProjectWatcher {
                 try {
                   const stat: FileSystemStats = FileSystem.getStatistics(fullName);
                   if (stat.isDirectory()) {
-                    addWatcher(fullName);
+                    addWatcher(fullName, true);
                   }
                 } catch (err) {
                   const code: string | undefined = (err as NodeJS.ErrnoException).code;
@@ -219,8 +239,8 @@ export class ProjectWatcher {
           }
         }
 
-        function changeListener(root: string): (event: string, fileName: string) => void {
-          return innerListener.bind(0, root);
+        function changeListener(root: string, recursive: boolean): (event: string, fileName: string) => void {
+          return innerListener.bind(0, root, recursive);
         }
       }
     );
