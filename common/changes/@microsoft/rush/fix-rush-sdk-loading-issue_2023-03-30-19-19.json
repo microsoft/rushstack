@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where rush-sdk sometimes failed to load if the globally installed Rush version was older than rushVersion in rush.json (GitHub #4039)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
