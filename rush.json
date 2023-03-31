@@ -1041,6 +1041,12 @@
 
     // "webpack" folder (alphabetical order)
     {
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+      "projectFolder": "webpack/webpack-embedded-dependencies-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/webpack-plugin-utilities",
       "projectFolder": "webpack/webpack-plugin-utilities",
       "reviewCategory": "libraries",

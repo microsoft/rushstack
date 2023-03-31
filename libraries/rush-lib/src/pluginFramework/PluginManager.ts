@@ -11,6 +11,7 @@ import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoa
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -18,6 +19,7 @@ export interface IPluginManagerOptions {
   rushSession: RushSession;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
   restrictConsoleOutput: boolean;
+  rushGlobalFolder: RushGlobalFolder;
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -34,6 +36,7 @@ export class PluginManager {
   private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
+  private readonly _rushGlobalFolder: RushGlobalFolder;
 
   private _error: Error | undefined;
 
@@ -42,6 +45,7 @@ export class PluginManager {
     this._rushConfiguration = options.rushConfiguration;
     this._rushSession = options.rushSession;
     this._restrictConsoleOutput = options.restrictConsoleOutput;
+    this._rushGlobalFolder = options.rushGlobalFolder;
 
     this._installedAutoinstallerNames = new Set<string>();
 
@@ -99,7 +103,8 @@ export class PluginManager {
         pluginConfiguration,
         rushConfiguration: this._rushConfiguration,
         terminal: this._terminal,
-        restrictConsoleOutput: this._restrictConsoleOutput
+        restrictConsoleOutput: this._restrictConsoleOutput,
+        rushGlobalFolder: this._rushGlobalFolder
       });
     });
   }

@@ -263,6 +263,7 @@ export interface ICreateOperationsContext {
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
+    readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
@@ -305,6 +306,7 @@ export interface IExperimentsJson {
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
+    printEventHooksOutputToConsole?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
@@ -495,6 +497,14 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @beta
+export interface IPrefixMatch<TItem> {
+    // (undocumented)
+    index: number;
+    // (undocumented)
+    value: TItem;
+}
+
+// @beta
 export interface IRushCommand {
     readonly actionName: string;
 }
@@ -610,6 +620,7 @@ export class LookupByPath<TItem> {
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
     setItem(serializedPath: string, value: TItem): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
@@ -744,7 +755,9 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 // @alpha
 export class PhasedCommandHooks {
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
+    readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
+    readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly waitingForChanges: SyncHook<void>;
 }
 

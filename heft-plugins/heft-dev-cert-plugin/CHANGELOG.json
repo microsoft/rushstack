@@ -2,6 +2,51 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.2.20",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.20",
+      "date": "Mon, 20 Mar 2023 20:14:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.19",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.19",
+      "date": "Sat, 18 Mar 2023 00:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.7` to `^0.50.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.18",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.18",
+      "date": "Fri, 03 Mar 2023 04:11:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.17",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.2.17",
       "date": "Fri, 10 Feb 2023 01:18:50 GMT",
