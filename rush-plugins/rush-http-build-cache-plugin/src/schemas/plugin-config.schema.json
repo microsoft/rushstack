@@ -24,8 +24,21 @@
       }
     },
     "tokenHandler": {
-      "type": "string",
-      "description": "(Optional) Shell command that prints the authorization token needed to communicate with the HTTPS server and exits with code 0. This command will be executed from the root of the monorepo."
+      "type": "object",
+      "description": "(Optional) Shell command that prints the authorization token needed to communicate with the HTTPS server and exits with code 0. This command will be executed from the root of the monorepo.",
+      "properties": {
+        "exec": {
+          "type": "string",
+          "description": "(Required) The command or script to execute."
+        },
+        "args": {
+          "type": "array",
+          "description": "(Optional) Arguments to pass to the command or script.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "cacheKeyPrefix": {
       "type": "string",

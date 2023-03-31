@@ -1,4 +1,4 @@
-import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminal, Executable } from '@rushstack/node-core-library';
 import {
   ICloudBuildCacheProvider,
   ICredentialCacheEntry,
@@ -7,7 +7,6 @@ import {
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 import fetch, { BodyInit, Response } from 'node-fetch';
-import { exec } from './exec';
 
 enum CredentialsOptions {
   Optional,
@@ -23,12 +22,17 @@ enum FailureType {
   Authentication
 }
 
+export interface IHttpBuildCacheTokenHandler {
+  exec: string;
+  args?: string[];
+}
+
 /**
  * @public
  */
 export interface IHttpBuildCacheProviderOptions {
   url: string;
-  tokenHandler?: string;
+  tokenHandler?: IHttpBuildCacheTokenHandler;
   uploadMethod?: string;
   headers?: Record<string, string>;
   cacheKeyPrefix?: string;
@@ -47,7 +51,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _uploadMethod: string;
   private readonly _headers: Record<string, string>;
   private readonly _cacheKeyPrefix: string;
-  private readonly _tokenHandler: string | undefined;
+  private readonly _tokenHandler: IHttpBuildCacheTokenHandler | undefined;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
@@ -133,7 +137,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   }
 
   public async updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void> {
-    if (typeof this._tokenHandler !== 'string') {
+    if (!this._tokenHandler) {
       throw new Error(
         `The interactive cloud credentials flow is not configured.\n` +
           `Set the 'tokenHandler' setting in 'common/config/rush-plugins/${this._pluginName}.json' to a command that writes your credentials to standard output and exits with code 0 ` +
@@ -142,9 +146,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       );
     }
 
-    const cmd: string = this._tokenHandler;
+    const cmd: string = `${this._tokenHandler.exec} ${(this._tokenHandler.args || []).join(' ')}`;
     terminal.writeVerboseLine(`Running '${cmd}' to get credentials`);
-    const result = await exec(cmd, this._rushProjectRoot);
+    const result = Executable.spawnSync(this._tokenHandler.exec, this._tokenHandler.args || []);
 
     terminal.writeErrorLine(result.stderr);
 

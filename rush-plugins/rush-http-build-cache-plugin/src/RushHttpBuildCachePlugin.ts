@@ -29,9 +29,13 @@ export interface IRushHttpBuildCachePluginOptions {
   headers?: Record<string, string>;
 
   /**
-   * An optional command that prints the endpoint's credentials to stdout.
+   * An optional command that prints the endpoint's credentials to stdout. Provide the
+   * command or script to execute and, optionally, any arguments to pass to the script.
    */
-  tokenHandler?: string;
+  tokenHandler?: {
+    exec: string;
+    args?: string[];
+  };
 
   /**
    * Prefix for cache keys.

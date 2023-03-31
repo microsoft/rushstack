@@ -9,7 +9,10 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-lib
 
 const EXAMPLE_OPTIONS = {
   url: 'https://buildcache.example.acme.com',
-  tokenHandler: 'node tokenHandler.js',
+  tokenHandler: {
+    exec: 'node',
+    args: ['tokenHandler.js']
+  },
   uploadMethod: 'POST',
   isCacheWriteAllowed: false,
   pluginName: 'example-plugin',
