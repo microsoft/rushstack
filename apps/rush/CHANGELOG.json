@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.96.0",
+      "tag": "@microsoft/rush_v5.96.0",
+      "date": "Fri, 31 Mar 2023 00:27:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-sdk sometimes failed to load if the globally installed Rush version was older than rushVersion in rush.json (GitHub #4039)"
+          },
+          {
+            "comment": "Modify the scheduling behavior of phased commands to schedule only the expressly enumerated phases in all selected projects, adding additional phases only where needed to satisfy dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.95.0",
       "tag": "@microsoft/rush_v5.95.0",
       "date": "Fri, 24 Mar 2023 08:53:43 GMT",
