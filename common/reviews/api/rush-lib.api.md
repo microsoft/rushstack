@@ -795,7 +795,6 @@ export class ProjectChangeAnalyzer {
     //
     // @internal (undocumented)
     _ensureInitializedAsync(terminal: ITerminal): Promise<IRawRepoState | undefined>;
-    // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal, filterByProject?: ProjectFilterFactory): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
@@ -804,7 +803,7 @@ export class ProjectChangeAnalyzer {
     _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export type ProjectFilterFactory = (project: RushConfigurationProject) => Promise<(relativePath: string) => boolean>;
 
 // @public

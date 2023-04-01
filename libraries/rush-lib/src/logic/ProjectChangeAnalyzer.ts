@@ -55,6 +55,9 @@ export interface IGetChangedProjectsOptions {
   filterByProject?: ProjectFilterFactory;
 }
 
+/**
+ * @beta
+ */
 export type ProjectFilterFactory = (
   project: RushConfigurationProject
 ) => Promise<(relativePath: string) => boolean>;
