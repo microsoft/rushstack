@@ -88,7 +88,11 @@ export { RushInternals as _RushInternals } from './api/RushInternals';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 
-export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export {
+  ProjectChangeAnalyzer,
+  IGetChangedProjectsOptions,
+  ProjectFilterFactory
+} from './logic/ProjectChangeAnalyzer';
 
 export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';
