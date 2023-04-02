@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rush version now optionally produces a version manifest file.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
