@@ -54,7 +54,8 @@ export class VersionManager {
   }
 
   /**
-   * Bumps versions following version policies.
+   * Bumps versions following version policies. Returns a map of updated packages and the corresponding
+   * updated Package JSON data. If there is not at least one updated package, returns undefined instead.
    *
    * @param lockStepVersionPolicyName - a specified lock step version policy name. Without this value,
    * versions for all lock step policies and all individual policies will be bumped.
@@ -68,7 +69,7 @@ export class VersionManager {
     bumpType?: BumpType,
     identifier?: string,
     shouldCommit?: boolean
-  ): Promise<void> {
+  ): Promise<Map<string, IPackageJson> | undefined> {
     // Bump all the lock step version policies.
     this._versionPolicyConfiguration.bump(lockStepVersionPolicyName, bumpType, identifier, shouldCommit);
 
@@ -88,9 +89,11 @@ export class VersionManager {
     );
 
     changeManager.load(this._rushConfiguration.changesFolder);
-    if (changeManager.hasChanges()) {
+    const updatedPackages: Map<string, IPackageJson> | undefined = changeManager.apply(!!shouldCommit);
+
+    if (updatedPackages) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
-      changeManager.apply(!!shouldCommit)!.forEach((packageJson) => {
+      updatedPackages.forEach((packageJson) => {
         this.updatedProjects.set(packageJson.name, packageJson);
       });
       changeManager.updateChangelog(!!shouldCommit);
@@ -101,6 +104,8 @@ export class VersionManager {
     this._rushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this._rushConfiguration.rushJsonFile
     );
+
+    return updatedPackages;
   }
 
   private _ensure(versionPolicyName?: string, shouldCommit?: boolean, force?: boolean): void {
