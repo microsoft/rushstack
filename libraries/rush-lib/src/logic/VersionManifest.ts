@@ -23,7 +23,7 @@ interface IVersionManifestProjectJson {
 export class VersionManifest {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _data: IVersionManifestJson;
+  private readonly _data: IVersionManifestJson;
 
   private constructor(data: IVersionManifestJson) {
     this._data = data;
@@ -36,7 +36,7 @@ export class VersionManifest {
   public static fromUpdatedProjects(updatedProjects: Map<string, IPackageJson>): VersionManifest {
     const data: IVersionManifestJson = { projects: [] };
 
-    for (const [name, packageJson] of updatedProjects.entries()) {
+    for (const [name, packageJson] of updatedProjects) {
       data.projects.push({
         name: name,
         relativeFolderPath: '.',
