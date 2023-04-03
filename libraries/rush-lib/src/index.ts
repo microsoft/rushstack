@@ -31,7 +31,7 @@ export {
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
-export { CobuildConfiguration } from './api/CobuildConfiguration';
+export { CobuildConfiguration, ICobuildJson } from './api/CobuildConfiguration';
 export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
 export {
   FileSystemBuildCacheProvider,

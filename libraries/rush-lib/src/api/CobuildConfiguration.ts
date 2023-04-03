@@ -11,11 +11,17 @@ import { RushConstants } from '../logic/RushConstants';
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
 
+/**
+ * @beta
+ */
 export interface ICobuildJson {
   cobuildEnabled: boolean;
   cobuildLockProvider: string;
 }
 
+/**
+ * @beta
+ */
 export interface ICobuildConfigurationOptions {
   cobuildJson: ICobuildJson;
   rushConfiguration: RushConfiguration;

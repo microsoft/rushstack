@@ -112,8 +112,6 @@ export class CobuildConfiguration {
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<CobuildConfiguration | undefined>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ICobuildJson" needs to be exported by the entry point index.d.ts
-//
 // @beta (undocumented)
 export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider;
 
@@ -286,6 +284,14 @@ export interface ICobuildContext {
     contextId: string;
     // (undocumented)
     version: number;
+}
+
+// @beta (undocumented)
+export interface ICobuildJson {
+    // (undocumented)
+    cobuildEnabled: boolean;
+    // (undocumented)
+    cobuildLockProvider: string;
 }
 
 // @beta (undocumented)
