@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-plugin-utilities",
-  "version": "0.1.57",
+  "version": "0.2.1",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "dist/webpack-plugin-utilities.d.ts",
@@ -13,6 +13,10 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft build --clean"
+  },
+  "dependencies": {
+    "webpack-merge": "~5.8.0",
+    "memfs": "3.4.3"
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",

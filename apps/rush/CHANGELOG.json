@@ -2,6 +2,48 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.96.0",
+      "tag": "@microsoft/rush_v5.96.0",
+      "date": "Fri, 31 Mar 2023 00:27:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush-sdk sometimes failed to load if the globally installed Rush version was older than rushVersion in rush.json (GitHub #4039)"
+          },
+          {
+            "comment": "Modify the scheduling behavior of phased commands to schedule only the expressly enumerated phases in all selected projects, adding additional phases only where needed to satisfy dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.95.0",
+      "tag": "@microsoft/rush_v5.95.0",
+      "date": "Fri, 24 Mar 2023 08:53:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add experiment `printEventHooksOutputToConsole` to allow printing outputs from event hooks to the console."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.94.1",
+      "tag": "@microsoft/rush_v5.94.1",
+      "date": "Wed, 22 Mar 2023 20:48:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush plugin autoinstallers would fail to install because the Rush global folder had not yet been initialized."
+          },
+          {
+            "comment": "Fix an issue with `rush update-autoinstaller` where it may fail with an `Cannot install with \"frozen-lockfile\" because pnpm-lock.yaml is not up to date with package.json` error."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.94.0",
       "tag": "@microsoft/rush_v5.94.0",
       "date": "Mon, 20 Mar 2023 20:14:36 GMT",
