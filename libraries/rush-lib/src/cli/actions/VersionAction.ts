@@ -139,7 +139,10 @@ export class VersionAction extends BaseRushAction {
         true
       );
       if (updatedPackages && this._manifestFileParameter.value) {
-        const manifest: VersionManifest = VersionManifest.fromUpdatedProjects(updatedPackages);
+        const manifest: VersionManifest = VersionManifest.fromUpdatedProjects(
+          this.rushConfiguration,
+          updatedPackages
+        );
         await manifest.save(this._manifestFileParameter.value);
       }
       this._gitProcess(tempBranch, this._targetBranch.value);
