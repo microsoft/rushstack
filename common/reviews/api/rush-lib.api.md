@@ -278,11 +278,8 @@ export interface ICobuildCompletedState {
 
 // @beta (undocumented)
 export interface ICobuildContext {
-    // (undocumented)
     cacheId: string;
-    // (undocumented)
     contextId: string;
-    // (undocumented)
     version: number;
 }
 

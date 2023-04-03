@@ -70,7 +70,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
       } else {
         missingEnvironmentVariables.add(finalOptions.passwordEnvironmentVariable);
       }
-      delete finalOptions.passwordEnvironmentVariable;
+      finalOptions.passwordEnvironmentVariable = undefined;
     }
 
     if (missingEnvironmentVariables.size) {

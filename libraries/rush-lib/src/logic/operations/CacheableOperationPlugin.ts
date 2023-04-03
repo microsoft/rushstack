@@ -274,10 +274,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (buildCacheContext.isCacheWriteAllowed && cobuildLock) {
             const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
             if (acquireSuccess) {
-              if (context.status === OperationStatus.RemoteExecuting) {
-                // This operation is used to marked remote executing, now change it to executing
-                context.status = OperationStatus.Executing;
-              }
+              // The operation may be used to marked remote executing, now change it to executing
+              context.status = OperationStatus.Executing;
               runner.periodicCallback.addCallback(async () => {
                 await cobuildLock?.renewLockAsync();
               });

@@ -49,7 +49,7 @@ const prioritySort: IOperationSortFunction = (
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  public readonly changedProjectsOnly: boolean;
+  private readonly _changedProjectsOnly: boolean;
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
@@ -89,7 +89,7 @@ export class OperationExecutionManager {
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
-    this.changedProjectsOnly = changedProjectsOnly;
+    this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
 
     this._beforeExecuteOperation = beforeExecuteOperation;
@@ -371,17 +371,15 @@ export class OperationExecutionManager {
       }
     }
 
-    // Apply status changes to direct dependents
-    for (const item of record.consumers) {
-      if (status !== OperationStatus.RemoteExecuting) {
-        // Remove this operation from the dependencies, to unblock the scheduler
-        item.dependencies.delete(record);
-      }
-    }
-
     if (record.status !== OperationStatus.RemoteExecuting) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
+
+      // Apply status changes to direct dependents
+      for (const item of record.consumers) {
+        // Remove this operation from the dependencies, to unblock the scheduler
+        item.dependencies.delete(record);
+      }
     }
   }
 }

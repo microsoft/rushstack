@@ -7,8 +7,22 @@ import type { OperationStatus } from '../operations/OperationStatus';
  * @beta
  */
 export interface ICobuildContext {
+  /**
+   * The contextId is provided by the monorepo maintainer, it reads from environment variable {@link EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID}.
+   * It ensure only the builds from the same given contextId cooperated. If user was more permissive,
+   * and wanted all PR and CI builds building anything with the same contextId to cooperate, then just
+   * set it to a static value.
+   */
   contextId: string;
+  /**
+   * The id of cache. It should be keep same as the normal cacheId from ProjectBuildCache.
+   * Otherwise, there is a discrepancy in the success case then turning on cobuilds will
+   * fail to populate the normal build cache.
+   */
   cacheId: string;
+  /**
+   * {@inheritdoc RushConstants.cobuildLockVersion}
+   */
   version: number;
 }
 
