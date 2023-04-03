@@ -36,7 +36,7 @@ export class VersionManifest {
   public static fromUpdatedProjects(updatedProjects: Map<string, IPackageJson>): VersionManifest {
     const data: IVersionManifestJson = { projects: [] };
 
-    for (const [name, packageJson] of updatedProjects.entries()) {
+    for (const [name, packageJson] of updatedProjects) {
       data.projects.push({
         name: name,
         relativeFolderPath: '.',
