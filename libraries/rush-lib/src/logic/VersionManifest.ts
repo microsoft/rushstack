@@ -23,7 +23,7 @@ interface IVersionManifestProjectJson {
 export class VersionManifest {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _data: IVersionManifestJson;
+  private readonly _data: IVersionManifestJson;
 
   private constructor(data: IVersionManifestJson) {
     this._data = data;
