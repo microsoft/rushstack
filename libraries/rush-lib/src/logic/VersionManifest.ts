@@ -30,7 +30,7 @@ export class VersionManifest {
   }
 
   public async save(filePath: string): Promise<void> {
-    await FileSystem.writeFileAsync(filePath, JSON.stringify(this._data, undefined, 2));
+    await JsonFile.saveAsync(this._data, filePath);
   }
 
   public static fromUpdatedProjects(updatedProjects: Map<string, IPackageJson>): VersionManifest {

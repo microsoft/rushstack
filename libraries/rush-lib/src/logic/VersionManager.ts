@@ -93,9 +93,9 @@ export class VersionManager {
 
     if (updatedPackages) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
-      updatedPackages.forEach((packageJson) => {
-        this.updatedProjects.set(packageJson.name, packageJson);
-      });
+      for (const [packageName, packageJson] of updatedPackages) {
+        this.updatedProjects.set(packageName, packageJson);
+      }
       changeManager.updateChangelog(!!shouldCommit);
     }
 
