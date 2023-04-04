@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-webpack5-plugin",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Heft plugin for Webpack 5",
   "repository": {
     "type": "git",
