@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-github-action-build-cache-plugin",
+      "description": "Github action rush build cache plugin",
+      "entryPoint": "lib/index.js"
+    }
+  ]
+}
