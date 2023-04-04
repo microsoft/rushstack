@@ -4,6 +4,9 @@
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
+import path from 'path';
+import { DocumenterConfig } from '../documenters/DocumenterConfig';
+import { FileSystem } from '@rushstack/node-core-library';
 
 export class MarkdownAction extends BaseAction {
   public constructor(parser: ApiDocumenterCommandLine) {
@@ -17,12 +20,25 @@ export class MarkdownAction extends BaseAction {
   }
 
   protected async onExecute(): Promise<void> {
-    // override
+    let configFilePath: string = path.join(process.cwd(), DocumenterConfig.FILENAME);
+
+    // First try the current folder
+    if (!FileSystem.exists(configFilePath)) {
+      // Otherwise try the standard "config" subfolder
+      configFilePath = path.join(process.cwd(), 'config', DocumenterConfig.FILENAME);
+      if (!FileSystem.exists(configFilePath)) {
+        throw new Error(
+          `Unable to find ${DocumenterConfig.FILENAME} in the current folder or in a "config" subfolder`
+        );
+      }
+    }
+
+    let documenterConfig: DocumenterConfig = DocumenterConfig.loadFile(configFilePath);
     const { apiModel, outputFolder } = this.buildApiModel();
 
     const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({
       apiModel,
-      documenterConfig: undefined,
+      documenterConfig,
       outputFolder
     });
     markdownDocumenter.generateFiles();
