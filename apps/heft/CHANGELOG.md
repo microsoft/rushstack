@@ -1,44 +1,48 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 15 Mar 2023 20:22:44 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
 
-## 0.50.0-rc.4
-Wed, 15 Mar 2023 20:22:44 GMT
+## 0.50.0
+Sat, 18 Mar 2023 00:20:56 GMT
 
-### Prerelease Changes
+### Minor changes
 
-- Fix an issue with `watchGlobAsync`
+- Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works.
 
-## 0.50.0-rc.3
-Fri, 20 Jan 2023 20:13:16 GMT
+## 0.49.7
+Fri, 10 Feb 2023 01:18:50 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix issues with SASS incremental builds.
-- Add support for TypeScript solution incremental builds.
-- Improve responsiveness of watcher loop.
+## 0.49.6
+Sun, 05 Feb 2023 03:02:02 GMT
 
-## 0.49.0-rc.2
-Fri, 2 Dec 2022 05:28:24 GMT
+_Version update only_
 
-### Prerelease Changes
+## 0.49.5
+Wed, 01 Feb 2023 02:16:34 GMT
 
-- Improve watch mode performance.
-- Improve logging output.
+_Version update only_
 
-## 0.49.0-rc.1
-Fri, 18 Nov 2022 02:34:26 GMT
+## 0.49.4
+Mon, 30 Jan 2023 16:22:30 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix incremental TypeScript compilation.
+## 0.49.3
+Thu, 26 Jan 2023 02:55:10 GMT
 
-## 0.49.0-rc.0
-Tue, 15 Nov 2022 22:59:35 GMT
+_Version update only_
 
-### Prerelease Changes
+## 0.49.2
+Wed, 25 Jan 2023 07:26:55 GMT
 
-- General fixes and improvements, in preparation for a general release.
+_Version update only_
+
+## 0.49.1
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.49.0
 Tue, 20 Dec 2022 01:18:22 GMT
@@ -455,7 +459,7 @@ Wed, 06 Oct 2021 15:08:25 GMT
 
 ### Patches
 
-- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters.
 
 ## 0.41.1
 Wed, 06 Oct 2021 02:41:48 GMT
@@ -1076,7 +1080,7 @@ Sat, 24 Oct 2020 00:11:18 GMT
 
 ### Patches
 
-- Add fileExtensions config to SassTypingsGenerator. 
+- Add fileExtensions config to SassTypingsGenerator.
 
 ## 0.17.1
 Wed, 21 Oct 2020 05:09:44 GMT

@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -184,6 +184,7 @@
           ],
           "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "MergedClassAndInterface",
           "preserveMemberOrder": false,
           "members": [
@@ -214,7 +215,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []
@@ -321,6 +323,7 @@
           ],
           "fileUrlPath": "src/mergedDeclarations/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "MergedClassAndNamespace",
           "preserveMemberOrder": false,
           "members": [
@@ -351,7 +354,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []
@@ -466,6 +470,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "AnotherClass",
               "preserveMemberOrder": false,
               "members": [],
@@ -482,6 +487,7 @@
                 }
               ],
               "releaseTag": "Public",
+              "isAbstract": false,
               "name": "SomeClass",
               "preserveMemberOrder": false,
               "members": [],

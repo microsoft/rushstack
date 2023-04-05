@@ -2,70 +2,130 @@
   "name": "@rushstack/heft",
   "entries": [
     {
-      "version": "0.50.0-rc.4",
-      "tag": "@rushstack/heft_v0.50.0-rc.4",
-      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
+      "version": "0.50.0",
+      "tag": "@rushstack/heft_v0.50.0",
+      "date": "Sat, 18 Mar 2023 00:20:56 GMT",
       "comments": {
         "minor": [
           {
-            "comment": "Fix an issue with `watchGlobAsync`"
+            "comment": "Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works."
           }
         ]
       }
     },
     {
-      "version": "0.50.0-rc.3",
-      "tag": "@rushstack/heft_v0.50.0-rc.3",
-      "date": "Fri, 20 Jan 2023 20:13:16 GMT",
+      "version": "0.49.7",
+      "tag": "@rushstack/heft_v0.49.7",
+      "date": "Fri, 10 Feb 2023 01:18:50 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "Fix issues with SASS incremental builds."
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.9`"
           },
           {
-            "comment": "Add support for TypeScript solution incremental builds."
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
           },
           {
-            "comment": "Improve responsiveness of watcher loop."
-          }
-        ]
-      }
-    },
-    {
-      "version": "0.49.0-rc.2",
-      "tag": "@rushstack/heft_v0.49.0-rc.2",
-      "date": "Fri, 2 Dec 2022 05:28:24 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Improve watch mode performance."
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.18`"
           },
           {
-            "comment": "Improve logging output."
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
           }
         ]
       }
     },
     {
-      "version": "0.49.0-rc.1",
-      "tag": "@rushstack/heft_v0.49.0-rc.1",
-      "date": "Fri, 18 Nov 2022 02:34:26 GMT",
+      "version": "0.49.6",
+      "tag": "@rushstack/heft_v0.49.6",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "Fix incremental TypeScript compilation."
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.3`"
           }
         ]
       }
     },
     {
-      "version": "0.49.0-rc.0",
-      "tag": "@rushstack/heft_v0.49.0-rc.0",
-      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "version": "0.49.5",
+      "tag": "@rushstack/heft_v0.49.5",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "General fixes and improvements, in preparation for a general release."
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.4",
+      "tag": "@rushstack/heft_v0.49.4",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.3",
+      "tag": "@rushstack/heft_v0.49.3",
+      "date": "Thu, 26 Jan 2023 02:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.2",
+      "tag": "@rushstack/heft_v0.49.2",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.1",
+      "tag": "@rushstack/heft_v0.49.1",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.33.8`"
           }
         ]
       }

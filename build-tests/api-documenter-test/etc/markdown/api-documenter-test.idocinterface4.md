@@ -7,7 +7,7 @@
 Type union in an interface.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IDocInterface4 

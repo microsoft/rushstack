@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkerPoolMinifier Includes terser package version in config hash: terser-5.9.1 1`] = `"0cjBnphY49XdxkmLxJLfNoRQbl3R6HdeT8WNl56oZWk="`;
+
+exports[`WorkerPoolMinifier Includes terser package version in config hash: terser-5.16.1 1`] = `"dYinCy9XUHWWDXSIwq7F/GvAYLxxv3WjZdHIpd2sZpc="`;
+
+exports[`WorkerPoolMinifier Includes terserOptions in config hash: ecma5 1`] = `"FcgklO/zYzwo0R2IM6OKH5uLA0hXVekjeqmFqKweKCg="`;
+
+exports[`WorkerPoolMinifier Includes terserOptions in config hash: ecma2015 1`] = `"Vku2B3kuB95N1Xo2q8J/nAJrmxwXV+fQmmUwp4xj+Xk="`;

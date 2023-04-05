@@ -1,6 +1,33 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 09 Dec 2022 16:18:27 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 3.55.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 3.55.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
+
+## 3.55.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
+
+## 3.54.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Add a `peerDependenciesMeta` property to `IPackageJson`.
+- Move the @types/node dependency to an optional peerDependency.
 
 ## 3.53.3
 Fri, 09 Dec 2022 16:18:27 GMT

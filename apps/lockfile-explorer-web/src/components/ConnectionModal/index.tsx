@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Text } from '@rushstack/rush-themed-ui';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { checkAliveAsync } from '../../parsing/getPackageFiles';
@@ -41,17 +42,24 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
   return (
     <div className={styles.DisconnectOverlayBackground}>
       <div className={`${styles.DisconnectOverlay} ${appStyles.ContainerCard}`}>
-        <h5>The server has disconnected!</h5>
+        <Text type="h5" bold>
+          The Lockfile Explorer server has disconnected!
+        </Text>
         {manualChecked ? (
-          <p>We were still not able to establish a connection to the server. Are you sure it is running?</p>
+          <Text type="p">
+            We were still not able to connect to the server. Are you sure the &quot;lockfile-explorer&quot;
+            shell command is running?
+          </Text>
         ) : (
-          <p>Please re-start the local development server to continue using this application.</p>
+          <Text type="p">
+            Please restart the &quot;lockfile-explorer&quot; shell command to continue using this application.
+          </Text>
         )}
         <div className={styles.DisconnectCheckRow}>
-          <button disabled={checking} onClick={checkAliveManual}>
+          <Button disabled={checking} onClick={checkAliveManual}>
             Check Again
-          </button>
-          {checking ? <p>Checking...</p> : null}
+          </Button>
+          {checking ? <Text type="p">Checking...</Text> : null}
         </div>
       </div>
     </div>

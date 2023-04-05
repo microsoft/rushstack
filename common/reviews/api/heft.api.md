@@ -305,6 +305,4 @@ export class _MetricsCollector {
 // @public
 export type WatchGlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<Map<string, IWatchedFileState>>;
 
-// (No @packageDocumentation comment for this package)
-
 ```

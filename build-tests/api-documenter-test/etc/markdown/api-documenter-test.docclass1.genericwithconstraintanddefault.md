@@ -6,7 +6,7 @@
 
 This is a method with a complex type parameter.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
@@ -18,7 +18,7 @@ genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
 |  --- | --- | --- |
 |  x | T | some generic parameter. |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

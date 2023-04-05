@@ -5,6 +5,12 @@
 ```ts
 
 // @public
+export abstract class AbstractClass {
+    abstract method(): void;
+    protected abstract property: number;
+}
+
+// @public
 export interface Constraint {
 }
 

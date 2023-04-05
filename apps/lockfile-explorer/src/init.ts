@@ -4,15 +4,18 @@
 // This function will read the current directory and try to figure out if it's a rush project or regular pnpm workspace
 // Currently it will throw error if neither can be determined
 
-import { FileSystem, JsonFile, PackageJsonLookup, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 
 import { type IAppState, IRushProjectDetails, ProjectType } from './state';
 
-export const init = (): IAppState => {
+export const init = (options: {
+  lockfileExplorerProjectRoot: string;
+  appVersion: string;
+  debugMode: boolean;
+}): IAppState => {
+  const { lockfileExplorerProjectRoot, appVersion, debugMode } = options;
   const currDir = process.cwd();
-  const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-  const appVersion: string = JsonFile.load(`${lockfileExplorerProjectRoot}/package.json`).version;
 
   let appState: IAppState | undefined;
   let currExploredDir = Path.convertToSlashes(currDir);
@@ -21,7 +24,7 @@ export const init = (): IAppState => {
     const rushJsonPath: string = `${currExploredDir}/rush.json`;
     const pnpmLockPath: string = `${currExploredDir}/pnpm-lock.yaml`;
     if (FileSystem.exists(rushJsonPath)) {
-      console.log('found rush project: ', rushJsonPath);
+      console.log('Found a Rush workspace: ', rushJsonPath);
       // Load the rush projects
       const rushJson: IRushConfigurationJson = JsonFile.load(rushJsonPath);
       const projectsByProjectFolder: Map<string, IRushProjectDetails> = new Map();
@@ -35,6 +38,7 @@ export const init = (): IAppState => {
       appState = {
         currDir,
         appVersion,
+        debugMode,
         lockfileExplorerProjectRoot,
         projectType: ProjectType.RUSH_PROJECT,
         pnpmLockfileLocation: `${currExploredDir}/common/config/rush/pnpm-lock.yaml`,
@@ -50,6 +54,7 @@ export const init = (): IAppState => {
       appState = {
         currDir,
         appVersion,
+        debugMode,
         lockfileExplorerProjectRoot,
         projectType: ProjectType.PNPM_WORKSPACE,
         pnpmLockfileLocation: `${currExploredDir}/pnpm-lock.yaml`,
@@ -64,7 +69,7 @@ export const init = (): IAppState => {
   }
 
   if (!appState) {
-    throw new Error('Could not find a rush or pnpm project!');
+    throw new Error('Could not find a Rush or PNPM workspace!');
   }
 
   return appState;

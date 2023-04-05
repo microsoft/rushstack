@@ -1,6 +1,6 @@
 # Upgrade notes for @rushstack/heft
 
-### Heft 0.49.0-rc.1
+### Heft 0.50.0-rc.4
 
 Multi-phase Heft is a complete re-write of the `@rushstack/heft` project with the intention of being more closely compatible with multi-phase Rush builds. In addition, this update brings greater customizability and improved parallel process handling to Heft.
 
@@ -37,7 +37,7 @@ Additionally, task- and phase-specific parameters may be provided to the `heft r
 In addition, Heft will generate actions for each phase specified in the "heft.json" configuration. These actions are executed by running `heft <phaseName>` and run Heft to the specified phase, including all phase dependencies. As such, these inferred Heft actions are equivalent to running `heft run --to <phaseName>`, and are intended as a CLI shorthand.
 
 #### Watch Mode
-Watch mode is now a first-class feature in Heft. Watch mode actions are created for all Heft actions. For example, to run "build" and "test" phases in watch mode, either of the commands `heft test-watch` or `heft run-watch --to test`. When running in watch mode, Heft will start a file watcher and watch for changes, restarting the watch loop when changes to source files are detected. The list of changed files will be provided to the plugin for incremental processing.
+Watch mode is now a first-class feature in Heft. Watch mode actions are created for all Heft actions. For example, to run "build" and "test" phases in watch mode, either of the commands `heft test-watch` or `heft run-watch --to test`. When running in watch mode, Heft prefers the `runIncremental` hook to the `run` hook (see [Heft Task Plugins](#heft-task-plugins)).
 
 #### Heft Plugins
 ##### Heft Lifecycle Plugins
@@ -48,8 +48,11 @@ Heft lifecycle plugins provide the implementation for certain lifecycle-related 
 
 ##### Heft Task Plugins
 Heft task plugins provide the implementation for Heft tasks. Heft plugins provide an `apply` method, and here plugins can hook into the following Tapable hooks:
+- `registerFileOperations` - Invoked exactly once before the first time a plugin runs. Allows a plugin to register copy or delete operations using the same options as the `copyFiles` and `deleteFiles` Heft events (this hook is how those events are implemented).
 - `run` - Used to provide plugin-related task functionality
-- `runIncremental` - Used to provide plugin-related task functionality when in watch mode. A list of modified files is provided for the plugin to process. If no `runIncremental` implementation is provided, Heft will fall back to using the `run` hook as usual.
+- `runIncremental` - Used to provide plugin-related task functionality when in watch mode. If no `runIncremental` implementation is provided for a task, Heft will fall back to using the `run` hook as usual. The options structure includes two functions used to support watch operations:
+  - `requestRun()` - This function asks the Heft runtime to schedule a new run of the plugin's owning task, potentially cancelling the current build.
+  - `watchGlobAsync(patterns, options)` - This function is provided for convenience for the common case of monitoring a glob for changes. It returns a `Map<string, IWatchedFileState>` that enumerates the list of files (or folders) selected by the glob and whether or not they have changed since the previous invocation. It will automatically invoke the `requestRun()` callback if it detects changes to files or directory listings that might impact the output of the glob.
 
 ##### Heft Cross-Plugin Interaction
 Heft plugins can use the `requestAccessToPluginByName` API to access the requested plugin accessors. Accessors are objects provided by plugins for external use and are the ideal place to share plugin-specific information or hooks used to provide additional plugin functionality.
@@ -154,21 +157,7 @@ The following is an example "heft.json" file defining both a "build" and a "test
   }
 }
 ```
-##### Watch Mode Options in "heft.json"
-Since watch mode and the associated file watcher are now directly managed by Heft, some watch mode options have been provided to modify behavior when encountering modified source files:
-```json
-{
-  "watchOptions": {
-    "ignoredSourceFileGlobs": [
-      "**/*.snap"
-    ],
-    "forbiddenSourceFileGlobs": [
-      "tsconfig.json"
-    ]
-  }
-}
-```
-These options allow developers to tell Heft to ignore when specific source file changes are made (for example, when checked-in snapshot files are updated by Jest) or to break the Heft build when specific source file changes are made (for example, modifying a configuration file that is only loaded on the first execution). Notably, these properties are global and apply to all watch mode actions.
+
 ##### Property Inheritance in "heft.json"
 Previously, common properties between a "heft.json" file its extended base file would merge arrays and overwrite objects. Now, both arrays and objects will merge, allowing for simplified use of the "heft.json" file when customizing extended base configurations.
 
@@ -198,12 +187,6 @@ One thing to note is that different mergeBehavior verbs are used for the merging
 ```json
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
-
-  "watchOptions": {
-    "ignoredSourceFileGlobs": [
-      "**/*.snap"
-    ]
-  },
 
   "phasesByName": {
     "build": {
@@ -337,7 +320,7 @@ In updating to the new version of Heft, plugins will also need to be updated for
 - Plugins can no longer define their own actions. If a plugin deserves its own action, a dedicated phase should be added to the consumers "heft.json"
 - The `runScript` Heft event has been modified to only accept a `runAsync` method, and the properties have been updated to reflect what is available to normal Heft task plugins
 - Path-related variables have been renamed to clarify they are paths (ex. `HeftConfiguration.buildFolder` is now `HeftConfiguration.buildFolderPath`)
-- The `runIncremental` hook can now be utilized to add native incremental watch mode support
+- The `runIncremental` hook can now be utilized to add ensure that watch mode rebuilds occur in proper dependency order
 - The `clean` hook was removed in favor of the `cleanFiles` option in "heft.json" in order to make it obvious what files are being cleaned and when
 - The `folderNameForTests` and `extensionForTests` properties are now specified in the `@rushstack/heft-jest-plugin` options in "heft.json" instead of in "typescript.json"
 

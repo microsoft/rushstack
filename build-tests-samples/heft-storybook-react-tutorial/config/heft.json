@@ -4,13 +4,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
-  "watchOptions": {
-    "ignoredSourceFileGlobs": [
-      // Snapshots from Jest are updated even when the source file hasn't changed
-      "**/*.snap"
-    ]
-  },
-
   // TODO: Add comments
   "phasesByName": {
     "build": {
@@ -39,7 +32,9 @@
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {
               "storykitPackageName": "heft-storybook-react-tutorial-storykit",
-              "startupModulePath": "@storybook/react/bin/index.js"
+              "startupModulePath": "@storybook/react/bin/index.js",
+              "staticBuildModulePath": "@storybook/react/bin/build.js",
+              "staticBuildOutputFolder": "static-build-dir"
             }
           }
         }

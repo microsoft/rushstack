@@ -2,70 +2,189 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
-      "version": "0.2.0-rc.4",
-      "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.4",
-      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
+      "version": "0.2.4",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.4",
+      "date": "Sat, 18 Mar 2023 00:20:56 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "Fix an issue with `watchGlobAsync`"
-          }
-        ]
-      }
-    },
-    {
-      "version": "0.2.0-rc.3",
-      "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.3",
-      "date": "Fri, 20 Jan 2023 20:13:16 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Fix issues with SASS incremental builds."
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.0`"
           },
           {
-            "comment": "Add support for TypeScript solution incremental builds."
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.5`"
           },
           {
-            "comment": "Improve responsiveness of watcher loop."
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.7` to `^0.50.0`"
           }
         ]
       }
     },
     {
-      "version": "0.2.0-rc.2",
-      "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.2",
-      "date": "Fri, 2 Dec 2022 05:28:24 GMT",
+      "version": "0.2.3",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.3",
+      "date": "Wed, 22 Feb 2023 16:26:55 GMT",
       "comments": {
-        "minor": [
+        "patch": [
           {
-            "comment": "Improve watch mode performance."
+            "comment": "Fix an issue where static build output ends up in the wrong folder."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.2",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
           },
           {
-            "comment": "Improve logging output."
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.6` to `^0.49.7`"
           }
         ]
       }
     },
     {
-      "version": "0.2.0-rc.1",
-      "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.1",
-      "date": "Fri, 18 Nov 2022 02:34:26 GMT",
+      "version": "0.2.1",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.1",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "Fix incremental TypeScript compilation."
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.5` to `^0.49.6`"
           }
         ]
       }
     },
     {
-      "version": "0.2.0-rc.0",
-      "tag": "@rushstack/heft-storybook-plugin_v0.2.0-rc.0",
-      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-storybook-plugin_v0.2.0",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
       "comments": {
         "minor": [
           {
-            "comment": "General fixes and improvements, in preparation for a general release."
+            "comment": "Add support for storybook static build"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.4` to `^0.49.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.99",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.99",
+      "date": "Mon, 30 Jan 2023 16:22:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.3` to `^0.49.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.98",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.98",
+      "date": "Mon, 30 Jan 2023 00:55:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.97",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.97",
+      "date": "Thu, 26 Jan 2023 02:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.2` to `^0.49.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.96",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.96",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.1` to `^0.49.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.95",
+      "tag": "@rushstack/heft-storybook-plugin_v0.1.95",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.0` to `^0.49.1`"
           }
         ]
       }

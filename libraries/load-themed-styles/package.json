@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "2.0.19",
+  "version": "2.0.31",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -20,6 +20,7 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-web-rig": "workspace:*",
-    "@types/webpack-env": "1.13.0"
+    "@types/heft-jest": "1.0.1",
+    "@types/webpack-env": "1.18.0"
   }
 }

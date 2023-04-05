@@ -6,7 +6,7 @@
 
 The overloaded constructor for `DocBaseClass`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(x: number);

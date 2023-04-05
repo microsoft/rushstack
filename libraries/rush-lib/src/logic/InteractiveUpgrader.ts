@@ -72,7 +72,10 @@ export class InteractiveUpgrader {
   ): Promise<NpmCheck.INpmCheckPackage[]> {
     const { projectFolder } = rushProject;
 
-    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({ cwd: projectFolder });
+    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({
+      cwd: projectFolder,
+      skipUnused: true
+    });
 
     return currentState.get('packages');
   }

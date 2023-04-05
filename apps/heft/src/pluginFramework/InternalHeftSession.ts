@@ -116,19 +116,6 @@ export class InternalHeftSession {
     return this._phasesByName!;
   }
 
-  public get watchOptions(): IHeftSessionWatchOptions {
-    if (!this._watchOptions) {
-      this._watchOptions = {
-        ignoredSourceFileGlobs: this._heftConfigurationJson.watchOptions?.ignoredSourceFileGlobs || [],
-        forbiddenSourceFileGlobs: [
-          ...FORBIDDEN_SOURCE_FILE_GLOBS,
-          ...(this._heftConfigurationJson.watchOptions?.forbiddenSourceFileGlobs || [])
-        ]
-      };
-    }
-    return this._watchOptions;
-  }
-
   public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
     let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByPhase.get(phase);
     if (!phaseSession) {

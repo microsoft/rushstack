@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalMinifier Includes terser package version in config hash: terser-5.9.1 1`] = `"4EVkVBAkdvF45JdRt44fWqn3HDW5t4dHo0zmzpQrWtc="`;
+
+exports[`LocalMinifier Includes terser package version in config hash: terser-5.16.1 1`] = `"3tk4bireIeb1adtnntg0kD4LU91VU+hweuk5GEkvX9A="`;
+
+exports[`LocalMinifier Includes terserOptions in config hash: ecma5 1`] = `"xpQ+VFd1iTb0qFjWnrRxNm25O1Z77Oy9Ppi+VG9SFEQ="`;
+
+exports[`LocalMinifier Includes terserOptions in config hash: ecma2015 1`] = `"IvCYjNIccj8xYkftaoV19M8WU5Vzy+06PL6gzGVUYxI="`;

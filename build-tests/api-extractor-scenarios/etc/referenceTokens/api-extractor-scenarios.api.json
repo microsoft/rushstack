@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -392,6 +392,7 @@
           ],
           "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass1",
           "preserveMemberOrder": false,
           "members": [
@@ -422,7 +423,8 @@
                 "endIndex": 2
               },
               "isStatic": true,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []
@@ -448,6 +450,7 @@
           ],
           "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass3",
           "preserveMemberOrder": false,
           "members": [],
@@ -478,6 +481,7 @@
           ],
           "fileUrlPath": "src/referenceTokens/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "SomeClass4",
           "preserveMemberOrder": false,
           "members": [],

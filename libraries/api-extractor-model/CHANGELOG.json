@@ -2,6 +2,69 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.26.4",
+      "tag": "@microsoft/api-extractor-model_v7.26.4",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.26.3",
+      "tag": "@microsoft/api-extractor-model_v7.26.3",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.26.2",
+      "tag": "@microsoft/api-extractor-model_v7.26.2",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.26.1",
+      "tag": "@microsoft/api-extractor-model_v7.26.1",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.26.0",
+      "tag": "@microsoft/api-extractor-model_v7.26.0",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.25.3",
       "tag": "@microsoft/api-extractor-model_v7.25.3",
       "date": "Fri, 09 Dec 2022 16:18:28 GMT",

@@ -2,6 +2,104 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.34.4",
+      "tag": "@microsoft/api-extractor_v7.34.4",
+      "date": "Fri, 10 Feb 2023 01:18:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.34.3",
+      "tag": "@microsoft/api-extractor_v7.34.3",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.34.2",
+      "tag": "@microsoft/api-extractor_v7.34.2",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.34.1",
+      "tag": "@microsoft/api-extractor_v7.34.1",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.34.0",
+      "tag": "@microsoft/api-extractor_v7.34.0",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.26.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.8",
+      "tag": "@microsoft/api-extractor_v7.33.8",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use ts.getCheckFlags to fix TS 5.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.7",
       "tag": "@microsoft/api-extractor_v7.33.7",
       "date": "Fri, 09 Dec 2022 16:18:28 GMT",

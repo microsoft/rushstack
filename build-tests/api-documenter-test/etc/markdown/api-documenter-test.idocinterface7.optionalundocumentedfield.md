@@ -4,7 +4,7 @@
 
 ## IDocInterface7.optionalUndocumentedField property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 optionalUndocumentedField?: boolean;

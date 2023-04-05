@@ -43,6 +43,4 @@ export class WorkerPool {
     reset(): void;
 }
 
-// (No @packageDocumentation comment for this package)
-
 ```

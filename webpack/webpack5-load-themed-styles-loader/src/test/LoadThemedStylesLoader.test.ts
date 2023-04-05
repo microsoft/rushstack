@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as loader from '..';
+import type { Stats } from 'webpack';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');
 import getCompiler from './testData/getCompiler';
 
@@ -19,7 +20,7 @@ describe('webpack5-load-themed-style-loader', () => {
   });
 
   it('it inserts the resolved load-themed-styles path', async () => {
-    const stats = await getCompiler('./MockStyle1.css');
+    const stats: Stats | undefined = await getCompiler('./MockStyle1.css');
     if (!stats) {
       throw new Error(`Expected stats`);
     }

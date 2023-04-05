@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-serve-plugin",
-  "version": "0.3.8",
+  "version": "0.4.5",
   "description": "A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository.",
   "license": "MIT",
   "repository": {
@@ -29,6 +29,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/express": "4.17.13",
-    "@types/node": "12.20.24"
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "14.18.36"
   }
 }
