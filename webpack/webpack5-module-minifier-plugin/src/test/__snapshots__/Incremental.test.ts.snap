@@ -35,7 +35,7 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "// Begin Asset Hash=ba01c299c5bb3f37b96b943e3a4992b22dfc4d7dc60e5dca924861e9f87e1e1a
+  "/release/main.js": "// Begin Asset Hash=ff9c1e084c22b048bb2c8c4e91277859c501f3d66200893c5f77899e830145f6
 define([\\"bar\\",\\"baz\\"], (__WEBPACK_EXTERNAL_MODULE__565__, __WEBPACK_EXTERNAL_MODULE__506__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -185,7 +185,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			};
+/******/ 			}
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -211,7 +211,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
 /******/ 			if (document.currentScript)
-/******/ 				scriptUrl = document.currentScript.src
+/******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
@@ -362,7 +362,7 @@ function foo() { (0,bar__WEBPACK_IMPORTED_MODULE_0__.something)(); }
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @lic OtherLicense
 ",
-  "/release/main.js": "// Begin Asset Hash=8cb2cd5ea24475cb83869e60a7e7e6c19f900a89b19a075000f7a98850f0f6aa
+  "/release/main.js": "// Begin Asset Hash=fb2b1d8083a33d0a2b25f8aa0cd7a8c5b8b28db3dfa41e6eda716c1b21084754
 define([\\"bar\\"], (__WEBPACK_EXTERNAL_MODULE__565__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -504,7 +504,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__565__;
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			};
+/******/ 			}
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -530,7 +530,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__565__;
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
 /******/ 			if (document.currentScript)
-/******/ 				scriptUrl = document.currentScript.src
+/******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
