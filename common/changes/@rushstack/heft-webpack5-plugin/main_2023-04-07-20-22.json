@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Bump webpack to 5.78.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin"
+}
