@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.2.22",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.2.22",
+      "date": "Fri, 07 Apr 2023 22:19:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to 5.78.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.21",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.2.21",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",

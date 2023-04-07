@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.14.9",
+      "tag": "@rushstack/heft-web-rig_v0.14.9",
+      "date": "Fri, 07 Apr 2023 22:19:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to 5.78.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.6.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.8",
       "tag": "@rushstack/heft-web-rig_v0.14.8",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",

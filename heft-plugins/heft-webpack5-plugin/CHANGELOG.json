@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.6.3",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.3",
+      "date": "Fri, 07 Apr 2023 22:19:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to 5.78.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.2",
       "tag": "@rushstack/heft-webpack5-plugin_v0.6.2",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",

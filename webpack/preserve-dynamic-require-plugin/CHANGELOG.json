@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
   "entries": [
     {
+      "version": "0.10.6",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.10.6",
+      "date": "Fri, 07 Apr 2023 22:19:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to 5.78.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.5",
       "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.10.5",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",

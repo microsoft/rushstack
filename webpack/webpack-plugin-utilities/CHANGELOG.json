@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.2.3",
+      "date": "Fri, 07 Apr 2023 22:19:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to 5.78.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/webpack-plugin-utilities_v0.2.2",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",
