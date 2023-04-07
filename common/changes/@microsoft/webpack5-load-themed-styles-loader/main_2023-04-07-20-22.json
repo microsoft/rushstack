@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "comment": "Bump webpack to 5.78.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/webpack5-load-themed-styles-loader"
+}

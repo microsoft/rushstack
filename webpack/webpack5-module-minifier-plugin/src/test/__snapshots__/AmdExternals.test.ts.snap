@@ -35,7 +35,7 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "// Begin Asset Hash=e27e1ab4650176726943ebe6738ed1d860bdb2fabfb54b39ada68898ca903312
+  "/release/main.js": "// Begin Asset Hash=b7fc2462de348315cb2fd1daa625acef56088c98afb80ddf2b701b74faed5b03
 define([\\"bar\\",\\"baz\\"], (__WEBPACK_EXTERNAL_MODULE__791__, __WEBPACK_EXTERNAL_MODULE__506__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -185,7 +185,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			};
+/******/ 			}
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -211,7 +211,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
 /******/ 			if (document.currentScript)
-/******/ 				scriptUrl = document.currentScript.src
+/******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
