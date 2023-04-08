@@ -23,7 +23,7 @@
             "type": "string"
           },
           "relativeFolderPath": {
-            "description": "The relative path to the folder containing this project.",
+            "description": "The path to the folder containing this project, relative to the root of the monorepo.",
             "type": "string"
           },
           "version": {
