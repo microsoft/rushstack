@@ -163,6 +163,13 @@ export enum EnvironmentVariableNames {
   RUSH_COBUILD_CONTEXT_ID = 'RUSH_COBUILD_CONTEXT_ID',
 
   /**
+   * If this variable is set to "1", When getting distributed builds, Rush will automatically handle the leaf project
+   * with build cache "disabled" by writing to the cache in a special "log files only mode". This is useful when you
+   * want to use Cobuilds to improve the performance in CI validations and the leaf projects have not enabled cache.
+   */
+  RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED = 'RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED',
+
+  /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
   RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
@@ -224,6 +231,8 @@ export class EnvironmentConfiguration {
   private static _cobuildEnabled: boolean | undefined;
 
   private static _cobuildContextId: string | undefined;
+
+  private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -338,6 +347,15 @@ export class EnvironmentConfiguration {
   public static get cobuildContextId(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._cobuildContextId;
+  }
+
+  /**
+   * If set, enables or disables the cobuild leaf project log only feature.
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED}
+   */
+  public static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed;
   }
 
   /**
@@ -481,6 +499,15 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
             EnvironmentConfiguration._cobuildContextId = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: {
+            EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED,
+                value
+              );
             break;
           }
 

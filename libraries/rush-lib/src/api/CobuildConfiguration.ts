@@ -53,6 +53,13 @@ export class CobuildConfiguration {
    * The cobuild feature won't be enabled until the context id is provided as an non-empty string.
    */
   public readonly cobuildContextId: string | undefined;
+  /**
+   * If true, Rush will automatically handle the leaf project with build cache "disabled" by writing
+   * to the cache in a special "log files only mode". This is useful when you want to use Cobuilds
+   * to improve the performance in CI validations and the leaf projects have not enabled cache.
+   */
+  public readonly cobuildLeafProjectLogOnlyAllowed: boolean;
+
   public readonly cobuildLockProvider: ICobuildLockProvider;
 
   private constructor(options: ICobuildConfigurationOptions) {
@@ -60,6 +67,8 @@ export class CobuildConfiguration {
 
     this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
+    this.cobuildLeafProjectLogOnlyAllowed =
+      EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
     if (!this.cobuildContextId) {
       this.cobuildEnabled = false;
     }

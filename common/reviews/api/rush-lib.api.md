@@ -99,6 +99,7 @@ export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) =
 export class CobuildConfiguration {
     readonly cobuildContextId: string | undefined;
     readonly cobuildEnabled: boolean;
+    readonly cobuildLeafProjectLogOnlyAllowed: boolean;
     // (undocumented)
     readonly cobuildLockProvider: ICobuildLockProvider;
     // (undocumented)
@@ -171,6 +172,7 @@ export class EnvironmentConfiguration {
     static get buildCacheWriteAllowed(): boolean | undefined;
     static get cobuildContextId(): string | undefined;
     static get cobuildEnabled(): boolean | undefined;
+    static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -197,6 +199,7 @@ export enum EnvironmentVariableNames {
     RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
     RUSH_COBUILD_CONTEXT_ID = "RUSH_COBUILD_CONTEXT_ID",
     RUSH_COBUILD_ENABLED = "RUSH_COBUILD_ENABLED",
+    RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED = "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",

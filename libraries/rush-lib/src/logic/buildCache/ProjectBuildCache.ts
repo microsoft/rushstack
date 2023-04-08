@@ -7,7 +7,6 @@ import { FileSystem, Path, ITerminal, FolderItem, InternalError, Async } from '@
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
@@ -17,7 +16,7 @@ import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 
 export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
-  projectConfiguration: RushProjectConfiguration;
+  project: RushConfigurationProject;
   projectOutputFolderNames: ReadonlyArray<string>;
   additionalProjectOutputFilePaths?: ReadonlyArray<string>;
   additionalContext?: Record<string, string>;
@@ -50,13 +49,9 @@ export class ProjectBuildCache {
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
-    const {
-      buildCacheConfiguration,
-      projectConfiguration,
-      projectOutputFolderNames,
-      additionalProjectOutputFilePaths
-    } = options;
-    this._project = projectConfiguration.project;
+    const { buildCacheConfiguration, project, projectOutputFolderNames, additionalProjectOutputFilePaths } =
+      options;
+    this._project = project;
     this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
@@ -81,18 +76,13 @@ export class ProjectBuildCache {
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const { terminal, projectConfiguration, projectOutputFolderNames, trackedProjectFiles } = options;
+    const { terminal, project, projectOutputFolderNames, trackedProjectFiles } = options;
     if (!trackedProjectFiles) {
       return undefined;
     }
 
     if (
-      !ProjectBuildCache._validateProject(
-        terminal,
-        projectConfiguration,
-        projectOutputFolderNames,
-        trackedProjectFiles
-      )
+      !ProjectBuildCache._validateProject(terminal, project, projectOutputFolderNames, trackedProjectFiles)
     ) {
       return undefined;
     }
@@ -103,13 +93,11 @@ export class ProjectBuildCache {
 
   private static _validateProject(
     terminal: ITerminal,
-    projectConfiguration: RushProjectConfiguration,
+    project: RushConfigurationProject,
     projectOutputFolderNames: ReadonlyArray<string>,
     trackedProjectFiles: string[]
   ): boolean {
-    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
-      projectConfiguration.project.projectRelativeFolder
-    );
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(project.projectRelativeFolder);
     const outputFolders: string[] = [];
     if (projectOutputFolderNames) {
       for (const outputFolderName of projectOutputFolderNames) {
@@ -434,7 +422,7 @@ export class ProjectBuildCache {
     const projectStates: string[] = [];
     const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
     let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-    projectsToProcess.add(options.projectConfiguration.project);
+    projectsToProcess.add(options.project);
 
     while (projectsToProcess.size > 0) {
       const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
@@ -491,7 +479,7 @@ export class ProjectBuildCache {
     const projectStateHash: string = hash.digest('hex');
 
     return options.buildCacheConfiguration.getCacheEntryId({
-      projectName: options.projectConfiguration.project.packageName,
+      projectName: options.project.packageName,
       projectStateHash,
       phaseName: options.phaseName
     });

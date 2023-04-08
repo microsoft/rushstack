@@ -24,6 +24,14 @@
     {
       "packageName": "e",
       "projectFolder": "projects/e"
+    },
+    {
+      "packageName": "f",
+      "projectFolder": "projects/f"
+    },
+    {
+      "packageName": "g",
+      "projectFolder": "projects/g"
     }
   ]
 }

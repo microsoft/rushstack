@@ -32,3 +32,15 @@ importers:
     dependencies:
       b: link:../b
       d: link:../d
+
+  ../../projects/f:
+    specifiers:
+      b: workspace:*
+    dependencies:
+      b: link:../b
+
+  ../../projects/g:
+    specifiers:
+      b: workspace:*
+    dependencies:
+      b: link:../b

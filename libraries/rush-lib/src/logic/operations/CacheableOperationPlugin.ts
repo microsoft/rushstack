@@ -170,7 +170,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             });
           }
 
-          const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
+          let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheConfiguration,
             runner,
             rushProject,
@@ -183,12 +183,40 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             trackedProjectFiles,
             operationMetadataManager: context._operationMetadataManager
           });
-          // eslint-disable-next-line require-atomic-updates -- we are mutating the build cache context intentionally
-          buildCacheContext.projectBuildCache = projectBuildCache;
 
           // Try to acquire the cobuild lock
           let cobuildLock: CobuildLock | undefined;
           if (cobuildConfiguration?.cobuildEnabled) {
+            if (
+              cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
+              rushProject.consumingProjects.size === 0 &&
+              !projectBuildCache
+            ) {
+              // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
+              // a log files only project build cache
+              projectBuildCache = await this._tryGetLogOnlyProjectBuildCacheAsync({
+                buildCacheConfiguration,
+                runner,
+                rushProject,
+                phase,
+                projectChangeAnalyzer,
+                commandName,
+                commandToRun,
+                terminal,
+                trackedProjectFiles,
+                operationMetadataManager: context._operationMetadataManager
+              });
+              if (projectBuildCache) {
+                terminal.writeVerboseLine(
+                  `Log files only build cache is enabled for the project "${rushProject.packageName}" because the cobuild leaf project log only is allowed`
+                );
+              } else {
+                terminal.writeWarningLine(
+                  `Failed to get log files only build cache for the project "${rushProject.packageName}"`
+                );
+              }
+            }
+
             cobuildLock = await this._tryGetCobuildLockAsync({
               runner,
               projectBuildCache,
@@ -451,7 +479,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 }
               }
               buildCacheContext.projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
-                projectConfiguration,
+                project: rushProject,
                 projectOutputFolderNames,
                 additionalProjectOutputFilePaths,
                 additionalContext,
@@ -474,6 +502,92 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     }
 
     return buildCacheContext.projectBuildCache;
+  }
+
+  private async _tryGetLogOnlyProjectBuildCacheAsync({
+    runner,
+    rushProject,
+    terminal,
+    commandName,
+    commandToRun,
+    buildCacheConfiguration,
+    phase,
+    trackedProjectFiles,
+    projectChangeAnalyzer,
+    operationMetadataManager
+  }: {
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    runner: IOperationRunner;
+    rushProject: RushConfigurationProject;
+    phase: IPhase;
+    commandToRun: string;
+    commandName: string;
+    terminal: ITerminal;
+    trackedProjectFiles: string[] | undefined;
+    projectChangeAnalyzer: ProjectChangeAnalyzer;
+    operationMetadataManager: OperationMetadataManager | undefined;
+  }): Promise<ProjectBuildCache | undefined> {
+    const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
+    if (buildCacheConfiguration && buildCacheConfiguration.buildCacheEnabled) {
+      // Disable legacy skip logic if the build cache is in play
+      buildCacheContext.isSkipAllowed = false;
+      const projectConfiguration: RushProjectConfiguration | undefined =
+        await RushProjectConfiguration.tryLoadForProjectAsync(rushProject, terminal);
+
+      let projectOutputFolderNames: ReadonlyArray<string> = [];
+      const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
+        ...(operationMetadataManager?.relativeFilepaths || [])
+      ];
+      const additionalContext: Record<string, string> = {
+        // Force the cache to be a log files only cache
+        logFilesOnly: '1'
+      };
+      if (projectConfiguration) {
+        const operationSettings: IOperationSettings | undefined =
+          projectConfiguration.operationSettingsByOperationName.get(commandName);
+        if (operationSettings) {
+          if (operationSettings.outputFolderNames) {
+            projectOutputFolderNames = operationSettings.outputFolderNames;
+          }
+          if (operationSettings.dependsOnEnvVars) {
+            for (const varName of operationSettings.dependsOnEnvVars) {
+              additionalContext['$' + varName] = process.env[varName] || '';
+            }
+          }
+
+          if (operationSettings.dependsOnAdditionalFiles) {
+            const repoState: IRawRepoState | undefined = await projectChangeAnalyzer._ensureInitializedAsync(
+              terminal
+            );
+
+            const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
+              operationSettings.dependsOnAdditionalFiles,
+              rushProject.projectFolder,
+              repoState
+            );
+
+            for (const [filePath, fileHash] of additionalFiles) {
+              additionalContext['file://' + filePath] = fileHash;
+            }
+          }
+        }
+      }
+      const projectBuildCache: ProjectBuildCache | undefined =
+        await ProjectBuildCache.tryGetProjectBuildCache({
+          project: rushProject,
+          projectOutputFolderNames,
+          additionalProjectOutputFilePaths,
+          additionalContext,
+          buildCacheConfiguration,
+          terminal,
+          command: commandToRun,
+          trackedProjectFiles,
+          projectChangeAnalyzer: projectChangeAnalyzer,
+          phaseName: phase.name
+        });
+      buildCacheContext.projectBuildCache = projectBuildCache;
+      return projectBuildCache;
+    }
   }
 
   private async _tryGetCobuildLockAsync({
