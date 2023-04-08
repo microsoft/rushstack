@@ -143,7 +143,7 @@ export class VersionAction extends BaseRushAction {
           this.rushConfiguration,
           updatedPackages
         );
-        await manifest.save(this._manifestFileParameter.value);
+        await manifest.saveAsync(this._manifestFileParameter.value);
       }
       this._gitProcess(tempBranch, this._targetBranch.value);
     }

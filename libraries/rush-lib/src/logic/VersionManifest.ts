@@ -32,7 +32,7 @@ export class VersionManifest {
     this._data = data;
   }
 
-  public async save(filePath: string): Promise<void> {
+  public async saveAsync(filePath: string): Promise<void> {
     await JsonFile.saveAsync(this._data, filePath);
   }
 
@@ -66,8 +66,11 @@ export class VersionManifest {
     return new VersionManifest(data);
   }
 
-  public static async load(filePath: string): Promise<VersionManifest> {
-    const data: IVersionManifestJson = JsonFile.loadAndValidate(filePath, VersionManifest._jsonSchema);
+  public static async loadAsync(filePath: string): Promise<VersionManifest> {
+    const data: IVersionManifestJson = await JsonFile.loadAndValidateAsync(
+      filePath,
+      VersionManifest._jsonSchema
+    );
     return new VersionManifest(data);
   }
 }
