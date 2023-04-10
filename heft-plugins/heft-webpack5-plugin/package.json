@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.50.0",
-    "webpack": "~5.75.0"
+    "webpack": "~5.78.0"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
