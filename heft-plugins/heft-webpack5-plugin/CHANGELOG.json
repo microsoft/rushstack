@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.6.4",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.4",
+      "date": "Tue, 11 Apr 2023 00:23:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug where peerDep of webpack was not properly updated with regular dependency version. "
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.3",
       "tag": "@rushstack/heft-webpack5-plugin_v0.6.3",
       "date": "Fri, 07 Apr 2023 22:19:21 GMT",
