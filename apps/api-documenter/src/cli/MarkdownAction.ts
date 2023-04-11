@@ -33,7 +33,7 @@ export class MarkdownAction extends BaseAction {
       }
     }
 
-    let documenterConfig: DocumenterConfig = DocumenterConfig.loadFile(configFilePath);
+    const documenterConfig: DocumenterConfig = DocumenterConfig.loadFile(configFilePath);
     const { apiModel, outputFolder } = this.buildApiModel();
 
     const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({
