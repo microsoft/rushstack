@@ -153,7 +153,7 @@ export const EnvironmentVariableNames = {
    *
    * If there is no cobuild configured, then this environment variable is ignored.
    */
-  RUSH_COBUILD_ENABLED = 'RUSH_COBUILD_ENABLED',
+  RUSH_COBUILD_ENABLED: 'RUSH_COBUILD_ENABLED',
 
   /**
    * Setting this environment variable opt into running with cobuilds.
@@ -161,14 +161,14 @@ export const EnvironmentVariableNames = {
    * @remarks
    * If there is no cobuild configured, then this environment variable is ignored.
    */
-  RUSH_COBUILD_CONTEXT_ID = 'RUSH_COBUILD_CONTEXT_ID',
+  RUSH_COBUILD_CONTEXT_ID: 'RUSH_COBUILD_CONTEXT_ID',
 
   /**
    * If this variable is set to "1", When getting distributed builds, Rush will automatically handle the leaf project
    * with build cache "disabled" by writing to the cache in a special "log files only mode". This is useful when you
    * want to use Cobuilds to improve the performance in CI validations and the leaf projects have not enabled cache.
    */
-  RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED = 'RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED',
+  RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: 'RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED',
 
   /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
