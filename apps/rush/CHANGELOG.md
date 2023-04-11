@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 31 Mar 2023 00:27:51 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Apr 2023 21:46:37 GMT and should not be manually modified.
+
+## 5.97.0
+Wed, 05 Apr 2023 21:46:37 GMT
+
+### Updates
+
+- Convert the `EnvironmentVariableNames` from an enum to a const so that its values can be referred to by type.
 
 ## 5.96.0
 Fri, 31 Mar 2023 00:27:51 GMT

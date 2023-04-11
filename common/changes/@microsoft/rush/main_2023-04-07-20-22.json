@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "",
+      "comment": "Bump webpack to 5.78.0",
       "type": "none"
     }
   ],
