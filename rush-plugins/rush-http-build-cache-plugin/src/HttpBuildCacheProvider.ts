@@ -307,13 +307,14 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     }
 
     switch (response.status) {
-      // We select 503 specifically because this represents "service unavailable" and
-      // "rate limit throttle" errors, which are transient issues.
-      //
-      // There are other 5xx errors, such as 501, that can occur if the request is
-      // malformed, so as a general rule we want to let through other 5xx errors
-      // so the user can troubleshoot.
       case 503: {
+        // We select 503 specifically because this represents "service unavailable" and
+        // "rate limit throttle" errors, which are transient issues.
+        //
+        // There are other 5xx errors, such as 501, that can occur if the request is
+        // malformed, so as a general rule we want to let through other 5xx errors
+        // so the user can troubleshoot.
+
         // Don't fail production builds with warnings for transient issues
         return FailureType.Informational;
       }
