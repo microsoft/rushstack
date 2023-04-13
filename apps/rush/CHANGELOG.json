@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.97.0",
+      "tag": "@microsoft/rush_v5.97.0",
+      "date": "Wed, 05 Apr 2023 21:46:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert the `EnvironmentVariableNames` from an enum to a const so that its values can be referred to by type."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.96.0",
       "tag": "@microsoft/rush_v5.96.0",
       "date": "Fri, 31 Mar 2023 00:27:51 GMT",

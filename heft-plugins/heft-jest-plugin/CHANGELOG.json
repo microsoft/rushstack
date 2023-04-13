@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.5.6",
+      "tag": "@rushstack/heft-jest-plugin_v0.5.6",
+      "date": "Tue, 04 Apr 2023 22:36:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade Jest to 29.5.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.5",
       "tag": "@rushstack/heft-jest-plugin_v0.5.5",
       "date": "Sat, 18 Mar 2023 00:20:56 GMT",
