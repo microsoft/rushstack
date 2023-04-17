@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.21",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.21",
+      "date": "Mon, 17 Apr 2023 15:21:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include \"rushstack.localhost\" and \"127.0.0.1\" in the default certificate subjects."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.20",
       "tag": "@rushstack/debug-certificate-manager_v1.2.20",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/rush-serve-plugin",
   "entries": [
     {
+      "version": "0.4.7",
+      "tag": "@rushstack/rush-serve-plugin_v0.4.7",
+      "date": "Mon, 17 Apr 2023 15:21:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.21`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.6",
       "tag": "@rushstack/rush-serve-plugin_v0.4.6",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",
