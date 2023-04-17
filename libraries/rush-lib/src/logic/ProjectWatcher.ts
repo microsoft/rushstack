@@ -31,6 +31,10 @@ export interface IProjectChangeResult {
   state: ProjectChangeAnalyzer;
 }
 
+interface IPathWatchOptions {
+  recurse: boolean;
+}
+
 /**
  * This class is for incrementally watching a set of projects in the repository for changes.
  *
@@ -82,7 +86,8 @@ export class ProjectWatcher {
     const previousState: ProjectChangeAnalyzer = initialChangeResult.state;
     const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
 
-    const pathsToWatch: Map<string, boolean> = new Map();
+    // Map of path to whether config for the path
+    const pathsToWatch: Map<string, IPathWatchOptions> = new Map();
 
     // Node 12 supports the "recursive" parameter to fs.watch only on win32 and OSX
     // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
@@ -90,14 +95,16 @@ export class ProjectWatcher {
 
     if (useNativeRecursiveWatch) {
       // Watch the root non-recursively
-      pathsToWatch.set(repoRoot, false);
+      pathsToWatch.set(repoRoot, { recurse: false });
 
       // Watch the rush config folder non-recursively
-      pathsToWatch.set(Path.convertToSlashes(this._rushConfiguration.commonRushConfigFolder), false);
+      pathsToWatch.set(Path.convertToSlashes(this._rushConfiguration.commonRushConfigFolder), {
+        recurse: false
+      });
 
       for (const project of this._projectsToWatch) {
         // Use recursive watch in individual project folders
-        pathsToWatch.set(Path.convertToSlashes(project.projectFolder), true);
+        pathsToWatch.set(Path.convertToSlashes(project.projectFolder), { recurse: true });
       }
     } else {
       for (const project of this._projectsToWatch) {
@@ -109,7 +116,7 @@ export class ProjectWatcher {
         const prefixLength: number = project.projectFolder.length - repoRoot.length - 1;
         // Watch files in the root of the project, or
         for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(projectState.keys(), prefixLength)) {
-          pathsToWatch.set(`${this._repoRoot}/${pathToWatch}`, true);
+          pathsToWatch.set(`${this._repoRoot}/${pathToWatch}`, { recurse: true });
         }
       }
     }
@@ -158,8 +165,8 @@ export class ProjectWatcher {
           }
         };
 
-        for (const [pathToWatch, recursive] of pathsToWatch) {
-          addWatcher(pathToWatch, recursive);
+        for (const [pathToWatch, { recurse }] of pathsToWatch) {
+          addWatcher(pathToWatch, recurse);
         }
 
         if (onWatchingFiles) {
