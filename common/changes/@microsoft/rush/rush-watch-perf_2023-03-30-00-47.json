@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix file watching on Windows in the presence of Git's fsmonitor by not watching the .git folder.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

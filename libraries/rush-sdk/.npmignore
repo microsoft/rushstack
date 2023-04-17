@@ -27,4 +27,6 @@
 # DO NOT MODIFY THE TEMPLATE ABOVE THIS LINE
 #--------------------------------------------
 
+/lib-shim/generate-stubs*
+
 # (Add your project-specific overrides here)
