@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.97.1",
+      "tag": "@microsoft/rush_v5.97.1",
+      "date": "Tue, 18 Apr 2023 16:39:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "`rush version` will now respect the `ensureConsistentVersions` field in `rush.json`"
+          },
+          {
+            "comment": "Bump webpack to 5.78.0"
+          },
+          {
+            "comment": "Fix file watching on Windows in the presence of Git's fsmonitor by not watching the .git folder."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.97.0",
       "tag": "@microsoft/rush_v5.97.0",
       "date": "Wed, 05 Apr 2023 21:46:37 GMT",
