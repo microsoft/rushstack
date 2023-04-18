@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 24 Mar 2023 08:53:43 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Apr 2023 21:46:37 GMT and should not be manually modified.
+
+## 5.97.0
+Wed, 05 Apr 2023 21:46:37 GMT
+
+### Updates
+
+- Convert the `EnvironmentVariableNames` from an enum to a const so that its values can be referred to by type.
+
+## 5.96.0
+Fri, 31 Mar 2023 00:27:51 GMT
+
+### Updates
+
+- Fix an issue where rush-sdk sometimes failed to load if the globally installed Rush version was older than rushVersion in rush.json (GitHub #4039)
+- Modify the scheduling behavior of phased commands to schedule only the expressly enumerated phases in all selected projects, adding additional phases only where needed to satisfy dependencies.
 
 ## 5.95.0
 Fri, 24 Mar 2023 08:53:43 GMT

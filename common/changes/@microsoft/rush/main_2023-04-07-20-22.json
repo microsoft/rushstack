@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Bump webpack to 5.78.0",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

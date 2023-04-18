@@ -96,7 +96,7 @@ function a2() { console.log('async-2'); }
   "/release/async-2.js.LICENSE.txt": "// @license BAZ
 // @license MIT
 ",
-  "/release/entry1.js": "// Begin Asset Hash=9b2f2c0d54fbb3ce1ede4408a8968452e80e92d384220ca8c3c87c535c02237b
+  "/release/entry1.js": "// Begin Asset Hash=74e630e0e51a143c6bf040e9830b7232240eb7f77b9f975b5b0b0ceb5effaffa
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
@@ -216,7 +216,7 @@ function a2() { console.log('async-2'); }
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			};
+/******/ 			}
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -242,7 +242,7 @@ function a2() { console.log('async-2'); }
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
 /******/ 			if (document.currentScript)
-/******/ 				scriptUrl = document.currentScript.src
+/******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
@@ -354,7 +354,7 @@ __webpack_require__.e(/* import() | async-1 */ 842).then(__webpack_require__.bin
 /******/ })()
 ;
 // End Asset",
-  "/release/entry2.js": "// Begin Asset Hash=b6b2dec55f1385016da9824761fd9d3624d5835eb8e6178c678910e1e84f25b0
+  "/release/entry2.js": "// Begin Asset Hash=e3c1d19e03a2663e0d40d6720cb99f21c3fe6c6140d967f232f3b97b44e5c53b
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
@@ -474,7 +474,7 @@ __webpack_require__.e(/* import() | async-1 */ 842).then(__webpack_require__.bin
 /******/ 				script.parentNode && script.parentNode.removeChild(script);
 /******/ 				doneFns && doneFns.forEach((fn) => (fn(event)));
 /******/ 				if(prev) return prev(event);
-/******/ 			};
+/******/ 			}
 /******/ 			var timeout = setTimeout(onScriptComplete.bind(null, undefined, { type: 'timeout', target: script }), 120000);
 /******/ 			script.onerror = onScriptComplete.bind(null, script.onerror);
 /******/ 			script.onload = onScriptComplete.bind(null, script.onload);
@@ -500,7 +500,7 @@ __webpack_require__.e(/* import() | async-1 */ 842).then(__webpack_require__.bin
 /******/ 		var document = __webpack_require__.g.document;
 /******/ 		if (!scriptUrl && document) {
 /******/ 			if (document.currentScript)
-/******/ 				scriptUrl = document.currentScript.src
+/******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
 /******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src

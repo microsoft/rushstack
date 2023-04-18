@@ -18,6 +18,6 @@
     "html-webpack-plugin": "~4.5.2",
     "typescript": "~4.8.4",
     "webpack-bundle-analyzer": "~4.5.0",
-    "webpack": "~5.75.0"
+    "webpack": "~5.78.0"
   }
 }

@@ -21,7 +21,11 @@ const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
  * The set of names the certificate should be generated for, by default.
  * @public
  */
-export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localhost'];
+export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = [
+  'localhost',
+  'rushstack.localhost',
+  '127.0.0.1'
+];
 
 /**
  * The interface for a debug certificate instance
@@ -129,6 +133,17 @@ export class CertificateManager {
           'The existing development certificate is missing the subjectAltName ' +
             'property and will not work with the latest versions of some browsers.'
         );
+      } else {
+        const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
+        for (const { value } of altNamesExtension.altNames) {
+          missingSubjectNames.delete(value);
+        }
+        if (missingSubjectNames.size) {
+          messages.push(
+            `The existing development certificate does not include the following expected subjectAltName values: ` +
+              Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
+          );
+        }
       }
 
       const { notBefore, notAfter } = certificate.validity;
