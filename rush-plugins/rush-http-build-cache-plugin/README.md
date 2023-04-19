@@ -58,7 +58,7 @@ First, start up and configure your build cache node locally:
 
 Second, create your `rush-http-build-cache-plugin.json` file as described in the Configuration section:
 
- - Note that your `url` should end with `/cache`, for example, `http://localhost:5071/cache/`
+ - Note that your `url` should end with `/cache/`, for example, `http://localhost:5071/cache/`
  - To test reading and writing, set `isCacheWriteAllowed: true`.
  - Configure `tokenHandler` to point to a script that prints a Basic or Bearer Authorization value (this can be a dummy string if you granted Read and Write to Anonymous in your build cache node configuration).
 
