@@ -32,7 +32,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
-    "webpack": "~5.78.0",
+    "webpack": "~5.80.0",
     "memfs": "3.4.3",
     "css-loader": "~6.6.0"
   }
