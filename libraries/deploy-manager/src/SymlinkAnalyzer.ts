@@ -37,7 +37,7 @@ export interface ILinkNode {
 export type PathNode = IFileNode | IFolderNode | ILinkNode;
 
 /**
- * Represents a symbolic link reported by {@link SymlinkAnalyzer.reportSymlinks()}.
+ * Represents a symbolic link reported by {@link SymlinkAnalyzer.reportSymlinks}.
  */
 export interface ILinkInfo {
   kind: 'fileLink' | 'folderLink';

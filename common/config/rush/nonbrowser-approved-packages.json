@@ -79,6 +79,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/deploy-manager",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
     },

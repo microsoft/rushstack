@@ -1,14 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+import type { IPackageJson } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { PnpmfileConfiguration } from '../../logic/pnpm/PnpmfileConfiguration';
+import type { ILogger } from '../../pluginFramework/logging/Logger';
 
-import type * as deployManagerType from '../../logic/deploy/DeployManager';
+import type * as deployManagerType from '@rushstack/deploy-manager/lib/DeployManager';
+import {
+  DeployScenarioConfiguration,
+  type IDeployScenarioProjectJson
+} from '../../logic/deploy/DeployScenarioConfiguration';
 
 export class DeployAction extends BaseRushAction {
+  private readonly _logger: ILogger;
   private readonly _scenario: CommandLineStringParameter;
   private readonly _project: CommandLineStringParameter;
   private readonly _overwrite: CommandLineFlagParameter;
@@ -32,6 +41,8 @@ export class DeployAction extends BaseRushAction {
       // to different target folders.
       safeForSimultaneousRushProcesses: true
     });
+
+    this._logger = this.rushSession.getLogger('deploy');
 
     this._project = this.defineStringParameter({
       parameterLongName: '--project',
@@ -82,19 +93,92 @@ export class DeployAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const deployManagerModule: typeof deployManagerType = await import(
-      /* webpackChunkName: 'DeployManager' */
-      '../../logic/deploy/DeployManager'
-    );
-    const deployManager: deployManagerType.DeployManager = new deployManagerModule.DeployManager(
+    const scenarioName: string | undefined = this._scenario.value;
+    const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
+      scenarioName,
       this.rushConfiguration
     );
-    await deployManager.deployAsync(
-      this._project.value,
-      this._scenario.value,
-      !!this._overwrite.value,
-      this._targetFolder.value,
-      this._createArchivePath.value
+    const scenarioConfiguration: DeployScenarioConfiguration = DeployScenarioConfiguration.loadFromFile(
+      this._logger.terminal,
+      scenarioFilePath,
+      this.rushConfiguration
     );
+
+    let mainProjectName: string | undefined = this._project.value;
+    if (!mainProjectName) {
+      if (scenarioConfiguration.json.deploymentProjectNames.length === 1) {
+        // If there is only one project, then "--project" is optional
+        mainProjectName = scenarioConfiguration.json.deploymentProjectNames[0];
+      } else {
+        throw new Error(
+          `The ${path.basename(scenarioFilePath)} configuration specifies multiple items for` +
+            ` "deploymentProjectNames". Use the "--project" parameter to indicate the project to be deployed.`
+        );
+      }
+    } else {
+      if (scenarioConfiguration.json.deploymentProjectNames.indexOf(mainProjectName) < 0) {
+        throw new Error(
+          `The project "${mainProjectName}" does not appear in the list of "deploymentProjectNames"` +
+            ` from ${path.basename(scenarioFilePath)}.`
+        );
+      }
+    }
+
+    const targetRootFolder: string = this._targetFolder.value
+      ? path.resolve(this._targetFolder.value)
+      : path.join(this.rushConfiguration.commonFolder, 'deploy');
+
+    const createArchiveFilePath: string | undefined = this._createArchivePath.value
+      ? path.resolve(this._createArchivePath.value)
+      : undefined;
+
+    let transformPackageJson: ((packageJson: IPackageJson) => IPackageJson) | undefined;
+    let pnpmInstallFolder: string | undefined;
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
+        this.rushConfiguration
+      );
+      transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
+      if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
+        pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
+      }
+    }
+
+    // Construct the project list for the deployer
+    const projectConfigurations: deployManagerType.IDeployProjectConfiguration[] = [];
+    for (const project of this.rushConfiguration.projects) {
+      const scenarioProjectJson: IDeployScenarioProjectJson | undefined =
+        scenarioConfiguration.projectJsonsByName.get(project.packageName);
+      projectConfigurations.push({
+        projectName: project.packageName,
+        projectFolder: project.projectFolder,
+        additionalProjectsToInclude: scenarioProjectJson?.additionalProjectsToInclude,
+        additionalDependenciesToInclude: scenarioProjectJson?.additionalDependenciesToInclude,
+        dependenciesToExclude: scenarioProjectJson?.dependenciesToExclude
+      });
+    }
+
+    // Call the deploy manager
+    const deployManagerModule: typeof deployManagerType = await import(
+      /* webpackChunkName: 'DeployManager' */
+      '@rushstack/deploy-manager/lib/DeployManager'
+    );
+    const deployManager: deployManagerType.DeployManager = new deployManagerModule.DeployManager();
+    await deployManager.deployAsync({
+      terminal: this._logger.terminal,
+      scenarioName: path.basename(scenarioFilePath),
+      overwriteExisting: !!this._overwrite.value,
+      includeDevDependencies: scenarioConfiguration.json.includeDevDependencies,
+      includeNpmIgnoreFiles: scenarioConfiguration.json.includeNpmIgnoreFiles,
+      folderToCopy: scenarioConfiguration.json.folderToCopy,
+      linkCreation: scenarioConfiguration.json.linkCreation,
+      sourceRootFolder: this.rushConfiguration.rushJsonFolder,
+      targetRootFolder,
+      mainProjectName,
+      projectConfigurations,
+      createArchiveFilePath,
+      pnpmInstallFolder,
+      transformPackageJson
+    });
   }
 }

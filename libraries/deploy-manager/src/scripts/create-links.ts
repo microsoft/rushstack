@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type { IDeployMetadataJson } from '../logic/deploy/DeployManager';
+import type { IDeployMetadataJson } from '../DeployManager';
 import type { IFileSystemCreateLinkOptions } from '@rushstack/node-core-library';
 
 // API borrowed from @rushstack/node-core-library, since this script avoids using any

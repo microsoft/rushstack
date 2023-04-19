@@ -190,3 +190,91 @@ export class Async {
     }
   }
 }
+
+type IterationResolveType = 'push' | 'callback';
+
+/**
+ * An async iterable queue that allows for asynchronous iteration. During iteration,
+ * the queue will wait until the next item is pushed into the queue before yielding.
+ * If instead all queue items are consumed and all callbacks are called, then the
+ * queue will return.
+ *
+ * @public
+ */
+export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
+  private _queue: T[];
+  private _onPushPromise: Promise<'push'>;
+  private _onPushResolve: () => void;
+
+  public constructor(iterable?: Iterable<T>) {
+    this._queue = iterable ? Array.from(iterable) : [];
+    const [promise, resolver] = this._getIterationPromise('push');
+    this._onPushPromise = promise;
+    this._onPushResolve = resolver;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public [Symbol.asyncIterator](): AsyncIterator<[T, () => void], any, undefined> {
+    let position: number = 0;
+    let activeIterations: number = 0;
+
+    let [callbackPromise, callbackResolve] = this._getIterationPromise('callback');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const iterator: AsyncIterator<[T, () => void], any, undefined> = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      next: async (...args: [] | [undefined]): Promise<IteratorResult<[T, () => void], any>> => {
+        const callback: () => void = () => {
+          activeIterations--;
+          // Resolve whatever the latest callback promise is and create a new one
+          callbackResolve();
+          const [newCallbackPromise, newCallbackResolve] = this._getIterationPromise('callback');
+          callbackPromise = newCallbackPromise;
+          callbackResolve = newCallbackResolve;
+        };
+
+        // Return items that have already been queued up
+        if (this._queue.length > position) {
+          activeIterations++;
+          return { done: false, value: [this._queue[position++], callback] };
+        }
+
+        // Wait for an item to be added to the queue, or for the last operation to complete. The callback
+        // will decrement the active iterations and generate a new callback promise to await on.
+        // eslint-disable-next-line no-unmodified-loop-condition
+        while (activeIterations > 0) {
+          const result: IterationResolveType = await Promise.race([this._onPushPromise, callbackPromise]);
+          if (result === 'push') {
+            break;
+          }
+        }
+
+        // If items were added from the queue push, return them
+        if (this._queue.length > position) {
+          activeIterations++;
+          return { done: false, value: [this._queue[position++], callback] };
+        }
+
+        // Active iterations is 0 and the queue equals the position, so the iterator is complete
+        return { done: true, value: undefined };
+      }
+    };
+    return iterator;
+  }
+
+  public push(item: T): void {
+    this._queue.push(item);
+    this._onPushResolve();
+    const [onPushPromise, onPushResolve] = this._getIterationPromise('push');
+    this._onPushPromise = onPushPromise;
+    this._onPushResolve = onPushResolve;
+  }
+
+  private _getIterationPromise<T extends IterationResolveType>(iterationType: T): [Promise<T>, () => void] {
+    let resolver: () => void;
+    const promise: Promise<T> = new Promise<T>((resolve) => {
+      resolver = resolve.bind(resolve, iterationType);
+    });
+    return [promise, resolver!];
+  }
+}

@@ -38,6 +38,15 @@ export class Async {
 }
 
 // @public
+export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
+    // (undocumented)
+    [Symbol.asyncIterator](): AsyncIterator<[T, () => void], any, undefined>;
+    constructor(iterable?: Iterable<T>);
+    // (undocumented)
+    push(item: T): void;
+}
+
+// @public
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
@@ -215,7 +224,7 @@ export class FileSystem {
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
-    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;

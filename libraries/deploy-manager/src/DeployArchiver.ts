@@ -6,24 +6,23 @@ import JSZip from 'jszip';
 import * as path from 'path';
 import { FileSystem, FileSystemStats, Path } from '@rushstack/node-core-library';
 
-import { IDeployState } from './DeployManager';
+import { IDeployOptions } from './DeployManager';
 
 export class DeployArchiver {
-  public static async createArchiveAsync(deployState: IDeployState): Promise<void> {
-    if (deployState.createArchiveFilePath !== undefined) {
-      console.log('Creating archive...');
-      const zip: JSZip = this._getZipOfFolder(deployState.targetRootFolder);
+  public static async createArchiveAsync(options: IDeployOptions): Promise<void> {
+    const { terminal, targetRootFolder, createArchiveFilePath } = options;
+    if (createArchiveFilePath) {
+      const archivePath: string = path.resolve(targetRootFolder, createArchiveFilePath);
+      terminal.writeLine(`Creating archive at "${archivePath}"...`);
+
+      const zip: JSZip = this._getZipOfFolder(targetRootFolder);
       const zipContent: Buffer = await zip.generateAsync({
         type: 'nodebuffer',
         platform: 'UNIX'
       });
+      await FileSystem.writeFileAsync(archivePath, zipContent);
 
-      FileSystem.writeFile(
-        path.resolve(deployState.targetRootFolder, deployState.createArchiveFilePath),
-        zipContent
-      );
-
-      console.log('Archive created successfully.');
+      terminal.writeLine('Archive created successfully.');
     }
   }
 
