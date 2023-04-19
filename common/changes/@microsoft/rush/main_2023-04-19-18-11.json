@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Update webpack to v5.80.0",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush"
