@@ -12,7 +12,7 @@ const PLUGIN_NAME: string = 'HttpBuildCachePlugin';
 /**
  * @public
  */
-export interface IRushHttpBuildCachePluginOptions {
+export interface IRushHttpBuildCachePluginConfig {
   /**
    * The URL of the server that stores the caches (e.g. "https://build-caches.example.com").
    */
@@ -53,19 +53,19 @@ export interface IRushHttpBuildCachePluginOptions {
  */
 export class RushHttpBuildCachePlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
-  private readonly _options: IRushHttpBuildCachePluginOptions;
-
-  public constructor(options: IRushHttpBuildCachePluginOptions) {
-    this._options = options;
-  }
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(this.pluginName, () => {
       rushSession.registerCloudBuildCacheProviderFactory(
         'http',
         (buildCacheConfig): HttpBuildCacheProvider => {
-          const { url, uploadMethod, headers, tokenHandler, cacheKeyPrefix, isCacheWriteAllowed } =
-            this._options;
+          const config: IRushHttpBuildCachePluginConfig = (
+            buildCacheConfig as typeof buildCacheConfig & {
+              httpConfiguration: IRushHttpBuildCachePluginConfig;
+            }
+          ).httpConfiguration;
+
+          const { url, uploadMethod, headers, tokenHandler, cacheKeyPrefix, isCacheWriteAllowed } = config;
 
           const options: IHttpBuildCacheProviderOptions = {
             pluginName: this.pluginName,
