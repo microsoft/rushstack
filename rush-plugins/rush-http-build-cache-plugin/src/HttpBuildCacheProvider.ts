@@ -380,7 +380,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         throw new Error(
           [
             `${this._url.href} responded with ${response.status}: ${response.statusText}.`,
-            `Credentials may be misconfigured of have expired.`,
+            `Credentials may be misconfigured or have expired.`,
             `In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.`,
             ``,
             `For local developers, run:`,
