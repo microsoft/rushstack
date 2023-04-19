@@ -26,9 +26,9 @@ Once enabled, configure the HTTP build cache in config file `common/config/rush-
 }
 ```
 
-- url: The server to store cache objects.
-- tokenHandler: A script that can print the Authorization header expected by the server. The value printed to `stdout` by this command should be an exact header, for example, `Bearer ab98d8c878d937290d979a9097c90dfffff` or `Basic 098abc7dff==`.
-- isCacheWriteAllowed: A flag that determines if the plugin should write to the cache.
+- `url`: The server to store cache objects.
+- `tokenHandler`: A script that can print the Authorization header expected by the server. The value printed to `stdout` by this command should be an exact header, for example, `Bearer ab98d8c878d937290d979a9097c90dfffff` or `Basic 098abc7dff==`.
+- `isCacheWriteAllowed`: A flag that determines if the plugin should write to the cache.
 
 ## HTTP Cache Server Requirements
 
@@ -58,7 +58,7 @@ First, start up and configure your build cache node locally:
 
 Second, create your `rush-http-build-cache-plugin.json` file as described in the Configuration section:
 
- - Note that your `url` should end with `/cache`, for example, `http://localhost:5071/cache/`
+ - Note that your `url` should end with `/cache/`, for example, `http://localhost:5071/cache/`
  - To test reading and writing, set `isCacheWriteAllowed: true`.
  - Configure `tokenHandler` to point to a script that prints a Basic or Bearer Authorization value (this can be a dummy string if you granted Read and Write to Anonymous in your build cache node configuration).
 
