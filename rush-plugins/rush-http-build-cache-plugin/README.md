@@ -27,7 +27,7 @@ Once enabled, configure the HTTP build cache in config file `common/config/rush-
 ```
 
 - url: The server to store cache objects.
-- tokenHandler: A script that can print the Authorization header expected by the server. The value printed to `stdout` by this command should be an exact header, for example, `Bearer ab98d8c878d937290d979a9097c90dfffff` or `Basic 098abc7dff==`.
+- `tokenHandler`: A script that can print the Authorization header expected by the server. The value printed to `stdout` by this command should be an exact header, for example, `Bearer ab98d8c878d937290d979a9097c90dfffff` or `Basic 098abc7dff==`.
 - `isCacheWriteAllowed`: A flag that determines if the plugin should write to the cache.
 
 ## HTTP Cache Server Requirements
