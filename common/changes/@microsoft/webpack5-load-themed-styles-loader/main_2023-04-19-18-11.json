@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/webpack5-load-themed-styles-loader",
+      "comment": "Update webpack to v5.80.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/webpack5-load-themed-styles-loader"
+}
