@@ -779,14 +779,16 @@ export class PublishUtilities {
       const isWorkspaceWildcardVersion: boolean =
         requiredVersion.specifierType === DependencySpecifierType.Workspace &&
         requiredVersion.versionSpecifier === '*';
-      const alwaysUpdate: boolean =
-        (!!prereleaseToken &&
-          prereleaseToken.hasValue &&
-          !allChanges.packageChanges.has(parentPackageName)) ||
-        isWorkspaceWildcardVersion;
+
+      const isPrerelease: boolean =
+        !!prereleaseToken && prereleaseToken.hasValue && !allChanges.packageChanges.has(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
-      if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
+      if (
+        isPrerelease ||
+        isWorkspaceWildcardVersion ||
+        requiredVersion.versionSpecifier !== change.newRangeDependency
+      ) {
         let changeType: ChangeType | undefined;
         // Propagate hotfix changes to dependencies
         if (change.changeType === ChangeType.hotfix) {
@@ -815,7 +817,7 @@ export class PublishUtilities {
           projectsToExclude
         });
 
-        if (hasChanges || alwaysUpdate) {
+        if (hasChanges || isPrerelease) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
           // caused a version bump.
           hasChanges =
