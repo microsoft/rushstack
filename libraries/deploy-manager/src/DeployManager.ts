@@ -232,14 +232,28 @@ export class DeployManager {
       linkCreation
     } = options;
 
-    // Calculate the set with additionalProjectsToInclude
-    const includedProjectsSet: Set<IDeployProjectConfiguration> = new Set();
     const mainProjectConfiguration: IDeployProjectConfiguration | undefined =
       state.projectConfigurationsByName.get(mainProjectName);
     if (!mainProjectConfiguration) {
       throw new Error(`Main project "${mainProjectName}" was not found in the list of projects`);
     }
-    this._collectProjectsToInclude(includedProjectsSet, mainProjectConfiguration, state);
+
+    // Calculate the set with additionalProjectsToInclude
+    const includedProjectsSet: Set<IDeployProjectConfiguration> = new Set([mainProjectConfiguration]);
+    for (const { additionalProjectsToInclude } of includedProjectsSet) {
+      if (additionalProjectsToInclude) {
+        for (const additionalProjectNameToInclude of additionalProjectsToInclude) {
+          const additionalProjectToInclude: IDeployProjectConfiguration | undefined =
+            state.projectConfigurationsByName.get(additionalProjectNameToInclude);
+          if (!additionalProjectToInclude) {
+            throw new Error(
+              `Project "${additionalProjectNameToInclude}" was not found in the list of projects.`
+            );
+          }
+          includedProjectsSet.add(additionalProjectToInclude);
+        }
+      }
+    }
 
     for (const { projectName, projectFolder } of includedProjectsSet) {
       terminal.writeLine(Colors.cyan(`Analyzing project: ${projectName}`));
@@ -644,35 +658,6 @@ export class DeployManager {
         linkTargetPath: relativeTargetPath,
         newLinkPath: linkInfo.linkPath
       });
-    }
-  }
-
-  /**
-   * Recursively apply the "additionalProjectToInclude" setting.
-   */
-  private _collectProjectsToInclude(
-    includedProjectNamesSet: Set<IDeployProjectConfiguration>,
-    project: IDeployProjectConfiguration,
-    state: IDeployState
-  ): void {
-    if (includedProjectNamesSet.has(project)) {
-      return;
-    }
-    includedProjectNamesSet.add(project);
-
-    const projectConfiguration: IDeployProjectConfiguration | undefined =
-      state.projectConfigurationsByName.get(project.projectName);
-    if (projectConfiguration && projectConfiguration.additionalProjectsToInclude) {
-      for (const additionalProjectNameToInclude of projectConfiguration.additionalProjectsToInclude) {
-        const additionalProjectToInclude: IDeployProjectConfiguration | undefined =
-          state.projectConfigurationsByName.get(additionalProjectNameToInclude);
-        if (!additionalProjectToInclude) {
-          throw new Error(
-            `Project "${additionalProjectNameToInclude}" was not found in the list of projects.`
-          );
-        }
-        this._collectProjectsToInclude(includedProjectNamesSet, additionalProjectToInclude, state);
-      }
     }
   }
 
