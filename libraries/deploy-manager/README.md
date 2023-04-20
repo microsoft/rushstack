@@ -1,6 +1,6 @@
 ## @rushstack/deploy-manager
 
-TODO
+A library used for creating an isolated copy of a package and, optionally, bundling it into an archive.
 
 ## Links
 

@@ -40,7 +40,7 @@ export class Async {
 // @public
 export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
     // (undocumented)
-    [Symbol.asyncIterator](): AsyncIterator<[T, () => void], any, undefined>;
+    [Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]>;
     constructor(iterable?: Iterable<T>);
     // (undocumented)
     push(item: T): void;

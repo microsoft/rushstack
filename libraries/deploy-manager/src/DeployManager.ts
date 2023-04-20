@@ -396,6 +396,7 @@ export class DeployManager {
           try {
             // The PNPM virtual store links are created in this folder.  We will resolve the current package
             // from that location and collect any additional links encountered along the way.
+            // TODO: This can be configured via NPMRC. We should support that.
             const pnpmDotFolderPath: string = path.join(pnpmInstallFolder, 'node_modules', '.pnpm');
 
             // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
@@ -538,10 +539,10 @@ export class DeployManager {
    */
   private _remapPathForDeployFolder(absolutePathInSourceFolder: string, options: IDeployOptions): string {
     const { sourceRootFolder, targetRootFolder } = options;
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, sourceRootFolder)) {
+    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
+    if (relativePath.startsWith('..')) {
       throw new Error(`Source path "${absolutePathInSourceFolder}"is not under "${sourceRootFolder}"`);
     }
-    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     const absolutePathInTargetFolder: string = path.join(targetRootFolder, relativePath);
     return absolutePathInTargetFolder;
   }
@@ -554,10 +555,10 @@ export class DeployManager {
    */
   private _remapPathForDeployMetadata(absolutePathInSourceFolder: string, options: IDeployOptions): string {
     const { sourceRootFolder } = options;
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, sourceRootFolder)) {
+    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
+    if (relativePath.startsWith('..')) {
       throw new Error(`Source path "${absolutePathInSourceFolder}"is not under "${sourceRootFolder}"`);
     }
-    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     return relativePath.replace('\\', '/');
   }
 
@@ -681,28 +682,12 @@ export class DeployManager {
     const relativeTargetPath: string = path.relative(newLinkFolder, linkInfo.targetPath);
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
-    if (process.platform === 'win32') {
-      if (linkInfo.kind === 'folderLink') {
-        // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-        await FileSystem.createSymbolicLinkJunctionAsync({
-          linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath
-        });
-      } else {
-        // For files, we use a Windows "hard link", because creating a symbolic link requires
-        // administrator permission.
-
-        // NOTE: We cannot use the relative path for hard links
+    if (linkInfo.kind === 'fileLink') {
+      // For files, we use a Windows "hard link", because creating a symbolic link requires
+      // administrator permission. However hard links seem to cause build failures on Mac,
+      // so for all other operating systems we use symbolic links for this case.
+      if (process.platform === 'win32') {
         await FileSystem.createHardLinkAsync({
-          linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath
-        });
-      }
-    } else {
-      // However hard links seem to cause build failures on Mac, so for all other operating systems
-      // we use symbolic links for this case.
-      if (linkInfo.kind === 'folderLink') {
-        await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath
         });
@@ -712,6 +697,12 @@ export class DeployManager {
           newLinkPath: linkInfo.linkPath
         });
       }
+    } else {
+      // Junctions are only supported on Windows. This will create a symbolic link on other platforms.
+      await FileSystem.createSymbolicLinkJunctionAsync({
+        linkTargetPath: relativeTargetPath,
+        newLinkPath: linkInfo.linkPath
+      });
     }
   }
 

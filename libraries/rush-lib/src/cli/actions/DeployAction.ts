@@ -4,16 +4,15 @@
 import * as path from 'path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type { DeployManager, IDeployProjectConfiguration } from '@rushstack/deploy-manager/lib/DeployManager';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PnpmfileConfiguration } from '../../logic/pnpm/PnpmfileConfiguration';
 import type { ILogger } from '../../pluginFramework/logging/Logger';
-
-import type * as deployManagerType from '@rushstack/deploy-manager/lib/DeployManager';
-import {
+import type {
   DeployScenarioConfiguration,
-  type IDeployScenarioProjectJson
+  IDeployScenarioProjectJson
 } from '../../logic/deploy/DeployScenarioConfiguration';
 
 export class DeployAction extends BaseRushAction {
@@ -94,6 +93,7 @@ export class DeployAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const scenarioName: string | undefined = this._scenario.value;
+    const { DeployScenarioConfiguration } = await import('../../logic/deploy/DeployScenarioConfiguration');
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
       this.rushConfiguration
@@ -145,7 +145,7 @@ export class DeployAction extends BaseRushAction {
     }
 
     // Construct the project list for the deployer
-    const projectConfigurations: deployManagerType.IDeployProjectConfiguration[] = [];
+    const projectConfigurations: IDeployProjectConfiguration[] = [];
     for (const project of this.rushConfiguration.projects) {
       const scenarioProjectJson: IDeployScenarioProjectJson | undefined =
         scenarioConfiguration.projectJsonsByName.get(project.packageName);
@@ -159,11 +159,11 @@ export class DeployAction extends BaseRushAction {
     }
 
     // Call the deploy manager
-    const deployManagerModule: typeof deployManagerType = await import(
+    const { DeployManager } = await import(
       /* webpackChunkName: 'DeployManager' */
       '@rushstack/deploy-manager/lib/DeployManager'
     );
-    const deployManager: deployManagerType.DeployManager = new deployManagerModule.DeployManager();
+    const deployManager: DeployManager = new DeployManager();
     await deployManager.deployAsync({
       terminal: this._logger.terminal,
       scenarioName: path.basename(scenarioFilePath),
