@@ -4,7 +4,7 @@
 import * as path from 'path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import type { DeployManager, IDeployProjectConfiguration } from '@rushstack/deploy-manager/lib/DeployManager';
+import type { DeployManager, IDeployProjectConfiguration } from '@rushstack/deploy-manager';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -161,7 +161,7 @@ export class DeployAction extends BaseRushAction {
     // Call the deploy manager
     const { DeployManager } = await import(
       /* webpackChunkName: 'DeployManager' */
-      '@rushstack/deploy-manager/lib/DeployManager'
+      '@rushstack/deploy-manager'
     );
     const deployManager: DeployManager = new DeployManager();
     await deployManager.deployAsync({

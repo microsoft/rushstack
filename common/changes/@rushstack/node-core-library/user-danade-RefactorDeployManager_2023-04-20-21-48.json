@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Adds the AsyncQueue class, a queue type that allows for iterating and concurrently adding to the queue. Adds support for async Import.resolve* APIs. Fixes a typings issue in FileSystem.copyFilesAsync.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
