@@ -788,21 +788,19 @@ export class PublishUtilities {
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
         let changeType: ChangeType | undefined;
-        if (changeType === undefined) {
-          // Propagate hotfix changes to dependencies
-          if (change.changeType === ChangeType.hotfix) {
-            changeType = ChangeType.hotfix;
-          } else {
-            // Either it already satisfies the new version, or doesn't.
-            // If not, the downstream dep needs to be republished.
-            // The downstream dep will also need to be republished if using `workspace:*` as this will publish
-            // as the exact version.
-            changeType =
-              semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
-              !isWorkspaceWildcardVersion
-                ? ChangeType.dependency
-                : ChangeType.patch;
-          }
+        // Propagate hotfix changes to dependencies
+        if (change.changeType === ChangeType.hotfix) {
+          changeType = ChangeType.hotfix;
+        } else {
+          // Either it already satisfies the new version, or doesn't.
+          // If not, the downstream dep needs to be republished.
+          // The downstream dep will also need to be republished if using `workspace:*` as this will publish
+          // as the exact version.
+          changeType =
+            !isWorkspaceWildcardVersion &&
+            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier)
+              ? ChangeType.dependency
+              : ChangeType.patch;
         }
 
         hasChanges = PublishUtilities._addChange({
