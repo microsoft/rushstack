@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/deploy-manager",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "lib/index.js",
   "typings": "dist/deploy-manager.d.ts",
@@ -22,8 +22,7 @@
     "@rushstack/terminal": "workspace:*",
     "ignore": "~5.1.6",
     "jszip": "~3.8.0",
-    "npm-packlist": "~2.1.2",
-    "resolve": "~1.22.1"
+    "npm-packlist": "~2.1.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -33,7 +32,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
     "@types/npm-packlist": "~1.1.1",
-    "@types/resolve": "1.20.2",
     "eslint": "~8.7.0"
   }
 }

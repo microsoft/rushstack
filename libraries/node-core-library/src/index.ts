@@ -34,8 +34,11 @@ export {
 export {
   Import,
   IImportResolveOptions,
+  IImportResolveAsyncOptions,
   IImportResolveModuleOptions,
-  IImportResolvePackageOptions
+  IImportResolveModuleAsyncOptions,
+  IImportResolvePackageOptions,
+  IImportResolvePackageAsyncOptions
 } from './Import';
 export { InternalError } from './InternalError';
 export {

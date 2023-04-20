@@ -1739,12 +1739,10 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/npm-packlist': ~1.1.1
-      '@types/resolve': 1.20.2
       eslint: ~8.7.0
       ignore: ~5.1.6
       jszip: ~3.8.0
       npm-packlist: ~2.1.2
-      resolve: ~1.22.1
     dependencies:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/node-core-library': link:../node-core-library
@@ -1752,7 +1750,6 @@ importers:
       ignore: 5.1.9
       jszip: 3.8.0
       npm-packlist: 2.1.5
-      resolve: 1.22.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -1761,7 +1758,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/npm-packlist': 1.1.2
-      '@types/resolve': 1.20.2
       eslint: 8.7.0
 
   ../../libraries/heft-config-file:

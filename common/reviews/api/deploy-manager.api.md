@@ -9,7 +9,6 @@ import { ITerminal } from '@rushstack/node-core-library';
 
 // @public
 export class DeployManager {
-    constructor();
     deployAsync(options: IDeployOptions): Promise<void>;
 }
 

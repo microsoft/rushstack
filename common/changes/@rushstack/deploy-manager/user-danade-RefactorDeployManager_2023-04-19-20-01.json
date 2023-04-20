@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/deploy-manager",
       "comment": "Create new @rushstack/deploy-manager package allowing for deployment of a target package and associated dependencies",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/deploy-manager"

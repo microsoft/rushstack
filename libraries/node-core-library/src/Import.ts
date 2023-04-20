@@ -11,6 +11,8 @@ import { FileSystem } from './FileSystem';
 import { IPackageJson } from './IPackageJson';
 import { PackageName } from './PackageName';
 
+type RealpathFnType = Parameters<typeof Resolve.default>[1]['realpath'];
+
 /**
  * Common options shared by {@link IImportResolveModuleOptions} and {@link IImportResolvePackageOptions}
  * @public
@@ -58,6 +60,32 @@ export interface IImportResolveOptions {
    * ```
    */
   allowSelfReference?: boolean;
+
+  /**
+   * A function used to resolve the realpath of a provided file path.
+   *
+   * @remarks
+   * This is used to resolve symlinks and other non-standard file paths. By default, this uses the
+   * {@link FileSystem.getRealPath} function. However, it can be overridden to use a custom implementation
+   * which may be faster, more accurate, or provide support for additional non-standard file paths.
+   */
+  getRealPath?: (filePath: string) => string;
+}
+
+/**
+ * Common options shared by {@link IImportResolveModuleAsyncOptions} and {@link IImportResolvePackageAsyncOptions}
+ * @public
+ */
+export interface IImportResolveAsyncOptions extends IImportResolveOptions {
+  /**
+   * A function used to resolve the realpath of a provided file path.
+   *
+   * @remarks
+   * This is used to resolve symlinks and other non-standard file paths. By default, this uses the
+   * {@link FileSystem.getRealPath} function. However, it can be overridden to use a custom implementation
+   * which may be faster, more accurate, or provide support for additional non-standard file paths.
+   */
+  getRealPathAsync?: (filePath: string) => Promise<string>;
 }
 
 /**
@@ -73,10 +101,33 @@ export interface IImportResolveModuleOptions extends IImportResolveOptions {
 }
 
 /**
+ * Options for {@link Import.resolveModuleAsync}
+ * @public
+ */
+export interface IImportResolveModuleAsyncOptions extends IImportResolveAsyncOptions {
+  /**
+   * The module identifier to resolve. For example "\@rushstack/node-core-library" or
+   * "\@rushstack/node-core-library/lib/index.js"
+   */
+  modulePath: string;
+}
+
+/**
  * Options for {@link Import.resolvePackage}
  * @public
  */
 export interface IImportResolvePackageOptions extends IImportResolveOptions {
+  /**
+   * The package name to resolve. For example "\@rushstack/node-core-library"
+   */
+  packageName: string;
+}
+
+/**
+ * Options for {@link Import.resolvePackageAsync}
+ * @public
+ */
+export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOptions {
   /**
    * The package name to resolve. For example "\@rushstack/node-core-library"
    */
@@ -203,13 +254,13 @@ export class Import {
    * and a system module is found, then its name is returned without any file path.
    */
   public static resolveModule(options: IImportResolveModuleOptions): string {
-    const { modulePath, baseFolderPath, includeSystemModules, allowSelfReference } = options;
+    const { modulePath, baseFolderPath, includeSystemModules, allowSelfReference, getRealPath } = options;
 
     if (path.isAbsolute(modulePath)) {
       return modulePath;
     }
 
-    const normalizedRootPath: string = FileSystem.getRealPath(baseFolderPath);
+    const normalizedRootPath: string = (getRealPath || FileSystem.getRealPath)(baseFolderPath);
 
     if (modulePath.startsWith('.')) {
       // This looks like a conventional relative path
@@ -234,9 +285,95 @@ export class Import {
         includeSystemModules !== true && modulePath.indexOf('/') === -1 ? `${modulePath}/` : modulePath,
         {
           basedir: normalizedRootPath,
-          preserveSymlinks: false
+          preserveSymlinks: false,
+          realpathSync: getRealPath
         }
       );
+    } catch (e) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
+    }
+  }
+
+  /**
+   * Async version of {@link Import.resolveModule}.
+   */
+  public static async resolveModuleAsync(options: IImportResolveModuleAsyncOptions): Promise<string> {
+    const {
+      modulePath,
+      baseFolderPath,
+      includeSystemModules,
+      allowSelfReference,
+      getRealPath,
+      getRealPathAsync
+    } = options;
+
+    if (path.isAbsolute(modulePath)) {
+      return modulePath;
+    }
+
+    const normalizedRootPath: string = await (getRealPathAsync || getRealPath || FileSystem.getRealPathAsync)(
+      baseFolderPath
+    );
+
+    if (modulePath.startsWith('.')) {
+      // This looks like a conventional relative path
+      return path.resolve(normalizedRootPath, modulePath);
+    }
+
+    if (includeSystemModules === true && Import._builtInModules.has(modulePath)) {
+      return modulePath;
+    }
+
+    if (allowSelfReference === true) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
+      if (ownPackage && modulePath.startsWith(ownPackage.packageName)) {
+        const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
+        return path.resolve(ownPackage.packageRootPath, packagePath);
+      }
+    }
+
+    try {
+      const resolvePromise: Promise<string> = new Promise(
+        (resolve: (resolvedPath: string) => void, reject: (error: Error) => void) => {
+          const realPathFn: RealpathFnType =
+            getRealPathAsync || getRealPath
+              ? (filePath: string, callback: (error: Error | null, resolvedPath?: string) => void) => {
+                  if (getRealPathAsync) {
+                    getRealPathAsync(filePath)
+                      .then((resolvedPath) => callback(null, resolvedPath))
+                      .catch((error) => callback(error));
+                  } else {
+                    try {
+                      const resolvedPath: string = getRealPath!(filePath);
+                      callback(null, resolvedPath);
+                    } catch (error: unknown) {
+                      callback(error as Error);
+                    }
+                  }
+                }
+              : undefined;
+
+          Resolve.default(
+            // Append a slash to the package name to ensure `resolve` doesn't attempt to return a system package
+            includeSystemModules !== true && modulePath.indexOf('/') === -1 ? `${modulePath}/` : modulePath,
+            {
+              basedir: normalizedRootPath,
+              preserveSymlinks: false,
+              realpath: realPathFn
+            },
+            (error: Error | null, resolvedPath?: string) => {
+              if (error) {
+                reject(error);
+              } else {
+                // Resolve docs state that either an error will be returned, or the resolved path.
+                // In this case, the resolved path should always be populated.
+                resolve(resolvedPath!);
+              }
+            }
+          );
+        }
+      );
+      return await resolvePromise;
     } catch (e) {
       throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
@@ -263,13 +400,13 @@ export class Import {
    * and a system module is found, then its name is returned without any file path.
    */
   public static resolvePackage(options: IImportResolvePackageOptions): string {
-    const { packageName, includeSystemModules, baseFolderPath, allowSelfReference } = options;
+    const { packageName, includeSystemModules, baseFolderPath, allowSelfReference, getRealPath } = options;
 
     if (includeSystemModules && Import._builtInModules.has(packageName)) {
       return packageName;
     }
 
-    const normalizedRootPath: string = FileSystem.getRealPath(baseFolderPath);
+    const normalizedRootPath: string = (getRealPath || FileSystem.getRealPath)(baseFolderPath);
 
     if (allowSelfReference) {
       const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
@@ -292,8 +429,101 @@ export class Import {
           // even if the real entry point was in an subfolder with arbitrary nesting.
           pkg.main = 'package.json';
           return pkg;
-        }
+        },
+        realpathSync: getRealPath
       });
+
+      const packagePath: string = path.dirname(resolvedPath);
+      return packagePath;
+    } catch {
+      throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}".`);
+    }
+  }
+
+  /**
+   * Async version of {@link Import.resolvePackage}.
+   */
+  public static async resolvePackageAsync(options: IImportResolvePackageAsyncOptions): Promise<string> {
+    const {
+      packageName,
+      includeSystemModules,
+      baseFolderPath,
+      allowSelfReference,
+      getRealPath,
+      getRealPathAsync
+    } = options;
+
+    if (includeSystemModules && Import._builtInModules.has(packageName)) {
+      return packageName;
+    }
+
+    const normalizedRootPath: string = await (getRealPathAsync || getRealPath || FileSystem.getRealPathAsync)(
+      baseFolderPath
+    );
+
+    if (allowSelfReference) {
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
+      if (ownPackage && ownPackage.packageName === packageName) {
+        return ownPackage.packageRootPath;
+      }
+    }
+
+    PackageName.parse(packageName); // Ensure the package name is valid and doesn't contain a path
+
+    try {
+      const resolvePromise: Promise<string> = new Promise(
+        (resolve: (resolvedPath: string) => void, reject: (error: Error) => void) => {
+          const realPathFn: RealpathFnType =
+            getRealPathAsync || getRealPath
+              ? (filePath: string, callback: (error: Error | null, resolvedPath?: string) => void) => {
+                  if (getRealPathAsync) {
+                    getRealPathAsync(filePath)
+                      .then((resolvedPath) => callback(null, resolvedPath))
+                      .catch((error) => callback(error));
+                  } else {
+                    try {
+                      const resolvedPath: string = getRealPath!(filePath);
+                      callback(null, resolvedPath);
+                    } catch (error: unknown) {
+                      callback(error as Error);
+                    }
+                  }
+                }
+              : undefined;
+
+          Resolve.default(
+            // Append a slash to the package name to ensure `resolve` doesn't attempt to return a system package
+            `${packageName}/`,
+            {
+              basedir: normalizedRootPath,
+              preserveSymlinks: false,
+              packageFilter: (
+                pkg: Resolve.PackageJSON,
+                pkgFile: string,
+                dir: string
+              ): Resolve.PackageJSON => {
+                // Hardwire "main" to point to a file that is guaranteed to exist.
+                // This helps resolve packages such as @types/node that have no entry point.
+                // And then we can use path.dirname() below to locate the package folder,
+                // even if the real entry point was in an subfolder with arbitrary nesting.
+                pkg.main = 'package.json';
+                return pkg;
+              },
+              realpath: realPathFn
+            },
+            (error: Error | null, resolvedPath?: string) => {
+              if (error) {
+                reject(error);
+              } else {
+                // Resolve docs state that either an error will be returned, or the resolved path.
+                // In this case, the resolved path should always be populated.
+                resolve(resolvedPath!);
+              }
+            }
+          );
+        }
+      );
+      const resolvedPath: string = await resolvePromise;
 
       const packagePath: string = path.dirname(resolvedPath);
       return packagePath;

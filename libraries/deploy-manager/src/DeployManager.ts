@@ -2,26 +2,24 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { default as resolveFn, isCore, type PackageJSON } from 'resolve';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
-
 import ignore, { Ignore } from 'ignore';
 import {
   Async,
   AsyncQueue,
   Path,
   FileSystem,
-  PackageJsonLookup,
+  Import,
   Colors,
   JsonFile,
   AlreadyExistsBehavior,
-  InternalError,
   NewlineKind,
   type FileSystemStats,
   type IPackageJson,
   type ITerminal
 } from '@rushstack/node-core-library';
+
 import { DeployArchiver } from './DeployArchiver';
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
 import { matchesWithStar } from './Utils';
@@ -172,12 +170,6 @@ export interface IDeployOptions {
  * @public
  */
 export class DeployManager {
-  private readonly _packageJsonLookup: PackageJsonLookup;
-
-  public constructor() {
-    this._packageJsonLookup = new PackageJsonLookup();
-  }
-
   /**
    * Perform a deployment using the provided options
    */
@@ -372,17 +364,23 @@ export class DeployManager {
 
         for (const dependencyPackageName of dependencyNamesToProcess) {
           try {
-            const dependencyPackageFolderPath: string = await this._traceResolveDependencyAsync(
-              dependencyPackageName,
-              packageJsonRealFolderPath,
-              state
-            );
+            const dependencyPackageFolderPath: string = await Import.resolvePackageAsync({
+              packageName: dependencyPackageName,
+              baseFolderPath: packageJsonRealFolderPath,
+              getRealPathAsync: async (filePath: string) => {
+                try {
+                  return (await state.symlinkAnalyzer.analyzePathAsync(filePath)).nodePath;
+                } catch (error: unknown) {
+                  if (FileSystem.isFileDoesNotExistError(error as Error)) {
+                    return filePath;
+                  }
+                  throw error;
+                }
+              }
+            });
             packageJsonFolderPathQueue.push(dependencyPackageFolderPath);
           } catch (resolveErr) {
-            if (
-              (resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND' &&
-              optionalDependencyNames.has(dependencyPackageName)
-            ) {
+            if (optionalDependencyNames.has(dependencyPackageName)) {
               // Ignore missing optional dependency
               continue;
             }
@@ -404,18 +402,25 @@ export class DeployManager {
             // "dependencies": {
             //   "alias-name": "npm:real-name@^1.2.3"
             // }
-            const dependencyPackageFolderPath: string = await this._traceResolveDependencyAsync(
-              packageJson.name,
-              pnpmDotFolderPath,
-              state
-            );
+            const dependencyPackageFolderPath: string = await Import.resolvePackageAsync({
+              packageName: packageJson.name,
+              baseFolderPath: pnpmDotFolderPath,
+              getRealPathAsync: async (filePath: string) => {
+                try {
+                  return (await state.symlinkAnalyzer.analyzePathAsync(filePath)).nodePath;
+                } catch (error: unknown) {
+                  if (FileSystem.isFileDoesNotExistError(error as Error)) {
+                    return filePath;
+                  }
+                  throw error;
+                }
+              }
+            });
             packageJsonFolderPathQueue.push(dependencyPackageFolderPath);
           } catch (resolveErr) {
-            if ((resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND') {
-              // The virtual store link isn't guaranteed to exist, so ignore if it's missing
-              // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
-              console.log('Ignoring missing PNPM virtual store link for ' + packageJsonFolderPath);
-            }
+            // The virtual store link isn't guaranteed to exist, so ignore if it's missing
+            // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
+            console.log('Ignoring missing PNPM virtual store link for ' + packageJsonFolderPath);
           }
         }
 
@@ -465,70 +470,6 @@ export class DeployManager {
     }
 
     return allDependencyNames;
-  }
-
-  private async _traceResolveDependencyAsync(
-    packageName: string,
-    startingFolder: string,
-    state: IDeployState
-  ): Promise<string> {
-    // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
-    // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
-    // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
-    packageName = `${packageName}${isCore(packageName) ? '/' : ''}`;
-
-    const resolveDependencyPromise: Promise<string | undefined> = new Promise(
-      (resolve: (path: string | undefined) => void, reject: (error: Error) => void) => {
-        resolveFn(
-          packageName,
-          {
-            basedir: startingFolder,
-            preserveSymlinks: false,
-            packageFilter: (packageJson: PackageJSON) => {
-              // point "main" at a file that is guaranteed to exist
-              // This helps resolve packages such as @types/node that have no entry point
-              packageJson.main = './package.json';
-              return packageJson;
-            },
-            realpath: (filePath, callback: (err: Error | null, resolved?: string) => void) => {
-              // Analyze all links in the path while we traverse the file system
-              state.symlinkAnalyzer
-                .analyzePathAsync(filePath)
-                .then((targetNode: PathNode) => {
-                  callback(null, targetNode.nodePath);
-                })
-                .catch((error: Error) => {
-                  if (FileSystem.isFileDoesNotExistError(error)) {
-                    callback(null, filePath);
-                  } else {
-                    callback(error);
-                  }
-                });
-            }
-          },
-          (error: Error | null, resolvedPath?: string) => {
-            if (error) {
-              reject(error);
-            }
-            resolve(resolvedPath);
-          }
-        );
-      }
-    );
-    const resolvedDependency: string | undefined = await resolveDependencyPromise;
-
-    if (!resolvedDependency) {
-      // This should not happen, since the resolve.sync() docs say it will throw an exception instead
-      throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
-    }
-
-    const dependencyPackageFolderPath: string | undefined =
-      this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
-
-    if (!dependencyPackageFolderPath) {
-      throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
-    }
-    return dependencyPackageFolderPath;
   }
 
   /**

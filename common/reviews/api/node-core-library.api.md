@@ -42,7 +42,6 @@ export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
     // (undocumented)
     [Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]>;
     constructor(iterable?: Iterable<T>);
-    // (undocumented)
     push(item: T): void;
 }
 
@@ -454,6 +453,16 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveAsyncOptions extends IImportResolveOptions {
+    getRealPathAsync?: (filePath: string) => Promise<string>;
+}
+
+// @public
+export interface IImportResolveModuleAsyncOptions extends IImportResolveAsyncOptions {
+    modulePath: string;
+}
+
+// @public
 export interface IImportResolveModuleOptions extends IImportResolveOptions {
     modulePath: string;
 }
@@ -462,7 +471,13 @@ export interface IImportResolveModuleOptions extends IImportResolveOptions {
 export interface IImportResolveOptions {
     allowSelfReference?: boolean;
     baseFolderPath: string;
+    getRealPath?: (filePath: string) => string;
     includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOptions {
+    packageName: string;
 }
 
 // @public
@@ -513,7 +528,9 @@ export interface IJsonSchemaValidateOptions {
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
     static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolveModuleAsync(options: IImportResolveModuleAsyncOptions): Promise<string>;
     static resolvePackage(options: IImportResolvePackageOptions): string;
+    static resolvePackageAsync(options: IImportResolvePackageAsyncOptions): Promise<string>;
 }
 
 // @public
