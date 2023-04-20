@@ -2,12 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as resolve from 'resolve';
-import * as npmPacklist from 'npm-packlist';
+import { default as resolveFn, isCore, type PackageJSON } from 'resolve';
+import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
-
-// (Used only by the legacy code fragment in the resolve.sync() hook below)
-import * as fsForResolve from 'fs';
 
 import ignore, { Ignore } from 'ignore';
 import {
@@ -26,18 +23,9 @@ import {
   type ITerminal
 } from '@rushstack/node-core-library';
 import { DeployArchiver } from './DeployArchiver';
-import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
+import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
 import { matchesWithStar } from './Utils';
 import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
-
-// (@types/npm-packlist is missing this API)
-declare module 'npm-packlist' {
-  export class WalkerSync {
-    public readonly result: string[];
-    public constructor(opts: { path: string });
-    public start(): void;
-  }
-}
 
 /**
  * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
@@ -152,8 +140,8 @@ export interface IDeployOptions {
   includeNpmIgnoreFiles?: boolean;
 
   /**
-   * The folder where the PNPM "node_modules" folder is located. This is used to resolve PNPM workaround
-   * links.
+   * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
+   * to the PNPM virtual store.
    */
   pnpmInstallFolder?: string;
 
@@ -293,16 +281,9 @@ export class DeployManager {
       case 'default': {
         terminal.writeLine('Creating symlinks');
         const linksToCopy: ILinkInfo[] = state.symlinkAnalyzer.reportSymlinks();
-        for (const linkToCopy of linksToCopy) {
-          const symlinkDeployed: boolean = await this._deploySymlinkAsync(linkToCopy, options);
-          if (!symlinkDeployed) {
-            // TODO: If a symbolic link points to another symbolic link, then we should order the operations
-            // so that the intermediary target is created first.  This case was procrastinated because it does
-            // not seem to occur in practice.  If you encounter this, please report it.
-            throw new InternalError('Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2));
-          }
-        }
-
+        await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
+          await this._deploySymlinkAsync(linkToCopy, options);
+        });
         await this._makeBinLinksAsync(options, state);
         break;
       }
@@ -347,7 +328,7 @@ export class DeployManager {
         }
         state.foldersToCopy.add(packageJsonRealFolderPath);
 
-        const originalPackageJson: IPackageJson = JsonFile.load(
+        const originalPackageJson: IPackageJson = await JsonFile.loadAsync(
           path.join(packageJsonRealFolderPath, 'package.json')
         );
 
@@ -409,11 +390,11 @@ export class DeployManager {
           }
         }
 
-        // Replicate the PNPM workaround links.
+        // Replicate the links to the virtual store.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
         if (pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, pnpmInstallFolder)) {
           try {
-            // The PNPM workaround links are created in this folder.  We will resolve the current package
+            // The PNPM virtual store links are created in this folder.  We will resolve the current package
             // from that location and collect any additional links encountered along the way.
             const pnpmDotFolderPath: string = path.join(pnpmInstallFolder, 'node_modules', '.pnpm');
 
@@ -430,9 +411,9 @@ export class DeployManager {
             packageJsonFolderPathQueue.push(dependencyPackageFolderPath);
           } catch (resolveErr) {
             if ((resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND') {
-              // The workaround link isn't guaranteed to exist, so ignore if it's missing
+              // The virtual store link isn't guaranteed to exist, so ignore if it's missing
               // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
-              console.log('Ignoring missing PNPM workaround link for ' + packageJsonFolderPath);
+              console.log('Ignoring missing PNPM virtual store link for ' + packageJsonFolderPath);
             }
           }
         }
@@ -493,31 +474,47 @@ export class DeployManager {
     // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
     // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
     // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
-    const resolveSuffix: string = packageName + resolve.isCore(packageName) ? '/' : '';
+    packageName = `${packageName}${isCore(packageName) ? '/' : ''}`;
 
-    const resolvedDependency: string = resolve.sync(packageName + resolveSuffix, {
-      basedir: startingFolder,
-      preserveSymlinks: false,
-      packageFilter: (pkg, dir) => {
-        // point "main" at a file that is guaranteed to exist
-        // This helps resolve packages such as @types/node that have no entry point
-        pkg.main = './package.json';
-        return pkg;
-      },
-      realpathSync: (filePath) => {
-        // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
-        try {
-          const resolvedPath: string = fsForResolve.realpathSync(filePath);
-          state.symlinkAnalyzer.analyzePath(filePath);
-          return resolvedPath;
-        } catch (realpathErr: unknown) {
-          if (!FileSystem.isFileDoesNotExistError(realpathErr as Error)) {
-            throw realpathErr;
+    const resolveDependencyPromise: Promise<string | undefined> = new Promise(
+      (resolve: (path: string | undefined) => void, reject: (error: Error) => void) => {
+        resolveFn(
+          packageName,
+          {
+            basedir: startingFolder,
+            preserveSymlinks: false,
+            packageFilter: (packageJson: PackageJSON) => {
+              // point "main" at a file that is guaranteed to exist
+              // This helps resolve packages such as @types/node that have no entry point
+              packageJson.main = './package.json';
+              return packageJson;
+            },
+            realpath: (filePath, callback: (err: Error | null, resolved?: string) => void) => {
+              // Analyze all links in the path while we traverse the file system
+              state.symlinkAnalyzer
+                .analyzePathAsync(filePath)
+                .then((targetNode: PathNode) => {
+                  callback(null, targetNode.nodePath);
+                })
+                .catch((error: Error) => {
+                  if (FileSystem.isFileDoesNotExistError(error)) {
+                    callback(null, filePath);
+                  } else {
+                    callback(error);
+                  }
+                });
+            }
+          },
+          (error: Error | null, resolvedPath?: string) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(resolvedPath);
           }
-        }
-        return filePath;
+        );
       }
-    });
+    );
+    const resolvedDependency: string | undefined = await resolveDependencyPromise;
 
     if (!resolvedDependency) {
       // This should not happen, since the resolve.sync() docs say it will throw an exception instead
@@ -590,11 +587,9 @@ export class DeployManager {
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
       // that "bundledDependencies" are not included.
-      const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
+      const npmPackFiles: string[] = await npmPacklist({
         path: sourceFolderPath
       });
-      walker.start();
-      const npmPackFiles: string[] = walker.result;
 
       const alreadyCopiedSourcePaths: Set<string> = new Set();
 
@@ -615,8 +610,8 @@ export class DeployManager {
           alreadyCopiedSourcePaths.add(copySourcePath);
 
           const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
-
-          if (state.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
+          const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(copySourcePath);
+          if (copySourcePathNode.kind !== 'link') {
             await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
 
             await FileSystem.copyFileAsync({
@@ -659,7 +654,7 @@ export class DeployManager {
 
           const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
           if (stats.isSymbolicLink()) {
-            state.symlinkAnalyzer.analyzePath(src);
+            await state.symlinkAnalyzer.analyzePathAsync(src);
             return false;
           } else {
             return true;
@@ -672,18 +667,12 @@ export class DeployManager {
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private async _deploySymlinkAsync(originalLinkInfo: ILinkInfo, options: IDeployOptions): Promise<boolean> {
+  private async _deploySymlinkAsync(originalLinkInfo: ILinkInfo, options: IDeployOptions): Promise<void> {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
       linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, options),
       targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, options)
     };
-
-    // Has the link target been created yet?  If not, we should try again later
-    const targetExists: boolean = await FileSystem.existsAsync(linkInfo.targetPath);
-    if (!targetExists) {
-      return false;
-    }
 
     const newLinkFolder: string = path.dirname(linkInfo.linkPath);
     await FileSystem.ensureFolderAsync(newLinkFolder);
@@ -724,8 +713,6 @@ export class DeployManager {
         });
       }
     }
-
-    return true;
   }
 
   /**
@@ -797,14 +784,20 @@ export class DeployManager {
     const { terminal } = options;
     const { projectConfigurationsByPath } = state;
 
-    for (const projectFolder of projectConfigurationsByPath.keys()) {
-      const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
-      const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
-      const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
+    await Async.forEachAsync(
+      projectConfigurationsByPath.keys(),
+      async (projectFolder: string) => {
+        const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
+        const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
+        const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
 
-      await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
-        warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
-      });
-    }
+        await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
+          warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
+        });
+      },
+      {
+        concurrency: 10
+      }
+    );
   }
 }
