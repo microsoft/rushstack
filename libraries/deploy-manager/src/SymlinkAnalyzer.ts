@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, FileSystemStats, Sort, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, FileSystemStats, Sort } from '@rushstack/node-core-library';
 
 import * as path from 'path';
 
@@ -60,31 +60,58 @@ export class SymlinkAnalyzer {
   // The symlinks that we encountered while building the directory tree
   private readonly _linkInfosByPath: Map<string, ILinkInfo> = new Map<string, ILinkInfo>();
 
-  public analyzePath(inputPath: string, preserveLinks: boolean = false): PathNode {
-    let pathSegments: string[] = path.resolve(inputPath).split(path.sep);
-    let pathSegmentsIndex: number = 0;
+  public async analyzePathAsync(inputPath: string, preserveLinks: boolean = false): Promise<PathNode> {
+    // First, try to short-circuit the analysis if we've already analyzed this path
+    const resolvedPath: string = path.resolve(inputPath);
+    const existingNode: PathNode | undefined = this._nodesByPath.get(resolvedPath);
+    if (existingNode) {
+      return existingNode;
+    }
 
-    for (;;) {
-      const currentPath: string = pathSegments.slice(0, pathSegmentsIndex + 1).join(path.sep);
+    let currentNode: PathNode | undefined;
+    let pathSegments: string[] = resolvedPath.split(path.sep);
 
+    for (let i: number = 0; i < pathSegments.length; i++) {
+      if (!preserveLinks) {
+        while (currentNode?.kind === 'link') {
+          const targetNode: PathNode = await this.analyzePathAsync(currentNode.linkTarget, true);
+
+          // Have we created an ILinkInfo for this link yet?
+          if (!this._linkInfosByPath.has(currentNode.nodePath)) {
+            // Follow any symbolic links to determine whether the final target is a directory
+            const targetStats: FileSystemStats = await FileSystem.getStatisticsAsync(targetNode.nodePath);
+            const targetIsDirectory: boolean = targetStats.isDirectory();
+            const linkInfo: ILinkInfo = {
+              kind: targetIsDirectory ? 'folderLink' : 'fileLink',
+              linkPath: currentNode.nodePath,
+              targetPath: targetNode.nodePath
+            };
+            this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
+          }
+
+          const targetSegments: string[] = targetNode.nodePath.split(path.sep);
+          const remainingSegments: string[] = pathSegments.slice(i);
+          pathSegments = [...targetSegments, ...remainingSegments];
+          i = targetSegments.length;
+          currentNode = targetNode;
+        }
+      }
+
+      const currentPath: string = pathSegments.slice(0, i + 1).join(path.sep);
       if (currentPath === '') {
         // Edge case for a Unix path like "/folder/file" --> [ "", "folder", "file" ]
-        ++pathSegmentsIndex;
         continue;
       }
 
-      let currentNode: PathNode | undefined = this._nodesByPath.get(currentPath);
+      currentNode = this._nodesByPath.get(currentPath);
       if (currentNode === undefined) {
-        const linkStats: FileSystemStats = FileSystem.getLinkStatistics(currentPath);
-
+        const linkStats: FileSystemStats = await FileSystem.getLinkStatisticsAsync(currentPath);
         if (linkStats.isSymbolicLink()) {
-          const linkTargetPath: string = FileSystem.readLink(currentPath);
-          const parentFolder: string = path.join(currentPath, '..');
-          const resolvedLinkTargetPath: string = path.resolve(parentFolder, linkTargetPath);
+          const linkTargetPath: string = await FileSystem.readLinkAsync(currentPath);
           currentNode = {
             kind: 'link',
             nodePath: currentPath,
-            linkTarget: resolvedLinkTargetPath
+            linkTarget: linkTargetPath
           };
         } else if (linkStats.isDirectory()) {
           currentNode = {
@@ -99,51 +126,19 @@ export class SymlinkAnalyzer {
         } else {
           throw new Error('Unknown object type: ' + currentPath);
         }
-
         this._nodesByPath.set(currentPath, currentNode);
       }
-
-      ++pathSegmentsIndex;
-
-      if (!preserveLinks) {
-        while (currentNode.kind === 'link') {
-          const targetNode: PathNode = this.analyzePath(currentNode.linkTarget, true);
-
-          // Have we created an ILinkInfo for this link yet?
-          if (!this._linkInfosByPath.has(currentNode.nodePath)) {
-            // Follow any symbolic links to determine whether the final target is a directory
-            const targetIsDirectory: boolean = FileSystem.getStatistics(targetNode.nodePath).isDirectory();
-            const linkInfo: ILinkInfo = {
-              kind: targetIsDirectory ? 'folderLink' : 'fileLink',
-              linkPath: currentNode.nodePath,
-              targetPath: targetNode.nodePath
-            };
-            this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
-          }
-
-          const targetSegments: string[] = targetNode.nodePath.split(path.sep);
-          const remainingSegments: string[] = pathSegments.slice(pathSegmentsIndex);
-          pathSegments = [...targetSegments, ...remainingSegments];
-          pathSegmentsIndex = targetSegments.length;
-          currentNode = targetNode;
-        }
-      }
-
-      if (pathSegmentsIndex >= pathSegments.length) {
-        // We reached the end
-        return currentNode;
-      }
-
-      if (currentNode.kind !== 'folder') {
-        // This should never happen, because analyzePath() is always supposed to receive complete paths
-        // to real filesystem objects.
-        throw new InternalError('The path ends prematurely at: ' + inputPath);
-      }
     }
+
+    if (!currentNode) {
+      throw new Error('Unable to analyze path: ' + inputPath);
+    }
+
+    return currentNode;
   }
 
   /**
-   * Returns a summary of all the symbolic links encountered by {@link SymlinkAnalyzer.analyzePath}.
+   * Returns a summary of all the symbolic links encountered by {@link SymlinkAnalyzer.analyzePathAsync}.
    */
   public reportSymlinks(): ILinkInfo[] {
     const list: ILinkInfo[] = [...this._linkInfosByPath.values()];
