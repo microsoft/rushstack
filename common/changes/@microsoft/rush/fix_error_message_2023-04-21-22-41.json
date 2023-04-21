@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve rush deploy error message for symlinks outside of the source path.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
