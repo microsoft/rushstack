@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as fs from 'fs';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { Ignore } from 'ignore';
@@ -14,8 +15,6 @@ import {
   Colors,
   JsonFile,
   AlreadyExistsBehavior,
-  NewlineKind,
-  type FileSystemStats,
   type IPackageJson,
   type ITerminal
 } from '@rushstack/node-core-library';
@@ -50,6 +49,7 @@ interface IDeployState {
   projectConfigurationsByPath: Map<string, IDeployProjectConfiguration>;
   projectConfigurationsByName: Map<string, IDeployProjectConfiguration>;
   symlinkAnalyzer: SymlinkAnalyzer;
+  archiver?: DeployArchiver;
 }
 
 /**
@@ -122,6 +122,12 @@ export interface IDeployOptions {
   createArchiveFilePath?: string;
 
   /**
+   * Whether to skip creating a deploy directory, and only create a deploy archive. This is only
+   * supported when linkCreation is 'script' or 'none'.
+   */
+  createArchiveOnly?: boolean;
+
+  /**
    * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
    * transform the package.json prior to deploy.
    */
@@ -180,8 +186,28 @@ export class DeployManager {
       targetRootFolder,
       mainProjectName,
       overwriteExisting,
-      createArchiveFilePath
+      createArchiveFilePath,
+      createArchiveOnly
     } = options;
+
+    if (createArchiveOnly) {
+      if (options.linkCreation !== 'script' && options.linkCreation !== 'none') {
+        throw new Error('createArchiveOnly is only supported when linkCreation is "script" or "none"');
+      }
+      if (!createArchiveFilePath) {
+        throw new Error('createArchiveOnly is only supported when createArchiveFilePath is specified');
+      }
+    }
+
+    let archiver: DeployArchiver | undefined;
+    if (createArchiveFilePath) {
+      if (path.extname(createArchiveFilePath) !== '.zip') {
+        throw new Error('Only archives with the .zip file extension are currently supported.');
+      }
+
+      const archiveFilePath: string = path.resolve(targetRootFolder, createArchiveFilePath);
+      archiver = new DeployArchiver({ archiveFilePath });
+    }
 
     await FileSystem.ensureFolderAsync(targetRootFolder);
 
@@ -206,17 +232,13 @@ export class DeployManager {
       }
     }
 
-    // If create archive is set, ensure it has a legal extension
-    if (createArchiveFilePath && path.extname(createArchiveFilePath) !== '.zip') {
-      throw new Error('Only archives with the .zip file extension are currently supported.');
-    }
-
     // Create a new state for each run
     const state: IDeployState = {
       foldersToCopy: new Set(),
       projectConfigurationsByName: new Map(projectConfigurations.map((p) => [p.projectName, p])),
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
-      symlinkAnalyzer: new SymlinkAnalyzer()
+      symlinkAnalyzer: new SymlinkAnalyzer(),
+      archiver
     };
 
     await this._performDeploymentAsync(options, state);
@@ -231,9 +253,10 @@ export class DeployManager {
       folderToCopy: addditionalFolderToCopy,
       linkCreation
     } = options;
+    const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer, archiver } = state;
 
     const mainProjectConfiguration: IDeployProjectConfiguration | undefined =
-      state.projectConfigurationsByName.get(mainProjectName);
+      projectConfigurationsByName.get(mainProjectName);
     if (!mainProjectConfiguration) {
       throw new Error(`Main project "${mainProjectName}" was not found in the list of projects`);
     }
@@ -244,7 +267,7 @@ export class DeployManager {
       if (additionalProjectsToInclude) {
         for (const additionalProjectNameToInclude of additionalProjectsToInclude) {
           const additionalProjectToInclude: IDeployProjectConfiguration | undefined =
-            state.projectConfigurationsByName.get(additionalProjectNameToInclude);
+            projectConfigurationsByName.get(additionalProjectNameToInclude);
           if (!additionalProjectToInclude) {
             throw new Error(
               `Project "${additionalProjectNameToInclude}" was not found in the list of projects.`
@@ -260,9 +283,11 @@ export class DeployManager {
       await this._collectFoldersAsync(projectFolder, options, state);
     }
 
-    terminal.writeLine(`Copying folders to target folder "${targetRootFolder}"`);
+    if (!options.createArchiveOnly) {
+      terminal.writeLine(`Copying folders to target folder "${targetRootFolder}"`);
+    }
     await Async.forEachAsync(
-      state.foldersToCopy,
+      foldersToCopy,
       async (folderToCopy: string) => {
         await this._deployFolderAsync(folderToCopy, options, state);
       },
@@ -271,26 +296,41 @@ export class DeployManager {
       }
     );
 
-    terminal.writeLine('Writing deploy-metadata.json');
+    terminal.writeLine('Creating deploy-metadata.json');
     await this._writeDeployMetadataAsync(options, state);
 
     switch (linkCreation) {
       case 'script': {
-        terminal.writeLine('Writing create-links.js');
-        await FileSystem.copyFileAsync({
-          sourcePath: path.join(scriptsFolderPath, createLinksScriptFilename),
-          destinationPath: path.join(targetRootFolder, createLinksScriptFilename),
-          alreadyExistsBehavior: AlreadyExistsBehavior.Error
+        const sourceFilePath: string = path.join(scriptsFolderPath, createLinksScriptFilename);
+        if (!options.createArchiveOnly) {
+          terminal.writeLine(`Creating ${createLinksScriptFilename}`);
+          await FileSystem.copyFileAsync({
+            sourcePath: sourceFilePath,
+            destinationPath: path.join(targetRootFolder, createLinksScriptFilename),
+            alreadyExistsBehavior: AlreadyExistsBehavior.Error
+          });
+        }
+        await state.archiver?.addToArchiveAsync({
+          filePath: sourceFilePath,
+          archivePath: createLinksScriptFilename
         });
         break;
       }
       case 'default': {
         terminal.writeLine('Creating symlinks');
-        const linksToCopy: ILinkInfo[] = state.symlinkAnalyzer.reportSymlinks();
+        const linksToCopy: ILinkInfo[] = symlinkAnalyzer.reportSymlinks();
         await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
-          await this._deploySymlinkAsync(linkToCopy, options);
+          await this._deploySymlinkAsync(linkToCopy, options, state);
         });
-        await this._makeBinLinksAsync(options, state);
+        await Async.forEachAsync(
+          includedProjectsSet,
+          async (project: IDeployProjectConfiguration) => {
+            await this._makeBinLinksAsync(project.projectFolder, options, state);
+          },
+          {
+            concurrency: 10
+          }
+        );
         break;
       }
       default: {
@@ -307,7 +347,10 @@ export class DeployManager {
       });
     }
 
-    await DeployArchiver.createArchiveAsync(options);
+    if (archiver) {
+      terminal.writeLine(`Creating archive at "${archiver.archiveFilePath}"`);
+      await archiver.createArchiveAsync();
+    }
   }
 
   /**
@@ -496,7 +539,7 @@ export class DeployManager {
     const { sourceRootFolder, targetRootFolder } = options;
     const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     if (relativePath.startsWith('..')) {
-      throw new Error(`Source path "${absolutePathInSourceFolder}"is not under "${sourceRootFolder}"`);
+      throw new Error(`Source path "${absolutePathInSourceFolder}" is not under "${sourceRootFolder}"`);
     }
     const absolutePathInTargetFolder: string = path.join(targetRootFolder, relativePath);
     return absolutePathInTargetFolder;
@@ -512,7 +555,7 @@ export class DeployManager {
     const { sourceRootFolder } = options;
     const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     if (relativePath.startsWith('..')) {
-      throw new Error(`Source path "${absolutePathInSourceFolder}"is not under "${sourceRootFolder}"`);
+      throw new Error(`Source path "${absolutePathInSourceFolder}" is not under "${sourceRootFolder}"`);
     }
     return relativePath.replace('\\', '/');
   }
@@ -525,8 +568,8 @@ export class DeployManager {
     options: IDeployOptions,
     state: IDeployState
   ): Promise<void> {
-    const { includeNpmIgnoreFiles } = options;
-    const { projectConfigurationsByPath } = state;
+    const { includeNpmIgnoreFiles, targetRootFolder } = options;
+    const { projectConfigurationsByPath, archiver } = state;
     let useNpmIgnoreFilter: boolean = false;
 
     if (!includeNpmIgnoreFiles) {
@@ -568,13 +611,21 @@ export class DeployManager {
           const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
           const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(copySourcePath);
           if (copySourcePathNode.kind !== 'link') {
-            await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
+            if (!options.createArchiveOnly) {
+              await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
+              // Use the fs.copyFile API instead of FileSystem.copyFileAsync() since copyFileAsync performs
+              // a needless stat() call to determine if it's a file or folder, and we already know it's a file.
+              await fs.promises.copyFile(copySourcePath, copyDestinationPath, fs.constants.COPYFILE_EXCL);
+            }
 
-            await FileSystem.copyFileAsync({
-              sourcePath: copySourcePath,
-              destinationPath: copyDestinationPath,
-              alreadyExistsBehavior: AlreadyExistsBehavior.Error
-            });
+            if (archiver) {
+              const archivePath: string = path.relative(targetRootFolder, copyDestinationPath);
+              await archiver.addToArchiveAsync({
+                filePath: copySourcePath,
+                archivePath,
+                stats: copySourcePathNode.linkStats
+              });
+            }
           }
         },
         {
@@ -594,36 +645,62 @@ export class DeployManager {
         '**/.DS_Store'
       ]);
 
-      await FileSystem.copyFilesAsync({
-        sourcePath: sourceFolderPath,
-        destinationPath: targetFolderPath,
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error,
-        filter: async (src: string, dest: string) => {
-          const relativeSrc: string = path.relative(sourceFolderPath, src);
-          if (!relativeSrc) {
-            return true; // don't filter sourceFolderPath itself
+      // Do a breadth-first search of the source folder, copying each file to the target folder
+      const queue: AsyncQueue<string> = new AsyncQueue([sourceFolderPath]);
+      await Async.forEachAsync(
+        queue,
+        async ([sourcePath, callback]: [string, () => void]) => {
+          const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
+          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
+            callback();
+            return;
           }
 
-          if (ignoreFilter.ignores(relativeSrc)) {
-            return false;
+          const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
+          if (sourcePathNode.kind === 'file') {
+            const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
+            if (!options.createArchiveOnly) {
+              // Manually call fs.copyFile to avoid unnecessary stat calls.
+              await fs.promises.copyFile(sourcePath, targetPath, fs.constants.COPYFILE_EXCL);
+            }
+
+            // Add the file to the archive. Only need to add files since directories will be auto-created
+            if (archiver) {
+              const archivePath: string = path.relative(targetRootFolder, targetPath);
+              await archiver.addToArchiveAsync({
+                filePath: sourcePath,
+                archivePath: archivePath,
+                stats: sourcePathNode.linkStats
+              });
+            }
+          } else if (sourcePathNode.kind === 'folder') {
+            if (!options.createArchiveOnly) {
+              const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
+              await FileSystem.ensureFolderAsync(targetPath);
+            }
+            const children: string[] = await FileSystem.readFolderItemNamesAsync(sourcePath);
+            for (const child of children) {
+              queue.push(path.join(sourcePath, child));
+            }
           }
 
-          const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
-          if (stats.isSymbolicLink()) {
-            await state.symlinkAnalyzer.analyzePathAsync(src);
-            return false;
-          } else {
-            return true;
-          }
+          callback();
+        },
+        {
+          concurrency: 10
         }
-      });
+      );
     }
   }
 
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private async _deploySymlinkAsync(originalLinkInfo: ILinkInfo, options: IDeployOptions): Promise<void> {
+  private async _deploySymlinkAsync(
+    originalLinkInfo: ILinkInfo,
+    options: IDeployOptions,
+    state: IDeployState
+  ): Promise<void> {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
       linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, options),
@@ -659,6 +736,13 @@ export class DeployManager {
         newLinkPath: linkInfo.linkPath
       });
     }
+
+    // Since the created symlinks have the required relative paths, they can be added directly to
+    // the archive.
+    await state.archiver?.addToArchiveAsync({
+      filePath: linkInfo.linkPath,
+      archivePath: path.relative(options.targetRootFolder, linkInfo.linkPath)
+    });
   }
 
   /**
@@ -668,7 +752,8 @@ export class DeployManager {
     const { mainProjectName, scenarioName, targetRootFolder } = options;
     const { projectConfigurationsByPath } = state;
 
-    const deployMetadataFilePath: string = path.join(targetRootFolder, 'deploy-metadata.json');
+    const deployMetadataFileName: string = 'deploy-metadata.json';
+    const deployMetadataFilePath: string = path.join(targetRootFolder, deployMetadataFileName);
     const deployMetadataJson: IDeployMetadataJson = {
       mainProjectName,
       scenarioName,
@@ -692,29 +777,40 @@ export class DeployManager {
       deployMetadataJson.links.push(relativeInfo);
     }
 
-    await JsonFile.saveAsync(deployMetadataJson, deployMetadataFilePath, {
-      newlineConversion: NewlineKind.OsDefault
+    const deployMetadataFileContent: string = JSON.stringify(deployMetadataJson, undefined, 0);
+    if (!options.createArchiveOnly) {
+      await FileSystem.writeFileAsync(deployMetadataFilePath, deployMetadataFileContent);
+    }
+    await state.archiver?.addToArchiveAsync({
+      fileData: deployMetadataFileContent,
+      archivePath: deployMetadataFileName
     });
   }
 
-  private async _makeBinLinksAsync(options: IDeployOptions, state: IDeployState): Promise<void> {
+  private async _makeBinLinksAsync(
+    projectFolder: string,
+    options: IDeployOptions,
+    state: IDeployState
+  ): Promise<void> {
     const { terminal } = options;
-    const { projectConfigurationsByPath } = state;
 
-    await Async.forEachAsync(
-      projectConfigurationsByPath.keys(),
-      async (projectFolder: string) => {
-        const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
-        const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
-        const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
+    const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
+    const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
+    const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
 
-        await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
-          warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
+    await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
+      warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
+    });
+
+    if (state.archiver) {
+      const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(deployedProjectBinFolder);
+      for (const binFolderItem of binFolderItems) {
+        const binFilePath: string = path.join(deployedProjectBinFolder, binFolderItem);
+        await state.archiver.addToArchiveAsync({
+          filePath: binFilePath,
+          archivePath: path.relative(options.targetRootFolder, binFilePath)
         });
-      },
-      {
-        concurrency: 10
       }
-    );
+    }
   }
 }

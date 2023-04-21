@@ -2,82 +2,74 @@
 // See LICENSE in the project root for license information.
 
 import JSZip from 'jszip';
-
-import * as path from 'path';
 import { FileSystem, FileSystemStats, Path } from '@rushstack/node-core-library';
 
-import { IDeployOptions } from './DeployManager';
+// This value sets the allowed permissions when preserving symbolic links.
+// 120000 is the symbolic link identifier, and 0755 designates the allowed permissions.
+// See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
+const SYMBOLIC_LINK_PERMISSIONS: number = 0o120755;
+
+export interface IDeployArchiverOptions {
+  archiveFilePath: string;
+}
+
+export interface IAddToArchiveOptions {
+  filePath?: string;
+  fileData?: Buffer | string;
+  archivePath: string;
+  stats?: FileSystemStats;
+}
 
 export class DeployArchiver {
-  public static async createArchiveAsync(options: IDeployOptions): Promise<void> {
-    const { terminal, targetRootFolder, createArchiveFilePath } = options;
-    if (createArchiveFilePath) {
-      const archivePath: string = path.resolve(targetRootFolder, createArchiveFilePath);
-      terminal.writeLine(`Creating archive at "${archivePath}"...`);
+  private _options: IDeployArchiverOptions;
+  private _zip: JSZip;
 
-      const zip: JSZip = this._getZipOfFolder(targetRootFolder);
-      const zipContent: Buffer = await zip.generateAsync({
-        type: 'nodebuffer',
-        platform: 'UNIX'
-      });
-      await FileSystem.writeFileAsync(archivePath, zipContent);
-
-      terminal.writeLine('Archive created successfully.');
-    }
+  public constructor(options: IDeployArchiverOptions) {
+    this._options = options;
+    this._zip = new JSZip();
   }
 
-  private static _getFilePathsRecursively(dir: string): string[] {
-    // returns a flat array of absolute paths of all files recursively contained in the dir
-    let results: string[] = [];
-    const list: string[] = FileSystem.readFolderItemNames(dir);
-
-    if (!list.length) return results;
-
-    for (let file of list) {
-      file = path.resolve(dir, file);
-
-      const stat: FileSystemStats = FileSystem.getLinkStatistics(file);
-
-      if (stat && stat.isDirectory()) {
-        results = results.concat(this._getFilePathsRecursively(file));
-      } else {
-        results.push(file);
-      }
-    }
-
-    return results;
+  public get archiveFilePath(): string {
+    return this._options.archiveFilePath;
   }
 
-  private static _getZipOfFolder(dir: string): JSZip {
-    // returns a JSZip instance filled with contents of dir.
-    const allPaths: string[] = this._getFilePathsRecursively(dir);
+  public async addToArchiveAsync(options: IAddToArchiveOptions): Promise<void> {
+    const { filePath, fileData, archivePath } = options;
 
-    // This value sets the allowed permissions when preserving symbolic links.
-    // 120000 is the symbolic link identifier, and 0755 designates the allowed permissions.
-    // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
-    const permissionsValue: number = 0o120755;
-
-    const zip: JSZip = new JSZip();
-    for (const filePath of allPaths) {
-      // Get the relative path and replace backslashes for Unix compat
-      const addPath: string = Path.convertToSlashes(path.relative(dir, filePath));
-      const stat: FileSystemStats = FileSystem.getLinkStatistics(filePath);
-      const permissions: number = stat.mode;
-
-      if (stat.isSymbolicLink()) {
-        zip.file(addPath, FileSystem.readLink(filePath), {
-          unixPermissions: permissionsValue,
-          dir: stat.isDirectory()
-        });
+    let data: Buffer | string;
+    let permissions: number;
+    if (filePath) {
+      const stats: FileSystemStats = options.stats ?? (await FileSystem.getLinkStatisticsAsync(filePath));
+      if (stats.isSymbolicLink()) {
+        data = await FileSystem.readLinkAsync(filePath);
+        permissions = SYMBOLIC_LINK_PERMISSIONS;
+      } else if (stats.isDirectory()) {
+        throw new Error('Directories cannot be added to the archive');
       } else {
-        const data: Buffer = FileSystem.readFileToBuffer(filePath);
-        zip.file(addPath, data, {
-          unixPermissions: permissions,
-          dir: stat.isDirectory()
-        });
+        data = await FileSystem.readFileToBufferAsync(filePath);
+        permissions = stats.mode;
       }
+    } else if (fileData) {
+      data = fileData;
+      permissions = 0o000755;
+    } else {
+      throw new Error('Either filePath or fileData must be provided');
     }
 
-    return zip;
+    // Replace backslashes for Unix compat
+    const addPath: string = Path.convertToSlashes(archivePath);
+    this._zip.file(addPath, data, {
+      unixPermissions: permissions,
+      dir: false
+    });
+  }
+
+  public async createArchiveAsync(): Promise<void> {
+    const { archiveFilePath } = this._options;
+    const zipContent: Buffer = await this._zip.generateAsync({
+      type: 'nodebuffer',
+      platform: 'UNIX'
+    });
+    await FileSystem.writeFileAsync(archiveFilePath, zipContent);
   }
 }

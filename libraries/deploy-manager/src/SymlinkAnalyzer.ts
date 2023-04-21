@@ -5,28 +5,31 @@ import { FileSystem, FileSystemStats, Sort } from '@rushstack/node-core-library'
 
 import * as path from 'path';
 
+export interface IPathNodeBase {
+  kind: 'file' | 'folder' | 'link';
+  nodePath: string;
+  linkStats: FileSystemStats;
+}
+
 /**
  * Represents a file object analyzed by {@link SymlinkAnalyzer}.
  */
-export interface IFileNode {
+export interface IFileNode extends IPathNodeBase {
   kind: 'file';
-  nodePath: string;
 }
 
 /**
  * Represents a folder object analyzed by {@link SymlinkAnalyzer}.
  */
-export interface IFolderNode {
+export interface IFolderNode extends IPathNodeBase {
   kind: 'folder';
-  nodePath: string;
 }
 
 /**
  * Represents a symbolic link analyzed by {@link SymlinkAnalyzer}.
  */
-export interface ILinkNode {
+export interface ILinkNode extends IPathNodeBase {
   kind: 'link';
-  nodePath: string;
 
   /**
    * The immediate target that the symlink resolves to.
@@ -111,17 +114,20 @@ export class SymlinkAnalyzer {
           currentNode = {
             kind: 'link',
             nodePath: currentPath,
-            linkTarget: linkTargetPath
+            linkTarget: linkTargetPath,
+            linkStats
           };
         } else if (linkStats.isDirectory()) {
           currentNode = {
             kind: 'folder',
-            nodePath: currentPath
+            nodePath: currentPath,
+            linkStats
           };
         } else if (linkStats.isFile()) {
           currentNode = {
             kind: 'file',
-            nodePath: currentPath
+            nodePath: currentPath,
+            linkStats
           };
         } else {
           throw new Error('Unknown object type: ' + currentPath);

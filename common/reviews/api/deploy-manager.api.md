@@ -15,6 +15,7 @@ export class DeployManager {
 // @public
 export interface IDeployOptions {
     createArchiveFilePath?: string;
+    createArchiveOnly?: boolean;
     folderToCopy?: string;
     includeDevDependencies?: boolean;
     includeNpmIgnoreFiles?: boolean;

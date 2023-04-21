@@ -22,6 +22,7 @@ export class DeployAction extends BaseRushAction {
   private readonly _overwrite: CommandLineFlagParameter;
   private readonly _targetFolder: CommandLineStringParameter;
   private readonly _createArchivePath: CommandLineStringParameter;
+  private readonly _createArchiveOnly: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -89,6 +90,13 @@ export class DeployAction extends BaseRushAction {
         ' The newly created archive file will be placed according to the designated path, relative' +
         ' to the target folder. Supported file extensions: .zip'
     });
+
+    this._createArchiveOnly = this.defineFlagParameter({
+      parameterLongName: '--create-archive-only',
+      description:
+        'If specified, "rush deploy" will only create an archive containing the contents of the target folder.' +
+        ' The target folder will not be modified other than to create the archive file.'
+    });
   }
 
   protected async runAsync(): Promise<void> {
@@ -131,6 +139,8 @@ export class DeployAction extends BaseRushAction {
     const createArchiveFilePath: string | undefined = this._createArchivePath.value
       ? path.resolve(targetRootFolder, this._createArchivePath.value)
       : undefined;
+
+    const createArchiveOnly: boolean = this._createArchiveOnly.value;
 
     let transformPackageJson: ((packageJson: IPackageJson) => IPackageJson) | undefined;
     let pnpmInstallFolder: string | undefined;
@@ -177,6 +187,7 @@ export class DeployAction extends BaseRushAction {
       mainProjectName,
       projectConfigurations,
       createArchiveFilePath,
+      createArchiveOnly,
       pnpmInstallFolder,
       transformPackageJson
     });
