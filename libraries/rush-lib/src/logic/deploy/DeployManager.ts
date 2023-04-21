@@ -583,6 +583,11 @@ export class DeployManager {
 
     // Remap the links to be relative to target folder
     for (const absoluteLinkInfo of deployState.symlinkAnalyzer.reportSymlinks()) {
+      if (!Path.isUnderOrEqual(absoluteLinkInfo.targetPath, deployState.sourceRootFolder)) {
+        throw new Error(
+          `Symlink targets must be under ${deployState.sourceRootFolder}\n${absoluteLinkInfo.linkPath} -> ${absoluteLinkInfo.targetPath}`
+        );
+      }
       const relativeInfo: ILinkInfo = {
         kind: absoluteLinkInfo.kind,
         linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, deployState),
