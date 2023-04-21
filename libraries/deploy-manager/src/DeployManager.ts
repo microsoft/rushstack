@@ -2,41 +2,28 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as resolve from 'resolve';
-import * as npmPacklist from 'npm-packlist';
+import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
-
-// (Used only by the legacy code fragment in the resolve.sync() hook below)
-import * as fsForResolve from 'fs';
-
 import ignore, { Ignore } from 'ignore';
 import {
   Async,
+  AsyncQueue,
   Path,
   FileSystem,
-  PackageJsonLookup,
+  Import,
   Colors,
   JsonFile,
   AlreadyExistsBehavior,
-  InternalError,
   NewlineKind,
   type FileSystemStats,
   type IPackageJson,
   type ITerminal
 } from '@rushstack/node-core-library';
+
 import { DeployArchiver } from './DeployArchiver';
-import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
+import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
 import { matchesWithStar } from './Utils';
 import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
-
-// (@types/npm-packlist is missing this API)
-declare module 'npm-packlist' {
-  export class WalkerSync {
-    public readonly result: string[];
-    public constructor(opts: { path: string });
-    public start(): void;
-  }
-}
 
 /**
  * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
@@ -151,8 +138,8 @@ export interface IDeployOptions {
   includeNpmIgnoreFiles?: boolean;
 
   /**
-   * The folder where the PNPM "node_modules" folder is located. This is used to resolve PNPM workaround
-   * links.
+   * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
+   * to the PNPM virtual store.
    */
   pnpmInstallFolder?: string;
 
@@ -183,12 +170,6 @@ export interface IDeployOptions {
  * @public
  */
 export class DeployManager {
-  private readonly _packageJsonLookup: PackageJsonLookup;
-
-  public constructor() {
-    this._packageJsonLookup = new PackageJsonLookup();
-  }
-
   /**
    * Perform a deployment using the provided options
    */
@@ -251,14 +232,28 @@ export class DeployManager {
       linkCreation
     } = options;
 
-    // Calculate the set with additionalProjectsToInclude
-    const includedProjectsSet: Set<IDeployProjectConfiguration> = new Set();
     const mainProjectConfiguration: IDeployProjectConfiguration | undefined =
       state.projectConfigurationsByName.get(mainProjectName);
     if (!mainProjectConfiguration) {
       throw new Error(`Main project "${mainProjectName}" was not found in the list of projects`);
     }
-    this._collectProjectsToInclude(includedProjectsSet, mainProjectConfiguration, state);
+
+    // Calculate the set with additionalProjectsToInclude
+    const includedProjectsSet: Set<IDeployProjectConfiguration> = new Set([mainProjectConfiguration]);
+    for (const { additionalProjectsToInclude } of includedProjectsSet) {
+      if (additionalProjectsToInclude) {
+        for (const additionalProjectNameToInclude of additionalProjectsToInclude) {
+          const additionalProjectToInclude: IDeployProjectConfiguration | undefined =
+            state.projectConfigurationsByName.get(additionalProjectNameToInclude);
+          if (!additionalProjectToInclude) {
+            throw new Error(
+              `Project "${additionalProjectNameToInclude}" was not found in the list of projects.`
+            );
+          }
+          includedProjectsSet.add(additionalProjectToInclude);
+        }
+      }
+    }
 
     for (const { projectName, projectFolder } of includedProjectsSet) {
       terminal.writeLine(Colors.cyan(`Analyzing project: ${projectName}`));
@@ -292,16 +287,9 @@ export class DeployManager {
       case 'default': {
         terminal.writeLine('Creating symlinks');
         const linksToCopy: ILinkInfo[] = state.symlinkAnalyzer.reportSymlinks();
-        for (const linkToCopy of linksToCopy) {
-          const symlinkDeployed: boolean = await this._deploySymlinkAsync(linkToCopy, options);
-          if (!symlinkDeployed) {
-            // TODO: If a symbolic link points to another symbolic link, then we should order the operations
-            // so that the intermediary target is created first.  This case was procrastinated because it does
-            // not seem to occur in practice.  If you encounter this, please report it.
-            throw new InternalError('Target does not exist: ' + JSON.stringify(linkToCopy, undefined, 2));
-          }
-        }
-
+        await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
+          await this._deploySymlinkAsync(linkToCopy, options);
+        });
         await this._makeBinLinksAsync(options, state);
         break;
       }
@@ -333,19 +321,20 @@ export class DeployManager {
     const { terminal, pnpmInstallFolder, transformPackageJson } = options;
     const { projectConfigurationsByPath } = state;
 
-    const packageJsonFolderPathsQueue: Set<string> = new Set<string>([packageJsonFolder]);
+    const packageJsonFolderPathQueue: AsyncQueue<string> = new AsyncQueue([packageJsonFolder]);
 
     await Async.forEachAsync(
-      packageJsonFolderPathsQueue,
-      async (packageJsonFolderPath: string) => {
+      packageJsonFolderPathQueue,
+      async ([packageJsonFolderPath, callback]: [string, () => void]) => {
         const packageJsonRealFolderPath: string = await FileSystem.getRealPathAsync(packageJsonFolderPath);
         if (state.foldersToCopy.has(packageJsonRealFolderPath)) {
           // we've already seen this folder
+          callback();
           return;
         }
         state.foldersToCopy.add(packageJsonRealFolderPath);
 
-        const originalPackageJson: IPackageJson = JsonFile.load(
+        const originalPackageJson: IPackageJson = await JsonFile.loadAsync(
           path.join(packageJsonRealFolderPath, 'package.json')
         );
 
@@ -389,17 +378,23 @@ export class DeployManager {
 
         for (const dependencyPackageName of dependencyNamesToProcess) {
           try {
-            const dependencyPackageFolderPath: string = await this._traceResolveDependencyAsync(
-              dependencyPackageName,
-              packageJsonRealFolderPath,
-              state
-            );
-            packageJsonFolderPathsQueue.add(dependencyPackageFolderPath);
+            const dependencyPackageFolderPath: string = await Import.resolvePackageAsync({
+              packageName: dependencyPackageName,
+              baseFolderPath: packageJsonRealFolderPath,
+              getRealPathAsync: async (filePath: string) => {
+                try {
+                  return (await state.symlinkAnalyzer.analyzePathAsync(filePath)).nodePath;
+                } catch (error: unknown) {
+                  if (FileSystem.isFileDoesNotExistError(error as Error)) {
+                    return filePath;
+                  }
+                  throw error;
+                }
+              }
+            });
+            packageJsonFolderPathQueue.push(dependencyPackageFolderPath);
           } catch (resolveErr) {
-            if (
-              (resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND' &&
-              optionalDependencyNames.has(dependencyPackageName)
-            ) {
+            if (optionalDependencyNames.has(dependencyPackageName)) {
               // Ignore missing optional dependency
               continue;
             }
@@ -407,12 +402,13 @@ export class DeployManager {
           }
         }
 
-        // Replicate the PNPM workaround links.
+        // Replicate the links to the virtual store.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
         if (pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, pnpmInstallFolder)) {
           try {
-            // The PNPM workaround links are created in this folder.  We will resolve the current package
+            // The PNPM virtual store links are created in this folder.  We will resolve the current package
             // from that location and collect any additional links encountered along the way.
+            // TODO: This can be configured via NPMRC. We should support that.
             const pnpmDotFolderPath: string = path.join(pnpmInstallFolder, 'node_modules', '.pnpm');
 
             // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
@@ -420,23 +416,32 @@ export class DeployManager {
             // "dependencies": {
             //   "alias-name": "npm:real-name@^1.2.3"
             // }
-            const dependencyPackageFolderPath: string = await this._traceResolveDependencyAsync(
-              packageJson.name,
-              pnpmDotFolderPath,
-              state
-            );
-            packageJsonFolderPathsQueue.add(dependencyPackageFolderPath);
+            const dependencyPackageFolderPath: string = await Import.resolvePackageAsync({
+              packageName: packageJson.name,
+              baseFolderPath: pnpmDotFolderPath,
+              getRealPathAsync: async (filePath: string) => {
+                try {
+                  return (await state.symlinkAnalyzer.analyzePathAsync(filePath)).nodePath;
+                } catch (error: unknown) {
+                  if (FileSystem.isFileDoesNotExistError(error as Error)) {
+                    return filePath;
+                  }
+                  throw error;
+                }
+              }
+            });
+            packageJsonFolderPathQueue.push(dependencyPackageFolderPath);
           } catch (resolveErr) {
-            if ((resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND') {
-              // The workaround link isn't guaranteed to exist, so ignore if it's missing
-              // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
-              console.log('Ignoring missing PNPM workaround link for ' + packageJsonFolderPath);
-            }
+            // The virtual store link isn't guaranteed to exist, so ignore if it's missing
+            // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
+            console.log('Ignoring missing PNPM virtual store link for ' + packageJsonFolderPath);
           }
         }
+
+        callback();
       },
       {
-        concurrency: 1
+        concurrency: 10
       }
     );
   }
@@ -481,54 +486,6 @@ export class DeployManager {
     return allDependencyNames;
   }
 
-  private async _traceResolveDependencyAsync(
-    packageName: string,
-    startingFolder: string,
-    state: IDeployState
-  ): Promise<string> {
-    // The "resolve" library models the Node.js require() API, which gives precedence to "core" system modules
-    // over an NPM package with the same name.  But we are traversing package.json dependencies, which never
-    // refer to system modules.  Appending a "/" forces require() to look for the NPM package.
-    const resolveSuffix: string = packageName + resolve.isCore(packageName) ? '/' : '';
-
-    const resolvedDependency: string = resolve.sync(packageName + resolveSuffix, {
-      basedir: startingFolder,
-      preserveSymlinks: false,
-      packageFilter: (pkg, dir) => {
-        // point "main" at a file that is guaranteed to exist
-        // This helps resolve packages such as @types/node that have no entry point
-        pkg.main = './package.json';
-        return pkg;
-      },
-      realpathSync: (filePath) => {
-        // This code fragment is a modification of the documented default implementation from the "fs-extra" docs
-        try {
-          const resolvedPath: string = fsForResolve.realpathSync(filePath);
-          state.symlinkAnalyzer.analyzePath(filePath);
-          return resolvedPath;
-        } catch (realpathErr: unknown) {
-          if (!FileSystem.isFileDoesNotExistError(realpathErr as Error)) {
-            throw realpathErr;
-          }
-        }
-        return filePath;
-      }
-    });
-
-    if (!resolvedDependency) {
-      // This should not happen, since the resolve.sync() docs say it will throw an exception instead
-      throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
-    }
-
-    const dependencyPackageFolderPath: string | undefined =
-      this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
-
-    if (!dependencyPackageFolderPath) {
-      throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
-    }
-    return dependencyPackageFolderPath;
-  }
-
   /**
    * Maps a file path from IDeployOptions.sourceRootFolder to IDeployOptions.targetRootFolder
    *
@@ -537,10 +494,10 @@ export class DeployManager {
    */
   private _remapPathForDeployFolder(absolutePathInSourceFolder: string, options: IDeployOptions): string {
     const { sourceRootFolder, targetRootFolder } = options;
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, sourceRootFolder)) {
+    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
+    if (relativePath.startsWith('..')) {
       throw new Error(`Source path "${absolutePathInSourceFolder}"is not under "${sourceRootFolder}"`);
     }
-    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     const absolutePathInTargetFolder: string = path.join(targetRootFolder, relativePath);
     return absolutePathInTargetFolder;
   }
@@ -553,10 +510,10 @@ export class DeployManager {
    */
   private _remapPathForDeployMetadata(absolutePathInSourceFolder: string, options: IDeployOptions): string {
     const { sourceRootFolder } = options;
-    if (!Path.isUnderOrEqual(absolutePathInSourceFolder, sourceRootFolder)) {
+    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
+    if (relativePath.startsWith('..')) {
       throw new Error(`Source path "${absolutePathInSourceFolder}"is not under "${sourceRootFolder}"`);
     }
-    const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     return relativePath.replace('\\', '/');
   }
 
@@ -586,11 +543,9 @@ export class DeployManager {
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
       // that "bundledDependencies" are not included.
-      const walker: npmPacklist.WalkerSync = new npmPacklist.WalkerSync({
+      const npmPackFiles: string[] = await npmPacklist({
         path: sourceFolderPath
       });
-      walker.start();
-      const npmPackFiles: string[] = walker.result;
 
       const alreadyCopiedSourcePaths: Set<string> = new Set();
 
@@ -611,8 +566,8 @@ export class DeployManager {
           alreadyCopiedSourcePaths.add(copySourcePath);
 
           const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
-
-          if (state.symlinkAnalyzer.analyzePath(copySourcePath).kind !== 'link') {
+          const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(copySourcePath);
+          if (copySourcePathNode.kind !== 'link') {
             await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
 
             await FileSystem.copyFileAsync({
@@ -655,7 +610,7 @@ export class DeployManager {
 
           const stats: FileSystemStats = FileSystem.getLinkStatistics(src);
           if (stats.isSymbolicLink()) {
-            state.symlinkAnalyzer.analyzePath(src);
+            await state.symlinkAnalyzer.analyzePathAsync(src);
             return false;
           } else {
             return true;
@@ -668,18 +623,12 @@ export class DeployManager {
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private async _deploySymlinkAsync(originalLinkInfo: ILinkInfo, options: IDeployOptions): Promise<boolean> {
+  private async _deploySymlinkAsync(originalLinkInfo: ILinkInfo, options: IDeployOptions): Promise<void> {
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
       linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, options),
       targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, options)
     };
-
-    // Has the link target been created yet?  If not, we should try again later
-    const targetExists: boolean = await FileSystem.existsAsync(linkInfo.targetPath);
-    if (!targetExists) {
-      return false;
-    }
 
     const newLinkFolder: string = path.dirname(linkInfo.linkPath);
     await FileSystem.ensureFolderAsync(newLinkFolder);
@@ -688,28 +637,12 @@ export class DeployManager {
     const relativeTargetPath: string = path.relative(newLinkFolder, linkInfo.targetPath);
 
     // NOTE: This logic is based on NpmLinkManager._createSymlink()
-    if (process.platform === 'win32') {
-      if (linkInfo.kind === 'folderLink') {
-        // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-        await FileSystem.createSymbolicLinkJunctionAsync({
-          linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath
-        });
-      } else {
-        // For files, we use a Windows "hard link", because creating a symbolic link requires
-        // administrator permission.
-
-        // NOTE: We cannot use the relative path for hard links
+    if (linkInfo.kind === 'fileLink') {
+      // For files, we use a Windows "hard link", because creating a symbolic link requires
+      // administrator permission. However hard links seem to cause build failures on Mac,
+      // so for all other operating systems we use symbolic links for this case.
+      if (process.platform === 'win32') {
         await FileSystem.createHardLinkAsync({
-          linkTargetPath: relativeTargetPath,
-          newLinkPath: linkInfo.linkPath
-        });
-      }
-    } else {
-      // However hard links seem to cause build failures on Mac, so for all other operating systems
-      // we use symbolic links for this case.
-      if (linkInfo.kind === 'folderLink') {
-        await FileSystem.createSymbolicLinkFolderAsync({
           linkTargetPath: relativeTargetPath,
           newLinkPath: linkInfo.linkPath
         });
@@ -719,37 +652,12 @@ export class DeployManager {
           newLinkPath: linkInfo.linkPath
         });
       }
-    }
-
-    return true;
-  }
-
-  /**
-   * Recursively apply the "additionalProjectToInclude" setting.
-   */
-  private _collectProjectsToInclude(
-    includedProjectNamesSet: Set<IDeployProjectConfiguration>,
-    project: IDeployProjectConfiguration,
-    state: IDeployState
-  ): void {
-    if (includedProjectNamesSet.has(project)) {
-      return;
-    }
-    includedProjectNamesSet.add(project);
-
-    const projectConfiguration: IDeployProjectConfiguration | undefined =
-      state.projectConfigurationsByName.get(project.projectName);
-    if (projectConfiguration && projectConfiguration.additionalProjectsToInclude) {
-      for (const additionalProjectNameToInclude of projectConfiguration.additionalProjectsToInclude) {
-        const additionalProjectToInclude: IDeployProjectConfiguration | undefined =
-          state.projectConfigurationsByName.get(additionalProjectNameToInclude);
-        if (!additionalProjectToInclude) {
-          throw new Error(
-            `Project "${additionalProjectNameToInclude}" was not found in the list of projects.`
-          );
-        }
-        this._collectProjectsToInclude(includedProjectNamesSet, additionalProjectToInclude, state);
-      }
+    } else {
+      // Junctions are only supported on Windows. This will create a symbolic link on other platforms.
+      await FileSystem.createSymbolicLinkJunctionAsync({
+        linkTargetPath: relativeTargetPath,
+        newLinkPath: linkInfo.linkPath
+      });
     }
   }
 
@@ -793,14 +701,20 @@ export class DeployManager {
     const { terminal } = options;
     const { projectConfigurationsByPath } = state;
 
-    for (const projectFolder of projectConfigurationsByPath.keys()) {
-      const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
-      const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
-      const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
+    await Async.forEachAsync(
+      projectConfigurationsByPath.keys(),
+      async (projectFolder: string) => {
+        const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
+        const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
+        const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
 
-      await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
-        warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
-      });
-    }
+        await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
+          warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
+        });
+      },
+      {
+        concurrency: 10
+      }
+    );
   }
 }
