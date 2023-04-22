@@ -1042,13 +1042,13 @@
       "packageName": "@rushstack/rush-redis-cobuild-plugin",
       "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "rush"
     },
 
     // "webpack" folder (alphabetical order)
