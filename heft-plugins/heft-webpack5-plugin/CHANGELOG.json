@@ -2,6 +2,84 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.6.5",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.5",
+      "date": "Thu, 20 Apr 2023 15:16:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update webpack to v5.80.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.4",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.4",
+      "date": "Tue, 11 Apr 2023 00:23:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug where peerDep of webpack was not properly updated with regular dependency version. "
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.3",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.3",
+      "date": "Fri, 07 Apr 2023 22:19:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to 5.78.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.2",
+      "date": "Tue, 04 Apr 2023 22:36:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.1",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.1",
+      "date": "Sat, 18 Mar 2023 00:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.49.7` to `^0.50.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.6.0",
+      "date": "Sat, 11 Mar 2023 01:24:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for `.cjs` and `.mjs` file extensions for webpack config files, in addition to the `.js` file extension."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.73",
       "tag": "@rushstack/heft-webpack5-plugin_v0.5.73",
       "date": "Fri, 10 Feb 2023 01:18:51 GMT",

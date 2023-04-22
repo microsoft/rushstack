@@ -8,4 +8,5 @@
  */
 
 import * as VersionDetection from './DetectWebpackVersion';
-export { VersionDetection };
+import * as Testing from './Testing';
+export { VersionDetection, Testing };

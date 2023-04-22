@@ -28,6 +28,7 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
 import { Operation } from '../../logic/operations/Operation';
+import { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
@@ -46,6 +47,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   incremental: boolean;
   disableBuildCache: boolean;
 
+  originalPhases: Set<IPhase>;
   initialPhases: Set<IPhase>;
   watchPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
@@ -102,6 +104,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
+  private readonly _originalPhases: ReadonlySet<IPhase>;
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _watchDebounceMs: number;
@@ -124,6 +127,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._enableParallelism = options.enableParallelism;
     this._isIncrementalBuildAllowed = options.incremental;
     this._disableBuildCache = options.disableBuildCache;
+    this._originalPhases = options.originalPhases;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
@@ -330,6 +334,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       isInitial: true,
       isWatch,
       rushConfiguration: this.rushConfiguration,
+      phaseOriginal: new Set(this._originalPhases),
       phaseSelection: new Set(this._initialPhases),
       projectChangeAnalyzer,
       projectSelection,
@@ -340,7 +345,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism,
-      changedProjectsOnly
+      changedProjectsOnly,
+      beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+        await this.hooks.beforeExecuteOperations.promise(records);
+      },
+      onOperationStatusChanged: (record: OperationExecutionRecord) => {
+        this.hooks.onOperationStatusChanged.call(record);
+      }
     };
 
     const internalOptions: IRunPhasesOptions = {
@@ -400,6 +411,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private async _runWatchPhases(options: IRunPhasesOptions): Promise<void> {
     const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
+    const phaseOriginal: Set<IPhase> = new Set(this._watchPhases);
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
     const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
@@ -457,6 +469,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         isInitial: false,
         projectChangeAnalyzer: state,
         projectsInUnknownState: changedProjects,
+        phaseOriginal,
         phaseSelection
       };
 

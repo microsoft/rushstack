@@ -180,26 +180,26 @@ export class EnvironmentConfiguration {
 }
 
 // @beta
-export enum EnvironmentVariableNames {
-    RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
-    RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
-    RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD",
-    RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
-    RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
-    RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
-    RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
-    RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
-    RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
-    RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
-    RUSH_LIB_PATH = "_RUSH_LIB_PATH",
-    RUSH_PARALLELISM = "RUSH_PARALLELISM",
-    RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
-    RUSH_PNPM_VERIFY_STORE_INTEGRITY = "RUSH_PNPM_VERIFY_STORE_INTEGRITY",
-    RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
-    RUSH_TAR_BINARY_PATH = "RUSH_TAR_BINARY_PATH",
-    RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
-    RUSH_VARIANT = "RUSH_VARIANT"
-}
+export const EnvironmentVariableNames: {
+    readonly RUSH_TEMP_FOLDER: "RUSH_TEMP_FOLDER";
+    readonly RUSH_PREVIEW_VERSION: "RUSH_PREVIEW_VERSION";
+    readonly RUSH_ALLOW_UNSUPPORTED_NODEJS: "RUSH_ALLOW_UNSUPPORTED_NODEJS";
+    readonly RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD";
+    readonly RUSH_VARIANT: "RUSH_VARIANT";
+    readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
+    readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
+    readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
+    readonly RUSH_PNPM_VERIFY_STORE_INTEGRITY: "RUSH_PNPM_VERIFY_STORE_INTEGRITY";
+    readonly RUSH_DEPLOY_TARGET_FOLDER: "RUSH_DEPLOY_TARGET_FOLDER";
+    readonly RUSH_GLOBAL_FOLDER: "RUSH_GLOBAL_FOLDER";
+    readonly RUSH_BUILD_CACHE_CREDENTIAL: "RUSH_BUILD_CACHE_CREDENTIAL";
+    readonly RUSH_BUILD_CACHE_ENABLED: "RUSH_BUILD_CACHE_ENABLED";
+    readonly RUSH_BUILD_CACHE_WRITE_ALLOWED: "RUSH_BUILD_CACHE_WRITE_ALLOWED";
+    readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
+    readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
+    readonly RUSH_LIB_PATH: "_RUSH_LIB_PATH";
+    readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
+};
 
 // @beta
 export enum Event {
@@ -277,6 +277,7 @@ export interface ICreateOperationsContext {
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
+    readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
@@ -320,6 +321,7 @@ export interface IExperimentsJson {
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
+    printEventHooksOutputToConsole?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
@@ -525,6 +527,14 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @beta
+export interface IPrefixMatch<TItem> {
+    // (undocumented)
+    index: number;
+    // (undocumented)
+    value: TItem;
+}
+
+// @beta
 export interface IRushCommand {
     readonly actionName: string;
 }
@@ -637,6 +647,7 @@ export class LookupByPath<TItem> {
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
     findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
     static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
     setItem(serializedPath: string, value: TItem): this;
     setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
@@ -771,7 +782,9 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 // @alpha
 export class PhasedCommandHooks {
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
+    readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
+    readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly waitingForChanges: SyncHook<void>;
 }
 

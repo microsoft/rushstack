@@ -1,6 +1,44 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Apr 2023 15:16:55 GMT and should not be manually modified.
+
+## 0.6.5
+Thu, 20 Apr 2023 15:16:55 GMT
+
+### Patches
+
+- Update webpack to v5.80.0
+
+## 0.6.4
+Tue, 11 Apr 2023 00:23:22 GMT
+
+### Patches
+
+- Fix bug where peerDep of webpack was not properly updated with regular dependency version. 
+
+## 0.6.3
+Fri, 07 Apr 2023 22:19:21 GMT
+
+### Patches
+
+- Bump webpack to 5.78.0
+
+## 0.6.2
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 0.6.1
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 0.6.0
+Sat, 11 Mar 2023 01:24:51 GMT
+
+### Minor changes
+
+- Add support for `.cjs` and `.mjs` file extensions for webpack config files, in addition to the `.js` file extension.
 
 ## 0.5.73
 Fri, 10 Feb 2023 01:18:51 GMT

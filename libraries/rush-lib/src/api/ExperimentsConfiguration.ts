@@ -59,6 +59,11 @@ export interface IExperimentsJson {
    * `.npmrc` file has changed since the last install.
    */
   cleanInstallAfterNpmrcChanges?: boolean;
+
+  /**
+   * If true, print the outputs of shell commands defined in event hooks to the console.
+   */
+  printEventHooksOutputToConsole?: boolean;
 }
 
 /**

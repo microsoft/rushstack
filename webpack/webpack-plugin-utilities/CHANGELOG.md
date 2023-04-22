@@ -1,6 +1,44 @@
 # Change Log - @rushstack/webpack-plugin-utilities
 
-This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Apr 2023 15:16:55 GMT and should not be manually modified.
+
+## 0.2.4
+Thu, 20 Apr 2023 15:16:55 GMT
+
+### Patches
+
+- Update webpack to v5.80.0
+
+## 0.2.3
+Fri, 07 Apr 2023 22:19:21 GMT
+
+### Patches
+
+- Bump webpack to 5.78.0
+
+## 0.2.2
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 0.2.1
+Thu, 23 Mar 2023 15:24:08 GMT
+
+### Patches
+
+- Fix an issue where the `Testing` library has a had a hard dependency on `webpack`, but the package declared it as an optional peerDependency.
+
+## 0.2.0
+Wed, 22 Mar 2023 20:48:30 GMT
+
+### Minor changes
+
+- Added Testing.getTestingWebpackCompiler utility function for webpack plugin testing.
+
+## 0.1.57
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
 
 ## 0.1.56
 Fri, 10 Feb 2023 01:18:51 GMT

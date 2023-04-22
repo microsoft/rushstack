@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+
+## 0.5.6
+Tue, 04 Apr 2023 22:36:28 GMT
+
+### Patches
+
+- Upgrade Jest to 29.5.0.
+
+## 0.5.5
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
 
 ## 0.5.4
 Fri, 10 Feb 2023 01:18:50 GMT

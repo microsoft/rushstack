@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.50.0",
+      "tag": "@rushstack/heft_v0.50.0",
+      "date": "Sat, 18 Mar 2023 00:20:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.49.7",
       "tag": "@rushstack/heft_v0.49.7",
       "date": "Fri, 10 Feb 2023 01:18:50 GMT",

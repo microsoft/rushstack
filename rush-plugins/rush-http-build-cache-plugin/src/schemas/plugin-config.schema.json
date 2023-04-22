@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for build cache with HTTPS server",
+  "type": "object",
+  "required": ["url"],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "(Required) The URL of the server that stores the caches (e.g. \"https://build-caches.example.com\").",
+      "format": "uri"
+    },
+    "uploadMethod": {
+      "type": "string",
+      "description": "(Optional) The HTTP method to use when writing to the cache (defaults to PUT).",
+      "enum": ["PUT", "POST", "PATCH"],
+      "default": "PUT"
+    },
+    "headers": {
+      "type": "object",
+      "description": "(Optional) HTTP headers to pass to the cache server",
+      "properties": {},
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tokenHandler": {
+      "type": "object",
+      "description": "(Optional) Shell command that prints the authorization token needed to communicate with the HTTPS server and exits with code 0. This command will be executed from the root of the monorepo.",
+      "properties": {
+        "exec": {
+          "type": "string",
+          "description": "(Required) The command or script to execute."
+        },
+        "args": {
+          "type": "array",
+          "description": "(Optional) Arguments to pass to the command or script.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "cacheKeyPrefix": {
+      "type": "string",
+      "description": "(Optional) prefix for cache keys."
+    },
+    "isCacheWriteAllowed": {
+      "type": "boolean",
+      "description": "(Optional) If set to true, allow writing to the cache. Defaults to false."
+    }
+  }
+}
