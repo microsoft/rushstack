@@ -124,10 +124,14 @@ export class CobuildConfiguration {
   }
 
   public async connectLockProviderAsync(): Promise<void> {
-    await this.cobuildLockProvider.connectAsync();
+    if (this.cobuildEnabled) {
+      await this.cobuildLockProvider.connectAsync();
+    }
   }
 
   public async disconnectLockProviderAsync(): Promise<void> {
-    await this.cobuildLockProvider.disconnectAsync();
+    if (this.cobuildEnabled) {
+      await this.cobuildLockProvider.disconnectAsync();
+    }
   }
 }
