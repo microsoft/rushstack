@@ -4,10 +4,13 @@
 import JSZip from 'jszip';
 import { FileSystem, FileSystemStats, Path } from '@rushstack/node-core-library';
 
+// 755 are default permissions to allow read/write/execute for owner and read/execute for group and others.
+const DEFAULT_FILE_PERMISSIONS: number = 0o000755;
 // This value sets the allowed permissions when preserving symbolic links.
-// 120000 is the symbolic link identifier, and 0755 designates the allowed permissions.
+// 120000 is the symbolic link identifier, and is OR'd with the default file permissions.
 // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10
-const SYMBOLIC_LINK_PERMISSIONS: number = 0o120755;
+// eslint-disable-next-line no-bitwise
+const SYMBOLIC_LINK_PERMISSIONS: number = 0o120000 | DEFAULT_FILE_PERMISSIONS;
 
 export interface IDeployArchiverOptions {
   archiveFilePath: string;
@@ -51,7 +54,7 @@ export class DeployArchiver {
       }
     } else if (fileData) {
       data = fileData;
-      permissions = 0o000755;
+      permissions = DEFAULT_FILE_PERMISSIONS;
     } else {
       throw new Error('Either filePath or fileData must be provided');
     }

@@ -394,11 +394,6 @@ export class DeployManager {
         for (const name of Object.keys(packageJson.dependencies || {})) {
           dependencyNamesToProcess.add(name);
         }
-        if (options.includeDevDependencies) {
-          for (const name of Object.keys(packageJson.devDependencies || {})) {
-            dependencyNamesToProcess.add(name);
-          }
-        }
         for (const name of Object.keys(packageJson.peerDependencies || {})) {
           dependencyNamesToProcess.add(name);
           optionalDependencyNames.add(name); // consider peers optional, since they are so frequently broken
@@ -408,9 +403,17 @@ export class DeployManager {
           optionalDependencyNames.add(name);
         }
 
+        // Check to see if this is a local project
         const projectConfiguration: IDeployProjectConfiguration | undefined =
           projectConfigurationsByPath.get(packageJsonRealFolderPath);
+
         if (projectConfiguration) {
+          if (options.includeDevDependencies) {
+            for (const name of Object.keys(packageJson.devDependencies || {})) {
+              dependencyNamesToProcess.add(name);
+            }
+          }
+
           this._applyDependencyFilters(
             terminal,
             dependencyNamesToProcess,
