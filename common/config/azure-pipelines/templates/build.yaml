@@ -12,7 +12,7 @@ steps:
   #    displayName: 'Verify Change Logs'
   - script: 'node common/scripts/install-run-rush.js install'
     displayName: 'Rush Install'
-  - script: 'node common/scripts/install-run-rush.js retest --verbose --production --to rush --to rush-lib'
+  - script: 'node common/scripts/install-run-rush.js retest --verbose --production --to rush --from rush-lib'
     displayName: 'Rush retest (install-run-rush) --to rush'
     env:
       # Prevent time-based browserslist update warning
