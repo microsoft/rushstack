@@ -319,15 +319,7 @@ export class DeployManager {
         await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
           await this._deploySymlinkAsync(linkToCopy, options, state);
         });
-        await Async.forEachAsync(
-          includedProjectsSet,
-          async (project: IDeployProjectConfiguration) => {
-            await this._makeBinLinksAsync(project.projectFolder, options, state);
-          },
-          {
-            concurrency: 10
-          }
-        );
+        await this._makeBinLinksAsync(options, state);
         break;
       }
       default: {
@@ -560,7 +552,7 @@ export class DeployManager {
     if (relativePath.startsWith('..')) {
       throw new Error(`Source path "${absolutePathInSourceFolder}" is not under "${sourceRootFolder}"`);
     }
-    return relativePath.replace('\\', '/');
+    return Path.convertToSlashes(relativePath);
   }
 
   /**
@@ -775,9 +767,11 @@ export class DeployManager {
     };
 
     for (const projectFolder of projectConfigurationsByPath.keys()) {
-      deployMetadataJson.projects.push({
-        path: this._remapPathForDeployMetadata(projectFolder, options)
-      });
+      if (state.foldersToCopy.has(projectFolder)) {
+        deployMetadataJson.projects.push({
+          path: this._remapPathForDeployMetadata(projectFolder, options)
+        });
+      }
     }
 
     // Remap the links to be relative to target folder
@@ -800,30 +794,40 @@ export class DeployManager {
     });
   }
 
-  private async _makeBinLinksAsync(
-    projectFolder: string,
-    options: IDeployOptions,
-    state: IDeployState
-  ): Promise<void> {
+  private async _makeBinLinksAsync(options: IDeployOptions, state: IDeployState): Promise<void> {
     const { terminal } = options;
 
-    const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
-    const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
-    const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
+    const deployedProjectFolders: string[] = Array.from(state.projectConfigurationsByPath.keys()).filter(
+      (folderPath: string) => state.foldersToCopy.has(folderPath)
+    );
 
-    await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
-      warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
-    });
+    await Async.forEachAsync(
+      deployedProjectFolders,
+      async (projectFolder: string) => {
+        const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
+        const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
+        const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
 
-    if (state.archiver) {
-      const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(deployedProjectBinFolder);
-      for (const binFolderItem of binFolderItems) {
-        const binFilePath: string = path.join(deployedProjectBinFolder, binFolderItem);
-        await state.archiver.addToArchiveAsync({
-          filePath: binFilePath,
-          archivePath: path.relative(options.targetRootFolder, binFilePath)
+        await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
+          warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
         });
+
+        if (state.archiver) {
+          const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(
+            deployedProjectBinFolder
+          );
+          for (const binFolderItem of binFolderItems) {
+            const binFilePath: string = path.join(deployedProjectBinFolder, binFolderItem);
+            await state.archiver.addToArchiveAsync({
+              filePath: binFilePath,
+              archivePath: path.relative(options.targetRootFolder, binFilePath)
+            });
+          }
+        }
+      },
+      {
+        concurrency: 10
       }
-    }
+    );
   }
 }
