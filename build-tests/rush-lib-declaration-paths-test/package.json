@@ -8,7 +8,7 @@
     "_phase:build": "heft build --clean"
   },
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:5.93.1-pr3481.17"
+    "@microsoft/rush-lib": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
