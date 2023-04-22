@@ -7,10 +7,8 @@ import {
   JsonFile,
   Text,
   FileSystem,
-  JsonObject,
   NewlineKind,
   InternalError,
-  ITerminal,
   Terminal,
   ColorValue
 } from '@rushstack/node-core-library';
@@ -19,27 +17,26 @@ import {
   TextRewriterTransform,
   StderrLineTransform,
   SplitterTransform,
-  DiscardStdoutTransform,
-  PrintUtilities
+  DiscardStdoutTransform
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
-import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
-import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import { RushConstants } from '../RushConstants';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { OperationMetadataManager } from './OperationMetadataManager';
+import { PeriodicCallback } from './PeriodicCallback';
+import {
+  IOperationRunnerAfterExecuteContext,
+  IOperationRunnerBeforeExecuteContext,
+  OperationRunnerHooks
+} from './OperationRunnerHooks';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ProjectChangeAnalyzer, IRawRepoState } from '../ProjectChangeAnalyzer';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 export interface IProjectDeps {
@@ -50,9 +47,7 @@ export interface IProjectDeps {
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
-  buildCacheConfiguration: BuildCacheConfiguration | undefined;
   commandToRun: string;
-  isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   displayName: string;
   phase: IPhase;
@@ -60,20 +55,6 @@ export interface IOperationRunnerOptions {
    * The set of phases being executed in the current command, for validation of rush-project.json
    */
   selectedPhases: Iterable<IPhase>;
-}
-
-function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
-  for (const n in object1) {
-    if (!(n in object2) || object1[n] !== object2[n]) {
-      return false;
-    }
-  }
-  for (const n in object2) {
-    if (!(n in object1)) {
-      return false;
-    }
-  }
-  return true;
 }
 
 /**
@@ -84,30 +65,22 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
 export class ShellOperationRunner implements IOperationRunner {
   public readonly name: string;
 
-  // This runner supports cache writes by default.
-  public isCacheWriteAllowed: boolean = true;
-  public isSkipAllowed: boolean;
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
+  public readonly hooks: OperationRunnerHooks;
+  public readonly periodicCallback: PeriodicCallback;
+
   private readonly _rushProject: RushConfigurationProject;
   private readonly _phase: IPhase;
   private readonly _rushConfiguration: RushConfiguration;
-  private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
-  private readonly _isCacheReadAllowed: boolean;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
   private readonly _logFilenameIdentifier: string;
   private readonly _selectedPhases: Iterable<IPhase>;
-
-  /**
-   * UNINITIALIZED === we haven't tried to initialize yet
-   * undefined === we didn't create one because the feature is not enabled
-   */
-  private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
 
   public constructor(options: IOperationRunnerOptions) {
     const { phase } = options;
@@ -116,17 +89,19 @@ export class ShellOperationRunner implements IOperationRunner {
     this._rushProject = options.rushProject;
     this._phase = phase;
     this._rushConfiguration = options.rushConfiguration;
-    this._buildCacheConfiguration = options.buildCacheConfiguration;
     this._commandName = phase.name;
     this._commandToRun = options.commandToRun;
-    this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
-    this.isSkipAllowed = options.isIncrementalBuildAllowed;
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._logFilenameIdentifier = phase.logFilenameIdentifier;
     this._selectedPhases = options.selectedPhases;
+
+    this.hooks = new OperationRunnerHooks();
+    this.periodicCallback = new PeriodicCallback({
+      interval: 10 * 1000
+    });
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -226,16 +201,6 @@ export class ShellOperationRunner implements IOperationRunner {
             files,
             arguments: this._commandToRun
           };
-        } else if (this.isSkipAllowed) {
-          // To test this code path:
-          // Remove the `.git` folder then run "rush build --verbose"
-          terminal.writeLine({
-            text: PrintUtilities.wrapWords(
-              'This workspace does not appear to be tracked by Git. ' +
-                'Rush will proceed without incremental execution, caching, and change detection.'
-            ),
-            foregroundColor: ColorValue.Cyan
-          });
         }
       } catch (error) {
         // To test this code path:
@@ -247,55 +212,26 @@ export class ShellOperationRunner implements IOperationRunner {
         });
       }
 
-      // If possible, we want to skip this operation -- either by restoring it from the
-      // cache, if caching is enabled, or determining that the project
-      // is unchanged (using the older incremental execution logic). These two approaches,
-      // "caching" and "skipping", are incompatible, so only one applies.
-      //
-      // Note that "caching" and "skipping" take two different approaches
-      // to tracking dependents:
-      //
-      //   - For caching, "isCacheReadAllowed" is set if a project supports
-      //     incremental builds, and determining whether this project or a dependent
-      //     has changed happens inside the hashing logic.
-      //
-      //   - For skipping, "isSkipAllowed" is set to true initially, and during
-      //     the process of running dependents, it will be changed by OperationExecutionManager to
-      //     false if a dependency wasn't able to be skipped.
-      //
-      let buildCacheReadAttempted: boolean = false;
-      if (this._isCacheReadAllowed) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
-          terminal,
-          trackedProjectFiles,
-          operationMetadataManager: context._operationMetadataManager
-        });
+      const beforeExecuteContext: IOperationRunnerBeforeExecuteContext = {
+        context,
+        runner: this,
+        terminal,
+        projectDeps,
+        lastProjectDeps,
+        trackedProjectFiles,
+        logPath: projectLogWritable.logPath,
+        errorLogPath: projectLogWritable.errorLogPath,
+        rushProject: this._rushProject,
+        phase: this._phase,
+        commandName: this._commandName,
+        commandToRun: this._commandToRun,
+        earlyReturnStatus: undefined
+      };
 
-        buildCacheReadAttempted = !!projectBuildCache;
-        const restoreFromCacheSuccess: boolean | undefined =
-          await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
+      await this.hooks.beforeExecute.promise(beforeExecuteContext);
 
-        if (restoreFromCacheSuccess) {
-          // Restore the original state of the operation without cache
-          await context._operationMetadataManager?.tryRestoreAsync({
-            terminal,
-            logPath: projectLogWritable.logPath,
-            errorLogPath: projectLogWritable.errorLogPath
-          });
-          return OperationStatus.FromCache;
-        }
-      }
-      if (this.isSkipAllowed && !buildCacheReadAttempted) {
-        const isPackageUnchanged: boolean = !!(
-          lastProjectDeps &&
-          projectDeps &&
-          projectDeps.arguments === lastProjectDeps.arguments &&
-          _areShallowEqual(projectDeps.files, lastProjectDeps.files)
-        );
-
-        if (isPackageUnchanged) {
-          return OperationStatus.Skipped;
-        }
+      if (beforeExecuteContext.earlyReturnStatus) {
+        return beforeExecuteContext.earlyReturnStatus;
       }
 
       // If the deps file exists, remove it before starting execution.
@@ -319,6 +255,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
       // Run the operation
       terminal.writeLine('Invoking: ' + this._commandToRun);
+      this.periodicCallback.start();
 
       const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
         this._commandToRun,
@@ -348,12 +285,16 @@ export class ShellOperationRunner implements IOperationRunner {
         });
       }
 
+      let exitCode: number = 1;
       let status: OperationStatus = await new Promise(
         (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
           subProcess.on('close', (code: number) => {
+            exitCode = code;
             try {
               if (code !== 0) {
-                reject(new OperationError('error', `Returned error code: ${code}`));
+                // Do NOT reject here immediately, give a chance for hooks to suppress the error
+                context.error = new OperationError('error', `Returned error code: ${code}`);
+                resolve(OperationStatus.Failure);
               } else if (hasWarningOrError) {
                 resolve(OperationStatus.SuccessWithWarning);
               } else {
@@ -366,6 +307,14 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       );
 
+      // Save the metadata to disk
+      const { duration: durationInSeconds } = context.stopwatch;
+      await context._operationMetadataManager?.saveAsync({
+        durationInSeconds,
+        logPath: projectLogWritable.logPath,
+        errorLogPath: projectLogWritable.errorLogPath
+      });
+
       const taskIsSuccessful: boolean =
         status === OperationStatus.Success ||
         (status === OperationStatus.SuccessWithWarning &&
@@ -375,37 +324,30 @@ export class ShellOperationRunner implements IOperationRunner {
 
       if (taskIsSuccessful && projectDeps) {
         // Write deps on success.
-        const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(projectDeps, currentDepsPath, {
+        await JsonFile.saveAsync(projectDeps, currentDepsPath, {
           ensureFolderExists: true
         });
+      }
 
-        // If the operation without cache was successful, we can save the metadata to disk
-        const { duration: durationInSeconds } = context.stopwatch;
-        await context._operationMetadataManager?.saveAsync({
-          durationInSeconds,
-          logPath: projectLogWritable.logPath,
-          errorLogPath: projectLogWritable.errorLogPath
-        });
+      const afterExecuteContext: IOperationRunnerAfterExecuteContext = {
+        context,
+        terminal,
+        exitCode,
+        status,
+        taskIsSuccessful
+      };
 
-        // If the command is successful, we can calculate project hash, and no dependencies were skipped,
-        // write a new cache entry.
-        const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
-          ? (
-              await this._tryGetProjectBuildCacheAsync({
-                terminal,
-                trackedProjectFiles,
-                operationMetadataManager: context._operationMetadataManager
-              })
-            )?.trySetCacheEntryAsync(terminal)
-          : undefined;
+      await this.hooks.afterExecute.promise(afterExecuteContext);
 
-        const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
+      if (context.error) {
+        throw context.error;
+      }
 
-        if (terminalProvider.hasErrors) {
-          status = OperationStatus.Failure;
-        } else if (cacheWriteSuccess === false) {
-          status = OperationStatus.SuccessWithWarning;
-        }
+      // Sync the status in case it was changed by the hook
+      status = afterExecuteContext.status;
+
+      if (terminalProvider.hasErrors) {
+        status = OperationStatus.Failure;
       }
 
       normalizeNewlineTransform.close();
@@ -419,99 +361,8 @@ export class ShellOperationRunner implements IOperationRunner {
       return status;
     } finally {
       projectLogWritable.close();
+      this.periodicCallback.stop();
     }
-  }
-
-  private async _tryGetProjectBuildCacheAsync({
-    terminal,
-    trackedProjectFiles,
-    operationMetadataManager
-  }: {
-    terminal: ITerminal;
-    trackedProjectFiles: string[] | undefined;
-    operationMetadataManager: OperationMetadataManager | undefined;
-  }): Promise<ProjectBuildCache | undefined> {
-    if (this._projectBuildCache === UNINITIALIZED) {
-      this._projectBuildCache = undefined;
-
-      if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
-        // Disable legacy skip logic if the build cache is in play
-        this.isSkipAllowed = false;
-
-        const projectConfiguration: RushProjectConfiguration | undefined =
-          await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
-        if (projectConfiguration) {
-          projectConfiguration.validatePhaseConfiguration(this._selectedPhases, terminal);
-          if (projectConfiguration.disableBuildCacheForProject) {
-            terminal.writeVerboseLine('Caching has been disabled for this project.');
-          } else {
-            const operationSettings: IOperationSettings | undefined =
-              projectConfiguration.operationSettingsByOperationName.get(this._commandName);
-            if (!operationSettings) {
-              terminal.writeVerboseLine(
-                `This project does not define the caching behavior of the "${this._commandName}" command, so caching has been disabled.`
-              );
-            } else if (operationSettings.disableBuildCacheForOperation) {
-              terminal.writeVerboseLine(
-                `Caching has been disabled for this project's "${this._commandName}" command.`
-              );
-            } else {
-              const projectOutputFolderNames: ReadonlyArray<string> =
-                operationSettings.outputFolderNames || [];
-              const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
-                ...(operationMetadataManager?.relativeFilepaths || [])
-              ];
-              const additionalContext: Record<string, string> = {};
-              if (operationSettings.dependsOnEnvVars) {
-                for (const varName of operationSettings.dependsOnEnvVars) {
-                  additionalContext['$' + varName] = process.env[varName] || '';
-                }
-              }
-
-              if (operationSettings.dependsOnAdditionalFiles) {
-                const repoState: IRawRepoState | undefined =
-                  await this._projectChangeAnalyzer._ensureInitializedAsync(terminal);
-
-                const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
-                  operationSettings.dependsOnAdditionalFiles,
-                  this._rushProject.projectFolder,
-                  repoState
-                );
-
-                terminal.writeDebugLine(
-                  `Including additional files to calculate build cache hash:\n  ${Array.from(
-                    additionalFiles.keys()
-                  ).join('\n  ')} `
-                );
-
-                for (const [filePath, fileHash] of additionalFiles) {
-                  additionalContext['file://' + filePath] = fileHash;
-                }
-              }
-              this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
-                projectConfiguration,
-                projectOutputFolderNames,
-                additionalProjectOutputFilePaths,
-                additionalContext,
-                buildCacheConfiguration: this._buildCacheConfiguration,
-                terminal,
-                command: this._commandToRun,
-                trackedProjectFiles: trackedProjectFiles,
-                projectChangeAnalyzer: this._projectChangeAnalyzer,
-                phaseName: this._phase.name
-              });
-            }
-          }
-        } else {
-          terminal.writeVerboseLine(
-            `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-              'or one provided by a rig, so it does not support caching.'
-          );
-        }
-      }
-    }
-
-    return this._projectBuildCache;
   }
 }
 

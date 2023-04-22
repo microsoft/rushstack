@@ -104,5 +104,8 @@ libraries/rush-lib/assets/rush-init/
 # These are intentionally invalid files
 libraries/heft-config-file/src/test/errorCases/invalidJson/config.json
 
+# common scripts in sandbox repo
+build-tests/rush-redis-cobuild-plugin-integration-test/sandbox/repo/common/scripts/
+
 # We'll consider enabling this later; Prettier reformats code blocks, which affects end-user content
 *.md

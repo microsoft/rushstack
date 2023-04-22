@@ -1348,6 +1348,30 @@ importers:
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 14.18.36
 
+  ../../build-tests/rush-redis-cobuild-plugin-integration-test:
+    specifiers:
+      '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/rush-redis-cobuild-plugin': workspace:*
+      '@types/http-proxy': ~1.17.8
+      '@types/node': 14.18.36
+      eslint: ~8.7.0
+      http-proxy: ~1.18.1
+      typescript: ~4.8.4
+    devDependencies:
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/rush-redis-cobuild-plugin': link:../../rush-plugins/rush-redis-cobuild-plugin
+      '@types/http-proxy': 1.17.9
+      '@types/node': 14.18.36
+      eslint: 8.7.0
+      http-proxy: 1.18.1
+      typescript: 4.8.4
+
   ../../build-tests/set-webpack-public-path-plugin-webpack4-test:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -2443,6 +2467,29 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
     devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+
+  ../../rush-plugins/rush-redis-cobuild-plugin:
+    specifiers:
+      '@microsoft/rush-lib': workspace:*
+      '@redis/client': ~1.5.5
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/rush-sdk': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+    dependencies:
+      '@redis/client': 1.5.5
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/rush-sdk': link:../../libraries/rush-sdk
+    devDependencies:
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
@@ -6411,6 +6458,15 @@ packages:
       '@types/react-dom': 16.9.14
       react: 16.13.1
     dev: true
+
+  /@redis/client/1.5.5:
+    resolution: {integrity: sha512-fuMnpDYSjT5JXR9rrCW1YWA4L8N/9/uS4ImT3ZEC/hcaQRI1D/9FvwjriRj1UvepIgzZXthFVKMNRzP/LNL7BQ==}
+    engines: {node: '>=14'}
+    dependencies:
+      cluster-key-slot: 1.1.2
+      generic-pool: 3.9.0
+      yallist: 4.0.0
+    dev: false
 
   /@reduxjs/toolkit/1.8.6_qfynotfwlyrsyq662adyrweaoe:
     resolution: {integrity: sha512-4Ia/Loc6WLmdSOzi7k5ff7dLK8CgG2b8aqpLsCAJhazAzGdp//YBUSaj0ceW6a3kDBDNRrq5CRwyCS0wBiL1ig==}
@@ -11207,6 +11263,11 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /cluster-key-slot/1.1.2:
+    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
   /cmd-extension/1.0.2:
     resolution: {integrity: sha512-iWDjmP8kvsMdBmLTHxFaqXikO8EdFRDfim7k6vUHglY/2xJ5jLrPsnQGijdfp4U+sr/BeecG0wKm02dSIAeQ1g==}
     engines: {node: '>=10'}
@@ -14055,6 +14116,11 @@ packages:
     resolution: {integrity: sha512-kPCHWa1m9wGG/OwQpeweTwM/PYiQLrUIxXbt/P4Nic3LbGjCP0YwrALHW1uNLKZ0LIMg+RF+XRlj2ekT9ZlZAQ==}
     dependencies:
       loader-utils: 1.4.2
+    dev: false
+
+  /generic-pool/3.9.0:
+    resolution: {integrity: sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==}
+    engines: {node: '>= 4'}
     dev: false
 
   /gensync/1.0.0-beta.2:

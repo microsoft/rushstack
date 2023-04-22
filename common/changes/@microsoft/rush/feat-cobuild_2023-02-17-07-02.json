@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(EXPERIMENTAL) Add a cheap way to get distributed builds called \"cobuild\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

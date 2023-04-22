@@ -11,9 +11,17 @@ export enum OperationStatus {
    */
   Ready = 'READY',
   /**
+   * The Operation is Queued
+   */
+  Queued = 'QUEUED',
+  /**
    * The Operation is currently executing
    */
   Executing = 'EXECUTING',
+  /**
+   * The Operation is currently executing by a remote process
+   */
+  RemoteExecuting = 'REMOTE EXECUTING',
   /**
    * The Operation completed successfully and did not write to standard output
    */

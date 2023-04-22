@@ -31,6 +31,7 @@ export {
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
+export { CobuildConfiguration, ICobuildJson } from './api/CobuildConfiguration';
 export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
 export {
   FileSystemBuildCacheProvider,
@@ -100,7 +101,8 @@ export { OperationStatus } from './logic/operations/OperationStatus';
 export {
   RushSession,
   IRushSessionOptions,
-  CloudBuildCacheProviderFactory
+  CloudBuildCacheProviderFactory,
+  CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
 
 export {
@@ -118,6 +120,11 @@ export { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from '.
 export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+export {
+  ICobuildLockProvider,
+  ICobuildContext,
+  ICobuildCompletedState
+} from './logic/cobuild/ICobuildLockProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 

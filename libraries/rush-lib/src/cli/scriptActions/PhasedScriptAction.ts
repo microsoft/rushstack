@@ -38,6 +38,9 @@ import { IExecutionResult } from '../../logic/operations/IOperationExecutionResu
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import type { IOperationRunnerContext } from '../../logic/operations/IOperationRunner';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -144,6 +147,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     new PhasedOperationPlugin().apply(this.hooks);
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(this.hooks);
+    // Applies the build cache related logic to the selected operations
+    new CacheableOperationPlugin().apply(this.hooks);
 
     if (this._enableParallelism) {
       this._parallelismParameter = this.defineStringParameter({
@@ -303,12 +308,19 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const changedProjectsOnly: boolean = !!this._changedProjectsOnly?.value;
 
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    let cobuildConfiguration: CobuildConfiguration | undefined;
     if (!this._disableBuildCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
         terminal,
         this.rushConfiguration,
         this.rushSession
       );
+      cobuildConfiguration = await CobuildConfiguration.tryLoadAsync(
+        terminal,
+        this.rushConfiguration,
+        this.rushSession
+      );
+      await cobuildConfiguration?.connectLockProviderAsync();
     }
 
     const projectSelection: Set<RushConfigurationProject> =
@@ -329,6 +341,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
+      cobuildConfiguration,
       customParameters: customParametersByName,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       isInitial: true,
@@ -346,6 +359,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       debugMode: this.parser.isDebug,
       parallelism,
       changedProjectsOnly,
+      beforeExecuteOperation: async (record: IOperationRunnerContext) => {
+        await this.hooks.beforeExecuteOperation.promise(record);
+      },
+      afterExecuteOperation: async (record: IOperationRunnerContext) => {
+        await this.hooks.afterExecuteOperation.promise(record);
+      },
       beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
         await this.hooks.beforeExecuteOperations.promise(records);
       },
@@ -379,6 +398,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       await this._runWatchPhases(internalOptions);
     }
+
+    await cobuildConfiguration?.disconnectLockProviderAsync();
   }
 
   private async _runInitialPhases(options: IRunPhasesOptions): Promise<void> {

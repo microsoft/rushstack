@@ -797,6 +797,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-redis-cobuild-plugin-integration-test",
+      "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "set-webpack-public-path-plugin-webpack4-test",
       "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
       "reviewCategory": "tests",
@@ -1031,6 +1037,12 @@
       "projectFolder": "rush-plugins/rush-litewatch-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-redis-cobuild-plugin",
+      "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/rush-serve-plugin",

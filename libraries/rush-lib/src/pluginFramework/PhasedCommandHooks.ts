@@ -8,10 +8,14 @@ import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
-import { IExecutionResult, IOperationExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../logic/operations/IOperationExecutionResult';
+import type { CobuildConfiguration } from '../api/CobuildConfiguration';
+import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -33,6 +37,10 @@ export interface ICreateOperationsContext {
    * The configuration for the build cache, if the feature is enabled.
    */
   readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  /**
+   * The configuration for the cobuild, if cobuild feature and build cache feature are both enabled.
+   */
+  readonly cobuildConfiguration: CobuildConfiguration | undefined;
   /**
    * The set of custom parameters for the executing command.
    * Maps from the `longName` field in command-line.json to the parser configuration in ts-command-line.
@@ -111,6 +119,20 @@ export class PhasedCommandHooks {
    */
   public readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]> =
     new AsyncSeriesHook(['results', 'context']);
+
+  /**
+   * Hook invoked before executing a operation.
+   */
+  public readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]> = new AsyncSeriesHook<
+    [IOperationRunnerContext]
+  >(['runnerContext'], 'beforeExecuteOperation');
+
+  /**
+   * Hook invoked after executing a operation.
+   */
+  public readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]> = new AsyncSeriesHook<
+    [IOperationRunnerContext]
+  >(['runnerContext'], 'afterExecuteOperation');
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.

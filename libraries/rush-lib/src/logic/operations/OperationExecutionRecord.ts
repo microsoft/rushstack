@@ -17,10 +17,13 @@ export interface IOperationExecutionRecordContext {
 
   debugMode: boolean;
   quietMode: boolean;
+  changedProjectsOnly: boolean;
 }
 
 /**
  * Internal class representing everything about executing an operation
+ *
+ * @internal
  */
 export class OperationExecutionRecord implements IOperationRunnerContext {
   /**
@@ -47,6 +50,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    * operation to execute, the operation with the highest criticalPathLength is chosen.
    *
    * Example:
+   * ```
    *        (0) A
    *             \
    *          (1) B     C (0)         (applications)
@@ -63,6 +67,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    * X has a score of 1, since the only package which depends on it is A
    * Z has a score of 2, since only X depends on it, and X has a score of 1
    * Y has a score of 2, since the chain Y->X->C is longer than Y->C
+   * ```
    *
    * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()
    */
@@ -120,6 +125,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._context.quietMode;
   }
 
+  public get changedProjectsOnly(): boolean {
+    return this._context.changedProjectsOnly;
+  }
+
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
     if (!this._collatedWriter) {
@@ -133,7 +142,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.nonCachedDurationMs;
   }
 
-  public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
+  public async executeAsync(onResult: (record: OperationExecutionRecord) => Promise<void>): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
     this._context.onOperationStatusChanged?.(this);
@@ -141,16 +150,18 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     try {
       this.status = await this.runner.executeAsync(this);
       // Delegate global state reporting
-      onResult(this);
+      await onResult(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
       this.error = error;
       // Delegate global state reporting
-      onResult(this);
+      await onResult(this);
     } finally {
-      this._collatedWriter?.close();
-      this.stdioSummarizer.close();
-      this.stopwatch.stop();
+      if (this.status !== OperationStatus.RemoteExecuting) {
+        this._collatedWriter?.close();
+        this.stdioSummarizer.close();
+        this.stopwatch.stop();
+      }
       this._context.onOperationStatusChanged?.(this);
     }
   }

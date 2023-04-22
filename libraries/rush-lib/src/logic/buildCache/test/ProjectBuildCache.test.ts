@@ -3,7 +3,7 @@
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
-import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
@@ -36,13 +36,11 @@ describe(ProjectBuildCache.name, () => {
         }
       } as unknown as BuildCacheConfiguration,
       projectOutputFolderNames: ['dist'],
-      projectConfiguration: {
-        project: {
-          packageName: 'acme-wizard',
-          projectRelativeFolder: 'apps/acme-wizard',
-          dependencyProjects: []
-        }
-      } as unknown as RushProjectConfiguration,
+      project: {
+        packageName: 'acme-wizard',
+        projectRelativeFolder: 'apps/acme-wizard',
+        dependencyProjects: []
+      } as unknown as RushConfigurationProject,
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,

@@ -1,0 +1,12 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "cobuild",
+      "outputFolderNames": ["dist"]
+    },
+    {
+      "operationName": "build",
+      "outputFolderNames": ["dist"]
+    }
+  ]
+}

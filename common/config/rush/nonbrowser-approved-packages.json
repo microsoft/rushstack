@@ -75,6 +75,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@redis/client",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },
@@ -165,6 +169,10 @@
     {
       "name": "@rushstack/package-deps-hash",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-redis-cobuild-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/rig-package",
