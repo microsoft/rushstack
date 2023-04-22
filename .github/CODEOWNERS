@@ -1,17 +1,24 @@
-.github/CODEOWNERS @iclanton @octogonz @patmill @apostolisms
-common/config/**/* @iclanton @octogonz @patmill @apostolisms
+.github/CODEOWNERS @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @patmill
+common/autoinstallers/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @patmill
+common/config/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @patmill
 
-common/reviews/**/* @iclanton @octogonz @apostolisms
+common/reviews/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
 
-apps/**/* @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-build-tests/**/* @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-core-build/**/* @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-libraries/**/* @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-stack/**/* @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-webpack/**/* @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-rush.json @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-.gitattributes @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-.gitignore @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
-README.md @iclanton @octogonz @apostolisms @halfnibble @sachinjoseph @D4N14L
+apps/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+build-tests/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+build-tests-samples/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+eslint/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+heft-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+libraries/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+repo-scripts/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+rigs/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+rush-plugins/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+stack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+tutorials/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+webpack/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @TheLarkInn
+rush.json @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+.gitattributes @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+.gitignore @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
+README.md @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft
 
-libraries/load-themed-styles/**/* @iclanton @octogonz @dzearing @apostolisms
+libraries/load-themed-styles/**/* @iclanton @octogonz @apostolisms @D4N14L @dmichon-msft @dzearing
