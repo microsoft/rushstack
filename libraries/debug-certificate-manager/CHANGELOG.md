@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Mon, 17 Apr 2023 15:21:31 GMT and should not be manually modified.
+
+## 1.2.21
+Mon, 17 Apr 2023 15:21:31 GMT
+
+### Patches
+
+- Include "rushstack.localhost" and "127.0.0.1" in the default certificate subjects.
 
 ## 1.2.20
 Tue, 04 Apr 2023 22:36:28 GMT
