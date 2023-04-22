@@ -10,7 +10,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@microsoft/rush-lib": "workspace:5.93.1-pr3481.17",
+    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
