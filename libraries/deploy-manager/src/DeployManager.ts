@@ -296,9 +296,6 @@ export class DeployManager {
       }
     );
 
-    terminal.writeLine('Creating deploy-metadata.json');
-    await this._writeDeployMetadataAsync(options, state);
-
     switch (linkCreation) {
       case 'script': {
         const sourceFilePath: string = path.join(scriptsFolderPath, createLinksScriptFilename);
@@ -337,6 +334,9 @@ export class DeployManager {
         break;
       }
     }
+
+    terminal.writeLine('Creating deploy-metadata.json');
+    await this._writeDeployMetadataAsync(options, state);
 
     if (addditionalFolderToCopy) {
       const sourceFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
@@ -701,6 +701,16 @@ export class DeployManager {
     options: IDeployOptions,
     state: IDeployState
   ): Promise<void> {
+    // Do a check to make sure that the link target path is not outside the source folder
+    const { sourceRootFolder } = options;
+    const linkTargetPath: string = path.relative(sourceRootFolder, originalLinkInfo.targetPath);
+    if (linkTargetPath.startsWith('..')) {
+      throw new Error(
+        `Symlink targets not under source folder "${sourceRootFolder}": ` +
+          `${originalLinkInfo.linkPath} -> ${originalLinkInfo.targetPath}`
+      );
+    }
+
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
       linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, options),
