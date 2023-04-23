@@ -110,11 +110,13 @@ export class SymlinkAnalyzer {
       if (currentNode === undefined) {
         const linkStats: FileSystemStats = await FileSystem.getLinkStatisticsAsync(currentPath);
         if (linkStats.isSymbolicLink()) {
+          // Link target paths can be relative or absolute, so we need to resolve them
           const linkTargetPath: string = await FileSystem.readLinkAsync(currentPath);
+          const resolvedLinkTargetPath: string = path.resolve(path.dirname(currentPath), linkTargetPath);
           currentNode = {
             kind: 'link',
             nodePath: currentPath,
-            linkTarget: linkTargetPath,
+            linkTarget: resolvedLinkTargetPath,
             linkStats
           };
         } else if (linkStats.isDirectory()) {
