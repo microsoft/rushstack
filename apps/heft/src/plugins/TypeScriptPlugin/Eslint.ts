@@ -5,10 +5,10 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
 import * as TEslint from 'eslint';
+import { FileError } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
-import { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
-import { FileError } from '../../pluginFramework/logging/FileError';
+import { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -29,7 +29,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackage: typeof TEslint;
   private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
 
-  private _eslintCli!: TEslint.CLIEngine;
   private _eslint!: TEslint.ESLint;
   private _eslintBaseConfiguration: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   private _lintResult!: TEslint.ESLint.LintResult[];
@@ -37,7 +36,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   public constructor(options: IEslintOptions) {
     super('eslint', options);
 
-    this._patchTimer(options.eslintPackagePath); // This must happen before the rest of the linter package is loaded
+    // This must happen before the rest of the linter package is loaded
+    this._patchTimer(options.eslintPackagePath);
 
     this._eslintPackagePath = options.eslintPackagePath;
     this._eslintPackage = require(options.eslintPackagePath);
@@ -52,7 +52,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
         'Heft requires ESLint 7 or newer.  Your ESLint version is too old:\n' + this._eslintPackagePath
       );
     }
-    if (majorVersion > 7) {
+    if (majorVersion > 8) {
       // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a newer ESLint release, their build should be allowed to succeed.
       this._terminal.writeLine(
@@ -68,22 +68,18 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     const warnings: Error[] = [];
 
     for (const eslintFileResult of this._lintResult) {
-      const buildFolderRelativeFilePath: string = path.relative(
-        this._buildFolderPath,
-        eslintFileResult.filePath
-      );
       for (const message of eslintFileResult.messages) {
         eslintFailureCount++;
         // https://eslint.org/docs/developer-guide/nodejs-api#◆-lintmessage-type
         const formattedMessage: string = message.ruleId
           ? `(${message.ruleId}) ${message.message}`
           : message.message;
-        const errorObject: FileError = new FileError(
-          formattedMessage,
-          buildFolderRelativeFilePath,
-          message.line,
-          message.column
-        );
+        const errorObject: FileError = new FileError(formattedMessage, {
+          absolutePath: eslintFileResult.filePath,
+          projectFolder: this._buildFolderPath,
+          line: message.line,
+          column: message.column
+        });
         switch (message.severity) {
           case EslintMessageSeverity.error: {
             errors.push(errorObject);
@@ -124,25 +120,27 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     return eslintConfigVersion;
   }
 
-  protected async initializeAsync(): Promise<void> {
+  protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
+    // Override config takes precedence over overrideConfigFile, which allows us to provide
+    // the source TypeScript program.
     this._eslint = new this._eslintPackage.ESLint({
       cwd: this._buildFolderPath,
-      overrideConfigFile: this._linterConfigFilePath
+      overrideConfigFile: this._linterConfigFilePath,
+      overrideConfig: {
+        parserOptions: {
+          programs: [tsProgram]
+        }
+      }
     });
 
     this._eslintBaseConfiguration = await this._eslint.calculateConfigForFile(this._linterConfigFilePath);
-
-    this._eslintCli = new this._eslintPackage.CLIEngine({
-      cwd: this._buildFolderPath,
-      configFile: this._linterConfigFilePath
-    });
   }
 
-  protected lintFile(sourceFile: IExtendedSourceFile): TEslint.ESLint.LintResult[] {
-    const lintResults: TEslint.ESLint.LintResult[] = this._eslintCli.executeOnText(
-      sourceFile.text,
-      sourceFile.fileName
-    ).results;
+  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
+    const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
+      filePath: sourceFile.fileName
+    });
+
     const failures: TEslint.ESLint.LintResult[] = [];
     for (const lintResult of lintResults) {
       if (lintResult.messages.length > 0) {

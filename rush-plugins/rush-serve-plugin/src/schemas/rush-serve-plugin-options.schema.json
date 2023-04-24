@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for the @rushstack/rush-serve-plugin.",
+  "description": "For use with the Rush tool, this file provides per-project configuration options. See http://rushjs.io for details.",
+
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phasedCommands"],
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "phasedCommands": {
+      "type": "array",
+      "description": "Rush commands for which files should be served. Serving will be skipped if the command is not running in watch mode.",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+
+    "portParameterLongName": {
+      "type": "string",
+      "description": "The name of a custom parameter in command-line.json that provides a port number for the server. If the parameter is defined and not passed on the command line, it will be populated with the auto-assigned port number after the server starts.",
+      "pattern": "^--(?:[a-z0-9]+)(?:-[a-z0-9]+)*$"
+    },
+
+    "globalRouting": {
+      "type": "array",
+      "description": "Routing rules for files that are associated with the entire workspace, rather than a single project (e.g. files output by Rush plugins).",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["workspaceRelativeFolder", "servePath"],
+            "properties": {
+              "workspaceRelativeFolder": {
+                "type": "string",
+                "description": "The folder from which to read assets, relative to the root of the Rush workspace."
+              },
+
+              "servePath": {
+                "type": "string",
+                "description": "The server path at which to serve the assets in \"workspaceRelativeFolder\"."
+              },
+
+              "immutable": {
+                "type": "boolean",
+                "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static)."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["workspaceRelativeFile", "servePath"],
+            "properties": {
+              "workspaceRelativeFile": {
+                "type": "string",
+                "description": "The file to serve, relative to the root of the Rush workspace"
+              },
+
+              "servePath": {
+                "type": "string",
+                "description": "The server path at which to serve \"workspaceRelativeFile\"."
+              },
+
+              "immutable": {
+                "type": "boolean",
+                "description": "Enables or disables the `immutable` directive in the `Cache-Control` resoponse header. See (https://expressjs.com/en/4x/api.html#express.static)."
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

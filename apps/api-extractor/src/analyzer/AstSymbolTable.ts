@@ -118,7 +118,7 @@ export class AstSymbolTable {
    * Used to analyze an entry point that belongs to the working package.
    */
   public fetchAstModuleFromWorkingPackage(sourceFile: ts.SourceFile): AstModule {
-    return this._exportAnalyzer.fetchAstModuleFromSourceFile(sourceFile, undefined);
+    return this._exportAnalyzer.fetchAstModuleFromSourceFile(sourceFile, undefined, false);
   }
 
   /**

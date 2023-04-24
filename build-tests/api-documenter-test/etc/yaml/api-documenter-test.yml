@@ -7,6 +7,7 @@ summary: |-
 
   This project tests various documentation generation scenarios and doc comment syntaxes.
 classes:
+  - 'api-documenter-test!AbstractClass:class'
   - 'api-documenter-test!DecoratorExample:class'
   - 'api-documenter-test!DocBaseClass:class'
   - 'api-documenter-test!DocClass1:class'
@@ -14,6 +15,8 @@ classes:
   - 'api-documenter-test!Generic:class'
   - 'api-documenter-test!SystemEvent:class'
 interfaces:
+  - 'api-documenter-test!Constraint:interface'
+  - 'api-documenter-test!DefaultType:interface'
   - 'api-documenter-test!DocClassInterfaceMerge:interface'
   - 'api-documenter-test!IDocInterface1:interface'
   - 'api-documenter-test!IDocInterface2:interface'
@@ -25,12 +28,19 @@ interfaces:
 enums:
   - 'api-documenter-test!DocEnum:enum'
   - 'api-documenter-test!DocEnumNamespaceMerge:enum'
+typeAliases:
+  - 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+  - 'api-documenter-test!ExampleTypeAlias:type'
+  - 'api-documenter-test!ExampleUnionTypeAlias:type'
+  - 'api-documenter-test!GenericTypeAlias:type'
+  - 'api-documenter-test!TypeAlias:type'
 functions:
   - name: 'exampleFunction(x, y)'
     uid: 'api-documenter-test!exampleFunction:function(1)'
     package: api-documenter-test!
     summary: An exported function with hyperlinked parameters and return value.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -50,6 +60,7 @@ functions:
     package: api-documenter-test!
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

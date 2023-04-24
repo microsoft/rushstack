@@ -59,7 +59,7 @@ export class WebpackConfigurationLoader {
         );
       }
     } catch (error) {
-      logger.emitError(error);
+      logger.emitError(error as Error);
     }
 
     if (webpackConfigJs) {

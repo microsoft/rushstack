@@ -5,9 +5,33 @@
 ```ts
 
 // @public
+export function ensureGitMinimumVersion(gitPath?: string): void;
+
+// @public
 export function getGitHashForFiles(filesToHash: string[], packagePath: string, gitPath?: string): Map<string, string>;
 
 // @public
 export function getPackageDeps(packagePath?: string, excludedPaths?: string[], gitPath?: string): Map<string, string>;
+
+// @beta
+export function getRepoChanges(currentWorkingDirectory: string, revision?: string, gitPath?: string): Map<string, IFileDiffStatus>;
+
+// @beta
+export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): string;
+
+// @beta
+export function getRepoStateAsync(rootDirectory: string, additionalRelativePathsToHash?: string[], gitPath?: string): Promise<Map<string, string>>;
+
+// @beta
+export interface IFileDiffStatus {
+    // (undocumented)
+    mode: string;
+    // (undocumented)
+    newhash: string;
+    // (undocumented)
+    oldhash: string;
+    // (undocumented)
+    status: 'A' | 'D' | 'M';
+}
 
 ```

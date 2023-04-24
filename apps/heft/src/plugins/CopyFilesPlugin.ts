@@ -5,8 +5,9 @@ import * as chokidar from 'chokidar';
 import * as path from 'path';
 import glob from 'fast-glob';
 import { performance } from 'perf_hooks';
-import { AlreadyExistsBehavior, FileSystem } from '@rushstack/node-core-library';
+import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
+import { HeftAsync } from '../utilities/HeftAsync';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
 import { HeftSession } from '../pluginFramework/HeftSession';
@@ -18,7 +19,6 @@ import {
   HeftEvent
 } from '../utilities/CoreConfigFiles';
 import { IBuildStageProperties } from '../stages/BuildStage';
-import { Async } from '../utilities/Async';
 import { Constants } from '../utilities/Constants';
 
 interface ICopyFileDescriptor {
@@ -113,7 +113,7 @@ export class CopyFilesPlugin extends HeftEventPluginBase<IHeftConfigurationCopyF
 
     // Then enter watch mode if requested
     if (options.watchMode) {
-      Async.runWatcherWithErrorHandling(async () => await this._runWatchAsync(options), logger);
+      HeftAsync.runWatcherWithErrorHandling(async () => await this._runWatchAsync(options), logger);
     }
   }
 
@@ -124,9 +124,8 @@ export class CopyFilesPlugin extends HeftEventPluginBase<IHeftConfigurationCopyF
 
     let copiedFileCount: number = 0;
     let linkedFileCount: number = 0;
-    await Async.forEachLimitAsync(
+    await Async.forEachAsync(
       copyDescriptors,
-      Constants.maxParallelism,
       async (copyDescriptor: ICopyFileDescriptor) => {
         if (copyDescriptor.hardlink) {
           linkedFileCount++;
@@ -143,7 +142,8 @@ export class CopyFilesPlugin extends HeftEventPluginBase<IHeftConfigurationCopyF
             alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
           });
         }
-      }
+      },
+      { concurrency: Constants.maxParallelism }
     );
 
     return {

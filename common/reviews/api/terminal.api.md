@@ -5,8 +5,8 @@
 ```ts
 
 import { Brand } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
-import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class CallbackWritable extends TerminalWritable {
@@ -113,7 +113,7 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
 // @public
 export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
-    static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void;
+    static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
 }
 

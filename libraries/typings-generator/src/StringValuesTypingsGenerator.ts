@@ -49,10 +49,11 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
   public constructor(options: IStringValuesTypingsGeneratorOptions) {
     super({
       ...options,
-      parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
+      parseAndGenerateTypings: async (fileContents: string, filePath: string, relativePath: string) => {
         const stringValueTypings: IStringValueTypings | undefined = await options.parseAndGenerateTypings(
           fileContents,
-          filePath
+          filePath,
+          relativePath
         );
 
         if (stringValueTypings === undefined) {

@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CommandLineParser prints the action help 1`] = `
+"usage: example scoped-action [-h] [--verbose] [--scope SCOPE] ...
+
+a longer description
+
+Positional arguments:
+  \\"...\\"          Scoped parameters. Must be prefixed with \\"--\\", ex. \\"-- 
+                 --scopedParameter foo --scopedFlag\\". For more information on 
+                 available scoped parameters, use \\"-- --help\\".
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+  --verbose      A flag parameter.
+
+Optional scoping arguments:
+  --scope SCOPE  The scope
+"
+`;
+
+exports[`CommandLineParser prints the scoped action help 1`] = `
+"usage: example scoped-action --scope foo -- [-h] [--scoped-foo SCOPED]
+
+a longer description
+
+Optional arguments:
+  -h, --help           Show this help message and exit.
+  --scoped-foo SCOPED  The scoped argument.
+
+For more information on available unscoped parameters, use \\"example 
+scoped-action --help\\"
+"
+`;
+
+exports[`CommandLineParser prints the scoped action parameter map 1`] = `
+Object {
+  "--scope": "\\"foo\\"",
+  "--scoped-foo": undefined,
+  "--verbose": "false",
+}
+`;
+
+exports[`CommandLineParser prints the scoped action parameter map 2`] = `
+Object {
+  "--scope": "\\"foo\\"",
+  "--scoped-foo": "\\"bar\\"",
+  "--verbose": "false",
+}
+`;
+
+exports[`CommandLineParser prints the unscoped action parameter map 1`] = `
+Object {
+  "--scope": undefined,
+  "--verbose": "true",
+}
+`;
+
+exports[`CommandLineParser throws on missing positional arg divider with unknown positional args 1`] = `"example scoped-action: error: Unrecognized arguments: bar."`;
+
+exports[`CommandLineParser throws on unknown scoped arg 1`] = `
+"example scoped-action --scope foo --: error: Unrecognized arguments: --scoped-bar baz.
+"
+`;

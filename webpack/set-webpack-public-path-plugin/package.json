@@ -1,37 +1,42 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "3.2.66",
+  "version": "3.3.99",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/set-webpack-public-path-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/webpack/set-webpack-public-path-plugin"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/set-webpack-public-path-plugin"
   },
   "scripts": {
-    "build": "heft build --clean"
-  },
-  "dependencies": {
-    "lodash": "~4.17.15"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
   },
   "peerDependencies": {
-    "@types/webpack": "^4.39.8"
+    "@types/webpack": "^4.39.8",
+    "webpack": "^5.35.1"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
       "optional": true
+    },
+    "webpack": {
+      "optional": true
     }
+  },
+  "dependencies": {
+    "@rushstack/webpack-plugin-utilities": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/lodash": "4.14.116",
-    "@types/node": "10.17.13",
+    "@types/node": "14.18.36",
     "@types/tapable": "1.0.6",
-    "@types/uglify-js": "2.6.29",
-    "@types/webpack": "4.41.24"
+    "@types/webpack": "4.41.32"
   }
 }

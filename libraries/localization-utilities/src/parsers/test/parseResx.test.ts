@@ -1,0 +1,142 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import {
+  FileSystem,
+  NewlineKind,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
+import { IgnoreStringFunction } from '../../interfaces';
+import { IParseResxOptions, parseResx } from '../parseResx';
+
+describe(parseResx.name, () => {
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
+
+  beforeEach(() => {
+    terminalProvider = new StringBufferTerminalProvider();
+    terminal = new Terminal(terminalProvider);
+  });
+
+  afterEach(() => {
+    const outputObject: Record<string, string> = {};
+
+    const output: string = terminalProvider.getOutput();
+    if (output) {
+      outputObject.output = output;
+    }
+
+    const verboseOutput: string = terminalProvider.getVerbose();
+    if (verboseOutput) {
+      outputObject.verboseOutput = verboseOutput;
+    }
+
+    const errorOutput: string = terminalProvider.getErrorOutput();
+    if (errorOutput) {
+      outputObject.errorOutput = errorOutput;
+    }
+
+    const warningOutput: string = terminalProvider.getWarningOutput();
+    if (warningOutput) {
+      outputObject.warningOutput = warningOutput;
+    }
+
+    const debugOutput: string = terminalProvider.getDebugOutput();
+    if (debugOutput) {
+      outputObject.debugOutput = debugOutput;
+    }
+
+    expect(outputObject).toMatchSnapshot('terminal output');
+  });
+
+  async function testResxAsync(
+    filename:
+      | 'invalidXml'
+      | 'resxWithSchema'
+      | 'stringWithoutComment'
+      | 'stringWithQuotemarks'
+      | 'withNewlines'
+      | 'resxWithDuplicateEntry',
+    optionsOverride: Partial<IParseResxOptions> = {}
+  ): Promise<void> {
+    const content: string = await FileSystem.readFileAsync(`${__dirname}/testResxFiles/${filename}.resx`);
+
+    expect(
+      parseResx({
+        content,
+        filePath: 'test.resx',
+        terminal,
+        ignoreMissingResxComments: undefined,
+        resxNewlineNormalization: undefined,
+        ...optionsOverride
+      })
+    ).toMatchSnapshot('Loc file');
+  }
+
+  it('parses a valid file with a schema', async () => {
+    await testResxAsync('resxWithSchema');
+  });
+
+  it('parses a valid file with quotemarks', async () => {
+    await testResxAsync('stringWithQuotemarks');
+  });
+
+  it('prints an error on invalid XML', async () => {
+    await testResxAsync('invalidXml');
+  });
+
+  it('correctly ignores a string', async () => {
+    const ignoredStringFunction: IgnoreStringFunction = jest
+      .fn()
+      .mockImplementation(
+        (fileName: string, stringName: string) => fileName === 'test.resx' && stringName === 'bar'
+      );
+
+    await testResxAsync('resxWithSchema', {
+      ignoreString: ignoredStringFunction
+    });
+
+    expect((ignoredStringFunction as unknown as jest.SpyInstance).mock.calls).toMatchSnapshot(
+      'ignoreStrings calls'
+    );
+  });
+
+  describe('ignoreMissingResxComments', () => {
+    it('when set to true, ignores a missing comment', async () => {
+      await testResxAsync('stringWithoutComment', {
+        ignoreMissingResxComments: true
+      });
+    });
+
+    it('when set to false, warns on a missing comment', async () => {
+      await testResxAsync('stringWithoutComment', {
+        ignoreMissingResxComments: false
+      });
+    });
+
+    it('when set to undefined, warns on a missing comment', async () => {
+      await testResxAsync('stringWithoutComment', {
+        ignoreMissingResxComments: undefined
+      });
+    });
+  });
+
+  describe('resxNewlineNormalization', () => {
+    it('when set to CrLf, normalizes to CrLf', async () => {
+      await testResxAsync('withNewlines', {
+        resxNewlineNormalization: NewlineKind.CrLf
+      });
+    });
+
+    it('when set to Lf, normalizes to Lf', async () => {
+      await testResxAsync('withNewlines', {
+        resxNewlineNormalization: NewlineKind.Lf
+      });
+    });
+  });
+
+  it('fails to parse a RESX file with a duplicate string', async () => {
+    await testResxAsync('resxWithDuplicateEntry');
+  });
+});

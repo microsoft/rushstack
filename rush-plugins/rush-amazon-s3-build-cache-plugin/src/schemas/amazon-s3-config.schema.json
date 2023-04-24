@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for build cache with Amazon S3 configuration",
+  "type": "object",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["s3Endpoint", "s3Region"],
+      "properties": {
+        "s3Endpoint": {
+          "type": "string",
+          "description": "(Required) The Amazon S3 endpoint of the bucket to use for build cache (e.g. \"s3.us-east-2.amazonaws.com\")."
+        },
+        "s3Region": {
+          "type": "string",
+          "description": "(Required) The Amazon S3 region of the bucket to use for build cache (e.g. \"us-east-1\")."
+        },
+        "s3Prefix": {
+          "type": "string",
+          "description": "An optional prefix (\"folder\") for cache items."
+        },
+        "isCacheWriteAllowed": {
+          "type": "boolean",
+          "description": "If set to true, allow writing to the cache. Defaults to false."
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["s3Bucket", "s3Region"],
+      "properties": {
+        "s3Bucket": {
+          "type": "string",
+          "description": "(Required unless s3Endpoint is specified) The name of the bucket to use for build cache (e.g. \"my-bucket\")."
+        },
+        "s3Region": {
+          "type": "string",
+          "description": "(Required) The Amazon S3 region of the bucket to use for build cache (e.g. \"us-east-1\")."
+        },
+        "s3Prefix": {
+          "type": "string",
+          "description": "An optional prefix (\"folder\") for cache items."
+        },
+        "isCacheWriteAllowed": {
+          "type": "boolean",
+          "description": "If set to true, allow writing to the cache. Defaults to false."
+        }
+      }
+    }
+  ]
+}

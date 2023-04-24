@@ -25,6 +25,12 @@ export interface ICommandLineParserOptions {
   toolDescription: string;
 
   /**
+   * An optional string to append at the end of the "--help" main page. If not provided, an epilog
+   * will be automatically generated based on the toolFilename.
+   */
+  toolEpilog?: string;
+
+  /**
    * Set to true to auto-define a tab completion action. False by default.
    */
   enableTabCompletionAction?: boolean;
@@ -48,11 +54,11 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   public selectedAction: CommandLineAction | undefined;
 
-  private _argumentParser: argparse.ArgumentParser;
+  private readonly _argumentParser: argparse.ArgumentParser;
   private _actionsSubParser: argparse.SubParser | undefined;
-  private _options: ICommandLineParserOptions;
-  private _actions: CommandLineAction[];
-  private _actionsByName: Map<string, CommandLineAction>;
+  private readonly _options: ICommandLineParserOptions;
+  private readonly _actions: CommandLineAction[];
+  private readonly _actionsByName: Map<string, CommandLineAction>;
   private _executed: boolean = false;
   private _tabCompleteActionWasAdded: boolean = false;
 
@@ -68,11 +74,12 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
       epilog: colors.bold(
-        `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
+        this._options.toolEpilog ??
+          `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       )
     });
 
-    this.onDefineParameters();
+    this.onDefineParameters?.();
   }
 
   /**
@@ -155,7 +162,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           process.exitCode = err.exitCode;
         }
       } else {
-        let message: string = (err.message || 'An unknown error occurred').trim();
+        let message: string = ((err as Error).message || 'An unknown error occurred').trim();
 
         // If the message doesn't already start with "Error:" then add a prefix
         if (!/^(error|internal error|warning)\b/i.test(message)) {
@@ -190,23 +197,28 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
       this._validateDefinitions();
 
+      // Register the parameters before we print help or parse the CLI
+      this._registerDefinedParameters();
+
       if (!args) {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
       }
-      if (args.length === 0) {
+      if (this.actions.length > 0 && args.length === 0) {
+        // Parsers that use actions should print help when 0 args are provided. Allow
+        // actionless parsers to continue on zero args.
         this._argumentParser.printHelp();
         return;
       }
 
       const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
-      this._processParsedData(data);
+      this._processParsedData(this._options, data);
 
       for (const action of this._actions) {
         if (action.actionName === data.action) {
           this.selectedAction = action;
-          action._processParsedData(data);
+          action._processParsedData(this._options, data);
           break;
         }
       }
@@ -229,6 +241,14 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       throw err;
+    }
+  }
+
+  /** @internal */
+  public _registerDefinedParameters(): void {
+    super._registerDefinedParameters();
+    for (const action of this._actions) {
+      action._registerDefinedParameters();
     }
   }
 

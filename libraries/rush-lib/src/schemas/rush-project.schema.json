@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Rush's build cache.",
+  "description": "For use with the Rush tool, this file provides per-project configuration options. See http://rushjs.io for details.",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from. This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "incrementalBuildIgnoredGlobs": {
+      "type": "array",
+      "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Use \"incrementalBuildIgnoredGlobs\" to ignore specific files, specified as globs relative to the project folder.  The glob syntax is based on the .gitignore file format.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "disableBuildCacheForProject": {
+      "description": "Disable caching for this project. The project will never be restored from cache. This may be useful if this project affects state outside of its folder.",
+      "type": "boolean"
+    },
+
+    "operationSettings": {
+      "type": "array",
+      "description": "Options for individual commands and phases.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["operationName"],
+        "properties": {
+          "operationName": {
+            "type": "string",
+            "description": "The name of the operation. This should be a key in the \"package.json\" file's \"scripts\" section."
+          },
+
+          "outputFolderNames": {
+            "type": "array",
+            "description": "Specify the folders where this operation writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+
+          "dependsOnEnvVars": {
+            "type": "array",
+            "description": "Specify a list of environment variables that affect the output of this operation. If provided, the values of these variables will become part of the hash when reading and writing from cache.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+
+          "dependsOnAdditionalFiles": {
+            "type": "array",
+            "description": "Specify a list of glob (minimatch) paths (absolute or relative) pointing to files (within or outside the .git repository) that affect the output of this operation. If provided, the hash values of these files will become part of the final hash when reading and writing from cache.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+
+          "disableBuildCacheForOperation": {
+            "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

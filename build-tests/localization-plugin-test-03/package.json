@@ -5,20 +5,20 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "serve": "node serve.js"
+    "serve": "node serve.js",
+    "_phase:build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/rush-stack-compiler-3.9": "~0.4.47",
-    "@rushstack/localization-plugin": "workspace:*",
+    "@rushstack/webpack4-localization-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
-    "@types/webpack-env": "1.13.0",
-    "html-webpack-plugin": "~4.5.0",
+    "@types/webpack-env": "1.18.0",
+    "html-webpack-plugin": "~4.5.2",
     "ts-loader": "6.0.0",
-    "typescript": "~3.9.7",
-    "webpack": "~4.44.2",
-    "webpack-bundle-analyzer": "~3.6.0",
+    "typescript": "~4.8.4",
+    "webpack-bundle-analyzer": "~4.5.0",
     "webpack-cli": "~3.3.2",
-    "webpack-dev-server": "~3.11.0"
+    "webpack-dev-server": "~4.9.3",
+    "webpack": "~4.44.2"
   }
 }

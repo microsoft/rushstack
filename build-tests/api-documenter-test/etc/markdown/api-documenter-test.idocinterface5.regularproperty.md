@@ -6,7 +6,7 @@
 
 Property of type string that does something
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 regularProperty: string;

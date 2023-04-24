@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import {
   Encoding,
   Text,
@@ -12,7 +11,8 @@ import {
   IFileSystemCreateLinkOptions,
   FileSystem,
   FileSystemStats,
-  Sort
+  Sort,
+  FolderItem
 } from '@rushstack/node-core-library';
 
 export interface IReadFolderFilesAndDirectoriesResult {
@@ -43,7 +43,20 @@ export class TypeScriptCachedFileSystem {
       this.getStatistics(path);
       return true;
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
+  };
+
+  public directoryExists: (path: string) => boolean = (path: string) => {
+    try {
+      const stats: FileSystemStats = this.getStatistics(path);
+      return stats.isDirectory();
+    } catch (e) {
+      if (FileSystem.isNotExistError(e as Error)) {
         return false;
       } else {
         throw e;
@@ -126,7 +139,22 @@ export class TypeScriptCachedFileSystem {
   };
 
   public getRealPath: (linkPath: string) => string = (linkPath: string) => {
-    return this._withCaching(linkPath, FileSystem.getRealPath, this._realPathCache);
+    return this._withCaching(
+      linkPath,
+      (linkPath: string) => {
+        try {
+          return FileSystem.getRealPath(linkPath);
+        } catch (e) {
+          if (FileSystem.isNotExistError(e as Error)) {
+            // TypeScript's ts.sys.realpath returns the path it's provided if that path doesn't exist
+            return linkPath;
+          } else {
+            throw e;
+          }
+        }
+      },
+      this._realPathCache
+    );
   };
 
   public readFolderFilesAndDirectories: (folderPath: string) => IReadFolderFilesAndDirectoriesResult = (
@@ -135,15 +163,14 @@ export class TypeScriptCachedFileSystem {
     return this._withCaching(
       folderPath,
       (path: string) => {
-        // TODO: Replace this with a FileSystem API
-        const folderEntries: fs.Dirent[] = fs.readdirSync(path, { withFileTypes: true });
+        const folderEntries: FolderItem[] = FileSystem.readFolderItems(path);
         return this._sortFolderEntries(folderEntries);
       },
       this._readFolderCache
     );
   };
 
-  private _sortFolderEntries(folderEntries: fs.Dirent[]): IReadFolderFilesAndDirectoriesResult {
+  private _sortFolderEntries(folderEntries: FolderItem[]): IReadFolderFilesAndDirectoriesResult {
     // TypeScript expects entries sorted ordinally by name
     // In practice this might not matter
     folderEntries.sort((a, b) => Sort.compareByValue(a, b));
@@ -171,7 +198,7 @@ export class TypeScriptCachedFileSystem {
       try {
         cacheEntry = { entry: fn(path) };
       } catch (e) {
-        cacheEntry = { error: e, entry: undefined };
+        cacheEntry = { error: e as Error, entry: undefined };
       }
 
       cache.set(path, cacheEntry);

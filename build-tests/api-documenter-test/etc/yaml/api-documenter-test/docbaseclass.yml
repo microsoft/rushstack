@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: DocBaseClass
 summary: Example base class
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: class
@@ -15,6 +16,7 @@ constructors:
     fullName: (constructor)()
     summary: The simple constructor for `DocBaseClass`
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -25,6 +27,7 @@ constructors:
     fullName: (constructor)(x)
     summary: The overloaded constructor for `DocBaseClass`
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

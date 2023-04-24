@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
@@ -95,6 +96,17 @@ export interface IConfigApiReport {
    * prepend a folder token such as `<projectFolder>`.
    */
   reportTempFolder?: string;
+
+  /**
+   * Whether "forgotten exports" should be included in the API report file.
+   *
+   * @remarks
+   * Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See
+   * https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.
+   *
+   * @defaultValue `false`
+   */
+  includeForgottenExports?: boolean;
 }
 
 /**
@@ -119,6 +131,31 @@ export interface IConfigDocModel {
    * prepend a folder token such as `<projectFolder>`.
    */
   apiJsonFilePath?: string;
+
+  /**
+   * Whether "forgotten exports" should be included in the doc model file.
+   *
+   * @remarks
+   * Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See
+   * https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.
+   *
+   * @defaultValue `false`
+   */
+  includeForgottenExports?: boolean;
+
+  /**
+   * The base URL where the project's source code can be viewed on a website such as GitHub or
+   * Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk.
+   *
+   * @remarks
+   * This URL is concatenated with the file paths serialized to the doc model to produce URL file paths to individual API items.
+   * For example, if the `projectFolderUrl` is "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor" and an API
+   * item's file path is "api/ExtractorConfig.ts", the full URL file path would be
+   * "https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js".
+   *
+   * Can be omitted if you don't need source code links in your API documentation reference.
+   */
+  projectFolderUrl?: string;
 }
 
 /**
@@ -147,6 +184,17 @@ export interface IConfigDtsRollup {
    * prepend a folder token such as `<projectFolder>`.
    */
   untrimmedFilePath?: string;
+
+  /**
+   * Specifies the output path for a .d.ts rollup file to be generated with trimming for an "alpha" release.
+   *
+   * @remarks
+   * This file will include only declarations that are marked as `@public`, `@beta`, or `@alpha`.
+   *
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
+   */
+  alphaTrimmedFilePath?: string;
 
   /**
    * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
@@ -346,6 +394,35 @@ export interface IConfigFile {
   bundledPackages?: string[];
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.
+   *
+   * @remarks
+   * By default, the output files will be written with Windows-style newlines.
+   * To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   */
+  newlineKind?: 'crlf' | 'lf' | 'os';
+
+  /**
+   * Set to true when invoking API Extractor's test harness.
+   * @remarks
+   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
+   * to prevent spurious diffs in output files tracked for tests.
+   */
+  testMode?: boolean;
+
+  /**
+   * Specifies how API Extractor sorts members of an enum when generating the .api.json file.
+   *
+   * @remarks
+   * By default, the output files will be sorted alphabetically, which is "by-name".
+   * To keep the ordering in the source code, specify "preserve".
+   *
+   * @defaultValue `by-name`
+   */
+  enumMemberOrder?: EnumMemberOrder;
+
+  /**
    * {@inheritDoc IConfigCompiler}
    */
   compiler?: IConfigCompiler;
@@ -373,25 +450,7 @@ export interface IConfigFile {
   tsdocMetadata?: IConfigTsdocMetadata;
 
   /**
-   * Specifies what type of newlines API Extractor should use when writing output files.
-   *
-   * @remarks
-   * By default, the output files will be written with Windows-style newlines.
-   * To use POSIX-style newlines, specify "lf" instead.
-   * To use the OS's default newline kind, specify "os".
-   */
-  newlineKind?: 'crlf' | 'lf' | 'os';
-
-  /**
    * {@inheritDoc IExtractorMessagesConfig}
    */
   messages?: IExtractorMessagesConfig;
-
-  /**
-   * Set to true when invoking API Extractor's test harness.
-   * @remarks
-   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
-   * to prevent spurious diffs in output files tracked for tests.
-   */
-  testMode?: boolean;
 }

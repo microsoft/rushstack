@@ -8,8 +8,9 @@ import { ICleanStageOptions, CleanStage } from '../../stages/CleanStage';
 import { Logging } from '../../utilities/Logging';
 
 export class StartAction extends HeftActionBase {
-  private _buildStandardParameters!: IBuildStageStandardParameters;
-  private _cleanFlag!: CommandLineFlagParameter;
+  private readonly _buildStandardParameters: IBuildStageStandardParameters;
+  private readonly _cleanFlag: CommandLineFlagParameter;
+  private _storybookFlag!: CommandLineFlagParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(
@@ -20,10 +21,6 @@ export class StartAction extends HeftActionBase {
       },
       heftActionOptions
     );
-  }
-
-  public onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._buildStandardParameters = BuildStage.defineStageStandardParameters(this);
 
@@ -52,6 +49,7 @@ export class StartAction extends HeftActionBase {
       watchMode: true,
       serveMode: true
     };
+
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();
   }

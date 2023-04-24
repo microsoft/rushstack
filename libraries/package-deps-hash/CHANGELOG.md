@@ -1,6 +1,622 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 31 Aug 2021 00:07:11 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+
+## 4.0.11
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 4.0.10
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 4.0.9
+Fri, 24 Feb 2023 01:24:17 GMT
+
+### Patches
+
+- Prevent network calls or maintenance tasks during local Git operations.
+
+## 4.0.8
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 4.0.7
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 4.0.6
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 4.0.5
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 4.0.4
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 4.0.3
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 4.0.2
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 4.0.1
+Tue, 24 Jan 2023 00:16:54 GMT
+
+### Patches
+
+- Fix bug in parseGitHashObject when 0 hashes are expected.
+
+## 4.0.0
+Fri, 20 Jan 2023 16:19:50 GMT
+
+### Breaking changes
+
+- Add getRepoStateAsync API for faster repository state calculation. Remove synchronous getRepoState API.
+
+## 3.2.67
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 3.2.66
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
+
+## 3.2.65
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 3.2.64
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 3.2.63
+Fri, 18 Nov 2022 04:02:22 GMT
+
+### Patches
+
+- Refactor the logic of getting file hashes under git submodule paths
+
+## 3.2.62
+Tue, 15 Nov 2022 18:43:30 GMT
+
+### Patches
+
+- Get file hashes under git submodule paths when analyzing repo state
+
+## 3.2.61
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 3.2.60
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 3.2.59
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 3.2.58
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 3.2.57
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
+
+## 3.2.56
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 3.2.55
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 3.2.54
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 3.2.53
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 3.2.52
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
+
+## 3.2.51
+Fri, 23 Sep 2022 02:54:22 GMT
+
+### Patches
+
+- Fix getRepoState when the current working directory is not in the Git repository.
+
+## 3.2.50
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 3.2.49
+Thu, 15 Sep 2022 00:18:52 GMT
+
+_Version update only_
+
+## 3.2.48
+Tue, 13 Sep 2022 00:16:55 GMT
+
+_Version update only_
+
+## 3.2.47
+Mon, 12 Sep 2022 22:27:48 GMT
+
+_Version update only_
+
+## 3.2.46
+Fri, 02 Sep 2022 17:48:43 GMT
+
+_Version update only_
+
+## 3.2.45
+Wed, 31 Aug 2022 01:45:06 GMT
+
+_Version update only_
+
+## 3.2.44
+Wed, 31 Aug 2022 00:42:46 GMT
+
+_Version update only_
+
+## 3.2.43
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 3.2.42
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 3.2.41
+Fri, 19 Aug 2022 00:17:20 GMT
+
+_Version update only_
+
+## 3.2.40
+Wed, 10 Aug 2022 09:52:12 GMT
+
+_Version update only_
+
+## 3.2.39
+Wed, 10 Aug 2022 08:12:16 GMT
+
+_Version update only_
+
+## 3.2.38
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 3.2.37
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 3.2.36
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 3.2.35
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 3.2.34
+Wed, 13 Jul 2022 21:31:13 GMT
+
+_Version update only_
+
+## 3.2.33
+Fri, 08 Jul 2022 15:17:47 GMT
+
+_Version update only_
+
+## 3.2.32
+Mon, 04 Jul 2022 15:15:13 GMT
+
+_Version update only_
+
+## 3.2.31
+Thu, 30 Jun 2022 04:48:54 GMT
+
+_Version update only_
+
+## 3.2.30
+Tue, 28 Jun 2022 22:47:14 GMT
+
+_Version update only_
+
+## 3.2.29
+Tue, 28 Jun 2022 00:23:32 GMT
+
+_Version update only_
+
+## 3.2.28
+Mon, 27 Jun 2022 18:43:09 GMT
+
+_Version update only_
+
+## 3.2.27
+Sat, 25 Jun 2022 21:00:40 GMT
+
+_Version update only_
+
+## 3.2.26
+Sat, 25 Jun 2022 01:54:29 GMT
+
+_Version update only_
+
+## 3.2.25
+Fri, 24 Jun 2022 07:16:47 GMT
+
+_Version update only_
+
+## 3.2.24
+Thu, 23 Jun 2022 22:14:25 GMT
+
+_Version update only_
+
+## 3.2.23
+Fri, 17 Jun 2022 09:17:54 GMT
+
+_Version update only_
+
+## 3.2.22
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 3.2.21
+Tue, 07 Jun 2022 09:37:05 GMT
+
+_Version update only_
+
+## 3.2.20
+Wed, 25 May 2022 22:25:08 GMT
+
+_Version update only_
+
+## 3.2.19
+Thu, 19 May 2022 15:13:21 GMT
+
+_Version update only_
+
+## 3.2.18
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 3.2.17
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 3.2.16
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 3.2.15
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 3.2.14
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 3.2.13
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 3.2.12
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 3.2.11
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 3.2.10
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 3.2.9
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 3.2.8
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 3.2.7
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 3.2.6
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 3.2.5
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
+
+## 3.2.4
+Sat, 19 Mar 2022 08:05:38 GMT
+
+_Version update only_
+
+## 3.2.3
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 3.2.2
+Fri, 11 Feb 2022 10:30:26 GMT
+
+_Version update only_
+
+## 3.2.1
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 3.2.0
+Fri, 21 Jan 2022 01:10:41 GMT
+
+### Minor changes
+
+- Remove `--merge-base` from `getRepoChanges` and document the need to manually acquire merge-base commit if comparing against a separate branch.
+- Reduce minimum Git version to 2.20.
+
+### Patches
+
+- Fix incorrect parsing in `parseGitStatus`.
+
+## 3.1.13
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 3.1.12
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 3.1.11
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 3.1.10
+Thu, 16 Dec 2021 05:38:20 GMT
+
+### Patches
+
+- Provide a more useful error message if the git version is too old.
+
+## 3.1.9
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 3.1.8
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 3.1.7
+Thu, 09 Dec 2021 00:21:54 GMT
+
+### Patches
+
+- When detecting changes relative to a target branch, use the merge base between the target branch and the current commit as the comparison ref.
+
+## 3.1.6
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 3.1.5
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 3.1.4
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.1.3
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 3.1.2
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 3.1.1
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 3.1.0
+Sat, 06 Nov 2021 00:09:13 GMT
+
+### Minor changes
+
+- Added repo-level state extraction and change listing functions to support having rush.json in a subfolder of the repository.
+
+## 3.0.86
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 3.0.85
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 3.0.84
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 3.0.83
+Wed, 13 Oct 2021 15:09:55 GMT
+
+_Version update only_
+
+## 3.0.82
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 3.0.81
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 3.0.80
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 3.0.79
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 3.0.78
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 3.0.77
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 3.0.76
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 3.0.75
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 3.0.74
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 3.0.73
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 3.0.72
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 3.0.71
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 3.0.70
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 3.0.69
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 3.0.68
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 3.0.67
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 3.0.66
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 3.0.65
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
+
+## 3.0.64
+Fri, 03 Sep 2021 00:09:10 GMT
+
+_Version update only_
 
 ## 3.0.63
 Tue, 31 Aug 2021 00:07:11 GMT

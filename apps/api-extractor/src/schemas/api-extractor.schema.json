@@ -31,6 +31,13 @@
       }
     },
 
+    "enumMemberOrder": {
+      "description": "Specifies how API Extractor sorts the members of an enum when generating the .api.json doc model. \n 'by-name': sort the items according to the enum member name \n 'preserve': keep the original order that items appear in the source code",
+      "type": "string",
+      "enum": ["by-name", "preserve"],
+      "default": "by-name"
+    },
+
     "compiler": {
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
@@ -73,6 +80,11 @@
         "reportTempFolder": {
           "description": "Specifies the folder where the temporary report file is written.  The file name portion is determined by the \"reportFileName\" setting. After the temporary file is written to disk, it is compared with the file in the \"reportFolder\". If they are different, a production build will fail. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
+        },
+
+        "includeForgottenExports": {
+          "description": "Whether \"forgotten exports\" should be included in the API report file. Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.",
+          "type": "boolean"
         }
       },
       "required": ["enabled"],
@@ -90,6 +102,14 @@
         "apiJsonFilePath": {
           "description": "The output path for the doc model file.  The file extension should be \".api.json\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
+        },
+        "includeForgottenExports": {
+          "description": "Whether \"forgotten exports\" should be included in the doc model file. Forgotten exports are declarations flagged with `ae-forgotten-export` warnings. See https://api-extractor.com/pages/messages/ae-forgotten-export/ to learn more.",
+          "type": "boolean"
+        },
+        "projectFolderUrl": {
+          "description": "The base URL where the project's source code can be viewed on a website such as GitHub or Azure DevOps. This URL path corresponds to the `<projectFolder>` path on disk. This URL is concatenated with the file paths serialized to the doc model to produce URL file paths to individual API items. For example, if the `projectFolderUrl` is \"https://github.com/microsoft/rushstack/tree/main/apps/api-extractor\" and an API item's file path is \"api/ExtractorConfig.ts\", the full URL file path would be \"https://github.com/microsoft/rushstack/tree/main/apps/api-extractor/api/ExtractorConfig.js\". Can be omitted if you don't need source code links in your API documentation reference.",
+          "type": "string"
         }
       },
       "required": ["enabled"],
@@ -106,6 +126,10 @@
         },
         "untrimmedFilePath": {
           "description": "Specifies the output path for a .d.ts rollup file to be generated without any trimming. This file will include all declarations that are exported by the main entry point. If the path is an empty string, then this file will not be written. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
+          "type": "string"
+        },
+        "alphaTrimmedFilePath": {
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for an \"alpha\" release. This file will include only declarations that are marked as \"@public\", \"@beta\", or \"@alpha\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
         "betaTrimmedFilePath": {

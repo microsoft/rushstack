@@ -9,7 +9,7 @@
 
 export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
-export { Async, IAsyncParallelismOptions } from './Async';
+export { Async, IAsyncParallelismOptions, IRunWithRetriesOptions } from './Async';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
@@ -22,11 +22,14 @@ export {
   IExecutableSpawnOptions,
   Executable
 } from './Executable';
+export { IFileErrorOptions, IFileErrorFormattingOptions, FileError } from './FileError';
 export {
   INodePackageJson,
   IPackageJson,
   IPackageJsonDependencyTable,
-  IPackageJsonScriptTable
+  IPackageJsonScriptTable,
+  IPackageJsonRepository,
+  IPeerDependenciesMetaTable
 } from './IPackageJson';
 export {
   Import,
@@ -35,7 +38,16 @@ export {
   IImportResolvePackageOptions
 } from './Import';
 export { InternalError } from './InternalError';
-export { JsonObject, JsonFile, JsonNull, IJsonFileSaveOptions, IJsonFileStringifyOptions } from './JsonFile';
+export {
+  JsonObject,
+  JsonNull,
+  JsonSyntax,
+  IJsonFileParseOptions,
+  IJsonFileLoadAndValidateOptions,
+  IJsonFileStringifyOptions,
+  IJsonFileSaveOptions,
+  JsonFile
+} from './JsonFile';
 export {
   JsonSchema,
   IJsonSchemaErrorInfo,
@@ -54,7 +66,7 @@ export {
   IParsedPackageName,
   IParsedPackageNameOrError
 } from './PackageName';
-export { Path, IPathFormatConciselyOptions } from './Path';
+export { Path, FileLocationStyle, IPathFormatFileLocationOptions, IPathFormatConciselyOptions } from './Path';
 export { Encoding, Text, NewlineKind } from './Text';
 export { Sort } from './Sort';
 export {
@@ -62,6 +74,7 @@ export {
   FileSystem,
   FileSystemCopyFilesAsyncFilter,
   FileSystemCopyFilesFilter,
+  FolderItem,
   FileSystemStats,
   IFileSystemCopyFileBaseOptions,
   IFileSystemCopyFileOptions,
@@ -78,6 +91,8 @@ export {
 export { FileWriter, IFileWriterFlags } from './FileWriter';
 export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';
 export { StringBuilder, IStringBuilder } from './StringBuilder';
+export { ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
+export { ITerminal } from './Terminal/ITerminal';
 export { Terminal } from './Terminal/Terminal';
 export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Terminal/Colors';
 export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a performance bug in `rush version` when using `workspace:` protocol.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -4,7 +4,7 @@
 
 ```ts
 
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings | undefined> {
@@ -27,19 +27,29 @@ export interface IStringValueTypings {
 }
 
 // @public (undocumented)
-export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
-    // (undocumented)
-    fileExtensions: string[];
-    // (undocumented)
-    filesToIgnore?: string[];
+export interface ITypingsGeneratorBaseOptions {
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult | Promise<TTypingsResult>;
+    globsToIgnore?: string[];
+    // (undocumented)
+    secondaryGeneratedTsFolders?: string[];
     // (undocumented)
     srcFolder: string;
     // (undocumented)
-    terminal?: Terminal;
+    terminal?: ITerminal;
+}
+
+// @public (undocumented)
+export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> extends ITypingsGeneratorBaseOptions {
+    // (undocumented)
+    fileExtensions: string[];
+    // @deprecated (undocumented)
+    filesToIgnore?: string[];
+    // (undocumented)
+    getAdditionalOutputFiles?: (relativePath: string) => string[];
+    // (undocumented)
+    parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
 }
 
 // @public
@@ -50,16 +60,17 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
 // @public
 export class TypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
+    generateTypingsAsync(relativeFilePaths?: string[]): Promise<void>;
     // (undocumented)
-    generateTypingsAsync(): Promise<void>;
+    getOutputFilePaths(relativePath: string): string[];
+    readonly ignoredFileGlobs: readonly string[];
+    readonly inputFileGlob: string;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
-    registerDependency(target: string, dependency: string): void;
+    registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
-    }
-
-
-// (No @packageDocumentation comment for this package)
+    readonly sourceFolderPath: string;
+}
 
 ```

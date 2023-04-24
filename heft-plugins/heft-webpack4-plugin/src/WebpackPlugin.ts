@@ -109,7 +109,8 @@ export class WebpackPlugin implements IHeftPlugin {
     buildProperties: IBuildStageProperties,
     supportsColor: boolean
   ): Promise<void> {
-    const webpackConfiguration: IWebpackConfiguration = bundleSubstageProperties.webpackConfiguration;
+    const webpackConfiguration: IWebpackConfiguration | undefined | null =
+      bundleSubstageProperties.webpackConfiguration;
     if (!webpackConfiguration) {
       return;
     }
@@ -138,20 +139,34 @@ export class WebpackPlugin implements IHeftPlugin {
 
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
-    const compiler: WebpackCompiler | WebpackMultiCompiler = Array.isArray(webpackConfiguration)
-      ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => webpack.MultiCompiler */
-      : webpack(webpackConfiguration); /* (webpack.Compilation) => webpack.Compiler */
+    let compiler: WebpackCompiler | WebpackMultiCompiler;
+    if (Array.isArray(webpackConfiguration)) {
+      if (webpackConfiguration.length === 0) {
+        logger.terminal.writeLine('The webpack configuration received is an empty array - nothing to do.');
+        return;
+      } else {
+        compiler = webpack(webpackConfiguration); /* (webpack.Compilation[]) => MultiCompiler */
+      }
+    } else {
+      compiler = webpack(webpackConfiguration); /* (webpack.Compilation) => Compiler */
+    }
 
     if (buildProperties.serveMode) {
       const defaultDevServerOptions: TWebpackDevServer.Configuration = {
         host: 'localhost',
-        publicPath: '/',
-        filename: '[name]_[hash].js',
-        clientLogLevel: 'info',
-        stats: {
-          cached: false,
-          cachedAssets: false,
-          colors: supportsColor
+        devMiddleware: {
+          publicPath: '/',
+          stats: {
+            cached: false,
+            cachedAssets: false,
+            colors: supportsColor
+          }
+        },
+        client: {
+          logging: 'info',
+          webSocketURL: {
+            port: 8080
+          }
         },
         port: 8080
       };
@@ -179,8 +194,9 @@ export class WebpackPlugin implements IHeftPlugin {
       // Register a plugin to callback after webpack is done with the first compilation
       // so we can move on to post-build
       let firstCompilationDoneCallback: (() => void) | undefined;
-      const originalBeforeCallback: typeof options.before | undefined = options.before;
-      options.before = (app, devServer, compiler: WebpackCompiler) => {
+      const originalBeforeCallback: typeof options.onBeforeSetupMiddleware | undefined =
+        options.onBeforeSetupMiddleware;
+      options.onBeforeSetupMiddleware = (server: TWebpackDevServer) => {
         compiler.hooks.done.tap('heft-webpack-plugin', () => {
           if (firstCompilationDoneCallback) {
             firstCompilationDoneCallback();
@@ -189,7 +205,7 @@ export class WebpackPlugin implements IHeftPlugin {
         });
 
         if (originalBeforeCallback) {
-          return originalBeforeCallback(app, devServer, compiler);
+          return originalBeforeCallback(server);
         }
       };
 
@@ -229,7 +245,7 @@ export class WebpackPlugin implements IHeftPlugin {
             {}
           );
         } catch (e) {
-          logger.emitError(e);
+          logger.emitError(e as Error);
         }
       } else {
         try {
@@ -237,7 +253,7 @@ export class WebpackPlugin implements IHeftPlugin {
             (compiler as WebpackCompiler).run.bind(compiler)
           );
         } catch (e) {
-          logger.emitError(e);
+          logger.emitError(e as Error);
         }
       }
 
@@ -252,14 +268,33 @@ export class WebpackPlugin implements IHeftPlugin {
 
   private _emitErrors(logger: ScopedLogger, stats: WebpackStats | WebpackCompilation.MultiStats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: WebpackStats.ToJsonOutput = stats.toJson('errors-warnings');
+      const serializedStats: WebpackStats.ToJsonOutput[] = [stats.toJson('errors-warnings')];
 
-      for (const warning of serializedStats.warnings as (string | Error)[]) {
-        logger.emitWarning(warning instanceof Error ? warning : new Error(warning));
+      const warnings: Error[] = [];
+      const errors: Error[] = [];
+
+      for (const compilationStats of serializedStats) {
+        for (const warning of compilationStats.warnings as (string | Error)[]) {
+          warnings.push(warning instanceof Error ? warning : new Error(warning));
+        }
+
+        for (const error of compilationStats.errors as (string | Error)[]) {
+          errors.push(error instanceof Error ? error : new Error(error));
+        }
+
+        if (compilationStats.children) {
+          for (const child of compilationStats.children) {
+            serializedStats.push(child);
+          }
+        }
       }
 
-      for (const error of serializedStats.errors as (string | Error)[]) {
-        logger.emitError(error instanceof Error ? error : new Error(error));
+      for (const warning of warnings) {
+        logger.emitWarning(warning);
+      }
+
+      for (const error of errors) {
+        logger.emitError(error);
       }
     }
   }

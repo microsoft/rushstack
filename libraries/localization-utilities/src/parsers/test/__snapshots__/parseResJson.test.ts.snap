@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseResJson correctly ignores a string: Loc file 1`] = `
+Object {
+  "foo": Object {
+    "comment": "A string",
+    "value": "Foo",
+  },
+}
+`;
+
+exports[`parseResJson correctly ignores a string: ignoreStrings calls 1`] = `
+Array [
+  Array [
+    "test.resjson",
+    "foo",
+  ],
+  Array [
+    "test.resjson",
+    "bar",
+  ],
+]
+`;
+
+exports[`parseResJson parses a valid file 1`] = `
+Object {
+  "bar": Object {
+    "comment": "Another string",
+    "value": "Bar",
+  },
+  "foo": Object {
+    "comment": "A string",
+    "value": "Foo",
+  },
+}
+`;
+
+exports[`parseResJson throws on excess comments 1`] = `"The resjson file is invalid. Comments exist for the following string keys that don't have values: bar."`;

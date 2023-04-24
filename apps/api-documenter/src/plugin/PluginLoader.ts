@@ -87,7 +87,7 @@ export class PluginLoader {
             try {
               markdownDocumenterFeature = new featureDefinition.subclass(initialization);
             } catch (e) {
-              throw new Error(`Failed to construct feature subclass:\n` + e.toString());
+              throw new Error(`Failed to construct feature subclass:\n` + (e as Error).toString());
             }
             if (!(markdownDocumenterFeature instanceof MarkdownDocumenterFeature)) {
               throw new Error('The constructed subclass was not an instance of MarkdownDocumenterFeature');
@@ -96,7 +96,7 @@ export class PluginLoader {
             try {
               markdownDocumenterFeature.onInitialized();
             } catch (e) {
-              throw new Error('Error occurred during the onInitialized() event: ' + e.toString());
+              throw new Error('Error occurred during the onInitialized() event: ' + (e as Error).toString());
             }
 
             this.markdownDocumenterFeature = markdownDocumenterFeature;
@@ -105,7 +105,7 @@ export class PluginLoader {
           }
         }
       } catch (e) {
-        throw new Error(`Error loading plugin ${configPlugin.packageName}: ` + e.message);
+        throw new Error(`Error loading plugin ${configPlugin.packageName}: ` + (e as Error).message);
       }
     }
   }

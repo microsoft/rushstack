@@ -21,7 +21,13 @@ export class ValidationEnhancer {
     const alreadyWarnedEntities: Set<AstEntity> = new Set<AstEntity>();
 
     for (const entity of collector.entities) {
-      if (!entity.consumable) {
+      if (
+        !(
+          entity.consumable ||
+          collector.extractorConfig.apiReportIncludeForgottenExports ||
+          collector.extractorConfig.docModelIncludeForgottenExports
+        )
+      ) {
         continue;
       }
 
@@ -73,7 +79,7 @@ export class ValidationEnhancer {
 
     if (symbolMetadata.maxEffectiveReleaseTag === ReleaseTag.Internal) {
       if (!astSymbol.parentAstSymbol) {
-        // If it's marked as @internal and has no parent, then it needs and underscore.
+        // If it's marked as @internal and has no parent, then it needs an underscore.
         // We use maxEffectiveReleaseTag because a merged declaration would NOT need an underscore in a case like this:
         //
         //   /** @public */
@@ -210,9 +216,8 @@ export class ValidationEnhancer {
           continue;
         }
 
-        localName = rootSymbol.localName;
-
         collectorEntity = collector.tryGetCollectorEntity(rootSymbol);
+        localName = collectorEntity?.nameForEmit || rootSymbol.localName;
 
         const referencedMetadata: SymbolMetadata = collector.fetchSymbolMetadata(referencedEntity);
         referencedReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
@@ -222,7 +227,7 @@ export class ValidationEnhancer {
         // TODO: Currently the "import * as ___ from ___" syntax does not yet support doc comments
         referencedReleaseTag = ReleaseTag.Public;
 
-        localName = referencedEntity.localName;
+        localName = collectorEntity?.nameForEmit || referencedEntity.localName;
       } else {
         continue;
       }
@@ -233,7 +238,7 @@ export class ValidationEnhancer {
             ExtractorMessageId.IncompatibleReleaseTags,
             `The symbol "${astDeclaration.astSymbol.localName}"` +
               ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},` +
-              ` but its signature references "${referencedEntity.localName}"` +
+              ` but its signature references "${localName}"` +
               ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
             astDeclaration
           );

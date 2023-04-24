@@ -7,6 +7,7 @@ import { CommandLineAction } from '../providers/CommandLineAction';
 import { CommandLineParser } from '../providers/CommandLineParser';
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
+import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -36,10 +37,12 @@ function createParser(): DynamicCommandLineParser {
     description: 'The action remainder'
   });
 
+  commandLineParser._registerDefinedParameters();
+
   return commandLineParser;
 }
 
-describe('CommandLineRemainder', () => {
+describe(CommandLineRemainder.name, () => {
   it('prints the global help', () => {
     const commandLineParser: CommandLineParser = createParser();
     const helpText: string = colors.stripColors(commandLineParser.renderHelpText());
@@ -56,6 +59,27 @@ describe('CommandLineRemainder', () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('run');
     const args: string[] = ['run', '--title', 'The title', 'the', 'remaining', 'args'];
+
+    await commandLineParser.execute(args);
+
+    expect(commandLineParser.selectedAction).toBe(action);
+
+    const copiedArgs: string[] = [];
+    for (const parameter of action.parameters) {
+      copiedArgs.push(`### ${parameter.longName} output: ###`);
+      parameter.appendToArgList(copiedArgs);
+    }
+
+    copiedArgs.push(`### remainder output: ###`);
+    action.remainder!.appendToArgList(copiedArgs);
+
+    expect(copiedArgs).toMatchSnapshot();
+  });
+
+  it('parses an action input with remainder flagged options', async () => {
+    const commandLineParser: CommandLineParser = createParser();
+    const action: CommandLineAction = commandLineParser.getAction('run');
+    const args: string[] = ['run', '--title', 'The title', '--', '--the', 'remaining', '--args'];
 
     await commandLineParser.execute(args);
 

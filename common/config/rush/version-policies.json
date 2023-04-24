@@ -1,6 +1,6 @@
 /**
  * This is configuration file is used for advanced publishing configurations with Rush.
- * For full documentation, please see https://rushjs.io
+ * More documentation is available on the Rush website: https://rushjs.io
  */
 
 /**
@@ -51,7 +51,17 @@
   //    * If this field is omitted, then a separate CHANGELOG.md file will be maintained for each
   //    * package in the set.
   //    */
-  //   "mainProject": "my-app"
+  //   "mainProject": "my-app",
+  //
+  //   /**
+  //    * (Optional) If enabled, the "rush change" command will prompt the user for their email address
+  //    * and include it in the JSON change files.  If an organization maintains multiple repos, tracking
+  //    * this contact information may be useful for a service that automatically upgrades packages and
+  //    * needs to notify engineers whose change may be responsible for a downstream build break.  It might
+  //    * also be useful for crediting contributors.  Rush itself does not do anything with the collected
+  //    * email addresses.  The default value is "false".
+  //    */
+  //   // "includeEmailInChangeFile": true
   // },
   //
   // {
@@ -85,13 +95,15 @@
   //    * in some other way, set "exemptFromRushChange" to true to tell "rush change" to ignore the projects
   //    * belonging to this version policy.
   //    */
-  //   "exemptFromRushChange": false
+  //   "exemptFromRushChange": false,
+  //
+  //   // "includeEmailInChangeFile": true
   // }
   {
     "policyName": "rush",
     "definitionName": "lockStepVersion",
-    "version": "5.52.0",
-    "nextBump": "minor",
+    "version": "5.97.1",
+    "nextBump": "patch",
     "mainProject": "@microsoft/rush"
   }
 ]

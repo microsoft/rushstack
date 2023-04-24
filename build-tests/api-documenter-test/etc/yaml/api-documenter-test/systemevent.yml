@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: SystemEvent
 summary: A class used to exposed events.
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: class
@@ -15,6 +16,7 @@ methods:
     fullName: addHandler(handler)
     summary: Adds an handler for the event.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

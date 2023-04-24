@@ -7,7 +7,7 @@ import * as os from 'os';
  * The allowed types of encodings, as supported by Node.js
  * @public
  */
-export const enum Encoding {
+export enum Encoding {
   Utf8 = 'utf8'
 }
 
@@ -15,7 +15,7 @@ export const enum Encoding {
  * Enumeration controlling conversion of newline characters.
  * @public
  */
-export const enum NewlineKind {
+export enum NewlineKind {
   /**
    * Windows-style newlines
    */

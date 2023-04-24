@@ -1,3 +1,16 @@
+// Copied from heft-node-rig
+//
+// heft-jest-plugin cannot use heft-node-rig because it would cause a circular
+// dependency, but we can still use the same build cache outputs.
 {
-  "projectOutputFolderNames": ["lib", "dist"]
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["dist", "lib", "lib-commonjs", "temp"]
+    },
+    {
+      "operationName": "build",
+      "outputFolderNames": ["dist", "lib", "lib-commonjs", "temp"]
+    }
+  ]
 }

@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, Colors, InternalError, Text, IColorableSequence } from '@rushstack/node-core-library';
+import { ITerminal, Colors, InternalError, Text, IColorableSequence } from '@rushstack/node-core-library';
 import {
   Reporter,
   Test,
   TestResult,
   AggregatedResult,
-  Context,
+  TestContext,
   ReporterOnStartOptions,
   Config
 } from '@jest/reporters';
@@ -29,10 +29,10 @@ export interface IHeftJestReporterOptions {
  * Jest behavior.
  *
  * For reference, Jest's default implementation is here:
- * https://github.com/facebook/jest/blob/master/packages/jest-reporters/src/default_reporter.ts
+ * https://github.com/facebook/jest/blob/main/packages/jest-reporters/src/default_reporter.ts
  */
 export default class HeftJestReporter implements Reporter {
-  private _terminal: Terminal;
+  private _terminal: ITerminal;
   private _buildFolder: string;
   private _debugMode: boolean;
 
@@ -55,7 +55,7 @@ export default class HeftJestReporter implements Reporter {
     aggregatedResult: AggregatedResult
   ): Promise<void> {
     this._writeConsoleOutput(testResult);
-    const { numPassingTests, numFailingTests, failureMessage, testExecError } = testResult;
+    const { numPassingTests, numFailingTests, failureMessage, testExecError, perfStats } = testResult;
 
     if (numFailingTests > 0) {
       this._terminal.write(Colors.redBackground(Colors.black('FAIL')));
@@ -65,7 +65,11 @@ export default class HeftJestReporter implements Reporter {
       this._terminal.write(Colors.greenBackground(Colors.black('PASS')));
     }
 
-    const duration: string = test.duration ? `${test.duration / 1000}s` : '?';
+    // Calculate the suite duration time from the test result. This is necessary because Jest doesn't
+    // provide the duration on the 'test' object (at least not as of Jest 25), and other reporters
+    // (ex. jest-junit) only use perfStats:
+    // https://github.com/jest-community/jest-junit/blob/12da1a20217a9b6f30858013175319c1256f5b15/utils/buildJsonResults.js#L112
+    const duration: string = perfStats ? `${((perfStats.end - perfStats.start) / 1000).toFixed(3)}s` : '?';
     this._terminal.writeLine(
       ` ${this._getTestPath(
         test.path
@@ -173,7 +177,7 @@ export default class HeftJestReporter implements Reporter {
     );
   }
 
-  public async onRunComplete(contexts: Set<Context>, results: AggregatedResult): Promise<void> {
+  public async onRunComplete(contexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
     const { numPassedTests, numFailedTests, numTotalTests, numRuntimeErrorTestSuites } = results;
 
     this._terminal.writeLine();

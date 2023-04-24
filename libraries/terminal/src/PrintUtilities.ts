@@ -3,7 +3,7 @@
 
 import * as tty from 'tty';
 import wordwrap from 'wordwrap';
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * A sensible fallback column width for consoles.
@@ -41,8 +41,21 @@ export class PrintUtilities {
       maxLineLength = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
     }
 
-    const wrap: (textToWrap: string) => string = wordwrap(indent, maxLineLength, { mode: 'soft' });
-    return wrap(text);
+    // Apply word wrapping and the provided indent, while also respecting existing newlines
+    // and prefix spaces that may exist in the text string already.
+    const lines: string[] = text.split(/\r?\n/);
+    const wrappedLines: string[] = lines.map((line) => {
+      const startingSpace: RegExpMatchArray | null = line.match(/^ +/);
+      const addlIndent: number = startingSpace?.[0]?.length || 0;
+
+      if (addlIndent > 0) {
+        line = line.replace(/^ +/, '');
+      }
+
+      return wordwrap(indent! + addlIndent, maxLineLength! - indent! - addlIndent, { mode: 'soft' })(line);
+    });
+
+    return wrappedLines.join('\n');
   }
 
   /**
@@ -50,7 +63,7 @@ export class PrintUtilities {
    *
    * @param boxWidth - The width of the box, defaults to half of the console width.
    */
-  public static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void {
+  public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void {
     if (!boxWidth) {
       const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
       boxWidth = Math.floor(consoleWidth / 2);

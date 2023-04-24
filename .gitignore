@@ -58,11 +58,22 @@ jspm_packages/
 # OS X temporary files
 .DS_Store
 
+# IntelliJ IDEA project files; if you want to commit IntelliJ settings, this recipe may be helpful:
+# https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+.idea/
+*.iml
+
+# Visual Studio Code
+.vscode
+
 # Rush temporary files
 common/deploy/
 common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
+
+# Heft temporary files
+.heft
 
 # Common toolchain intermediate files
 temp
@@ -71,12 +82,7 @@ lib-amd
 lib-es6
 lib-esnext
 lib-commonjs
+lib-shim
 dist
 *.scss.ts
 *.sass.ts
-
-# Visual Studio Code
-.vscode
-
-# Heft
-.heft

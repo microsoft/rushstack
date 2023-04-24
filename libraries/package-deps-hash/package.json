@@ -1,16 +1,19 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "3.0.63",
+  "version": "4.0.11",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/package-deps-hash"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/package-deps-hash"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -18,7 +21,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13"
+    "@types/node": "14.18.36"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"

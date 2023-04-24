@@ -27,4 +27,7 @@
 # DO NOT MODIFY THE TEMPLATE ABOVE THIS LINE
 #--------------------------------------------
 
+/lib/start-dev.*
+/lib/start-dev-docs.*
+
 # (Add your project-specific overrides here)

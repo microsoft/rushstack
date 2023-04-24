@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { IBaseCommandLineDefinition, IBaseCommandLineDefinitionWithArgument } from './CommandLineDefinition';
 
 /**
@@ -25,22 +26,36 @@ export enum CommandLineParameterKind {
 }
 
 /**
+ * Matches kebab-case formatted strings prefixed with double dashes.
+ * Example: "--do-something"
+ */
+const LONG_NAME_REGEXP: RegExp = /^-(-[a-z0-9]+)+$/;
+
+/**
+ * Matches a single upper-case or lower-case letter prefixed with a dash.
+ * Example: "-d"
+ */
+const SHORT_NAME_REGEXP: RegExp = /^-[a-zA-Z]$/;
+
+/**
+ * Matches kebab-case formatted strings
+ * Example: "my-scope"
+ */
+const SCOPE_REGEXP: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/**
+ * "Environment variable names used by the utilities in the Shell and Utilities volume of
+ * IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
+ * from the characters defined in Portable Character Set and do not begin with a digit."
+ * Example: "THE_SETTING"
+ */
+const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
+
+/**
  * The base class for the various command-line parameter types.
  * @public
  */
 export abstract class CommandLineParameter {
-  // Example: "--do-something"
-  private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
-
-  // Example: "-d"
-  private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
-
-  // "Environment variable names used by the utilities in the Shell and Utilities volume of
-  // IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
-  // from the characters defined in Portable Character Set and do not begin with a digit."
-  // Example: "THE_SETTING"
-  private static _environmentVariableRegExp: RegExp = /^[A-Z_][A-Z0-9_]*$/;
-
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
    * @internal
@@ -50,8 +65,20 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
 
+  /**
+   * If a parameterScope is provided, returns the scope-prefixed long name of the flag,
+   * including double dashes, eg. "--scope:do-something". Otherwise undefined.
+   */
+  public readonly scopedLongName: string | undefined;
+
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public readonly shortName: string | undefined;
+
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterGroup} */
+  public readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
+
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterScope} */
+  public readonly parameterScope: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
@@ -69,12 +96,14 @@ export abstract class CommandLineParameter {
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
     this.shortName = definition.parameterShortName;
+    this.parameterGroup = definition.parameterGroup;
+    this.parameterScope = definition.parameterScope;
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
     this.undocumentedSynonyms = definition.undocumentedSynonyms;
 
-    if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
+    if (!LONG_NAME_REGEXP.test(this.longName)) {
       throw new Error(
         `Invalid name: "${this.longName}". The parameter long name must be` +
           ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
@@ -82,12 +111,24 @@ export abstract class CommandLineParameter {
     }
 
     if (this.shortName) {
-      if (!CommandLineParameter._shortNameRegExp.test(this.shortName)) {
+      if (!SHORT_NAME_REGEXP.test(this.shortName)) {
         throw new Error(
           `Invalid name: "${this.shortName}". The parameter short name must be` +
             ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`
         );
       }
+    }
+
+    if (this.parameterScope) {
+      if (!SCOPE_REGEXP.test(this.parameterScope)) {
+        throw new Error(
+          `Invalid scope: "${this.parameterScope}". The parameter scope name must be` +
+            ` lower-case and use dash delimiters (e.g. "my-scope")`
+        );
+      }
+      // Parameter long name is guaranteed to start with '--' since this is validated above
+      const unprefixedLongName: string = this.longName.slice(2);
+      this.scopedLongName = `--${this.parameterScope}:${unprefixedLongName}`;
     }
 
     if (this.environmentVariable) {
@@ -100,7 +141,7 @@ export abstract class CommandLineParameter {
         );
       }
 
-      if (!CommandLineParameter._environmentVariableRegExp.test(this.environmentVariable)) {
+      if (!ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)) {
         throw new Error(
           `Invalid environment variable name: "${this.environmentVariable}". The name must` +
             ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`
@@ -109,20 +150,16 @@ export abstract class CommandLineParameter {
     }
 
     if (this.undocumentedSynonyms && this.undocumentedSynonyms.length > 0) {
-      if (this.required) {
-        throw new Error('Undocumented synonyms are not allowed on required parameters.');
-      }
-
       for (const undocumentedSynonym of this.undocumentedSynonyms) {
         if (this.longName === undocumentedSynonym) {
           throw new Error(
-            `Invalid name: "${undocumentedSynonym}". Undocumented Synonyms must not be the same` +
+            `Invalid name: "${undocumentedSynonym}". Undocumented synonyms must not be the same` +
               ` as the the long name.`
           );
-        } else if (!CommandLineParameter._longNameRegExp.test(undocumentedSynonym)) {
+        } else if (!LONG_NAME_REGEXP.test(undocumentedSynonym)) {
           throw new Error(
-            `Invalid name: "${undocumentedSynonym}". All undocumented Synonyms name must be` +
-              ` lower-case and use dash delimiters (e.g. "--do-a-thing")`
+            `Invalid name: "${undocumentedSynonym}". All undocumented synonyms name must be lower-case and ` +
+              'use dash delimiters (e.g. "--do-a-thing")'
           );
         }
       }

@@ -1,0 +1,64 @@
+@use '../../styles/base';
+
+.LockfileEntryListView {
+  display: flex;
+  justify-content: space-between;
+  min-height: 400px;
+  flex: 1;
+  padding-top: 12px;
+  & > * {
+    width: calc(50% - 24px - 12px);
+  }
+}
+
+.DependencyListWrapper {
+  margin-top: 8px;
+  height: calc(100% - 24px);
+}
+
+.DependencyItem {
+  border: 1px solid white;
+  cursor: pointer;
+  margin-top: 12px;
+  &:hover {
+    border: 1px solid #107c10;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
+}
+
+.SelectedDependencyItem {
+  background-color: #dff6dd;
+}
+
+.InfluencerList {
+  margin: 12px 0;
+}
+
+.DependencyDetails {
+  @include base.card;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.InfluencerEntry {
+  display: block;
+  cursor: pointer;
+  &:hover {
+    color: #107c10;
+    text-decoration: underline;
+  }
+}
+
+.DependencyDetailInfo {
+  display: flex;
+  align-items: center;
+  span {
+    margin-left: 4px;
+  }
+}
+
+.TransitiveReferencersHeader {
+  margin-top: 12px;
+}

@@ -11,13 +11,24 @@ import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser } from '@rushstack/ts-command-line';
+import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { FileLocationStyle } from '@rushstack/node-core-library';
+import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineChoiceDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineChoiceListDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineFlagDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineIntegerDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineStringListDefinition } from '@rushstack/ts-command-line';
+import { IFileErrorFormattingOptions } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
-import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
 export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
@@ -60,13 +71,25 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 // @beta (undocumented)
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
+// @beta
+export class HeftCommandLine {
+    // @internal
+    constructor(commandLineParser: CommandLineParser, terminal: ITerminal);
+    registerChoiceListParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>): IHeftChoiceListParameter;
+    registerChoiceParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceDefinition>): IHeftChoiceParameter;
+    registerFlagParameter(options: IHeftRegisterParameterOptions<ICommandLineFlagDefinition>): IHeftFlagParameter;
+    registerIntegerParameter(options: IHeftRegisterParameterOptions<ICommandLineIntegerDefinition>): IHeftIntegerParameter;
+    registerStringListParameter(options: IHeftRegisterParameterOptions<ICommandLineStringListDefinition>): IHeftStringListParameter;
+    registerStringParameter(options: IHeftRegisterParameterOptions<ICommandLineStringDefinition>): IHeftStringParameter;
+}
+
 // @public (undocumented)
 export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get globalTerminal(): Terminal;
+    get globalTerminal(): ITerminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
@@ -90,6 +113,8 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
+    // @beta
+    readonly commandLine: HeftCommandLine;
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
@@ -117,7 +142,7 @@ export interface IBuildStageProperties {
     // (undocumented)
     lite: boolean;
     // (undocumented)
-    locale?: string;
+    locales?: ReadonlyArray<string>;
     // (undocumented)
     maxOldSpaceSize?: string;
     // (undocumented)
@@ -191,7 +216,7 @@ export interface ICustomActionOptions<TParameters> {
 export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
 
 // @beta (undocumented)
-export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
+export interface ICustomActionParameterBase<CustomActionParameterType> {
     // (undocumented)
     description: string;
     // (undocumented)
@@ -233,11 +258,30 @@ export interface IHeftActionConfigurationOptions {
     mergeArrays?: boolean;
 }
 
+// @beta
+export interface IHeftBaseParameter<TValue, TCommandLineDefinition extends IBaseCommandLineDefinition> {
+    readonly actionAssociated: boolean;
+    readonly definition: IHeftRegisterParameterOptions<TCommandLineDefinition>;
+    readonly value?: TValue;
+}
+
+// @beta
+export type IHeftChoiceListParameter = IHeftBaseParameter<readonly string[], ICommandLineChoiceListDefinition>;
+
+// @beta
+export type IHeftChoiceParameter = IHeftBaseParameter<string, ICommandLineChoiceDefinition>;
+
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
     cwd: string;
     terminalProvider: ITerminalProvider;
 }
+
+// @beta
+export type IHeftFlagParameter = IHeftBaseParameter<boolean, ICommandLineFlagDefinition>;
+
+// @beta
+export type IHeftIntegerParameter = IHeftBaseParameter<number, ICommandLineIntegerDefinition>;
 
 // @internal (undocumented)
 export interface _IHeftLifecycle {
@@ -257,6 +301,9 @@ export interface IHeftPlugin<TOptions = void> {
     readonly pluginName: string;
 }
 
+// @beta
+export type IHeftRegisterParameterOptions<TCommandLineDefinition extends IBaseCommandLineDefinition> = TCommandLineDefinition & IParameterAssociatedActionNames;
+
 // @public (undocumented)
 export interface IHeftSessionHooks {
     // (undocumented)
@@ -271,10 +318,17 @@ export interface IHeftSessionHooks {
     test: SyncHook<ITestStageContext>;
 }
 
+// @beta
+export type IHeftStringListParameter = IHeftBaseParameter<readonly string[], ICommandLineStringListDefinition>;
+
+// @beta
+export type IHeftStringParameter = IHeftBaseParameter<string, ICommandLineStringDefinition>;
+
 // @public (undocumented)
 export interface IMetricsData {
     command: string;
     commandParameters: Record<string, string>;
+    encounteredError?: boolean;
     machineArch: string;
     machineCores: number;
     machineOs: string;
@@ -283,8 +337,15 @@ export interface IMetricsData {
     taskTotalExecutionMs: number;
 }
 
+// @beta
+export interface IParameterAssociatedActionNames {
+    associatedActionNames: string[];
+}
+
 // @internal (undocumented)
 export interface _IPerformanceData {
+    // (undocumented)
+    encounteredError?: boolean;
     // (undocumented)
     taskTotalExecutionMs: number;
 }
@@ -316,7 +377,7 @@ export interface IScopedLogger {
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
     // (undocumented)
-    readonly terminal: Terminal;
+    readonly terminal: ITerminal;
 }
 
 // @public (undocumented)
@@ -333,26 +394,6 @@ export interface ITestStageContext extends IStageContext<TestStageHooks, ITestSt
 
 // @public (undocumented)
 export interface ITestStageProperties {
-    // (undocumented)
-    debugHeftReporter: boolean | undefined;
-    // (undocumented)
-    detectOpenHandles: boolean | undefined;
-    // (undocumented)
-    findRelatedTests: ReadonlyArray<string> | undefined;
-    // (undocumented)
-    maxWorkers: string | undefined;
-    // (undocumented)
-    passWithNoTests: boolean | undefined;
-    // (undocumented)
-    silent: boolean | undefined;
-    // (undocumented)
-    testNamePattern: string | undefined;
-    // (undocumented)
-    testPathPattern: ReadonlyArray<string> | undefined;
-    // (undocumented)
-    testTimeout: number | undefined;
-    // (undocumented)
-    updateSnapshots: boolean;
     // (undocumented)
     watchMode: boolean;
 }
@@ -395,7 +436,7 @@ export class ScopedLogger implements IScopedLogger {
     // @internal (undocumented)
     readonly _requestingPlugin: IHeftPlugin;
     // (undocumented)
-    readonly terminal: Terminal;
+    readonly terminal: ITerminal;
     // (undocumented)
     readonly terminalProvider: ITerminalProvider;
     // (undocumented)
@@ -419,7 +460,5 @@ export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
     // (undocumented)
     readonly run: AsyncParallelHook;
 }
-
-// (No @packageDocumentation comment for this package)
 
 ```

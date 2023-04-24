@@ -13,17 +13,23 @@ This project tests various documentation generation scenarios and doc comment sy
 |  Class | Description |
 |  --- | --- |
 |  [DecoratorExample](./api-documenter-test.decoratorexample.md) |  |
-|  [DocBaseClass](./api-documenter-test.docbaseclass.md) | Example base class |
+|  [DocBaseClass](./api-documenter-test.docbaseclass.md) | <p>Example base class</p> |
 |  [DocClass1](./api-documenter-test.docclass1.md) | This is an example class. |
 |  [DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md) | Class that merges with interface |
 |  [Generic](./api-documenter-test.generic.md) | Generic class. |
-|  [SystemEvent](./api-documenter-test.systemevent.md) | A class used to exposed events. |
+|  [SystemEvent](./api-documenter-test.systemevent.md) | <p>A class used to exposed events.</p> |
+
+## Abstract Classes
+
+|  Abstract Class | Description |
+|  --- | --- |
+|  [AbstractClass](./api-documenter-test.abstractclass.md) | Some abstract class with abstract members. |
 
 ## Enumerations
 
 |  Enumeration | Description |
 |  --- | --- |
-|  [DocEnum](./api-documenter-test.docenum.md) | Docs for DocEnum |
+|  [DocEnum](./api-documenter-test.docenum.md) | <p>Docs for DocEnum</p> |
 |  [DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md) | Enum that merges with namespace |
 
 ## Functions
@@ -37,11 +43,13 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Interface | Description |
 |  --- | --- |
+|  [Constraint](./api-documenter-test.constraint.md) | Type parameter constraint used by test case below. |
+|  [DefaultType](./api-documenter-test.defaulttype.md) | Type parameter default type used by test case below. |
 |  [DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md) | Interface that merges with class |
 |  [IDocInterface1](./api-documenter-test.idocinterface1.md) |  |
 |  [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |
-|  [IDocInterface3](./api-documenter-test.idocinterface3.md) | Some less common TypeScript declaration kinds. |
-|  [IDocInterface4](./api-documenter-test.idocinterface4.md) | Type union in an interface. |
+|  [IDocInterface3](./api-documenter-test.idocinterface3.md) | <p>Some less common TypeScript declaration kinds.</p> |
+|  [IDocInterface4](./api-documenter-test.idocinterface4.md) | <p>Type union in an interface.</p> |
 |  [IDocInterface5](./api-documenter-test.idocinterface5.md) | Interface without inline tag to test custom TOC |
 |  [IDocInterface6](./api-documenter-test.idocinterface6.md) | Interface without inline tag to test custom TOC with injection |
 |  [IDocInterface7](./api-documenter-test.idocinterface7.md) | Interface for testing optional properties |

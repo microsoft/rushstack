@@ -2,6 +2,2157 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.0.229",
+      "tag": "@rushstack/stream-collator_v4.0.229",
+      "date": "Tue, 04 Apr 2023 22:36:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.228",
+      "tag": "@rushstack/stream-collator_v4.0.228",
+      "date": "Sat, 18 Mar 2023 00:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.227",
+      "tag": "@rushstack/stream-collator_v4.0.227",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.226",
+      "tag": "@rushstack/stream-collator_v4.0.226",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.225",
+      "tag": "@rushstack/stream-collator_v4.0.225",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.224",
+      "tag": "@rushstack/stream-collator_v4.0.224",
+      "date": "Mon, 30 Jan 2023 16:22:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.223",
+      "tag": "@rushstack/stream-collator_v4.0.223",
+      "date": "Mon, 30 Jan 2023 00:55:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.92`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.222",
+      "tag": "@rushstack/stream-collator_v4.0.222",
+      "date": "Thu, 26 Jan 2023 02:55:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.91`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.221",
+      "tag": "@rushstack/stream-collator_v4.0.221",
+      "date": "Wed, 25 Jan 2023 07:26:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.90`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.220",
+      "tag": "@rushstack/stream-collator_v4.0.220",
+      "date": "Wed, 18 Jan 2023 22:44:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.89`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.219",
+      "tag": "@rushstack/stream-collator_v4.0.219",
+      "date": "Tue, 20 Dec 2022 01:18:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.88`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.218",
+      "tag": "@rushstack/stream-collator_v4.0.218",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.87`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.217",
+      "tag": "@rushstack/stream-collator_v4.0.217",
+      "date": "Mon, 05 Dec 2022 16:16:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.86`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.216",
+      "tag": "@rushstack/stream-collator_v4.0.216",
+      "date": "Tue, 29 Nov 2022 01:16:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.85`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.215",
+      "tag": "@rushstack/stream-collator_v4.0.215",
+      "date": "Tue, 08 Nov 2022 01:20:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.84`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.214",
+      "tag": "@rushstack/stream-collator_v4.0.214",
+      "date": "Wed, 26 Oct 2022 00:16:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.83`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.213",
+      "tag": "@rushstack/stream-collator_v4.0.213",
+      "date": "Mon, 17 Oct 2022 22:14:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.82`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.212",
+      "tag": "@rushstack/stream-collator_v4.0.212",
+      "date": "Mon, 17 Oct 2022 15:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.81`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.211",
+      "tag": "@rushstack/stream-collator_v4.0.211",
+      "date": "Fri, 14 Oct 2022 15:26:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.80`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.210",
+      "tag": "@rushstack/stream-collator_v4.0.210",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.79`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.209",
+      "tag": "@rushstack/stream-collator_v4.0.209",
+      "date": "Tue, 11 Oct 2022 23:49:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.78`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.208",
+      "tag": "@rushstack/stream-collator_v4.0.208",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.77`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.207",
+      "tag": "@rushstack/stream-collator_v4.0.207",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.76`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.11.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.206",
+      "tag": "@rushstack/stream-collator_v4.0.206",
+      "date": "Tue, 27 Sep 2022 22:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.75`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.205",
+      "tag": "@rushstack/stream-collator_v4.0.205",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.74`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.204",
+      "tag": "@rushstack/stream-collator_v4.0.204",
+      "date": "Thu, 15 Sep 2022 00:18:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.73`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.203",
+      "tag": "@rushstack/stream-collator_v4.0.203",
+      "date": "Tue, 13 Sep 2022 00:16:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.72`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.202",
+      "tag": "@rushstack/stream-collator_v4.0.202",
+      "date": "Mon, 12 Sep 2022 22:27:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.71`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.201",
+      "tag": "@rushstack/stream-collator_v4.0.201",
+      "date": "Fri, 02 Sep 2022 17:48:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.70`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.200",
+      "tag": "@rushstack/stream-collator_v4.0.200",
+      "date": "Wed, 31 Aug 2022 01:45:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.69`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.199",
+      "tag": "@rushstack/stream-collator_v4.0.199",
+      "date": "Wed, 31 Aug 2022 00:42:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.68`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.198",
+      "tag": "@rushstack/stream-collator_v4.0.198",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.67`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.197",
+      "tag": "@rushstack/stream-collator_v4.0.197",
+      "date": "Wed, 24 Aug 2022 00:14:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.66`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.196",
+      "tag": "@rushstack/stream-collator_v4.0.196",
+      "date": "Fri, 19 Aug 2022 00:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.65`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.195",
+      "tag": "@rushstack/stream-collator_v4.0.195",
+      "date": "Wed, 10 Aug 2022 09:52:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.64`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.194",
+      "tag": "@rushstack/stream-collator_v4.0.194",
+      "date": "Wed, 10 Aug 2022 08:12:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.63`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.193",
+      "tag": "@rushstack/stream-collator_v4.0.193",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.62`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.47.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.10.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.192",
+      "tag": "@rushstack/stream-collator_v4.0.192",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.61`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.191",
+      "tag": "@rushstack/stream-collator_v4.0.191",
+      "date": "Thu, 21 Jul 2022 23:30:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.60`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.190",
+      "tag": "@rushstack/stream-collator_v4.0.190",
+      "date": "Thu, 21 Jul 2022 00:16:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.59`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.189",
+      "tag": "@rushstack/stream-collator_v4.0.189",
+      "date": "Wed, 13 Jul 2022 21:31:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.58`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.188",
+      "tag": "@rushstack/stream-collator_v4.0.188",
+      "date": "Fri, 08 Jul 2022 15:17:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.57`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.187",
+      "tag": "@rushstack/stream-collator_v4.0.187",
+      "date": "Mon, 04 Jul 2022 15:15:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.56`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.186",
+      "tag": "@rushstack/stream-collator_v4.0.186",
+      "date": "Thu, 30 Jun 2022 04:48:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.55`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.185",
+      "tag": "@rushstack/stream-collator_v4.0.185",
+      "date": "Tue, 28 Jun 2022 22:47:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.49.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.54`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.46.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.184",
+      "tag": "@rushstack/stream-collator_v4.0.184",
+      "date": "Tue, 28 Jun 2022 00:23:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.53`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.183",
+      "tag": "@rushstack/stream-collator_v4.0.183",
+      "date": "Mon, 27 Jun 2022 18:43:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.47.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.52`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.182",
+      "tag": "@rushstack/stream-collator_v4.0.182",
+      "date": "Sat, 25 Jun 2022 21:00:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.51`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.181",
+      "tag": "@rushstack/stream-collator_v4.0.181",
+      "date": "Sat, 25 Jun 2022 01:54:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.46.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.50`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.180",
+      "tag": "@rushstack/stream-collator_v4.0.180",
+      "date": "Fri, 24 Jun 2022 07:16:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.49`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.179",
+      "tag": "@rushstack/stream-collator_v4.0.179",
+      "date": "Thu, 23 Jun 2022 22:14:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.48`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.178",
+      "tag": "@rushstack/stream-collator_v4.0.178",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.47`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.177",
+      "tag": "@rushstack/stream-collator_v4.0.177",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.46`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.176",
+      "tag": "@rushstack/stream-collator_v4.0.176",
+      "date": "Tue, 07 Jun 2022 09:37:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.45`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.175",
+      "tag": "@rushstack/stream-collator_v4.0.175",
+      "date": "Wed, 25 May 2022 22:25:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.44`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.174",
+      "tag": "@rushstack/stream-collator_v4.0.174",
+      "date": "Thu, 19 May 2022 15:13:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.43`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.173",
+      "tag": "@rushstack/stream-collator_v4.0.173",
+      "date": "Sat, 14 May 2022 03:01:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.42`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.172",
+      "tag": "@rushstack/stream-collator_v4.0.172",
+      "date": "Tue, 10 May 2022 01:20:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.41`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.171",
+      "tag": "@rushstack/stream-collator_v4.0.171",
+      "date": "Wed, 04 May 2022 23:29:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.40`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.170",
+      "tag": "@rushstack/stream-collator_v4.0.170",
+      "date": "Tue, 26 Apr 2022 00:10:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.39`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.169",
+      "tag": "@rushstack/stream-collator_v4.0.169",
+      "date": "Sat, 23 Apr 2022 02:13:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.168",
+      "tag": "@rushstack/stream-collator_v4.0.168",
+      "date": "Fri, 15 Apr 2022 00:12:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.167",
+      "tag": "@rushstack/stream-collator_v4.0.167",
+      "date": "Wed, 13 Apr 2022 15:12:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.166",
+      "tag": "@rushstack/stream-collator_v4.0.166",
+      "date": "Tue, 12 Apr 2022 23:29:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.165",
+      "tag": "@rushstack/stream-collator_v4.0.165",
+      "date": "Tue, 12 Apr 2022 02:58:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.164",
+      "tag": "@rushstack/stream-collator_v4.0.164",
+      "date": "Sat, 09 Apr 2022 19:07:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.163",
+      "tag": "@rushstack/stream-collator_v4.0.163",
+      "date": "Sat, 09 Apr 2022 02:24:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.162",
+      "tag": "@rushstack/stream-collator_v4.0.162",
+      "date": "Fri, 08 Apr 2022 20:05:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.161",
+      "tag": "@rushstack/stream-collator_v4.0.161",
+      "date": "Wed, 06 Apr 2022 22:35:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.160",
+      "tag": "@rushstack/stream-collator_v4.0.160",
+      "date": "Thu, 31 Mar 2022 02:06:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.159",
+      "tag": "@rushstack/stream-collator_v4.0.159",
+      "date": "Sat, 19 Mar 2022 08:05:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.158",
+      "tag": "@rushstack/stream-collator_v4.0.158",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.157",
+      "tag": "@rushstack/stream-collator_v4.0.157",
+      "date": "Fri, 11 Feb 2022 10:30:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.156",
+      "tag": "@rushstack/stream-collator_v4.0.156",
+      "date": "Tue, 25 Jan 2022 01:11:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.7.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.155",
+      "tag": "@rushstack/stream-collator_v4.0.155",
+      "date": "Fri, 21 Jan 2022 01:10:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.154",
+      "tag": "@rushstack/stream-collator_v4.0.154",
+      "date": "Thu, 20 Jan 2022 02:43:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.153",
+      "tag": "@rushstack/stream-collator_v4.0.153",
+      "date": "Wed, 05 Jan 2022 16:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.152",
+      "tag": "@rushstack/stream-collator_v4.0.152",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.151",
+      "tag": "@rushstack/stream-collator_v4.0.151",
+      "date": "Tue, 14 Dec 2021 19:27:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.150",
+      "tag": "@rushstack/stream-collator_v4.0.150",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.149",
+      "tag": "@rushstack/stream-collator_v4.0.149",
+      "date": "Thu, 09 Dec 2021 00:21:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.148",
+      "tag": "@rushstack/stream-collator_v4.0.148",
+      "date": "Wed, 08 Dec 2021 19:05:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.147",
+      "tag": "@rushstack/stream-collator_v4.0.147",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.146",
+      "tag": "@rushstack/stream-collator_v4.0.146",
+      "date": "Mon, 06 Dec 2021 16:08:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.145",
+      "tag": "@rushstack/stream-collator_v4.0.145",
+      "date": "Fri, 03 Dec 2021 03:05:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.144",
+      "tag": "@rushstack/stream-collator_v4.0.144",
+      "date": "Tue, 30 Nov 2021 20:18:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.143",
+      "tag": "@rushstack/stream-collator_v4.0.143",
+      "date": "Mon, 29 Nov 2021 07:26:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.142",
+      "tag": "@rushstack/stream-collator_v4.0.142",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.141",
+      "tag": "@rushstack/stream-collator_v4.0.141",
+      "date": "Fri, 05 Nov 2021 15:09:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.140",
+      "tag": "@rushstack/stream-collator_v4.0.140",
+      "date": "Thu, 28 Oct 2021 00:08:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.139",
+      "tag": "@rushstack/stream-collator_v4.0.139",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.138",
+      "tag": "@rushstack/stream-collator_v4.0.138",
+      "date": "Wed, 13 Oct 2021 15:09:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.137",
+      "tag": "@rushstack/stream-collator_v4.0.137",
+      "date": "Fri, 08 Oct 2021 09:35:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.136",
+      "tag": "@rushstack/stream-collator_v4.0.136",
+      "date": "Fri, 08 Oct 2021 08:08:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.135",
+      "tag": "@rushstack/stream-collator_v4.0.135",
+      "date": "Thu, 07 Oct 2021 23:43:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.134",
+      "tag": "@rushstack/stream-collator_v4.0.134",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.133",
+      "tag": "@rushstack/stream-collator_v4.0.133",
+      "date": "Wed, 06 Oct 2021 15:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.132",
+      "tag": "@rushstack/stream-collator_v4.0.132",
+      "date": "Wed, 06 Oct 2021 02:41:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.131",
+      "tag": "@rushstack/stream-collator_v4.0.131",
+      "date": "Tue, 05 Oct 2021 15:08:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.130",
+      "tag": "@rushstack/stream-collator_v4.0.130",
+      "date": "Mon, 04 Oct 2021 15:10:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.40.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.129",
+      "tag": "@rushstack/stream-collator_v4.0.129",
+      "date": "Fri, 24 Sep 2021 00:09:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.128",
+      "tag": "@rushstack/stream-collator_v4.0.128",
+      "date": "Thu, 23 Sep 2021 00:10:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.127",
+      "tag": "@rushstack/stream-collator_v4.0.127",
+      "date": "Wed, 22 Sep 2021 03:27:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.126",
+      "tag": "@rushstack/stream-collator_v4.0.126",
+      "date": "Wed, 22 Sep 2021 00:09:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.125",
+      "tag": "@rushstack/stream-collator_v4.0.125",
+      "date": "Sat, 18 Sep 2021 03:05:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.124",
+      "tag": "@rushstack/stream-collator_v4.0.124",
+      "date": "Tue, 14 Sep 2021 01:17:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.123",
+      "tag": "@rushstack/stream-collator_v4.0.123",
+      "date": "Mon, 13 Sep 2021 15:07:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.122",
+      "tag": "@rushstack/stream-collator_v4.0.122",
+      "date": "Fri, 10 Sep 2021 15:08:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.121",
+      "tag": "@rushstack/stream-collator_v4.0.121",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.120",
+      "tag": "@rushstack/stream-collator_v4.0.120",
+      "date": "Wed, 08 Sep 2021 00:08:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.119",
+      "tag": "@rushstack/stream-collator_v4.0.119",
+      "date": "Fri, 03 Sep 2021 00:09:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.118",
       "tag": "@rushstack/stream-collator_v4.0.118",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",

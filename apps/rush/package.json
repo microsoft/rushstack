@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.52.0",
+  "version": "5.97.1",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -15,7 +15,8 @@
   "preferGlobal": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/apps/rush"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/rush"
   },
   "engines": {
     "node": ">=5.6.0"
@@ -23,10 +24,14 @@
   "engineStrict": true,
   "homepage": "https://rushjs.io",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "start": "node lib/start-dev-docs.js",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "bin": {
     "rush": "./bin/rush",
+    "rush-pnpm": "./bin/rush-pnpm",
     "rushx": "./bin/rushx"
   },
   "license": "MIT",
@@ -40,8 +45,11 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-http-build-cache-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
+    "@types/node": "14.18.36",
     "@types/semver": "7.3.5"
   }
 }

@@ -6,16 +6,17 @@
   "main": "lib/index.js",
   "typings": "dist/api-extractor-lib3-test.d.ts",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "_phase:build": "node build.js"
   },
   "dependencies": {
     "api-extractor-lib1-test": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "@types/jest": "25.2.1",
-    "@types/node": "10.17.13",
+    "@types/jest": "29.2.5",
+    "@types/node": "14.18.36",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.9.7"
+    "typescript": "~4.8.4"
   }
 }

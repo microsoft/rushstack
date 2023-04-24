@@ -7,12 +7,13 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.13.2",
+    "@microsoft/tsdoc": "0.14.2",
     "@rushstack/node-core-library": "workspace:*",
     "js-yaml": "~3.13.1"
   },
@@ -21,6 +22,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "10.17.13"
+    "@types/node": "14.18.36"
   }
 }

@@ -1,28 +1,32 @@
 {
   "name": "@rushstack/rig-package",
-  "version": "0.3.0",
+  "version": "0.3.18",
   "description": "A system for sharing tool configurations between projects without duplicating config files.",
   "main": "lib/index.js",
   "typings": "dist/rig-package.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/rig-package"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/rig-package"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "resolve": "~1.17.0",
+    "resolve": "~1.22.1",
     "strip-json-comments": "~3.1.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "1.1.11",
-    "@rushstack/heft": "0.34.6",
+    "@rushstack/heft-node-rig": "1.11.14",
+    "@rushstack/heft": "0.49.3",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
-    "@types/resolve": "1.17.1",
+    "@types/node": "14.18.36",
+    "@types/resolve": "1.20.2",
     "ajv": "~6.12.5",
-    "resolve": "~1.17.0"
+    "resolve": "~1.22.1"
   }
 }

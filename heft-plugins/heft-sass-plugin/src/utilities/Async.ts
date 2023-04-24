@@ -8,7 +8,7 @@ export class Async {
     try {
       fn().catch((e) => scopedLogger.emitError(e));
     } catch (e) {
-      scopedLogger.emitError(e);
+      scopedLogger.emitError(e as Error);
     }
   }
 }

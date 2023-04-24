@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { type FolderItem, FileSystem } from '@rushstack/node-core-library';
 import type * as webpack from 'webpack';
 import type { IBuildStageProperties, ScopedLogger } from '@rushstack/heft';
 
@@ -24,8 +24,10 @@ type IWebpackConfigJsExport =
   | ((env: IWebpackConfigFunctionEnv) => Promise<webpack.Configuration | webpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
-const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
-const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
+interface IWebpackConfigFileNames {
+  dev: string | undefined;
+  prod: string | undefined;
+}
 
 export class WebpackConfigurationLoader {
   public static async tryLoadWebpackConfigAsync(
@@ -36,30 +38,34 @@ export class WebpackConfigurationLoader {
     // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
     // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
 
+    const webpackConfigFiles: IWebpackConfigFileNames | undefined = await findWebpackConfigAsync(buildFolder);
+    const webpackDevConfigFilename: string | undefined = webpackConfigFiles.dev;
+    const webpackConfigFilename: string | undefined = webpackConfigFiles.prod;
+
     let webpackConfigJs: IWebpackConfigJs | undefined;
 
     try {
-      if (buildProperties.serveMode) {
+      if (buildProperties.serveMode && webpackDevConfigFilename) {
         logger.terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${WEBPACK_DEV_CONFIG_FILENAME}".`
+          `Attempting to load webpack configuration from "${webpackDevConfigFilename}".`
         );
         webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
           buildFolder,
-          WEBPACK_DEV_CONFIG_FILENAME
+          webpackDevConfigFilename
         );
       }
 
-      if (!webpackConfigJs) {
+      if (!webpackConfigJs && webpackConfigFilename) {
         logger.terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${WEBPACK_CONFIG_FILENAME}".`
+          `Attempting to load webpack configuration from "${webpackConfigFilename}".`
         );
         webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
           buildFolder,
-          WEBPACK_CONFIG_FILENAME
+          webpackConfigFilename
         );
       }
     } catch (error) {
-      logger.emitError(error);
+      logger.emitError(error as Error);
     }
 
     if (webpackConfigJs) {
@@ -90,5 +96,36 @@ export class WebpackConfigurationLoader {
     } else {
       return undefined;
     }
+  }
+}
+
+async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConfigFileNames> {
+  try {
+    const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(buildFolder);
+    const dev: string[] = [];
+    const prod: string[] = [];
+
+    for (const folderItem of folderItems) {
+      if (folderItem.isFile()) {
+        if (folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
+          dev.push(folderItem.name);
+        } else if (folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
+          prod.push(folderItem.name);
+        }
+      }
+    }
+
+    if (dev.length > 1) {
+      throw new Error(`Error: Found more than one dev webpack configuration file.`);
+    } else if (prod.length > 1) {
+      throw new Error(`Error: Found more than one non-dev webpack configuration file.`);
+    }
+
+    return {
+      dev: dev[0],
+      prod: prod[0]
+    };
+  } catch (e) {
+    throw new Error(`Error finding webpack configuration: ${e}`);
   }
 }

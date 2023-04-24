@@ -1,6 +1,137 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 20 Aug 2021 15:08:10 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+
+## 4.13.2
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 4.13.1
+Tue, 08 Nov 2022 01:20:55 GMT
+
+### Patches
+
+- Make ScopedCommandLineAction.onDefineUnscopedParameters optional to match CommandLineAciton.onDefineParameters
+
+## 4.13.0
+Mon, 17 Oct 2022 22:14:21 GMT
+
+### Minor changes
+
+- Make the onDefineParameters function optional for `CommandLineAction`s and `CommandLineParser`s that either don't have parameters or that define their parameters in their constructor.
+
+## 4.12.5
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 4.12.4
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 4.12.3
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 4.12.2
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 4.12.1
+Tue, 28 Jun 2022 00:23:32 GMT
+
+_Version update only_
+
+## 4.12.0
+Thu, 23 Jun 2022 22:14:24 GMT
+
+### Minor changes
+
+- Add parameter scopes. Parameter scopes allow for behind-the-scenes conflict resolution between parameters with the same long name. For example, when provided scope "my-scope", a parameter can be referenced on the CLI as "--my-parameter" or as "--my-scope:my-parameter". In the case that multiple parameters are registered with the same long name but different scopes, the parameters can only be referenced by their scoped long names, eg. "--my-scope:my-parameter" and "--my-other-scope:my-parameter".
+
+## 4.11.1
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 4.11.0
+Tue, 10 May 2022 01:20:43 GMT
+
+### Minor changes
+
+- Add ScopedCommandLineAction class, which allows for the definition of actions that have dynamic arguments whose definition depends on a provided scope. See https://github.com/microsoft/rushstack/pull/3364
+
+## 4.10.10
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 4.10.9
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 4.10.8
+Sat, 09 Apr 2022 02:24:27 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 4.10.7
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 4.10.6
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 4.10.5
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 4.10.4
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 4.10.3
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 4.10.2
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 4.10.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 4.10.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add safety check parametersProcessed to CommandLineParameterProvider
+
+## 4.9.1
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 4.9.0
 Fri, 20 Aug 2021 15:08:10 GMT

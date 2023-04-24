@@ -28,6 +28,7 @@ import { ExtractorMessage } from './ExtractorMessage';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
+import { SourceMapper } from '../collector/SourceMapper';
 
 /**
  * Runtime options for Extractor.
@@ -202,13 +203,16 @@ export class Extractor {
       compilerState = CompilerState.create(extractorConfig, options);
     }
 
+    const sourceMapper: SourceMapper = new SourceMapper();
+
     const messageRouter: MessageRouter = new MessageRouter({
       workingPackageFolder: extractorConfig.packageFolder,
       messageCallback: options.messageCallback,
       messagesConfig: extractorConfig.messages || {},
       showVerboseMessages: !!options.showVerboseMessages,
       showDiagnostics: !!options.showDiagnostics,
-      tsdocConfiguration: extractorConfig.tsdocConfiguration
+      tsdocConfiguration: extractorConfig.tsdocConfiguration,
+      sourceMapper
     });
 
     if (extractorConfig.tsdocConfigFile.filePath && !extractorConfig.tsdocConfigFile.fileNotFound) {
@@ -250,7 +254,8 @@ export class Extractor {
     const collector: Collector = new Collector({
       program: compilerState.program as ts.Program,
       messageRouter,
-      extractorConfig: extractorConfig
+      extractorConfig: extractorConfig,
+      sourceMapper
     });
 
     collector.analyze();
@@ -382,6 +387,12 @@ export class Extractor {
         collector,
         extractorConfig.publicTrimmedFilePath,
         DtsRollupKind.PublicRelease,
+        extractorConfig.newlineKind
+      );
+      Extractor._generateRollupDtsFile(
+        collector,
+        extractorConfig.alphaTrimmedFilePath,
+        DtsRollupKind.AlphaRelease,
         extractorConfig.newlineKind
       );
       Extractor._generateRollupDtsFile(

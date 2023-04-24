@@ -27,47 +27,34 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  // schema-utils (dependency of webpack-dev-server) has an unfulfilled peer dependency
-  if (packageJson.name === 'schema-utils') {
-    if (!packageJson.dependencies) {
-      packageJson.dependencies = {};
+  if (packageJson.name.startsWith('@radix-ui/')) {
+    if (packageJson.peerDependencies && packageJson.peerDependencies['react']) {
+      packageJson.peerDependencies['@types/react'] = '*';
+      packageJson.peerDependencies['@types/react-dom'] = '*';
+    }
+  }
+
+  switch (packageJson.name) {
+    case '@jest/test-result': {
+      // The `@jest/test-result` package takes undeclared dependencies on `jest-haste-map`
+      // and `jest-resolve`
+      packageJson.dependencies['jest-haste-map'] = packageJson.version;
+      packageJson.dependencies['jest-resolve'] = packageJson.version;
     }
 
-    packageJson.dependencies['ajv'] = '~6.12.5';
-  } else if (packageJson.name === '@types/webpack-dev-server') {
-    delete packageJson.dependencies['@types/webpack'];
-
-    if (!packageJson.peerDependencies) {
-      packageJson.peerDependencies = {};
+    case '@serverless-stack/core': {
+      delete packageJson.dependencies['@typescript-eslint/eslint-plugin'];
+      delete packageJson.dependencies['eslint-config-serverless-stack'];
+      delete packageJson.dependencies['lerna'];
+      break;
     }
 
-    switch (packageJson.version) {
-      case '3.11.2': {
-        // This is for heft-webpack4-plugin and the other projects that use Webpack 4
-        packageJson.peerDependencies['@types/webpack'] = '^4.0.0';
-        break;
-      }
-
-      case '4.0.0': {
-        // This is for heft-webpack5-plugin and the other projects that use Webpack 5.
-        // Webpack 5 brings its own typings
-        packageJson.peerDependencies['webpack'] = '^5.0.0';
-        break;
-      }
-
-      default: {
-        throw new Error(
-          `Unexpected version of @types/webpack-dev-server: "${packageJson.version}". ` +
-            'Update pnpmfile.js to add support for this version.'
-        );
-      }
+    case 'tslint-microsoft-contrib': {
+      // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
+      // unmet peer typescript@"^2.1.0 || ^3.0.0": found 4.5.5
+      packageJson.peerDependencies['typescript'] = '*';
+      break;
     }
-  } else if (packageJson.name === '@typescript-eslint/types') {
-    // Workaround for https://github.com/typescript-eslint/typescript-eslint/issues/3622
-    if (!packageJson.peerDependencies) {
-      packageJson.peerDependencies = {};
-    }
-    packageJson.peerDependencies['typescript'] = '*';
   }
 
   return packageJson;

@@ -39,7 +39,92 @@ export type JsonObject = any;
 export type JsonNull = null;
 
 /**
- * Options for JsonFile.stringify()
+ * Specifies the variant of JSON syntax to be used.
+ *
+ * @public
+ */
+export enum JsonSyntax {
+  /**
+   * Specifies the exact RFC 8259 format as implemented by the `JSON.parse()` system API.
+   * This format was designed for machine generated inputs such as an HTTP payload.
+   * It is not a recommend choice for human-authored files, because it does not support
+   * code comments.
+   *
+   * @remarks
+   *
+   * A well-known quote from Douglas Crockford, the inventor of JSON:
+   *
+   * "I removed comments from JSON because I saw people were using them to hold parsing directives,
+   * a practice which would have destroyed interoperability.  I know that the lack of comments makes
+   * some people sad, but it shouldn't.  Suppose you are using JSON to keep configuration files,
+   * which you would like to annotate.  Go ahead and insert all the comments you like.
+   * Then pipe it through JSMin before handing it to your JSON parser."
+   *
+   * @see {@link https://datatracker.ietf.org/doc/html/rfc8259 | RFC 8259}
+   */
+  Strict = 'strict',
+
+  /**
+   * `JsonSyntax.JsonWithComments` is the recommended format for human-authored config files.
+   * It is a minimal extension to `JsonSyntax.Strict` adding support for code comments
+   * using `//` and `/*`.
+   *
+   * @remarks
+   *
+   * VS Code calls this format `jsonc`, but it should not be confused with unrelated file formats
+   * and libraries that also use the name "JSONC".
+   *
+   * To fix VS Code syntax highlighting, add this setting:
+   * `"files.associations": { "*.json": "jsonc" }`
+   *
+   * To fix GitHub syntax highlighting, add this to your `.gitattributes`:
+   * `*.json linguist-language=JSON-with-Comments`
+   */
+  JsonWithComments = 'jsonWithComments',
+
+  /**
+   * JSON5 is a project that proposes a JSON-like format supplemented with ECMAScript 5.1
+   * notations for objects, numbers, comments, and more.
+   *
+   * @remarks
+   * Files using this format should use the `.json5` file extension instead of `.json`.
+   *
+   * JSON5 has substantial differences from JSON: object keys may be unquoted, trailing commas
+   * are allowed, and strings may span multiple lines.  Whereas `JsonSyntax.JsonWithComments` can
+   * be cheaply converted to standard JSON by stripping comments, parsing JSON5 requires a
+   * nontrivial algorithm that may not be easily available in some contexts or programming languages.
+   *
+   * @see {@link https://json5.org/ | JSON5 project website}
+   */
+  Json5 = 'json5'
+}
+
+/**
+ * Options for {@link JsonFile.parseString}, {@link JsonFile.load}, and {@link JsonFile.loadAsync}.
+ *
+ * @public
+ */
+export interface IJsonFileParseOptions {
+  /**
+   * Specifies the variant of JSON syntax to be used.
+   *
+   * @defaultValue
+   * `JsonSyntax.Json5`
+   *
+   * NOTE: This default will be changed to `JsonSyntax.JsonWithComments` in a future release.
+   */
+  jsonSyntax?: JsonSyntax;
+}
+
+/**
+ * Options for {@link JsonFile.loadAndValidate} and {@link JsonFile.loadAndValidateAsync}
+ *
+ * @public
+ */
+export interface IJsonFileLoadAndValidateOptions extends IJsonFileParseOptions, IJsonSchemaValidateOptions {}
+
+/**
+ * Options for {@link JsonFile.stringify}
  *
  * @public
  */
@@ -50,8 +135,19 @@ export interface IJsonFileStringifyOptions {
   newlineConversion?: NewlineKind;
 
   /**
-   * If true, conforms to the standard behavior of JSON.stringify() when a property has the value `undefined`.
-   * Specifically, the key will be dropped from the emitted object.
+   * By default, `JsonFile.stringify()` validates that the object does not contain any
+   * keys whose value is `undefined`.  To disable this validation, set `ignoreUndefinedValues=true`
+   * which causes such keys to be silently discarded, consistent with the system `JSON.stringify()`.
+   *
+   * @remarks
+   *
+   * The JSON file format can represent `null` values ({@link JsonNull}) but not `undefined` values.
+   * In ECMAScript code however, we generally avoid `null` and always represent empty states
+   * as `undefined`, because it is the default value of missing/uninitialized variables.
+   * (In practice, distinguishing "null" versus "uninitialized" has more drawbacks than benefits.)
+   * This poses a problem when serializing ECMAScript objects that contain `undefined` members.
+   * As a safeguard, `JsonFile` will report an error if any `undefined` values are encountered
+   * during serialization.  Set `ignoreUndefinedValues=true` to disable this safeguard.
    */
   ignoreUndefinedValues?: boolean;
 
@@ -72,7 +168,7 @@ export interface IJsonFileStringifyOptions {
 }
 
 /**
- * Options for JsonFile.saveJsonFile()
+ * Options for {@link JsonFile.save} and {@link JsonFile.saveAsync}.
  *
  * @public
  */
@@ -98,7 +194,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   updateExistingFile?: boolean;
 }
 
-const DEFAULT_ENCODING: string = 'utf8';
+const DEFAULT_ENCODING: 'utf8' = 'utf8';
 
 /**
  * Utilities for reading/writing JSON files.
@@ -113,16 +209,19 @@ export class JsonFile {
   /**
    * Loads a JSON file.
    */
-  public static load(jsonFilename: string): JsonObject {
+  public static load(jsonFilename: string, options?: IJsonFileParseOptions): JsonObject {
     try {
       const contents: string = FileSystem.readFile(jsonFilename);
-      return jju.parse(contents);
+      const parseOptions: jju.ParseOptions = JsonFile._buildJjuParseOptions(options);
+      return jju.parse(contents, parseOptions);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error as Error)) {
         throw error;
       } else {
         throw new Error(
-          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` +
+            os.EOL +
+            `  ${(error as Error).message}`
         );
       }
     }
@@ -131,16 +230,19 @@ export class JsonFile {
   /**
    * An async version of {@link JsonFile.load}.
    */
-  public static async loadAsync(jsonFilename: string): Promise<JsonObject> {
+  public static async loadAsync(jsonFilename: string, options?: IJsonFileParseOptions): Promise<JsonObject> {
     try {
       const contents: string = await FileSystem.readFileAsync(jsonFilename);
-      return jju.parse(contents);
+      const parseOptions: jju.ParseOptions = JsonFile._buildJjuParseOptions(options);
+      return jju.parse(contents, parseOptions);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error as Error)) {
         throw error;
       } else {
         throw new Error(
-          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` +
+            os.EOL +
+            `  ${(error as Error).message}`
         );
       }
     }
@@ -149,8 +251,9 @@ export class JsonFile {
   /**
    * Parses a JSON file's contents.
    */
-  public static parseString(jsonContents: string): JsonObject {
-    return jju.parse(jsonContents);
+  public static parseString(jsonContents: string, options?: IJsonFileParseOptions): JsonObject {
+    const parseOptions: jju.ParseOptions = JsonFile._buildJjuParseOptions(options);
+    return jju.parse(jsonContents, parseOptions);
   }
 
   /**
@@ -159,9 +262,9 @@ export class JsonFile {
   public static loadAndValidate(
     jsonFilename: string,
     jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions
+    options?: IJsonFileLoadAndValidateOptions
   ): JsonObject {
-    const jsonObject: JsonObject = JsonFile.load(jsonFilename);
+    const jsonObject: JsonObject = JsonFile.load(jsonFilename, options);
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
 
     return jsonObject;
@@ -173,9 +276,9 @@ export class JsonFile {
   public static async loadAndValidateAsync(
     jsonFilename: string,
     jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions
+    options?: IJsonFileLoadAndValidateOptions
   ): Promise<JsonObject> {
-    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename);
+    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename, options);
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
 
     return jsonObject;
@@ -189,9 +292,10 @@ export class JsonFile {
   public static loadAndValidateWithCallback(
     jsonFilename: string,
     jsonSchema: JsonSchema,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void,
+    options?: IJsonFileLoadAndValidateOptions
   ): JsonObject {
-    const jsonObject: JsonObject = JsonFile.load(jsonFilename);
+    const jsonObject: JsonObject = JsonFile.load(jsonFilename, options);
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
 
     return jsonObject;
@@ -203,9 +307,10 @@ export class JsonFile {
   public static async loadAndValidateWithCallbackAsync(
     jsonFilename: string,
     jsonSchema: JsonSchema,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void,
+    options?: IJsonFileLoadAndValidateOptions
   ): Promise<JsonObject> {
-    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename);
+    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename, options);
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
 
     return jsonObject;
@@ -294,7 +399,7 @@ export class JsonFile {
       try {
         oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
       } catch (error) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -352,7 +457,7 @@ export class JsonFile {
       try {
         oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
       } catch (error) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -468,5 +573,26 @@ export class JsonFile {
       result.push(Text.replaceAll(line, '\r', ''));
     }
     return lines.join('\n') + '\n';
+  }
+
+  private static _buildJjuParseOptions(options: IJsonFileParseOptions | undefined): jju.ParseOptions {
+    if (!options) {
+      options = {};
+    }
+    const parseOptions: jju.ParseOptions = {};
+    switch (options.jsonSyntax) {
+      case JsonSyntax.Strict:
+        parseOptions.mode = 'json';
+        break;
+      case JsonSyntax.JsonWithComments:
+        parseOptions.mode = 'cjson';
+        break;
+      case JsonSyntax.Json5:
+      default:
+        parseOptions.mode = 'json5';
+        break;
+    }
+
+    return parseOptions;
   }
 }

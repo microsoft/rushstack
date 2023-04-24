@@ -8,9 +8,9 @@
  */
 
 import type { IHeftPlugin } from '@rushstack/heft';
-import { SassTypingsPlugin } from './SassTypingsPlugin';
+import { SassPlugin } from './SassPlugin';
 
 /**
- * @internal
+ * @public
  */
-export default new SassTypingsPlugin() as IHeftPlugin;
+export default new SassPlugin() as IHeftPlugin;

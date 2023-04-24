@@ -1,0 +1,5 @@
+{
+  "cssOutputFolders": ["lib"],
+  "preserveSCSSExtension": true,
+  "secondaryGeneratedTsFolders": ["lib"]
+}

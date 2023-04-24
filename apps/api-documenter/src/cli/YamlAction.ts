@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineFlagParameter, CommandLineChoiceParameter } from '@rushstack/ts-command-line';
 
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
@@ -10,8 +10,9 @@ import { YamlDocumenter } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 
 export class YamlAction extends BaseAction {
-  private _officeParameter!: CommandLineFlagParameter;
-  private _newDocfxNamespacesParameter!: CommandLineFlagParameter;
+  private readonly _officeParameter: CommandLineFlagParameter;
+  private readonly _newDocfxNamespacesParameter: CommandLineFlagParameter;
+  private readonly _yamlFormatParameter: CommandLineChoiceParameter;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({
@@ -22,11 +23,6 @@ export class YamlAction extends BaseAction {
         ' to the universal reference YAML format, which is used by the docs.microsoft.com' +
         ' pipeline.'
     });
-  }
-
-  protected onDefineParameters(): void {
-    // override
-    super.onDefineParameters();
 
     this._officeParameter = this.defineFlagParameter({
       parameterLongName: '--office',
@@ -40,6 +36,15 @@ export class YamlAction extends BaseAction {
         ` adds them to the table of contents.  This will also affect file layout as namespaced items will be nested` +
         ` under a directory for the namespace instead of just within the package.`
     });
+    this._yamlFormatParameter = this.defineChoiceParameter({
+      parameterLongName: '--yaml-format',
+      alternatives: ['udp', 'sdp'],
+      defaultValue: 'sdp',
+      description:
+        `Specifies the YAML format - udp or sdp. Universal Document Processor (udp) should be used if you generating` +
+        ` YAML files for DocFX 2.x. Schema Driven Processor (sdp) should be used with DocFX 3.x.` +
+        ` NOTE: This parameter is ignored if you use --office.`
+    });
   }
 
   protected async onExecute(): Promise<void> {
@@ -48,7 +53,11 @@ export class YamlAction extends BaseAction {
 
     const yamlDocumenter: YamlDocumenter = this._officeParameter.value
       ? new OfficeYamlDocumenter(apiModel, inputFolder, this._newDocfxNamespacesParameter.value)
-      : new YamlDocumenter(apiModel, this._newDocfxNamespacesParameter.value);
+      : new YamlDocumenter(
+          apiModel,
+          this._newDocfxNamespacesParameter.value,
+          this._yamlFormatParameter.value
+        );
 
     yamlDocumenter.generateFiles(outputFolder);
   }

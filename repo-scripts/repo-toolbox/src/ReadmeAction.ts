@@ -2,19 +2,38 @@
 // See the @microsoft/rush package's LICENSE file for license information.
 
 import * as path from 'path';
-import { StringBuilder, Text, Sort, FileSystem } from '@rushstack/node-core-library';
+import {
+  StringBuilder,
+  Sort,
+  FileSystem,
+  Text,
+  Terminal,
+  ConsoleTerminalProvider,
+  AlreadyReportedError,
+  Colors,
+  IColorableSequence
+} from '@rushstack/node-core-library';
 import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
-import { CommandLineAction } from '@rushstack/ts-command-line';
+import { CommandLineAction, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import * as Diff from 'diff';
 
 const GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY START -->';
 const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY END -->';
 
 export class ReadmeAction extends CommandLineAction {
+  private readonly _verifyParameter: CommandLineFlagParameter;
+
   public constructor() {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
       documentation: "Use this to update the repo's README.md"
+    });
+
+    this._verifyParameter = this.defineFlagParameter({
+      parameterLongName: '--verify',
+      parameterShortName: '-v',
+      description: 'Verify that the README.md file is up-to-date.'
     });
   }
 
@@ -23,12 +42,11 @@ export class ReadmeAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    // abstract
-
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const repoReadmePath: string = path.resolve(rushConfiguration.rushJsonFolder, 'README.md');
-    const existingReadme: string = await FileSystem.readFileAsync(repoReadmePath);
+    let existingReadme: string = await FileSystem.readFileAsync(repoReadmePath);
+    existingReadme = Text.convertToLf(existingReadme);
     const generatedProjectSummaryStartIndex: number = existingReadme.indexOf(
       GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT
     );
@@ -61,7 +79,11 @@ export class ReadmeAction extends CommandLineAction {
     builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Version | Changelog | Package |\n');
     builder.append('| ------ | ------- | --------- | ------- |\n');
-    for (const project of orderedProjects.filter((x) => ReadmeAction._isPublished(x))) {
+    for (const project of orderedProjects) {
+      if (!ReadmeAction._isPublished(project)) {
+        continue;
+      }
+
       // Example:
       //
       // | [/apps/api-extractor](./apps/api-extractor/)
@@ -73,9 +95,7 @@ export class ReadmeAction extends CommandLineAction {
 
       const scopedName: string = project.packageName; // "@microsoft/api-extractor"
       const folderPath: string = project.projectRelativeFolder; // "apps/api-extractor"
-      let escapedScopedName: string = scopedName; // "%40microsoft%2Fapi-extractor"
-      escapedScopedName = Text.replaceAll(escapedScopedName, '/', '%2F');
-      escapedScopedName = Text.replaceAll(escapedScopedName, '@', '%40');
+      const escapedScopedName: string = encodeURIComponent(scopedName); // "%40microsoft%2Fapi-extractor"
 
       // | [/apps/api-extractor](./apps/api-extractor/)
       builder.append(`| [/${folderPath}](./${folderPath}/) `);
@@ -113,7 +133,11 @@ export class ReadmeAction extends CommandLineAction {
     builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Description |\n');
     builder.append('| ------ | -----------|\n');
-    for (const project of orderedProjects.filter((x) => !ReadmeAction._isPublished(x))) {
+    for (const project of orderedProjects) {
+      if (ReadmeAction._isPublished(project)) {
+        continue;
+      }
+
       const folderPath: string = project.projectRelativeFolder; // "apps/api-extractor"
 
       // | [/apps/api-extractor](./apps/api-extractor/)
@@ -128,13 +152,49 @@ export class ReadmeAction extends CommandLineAction {
 
     builder.append(readmePostfix);
 
-    console.log(`Writing ${repoReadmePath}`);
-    FileSystem.writeFile(repoReadmePath, builder.toString());
+    const readmeString: string = builder.toString();
+    const diff: Diff.Change[] = Diff.diffLines(existingReadme, readmeString);
+    const readmeIsUpToDate: boolean = diff.length === 1 && !diff[0].added && !diff[0].removed;
 
-    console.log('\nSuccess.');
-  }
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-  protected onDefineParameters(): void {
-    // abstract
+    if (!readmeIsUpToDate) {
+      if (this._verifyParameter.value) {
+        for (const change of diff) {
+          const lines: string[] = change.value.trimEnd().split('\n');
+          let linePrefix: string;
+          let colorizer: (text: string | IColorableSequence) => IColorableSequence;
+          if (change.added) {
+            linePrefix = '+ ';
+            colorizer = Colors.green;
+          } else if (change.removed) {
+            linePrefix = '- ';
+            colorizer = Colors.red;
+          } else {
+            linePrefix = '  ';
+            colorizer = Colors.gray;
+          }
+
+          for (const line of lines) {
+            terminal.writeLine(colorizer(linePrefix + line));
+          }
+        }
+
+        terminal.writeLine();
+        terminal.writeLine();
+        terminal.writeErrorLine(
+          `The README.md needs to be updated. Please run 'repo-toolbox readme' to update the README.md.`
+        );
+
+        throw new AlreadyReportedError();
+      } else {
+        terminal.writeLine(`Writing ${repoReadmePath}`);
+        await FileSystem.writeFileAsync(repoReadmePath, readmeString);
+        terminal.writeLine();
+        terminal.writeLine(Colors.green('\nSuccess.'));
+      }
+    } else {
+      console.log(`The README.md is up to date.`);
+    }
   }
 }

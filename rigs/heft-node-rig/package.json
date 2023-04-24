@@ -1,23 +1,26 @@
 {
   "name": "@rushstack/heft-node-rig",
-  "version": "1.2.6",
+  "version": "1.12.6",
   "description": "A rig package for Node.js projects that build using Heft",
   "license": "MIT",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/rigs/heft-node-rig"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "rigs/heft-node-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.37.0"
+    "@rushstack/heft": "^0.50.0"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
-    "eslint": "~7.30.0",
-    "typescript": "~3.9.7"
+    "eslint": "~8.7.0",
+    "jest-environment-node": "~29.5.0",
+    "typescript": "~4.8.4"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"

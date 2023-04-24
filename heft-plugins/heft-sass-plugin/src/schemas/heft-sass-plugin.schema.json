@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Sass Configuration",
-  "description": "Defines the heft configuration for the sass typings plugin.",
+  "description": "This schema describes the \"config/sass.json\" config file used to configure \"@rushstack/heft-jest-plugin\", and also the \"options\" field that can be specified in heft.json when loading the plugin.",
   "type": "object",
 
   "additionalProperties": false,
@@ -27,14 +27,45 @@
       "description": "Output directory for generated Sass typings."
     },
 
+    "secondaryGeneratedTsFolders": {
+      "type": "array",
+      "description": "Optional additional folders to which Sass typings should be output.",
+      "items": {
+        "type": "string"
+      }
+    },
+
     "exportAsDefault": {
       "type": "boolean",
-      "description": "Determines if export values are wrapped in a default property, or not."
+      "description": "Determines whether export values are wrapped in a default property, or not."
+    },
+
+    "cssOutputFolders": {
+      "type": "array",
+      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation, unless \"preserveSCSSExtension\" is set.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "preserveSCSSExtension": {
+      "type": "boolean",
+      "description": "If set, when emitting compiled CSS from a file with a \".scss\" extension, the emitted CSS will have the extension \".scss\" instead of \".scss.css\"."
     },
 
     "fileExtensions": {
       "type": "array",
-      "description": "Files with these extensions will pass through the Sass transpiler for typings generation.",
+      "description": "Files with these extensions will be treated as SCSS modules and pass through the Sass transpiler for typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+      }
+    },
+
+    "nonModuleFileExtensions": {
+      "type": "array",
+      "description": "Files with these extensions will be treated as non-module SCSS and pass through the Sass transpiler for typings generation.",
       "items": {
         "type": "string",
         "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"

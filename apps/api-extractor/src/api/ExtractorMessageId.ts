@@ -28,7 +28,7 @@ export const enum ExtractorMessageId {
   IncompatibleReleaseTags = 'ae-incompatible-release-tags',
 
   /**
-   * "___ is exported by the package, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
+   * "___ is part of the package's API, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
    */
   MissingReleaseTag = 'ae-missing-release-tag',
 
@@ -95,7 +95,13 @@ export const enum ExtractorMessageId {
   /**
    * "The property ___ has a setter but no getter."
    */
-  MissingGetter = 'ae-missing-getter'
+  MissingGetter = 'ae-missing-getter',
+
+  /**
+   * "Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension.
+   * Troubleshooting tips: `https://api-extractor.com/link/dts-error`"
+   */
+  WrongInputFileType = 'ae-wrong-input-file-type'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -114,5 +120,6 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-cyclic-inherit-doc',
   'ae-unresolved-link',
   'ae-setter-with-docs',
-  'ae-missing-getter'
+  'ae-missing-getter',
+  'ae-wrong-input-file-type'
 ]);

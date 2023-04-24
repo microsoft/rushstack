@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Generated Rush changefiles",
+  "description": "For use with the Rush tool, this file tracks changes that are made to individual packages within the Rush repo. See http://rushjs.io for details.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "changes": {
+      "description": "A list of changes that apply to the specified package. These changes will cause the specified package and all dependent packages ",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["packageName", "comment", "type"],
+        "properties": {
+          "packageName": {
+            "type": "string",
+            "description": "The name of the package that the change applies to."
+          },
+          "comment": {
+            "type": "string",
+            "description": "A comment that describes the change being made."
+          },
+          "type": {
+            "type": "string",
+            "description": "The change type associated with the change.",
+            "enum": ["none", "dependency", "hotfix", "patch", "minor", "major"]
+          },
+          "customFields": {
+            "type": "object",
+            "description": "An optional dictionary of custom string fields.",
+            "patternProperties": {
+              "^.*$": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "packageName": {
+      "description": "The name of the package that the change file applies to.",
+      "type": "string"
+    },
+    "email": {
+      "description": "The email address for the author of the change.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

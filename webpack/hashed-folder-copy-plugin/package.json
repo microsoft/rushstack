@@ -1,0 +1,43 @@
+{
+  "name": "@rushstack/hashed-folder-copy-plugin",
+  "version": "0.2.10",
+  "description": "Webpack plugin for copying a folder to the output directory with a hash in the folder name.",
+  "typings": "dist/hashed-folder-copy-plugin.d.ts",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/hashed-folder-copy-plugin"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
+  },
+  "peerDependencies": {
+    "@types/webpack": "^4.39.0",
+    "webpack": "^4.31.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/webpack": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/webpack-plugin-utilities": "workspace:*",
+    "glob": "~7.0.5"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/enhanced-resolve": "3.0.7",
+    "@types/glob": "7.1.1",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "14.18.36",
+    "@types/webpack": "4.41.32",
+    "webpack": "~4.44.2",
+    "@rushstack/heft-webpack5-plugin": "workspace:*"
+  }
+}

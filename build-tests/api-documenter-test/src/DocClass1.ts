@@ -138,6 +138,18 @@ export interface IDocInterface4 {
 }
 
 /**
+ * Type parameter constraint used by test case below.
+ * @public
+ */
+export interface Constraint {}
+
+/**
+ * Type parameter default type used by test case below.
+ * @public
+ */
+export interface DefaultType {}
+
+/**
  * This is an example class.
  *
  * @remarks
@@ -156,6 +168,16 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public constructor(name: string) {
     super();
   }
+
+  /**
+   * Some protected property.
+   */
+  protected protectedProperty: string;
+
+  /**
+   * Some property with multiple modifiers.
+   */
+  protected static readonly multipleModifiersProperty: boolean;
 
   /**
    * This is an overloaded function.
@@ -179,6 +201,12 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     return x;
   }
 
+  /**
+   * This is a function with an optional parameter.
+   * @param x - the number
+   */
+  public optionalParamFunction(x?: number): void {}
+
   public get readonlyProperty(): string {
     return 'hello';
   }
@@ -187,6 +215,11 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     return 'hello';
   }
   public set writeableProperty(value: string) {}
+
+  /**
+   * API Extractor will surface an `ae-missing-getter` finding for this property.
+   */
+  public set writeonlyProperty(value: string) {}
 
   /**
    * This event is fired whenever the object is modified.
@@ -255,6 +288,12 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public static sumWithExample(x: number, y: number): number {
     return x + y;
   }
+
+  /**
+   * This is a method with a complex type parameter.
+   * @param x - some generic parameter.
+   */
+  public genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T) {}
 }
 
 /**

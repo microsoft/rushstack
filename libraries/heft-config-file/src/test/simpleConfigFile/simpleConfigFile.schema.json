@@ -15,6 +15,15 @@
       "items": {
         "type": "string"
       }
+    },
+
+    "thingsObj": {
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "booleanProp": {
+      "type": "boolean"
     }
   }
 }

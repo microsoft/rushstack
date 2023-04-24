@@ -1,15 +1,18 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.13.42",
+  "version": "7.21.7",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/apps/api-documenter"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/api-documenter"
   },
   "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
@@ -18,12 +21,12 @@
   "typings": "dist/rollup.d.ts",
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.13.2",
+    "@microsoft/tsdoc": "0.14.2",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "colors": "~1.2.1",
     "js-yaml": "~3.13.1",
-    "resolve": "~1.17.0"
+    "resolve": "~1.22.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -31,8 +34,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "10.17.13",
-    "@types/resolve": "1.17.1",
-    "jest": "~25.4.0"
+    "@types/node": "14.18.36",
+    "@types/resolve": "1.20.2"
   }
 }

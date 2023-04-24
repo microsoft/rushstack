@@ -1,4 +1,4 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
-  "reporters": ["default", "../lib/test/customJestReporter.js"]
+  "reporters": ["default", "../lib/test/customJestReporter.cjs"]
 }

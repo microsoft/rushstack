@@ -22,6 +22,34 @@ export interface IPackageJsonLookupParameters {
   loadExtraFields?: boolean;
 }
 
+type TryLoadPackageJsonInternalErrorCode =
+  | 'MISSING_NAME_FIELD'
+  | 'FILE_NOT_FOUND'
+  | 'MISSING_VERSION_FIELD'
+  | 'OTHER_ERROR';
+
+interface ITryLoadPackageJsonInternalSuccessResult {
+  packageJson: IPackageJson;
+  error?: never;
+}
+
+interface ITryLoadPackageJsonInternalFailureResult {
+  error: TryLoadPackageJsonInternalErrorCode;
+}
+interface ITryLoadPackageJsonInternalKnownFailureResult extends ITryLoadPackageJsonInternalFailureResult {
+  error: 'MISSING_NAME_FIELD' | 'FILE_NOT_FOUND';
+}
+
+interface ITryLoadPackageJsonInternalUnknownFailureResult extends ITryLoadPackageJsonInternalFailureResult {
+  error: 'OTHER_ERROR';
+  errorObject: Error;
+}
+
+type ITryLoadPackageJsonInternalResult =
+  | ITryLoadPackageJsonInternalSuccessResult
+  | ITryLoadPackageJsonInternalKnownFailureResult
+  | ITryLoadPackageJsonInternalUnknownFailureResult;
+
 /**
  * This class provides methods for finding the nearest "package.json" for a folder
  * and retrieving the name of the package.  The results are cached.
@@ -235,23 +263,77 @@ export class PackageJsonLookup {
    * if the `version` field is missing from the package.json file.
    */
   public loadNodePackageJson(jsonFilename: string): INodePackageJson {
-    if (!FileSystem.exists(jsonFilename)) {
-      throw new Error(`Input file not found: ${jsonFilename}`);
+    return this._loadPackageJsonInner(jsonFilename);
+  }
+
+  private _loadPackageJsonInner(jsonFilename: string): IPackageJson;
+  private _loadPackageJsonInner(
+    jsonFilename: string,
+    errorsToIgnore: Set<TryLoadPackageJsonInternalErrorCode>
+  ): IPackageJson | undefined;
+  private _loadPackageJsonInner(
+    jsonFilename: string,
+    errorsToIgnore?: Set<TryLoadPackageJsonInternalErrorCode>
+  ): IPackageJson | undefined {
+    const loadResult: ITryLoadPackageJsonInternalResult = this._tryLoadNodePackageJsonInner(jsonFilename);
+
+    if (loadResult.error && errorsToIgnore?.has(loadResult.error)) {
+      return undefined;
     }
 
+    switch (loadResult.error) {
+      case 'FILE_NOT_FOUND': {
+        throw new Error(`Input file not found: ${jsonFilename}`);
+      }
+
+      case 'MISSING_NAME_FIELD': {
+        throw new Error(`Error reading "${jsonFilename}":\n  The required field "name" was not found`);
+      }
+
+      case 'OTHER_ERROR': {
+        throw loadResult.errorObject;
+      }
+
+      default: {
+        return loadResult.packageJson;
+      }
+    }
+  }
+
+  /**
+   * Try to load a package.json file as an INodePackageJson,
+   * returning undefined if the found file does not contain a `name` field.
+   */
+  private _tryLoadNodePackageJsonInner(jsonFilename: string): ITryLoadPackageJsonInternalResult {
     // Since this will be a cache key, follow any symlinks and get an absolute path
     // to minimize duplication.  (Note that duplication can still occur due to e.g. character case.)
-    const normalizedFilePath: string = FileSystem.getRealPath(jsonFilename);
+    let normalizedFilePath: string;
+    try {
+      normalizedFilePath = FileSystem.getRealPath(jsonFilename);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        return {
+          error: 'FILE_NOT_FOUND'
+        };
+      } else {
+        return {
+          error: 'OTHER_ERROR',
+          errorObject: e
+        };
+      }
+    }
 
     let packageJson: IPackageJson | undefined = this._packageJsonCache.get(normalizedFilePath);
 
     if (!packageJson) {
-      const loadedPackageJson: IPackageJson = JsonFile.load(normalizedFilePath) as IPackageJson;
+      const loadedPackageJson: IPackageJson = JsonFile.load(normalizedFilePath);
 
       // Make sure this is really a package.json file.  CommonJS has fairly strict requirements,
       // but NPM only requires "name" and "version"
       if (!loadedPackageJson.name) {
-        throw new Error(`Error reading "${jsonFilename}":\n  The required field "name" was not found`);
+        return {
+          error: 'MISSING_NAME_FIELD'
+        };
       }
 
       if (this._loadExtraFields) {
@@ -281,7 +363,9 @@ export class PackageJsonLookup {
       this._packageJsonCache.set(normalizedFilePath, packageJson);
     }
 
-    return packageJson;
+    return {
+      packageJson
+    };
   }
 
   // Recursive part of the algorithm from tryGetPackageFolderFor()
@@ -292,8 +376,13 @@ export class PackageJsonLookup {
       return this._packageFolderCache.get(resolvedFileOrFolderPath);
     }
 
-    // Is resolvedFileOrFolderPath itself a folder with a package.json file?  If so, return it.
-    if (FileSystem.exists(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
+    // Is resolvedFileOrFolderPath itself a folder with a valid package.json file?  If so, return it.
+    const packageJsonFilePath: string = `${resolvedFileOrFolderPath}/${FileConstants.PackageJson}`;
+    const packageJson: IPackageJson | undefined = this._loadPackageJsonInner(
+      packageJsonFilePath,
+      new Set(['FILE_NOT_FOUND', 'MISSING_NAME_FIELD'])
+    );
+    if (packageJson) {
       this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
       return resolvedFileOrFolderPath;
     }

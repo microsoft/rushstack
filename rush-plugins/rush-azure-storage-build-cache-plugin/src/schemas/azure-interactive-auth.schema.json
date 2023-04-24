@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Azure interactive auth prompt",
+
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["storageAccountName", "storageContainerName"],
+
+  "properties": {
+    "storageAccountName": {
+      "type": "string",
+      "description": "(Required) The name of the the Azure storage account to authenticate to."
+    },
+
+    "storageContainerName": {
+      "type": "string",
+      "description": "(Required) The name of the container in the Azure storage account to authenticate to."
+    },
+
+    "azureEnvironment": {
+      "type": "string",
+      "description": "The Azure environment the storage account exists in. Defaults to AzurePublicCloud.",
+      "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
+    },
+
+    "minimumValidityInMinutes": {
+      "type": "number",
+      "description": "If specified and a credential exists that will be valid for at least this many minutes from the time of execution, no action will be taken."
+    },
+
+    "globalCommands": {
+      "type": "array",
+      "description": "The set of global rush commands before which this plugin should update credentials.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "phasedCommands": {
+      "type": "array",
+      "description": "The set of phased rush commands before which this plugin should update credentials.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

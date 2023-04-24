@@ -11,6 +11,15 @@ import {
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 
 /** @beta */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface ICustomActionParameterBase<CustomActionParameterType> {
+  kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
+
+  parameterLongName: string;
+  description: string;
+}
+
+/** @beta */
 export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
   kind: 'flag';
 }
@@ -31,13 +40,7 @@ export interface ICustomActionParameterStringList extends ICustomActionParameter
 }
 
 /** @beta */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
-  kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
-
-  parameterLongName: string;
-  description: string;
-}
+export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 /** @beta */
 export type ICustomActionParameter<TParameter> = TParameter extends boolean
@@ -51,9 +54,6 @@ export type ICustomActionParameter<TParameter> = TParameter extends boolean
   : never;
 
 /** @beta */
-export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
-
-/** @beta */
 export interface ICustomActionOptions<TParameters> {
   actionName: string;
   documentation: string;
@@ -65,8 +65,8 @@ export interface ICustomActionOptions<TParameters> {
 }
 
 export class CustomAction<TParameters> extends HeftActionBase {
-  private _customActionOptions: ICustomActionOptions<TParameters>;
-  private _parameterValues!: Map<string, () => CustomActionParameterType>;
+  private readonly _customActionOptions: ICustomActionOptions<TParameters>;
+  private readonly _parameterValues: Map<string, () => CustomActionParameterType>;
 
   public constructor(
     customActionOptions: ICustomActionOptions<TParameters>,
@@ -82,10 +82,6 @@ export class CustomAction<TParameters> extends HeftActionBase {
     );
 
     this._customActionOptions = customActionOptions;
-  }
-
-  public onDefineParameters(): void {
-    super.onDefineParameters();
 
     this._parameterValues = new Map<string, () => CustomActionParameterType>();
     for (const [callbackValueName, untypedParameterOption] of Object.entries(
@@ -97,8 +93,8 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
       let getParameterValue: () => CustomActionParameterType;
 
-      const parameterOption: ICustomActionParameterBase<CustomActionParameterType> =
-        untypedParameterOption as ICustomActionParameterBase<CustomActionParameterType>;
+      const parameterOption: ICustomActionParameter<CustomActionParameterType> =
+        untypedParameterOption as ICustomActionParameter<CustomActionParameterType>;
       switch (parameterOption.kind) {
         case 'flag': {
           const parameter: CommandLineFlagParameter = this.defineFlagParameter({
@@ -141,6 +137,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
         default: {
           throw new Error(
+            // @ts-expect-error All cases are handled above, therefore parameterOption is of type `never`
             `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
           );
         }

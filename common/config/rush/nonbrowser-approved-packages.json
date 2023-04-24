@@ -11,7 +11,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@babel/core",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@jest/core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@jest/create-cache-key-function",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -47,10 +55,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/rush-stack-compiler-3.9",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@microsoft/teams-js",
       "allowedCategories": [ "tests" ]
     },
@@ -64,6 +68,14 @@
     },
     {
       "name": "@pnpm/link-bins",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -87,12 +99,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/hashed-folder-copy-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft-dev-cert-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-jest-plugin",
@@ -107,6 +127,14 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-serverless-stack-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-storybook-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-web-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -116,15 +144,19 @@
     },
     {
       "name": "@rushstack/heft-webpack5-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/localization-plugin",
-      "allowedCategories": [ "tests" ]
+      "name": "@rushstack/localization-utilities",
+      "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/module-minifier-plugin",
-      "allowedCategories": [ "tests" ]
+      "name": "@rushstack/lockfile-explorer-web",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/module-minifier",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/node-core-library",
@@ -137,6 +169,22 @@
     {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-http-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-sdk",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/set-webpack-public-path-plugin",
@@ -163,6 +211,82 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/webpack-deep-imports-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack-plugin-utilities",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/webpack4-localization-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/webpack4-module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/webpack5-module-minifier-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/worker-pool",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@serverless-stack/aws-lambda-ric",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@serverless-stack/cli",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@serverless-stack/resources",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/addon-actions",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/addon-essentials",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/addon-links",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/cli",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/components",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/core-events",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/react",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/theming",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@tsconfig/node14",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },
@@ -172,7 +296,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -212,6 +336,14 @@
     },
     {
       "name": "autoprefixer",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "aws-cdk-lib",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "babel-loader",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -235,11 +367,23 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "css-loader",
+      "name": "constructs",
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "css-loader",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "css-minimizer-webpack-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "decache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "diff",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -263,12 +407,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "express",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "fast-glob",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "fastify",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "figures",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "file-loader",
@@ -307,7 +459,35 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-parameter-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-storybook-react-tutorial",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-storybook-react-tutorial-storybook",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-storybook-react-tutorial-storykit",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-web-rig-library-tutorial",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-webpack5-plugin",
+      "allowedCategories": []
+    },
+    {
       "name": "html-webpack-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "http-proxy",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -328,10 +508,14 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "jest-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -339,7 +523,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-watch-select-projects",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -371,6 +563,14 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "memfs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mini-css-extract-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "minimatch",
       "allowedCategories": [ "libraries" ]
     },
@@ -387,6 +587,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "npm-check",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "npm-package-arg",
       "allowedCategories": [ "libraries" ]
     },
@@ -395,12 +599,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "open",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "postcss",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "postcss-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "postcss-modules",
@@ -423,12 +631,20 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "sass",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "sass-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "semver",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "serialize-javascript",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "source-map",
@@ -436,7 +652,7 @@
     },
     {
       "name": "source-map-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "ssri",
@@ -456,7 +672,7 @@
     },
     {
       "name": "style-loader",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "sudo",
@@ -472,7 +688,11 @@
     },
     {
       "name": "terser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "terser-webpack-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "timsort",
@@ -499,12 +719,16 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "url-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "webpack",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-bundle-analyzer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "webpack-cli",
@@ -513,6 +737,10 @@
     {
       "name": "webpack-dev-server",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-merge",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "webpack-sources",

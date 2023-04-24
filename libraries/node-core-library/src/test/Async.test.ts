@@ -3,8 +3,13 @@
 
 import { Async } from '../Async';
 
-describe('Async', () => {
-  describe('mapAsync', () => {
+describe(Async.name, () => {
+  describe(Async.mapAsync.name, () => {
+    it('handles an empty array correctly', async () => {
+      const result = await Async.mapAsync([] as number[], async (item) => `result ${item}`);
+      expect(result).toEqual([]);
+    });
+
     it('returns the same result as built-in Promise.all', async () => {
       const array: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
       const fn: (item: number) => Promise<string> = async (item) => `result ${item}`;
@@ -55,9 +60,93 @@ describe('Async', () => {
       ]);
       expect(maxRunning).toEqual(3);
     });
+
+    it('rejects if a sync iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const syncIterator: Iterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return { done: false, value: iteratorIndex };
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: Iterable<number> = {
+        [Symbol.iterator]: () => syncIterator
+      };
+
+      await expect(() => Async.mapAsync(syncIterable, async (item) => `result ${item}`)).rejects.toThrow(
+        expectedError
+      );
+    });
+
+    it('rejects if an async iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() => Async.mapAsync(syncIterable, async (item) => `result ${item}`)).rejects.toThrow(
+        expectedError
+      );
+    });
+
+    it('rejects if an async iterator rejects', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            return Promise.reject(expectedError);
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() => Async.mapAsync(syncIterable, async (item) => `result ${item}`)).rejects.toThrow(
+        expectedError
+      );
+    });
   });
 
-  describe('forEachAsync', () => {
+  describe(Async.forEachAsync.name, () => {
+    it('handles an empty array correctly', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: number[] = [];
+
+      const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(1);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(0);
+      expect(maxRunning).toEqual(0);
+    });
+
     it('if concurrency is set, ensures no more than N operations occur in parallel', async () => {
       let running: number = 0;
       let maxRunning: number = 0;
@@ -74,6 +163,15 @@ describe('Async', () => {
       await Async.forEachAsync(array, fn, { concurrency: 3 });
       expect(fn).toHaveBeenCalledTimes(8);
       expect(maxRunning).toEqual(3);
+    });
+
+    it('returns when given an array with a large number of elements and a concurrency limit', async () => {
+      const array: number[] = [];
+      for (let i = 0; i < 250; i++) {
+        array.push(i);
+      }
+
+      await Async.forEachAsync(array, async () => await Async.sleep(1), { concurrency: 3 });
     });
 
     it('rejects if any operation rejects', async () => {
@@ -105,6 +203,259 @@ describe('Async', () => {
         'Something broke'
       );
       expect(fn).toHaveBeenCalledTimes(3);
+    });
+
+    it('rejects if a sync iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const syncIterator: Iterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return { done: false, value: iteratorIndex };
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: Iterable<number> = {
+        [Symbol.iterator]: () => syncIterator
+      };
+
+      await expect(() =>
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+      ).rejects.toThrow(expectedError);
+    });
+
+    it('rejects if an async iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() =>
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+      ).rejects.toThrow(expectedError);
+    });
+
+    it('does not exceed the maxiumum concurrency for an async iterator', async () => {
+      let waitingIterators: number = 0;
+
+      let resolve2!: (value: { done: true; value: undefined }) => void;
+      const signal2: Promise<{ done: true; value: undefined }> = new Promise((resolve, reject) => {
+        resolve2 = resolve;
+      });
+
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          iteratorIndex++;
+          if (iteratorIndex < 20) {
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            ++waitingIterators;
+            return signal2;
+          }
+        }
+      };
+      const asyncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      const expectedConcurrency: 4 = 4;
+      const finalPromise: Promise<void> = Async.forEachAsync(
+        asyncIterable,
+        async (item) => {
+          // Do nothing
+        },
+        {
+          concurrency: expectedConcurrency
+        }
+      );
+
+      // Wait for all the instant resolutions to be done
+      await Async.sleep(1);
+      expect(waitingIterators).toEqual(expectedConcurrency);
+      resolve2({ done: true, value: undefined });
+      await finalPromise;
+    });
+
+    it('rejects if an async iterator rejects', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            return Promise.reject(expectedError);
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() =>
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+      ).rejects.toThrow(expectedError);
+    });
+  });
+
+  describe(Async.runWithRetriesAsync.name, () => {
+    it('Correctly handles a sync function that succeeds the first time', async () => {
+      const expectedResult: string = 'RESULT';
+      const result: string = await Async.runWithRetriesAsync({ action: () => expectedResult, maxRetries: 0 });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles an async function that succeeds the first time', async () => {
+      const expectedResult: string = 'RESULT';
+      const result: string = await Async.runWithRetriesAsync({
+        action: async () => expectedResult,
+        maxRetries: 0
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles a sync function that throws and does not allow retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: () => {
+              throw new Error('error');
+            },
+            maxRetries: 0
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles an async function that throws and does not allow retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: async () => {
+              throw new Error('error');
+            },
+            maxRetries: 0
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles a sync function that always throws and allows several retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: () => {
+              throw new Error('error');
+            },
+            maxRetries: 5
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles an async function that always throws and allows several retries', async () => {
+      await expect(
+        async () =>
+          await Async.runWithRetriesAsync({
+            action: async () => {
+              throw new Error('error');
+            },
+            maxRetries: 5
+          })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('Correctly handles a sync function that throws once and then succeeds', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const result: string = await Async.runWithRetriesAsync({
+        action: () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles an async function that throws once and then succeeds', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const result: string = await Async.runWithRetriesAsync({
+        action: () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('Correctly handles a sync function that throws once and then succeeds with a timeout', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const sleepSpy: jest.SpyInstance = jest
+        .spyOn(Async, 'sleep')
+        .mockImplementation(() => Promise.resolve());
+
+      const resultPromise: Promise<string> = Async.runWithRetriesAsync({
+        action: () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1,
+        retryDelayMs: 5
+      });
+
+      expect(await resultPromise).toEqual(expectedResult);
+      expect(sleepSpy).toHaveBeenCalledTimes(1);
+      expect(sleepSpy).toHaveBeenLastCalledWith(5);
+    });
+
+    it('Correctly handles an async function that throws once and then succeeds with a timeout', async () => {
+      const expectedResult: string = 'RESULT';
+      let callCount: number = 0;
+      const sleepSpy: jest.SpyInstance = jest
+        .spyOn(Async, 'sleep')
+        .mockImplementation(() => Promise.resolve());
+
+      const resultPromise: Promise<string> = Async.runWithRetriesAsync({
+        action: async () => {
+          if (callCount++ === 0) {
+            throw new Error('error');
+          } else {
+            return expectedResult;
+          }
+        },
+        maxRetries: 1,
+        retryDelayMs: 5
+      });
+
+      expect(await resultPromise).toEqual(expectedResult);
+      expect(sleepSpy).toHaveBeenCalledTimes(1);
+      expect(sleepSpy).toHaveBeenLastCalledWith(5);
     });
   });
 });

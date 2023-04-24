@@ -6,7 +6,7 @@ import { JsonFile } from '../JsonFile';
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
 
-describe('JsonFile tests', () => {
+describe(JsonFile.name, () => {
   it('adds a header comment', () => {
     expect(
       JsonFile.stringify(

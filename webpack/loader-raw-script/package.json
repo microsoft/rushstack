@@ -1,25 +1,28 @@
 {
   "name": "@rushstack/loader-raw-script",
-  "version": "1.3.172",
+  "version": "1.3.283",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/webpack/loader-raw-script"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/loader-raw-script"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "dependencies": {
-    "loader-utils": "~1.1.0"
+    "loader-utils": "1.4.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13"
+    "@types/node": "14.18.36"
   }
 }

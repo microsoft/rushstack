@@ -1,6 +1,265 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 27 Aug 2021 00:07:25 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 0.11.9
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 0.11.8
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.11.7
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 0.11.6
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 0.11.5
+Thu, 26 Jan 2023 02:55:09 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.11.4
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.11.3
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.11.2
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.11.1
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 0.11.0
+Tue, 27 Sep 2022 22:17:20 GMT
+
+### Minor changes
+
+- Allow a schema object to be passed to the ConfigurationFile constructor instead of the path to a schema file.
+
+## 0.10.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Add a "propertyInheritanceDefaults" option that allows the default property inheritance type to be configured.
+
+## 0.9.6
+Thu, 15 Sep 2022 00:18:52 GMT
+
+_Version update only_
+
+## 0.9.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 0.9.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 0.9.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 0.9.2
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 0.9.1
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 0.9.0
+Wed, 13 Jul 2022 21:31:13 GMT
+
+### Minor changes
+
+- (BREAKING API CHANGE) Deprecate `PathResolutionMethod.NodeResolve` in favor of `PathResolutionMethod.nodeResolve`.
+
+### Patches
+
+- Improve types strictness of `IJsonPathsMetadata`
+
+## 0.8.10
+Tue, 28 Jun 2022 22:47:13 GMT
+
+_Version update only_
+
+## 0.8.9
+Tue, 28 Jun 2022 00:23:32 GMT
+
+_Version update only_
+
+## 0.8.8
+Mon, 27 Jun 2022 18:43:09 GMT
+
+_Version update only_
+
+## 0.8.7
+Sat, 25 Jun 2022 01:54:29 GMT
+
+_Version update only_
+
+## 0.8.6
+Fri, 17 Jun 2022 09:17:54 GMT
+
+_Version update only_
+
+## 0.8.5
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 0.8.4
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 0.8.3
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 0.8.2
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 0.8.1
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.8.0
+Sat, 19 Mar 2022 08:05:37 GMT
+
+### Minor changes
+
+- Add support for an inline "$<propertyName>.inheritanceType" property. This feature allows for configuration files to specify how object and array properties are inherited, overriding the default inheritance behavior provided by the configuration file class.
+
+## 0.7.12
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 0.7.11
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.7.10
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.7.9
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.7.8
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.7.7
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.7.6
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.7.5
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.7.4
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.7.3
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.7.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.7.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.6.8
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.6.7
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.6.6
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 0.6.5
+Mon, 13 Sep 2021 15:07:06 GMT
+
+_Version update only_
+
+## 0.6.4
+Wed, 08 Sep 2021 19:06:22 GMT
+
+### Patches
+
+- Fix issue with overwriting configuration properties using falsey values
 
 ## 0.6.3
 Fri, 27 Aug 2021 00:07:25 GMT

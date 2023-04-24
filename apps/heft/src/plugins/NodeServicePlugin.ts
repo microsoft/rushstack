@@ -4,7 +4,7 @@
 import * as child_process from 'child_process';
 import * as process from 'process';
 import { performance } from 'perf_hooks';
-import { InternalError } from '@rushstack/node-core-library';
+import { InternalError, SubprocessTerminator } from '@rushstack/node-core-library';
 
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -12,7 +12,6 @@ import { IBuildStageContext, ICompileSubstage, IPostBuildSubstage } from '../sta
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
-import { SubprocessTerminator } from '../utilities/subprocess/SubprocessTerminator';
 
 const PLUGIN_NAME: string = 'NodeServicePlugin';
 
@@ -432,7 +431,7 @@ export class NodeServicePlugin implements IHeftPlugin {
     try {
       action();
     } catch (error) {
-      this._logger.emitError(error);
+      this._logger.emitError(error as Error);
       this._logger.terminal.writeErrorLine('An unexpected error occurred');
 
       // TODO: Provide a Heft facility for this

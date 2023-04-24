@@ -6,13 +6,13 @@ import { PackageJsonLookup } from '../PackageJsonLookup';
 import { IPackageJson, INodePackageJson } from '../IPackageJson';
 import { FileConstants } from '../Constants';
 
-describe('PackageJsonLookup', () => {
+describe(PackageJsonLookup.name, () => {
   describe('basic tests', () => {
-    test('', () => {
+    test(PackageJsonLookup.loadOwnPackageJson.name, () => {
       expect(PackageJsonLookup.loadOwnPackageJson(__dirname).name).toEqual('@rushstack/node-core-library');
     });
 
-    test('tryLoadPackageJsonFor() test', () => {
+    test(PackageJsonLookup.prototype.tryLoadPackageJsonFor.name, () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package');
       const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(sourceFilePath);
@@ -26,7 +26,7 @@ describe('PackageJsonLookup', () => {
       }
     });
 
-    test('tryLoadNodePackageJsonFor() test package with no version', () => {
+    test(`${PackageJsonLookup.prototype.tryLoadNodePackageJsonFor.name} test package with no version`, () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package-no-version');
       const packageJson: INodePackageJson | undefined =
@@ -41,7 +41,7 @@ describe('PackageJsonLookup', () => {
       }
     });
 
-    test('tryGetPackageFolderFor() test', () => {
+    test(PackageJsonLookup.prototype.tryGetPackageFolderFor.name, () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
 
@@ -49,6 +49,23 @@ describe('PackageJsonLookup', () => {
       const foundFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(sourceFilePath);
       expect(foundFolder).toBeDefined();
       expect(foundFolder!.search(/[\\/]example-package$/i)).toBeGreaterThan(0);
+
+      const foundFile: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
+
+      expect(foundFile).toEqual(path.join(foundFolder || '', FileConstants.PackageJson));
+    });
+
+    test(`${PackageJsonLookup.prototype.tryGetPackageFolderFor.name} test package with inner package.json with no name`, () => {
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const sourceFilePath: string = path.join(
+        __dirname,
+        './test-data/example-subdir-package-no-name/src/ExampleFile.txt'
+      );
+
+      // Example: C:\rushstack\libraries\node-core-library\src\test\example-subdir-package-no-name
+      const foundFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(sourceFilePath);
+      expect(foundFolder).toBeDefined();
+      expect(foundFolder!.search(/[\\/]example-subdir-package-no-name$/i)).toBeGreaterThan(0);
 
       const foundFile: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
 

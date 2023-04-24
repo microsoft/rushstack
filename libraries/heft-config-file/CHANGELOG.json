@@ -2,6 +2,708 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.11.9",
+      "tag": "@rushstack/heft-config-file_v0.11.9",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.8",
+      "tag": "@rushstack/heft-config-file_v0.11.8",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.7",
+      "tag": "@rushstack/heft-config-file_v0.11.7",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.55.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.6",
+      "tag": "@rushstack/heft-config-file_v0.11.6",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.54.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.5",
+      "tag": "@rushstack/heft-config-file_v0.11.5",
+      "date": "Thu, 26 Jan 2023 02:55:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to webpack 5.75.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.4",
+      "tag": "@rushstack/heft-config-file_v0.11.4",
+      "date": "Fri, 09 Dec 2022 16:18:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.3",
+      "tag": "@rushstack/heft-config-file_v0.11.3",
+      "date": "Thu, 13 Oct 2022 00:20:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.2",
+      "tag": "@rushstack/heft-config-file_v0.11.2",
+      "date": "Mon, 10 Oct 2022 15:23:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.1",
+      "tag": "@rushstack/heft-config-file_v0.11.1",
+      "date": "Thu, 29 Sep 2022 07:13:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.0",
+      "tag": "@rushstack/heft-config-file_v0.11.0",
+      "date": "Tue, 27 Sep 2022 22:17:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow a schema object to be passed to the ConfigurationFile constructor instead of the path to a schema file."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.0",
+      "tag": "@rushstack/heft-config-file_v0.10.0",
+      "date": "Wed, 21 Sep 2022 20:21:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"propertyInheritanceDefaults\" option that allows the default property inheritance type to be configured."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.52.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.6",
+      "tag": "@rushstack/heft-config-file_v0.9.6",
+      "date": "Thu, 15 Sep 2022 00:18:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.5",
+      "tag": "@rushstack/heft-config-file_v0.9.5",
+      "date": "Wed, 24 Aug 2022 03:01:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.4",
+      "tag": "@rushstack/heft-config-file_v0.9.4",
+      "date": "Wed, 24 Aug 2022 00:14:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.51.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.3",
+      "tag": "@rushstack/heft-config-file_v0.9.3",
+      "date": "Fri, 19 Aug 2022 00:17:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.2",
+      "tag": "@rushstack/heft-config-file_v0.9.2",
+      "date": "Wed, 03 Aug 2022 18:40:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.1",
+      "tag": "@rushstack/heft-config-file_v0.9.1",
+      "date": "Mon, 01 Aug 2022 02:45:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.50.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-config-file_v0.9.0",
+      "date": "Wed, 13 Jul 2022 21:31:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING API CHANGE) Deprecate `PathResolutionMethod.NodeResolve` in favor of `PathResolutionMethod.nodeResolve`."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Improve types strictness of `IJsonPathsMetadata`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.10",
+      "tag": "@rushstack/heft-config-file_v0.8.10",
+      "date": "Tue, 28 Jun 2022 22:47:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.49.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.9",
+      "tag": "@rushstack/heft-config-file_v0.8.9",
+      "date": "Tue, 28 Jun 2022 00:23:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.48.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.8",
+      "tag": "@rushstack/heft-config-file_v0.8.8",
+      "date": "Mon, 27 Jun 2022 18:43:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.47.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.7",
+      "tag": "@rushstack/heft-config-file_v0.8.7",
+      "date": "Sat, 25 Jun 2022 01:54:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.46.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.6",
+      "tag": "@rushstack/heft-config-file_v0.8.6",
+      "date": "Fri, 17 Jun 2022 09:17:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.5",
+      "tag": "@rushstack/heft-config-file_v0.8.5",
+      "date": "Fri, 17 Jun 2022 00:16:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.4",
+      "tag": "@rushstack/heft-config-file_v0.8.4",
+      "date": "Tue, 10 May 2022 01:20:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.3",
+      "tag": "@rushstack/heft-config-file_v0.8.3",
+      "date": "Sat, 23 Apr 2022 02:13:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.2",
+      "tag": "@rushstack/heft-config-file_v0.8.2",
+      "date": "Fri, 15 Apr 2022 00:12:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.1",
+      "tag": "@rushstack/heft-config-file_v0.8.1",
+      "date": "Sat, 09 Apr 2022 02:24:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"master\" branch to \"main\"."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@rushstack/heft-config-file_v0.8.0",
+      "date": "Sat, 19 Mar 2022 08:05:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for an inline \"$<propertyName>.inheritanceType\" property. This feature allows for configuration files to specify how object and array properties are inherited, overriding the default inheritance behavior provided by the configuration file class."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.12",
+      "tag": "@rushstack/heft-config-file_v0.7.12",
+      "date": "Tue, 15 Mar 2022 19:15:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.11",
+      "tag": "@rushstack/heft-config-file_v0.7.11",
+      "date": "Wed, 05 Jan 2022 16:07:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.45.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.10",
+      "tag": "@rushstack/heft-config-file_v0.7.10",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.9",
+      "tag": "@rushstack/heft-config-file_v0.7.9",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.8",
+      "tag": "@rushstack/heft-config-file_v0.7.8",
+      "date": "Mon, 06 Dec 2021 16:08:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.7",
+      "tag": "@rushstack/heft-config-file_v0.7.7",
+      "date": "Fri, 03 Dec 2021 03:05:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.6",
+      "tag": "@rushstack/heft-config-file_v0.7.6",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.5",
+      "tag": "@rushstack/heft-config-file_v0.7.5",
+      "date": "Fri, 05 Nov 2021 15:09:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.4",
+      "tag": "@rushstack/heft-config-file_v0.7.4",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.3",
+      "tag": "@rushstack/heft-config-file_v0.7.3",
+      "date": "Wed, 13 Oct 2021 15:09:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.2",
+      "tag": "@rushstack/heft-config-file_v0.7.2",
+      "date": "Fri, 08 Oct 2021 08:08:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.1",
+      "tag": "@rushstack/heft-config-file_v0.7.1",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@rushstack/heft-config-file_v0.7.0",
+      "date": "Tue, 05 Oct 2021 15:08:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.8",
+      "tag": "@rushstack/heft-config-file_v0.6.8",
+      "date": "Fri, 24 Sep 2021 00:09:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.41.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.7",
+      "tag": "@rushstack/heft-config-file_v0.6.7",
+      "date": "Thu, 23 Sep 2021 00:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.6",
+      "tag": "@rushstack/heft-config-file_v0.6.6",
+      "date": "Tue, 14 Sep 2021 01:17:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.5",
+      "tag": "@rushstack/heft-config-file_v0.6.5",
+      "date": "Mon, 13 Sep 2021 15:07:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.4",
+      "tag": "@rushstack/heft-config-file_v0.6.4",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue with overwriting configuration properties using falsey values"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.3",
       "tag": "@rushstack/heft-config-file_v0.6.3",
       "date": "Fri, 27 Aug 2021 00:07:25 GMT",

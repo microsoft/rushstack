@@ -2,7 +2,10 @@
 // See the @microsoft/rush package's LICENSE file for license information.
 
 import { CommandLineParser } from '@rushstack/ts-command-line';
+
 import { ReadmeAction } from './ReadmeAction';
+import { RecordVersionsAction } from './RecordVersionsAction';
+import { BumpCyclicsAction } from './BumpCyclicsAction';
 
 export class ToolboxCommandLine extends CommandLineParser {
   public constructor() {
@@ -12,14 +15,7 @@ export class ToolboxCommandLine extends CommandLineParser {
     });
 
     this.addAction(new ReadmeAction());
-  }
-
-  protected onDefineParameters(): void {
-    // abstract
-  }
-
-  protected onExecute(): Promise<void> {
-    // override
-    return super.onExecute();
+    this.addAction(new RecordVersionsAction());
+    this.addAction(new BumpCyclicsAction());
   }
 }

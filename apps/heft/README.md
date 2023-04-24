@@ -26,7 +26,7 @@ Ultimately, you'll want to define a small set of stereotypical project types
 overriding the rig configuration. Being consistent ensures that any person can easily contribute to any project.
 Heft is a ready-made implementation of all these concepts.
 
-You don’t need a monorepo to use Heft, however. It also works well for small standalone projects. Compared to other
+You don't need a monorepo to use Heft, however. It also works well for small standalone projects. Compared to other
 similar systems, Heft has some unique design goals:
 
 - **Scalable**: Heft interfaces with the [Rush Stack](https://rushstack.io/) family of tools, which are tailored
@@ -79,10 +79,10 @@ the Rush Stack website.
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/heft/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/heft/CHANGELOG.md) - Find
   out what's new in the latest version
 - [UPGRADING.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/heft/UPGRADING.md) - Instructions
+  https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md) - Instructions
   for migrating existing projects to use a newer version of Heft
 - [API Reference](https://rushstack.io/pages/api/heft/)
 

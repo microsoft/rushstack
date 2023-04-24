@@ -1,6 +1,555 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 31 Aug 2021 00:07:11 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
+
+## 0.50.0
+Sat, 18 Mar 2023 00:20:56 GMT
+
+### Minor changes
+
+- Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works.
+
+## 0.49.7
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 0.49.6
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.49.5
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 0.49.4
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 0.49.3
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.49.2
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.49.1
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 0.49.0
+Tue, 20 Dec 2022 01:18:22 GMT
+
+### Minor changes
+
+- Replace Terminal with ITerminal in the API.
+
+## 0.48.9
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 0.48.8
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 0.48.7
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 0.48.6
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 0.48.5
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 0.48.4
+Fri, 14 Oct 2022 15:26:31 GMT
+
+_Version update only_
+
+## 0.48.3
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 0.48.2
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 0.48.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 0.48.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.8.
+
+## 0.47.11
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
+
+## 0.47.10
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 0.47.9
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 0.47.8
+Tue, 13 Sep 2022 00:16:55 GMT
+
+_Version update only_
+
+## 0.47.7
+Mon, 12 Sep 2022 22:27:48 GMT
+
+_Version update only_
+
+## 0.47.6
+Fri, 02 Sep 2022 17:48:43 GMT
+
+_Version update only_
+
+## 0.47.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 0.47.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 0.47.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 0.47.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+_Version update only_
+
+## 0.47.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+_Version update only_
+
+## 0.47.0
+Wed, 03 Aug 2022 18:40:35 GMT
+
+### Minor changes
+
+- Update the highest supported version of TypeScript to 4.7
+
+## 0.46.7
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 0.46.6
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 0.46.5
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 0.46.4
+Wed, 13 Jul 2022 21:31:13 GMT
+
+_Version update only_
+
+## 0.46.3
+Fri, 08 Jul 2022 15:17:46 GMT
+
+_Version update only_
+
+## 0.46.2
+Mon, 04 Jul 2022 15:15:13 GMT
+
+### Patches
+
+- Fix an issue with the `locales` build property. The property is now undefined if no `--locale` parameters are specified.
+
+## 0.46.1
+Thu, 30 Jun 2022 04:48:53 GMT
+
+_Version update only_
+
+## 0.46.0
+Tue, 28 Jun 2022 22:47:13 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Update the --locale build parameter to support multiple values and replace the `locale?: string` parameter in `IBuildStageProperties` with a `locales?: readonly string[]` parameter.
+
+## 0.45.14
+Tue, 28 Jun 2022 00:23:32 GMT
+
+_Version update only_
+
+## 0.45.13
+Mon, 27 Jun 2022 18:43:09 GMT
+
+_Version update only_
+
+## 0.45.12
+Sat, 25 Jun 2022 21:00:40 GMT
+
+_Version update only_
+
+## 0.45.11
+Sat, 25 Jun 2022 01:54:29 GMT
+
+_Version update only_
+
+## 0.45.10
+Fri, 24 Jun 2022 07:16:47 GMT
+
+_Version update only_
+
+## 0.45.9
+Thu, 23 Jun 2022 22:14:24 GMT
+
+_Version update only_
+
+## 0.45.8
+Fri, 17 Jun 2022 09:17:54 GMT
+
+_Version update only_
+
+## 0.45.7
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 0.45.6
+Tue, 07 Jun 2022 09:37:04 GMT
+
+_Version update only_
+
+## 0.45.5
+Wed, 25 May 2022 22:25:07 GMT
+
+_Version update only_
+
+## 0.45.4
+Thu, 19 May 2022 15:13:20 GMT
+
+_Version update only_
+
+## 0.45.3
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 0.45.2
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 0.45.1
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 0.45.0
+Sat, 23 Apr 2022 02:13:06 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.6
+
+## 0.44.13
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 0.44.12
+Wed, 13 Apr 2022 15:12:40 GMT
+
+_Version update only_
+
+## 0.44.11
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 0.44.10
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 0.44.9
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 0.44.8
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.44.7
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 0.44.6
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 0.44.5
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
+
+## 0.44.4
+Sat, 19 Mar 2022 08:05:37 GMT
+
+_Version update only_
+
+## 0.44.3
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 0.44.2
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 0.44.1
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.44.0
+Tue, 14 Dec 2021 19:27:51 GMT
+
+### Minor changes
+
+- Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin.
+
+## 0.43.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.43.1
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.43.0
+Wed, 08 Dec 2021 19:05:08 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.5
+
+## 0.42.6
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.42.5
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 0.42.4
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.42.3
+Mon, 29 Nov 2021 07:26:16 GMT
+
+### Patches
+
+- Remove an unused dependency.
+
+## 0.42.2
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.42.1
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.42.0
+Thu, 28 Oct 2021 00:08:22 GMT
+
+### Minor changes
+
+- Add environment variables for common heft test parameters
+
+## 0.41.8
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.41.7
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.41.6
+Fri, 08 Oct 2021 09:35:07 GMT
+
+### Patches
+
+- Fix reuse of TypeScript program to avoid breaking on older versions of @typescript-eslint/typescript-estree
+
+## 0.41.5
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.41.4
+Thu, 07 Oct 2021 23:43:12 GMT
+
+### Patches
+
+- Re-use the compiler TypeScript program when running ESLint to reduce overhead
+
+## 0.41.3
+Thu, 07 Oct 2021 07:13:35 GMT
+
+### Patches
+
+- Fix support for TypeScript 4.4 in --watch mode.
+
+## 0.41.2
+Wed, 06 Oct 2021 15:08:25 GMT
+
+### Patches
+
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
+
+## 0.41.1
+Wed, 06 Oct 2021 02:41:48 GMT
+
+### Patches
+
+- Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal.
+
+## 0.41.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.40.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add register custom parameters feature to Heft.
+
+## 0.39.2
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.39.1
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.39.0
+Wed, 22 Sep 2021 03:27:12 GMT
+
+### Minor changes
+
+- Add "encounteredErrors" boolean to IMetricsData.
+
+### Patches
+
+- Fix typo in temp folder path.
+
+## 0.38.2
+Wed, 22 Sep 2021 00:09:32 GMT
+
+### Patches
+
+- Fix formatting of tsBuildInfoFile tsconfig option. TypeScript uses an exact string match for change detection and normalizes slashes to '/' upon saving the file. Therefore the inputs need to be normalized as well.
+
+## 0.38.1
+Sat, 18 Sep 2021 03:05:57 GMT
+
+### Patches
+
+- Fix an issue where setting the emitMjsExtensionForESModule typescript.json option in a project whose tsconfig emits CommonJS will only emit .mjs files.
+
+## 0.38.0
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Minor changes
+
+- Temoprarily introduce a "--storybook" CLI parameter to support the experimental heft-storybook-plugin
+
+## 0.37.4
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 0.37.3
+Fri, 10 Sep 2021 15:08:28 GMT
+
+### Patches
+
+- Support ESLint configuration in .eslintrc.cjs (instead of .eslintrc.js) to support projects with ESM modules ("type": "module" in package.json).
+
+## 0.37.2
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.37.1
+Wed, 08 Sep 2021 00:08:03 GMT
+
+### Patches
+
+- Fix building for Typescript 4.4 (Error: directoryExists is not a function)
+- Ensure `process.cwd()` is set to the project root with correct file path casing.
 
 ## 0.37.0
 Tue, 31 Aug 2021 00:07:11 GMT

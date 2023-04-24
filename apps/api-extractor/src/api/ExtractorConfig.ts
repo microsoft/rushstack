@@ -21,6 +21,7 @@ import { RigConfig } from '@rushstack/rig-package';
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
@@ -135,6 +136,14 @@ export interface IExtractorConfigPrepareOptions {
    * `@microsoft/api-extractor/extends/tsdoc-base.json`.
    */
   tsdocConfigFile?: TSDocConfigFile;
+
+  /**
+   * When preparing the configuration object, folder and file paths referenced in the configuration are checked
+   * for existence, and an error is reported if they are not found.  This option can be used to disable this
+   * check for the main entry point module. This may be useful when preparing a configuration file for an
+   * un-built project.
+   */
+  ignoreMissingEntryPoint?: boolean;
 }
 
 interface IExtractorConfigParameters {
@@ -149,10 +158,14 @@ interface IExtractorConfigParameters {
   apiReportEnabled: boolean;
   reportFilePath: string;
   reportTempFilePath: string;
+  apiReportIncludeForgottenExports: boolean;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
+  docModelIncludeForgottenExports: boolean;
+  projectFolderUrl: string | undefined;
   rollupEnabled: boolean;
   untrimmedFilePath: string;
+  alphaTrimmedFilePath: string;
   betaTrimmedFilePath: string;
   publicTrimmedFilePath: string;
   omitTrimmingComments: boolean;
@@ -163,6 +176,7 @@ interface IExtractorConfigParameters {
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
+  enumMemberOrder: EnumMemberOrder;
 }
 
 /**
@@ -180,7 +194,7 @@ export class ExtractorConfig {
   /**
    * The config file name "api-extractor.json".
    */
-  public static readonly FILENAME: string = 'api-extractor.json';
+  public static readonly FILENAME: 'api-extractor.json' = 'api-extractor.json';
 
   /**
    * The full path to `extends/tsdoc-base.json` which contains the standard TSDoc configuration
@@ -235,16 +249,24 @@ export class ExtractorConfig {
   public readonly reportFilePath: string;
   /** The `reportTempFolder` path combined with the `reportFileName`. */
   public readonly reportTempFilePath: string;
+  /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
+  public readonly apiReportIncludeForgottenExports: boolean;
 
   /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
   /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */
   public readonly apiJsonFilePath: string;
+  /** {@inheritDoc IConfigDocModel.includeForgottenExports} */
+  public readonly docModelIncludeForgottenExports: boolean;
+  /** {@inheritDoc IConfigDocModel.projectFolderUrl} */
+  public readonly projectFolderUrl: string | undefined;
 
   /** {@inheritDoc IConfigDtsRollup.enabled} */
   public readonly rollupEnabled: boolean;
   /** {@inheritDoc IConfigDtsRollup.untrimmedFilePath} */
   public readonly untrimmedFilePath: string;
+  /** {@inheritDoc IConfigDtsRollup.alphaTrimmedFilePath} */
+  public readonly alphaTrimmedFilePath: string;
   /** {@inheritDoc IConfigDtsRollup.betaTrimmedFilePath} */
   public readonly betaTrimmedFilePath: string;
   /** {@inheritDoc IConfigDtsRollup.publicTrimmedFilePath} */
@@ -279,6 +301,9 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.testMode} */
   public readonly testMode: boolean;
 
+  /** {@inheritDoc IConfigFile.enumMemberOrder} */
+  public readonly enumMemberOrder: EnumMemberOrder;
+
   private constructor(parameters: IExtractorConfigParameters) {
     this.projectFolder = parameters.projectFolder;
     this.packageJson = parameters.packageJson;
@@ -291,10 +316,14 @@ export class ExtractorConfig {
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.reportFilePath = parameters.reportFilePath;
     this.reportTempFilePath = parameters.reportTempFilePath;
+    this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
+    this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
+    this.projectFolderUrl = parameters.projectFolderUrl;
     this.rollupEnabled = parameters.rollupEnabled;
     this.untrimmedFilePath = parameters.untrimmedFilePath;
+    this.alphaTrimmedFilePath = parameters.alphaTrimmedFilePath;
     this.betaTrimmedFilePath = parameters.betaTrimmedFilePath;
     this.publicTrimmedFilePath = parameters.publicTrimmedFilePath;
     this.omitTrimmingComments = parameters.omitTrimmingComments;
@@ -305,6 +334,7 @@ export class ExtractorConfig {
     this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
+    this.enumMemberOrder = parameters.enumMemberOrder;
   }
 
   /**
@@ -518,7 +548,7 @@ export class ExtractorConfig {
                 basedir: currentConfigFolderPath
               });
             } catch (e) {
-              throw new Error(`Error resolving NodeJS path "${extendsField}": ${e.message}`);
+              throw new Error(`Error resolving NodeJS path "${extendsField}": ${(e as Error).message}`);
             }
           }
         }
@@ -534,7 +564,7 @@ export class ExtractorConfig {
         currentConfigFilePath = extendsField;
       } while (currentConfigFilePath);
     } catch (e) {
-      throw new Error(`Error loading ${currentConfigFilePath}:\n` + e.message);
+      throw new Error(`Error loading ${currentConfigFilePath}:\n` + (e as Error).message);
     }
 
     // Lastly, apply the defaults
@@ -608,6 +638,13 @@ export class ExtractorConfig {
         configFile.dtsRollup.untrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
           'untrimmedFilePath',
           configFile.dtsRollup.untrimmedFilePath,
+          currentConfigFolderPath
+        );
+      }
+      if (configFile.dtsRollup.alphaTrimmedFilePath) {
+        configFile.dtsRollup.alphaTrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'alphaTrimmedFilePath',
+          configFile.dtsRollup.alphaTrimmedFilePath,
           currentConfigFolderPath
         );
       }
@@ -794,7 +831,7 @@ export class ExtractorConfig {
         );
       }
 
-      if (!FileSystem.exists(mainEntryPointFilePath)) {
+      if (!options.ignoreMissingEntryPoint && !FileSystem.exists(mainEntryPointFilePath)) {
         throw new Error('The "mainEntryPointFilePath" path does not exist: ' + mainEntryPointFilePath);
       }
 
@@ -823,6 +860,7 @@ export class ExtractorConfig {
       let apiReportEnabled: boolean = false;
       let reportFilePath: string = '';
       let reportTempFilePath: string = '';
+      let apiReportIncludeForgottenExports: boolean = false;
       if (configObject.apiReport) {
         apiReportEnabled = !!configObject.apiReport.enabled;
 
@@ -854,10 +892,13 @@ export class ExtractorConfig {
 
         reportFilePath = path.join(reportFolder, reportFilename);
         reportTempFilePath = path.join(reportTempFolder, reportFilename);
+        apiReportIncludeForgottenExports = !!configObject.apiReport.includeForgottenExports;
       }
 
       let docModelEnabled: boolean = false;
       let apiJsonFilePath: string = '';
+      let docModelIncludeForgottenExports: boolean = false;
+      let projectFolderUrl: string | undefined;
       if (configObject.docModel) {
         docModelEnabled = !!configObject.docModel.enabled;
         apiJsonFilePath = ExtractorConfig._resolvePathWithTokens(
@@ -865,6 +906,8 @@ export class ExtractorConfig {
           configObject.docModel.apiJsonFilePath,
           tokenContext
         );
+        docModelIncludeForgottenExports = !!configObject.docModel.includeForgottenExports;
+        projectFolderUrl = configObject.docModel.projectFolderUrl;
       }
 
       let tsdocMetadataEnabled: boolean = false;
@@ -912,6 +955,7 @@ export class ExtractorConfig {
       let rollupEnabled: boolean = false;
       let untrimmedFilePath: string = '';
       let betaTrimmedFilePath: string = '';
+      let alphaTrimmedFilePath: string = '';
       let publicTrimmedFilePath: string = '';
       let omitTrimmingComments: boolean = false;
 
@@ -920,6 +964,11 @@ export class ExtractorConfig {
         untrimmedFilePath = ExtractorConfig._resolvePathWithTokens(
           'untrimmedFilePath',
           configObject.dtsRollup.untrimmedFilePath,
+          tokenContext
+        );
+        alphaTrimmedFilePath = ExtractorConfig._resolvePathWithTokens(
+          'alphaTrimmedFilePath',
+          configObject.dtsRollup.alphaTrimmedFilePath,
           tokenContext
         );
         betaTrimmedFilePath = ExtractorConfig._resolvePathWithTokens(
@@ -947,6 +996,9 @@ export class ExtractorConfig {
           newlineKind = NewlineKind.CrLf;
           break;
       }
+
+      const enumMemberOrder: EnumMemberOrder = configObject.enumMemberOrder ?? EnumMemberOrder.ByName;
+
       extractorConfigParameters = {
         projectFolder: projectFolder,
         packageJson,
@@ -959,10 +1011,14 @@ export class ExtractorConfig {
         apiReportEnabled,
         reportFilePath,
         reportTempFilePath,
+        apiReportIncludeForgottenExports,
         docModelEnabled,
         apiJsonFilePath,
+        docModelIncludeForgottenExports,
+        projectFolderUrl,
         rollupEnabled,
         untrimmedFilePath,
+        alphaTrimmedFilePath,
         betaTrimmedFilePath,
         publicTrimmedFilePath,
         omitTrimmingComments,
@@ -970,10 +1026,11 @@ export class ExtractorConfig {
         tsdocMetadataFilePath,
         newlineKind,
         messages: configObject.messages || {},
-        testMode: !!configObject.testMode
+        testMode: !!configObject.testMode,
+        enumMemberOrder
       };
     } catch (e) {
-      throw new Error(`Error parsing ${filenameForErrors}:\n` + e.message);
+      throw new Error(`Error parsing ${filenameForErrors}:\n` + (e as Error).message);
     }
 
     let tsdocConfigFile: TSDocConfigFile | undefined = options.tsdocConfigFile;

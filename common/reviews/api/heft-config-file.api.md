@@ -4,8 +4,8 @@
 
 ```ts
 
+import { ITerminal } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
-import { Terminal } from '@rushstack/node-core-library';
 
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
@@ -14,17 +14,40 @@ export class ConfigurationFile<TConfigurationFile> {
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
-    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;
-    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
-    }
+    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
+}
 
 // @beta (undocumented)
-export interface IConfigurationFileOptions<TConfigurationFile> {
+export type IConfigurationFileOptions<TConfigurationFile> = IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile> | IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile>;
+
+// @beta (undocumented)
+export interface IConfigurationFileOptionsBase<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
-    jsonSchemaPath: string;
     projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
+    propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
+}
+
+// @beta (undocumented)
+export interface IConfigurationFileOptionsWithJsonSchemaFilePath<TConfigurationFile> extends IConfigurationFileOptionsBase<TConfigurationFile> {
+    // (undocumented)
+    jsonSchemaObject?: never;
+    jsonSchemaPath: string;
+}
+
+// @beta (undocumented)
+export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFile> extends IConfigurationFileOptionsBase<TConfigurationFile> {
+    jsonSchemaObject: object;
+    // (undocumented)
+    jsonSchemaPath?: never;
+}
+
+// @beta
+export interface ICustomJsonPathMetadata {
+    customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
+    pathResolutionMethod?: PathResolutionMethod.custom;
 }
 
 // @beta (undocumented)
@@ -32,11 +55,8 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
     inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
 
-// @beta
-export interface IJsonPathMetadata {
-    customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
-    pathResolutionMethod?: PathResolutionMethod;
-}
+// @beta (undocumented)
+export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
 
 // @beta
 export interface IJsonPathsMetadata {
@@ -48,20 +68,26 @@ export interface IJsonPathsMetadata {
 export enum InheritanceType {
     append = "append",
     custom = "custom",
+    merge = "merge",
     replace = "replace"
+}
+
+// @beta
+export interface INonCustomJsonPathMetadata {
+    pathResolutionMethod?: PathResolutionMethod.NodeResolve | PathResolutionMethod.nodeResolve | PathResolutionMethod.resolvePathRelativeToConfigurationFile | PathResolutionMethod.resolvePathRelativeToProjectRoot;
 }
 
 // @beta (undocumented)
 export interface IOriginalValueOptions<TParentProperty> {
     // (undocumented)
-    parentObject: TParentProperty;
+    parentObject: Partial<TParentProperty>;
     // (undocumented)
     propertyName: keyof TParentProperty;
 }
 
 // @beta (undocumented)
 export type IPropertiesInheritance<TConfigurationFile> = {
-    [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
+    [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.merge | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
 
 // @beta (undocumented)
@@ -71,17 +97,24 @@ export interface IPropertyInheritance<TInheritanceType extends InheritanceType> 
 }
 
 // @beta (undocumented)
+export interface IPropertyInheritanceDefaults {
+    // (undocumented)
+    array?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace>;
+    // (undocumented)
+    object?: IPropertyInheritance<InheritanceType.merge | InheritanceType.replace>;
+}
+
+// @beta (undocumented)
 export enum PathResolutionMethod {
-    custom = 3,
-    NodeResolve = 2,
-    resolvePathRelativeToConfigurationFile = 0,
-    resolvePathRelativeToProjectRoot = 1
+    custom = "custom",
+    // @deprecated
+    NodeResolve = "NodeResolve",
+    nodeResolve = "nodeResolve",
+    resolvePathRelativeToConfigurationFile = "resolvePathRelativeToConfigurationFile",
+    resolvePathRelativeToProjectRoot = "resolvePathRelativeToProjectRoot"
 }
 
 // @beta (undocumented)
 export type PropertyInheritanceCustomFunction<TObject> = (currentObject: TObject, parentObject: TObject) => TObject;
-
-
-// (No @packageDocumentation comment for this package)
 
 ```

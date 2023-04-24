@@ -6,7 +6,7 @@
 
 Interface for testing optional properties
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IDocInterface7 
@@ -14,15 +14,15 @@ export interface IDocInterface7
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [optionalField?](./api-documenter-test.idocinterface7.optionalfield.md) | boolean | <i>(Optional)</i> Description of optionalField |
-|  [optionalReadonlyField?](./api-documenter-test.idocinterface7.optionalreadonlyfield.md) | boolean | <i>(Optional)</i> Description of optionalReadonlyField |
-|  [optionalUndocumentedField?](./api-documenter-test.idocinterface7.optionalundocumentedfield.md) | boolean | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [optionalField?](./api-documenter-test.idocinterface7.optionalfield.md) |  | boolean | _(Optional)_ Description of optionalField |
+|  [optionalReadonlyField?](./api-documenter-test.idocinterface7.optionalreadonlyfield.md) | <code>readonly</code> | boolean | _(Optional)_ Description of optionalReadonlyField |
+|  [optionalUndocumentedField?](./api-documenter-test.idocinterface7.optionalundocumentedfield.md) |  | boolean | _(Optional)_ |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [optionalMember()?](./api-documenter-test.idocinterface7.optionalmember.md) | <i>(Optional)</i> Description of optionalMember |
+|  [optionalMember()?](./api-documenter-test.idocinterface7.optionalmember.md) | _(Optional)_ Description of optionalMember |
 

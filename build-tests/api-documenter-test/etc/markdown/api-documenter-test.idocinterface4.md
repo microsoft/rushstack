@@ -7,7 +7,7 @@
 Type union in an interface.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IDocInterface4 
@@ -15,10 +15,10 @@ export interface IDocInterface4
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [Context](./api-documenter-test.idocinterface4.context.md) | ({ children }: { children: string; }) =&gt; boolean | Test newline rendering when code blocks are used in tables |
-|  [generic](./api-documenter-test.idocinterface4.generic.md) | [Generic](./api-documenter-test.generic.md)<!-- -->&lt;number&gt; | make sure html entities are escaped in tables. |
-|  [numberOrFunction](./api-documenter-test.idocinterface4.numberorfunction.md) | number \| (() =&gt; number) | a union type with a function |
-|  [stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md) | string \| number | a union type |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [Context](./api-documenter-test.idocinterface4.context.md) |  | ({ children }: { children: string; }) =&gt; boolean | Test newline rendering when code blocks are used in tables |
+|  [generic](./api-documenter-test.idocinterface4.generic.md) |  | [Generic](./api-documenter-test.generic.md)<!-- -->&lt;number&gt; | make sure html entities are escaped in tables. |
+|  [numberOrFunction](./api-documenter-test.idocinterface4.numberorfunction.md) |  | number \| (() =&gt; number) | a union type with a function |
+|  [stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md) |  | string \| number | a union type |
 

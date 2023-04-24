@@ -6,14 +6,14 @@
 
 This is an example class.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 
 ```
-<b>Extends:</b> [DocBaseClass](./api-documenter-test.docbaseclass.md)
+**Extends:** [DocBaseClass](./api-documenter-test.docbaseclass.md)
 
-<b>Implements:</b> [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
+**Implements:** [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface2](./api-documenter-test.idocinterface2.md)
 
 ## Remarks
 
@@ -29,15 +29,18 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event should have been marked as readonly. |
-|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
+|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) | <code>readonly</code> | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) |  | string |  |
+|  [multipleModifiersProperty](./api-documenter-test.docclass1.multiplemodifiersproperty.md) | <p><code>protected</code></p><p><code>static</code></p><p><code>readonly</code></p> | boolean | Some property with multiple modifiers. |
+|  [protectedProperty](./api-documenter-test.docclass1.protectedproperty.md) | <code>protected</code> | string | Some protected property. |
+|  [readonlyProperty](./api-documenter-test.docclass1.readonlyproperty.md) | <code>readonly</code> | string |  |
 |  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
 |  [writeableProperty](./api-documenter-test.docclass1.writeableproperty.md) |  | string |  |
+|  [writeonlyProperty](./api-documenter-test.docclass1.writeonlyproperty.md) |  | string | API Extractor will surface an <code>ae-missing-getter</code> finding for this property. |
 
 ## Methods
 
@@ -46,7 +49,9 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [deprecatedExample()](./api-documenter-test.docclass1.deprecatedexample.md) |  |  |
 |  [exampleFunction(a, b)](./api-documenter-test.docclass1.examplefunction.md) |  | This is an overloaded function. |
 |  [exampleFunction(x)](./api-documenter-test.docclass1.examplefunction_1.md) |  | This is also an overloaded function. |
-|  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
+|  [genericWithConstraintAndDefault(x)](./api-documenter-test.docclass1.genericwithconstraintanddefault.md) |  | This is a method with a complex type parameter. |
+|  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | <p>Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"</p><p>The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/</p> |
+|  [optionalParamFunction(x)](./api-documenter-test.docclass1.optionalparamfunction.md) |  | This is a function with an optional parameter. |
 |  [sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md) | <code>static</code> | Returns the sum of two numbers. |
 |  [tableExample()](./api-documenter-test.docclass1.tableexample.md) |  | An example with tables: |
 

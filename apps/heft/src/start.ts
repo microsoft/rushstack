@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftToolsCommandLineParser } from './cli/HeftToolsCommandLineParser';
+import { HeftCommandLineParser } from './cli/HeftCommandLineParser';
 
 // Launching via lib/start.js bypasses the version selector.  Use that for debugging Heft.
 
-const parser: HeftToolsCommandLineParser = new HeftToolsCommandLineParser();
+const parser: HeftCommandLineParser = new HeftCommandLineParser();
 
 parser
   .execute()

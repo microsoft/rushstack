@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export const VARIABLE: string = 'hello';
+export const CONST_VARIABLE: string = 'hello';
 
 /** @public */
-export namespace NamespaceContainingVariable {
-  export let variable: object[] = [];
+export let nonConstVariable: string = 'hello';
 
-  export let constVariable: object[] = [];
-}
+/** @public */
+export const VARIABLE_WITHOUT_EXPLICIT_TYPE = 'hello';

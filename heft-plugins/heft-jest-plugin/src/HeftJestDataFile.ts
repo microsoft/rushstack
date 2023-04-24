@@ -62,7 +62,7 @@ export class HeftJestDataFile {
     try {
       dataFile = await JsonFile.loadAsync(jsonFilePath);
     } catch (e) {
-      if (FileSystem.isFileDoesNotExistError(e)) {
+      if (FileSystem.isFileDoesNotExistError(e as Error)) {
         throw new Error(
           `Could not find the Jest TypeScript data file at "${jsonFilePath}". Was the compiler invoked?`
         );
@@ -80,6 +80,11 @@ export class HeftJestDataFile {
   public static loadForProject(projectFolder: string): IHeftJestDataFileJson {
     const jsonFilePath: string = HeftJestDataFile.getConfigFilePath(projectFolder);
     return JsonFile.load(jsonFilePath);
+  }
+
+  public static async loadForProjectAsync(projectFolder: string): Promise<IHeftJestDataFileJson> {
+    const jsonFilePath: string = HeftJestDataFile.getConfigFilePath(projectFolder);
+    return await JsonFile.loadAsync(jsonFilePath);
   }
 
   /**

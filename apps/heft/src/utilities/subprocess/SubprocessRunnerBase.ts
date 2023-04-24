@@ -3,7 +3,13 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import { ITerminalProvider, Terminal } from '@rushstack/node-core-library';
+import {
+  ITerminalProvider,
+  ITerminal,
+  Terminal,
+  FileError,
+  SubprocessTerminator
+} from '@rushstack/node-core-library';
 
 import {
   ISubprocessMessageBase,
@@ -21,8 +27,6 @@ import {
 } from './SubprocessCommunicationManagerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
-import { FileError } from '../../pluginFramework/logging/FileError';
-import { SubprocessTerminator } from './SubprocessTerminator';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -68,7 +72,7 @@ export abstract class SubprocessRunnerBase<
   public _runningAsSubprocess: boolean = false;
   protected readonly _configuration: TSubprocessConfiguration;
 
-  protected _globalTerminal!: Terminal;
+  protected _globalTerminal!: ITerminal;
   private readonly _subprocessCommunicationManagers: SubprocessCommunicationManagerBase[] = [];
 
   /**
@@ -226,7 +230,7 @@ export abstract class SubprocessRunnerBase<
     try {
       await this.invokeAsync();
     } catch (e) {
-      error = e;
+      error = e as Error;
     } finally {
       process.removeAllListeners();
 
@@ -279,7 +283,7 @@ export abstract class SubprocessRunnerBase<
     this.registerSubprocessCommunicationManager(this._scopedLoggerManager);
   }
 
-  private _processNodeArgsForSubprocess(terminal: Terminal, nodeArgs: string[]): string[] {
+  private _processNodeArgsForSubprocess(terminal: ITerminal, nodeArgs: string[]): string[] {
     nodeArgs = [...nodeArgs]; // Clone the args array
     const inspectPort: number = SubprocessRunnerBase._subprocessInspectorPort++;
     let willUseInspector: boolean = false;
@@ -344,7 +348,8 @@ export abstract class SubprocessRunnerBase<
             value: {
               errorMessage: arg.message,
               errorStack: arg.stack,
-              filePath: arg.filePath,
+              absolutePath: arg.absolutePath,
+              projectFolder: arg.projectFolder,
               line: arg.line,
               column: arg.column
             }
@@ -402,12 +407,12 @@ export abstract class SubprocessRunnerBase<
       case SupportedSerializableArgType.FileError: {
         const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> =
           arg as ISubprocessApiCallArgWithValue<ISerializedFileErrorValue>;
-        const result: FileError = new FileError(
-          typedArg.value.errorMessage,
-          typedArg.value.filePath,
-          typedArg.value.line,
-          typedArg.value.column
-        );
+        const result: FileError = new FileError(typedArg.value.errorMessage, {
+          absolutePath: typedArg.value.absolutePath,
+          projectFolder: typedArg.value.projectFolder,
+          line: typedArg.value.line,
+          column: typedArg.value.column
+        });
         result.stack = typedArg.value.errorStack;
         return result;
       }

@@ -1,6 +1,283 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+
+## 3.55.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 3.55.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
+
+## 3.55.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
+
+## 3.54.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Add a `peerDependenciesMeta` property to `IPackageJson`.
+- Move the @types/node dependency to an optional peerDependency.
+
+## 3.53.3
+Fri, 09 Dec 2022 16:18:27 GMT
+
+### Patches
+
+- Improve performance of `Import.resolvePackage`.
+- Improve the error message emitted when a path inside a package is passed to `Import.resolvePackage`.
+
+## 3.53.2
+Thu, 13 Oct 2022 00:20:15 GMT
+
+### Patches
+
+- Fix a bug where `Sort.isSorted` and `Sort.isSortedBy` unexpectedly compared the first element against `undefined`. Optimize `Sort.sortMapKeys` to run the check for already being sorted against the original Map instead of a derived array.
+
+## 3.53.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 3.53.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Add a Path.convertToPlatformDefault API to convert a path to use the platform-default slashes.
+
+## 3.52.0
+Wed, 21 Sep 2022 20:21:10 GMT
+
+### Minor changes
+
+- Add a "FileSystem.isNotDirectoryError" function that returns `true` if the passed-in error object is an ENOTDIR error.
+- Add a parameter to the `LockFile.release` function to optionally delete the lockfile.
+
+## 3.51.2
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 3.51.1
+Wed, 24 Aug 2022 03:01:22 GMT
+
+### Patches
+
+- Introduce JsonSyntax option for JsonFile.load() and related APIs
+
+## 3.51.0
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Minor changes
+
+- Deprecate LegacyAdapters.sortStable and remove support for NodeJS < 11. If you are using NodeJS < 11, this is a breaking change.
+
+## 3.50.2
+Fri, 19 Aug 2022 00:17:19 GMT
+
+### Patches
+
+- Update `PackageJsonLookup` to only resolve to `package.json` files that contain a `"name"` field. See GitHub issue #2070
+
+## 3.50.1
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 3.50.0
+Mon, 01 Aug 2022 02:45:32 GMT
+
+### Minor changes
+
+- Add an Async.runWithRetriesAsync() API to run and a retry an async function that may intermittently fail.
+
+## 3.49.0
+Tue, 28 Jun 2022 22:47:13 GMT
+
+### Minor changes
+
+- Add SubprocessTerminator utility, which can be used to kill a process and all of its child processes on demand or on termination of the host process.
+
+## 3.48.0
+Tue, 28 Jun 2022 00:23:32 GMT
+
+### Minor changes
+
+- Add FileSystem.isDirectoryError utility function to determine if an error has the code "EISDIR". This error code may be returned (for example) when attempting to delete a folder as if it were a file using the FileSystem.deleteFile API.
+
+## 3.47.0
+Mon, 27 Jun 2022 18:43:09 GMT
+
+### Minor changes
+
+- Add a "trimLeadingDotSlash" option to the Path.formatConcisely function to not include the leading "./" in paths under the baseFolder.
+- Change the FileError relative path output to not include the leading "./"
+
+## 3.46.0
+Sat, 25 Jun 2022 01:54:29 GMT
+
+### Minor changes
+
+- Add FileError class. This error type can be thrown when encountering an error at a specific line and column of a target file.
+
+## 3.45.7
+Fri, 17 Jun 2022 09:17:54 GMT
+
+### Patches
+
+- Fix a race condition affecting the LockFile API on the Linux operating system
+
+## 3.45.6
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 3.45.5
+Tue, 10 May 2022 01:20:43 GMT
+
+### Patches
+
+- Fix and issue where Async.forEachAsync with an async iterator can overflow the max concurrency
+
+## 3.45.4
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 3.45.3
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 3.45.2
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 3.45.1
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 3.45.0
+Wed, 05 Jan 2022 16:07:47 GMT
+
+### Minor changes
+
+- Expose a FileSystem.readFolderItems and FileSystem.readFolderItemsAsync API to get folder entries with types in a single API call.
+- Deprecate FileSystem.readFolder in favor of FileSystem.readFolderItemNames.
+
+## 3.44.3
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 3.44.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+### Patches
+
+- Update z-schema to ~5.0.2.
+
+## 3.44.1
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.44.0
+Fri, 03 Dec 2021 03:05:22 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatability with JavaScript consumers.
+
+## 3.43.2
+Sat, 06 Nov 2021 00:09:13 GMT
+
+### Patches
+
+- Updated Path.convertToSlashes() to use replace(/\\/g, '/') instead of split/join for better performance.
+
+## 3.43.1
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 3.43.0
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Minor changes
+
+- Add more elaborate "repository" field types in IPackageJson.
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 3.42.3
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 3.42.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+### Patches
+
+- Fix an issue where Async.foreEachAsync can never resolve when operating on a large array.
+
+## 3.42.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 3.42.0
+Tue, 05 Oct 2021 15:08:38 GMT
+
+### Minor changes
+
+- Expose an ITerminal interface.
+
+## 3.41.0
+Fri, 24 Sep 2021 00:09:29 GMT
+
+### Minor changes
+
+- Allow Async.mapAsync and Async.forEachAsync to take an iterator.
+
+## 3.40.3
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 3.40.2
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Patches
+
+- Improve documentation to clarify usage for FileSystem APIs related to symbolic links
+
+## 3.40.1
+Mon, 13 Sep 2021 15:07:05 GMT
+
+### Patches
+
+- Add support for AlreadyExistsBehavior in symlink and junction scenarios
 
 ## 3.40.0
 Wed, 11 Aug 2021 00:07:21 GMT

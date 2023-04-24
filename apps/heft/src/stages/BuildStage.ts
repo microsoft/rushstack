@@ -10,7 +10,8 @@ import {
   CommandLineAction,
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  CommandLineIntegerParameter
+  CommandLineIntegerParameter,
+  CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
@@ -134,7 +135,7 @@ export interface IBuildStageProperties {
   // Input
   production: boolean;
   lite: boolean;
-  locale?: string;
+  locales?: ReadonlyArray<string>;
   maxOldSpaceSize?: string;
   watchMode: boolean;
   serveMode: boolean;
@@ -163,7 +164,7 @@ export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuil
 export interface IBuildStageOptions {
   production: boolean;
   lite: boolean;
-  locale?: string;
+  locales?: ReadonlyArray<string>;
   maxOldSpaceSize?: string;
   watchMode: boolean;
   serveMode: boolean;
@@ -172,7 +173,7 @@ export interface IBuildStageOptions {
 
 export interface IBuildStageStandardParameters {
   productionFlag: CommandLineFlagParameter;
-  localeParameter: CommandLineStringParameter;
+  localesParameter: CommandLineStringListParameter;
   liteFlag: CommandLineFlagParameter;
   typescriptMaxWriteParallelismParameter: CommandLineIntegerParameter;
   maxOldSpaceSizeParameter: CommandLineStringParameter;
@@ -201,7 +202,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
         description: 'If specified, build ship/production output'
       }),
 
-      localeParameter: action.defineStringParameter({
+      localesParameter: action.defineStringListParameter({
         parameterLongName: '--locale',
         argumentName: 'LOCALE',
         description: 'Only build the specified locale, if applicable.'
@@ -232,10 +233,11 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
   public static getOptionsFromStandardParameters(
     standardParameters: IBuildStageStandardParameters
   ): Omit<IBuildStageOptions, 'watchMode' | 'serveMode'> {
+    const localesParameterValues: readonly string[] = standardParameters.localesParameter.values;
     return {
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
-      locale: standardParameters.localeParameter.value,
+      locales: localesParameterValues.length > 0 ? localesParameterValues : undefined,
       maxOldSpaceSize: standardParameters.maxOldSpaceSizeParameter.value,
       typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParameter.value
     };
@@ -247,7 +249,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     return {
       production: options.production,
       lite: options.lite,
-      locale: options.locale,
+      locales: options.locales,
       maxOldSpaceSize: options.maxOldSpaceSize,
       watchMode: options.watchMode,
       serveMode: options.serveMode

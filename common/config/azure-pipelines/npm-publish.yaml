@@ -1,12 +1,22 @@
 pool:
   vmImage: 'ubuntu-latest'
 variables:
-  NodeVersion: 12
-  FORCE_COLOR: 1
+  - name: NodeVersion
+    value: 14
+  - name: FORCE_COLOR
+    value: 1
+  - name: SourceBranch
+    value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 steps:
   - checkout: self
     persistCredentials: true
   - template: templates/build.yaml
+  - template: templates/bump-versions.yaml
+    parameters:
+      VersionPolicyName: noRush
+      BranchName: $(SourceBranch)
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
+      BranchName: $(SourceBranch)
+  - template: templates/record-published-versions.yaml

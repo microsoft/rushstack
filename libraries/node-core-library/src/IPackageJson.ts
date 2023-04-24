@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * This interface is part of the IPackageJson file format.  It is used for the
+ * This interface is part of the {@link IPackageJson} file format.  It is used for the
  * "dependencies", "optionalDependencies", and "devDependencies" fields.
  * @public
  */
@@ -15,7 +15,7 @@ export interface IPackageJsonDependencyTable {
 }
 
 /**
- * This interface is part of the IPackageJson file format.  It is used for the
+ * This interface is part of the {@link IPackageJson} file format.  It is used for the
  * "scripts" field.
  * @public
  */
@@ -25,6 +25,39 @@ export interface IPackageJsonScriptTable {
    * be a file path or shell script command.
    */
   [scriptName: string]: string;
+}
+
+/**
+ * This interface is part of the {@link IPackageJson} file format.  It is used for the
+ * "repository" field.
+ * @public
+ */
+export interface IPackageJsonRepository {
+  /**
+   * The source control type for the repository that hosts the project. This is typically "git".
+   */
+  type: string;
+
+  /**
+   * The URL of the repository that hosts the project.
+   */
+  url: string;
+
+  /**
+   * If the project does not exist at the root of the repository, its path is specified here.
+   */
+  directory?: string;
+}
+
+/**
+ * This interface is part of the {@link IPackageJson} file format. It is used for the
+ * "peerDependenciesMeta" field.
+ * @public
+ */
+export interface IPeerDependenciesMetaTable {
+  [dependencyName: string]: {
+    optional?: boolean;
+  };
 }
 
 /**
@@ -71,7 +104,7 @@ export interface INodePackageJson {
   /**
    * The URL of the project's repository.
    */
-  repository?: string;
+  repository?: string | IPackageJsonRepository;
 
   /**
    * The URL to the project's web page.
@@ -132,6 +165,11 @@ export interface INodePackageJson {
    * but which will not be automatically installed by this package.
    */
   peerDependencies?: IPackageJsonDependencyTable;
+
+  /**
+   * An array of metadata about peer dependencies.
+   */
+  peerDependenciesMeta?: IPeerDependenciesMetaTable;
 
   /**
    * A table of script hooks that a package manager or build tool may invoke.

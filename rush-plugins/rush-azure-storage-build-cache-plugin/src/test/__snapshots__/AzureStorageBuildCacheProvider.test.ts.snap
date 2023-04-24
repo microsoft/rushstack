@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AzureStorageBuildCacheProvider Has an expected cached credential name (write allowed) 1`] = `
+Array [
+  "azure-blob-storage|AzurePublicCloud|storage-account|container-name|cacheWriteAllowed",
+  Object {
+    "credential": "credential",
+  },
+]
+`;
+
+exports[`AzureStorageBuildCacheProvider Has an expected cached credential name (write not allowed) 1`] = `
+Array [
+  "azure-blob-storage|AzurePublicCloud|storage-account|container-name",
+  Object {
+    "credential": "credential",
+  },
+]
+`;
+
+exports[`AzureStorageBuildCacheProvider uses a correct list of Azure authority hosts 1`] = `"The specified Azure Environment (\\"INCORRECT_AZURE_ENVIRONMENT\\") is invalid. If it is specified, it must be one of: AzureChina, AzureGermany, AzureGovernment, AzurePublicCloud"`;

@@ -230,7 +230,7 @@ export class RigConfig {
       }
       RigConfig._validateSchema(json);
     } catch (error) {
-      config = RigConfig._handleConfigError(error, projectFolderPath, rigConfigFilePath);
+      config = RigConfig._handleConfigError(error as Error, projectFolderPath, rigConfigFilePath);
     }
 
     if (!config) {
@@ -275,7 +275,7 @@ export class RigConfig {
 
       RigConfig._validateSchema(json);
     } catch (error) {
-      config = RigConfig._handleConfigError(error, projectFolderPath, rigConfigFilePath);
+      config = RigConfig._handleConfigError(error as Error, projectFolderPath, rigConfigFilePath);
     }
 
     if (!config) {

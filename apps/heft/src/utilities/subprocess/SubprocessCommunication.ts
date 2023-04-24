@@ -15,7 +15,8 @@ export interface ISerializedErrorValue {
 }
 
 export interface ISerializedFileErrorValue extends ISerializedErrorValue {
-  filePath: string;
+  absolutePath: string;
+  projectFolder: string;
   line: number | undefined;
   column: number | undefined;
 }

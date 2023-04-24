@@ -4,12 +4,12 @@
 import { AnsiEscape } from '@rushstack/node-core-library';
 import * as colorsPackage from 'colors';
 
-import { HeftToolsCommandLineParser } from '../HeftToolsCommandLineParser';
+import { HeftCommandLineParser } from '../HeftCommandLineParser';
 
 describe('CommandLineHelp', () => {
   let colorsEnabled: boolean;
 
-  let parser: HeftToolsCommandLineParser;
+  let parser: HeftCommandLineParser;
 
   beforeEach(() => {
     colorsEnabled = colorsPackage.enabled;
@@ -25,7 +25,7 @@ describe('CommandLineHelp', () => {
     // This call may terminate the entire test run because it invokes process.exit()
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
-    parser = new HeftToolsCommandLineParser();
+    parser = new HeftCommandLineParser();
   });
 
   afterEach(() => {

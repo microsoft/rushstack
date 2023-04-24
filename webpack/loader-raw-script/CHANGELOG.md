@@ -1,6 +1,569 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Tue, 31 Aug 2021 00:07:11 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+
+## 1.3.283
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 1.3.282
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 1.3.281
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 1.3.280
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 1.3.279
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 1.3.278
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 1.3.277
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 1.3.276
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 1.3.275
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 1.3.274
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
+
+## 1.3.273
+Tue, 20 Dec 2022 01:18:22 GMT
+
+_Version update only_
+
+## 1.3.272
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 1.3.271
+Tue, 29 Nov 2022 01:16:49 GMT
+
+_Version update only_
+
+## 1.3.270
+Mon, 14 Nov 2022 05:15:02 GMT
+
+### Patches
+
+- Updating webpack/loader-utils to resolve github advisory CVE-2022-37601. https://github.com/advisories/GHSA-76p3-8jx3-jpfq
+
+## 1.3.269
+Tue, 08 Nov 2022 01:20:56 GMT
+
+_Version update only_
+
+## 1.3.268
+Wed, 26 Oct 2022 00:16:16 GMT
+
+_Version update only_
+
+## 1.3.267
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 1.3.266
+Mon, 17 Oct 2022 15:16:00 GMT
+
+_Version update only_
+
+## 1.3.265
+Fri, 14 Oct 2022 15:26:32 GMT
+
+_Version update only_
+
+## 1.3.264
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 1.3.263
+Tue, 11 Oct 2022 23:49:12 GMT
+
+_Version update only_
+
+## 1.3.262
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 1.3.261
+Thu, 29 Sep 2022 07:13:06 GMT
+
+_Version update only_
+
+## 1.3.260
+Tue, 27 Sep 2022 22:17:20 GMT
+
+_Version update only_
+
+## 1.3.259
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 1.3.258
+Thu, 15 Sep 2022 00:18:52 GMT
+
+_Version update only_
+
+## 1.3.257
+Tue, 13 Sep 2022 00:16:55 GMT
+
+_Version update only_
+
+## 1.3.256
+Mon, 12 Sep 2022 22:27:48 GMT
+
+_Version update only_
+
+## 1.3.255
+Fri, 02 Sep 2022 17:48:43 GMT
+
+_Version update only_
+
+## 1.3.254
+Wed, 31 Aug 2022 01:45:06 GMT
+
+_Version update only_
+
+## 1.3.253
+Wed, 31 Aug 2022 00:42:46 GMT
+
+_Version update only_
+
+## 1.3.252
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 1.3.251
+Wed, 24 Aug 2022 00:14:38 GMT
+
+_Version update only_
+
+## 1.3.250
+Fri, 19 Aug 2022 00:17:20 GMT
+
+_Version update only_
+
+## 1.3.249
+Wed, 10 Aug 2022 09:52:12 GMT
+
+_Version update only_
+
+## 1.3.248
+Wed, 10 Aug 2022 08:12:16 GMT
+
+_Version update only_
+
+## 1.3.247
+Wed, 03 Aug 2022 18:40:35 GMT
+
+_Version update only_
+
+## 1.3.246
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 1.3.245
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 1.3.244
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 1.3.243
+Wed, 13 Jul 2022 21:31:13 GMT
+
+_Version update only_
+
+## 1.3.242
+Fri, 08 Jul 2022 15:17:47 GMT
+
+_Version update only_
+
+## 1.3.241
+Mon, 04 Jul 2022 15:15:13 GMT
+
+_Version update only_
+
+## 1.3.240
+Thu, 30 Jun 2022 04:48:54 GMT
+
+_Version update only_
+
+## 1.3.239
+Tue, 28 Jun 2022 22:47:14 GMT
+
+_Version update only_
+
+## 1.3.238
+Tue, 28 Jun 2022 00:23:32 GMT
+
+_Version update only_
+
+## 1.3.237
+Mon, 27 Jun 2022 18:43:09 GMT
+
+_Version update only_
+
+## 1.3.236
+Sat, 25 Jun 2022 21:00:40 GMT
+
+_Version update only_
+
+## 1.3.235
+Sat, 25 Jun 2022 01:54:29 GMT
+
+_Version update only_
+
+## 1.3.234
+Fri, 24 Jun 2022 07:16:47 GMT
+
+_Version update only_
+
+## 1.3.233
+Thu, 23 Jun 2022 22:14:25 GMT
+
+_Version update only_
+
+## 1.3.232
+Fri, 17 Jun 2022 09:17:54 GMT
+
+_Version update only_
+
+## 1.3.231
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 1.3.230
+Tue, 07 Jun 2022 09:37:05 GMT
+
+_Version update only_
+
+## 1.3.229
+Wed, 25 May 2022 22:25:07 GMT
+
+_Version update only_
+
+## 1.3.228
+Thu, 19 May 2022 15:13:20 GMT
+
+_Version update only_
+
+## 1.3.227
+Sat, 14 May 2022 03:01:27 GMT
+
+_Version update only_
+
+## 1.3.226
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 1.3.225
+Wed, 04 May 2022 23:29:13 GMT
+
+_Version update only_
+
+## 1.3.224
+Tue, 26 Apr 2022 00:10:15 GMT
+
+_Version update only_
+
+## 1.3.223
+Sat, 23 Apr 2022 02:13:07 GMT
+
+_Version update only_
+
+## 1.3.222
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 1.3.221
+Wed, 13 Apr 2022 15:12:41 GMT
+
+_Version update only_
+
+## 1.3.220
+Tue, 12 Apr 2022 23:29:34 GMT
+
+_Version update only_
+
+## 1.3.219
+Tue, 12 Apr 2022 02:58:32 GMT
+
+_Version update only_
+
+## 1.3.218
+Sat, 09 Apr 2022 19:07:48 GMT
+
+_Version update only_
+
+## 1.3.217
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 1.3.216
+Fri, 08 Apr 2022 20:05:59 GMT
+
+_Version update only_
+
+## 1.3.215
+Wed, 06 Apr 2022 22:35:23 GMT
+
+_Version update only_
+
+## 1.3.214
+Thu, 31 Mar 2022 02:06:05 GMT
+
+_Version update only_
+
+## 1.3.213
+Sat, 19 Mar 2022 08:05:38 GMT
+
+_Version update only_
+
+## 1.3.212
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 1.3.211
+Fri, 11 Feb 2022 10:30:26 GMT
+
+_Version update only_
+
+## 1.3.210
+Tue, 25 Jan 2022 01:11:07 GMT
+
+_Version update only_
+
+## 1.3.209
+Fri, 21 Jan 2022 01:10:41 GMT
+
+_Version update only_
+
+## 1.3.208
+Thu, 20 Jan 2022 02:43:46 GMT
+
+_Version update only_
+
+## 1.3.207
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 1.3.206
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 1.3.205
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 1.3.204
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 1.3.203
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 1.3.202
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 1.3.201
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 1.3.200
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 1.3.199
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 1.3.198
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 1.3.197
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 1.3.196
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 1.3.195
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 1.3.194
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 1.3.193
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 1.3.192
+Wed, 13 Oct 2021 15:09:55 GMT
+
+_Version update only_
+
+## 1.3.191
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 1.3.190
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 1.3.189
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 1.3.188
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 1.3.187
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 1.3.186
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 1.3.185
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 1.3.184
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 1.3.183
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 1.3.182
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 1.3.181
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 1.3.180
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 1.3.179
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 1.3.178
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 1.3.177
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 1.3.176
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 1.3.175
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 1.3.174
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
+
+## 1.3.173
+Fri, 03 Sep 2021 00:09:10 GMT
+
+_Version update only_
 
 ## 1.3.172
 Tue, 31 Aug 2021 00:07:11 GMT

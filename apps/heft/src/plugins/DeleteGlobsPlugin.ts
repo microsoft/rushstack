@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import glob from 'glob';
-import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
+import { FileSystem, LegacyAdapters, Async } from '@rushstack/node-core-library';
 
 import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
@@ -16,7 +16,6 @@ import {
 } from '../utilities/CoreConfigFiles';
 import { ICleanStageProperties } from '../stages/CleanStage';
 import { IBuildStageProperties } from '../stages/BuildStage';
-import { Async } from '../utilities/Async';
 import { Constants } from '../utilities/Constants';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
@@ -81,9 +80,8 @@ export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDel
       }
     }
 
-    await Async.forEachLimitAsync(
-      Array.from(pathsToDelete),
-      Constants.maxParallelism,
+    await Async.forEachAsync(
+      pathsToDelete,
       async (pathToDelete) => {
         try {
           FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
@@ -96,7 +94,8 @@ export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDel
             deletedFolders++;
           }
         }
-      }
+      },
+      { concurrency: Constants.maxParallelism }
     );
 
     if (deletedFiles > 0 || deletedFolders > 0) {

@@ -13,6 +13,7 @@ import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
 import { ICustomActionOptions } from '../cli/actions/CustomAction';
 import { IHeftLifecycle } from './HeftLifecycle';
+import { HeftCommandLine } from '../cli/HeftCommandLine';
 
 /** @beta */
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
@@ -73,6 +74,12 @@ export class HeftSession {
   public readonly registerAction: RegisterAction;
 
   /**
+   * @beta
+   * {@inheritDoc HeftCommandLine}
+   */
+  public readonly commandLine: HeftCommandLine;
+
+  /**
    * Call this function to receive a callback with the plugin if and after the specified plugin
    * has been applied. This is used to tap hooks on another plugin.
    *
@@ -89,6 +96,7 @@ export class HeftSession {
     this._loggingManager = internalSessionOptions.loggingManager;
     this.metricsCollector = internalSessionOptions.metricsCollector;
     this.registerAction = internalSessionOptions.registerAction;
+    this.commandLine = internalSessionOptions.commandLine;
 
     this.hooks = {
       metricsCollector: this.metricsCollector.hooks,

@@ -13,6 +13,7 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strict": true,
+    "useUnknownInCatchVariables": false,
     "esModuleInterop": true,
     "noEmitOnError": false,
     "allowUnreachableCode": false,

@@ -28,7 +28,7 @@ export class ParseError extends Error {
 
     // Boilerplate for extending a system class
     //
-    // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    // https://github.com/microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
     //
     // IMPORTANT: The prototype must also be set on any classes which extend this one
     (this as any).__proto__ = ParseError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any

@@ -2,7 +2,49 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Text } from './Text';
+
+/**
+ * The format that the FileError message should conform to. The supported formats are:
+ *  - Unix: `<path>:<line>:<column> - <message>`
+ *  - VisualStudio: `<path>(<line>,<column>) - <message>`
+ *
+ * @public
+ */
+export type FileLocationStyle = 'Unix' | 'VisualStudio';
+
+/**
+ * Options for {@link Path.formatFileLocation}.
+ * @public
+ */
+export interface IPathFormatFileLocationOptions {
+  /**
+   * The base path to use when converting `pathToFormat` to a relative path. If not specified,
+   * `pathToFormat` will be used as-is.
+   */
+  baseFolder?: string;
+  /**
+   * The path that will be used to specify the file location.
+   */
+  pathToFormat: string;
+  /**
+   * The message related to the file location.
+   */
+  message: string;
+  /**
+   * The style of file location formatting to use.
+   */
+  format: FileLocationStyle;
+  /**
+   * The optional line number. If not specified, the line number will not be included
+   * in the formatted string.
+   */
+  line?: number;
+  /**
+   * The optional column number. If not specified, the column number will not be included
+   * in the formatted string.
+   */
+  column?: number;
+}
 
 /**
  * Options for {@link Path.formatConcisely}.
@@ -13,10 +55,16 @@ export interface IPathFormatConciselyOptions {
    * The path to be converted.
    */
   pathToConvert: string;
+
   /**
    * The base path to use when converting `pathToConvert` to a relative path.
    */
   baseFolder: string;
+
+  /**
+   * If set to true, don't include the leading `./` if the path is under the base folder.
+   */
+  trimLeadingDotSlash?: boolean;
 }
 
 /**
@@ -80,7 +128,8 @@ export class Path {
   /**
    * Formats a path to look nice for reporting purposes.
    * @remarks
-   * If `pathToConvert` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix.
+   * If `pathToConvert` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix
+   * unless the {@link IPathFormatConciselyOptions.trimLeadingDotSlash} option is set to `true`.
    * Otherwise, it will be converted to an absolute path.
    *
    * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
@@ -92,11 +141,73 @@ export class Path {
 
     if (isUnderOrEqual) {
       // Note that isUnderOrEqual()'s relativePath is the reverse direction
-      return './' + Path.convertToSlashes(path.relative(options.baseFolder, options.pathToConvert));
+      const convertedPath: string = Path.convertToSlashes(
+        path.relative(options.baseFolder, options.pathToConvert)
+      );
+      if (options.trimLeadingDotSlash) {
+        return convertedPath;
+      } else {
+        return `./${convertedPath}`;
+      }
     }
 
     const absolutePath: string = path.resolve(options.pathToConvert);
     return absolutePath;
+  }
+
+  /**
+   * Formats a file location to look nice for reporting purposes.
+   * @remarks
+   * If `pathToFormat` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix.
+   * Otherwise, it will be converted to an absolute path.
+   *
+   * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
+   */
+  public static formatFileLocation(options: IPathFormatFileLocationOptions): string {
+    const { message, format, pathToFormat, baseFolder, line, column } = options;
+
+    // Convert the path to be relative to the base folder, if specified. Otherwise, use
+    // the path as-is.
+    const filePath: string = baseFolder
+      ? Path.formatConcisely({
+          pathToConvert: pathToFormat,
+          baseFolder,
+          trimLeadingDotSlash: true
+        })
+      : path.resolve(pathToFormat);
+
+    let formattedFileLocation: string;
+    switch (format) {
+      case 'Unix': {
+        if (line !== undefined && column !== undefined) {
+          formattedFileLocation = `:${line}:${column}`;
+        } else if (line !== undefined) {
+          formattedFileLocation = `:${line}`;
+        } else {
+          formattedFileLocation = '';
+        }
+
+        break;
+      }
+
+      case 'VisualStudio': {
+        if (line !== undefined && column !== undefined) {
+          formattedFileLocation = `(${line},${column})`;
+        } else if (line !== undefined) {
+          formattedFileLocation = `(${line})`;
+        } else {
+          formattedFileLocation = '';
+        }
+
+        break;
+      }
+
+      default: {
+        throw new Error(`Unknown format: ${format}`);
+      }
+    }
+
+    return `${filePath}${formattedFileLocation} - ${message}`;
   }
 
   /**
@@ -106,7 +217,7 @@ export class Path {
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   public static convertToSlashes(inputPath: string): string {
-    return Text.replaceAll(inputPath, '\\', '/');
+    return inputPath.replace(/\\/g, '/');
   }
 
   /**
@@ -116,7 +227,13 @@ export class Path {
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   public static convertToBackslashes(inputPath: string): string {
-    return Text.replaceAll(inputPath, '/', '\\');
+    return inputPath.replace(/\//g, '\\');
+  }
+  /**
+   * Replaces slashes or backslashes with the appropriate slash for the current operating system.
+   */
+  public static convertToPlatformDefault(inputPath: string): string {
+    return path.sep === '/' ? Path.convertToSlashes(inputPath) : Path.convertToBackslashes(inputPath);
   }
 
   /**

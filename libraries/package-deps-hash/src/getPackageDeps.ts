@@ -5,6 +5,8 @@ import * as child_process from 'child_process';
 import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
+import { ensureGitMinimumVersion } from './getRepoState';
+
 /**
  * Parses a quoted filename sourced from the output of the "git status" command.
  *
@@ -153,6 +155,8 @@ export function getGitHashForFiles(
     );
 
     if (result.status !== 0) {
+      ensureGitMinimumVersion(gitPath);
+
       throw new Error(`git hash-object exited with status ${result.status}: ${result.stderr}`);
     }
 
@@ -190,6 +194,8 @@ export function gitLsTree(path: string, gitPath?: string): string {
   );
 
   if (result.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git ls-tree exited with status ${result.status}: ${result.stderr}`);
   }
 
@@ -217,6 +223,8 @@ export function gitStatus(path: string, gitPath?: string): string {
   );
 
   if (result.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git status exited with status ${result.status}: ${result.stderr}`);
   }
 
