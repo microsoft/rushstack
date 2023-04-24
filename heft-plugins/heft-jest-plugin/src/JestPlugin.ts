@@ -27,7 +27,8 @@ import { getVersion, runCLI } from '@jest/core';
 import type { Config } from '@jest/types';
 import {
   ConfigurationFile,
-  IJsonPathMetadata,
+  ICustomJsonPathMetadata,
+  IJsonPathMetadataResolverOptions,
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
@@ -79,6 +80,10 @@ export interface IJestPluginOptions {
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
+
+interface IHeftJestConfigurationWithExtends extends IHeftJestConfiguration {
+  extends?: string;
+}
 
 interface IExtendedHeftJestConfiguration extends IHeftJestConfiguration {
   extends: string | undefined;
@@ -299,13 +304,15 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       }) as T;
     };
 
-    const tokenResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
-      rootDir: buildFolder
-    });
-    const jestResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
-      rootDir: buildFolder,
-      resolveAsModule: true
-    });
+    const tokenResolveMetadata: ICustomJsonPathMetadata<IHeftJestConfiguration> =
+      JestPlugin._getJsonPathMetadata({
+        rootDir: buildFolder
+      });
+    const jestResolveMetadata: ICustomJsonPathMetadata<IHeftJestConfiguration> =
+      JestPlugin._getJsonPathMetadata({
+        rootDir: buildFolder,
+        resolveAsModule: true
+      });
 
     return new ConfigurationFile<IHeftJestConfiguration>({
       projectRelativeFilePath: projectRelativeFilePath,
@@ -333,6 +340,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         '$.globalSetup': jestResolveMetadata,
         '$.globalTeardown': jestResolveMetadata,
         '$.moduleLoader': jestResolveMetadata,
+        '$.preset': jestResolveMetadata,
         '$.prettierPath': jestResolveMetadata,
         '$.resolver': jestResolveMetadata,
         '$.runner': jestResolveMetadata,
@@ -435,9 +443,14 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
    *   - replace <configDir> with the directory containing the current configuration file
    *   - replace <packageDir:...> with the path to the resolved package (NOT module)
    */
-  private static _getJsonPathMetadata(options: IJestResolutionOptions): IJsonPathMetadata {
+  private static _getJsonPathMetadata(
+    options: IJestResolutionOptions
+  ): ICustomJsonPathMetadata<IHeftJestConfiguration> {
     return {
-      customResolver: (configurationFilePath: string, propertyName: string, propertyValue: string) => {
+      customResolver: (resolverOptions: IJsonPathMetadataResolverOptions<IHeftJestConfiguration>) => {
+        const { propertyName, configurationFilePath, configurationFile } = resolverOptions;
+        let { propertyValue } = resolverOptions;
+
         const configDir: string = path.dirname(configurationFilePath);
         const parsedPropertyName: string | undefined = propertyName?.match(JSONPATHPROPERTY_REGEX)?.[1];
 
@@ -539,6 +552,37 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
               filePath: propertyValue,
               requireResolveFunction
             });
+          case 'preset':
+            // Do not allow use of presets and extends together, since that would create a
+            // confusing heirarchy.
+            if (
+              configurationFile.preset &&
+              (configurationFile as IHeftJestConfigurationWithExtends).extends
+            ) {
+              throw new Error(
+                `The configuration file at "${configurationFilePath}" cannot specify both "preset" and ` +
+                  `"extends" properties.`
+              );
+            }
+
+            // Preset is an odd value, since it can either be a relative path to a preset module
+            // from the rootDir, or a path to the parent directory of a preset module. So to
+            // determine which it is, we will attempt to resolve it as a module from the rootDir,
+            // as per the spec. If it resolves, then we will return the relative path to the
+            // resolved value from the rootDir. If it does not resolve, then we will return the
+            // original value to allow Jest to resolve within the target directory.
+            // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
+            // eslint-disable-next-line @rushstack/no-null
+            const resolvedValue: string | null = jestResolve(/*resolver:*/ undefined, {
+              rootDir: options.rootDir,
+              filePath: propertyValue,
+              key: propertyName
+            });
+            if (resolvedValue) {
+              return path.relative(options.rootDir, resolvedValue);
+            } else {
+              return propertyValue;
+            }
           default:
             // We know the value will be non-null since resolve will throw an error if it is null
             // and non-optional
