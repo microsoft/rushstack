@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack4-module-minifier-plugin",
+      "comment": "Emit metadata about character position of rendered modules.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-module-minifier-plugin"
+}

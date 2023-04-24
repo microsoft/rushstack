@@ -618,16 +618,50 @@ __webpack_require__.e(/* import() | async-2 */ 235).then(__webpack_require__.bin
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles multiple runtimes (mock): Metadata 1`] = `
-Map {
-  877 => Map {
-    842 => 452,
+Object {
+  "byAssetFilename": Map {
+    "entry1.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "entry2.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async-1.js" => Object {
+      "positionByModuleId": Map {
+        877 => Object {
+          "charLength": 452,
+          "charOffset": 242,
+        },
+        417 => Object {
+          "charLength": 499,
+          "charOffset": 709,
+        },
+      },
+    },
+    "async-2.js" => Object {
+      "positionByModuleId": Map {
+        531 => Object {
+          "charLength": 440,
+          "charOffset": 242,
+        },
+        417 => Object {
+          "charLength": 491,
+          "charOffset": 697,
+        },
+      },
+    },
   },
-  417 => Map {
-    842 => 499,
-    235 => 491,
-  },
-  531 => Map {
-    235 => 440,
+  "byModule": Map {
+    877 => Map {
+      842 => 452,
+    },
+    417 => Map {
+      842 => 499,
+      235 => 491,
+    },
+    531 => Map {
+      235 => 440,
+    },
   },
 }
 `;
@@ -658,16 +692,50 @@ Object {
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles multiple runtimes (terser): Metadata 1`] = `
-Map {
-  877 => Map {
-    842 => 77,
+Object {
+  "byAssetFilename": Map {
+    "entry1.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "entry2.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async-1.js" => Object {
+      "positionByModuleId": Map {
+        877 => Object {
+          "charLength": 77,
+          "charOffset": 137,
+        },
+        417 => Object {
+          "charLength": 54,
+          "charOffset": 220,
+        },
+      },
+    },
+    "async-2.js" => Object {
+      "positionByModuleId": Map {
+        531 => Object {
+          "charLength": 73,
+          "charOffset": 137,
+        },
+        417 => Object {
+          "charLength": 46,
+          "charOffset": 216,
+        },
+      },
+    },
   },
-  417 => Map {
-    842 => 54,
-    235 => 46,
-  },
-  531 => Map {
-    235 => 73,
+  "byModule": Map {
+    877 => Map {
+      842 => 77,
+    },
+    417 => Map {
+      842 => 54,
+      235 => 46,
+    },
+    531 => Map {
+      235 => 73,
+    },
   },
 }
 `;

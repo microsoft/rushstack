@@ -38,7 +38,9 @@ import {
   IPostProcessFragmentContext,
   IDehydratedAssets,
   _IWebpackCompilationData,
-  _IAcornComment
+  _IAcornComment,
+  IModuleMinifierPluginStats,
+  IAssetStats
 } from './ModuleMinifierPlugin.types';
 import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
@@ -85,6 +87,9 @@ interface IOptionsForHash extends Omit<IModuleMinifierPluginOptions, 'minifier'>
   minifier: undefined;
 }
 
+const compilationMetadataMap: WeakMap<webpack.compilation.Compilation, IModuleMinifierPluginStats> =
+  new WeakMap();
+
 /**
  * https://github.com/webpack/webpack/blob/30e747a55d9e796ae22f67445ae42c7a95a6aa48/lib/Template.js#L36-47
  * @param a first id to be sorted
@@ -115,13 +120,23 @@ function defaultRehydrateAssets(
 ): IDehydratedAssets {
   const { assets, modules } = dehydratedAssets;
 
+  const compilationMetadata: IModuleMinifierPluginStats | undefined = compilationMetadataMap.get(compilation);
+  if (!compilationMetadata) {
+    throw new Error(`Could not get compilation metadata`);
+  }
+
+  const { metadataByAssetFileName } = compilationMetadata;
+
   // Now assets/modules contain fully minified code. Rehydrate.
   for (const [assetName, info] of assets) {
     const banner: string = /\.m?js(\?.+)?$/.test(assetName)
       ? generateLicenseFileForAsset(compilation, info, modules)
       : '';
 
-    const outputSource: Source = rehydrateAsset(info, modules, banner);
+    const outputSource: Source = rehydrateAsset(info, modules, banner, true);
+    metadataByAssetFileName.set(assetName, {
+      positionByModuleId: info.renderInfo
+    });
     compilation.assets[assetName] = outputSource;
   }
 
@@ -186,6 +201,12 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     this._sourceMap = sourceMap;
   }
 
+  public static getCompilationStatistics(
+    compilation: webpack.compilation.Compilation
+  ): IModuleMinifierPluginStats | undefined {
+    return compilationMetadataMap.get(compilation);
+  }
+
   public apply(compiler: webpack.Compiler): void {
     for (const enhancer of this._enhancers) {
       enhancer.apply(compiler);
@@ -234,6 +255,12 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
          * The text and comments of all minified chunks. Most of these are trivial, but the runtime chunk is a bit larger.
          */
         const minifiedAssets: IAssetMap = new Map();
+
+        const metadataByAssetFileName: Map<string, IAssetStats> = new Map();
+        const compilationStatistics: IModuleMinifierPluginStats = {
+          metadataByAssetFileName
+        };
+        compilationMetadataMap.set(compilation, compilationStatistics);
 
         let pendingMinificationRequests: number = 0;
         /**
@@ -516,6 +543,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                             modules: chunkModules,
                             chunk,
                             fileName: assetName,
+                            renderInfo: new Map(),
                             externalNames
                           });
                         } catch (err) {
@@ -538,6 +566,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                     modules: chunkModules,
                     chunk,
                     fileName: assetName,
+                    renderInfo: new Map(),
                     externalNames
                   });
                 }
