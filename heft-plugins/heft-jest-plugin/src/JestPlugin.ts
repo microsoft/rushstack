@@ -573,11 +573,16 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
             // original value to allow Jest to resolve within the target directory.
             // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
             // eslint-disable-next-line @rushstack/no-null
-            const resolvedValue: string | null = jestResolve(/*resolver:*/ undefined, {
-              rootDir: options.rootDir,
-              filePath: propertyValue,
-              key: propertyName
-            });
+            let resolvedValue: string | null | undefined;
+            try {
+              resolvedValue = jestResolve(/*resolver:*/ undefined, {
+                rootDir: options.rootDir,
+                filePath: propertyValue,
+                key: propertyName
+              });
+            } catch (e) {
+              // Swallow
+            }
             if (resolvedValue) {
               return path.relative(options.rootDir, resolvedValue);
             } else {
