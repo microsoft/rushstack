@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Correctly match the prefix with the last single character segment",
+      "comment": "Fix an issue where the last character in a project's path is ignored when determining which files contribute to the project's cache ID.",
       "type": "none"
     }
   ],
