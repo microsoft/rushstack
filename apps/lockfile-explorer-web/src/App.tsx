@@ -13,6 +13,7 @@ import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
 import { ConnectionModal } from './components/ConnectionModal';
+import { linter } from './linter';
 
 /**
  * This React component renders the application page.
@@ -24,6 +25,7 @@ export const App = (): JSX.Element => {
     async function loadLockfileAsync(): Promise<void> {
       const lockfile = await readLockfileAsync();
       dispatch(loadEntries(lockfile));
+      linter(lockfile);
     }
     loadLockfileAsync().catch((e) => {
       console.log(`Failed to read lockfile: ${e}`);
