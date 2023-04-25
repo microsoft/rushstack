@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-config-file",
-      "comment": "The custom resolver method now accepts an options parameter. This parameter includes all previously provided information and now includes the partially-resolved configuration file.",
+      "comment": "BREAKING CHANGE: The custom resolver method now accepts an options parameter. This parameter includes all previously provided information and now includes the partially-resolved configuration file.",
       "type": "minor"
     }
   ],
