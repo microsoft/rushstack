@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 05 Apr 2023 21:46:37 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Apr 2023 16:39:03 GMT and should not be manually modified.
+
+## 5.97.1
+Tue, 18 Apr 2023 16:39:03 GMT
+
+### Updates
+
+- `rush version` will now respect the `ensureConsistentVersions` field in `rush.json`
+- Bump webpack to 5.78.0
+- Fix file watching on Windows in the presence of Git's fsmonitor by not watching the .git folder.
 
 ## 5.97.0
 Wed, 05 Apr 2023 21:46:37 GMT

@@ -1031,6 +1031,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-http-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-http-build-cache-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-litewatch-plugin",
       "projectFolder": "rush-plugins/rush-litewatch-plugin",
       "reviewCategory": "libraries",
@@ -1040,7 +1046,7 @@
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "rush"
     },
 
     // "webpack" folder (alphabetical order)
