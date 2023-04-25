@@ -2,6 +2,21 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "2.0.33",
+      "tag": "@microsoft/loader-load-themed-styles_v2.0.33",
+      "date": "Thu, 20 Apr 2023 15:16:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.0.35`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.0.34` to `^2.0.35`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.32",
       "tag": "@microsoft/loader-load-themed-styles_v2.0.32",
       "date": "Tue, 11 Apr 2023 00:23:22 GMT",

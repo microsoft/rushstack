@@ -111,7 +111,7 @@ export class LookupByPath<TItem> {
     }
 
     // Last segment
-    if (previousIndex + 1 < input.length) {
+    if (previousIndex < input.length) {
       yield {
         prefix: input.slice(previousIndex, input.length),
         index: input.length

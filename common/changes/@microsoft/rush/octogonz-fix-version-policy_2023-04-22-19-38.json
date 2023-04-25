@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "`rush version` will now respect the `ensureConsistentVersions` field in `rush.json`",
+      "comment": "",
       "type": "none"
     }
   ],

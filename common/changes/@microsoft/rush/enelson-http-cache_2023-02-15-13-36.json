@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix file watching on Windows in the presence of Git's fsmonitor by not watching the .git folder.",
+      "comment": "Add built-in plugin rush-http-build-cache-plugin",
       "type": "none"
     }
   ],

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.97.0",
+  "version": "5.97.1",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -47,6 +47,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-http-build-cache-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
     "@types/semver": "7.3.5"
