@@ -29,7 +29,7 @@ import type {
 } from '@rushstack/module-minifier';
 import { getIdentifier } from '@rushstack/module-minifier';
 
-import {
+import type {
   IModuleMinifierPluginOptions,
   IModuleMap,
   IAssetMap,
