@@ -34,6 +34,7 @@ import {
 } from '@rushstack/heft-config-file';
 import {
   FileSystem,
+  Path,
   Import,
   JsonFile,
   JsonSchema,
@@ -584,7 +585,11 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
               // Swallow
             }
             if (resolvedValue) {
-              return path.relative(options.rootDir, resolvedValue);
+              // Jest will resolve relative module paths to files only if they use forward slashes.
+              // They must also start with a '.' otherwise the preset resolution will assume it is a
+              // folder path and will path.join() it with the default 'jest-preset' filename.
+              // See: https://github.com/jestjs/jest/blob/268afca708199c0e64ef26f35995907faf4454ff/packages/jest-config/src/normalize.ts#L123
+              return Path.convertToSlashes(`.${path.sep}${path.relative(options.rootDir, resolvedValue)}`);
             } else {
               return propertyValue;
             }
