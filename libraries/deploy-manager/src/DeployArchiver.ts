@@ -5,7 +5,7 @@ import JSZip from 'jszip';
 import { FileSystem, FileSystemStats, Path } from '@rushstack/node-core-library';
 
 // 755 are default permissions to allow read/write/execute for owner and read/execute for group and others.
-const DEFAULT_FILE_PERMISSIONS: number = 0o000755;
+const DEFAULT_FILE_PERMISSIONS: number = 0o755;
 // This value sets the allowed permissions when preserving symbolic links.
 // 120000 is the symbolic link identifier, and is OR'd with the default file permissions.
 // See: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/stat.h#n10

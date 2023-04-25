@@ -515,6 +515,8 @@ describe(AsyncQueue.name, () => {
     await Async.forEachAsync(
       queue,
       async ([item, callback]) => {
+        // Add an async tick to ensure that the queue is actually running concurrently
+        await Async.sleep(1);
         seenItems++;
         expect(expectedItems.has(item)).toBe(true);
         expectedItems.delete(item);
@@ -540,6 +542,8 @@ describe(AsyncQueue.name, () => {
     await Async.forEachAsync(
       queue,
       async ([item, callback]) => {
+        // Add an async tick to ensure that the queue is actually running concurrently
+        await Async.sleep(1);
         seenItems++;
         if (item < 4) {
           expect(expectedItems.has(item)).toBe(true);
@@ -572,6 +576,8 @@ describe(AsyncQueue.name, () => {
     await Async.forEachAsync(
       queue,
       async ([item, callback]) => {
+        // Add an async tick to ensure that the queue is actually running concurrently
+        await Async.sleep(1);
         seenItems++;
         if (item < 4) {
           expect(expectedItems.has(item)).toBe(true);

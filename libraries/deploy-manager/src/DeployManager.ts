@@ -24,6 +24,17 @@ import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyze
 import { matchesWithStar } from './Utils';
 import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
 
+// (@types/npm-packlist is missing this API)
+declare module 'npm-packlist' {
+  export class Walker {
+    public readonly result: string[];
+    public constructor(opts: { path: string });
+    public on(event: 'done', callback: (result: string[]) => void): Walker;
+    public on(event: 'error', callback: (error: Error) => void): Walker;
+    public start(): void;
+  }
+}
+
 /**
  * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
  */
@@ -440,7 +451,8 @@ export class DeployManager {
           }
         }
 
-        // Replicate the links to the virtual store.
+        // Replicate the links to the virtual store. Note that if the package has not been hoisted by
+        // PNPM, the package will not be resolvable from here.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
         if (pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, pnpmInstallFolder)) {
           try {
@@ -579,11 +591,17 @@ export class DeployManager {
     const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, options);
 
     if (useNpmIgnoreFilter) {
-      // Use npm-packlist to filter the files.  Using the WalkerSync class (instead of the sync() API) ensures
+      // Use npm-packlist to filter the files.  Using the Walker class (instead of the default API) ensures
       // that "bundledDependencies" are not included.
-      const npmPackFiles: string[] = await npmPacklist({
-        path: sourceFolderPath
-      });
+      const walkerPromise: Promise<string[]> = new Promise<string[]>(
+        (resolve: (result: string[]) => void, reject: (error: Error) => void) => {
+          const walker: npmPacklist.Walker = new npmPacklist.Walker({
+            path: sourceFolderPath
+          });
+          walker.on('done', resolve).on('error', reject).start();
+        }
+      );
+      const npmPackFiles: string[] = await walkerPromise;
 
       const alreadyCopiedSourcePaths: Set<string> = new Set();
 

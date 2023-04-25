@@ -191,7 +191,7 @@ export class Async {
   }
 }
 
-function getResolvablePromise(): [Promise<void>, () => void] {
+function getSignal(): [Promise<void>, () => void] {
   let resolver: () => void;
   const promise: Promise<void> = new Promise<void>((resolve) => {
     resolver = resolve;
@@ -208,26 +208,27 @@ function getResolvablePromise(): [Promise<void>, () => void] {
  */
 export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
   private _queue: T[];
-  private _onPushPromise: Promise<void>;
+  private _onPushSignal: Promise<void>;
   private _onPushResolve: () => void;
 
   public constructor(iterable?: Iterable<T>) {
     this._queue = iterable ? Array.from(iterable) : [];
-    const [promise, resolver] = getResolvablePromise();
-    this._onPushPromise = promise;
+    const [promise, resolver] = getSignal();
+    this._onPushSignal = promise;
     this._onPushResolve = resolver;
   }
 
   public async *[Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]> {
     let activeIterations: number = 0;
-    let [callbackPromise, callbackResolve] = getResolvablePromise();
+    let [callbackSignal, callbackResolve] = getSignal();
     const callback: () => void = () => {
-      activeIterations--;
-      // Resolve whatever the latest callback promise is and create a new one
-      callbackResolve();
-      const [newCallbackPromise, newCallbackResolve] = getResolvablePromise();
-      callbackPromise = newCallbackPromise;
-      callbackResolve = newCallbackResolve;
+      if (--activeIterations === 0) {
+        // Resolve whatever the latest callback promise is and create a new one
+        callbackResolve();
+        const [newCallbackSignal, newCallbackResolve] = getSignal();
+        callbackSignal = newCallbackSignal;
+        callbackResolve = newCallbackResolve;
+      }
     };
 
     let position: number = 0;
@@ -236,11 +237,11 @@ export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
         activeIterations++;
         yield [this._queue[position++], callback];
       } else {
-        // On push, the item will be added to the queue and the onPushPromise will be resolved.
+        // On push, the item will be added to the queue and the onPushSignal will be resolved.
         // On calling the callback, active iterations will be decremented by the callback and the
-        // callbackPromise will be resolved. This means that the loop will continue if there are
+        // callbackSignal will be resolved. This means that the loop will continue if there are
         // active iterations or if there are items in the queue that haven't been yielded yet.
-        await Promise.race([this._onPushPromise, callbackPromise]);
+        await Promise.race([this._onPushSignal, callbackSignal]);
       }
     }
   }
@@ -253,8 +254,8 @@ export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
   public push(item: T): void {
     this._queue.push(item);
     this._onPushResolve();
-    const [onPushPromise, onPushResolve] = getResolvablePromise();
-    this._onPushPromise = onPushPromise;
+    const [onPushSignal, onPushResolve] = getSignal();
+    this._onPushSignal = onPushSignal;
     this._onPushResolve = onPushResolve;
   }
 }

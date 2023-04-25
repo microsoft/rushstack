@@ -71,41 +71,19 @@ export class SymlinkAnalyzer {
       return existingNode;
     }
 
+    // Postfix a '/' to the end of the path. This will get trimmed off later, but it
+    // ensures that the last path component is included in the loop below.
+    let targetPath: string = `${resolvedPath}${path.sep}`;
+    let targetPathIndex: number = -1;
     let currentNode: PathNode | undefined;
-    let pathSegments: string[] = resolvedPath.split(path.sep);
 
-    for (let i: number = 0; i < pathSegments.length; i++) {
-      if (!preserveLinks) {
-        while (currentNode?.kind === 'link') {
-          const targetNode: PathNode = await this.analyzePathAsync(currentNode.linkTarget, true);
-
-          // Have we created an ILinkInfo for this link yet?
-          if (!this._linkInfosByPath.has(currentNode.nodePath)) {
-            // Follow any symbolic links to determine whether the final target is a directory
-            const targetStats: FileSystemStats = await FileSystem.getStatisticsAsync(targetNode.nodePath);
-            const targetIsDirectory: boolean = targetStats.isDirectory();
-            const linkInfo: ILinkInfo = {
-              kind: targetIsDirectory ? 'folderLink' : 'fileLink',
-              linkPath: currentNode.nodePath,
-              targetPath: targetNode.nodePath
-            };
-            this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
-          }
-
-          const targetSegments: string[] = targetNode.nodePath.split(path.sep);
-          const remainingSegments: string[] = pathSegments.slice(i);
-          pathSegments = [...targetSegments, ...remainingSegments];
-          i = targetSegments.length;
-          currentNode = targetNode;
-        }
-      }
-
-      const currentPath: string = pathSegments.slice(0, i + 1).join(path.sep);
-      if (currentPath === '') {
+    while ((targetPathIndex = targetPath.indexOf(path.sep, targetPathIndex + 1)) >= 0) {
+      if (targetPathIndex === 0) {
         // Edge case for a Unix path like "/folder/file" --> [ "", "folder", "file" ]
         continue;
       }
 
+      const currentPath: string = targetPath.slice(0, targetPathIndex);
       currentNode = this._nodesByPath.get(currentPath);
       if (currentNode === undefined) {
         const linkStats: FileSystemStats = await FileSystem.getLinkStatisticsAsync(currentPath);
@@ -116,8 +94,8 @@ export class SymlinkAnalyzer {
           currentNode = {
             kind: 'link',
             nodePath: currentPath,
-            linkTarget: resolvedLinkTargetPath,
-            linkStats
+            linkStats,
+            linkTarget: resolvedLinkTargetPath
           };
         } else if (linkStats.isDirectory()) {
           currentNode = {
@@ -135,6 +113,36 @@ export class SymlinkAnalyzer {
           throw new Error('Unknown object type: ' + currentPath);
         }
         this._nodesByPath.set(currentPath, currentNode);
+      }
+
+      if (!preserveLinks) {
+        while (currentNode?.kind === 'link') {
+          const targetNode: PathNode = await this.analyzePathAsync(currentNode.linkTarget, true);
+
+          // Have we created an ILinkInfo for this link yet?
+          if (!this._linkInfosByPath.has(currentNode.nodePath)) {
+            // Follow any symbolic links to determine whether the final target is a directory
+            const targetStats: FileSystemStats = await FileSystem.getStatisticsAsync(targetNode.nodePath);
+            const targetIsDirectory: boolean = targetStats.isDirectory();
+            const linkInfo: ILinkInfo = {
+              kind: targetIsDirectory ? 'folderLink' : 'fileLink',
+              linkPath: currentNode.nodePath,
+              targetPath: targetNode.nodePath
+            };
+            this._linkInfosByPath.set(currentNode.nodePath, linkInfo);
+          }
+
+          const nodeTargetPath: string = targetNode.nodePath;
+          const remainingPath: string = targetPath.slice(targetPathIndex);
+          targetPath = path.join(nodeTargetPath, remainingPath);
+          targetPathIndex = nodeTargetPath.length;
+          currentNode = targetNode;
+        }
+      }
+
+      if (targetPath.length === targetPathIndex + 1) {
+        // We've reached the end of the path
+        break;
       }
     }
 

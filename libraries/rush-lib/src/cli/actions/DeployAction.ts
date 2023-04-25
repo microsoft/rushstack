@@ -7,7 +7,7 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 import type { DeployManager, IDeployProjectConfiguration } from '@rushstack/deploy-manager/lib/DeployManager';
 
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { PnpmfileConfiguration } from '../../logic/pnpm/PnpmfileConfiguration';
 import type { ILogger } from '../../pluginFramework/logging/Logger';
 import type {
