@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
+      "version": "0.12.0",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.0",
+      "date": "Wed, 26 Apr 2023 00:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Emit metadata about character position of rendered modules."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.4",
       "tag": "@rushstack/webpack4-module-minifier-plugin_v0.11.4",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",
