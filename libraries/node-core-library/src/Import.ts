@@ -267,28 +267,31 @@ export class Import {
       return path.resolve(normalizedRootPath, modulePath);
     }
 
-    if (includeSystemModules === true && Import._builtInModules.has(modulePath)) {
-      return modulePath;
+    // Built-in modules do not have a scope, so if there is a slash, then we need to check
+    // against the first path segment
+    const slashIndex: number = modulePath.indexOf('/');
+    const moduleName: string = slashIndex === -1 ? modulePath : modulePath.substr(0, slashIndex);
+    if (!includeSystemModules && Import._builtInModules.has(moduleName)) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
 
     if (allowSelfReference === true) {
       const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
-      if (ownPackage && modulePath.startsWith(ownPackage.packageName)) {
+      if (
+        ownPackage &&
+        (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
+      ) {
         const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
         return path.resolve(ownPackage.packageRootPath, packagePath);
       }
     }
 
     try {
-      return Resolve.sync(
-        // Append a slash to the package name to ensure `resolve.sync` doesn't attempt to return a system package
-        includeSystemModules !== true && modulePath.indexOf('/') === -1 ? `${modulePath}/` : modulePath,
-        {
-          basedir: normalizedRootPath,
-          preserveSymlinks: false,
-          realpathSync: getRealPath
-        }
-      );
+      return Resolve.sync(modulePath, {
+        basedir: normalizedRootPath,
+        preserveSymlinks: false,
+        realpathSync: getRealPath
+      });
     } catch (e) {
       throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
@@ -320,13 +323,20 @@ export class Import {
       return path.resolve(normalizedRootPath, modulePath);
     }
 
-    if (includeSystemModules === true && Import._builtInModules.has(modulePath)) {
-      return modulePath;
+    // Built-in modules do not have a scope, so if there is a slash, then we need to check
+    // against the first path segment
+    const slashIndex: number = modulePath.indexOf('/');
+    const moduleName: string = slashIndex === -1 ? modulePath : modulePath.substr(0, slashIndex);
+    if (!includeSystemModules && Import._builtInModules.has(moduleName)) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
 
     if (allowSelfReference === true) {
       const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
-      if (ownPackage && modulePath.startsWith(ownPackage.packageName)) {
+      if (
+        ownPackage &&
+        (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
+      ) {
         const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
         return path.resolve(ownPackage.packageRootPath, packagePath);
       }
@@ -354,8 +364,7 @@ export class Import {
               : undefined;
 
           Resolve.default(
-            // Append a slash to the package name to ensure `resolve` doesn't attempt to return a system package
-            includeSystemModules !== true && modulePath.indexOf('/') === -1 ? `${modulePath}/` : modulePath,
+            modulePath,
             {
               basedir: normalizedRootPath,
               preserveSymlinks: false,
