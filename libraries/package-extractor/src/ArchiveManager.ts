@@ -12,10 +12,6 @@ const DEFAULT_FILE_PERMISSIONS: number = 0o755;
 // eslint-disable-next-line no-bitwise
 const SYMBOLIC_LINK_PERMISSIONS: number = 0o120000 | DEFAULT_FILE_PERMISSIONS;
 
-export interface IDeployArchiverOptions {
-  archiveFilePath: string;
-}
-
 export interface IAddToArchiveOptions {
   filePath?: string;
   fileData?: Buffer | string;
@@ -23,18 +19,8 @@ export interface IAddToArchiveOptions {
   stats?: FileSystemStats;
 }
 
-export class DeployArchiver {
-  private _options: IDeployArchiverOptions;
-  private _zip: JSZip;
-
-  public constructor(options: IDeployArchiverOptions) {
-    this._options = options;
-    this._zip = new JSZip();
-  }
-
-  public get archiveFilePath(): string {
-    return this._options.archiveFilePath;
-  }
+export class ArchiveManager {
+  private _zip: JSZip = new JSZip();
 
   public async addToArchiveAsync(options: IAddToArchiveOptions): Promise<void> {
     const { filePath, fileData, archivePath } = options;
@@ -67,8 +53,7 @@ export class DeployArchiver {
     });
   }
 
-  public async createArchiveAsync(): Promise<void> {
-    const { archiveFilePath } = this._options;
+  public async createArchiveAsync(archiveFilePath: string): Promise<void> {
     const zipContent: Buffer = await this._zip.generateAsync({
       type: 'nodebuffer',
       platform: 'UNIX'

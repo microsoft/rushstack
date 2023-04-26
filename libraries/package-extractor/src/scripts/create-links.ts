@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type { IDeployMetadataJson } from '../DeployManager';
+import type { IExtractorMetadataJson } from '../PackageExtractor';
 import type { IFileSystemCreateLinkOptions } from '@rushstack/node-core-library';
 
 // API borrowed from @rushstack/node-core-library, since this script avoids using any
@@ -42,8 +42,8 @@ function ensureFolder(folderPath: string): void {
   fs.mkdirSync(folderPath);
 }
 
-function removeLinks(targetRootFolder: string, deployMetadataObject: IDeployMetadataJson): void {
-  for (const linkInfo of deployMetadataObject.links) {
+function removeLinks(targetRootFolder: string, extractorMetadataObject: IExtractorMetadataJson): void {
+  for (const linkInfo of extractorMetadataObject.links) {
     // Link to the relative path for symlinks
     const newLinkPath: string = path.join(targetRootFolder, linkInfo.linkPath);
     if (fs.existsSync(newLinkPath)) {
@@ -52,8 +52,8 @@ function removeLinks(targetRootFolder: string, deployMetadataObject: IDeployMeta
   }
 }
 
-function createLinks(targetRootFolder: string, deployMetadataObject: IDeployMetadataJson): void {
-  for (const linkInfo of deployMetadataObject.links) {
+function createLinks(targetRootFolder: string, extractorMetadataObject: IExtractorMetadataJson): void {
+  for (const linkInfo of extractorMetadataObject.links) {
     // Link to the relative path for symlinks
     const newLinkPath: string = path.join(targetRootFolder, linkInfo.linkPath);
     const linkTargetPath: string = path.join(targetRootFolder, linkInfo.targetPath);
@@ -90,8 +90,8 @@ function showUsage(): void {
   console.log('  node create-links.js create');
   console.log('  node create-links.js remove');
 
-  console.log('\nCreates or removes the symlinks for a deployment folder created by "rush deploy".');
-  console.log('The link information is read from "deploy-metadata.json" in the same folder.');
+  console.log('\nCreates or removes the symlinks for the output folder created by "rush deploy".');
+  console.log('The link information is read from "extractor-metadata.json" in the same folder.');
 }
 
 function main(): boolean {
@@ -104,22 +104,22 @@ function main(): boolean {
   }
 
   const targetRootFolder: string = __dirname;
-  const deployMetadataPath: string = path.join(targetRootFolder, 'deploy-metadata.json');
+  const extractorMetadataPath: string = path.join(targetRootFolder, 'extractor-metadata.json');
 
-  if (!fs.existsSync(deployMetadataPath)) {
-    throw new Error('Input file not found: ' + deployMetadataPath);
+  if (!fs.existsSync(extractorMetadataPath)) {
+    throw new Error('Input file not found: ' + extractorMetadataPath);
   }
 
-  const deployMetadataJson: string = fs.readFileSync(deployMetadataPath).toString();
-  const deployMetadataObject: IDeployMetadataJson = JSON.parse(deployMetadataJson);
+  const extractorMetadataJson: string = fs.readFileSync(extractorMetadataPath).toString();
+  const extractorMetadataObject: IExtractorMetadataJson = JSON.parse(extractorMetadataJson);
 
   if (args[0] === 'create') {
-    console.log(`\nCreating links for deployment scenario "${deployMetadataObject.scenarioName}"`);
-    removeLinks(targetRootFolder, deployMetadataObject);
-    createLinks(targetRootFolder, deployMetadataObject);
+    console.log(`\nCreating links for extraction at path "${targetRootFolder}"`);
+    removeLinks(targetRootFolder, extractorMetadataObject);
+    createLinks(targetRootFolder, extractorMetadataObject);
   } else {
-    console.log(`\nRemoving links for deployment scenario "${deployMetadataObject.scenarioName}"`);
-    removeLinks(targetRootFolder, deployMetadataObject);
+    console.log(`\nRemoving links for extraction at path "${targetRootFolder}"`);
+    removeLinks(targetRootFolder, extractorMetadataObject);
   }
 
   console.log('The operation completed successfully.');

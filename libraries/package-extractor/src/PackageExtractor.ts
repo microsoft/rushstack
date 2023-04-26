@@ -19,7 +19,7 @@ import {
   type ITerminal
 } from '@rushstack/node-core-library';
 
-import { DeployArchiver } from './DeployArchiver';
+import { ArchiveManager } from './ArchiveManager';
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
 import { matchesWithStar } from './Utils';
 import { createLinksScriptFilename, scriptsFolderPath } from './PathConstants';
@@ -36,39 +36,38 @@ declare module 'npm-packlist' {
 }
 
 /**
- * Part of the deploy-matadata.json file format. Represents a Rush project to be deployed.
+ * Part of the extractor-matadata.json file format. Represents an extracted project.
  */
 interface IProjectInfoJson {
   /**
-   * This path is relative to the deploy folder.
+   * This path is relative to the extractor target folder.
    */
   path: string;
 }
 
 /**
- * The deploy-matadata.json file format.
+ * The extractor-metadata.json file format.
  */
-export interface IDeployMetadataJson {
-  scenarioName: string;
+export interface IExtractorMetadataJson {
   mainProjectName: string;
   projects: IProjectInfoJson[];
   links: ILinkInfo[];
 }
 
-interface IDeployState {
+interface IExtractorState {
   foldersToCopy: Set<string>;
-  projectConfigurationsByPath: Map<string, IDeployProjectConfiguration>;
-  projectConfigurationsByName: Map<string, IDeployProjectConfiguration>;
+  projectConfigurationsByPath: Map<string, IExtractorProjectConfiguration>;
+  projectConfigurationsByName: Map<string, IExtractorProjectConfiguration>;
   symlinkAnalyzer: SymlinkAnalyzer;
-  archiver?: DeployArchiver;
+  archiver?: ArchiveManager;
 }
 
 /**
- * The deployment configuration for individual projects.
+ * The extractor configuration for individual projects.
  *
  * @public
  */
-export interface IDeployProjectConfiguration {
+export interface IExtractorProjectConfiguration {
   /**
    * The name of the project.
    */
@@ -78,39 +77,34 @@ export interface IDeployProjectConfiguration {
    */
   projectFolder: string;
   /**
-   * The names of additional projects to include when deploying this project.
+   * The names of additional projects to include when extracting this project.
    */
   additionalProjectsToInclude?: string[];
   /**
-   * The names of additional dependencies to include when deploying this project.
+   * The names of additional dependencies to include when extracting this project.
    */
   additionalDependenciesToInclude?: string[];
   /**
-   * The names of additional dependencies to exclude when deploying this project.
+   * The names of additional dependencies to exclude when extracting this project.
    */
   dependenciesToExclude?: string[];
 }
 
 /**
- * This object tracks DeployManager state during a deployment.
+ * Options that can be provided to the extractor.
  *
  * @public
  */
-export interface IDeployOptions {
+export interface IExtractorOptions {
   /**
-   * A terminal to log deployment progress.
+   * A terminal to log extraction progress.
    */
   terminal: ITerminal;
 
   /**
-   * The main project to include in the deployment.
+   * The main project to include in the extraction operation.
    */
   mainProjectName: string;
-
-  /**
-   * The name of the scenario being deployed. Included in the deploy-metadata.json file.
-   */
-  scenarioName: string;
 
   /**
    * The source folder that copying originates from.  Generally it is the repo root folder.
@@ -118,7 +112,7 @@ export interface IDeployOptions {
   sourceRootFolder: string;
 
   /**
-   * The target folder for the deployment.
+   * The target folder for the extraction.
    */
   targetRootFolder: string;
 
@@ -133,24 +127,24 @@ export interface IDeployOptions {
   createArchiveFilePath?: string;
 
   /**
-   * Whether to skip creating a deploy directory, and only create a deploy archive. This is only
-   * supported when linkCreation is 'script' or 'none'.
+   * Whether to skip copying files to the extraction target directory, and only create an extraction
+   * archive. This is only supported when linkCreation is 'script' or 'none'.
    */
   createArchiveOnly?: boolean;
 
   /**
    * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
-   * transform the package.json prior to deploy.
+   * transform the package.json prior to extraction.
    */
   transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
 
   /**
-   * If dependencies from the "devDependencies" package.json field should be included in the deployment.
+   * If dependencies from the "devDependencies" package.json field should be included in the extraction.
    */
   includeDevDependencies?: boolean;
 
   /**
-   * If files ignored by the .npmignore file should be included in the deployment.
+   * If files ignored by the .npmignore file should be included in the extraction.
    */
   includeNpmIgnoreFiles?: boolean;
 
@@ -166,19 +160,19 @@ export interface IDeployOptions {
    * if your file copy tool can handle links correctly.
    * "script": A Node.js script called create-links.js will be written to the target folder. Use this setting
    * to create links on the server machine, after the files have been uploaded.
-   * "none": Do nothing; some other tool may create the links later, based on the deploy-metadata.json file.
+   * "none": Do nothing; some other tool may create the links later, based on the extractor-metadata.json file.
    */
   linkCreation?: 'default' | 'script' | 'none';
 
   /**
-   * An additional folder containing files which will be copied into the root of the deployment.
+   * An additional folder containing files which will be copied into the root of the extraction.
    */
   folderToCopy?: string;
 
   /**
    * Configurations for individual projects, keyed by the project path relative to the sourceRootFolder.
    */
-  projectConfigurations: IDeployProjectConfiguration[];
+  projectConfigurations: IExtractorProjectConfiguration[];
 }
 
 /**
@@ -186,11 +180,11 @@ export interface IDeployOptions {
  *
  * @public
  */
-export class DeployManager {
+export class PackageExtractor {
   /**
-   * Perform a deployment using the provided options
+   * Extract a package using the provided options
    */
-  public async deployAsync(options: IDeployOptions): Promise<void> {
+  public async extractAsync(options: IExtractorOptions): Promise<void> {
     const {
       terminal,
       projectConfigurations,
@@ -210,27 +204,30 @@ export class DeployManager {
       }
     }
 
-    let archiver: DeployArchiver | undefined;
+    let archiver: ArchiveManager | undefined;
+    let archiveFilePath: string | undefined;
     if (createArchiveFilePath) {
       if (path.extname(createArchiveFilePath) !== '.zip') {
         throw new Error('Only archives with the .zip file extension are currently supported.');
       }
 
-      const archiveFilePath: string = path.resolve(targetRootFolder, createArchiveFilePath);
-      archiver = new DeployArchiver({ archiveFilePath });
+      archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
+      archiver = new ArchiveManager();
     }
 
     await FileSystem.ensureFolderAsync(targetRootFolder);
 
-    terminal.writeLine(Colors.cyan(`Deploying to target folder:  ${targetRootFolder}`));
-    terminal.writeLine(Colors.cyan(`Main project for deployment: ${mainProjectName}`));
+    terminal.writeLine(Colors.cyan(`Extracting to target folder:  ${targetRootFolder}`));
+    terminal.writeLine(Colors.cyan(`Main project for extraction: ${mainProjectName}`));
 
     try {
-      const existingDeployment: boolean =
+      const existingExtraction: boolean =
         (await FileSystem.readFolderItemNamesAsync(targetRootFolder)).length > 0;
-      if (existingDeployment) {
+      if (existingExtraction) {
         if (!overwriteExisting) {
-          throw new Error('The deploy target folder is not empty. Overwrite must be explicitly requested');
+          throw new Error(
+            'The extraction target folder is not empty. Overwrite must be explicitly requested'
+          );
         } else {
           terminal.writeLine('Deleting target folder contents...');
           terminal.writeLine('');
@@ -244,7 +241,7 @@ export class DeployManager {
     }
 
     // Create a new state for each run
-    const state: IDeployState = {
+    const state: IExtractorState = {
       foldersToCopy: new Set(),
       projectConfigurationsByName: new Map(projectConfigurations.map((p) => [p.projectName, p])),
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
@@ -252,10 +249,14 @@ export class DeployManager {
       archiver
     };
 
-    await this._performDeploymentAsync(options, state);
+    await this._performExtractionAsync(options, state);
+    if (archiver && archiveFilePath) {
+      terminal.writeLine(`Creating archive at "${archiveFilePath}"`);
+      await archiver.createArchiveAsync(archiveFilePath);
+    }
   }
 
-  private async _performDeploymentAsync(options: IDeployOptions, state: IDeployState): Promise<void> {
+  private async _performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const {
       terminal,
       mainProjectName,
@@ -264,20 +265,20 @@ export class DeployManager {
       folderToCopy: addditionalFolderToCopy,
       linkCreation
     } = options;
-    const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer, archiver } = state;
+    const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer } = state;
 
-    const mainProjectConfiguration: IDeployProjectConfiguration | undefined =
+    const mainProjectConfiguration: IExtractorProjectConfiguration | undefined =
       projectConfigurationsByName.get(mainProjectName);
     if (!mainProjectConfiguration) {
       throw new Error(`Main project "${mainProjectName}" was not found in the list of projects`);
     }
 
     // Calculate the set with additionalProjectsToInclude
-    const includedProjectsSet: Set<IDeployProjectConfiguration> = new Set([mainProjectConfiguration]);
+    const includedProjectsSet: Set<IExtractorProjectConfiguration> = new Set([mainProjectConfiguration]);
     for (const { additionalProjectsToInclude } of includedProjectsSet) {
       if (additionalProjectsToInclude) {
         for (const additionalProjectNameToInclude of additionalProjectsToInclude) {
-          const additionalProjectToInclude: IDeployProjectConfiguration | undefined =
+          const additionalProjectToInclude: IExtractorProjectConfiguration | undefined =
             projectConfigurationsByName.get(additionalProjectNameToInclude);
           if (!additionalProjectToInclude) {
             throw new Error(
@@ -300,7 +301,7 @@ export class DeployManager {
     await Async.forEachAsync(
       foldersToCopy,
       async (folderToCopy: string) => {
-        await this._deployFolderAsync(folderToCopy, options, state);
+        await this._extractFolderAsync(folderToCopy, options, state);
       },
       {
         concurrency: 10
@@ -328,7 +329,7 @@ export class DeployManager {
         terminal.writeLine('Creating symlinks');
         const linksToCopy: ILinkInfo[] = symlinkAnalyzer.reportSymlinks();
         await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
-          await this._deploySymlinkAsync(linkToCopy, options, state);
+          await this._extractSymlinkAsync(linkToCopy, options, state);
         });
         await this._makeBinLinksAsync(options, state);
         break;
@@ -338,8 +339,8 @@ export class DeployManager {
       }
     }
 
-    terminal.writeLine('Creating deploy-metadata.json');
-    await this._writeDeployMetadataAsync(options, state);
+    terminal.writeLine('Creating extractor-metadata.json');
+    await this._writeExtractorMetadataAsync(options, state);
 
     if (addditionalFolderToCopy) {
       const sourceFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
@@ -349,20 +350,15 @@ export class DeployManager {
         alreadyExistsBehavior: AlreadyExistsBehavior.Error
       });
     }
-
-    if (archiver) {
-      terminal.writeLine(`Creating archive at "${archiver.archiveFilePath}"`);
-      await archiver.createArchiveAsync();
-    }
   }
 
   /**
-   * Recursively crawl the node_modules dependencies and collect the result in IDeployState.foldersToCopy.
+   * Recursively crawl the node_modules dependencies and collect the result in IExtractorState.foldersToCopy.
    */
   private async _collectFoldersAsync(
     packageJsonFolder: string,
-    options: IDeployOptions,
-    state: IDeployState
+    options: IExtractorOptions,
+    state: IExtractorState
   ): Promise<void> {
     const { terminal, pnpmInstallFolder, transformPackageJson } = options;
     const { projectConfigurationsByPath } = state;
@@ -407,7 +403,7 @@ export class DeployManager {
         }
 
         // Check to see if this is a local project
-        const projectConfiguration: IDeployProjectConfiguration | undefined =
+        const projectConfiguration: IExtractorProjectConfiguration | undefined =
           projectConfigurationsByPath.get(packageJsonRealFolderPath);
 
         if (projectConfiguration) {
@@ -537,12 +533,15 @@ export class DeployManager {
   }
 
   /**
-   * Maps a file path from IDeployOptions.sourceRootFolder to IDeployOptions.targetRootFolder
+   * Maps a file path from IExtractorOptions.sourceRootFolder to IExtractorOptions.targetRootFolder
    *
    * Example input: "C:\\MyRepo\\libraries\\my-lib"
    * Example output: "C:\\MyRepo\\common\\deploy\\libraries\\my-lib"
    */
-  private _remapPathForDeployFolder(absolutePathInSourceFolder: string, options: IDeployOptions): string {
+  private _remapPathForExtractorFolder(
+    absolutePathInSourceFolder: string,
+    options: IExtractorOptions
+  ): string {
     const { sourceRootFolder, targetRootFolder } = options;
     const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     if (relativePath.startsWith('..')) {
@@ -553,12 +552,15 @@ export class DeployManager {
   }
 
   /**
-   * Maps a file path from IDeployOptions.sourceRootFolder to relative path
+   * Maps a file path from IExtractorOptions.sourceRootFolder to relative path
    *
    * Example input: "C:\\MyRepo\\libraries\\my-lib"
    * Example output: "libraries/my-lib"
    */
-  private _remapPathForDeployMetadata(absolutePathInSourceFolder: string, options: IDeployOptions): string {
+  private _remapPathForExtractorMetadata(
+    absolutePathInSourceFolder: string,
+    options: IExtractorOptions
+  ): string {
     const { sourceRootFolder } = options;
     const relativePath: string = path.relative(sourceRootFolder, absolutePathInSourceFolder);
     if (relativePath.startsWith('..')) {
@@ -568,12 +570,12 @@ export class DeployManager {
   }
 
   /**
-   * Copy one package folder to the deployment target folder.
+   * Copy one package folder to the extractor target folder.
    */
-  private async _deployFolderAsync(
+  private async _extractFolderAsync(
     sourceFolderPath: string,
-    options: IDeployOptions,
-    state: IDeployState
+    options: IExtractorOptions,
+    state: IExtractorState
   ): Promise<void> {
     const { includeNpmIgnoreFiles, targetRootFolder } = options;
     const { projectConfigurationsByPath, archiver } = state;
@@ -581,14 +583,14 @@ export class DeployManager {
 
     if (!includeNpmIgnoreFiles) {
       const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
-      const sourceProjectConfiguration: IDeployProjectConfiguration | undefined =
+      const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
         projectConfigurationsByPath.get(sourceFolderRealPath);
       if (sourceProjectConfiguration) {
         useNpmIgnoreFilter = true;
       }
     }
 
-    const targetFolderPath: string = this._remapPathForDeployFolder(sourceFolderPath, options);
+    const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
 
     if (useNpmIgnoreFilter) {
       // Use npm-packlist to filter the files.  Using the Walker class (instead of the default API) ensures
@@ -709,10 +711,10 @@ export class DeployManager {
   /**
    * Create a symlink as described by the ILinkInfo object.
    */
-  private async _deploySymlinkAsync(
+  private async _extractSymlinkAsync(
     originalLinkInfo: ILinkInfo,
-    options: IDeployOptions,
-    state: IDeployState
+    options: IExtractorOptions,
+    state: IExtractorState
   ): Promise<void> {
     // Do a check to make sure that the link target path is not outside the source folder
     const { sourceRootFolder } = options;
@@ -726,8 +728,8 @@ export class DeployManager {
 
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
-      linkPath: this._remapPathForDeployFolder(originalLinkInfo.linkPath, options),
-      targetPath: this._remapPathForDeployFolder(originalLinkInfo.targetPath, options)
+      linkPath: this._remapPathForExtractorFolder(originalLinkInfo.linkPath, options),
+      targetPath: this._remapPathForExtractorFolder(originalLinkInfo.targetPath, options)
     };
 
     const newLinkFolder: string = path.dirname(linkInfo.linkPath);
@@ -771,23 +773,25 @@ export class DeployManager {
   /**
    * Write the common/deploy/deploy-metadata.json file.
    */
-  private async _writeDeployMetadataAsync(options: IDeployOptions, state: IDeployState): Promise<void> {
-    const { mainProjectName, scenarioName, targetRootFolder } = options;
+  private async _writeExtractorMetadataAsync(
+    options: IExtractorOptions,
+    state: IExtractorState
+  ): Promise<void> {
+    const { mainProjectName, targetRootFolder } = options;
     const { projectConfigurationsByPath } = state;
 
-    const deployMetadataFileName: string = 'deploy-metadata.json';
-    const deployMetadataFilePath: string = path.join(targetRootFolder, deployMetadataFileName);
-    const deployMetadataJson: IDeployMetadataJson = {
+    const extractorMetadataFileName: string = 'extractor-metadata.json';
+    const extractorMetadataFilePath: string = path.join(targetRootFolder, extractorMetadataFileName);
+    const extractorMetadataJson: IExtractorMetadataJson = {
       mainProjectName,
-      scenarioName,
       projects: [],
       links: []
     };
 
     for (const projectFolder of projectConfigurationsByPath.keys()) {
       if (state.foldersToCopy.has(projectFolder)) {
-        deployMetadataJson.projects.push({
-          path: this._remapPathForDeployMetadata(projectFolder, options)
+        extractorMetadataJson.projects.push({
+          path: this._remapPathForExtractorMetadata(projectFolder, options)
         });
       }
     }
@@ -796,46 +800,46 @@ export class DeployManager {
     for (const absoluteLinkInfo of state.symlinkAnalyzer.reportSymlinks()) {
       const relativeInfo: ILinkInfo = {
         kind: absoluteLinkInfo.kind,
-        linkPath: this._remapPathForDeployMetadata(absoluteLinkInfo.linkPath, options),
-        targetPath: this._remapPathForDeployMetadata(absoluteLinkInfo.targetPath, options)
+        linkPath: this._remapPathForExtractorMetadata(absoluteLinkInfo.linkPath, options),
+        targetPath: this._remapPathForExtractorMetadata(absoluteLinkInfo.targetPath, options)
       };
-      deployMetadataJson.links.push(relativeInfo);
+      extractorMetadataJson.links.push(relativeInfo);
     }
 
-    const deployMetadataFileContent: string = JSON.stringify(deployMetadataJson, undefined, 0);
+    const extractorMetadataFileContent: string = JSON.stringify(extractorMetadataJson, undefined, 0);
     if (!options.createArchiveOnly) {
-      await FileSystem.writeFileAsync(deployMetadataFilePath, deployMetadataFileContent);
+      await FileSystem.writeFileAsync(extractorMetadataFilePath, extractorMetadataFileContent);
     }
     await state.archiver?.addToArchiveAsync({
-      fileData: deployMetadataFileContent,
-      archivePath: deployMetadataFileName
+      fileData: extractorMetadataFileContent,
+      archivePath: extractorMetadataFileName
     });
   }
 
-  private async _makeBinLinksAsync(options: IDeployOptions, state: IDeployState): Promise<void> {
+  private async _makeBinLinksAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {
     const { terminal } = options;
 
-    const deployedProjectFolders: string[] = Array.from(state.projectConfigurationsByPath.keys()).filter(
+    const extractedProjectFolders: string[] = Array.from(state.projectConfigurationsByPath.keys()).filter(
       (folderPath: string) => state.foldersToCopy.has(folderPath)
     );
 
     await Async.forEachAsync(
-      deployedProjectFolders,
+      extractedProjectFolders,
       async (projectFolder: string) => {
-        const deployedProjectFolder: string = this._remapPathForDeployFolder(projectFolder, options);
-        const deployedProjectNodeModulesFolder: string = path.join(deployedProjectFolder, 'node_modules');
-        const deployedProjectBinFolder: string = path.join(deployedProjectNodeModulesFolder, '.bin');
+        const extractedProjectFolder: string = this._remapPathForExtractorFolder(projectFolder, options);
+        const extractedProjectNodeModulesFolder: string = path.join(extractedProjectFolder, 'node_modules');
+        const extractedProjectBinFolder: string = path.join(extractedProjectNodeModulesFolder, '.bin');
 
-        await pnpmLinkBins(deployedProjectNodeModulesFolder, deployedProjectBinFolder, {
+        await pnpmLinkBins(extractedProjectNodeModulesFolder, extractedProjectBinFolder, {
           warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
         });
 
         if (state.archiver) {
           const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(
-            deployedProjectBinFolder
+            extractedProjectBinFolder
           );
           for (const binFolderItem of binFolderItems) {
-            const binFilePath: string = path.join(deployedProjectBinFolder, binFolderItem);
+            const binFilePath: string = path.join(extractedProjectBinFolder, binFolderItem);
             await state.archiver.addToArchiveAsync({
               filePath: binFilePath,
               archivePath: path.relative(options.targetRootFolder, binFilePath)
