@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add AsyncQueue class, an AsyncIterable which allows for iterating and cocurrently adding to a queue",
+      "comment": "Adds the AsyncQueue class, a queue type that allows for iterating and concurrently adding to the queue",
       "type": "minor"
     }
   ],

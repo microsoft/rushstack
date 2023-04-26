@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Adds support for async Import.resolve* APIs",
-      "type": "minor"
+      "comment": "Fix a typings issue in FileSystem.copyFilesAsync",
+      "type": "patch"
     }
   ],
   "packageName": "@rushstack/node-core-library"
