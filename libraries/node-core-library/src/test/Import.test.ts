@@ -271,7 +271,7 @@ describe(Import.name, () => {
         );
       });
 
-      it('throws on an attempt to resolve an existing path inside a system module with includeSystemModules turned on', () => {
+      it('resolves an an existing path inside a system module with includeSystemModules turned on', () => {
         expect(
           Import.resolvePackage({
             packageName: 'fs/promises',

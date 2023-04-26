@@ -270,7 +270,7 @@ export class Import {
     // Built-in modules do not have a scope, so if there is a slash, then we need to check
     // against the first path segment
     const slashIndex: number = modulePath.indexOf('/');
-    const moduleName: string = slashIndex === -1 ? modulePath : modulePath.substr(0, slashIndex);
+    const moduleName: string = slashIndex === -1 ? modulePath : modulePath.slice(0, slashIndex);
     if (!includeSystemModules && Import._builtInModules.has(moduleName)) {
       throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
@@ -281,7 +281,7 @@ export class Import {
         ownPackage &&
         (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
       ) {
-        const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
+        const packagePath: string = modulePath.slice(ownPackage.packageName.length + 1);
         return path.resolve(ownPackage.packageRootPath, packagePath);
       }
     }
@@ -326,7 +326,7 @@ export class Import {
     // Built-in modules do not have a scope, so if there is a slash, then we need to check
     // against the first path segment
     const slashIndex: number = modulePath.indexOf('/');
-    const moduleName: string = slashIndex === -1 ? modulePath : modulePath.substr(0, slashIndex);
+    const moduleName: string = slashIndex === -1 ? modulePath : modulePath.slice(0, slashIndex);
     if (!includeSystemModules && Import._builtInModules.has(moduleName)) {
       throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
     }
@@ -337,7 +337,7 @@ export class Import {
         ownPackage &&
         (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
       ) {
-        const packagePath: string = modulePath.substr(ownPackage.packageName.length + 1);
+        const packagePath: string = modulePath.slice(ownPackage.packageName.length + 1);
         return path.resolve(ownPackage.packageRootPath, packagePath);
       }
     }
