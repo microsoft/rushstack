@@ -1926,7 +1926,6 @@ importers:
     specifiers:
       '@pnpm/link-bins': ~5.3.7
       '@pnpm/logger': 4.0.0
-      '@rushstack/deploy-manager': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
@@ -1934,6 +1933,7 @@ importers:
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/package-deps-hash': workspace:*
+      '@rushstack/package-extractor': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/stream-collator': workspace:*
       '@rushstack/terminal': workspace:*
@@ -1983,10 +1983,10 @@ importers:
       webpack: ~5.78.0
     dependencies:
       '@pnpm/link-bins': 5.3.25
-      '@rushstack/deploy-manager': link:../deploy-manager
       '@rushstack/heft-config-file': link:../heft-config-file
       '@rushstack/node-core-library': link:../node-core-library
       '@rushstack/package-deps-hash': link:../package-deps-hash
+      '@rushstack/package-extractor': link:../deploy-manager
       '@rushstack/rig-package': link:../rig-package
       '@rushstack/stream-collator': link:../stream-collator
       '@rushstack/terminal': link:../terminal
@@ -13939,7 +13939,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: fsevents 1 will break on node v14+ and could be using insecure binaries. Upgrade to fsevents 2.
+    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
     requiresBuild: true
     dependencies:
       bindings: 1.5.0

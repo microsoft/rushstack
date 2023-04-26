@@ -868,7 +868,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/deploy-manager",
+      "packageName": "@rushstack/package-extractor",
       "projectFolder": "libraries/deploy-manager",
       "reviewCategory": "libraries",
       "shouldPublish": true

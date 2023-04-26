@@ -79,10 +79,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/deploy-manager",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -168,6 +164,10 @@
     },
     {
       "name": "@rushstack/package-deps-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/package-extractor",
       "allowedCategories": [ "libraries" ]
     },
     {

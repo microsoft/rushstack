@@ -1,4 +1,4 @@
-## @rushstack/deploy-manager
+## @rushstack/package-extractor
 
 A library used for creating an isolated copy of a package and, optionally, bundling it into an archive.
 
@@ -9,4 +9,4 @@ A library used for creating an isolated copy of a package and, optionally, bundl
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/deploy-manager/)
 
-`@rushstack/deploy-manager` is part of the [Rush Stack](https://rushstack.io/) family of projects.
+`@rushstack/package-extractor` is part of the [Rush Stack](https://rushstack.io/) family of projects.

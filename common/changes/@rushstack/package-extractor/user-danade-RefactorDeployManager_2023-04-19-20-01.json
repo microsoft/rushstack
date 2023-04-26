@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Create new @rushstack/package-extractor package allowing for deployment of a target package and associated dependencies",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}
