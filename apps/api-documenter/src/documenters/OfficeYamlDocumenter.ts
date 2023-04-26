@@ -6,7 +6,7 @@ import * as path from 'path';
 import yaml = require('js-yaml');
 
 import { ApiModel } from '@microsoft/api-extractor-model';
-import { Text, FileSystem } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { IYamlTocItem } from '../yaml/IYamlTocFile';
 import { IYamlItem } from '../yaml/IYamlApiFile';
@@ -78,18 +78,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\!/, '');
     if (yamlItem.summary) {
       yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
-      yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
     }
     if (yamlItem.remarks) {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
-      yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
-    }
-    if (yamlItem.syntax && yamlItem.syntax.parameters) {
-      yamlItem.syntax.parameters.forEach((part) => {
-        if (part.description) {
-          part.description = this._fixBoldAndItalics(part.description);
-        }
-      });
     }
 
     const snippets: string[] | undefined = this._snippetsAll[nameWithoutPackage];
@@ -130,21 +121,10 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return this._apiSetUrlDefault; // match not found.
   }
 
-  private _fixBoldAndItalics(text: string): string {
-    return Text.replaceAll(text, '\\*', '*');
-  }
-
   private _generateExampleSnippetText(snippets: string[]): string {
     const text: string[] = ['\n\n#### Examples\n'];
     for (const snippet of snippets) {
-      if (snippet.search(/await/) === -1) {
-        text.push('```javascript');
-      } else {
-        text.push('```typescript');
-      }
-
-      text.push(snippet);
-      text.push('```');
+      text.push(`\`\`\`TypeScript\n${snippet}\n\`\`\``);
     }
     return text.join('\n');
   }
