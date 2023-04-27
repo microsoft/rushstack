@@ -2,6 +2,87 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.51.0-rc.5",
+      "tag": "@rushstack/heft_v0.51.0-rc.5",
+      "date": "Thu, 27 Apr 2023 17:25:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update with latest main."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.0-rc.4",
+      "tag": "@rushstack/heft_v0.50.0-rc.4",
+      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue with `watchGlobAsync`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.0-rc.3",
+      "tag": "@rushstack/heft_v0.50.0-rc.3",
+      "date": "Fri, 20 Jan 2023 20:13:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix issues with SASS incremental builds."
+          },
+          {
+            "comment": "Add support for TypeScript solution incremental builds."
+          },
+          {
+            "comment": "Improve responsiveness of watcher loop."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.0-rc.2",
+      "tag": "@rushstack/heft_v0.49.0-rc.2",
+      "date": "Fri, 2 Dec 2022 05:28:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve watch mode performance."
+          },
+          {
+            "comment": "Improve logging output."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.0-rc.1",
+      "tag": "@rushstack/heft_v0.49.0-rc.1",
+      "date": "Fri, 18 Nov 2022 02:34:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix incremental TypeScript compilation."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.49.0-rc.0",
+      "tag": "@rushstack/heft_v0.49.0-rc.0",
+      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "General fixes and improvements, in preparation for a general release."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.50.1",
       "tag": "@rushstack/heft_v0.50.1",
       "date": "Thu, 27 Apr 2023 17:18:42 GMT",
