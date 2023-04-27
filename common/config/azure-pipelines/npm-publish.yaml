@@ -11,10 +11,10 @@ steps:
   - checkout: self
     persistCredentials: true
   - template: templates/build.yaml
-  - template: templates/bump-versions.yaml
-    parameters:
-      VersionPolicyName: noRush
-      BranchName: $(SourceBranch)
+  # - template: templates/bump-versions.yaml
+  #   parameters:
+  #     VersionPolicyName: noRush
+  #     BranchName: $(SourceBranch)
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
