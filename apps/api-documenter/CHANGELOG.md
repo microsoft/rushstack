@@ -1,6 +1,18 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Apr 2023 17:18:42 GMT and should not be manually modified.
+
+## 7.22.1
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 7.22.0
+Thu, 27 Apr 2023 00:22:57 GMT
+
+### Minor changes
+
+- Update OfficeYamlDocumenter to label all samples as TypeScript and no longer escape asterisks.
 
 ## 7.21.7
 Tue, 04 Apr 2023 22:36:28 GMT

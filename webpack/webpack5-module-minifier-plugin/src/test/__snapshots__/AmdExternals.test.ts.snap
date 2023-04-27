@@ -333,9 +333,24 @@ console.log(\\"Do stuff\\");__webpack_require__.e(/* import() | async */ 931).th
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Metadata 1`] = `
-Map {
-  417 => Map {
-    931 => 965,
+Object {
+  "byAssetFilename": Map {
+    "main.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async.js" => Object {
+      "positionByModuleId": Map {
+        417 => Object {
+          "charLength": 965,
+          "charOffset": 240,
+        },
+      },
+    },
+  },
+  "byModule": Map {
+    417 => Map {
+      931 => 965,
+    },
   },
 }
 `;
@@ -356,9 +371,24 @@ Object {
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Metadata 1`] = `
-Map {
-  417 => Map {
-    931 => 108,
+Object {
+  "byAssetFilename": Map {
+    "main.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async.js" => Object {
+      "positionByModuleId": Map {
+        417 => Object {
+          "charLength": 108,
+          "charOffset": 135,
+        },
+      },
+    },
+  },
+  "byModule": Map {
+    417 => Map {
+      931 => 108,
+    },
   },
 }
 `;

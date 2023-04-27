@@ -11,6 +11,7 @@ export function matchesWithStar(patternWithStar: string, input: string): boolean
       .map((x) => escapeRegExp(x))
       .join('.*') +
     '$';
+  // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
   const regExp: RegExp = new RegExp(pattern);
   return regExp.test(input);
 }
