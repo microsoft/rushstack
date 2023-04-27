@@ -38,6 +38,14 @@ export class Async {
 }
 
 // @public
+export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
+    // (undocumented)
+    [Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]>;
+    constructor(iterable?: Iterable<T>);
+    push(item: T): void;
+}
+
+// @public
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
@@ -215,7 +223,7 @@ export class FileSystem {
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
-    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -445,6 +453,16 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveAsyncOptions extends IImportResolveOptions {
+    getRealPathAsync?: (filePath: string) => Promise<string>;
+}
+
+// @public
+export interface IImportResolveModuleAsyncOptions extends IImportResolveAsyncOptions {
+    modulePath: string;
+}
+
+// @public
 export interface IImportResolveModuleOptions extends IImportResolveOptions {
     modulePath: string;
 }
@@ -453,7 +471,13 @@ export interface IImportResolveModuleOptions extends IImportResolveOptions {
 export interface IImportResolveOptions {
     allowSelfReference?: boolean;
     baseFolderPath: string;
+    getRealPath?: (filePath: string) => string;
     includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOptions {
+    packageName: string;
 }
 
 // @public
@@ -504,7 +528,9 @@ export interface IJsonSchemaValidateOptions {
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
     static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolveModuleAsync(options: IImportResolveModuleAsyncOptions): Promise<string>;
     static resolvePackage(options: IImportResolvePackageOptions): string;
+    static resolvePackageAsync(options: IImportResolvePackageAsyncOptions): Promise<string>;
 }
 
 // @public

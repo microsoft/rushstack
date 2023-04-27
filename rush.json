@@ -878,6 +878,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/package-extractor",
+      "projectFolder": "libraries/package-extractor",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-config-file",
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",

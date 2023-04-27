@@ -1062,7 +1062,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.copyFiles}.
    */
-  public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
+  public static async copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void> {
     options = {
       ...COPY_FILES_DEFAULT_OPTIONS,
       ...options

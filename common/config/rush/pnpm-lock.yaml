@@ -2042,6 +2042,39 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
 
+  ../../libraries/package-extractor:
+    specifiers:
+      '@pnpm/link-bins': ~5.3.7
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/terminal': workspace:*
+      '@types/glob': 7.1.1
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+      '@types/npm-packlist': ~1.1.1
+      eslint: ~8.7.0
+      ignore: ~5.1.6
+      jszip: ~3.8.0
+      npm-packlist: ~2.1.2
+    dependencies:
+      '@pnpm/link-bins': 5.3.25
+      '@rushstack/node-core-library': link:../node-core-library
+      '@rushstack/terminal': link:../terminal
+      ignore: 5.1.9
+      jszip: 3.8.0
+      npm-packlist: 2.1.5
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/glob': 7.1.1
+      '@types/heft-jest': 1.0.1
+      '@types/node': 14.18.36
+      '@types/npm-packlist': 1.1.2
+      eslint: 8.7.0
+
   ../../libraries/rig-package:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -2076,6 +2109,7 @@ importers:
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/package-deps-hash': workspace:*
+      '@rushstack/package-extractor': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/stream-collator': workspace:*
       '@rushstack/terminal': workspace:*
@@ -2090,9 +2124,7 @@ importers:
       '@types/node': 14.18.36
       '@types/node-fetch': 2.6.2
       '@types/npm-package-arg': 6.1.0
-      '@types/npm-packlist': ~1.1.1
       '@types/read-package-tree': 5.1.0
-      '@types/resolve': 1.20.2
       '@types/semver': 7.3.5
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
@@ -2111,14 +2143,11 @@ importers:
       ignore: ~5.1.6
       inquirer: ~7.3.3
       js-yaml: ~3.13.1
-      jszip: ~3.8.0
       lodash: ~4.17.15
       node-fetch: 2.6.7
       npm-check: ~6.0.1
       npm-package-arg: ~6.1.0
-      npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
-      resolve: ~1.22.1
       rxjs: ~6.6.7
       semver: ~7.3.0
       ssri: ~8.0.0
@@ -2132,6 +2161,7 @@ importers:
       '@rushstack/heft-config-file': link:../heft-config-file
       '@rushstack/node-core-library': link:../node-core-library
       '@rushstack/package-deps-hash': link:../package-deps-hash
+      '@rushstack/package-extractor': link:../package-extractor
       '@rushstack/rig-package': link:../rig-package
       '@rushstack/stream-collator': link:../stream-collator
       '@rushstack/terminal': link:../terminal
@@ -2150,14 +2180,11 @@ importers:
       ignore: 5.1.9
       inquirer: 7.3.3
       js-yaml: 3.13.1
-      jszip: 3.8.0
       lodash: 4.17.21
       node-fetch: 2.6.7
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
-      npm-packlist: 2.1.5
       read-package-tree: 5.1.6
-      resolve: 1.22.1
       rxjs: 6.6.7
       semver: 7.3.8
       ssri: 8.0.1
@@ -2180,9 +2207,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 14.18.36
       '@types/npm-package-arg': 6.1.0
-      '@types/npm-packlist': 1.1.2
       '@types/read-package-tree': 5.1.0
-      '@types/resolve': 1.20.2
       '@types/semver': 7.3.5
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0

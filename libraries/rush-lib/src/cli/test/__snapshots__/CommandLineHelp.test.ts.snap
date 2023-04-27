@@ -335,6 +335,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
 "usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO_NAME] [--overwrite]
                    [-t PATH] [--create-archive ARCHIVE_PATH]
+                   [--create-archive-only]
                    
 
 After building the repo, \\"rush deploy\\" can be used to prepare a deployment by 
@@ -374,6 +375,11 @@ Optional arguments:
                         archive file will be placed according to the 
                         designated path, relative to the target folder. 
                         Supported file extensions: .zip
+  --create-archive-only
+                        If specified, \\"rush deploy\\" will only create an 
+                        archive containing the contents of the target folder. 
+                        The target folder will not be modified other than to 
+                        create the archive file.
 "
 `;
 

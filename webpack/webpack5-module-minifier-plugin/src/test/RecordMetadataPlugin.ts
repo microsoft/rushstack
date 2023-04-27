@@ -2,21 +2,29 @@
 // See LICENSE in the project root for license information.
 
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
-import type { IModuleStats, IModuleMinifierPluginStats } from '../ModuleMinifierPlugin.types';
+import type { IModuleStats, IModuleMinifierPluginStats, IAssetStats } from '../ModuleMinifierPlugin.types';
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 
 export type IFlattenedModuleMetadata = Map<string | number, number | 'inline'>;
-export type IFlattenedCompilationMetadata = Map<string | number, IFlattenedModuleMetadata>;
+export type IFlattenedCompilationModuleMetadata = Map<string | number, IFlattenedModuleMetadata>;
+
+export interface IFlattenedCompilationMetadata {
+  byModule: IFlattenedCompilationModuleMetadata;
+  byAssetFilename: Map<string, IAssetStats>;
+}
 
 export class RecordMetadataPlugin implements WebpackPluginInstance {
-  public readonly metadata: IFlattenedCompilationMetadata = new Map();
+  public readonly metadata: IFlattenedCompilationMetadata = {
+    byModule: new Map(),
+    byAssetFilename: new Map()
+  };
 
   public apply(compiler: Compiler): void {
     compiler.hooks.afterEmit.tap('RecordMetadataPlugin', (compilation: Compilation) => {
       const { chunkGraph } = compilation;
 
       const { metadata } = this;
-      metadata.clear();
+      metadata.byModule.clear();
 
       const compilationMetadata: IModuleMinifierPluginStats | undefined =
         ModuleMinifierPlugin.getCompilationStatistics(compilation);
@@ -24,7 +32,8 @@ export class RecordMetadataPlugin implements WebpackPluginInstance {
         throw new Error(`Unable to get ModuleMinfierPlugin statistics`);
       }
 
-      const { metadataByModule } = compilationMetadata;
+      const { metadataByModule, metadataByAssetFileName } = compilationMetadata;
+      metadata.byAssetFilename = metadataByAssetFileName;
 
       for (const module of compilation.modules) {
         const id: string | number = chunkGraph.getModuleId(module);
@@ -40,7 +49,7 @@ export class RecordMetadataPlugin implements WebpackPluginInstance {
 
             flattenedModule.set(chunkId, typeof size === 'number' ? size : 'inline');
           }
-          metadata.set(id, flattenedModule);
+          metadata.byModule.set(id, flattenedModule);
         }
       }
     });
