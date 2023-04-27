@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix issues with Import.resolve* APIs when attempting to resolve system modules paths (ex. 'fs/promises') and self-referencing module paths",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

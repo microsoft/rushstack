@@ -167,6 +167,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/package-extractor",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
