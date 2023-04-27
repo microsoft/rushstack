@@ -25,6 +25,7 @@ export const App = (): JSX.Element => {
     async function loadLockfileAsync(): Promise<void> {
       const lockfile = await readLockfileAsync();
       dispatch(loadEntries(lockfile));
+
       linter(lockfile);
     }
     loadLockfileAsync().catch((e) => {
