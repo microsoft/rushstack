@@ -1,0 +1,31 @@
+{
+  "name": "@rushstack/package-extractor",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/package-extractor_v0.1.0",
+      "date": "Thu, 27 Apr 2023 17:18:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Create new @rushstack/package-extractor package allowing for deployment of a target package and associated dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.56.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.1`"
+          }
+        ]
+      }
+    }
+  ]
+}

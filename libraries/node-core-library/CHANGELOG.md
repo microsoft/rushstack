@@ -1,6 +1,19 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Apr 2023 17:18:42 GMT and should not be manually modified.
+
+## 3.56.0
+Thu, 27 Apr 2023 17:18:42 GMT
+
+### Minor changes
+
+- Adds the AsyncQueue class, a queue type that allows for iterating and concurrently adding to the queue
+- Adds support for async Import.resolve* APIs
+
+### Patches
+
+- Fix a typings issue in FileSystem.copyFilesAsync
+- Fix issues with Import.resolve* APIs when attempting to resolve system modules paths (ex. 'fs/promises') and self-referencing module paths
 
 ## 3.55.2
 Fri, 10 Feb 2023 01:18:51 GMT
