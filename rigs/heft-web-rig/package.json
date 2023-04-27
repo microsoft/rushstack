@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-web-rig",
-  "version": "0.14.10",
+  "version": "0.14.11",
   "description": "A rig package for web browser projects that build using Heft",
   "license": "MIT",
   "scripts": {
@@ -38,7 +38,7 @@
     "url-loader": "~4.1.1",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-merge": "~5.8.0",
-    "webpack": "~5.78.0"
+    "webpack": "~5.80.0"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"

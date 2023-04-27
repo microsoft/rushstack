@@ -96,5 +96,48 @@
      * If set to true, allow writing to the cache. Defaults to false.
      */
     // "isCacheWriteAllowed": true
+  },
+
+  /**
+   * Use this configuration with "cacheProvider"="http"
+   */
+  "httpConfiguration": {
+    /**
+     * (Required) The URL of the server that stores the caches.
+     * Example: "https://build-cacches.example.com/"
+     */
+    // "url": "https://build-cacches.example.com/",
+
+    /**
+     * (Optional) The HTTP method to use when writing to the cache (defaults to PUT).
+     * Should be one of PUT, POST, or PATCH.
+     * Example: "PUT"
+     */
+    // "uploadMethod": "PUT",
+
+    /**
+     * (Optional) HTTP headers to pass to the cache server.
+     * Example: { "X-HTTP-Company-Id": "109283" }
+     */
+    // "headers": {},
+
+    /**
+     * (Optional) Shell command that prints the authorization token needed to communicate with the
+     * cache server, and exits with exit code 0. This command will be executed from the root of
+     * the monorepo.
+     * Example: { "exec": "node", "args": ["common/scripts/auth.js"] }
+     */
+    // "tokenHandler": { "exec": "node", "args": ["common/scripts/auth.js"] },
+
+    /**
+     * (Optional) Prefix for cache keys.
+     * Example: "my-company-"
+     */
+    // "cacheKeyPrefix": "",
+
+    /**
+     * (Optional) If set to true, allow writing to the cache. Defaults to false.
+     */
+    // "isCacheWriteAllowed": true
   }
 }

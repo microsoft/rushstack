@@ -204,6 +204,11 @@ export class VersionAction extends BaseRushAction {
       this.rushConfiguration.rushJsonFile
     );
 
+    // Respect the `ensureConsistentVersions` field in rush.json
+    if (!rushConfig.ensureConsistentVersions) {
+      return;
+    }
+
     const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
     if (mismatchFinder.numberOfMismatches) {
       throw new Error(

@@ -779,30 +779,30 @@ export class PublishUtilities {
       const isWorkspaceWildcardVersion: boolean =
         requiredVersion.specifierType === DependencySpecifierType.Workspace &&
         requiredVersion.versionSpecifier === '*';
-      const alwaysUpdate: boolean =
-        (!!prereleaseToken &&
-          prereleaseToken.hasValue &&
-          !allChanges.packageChanges.has(parentPackageName)) ||
-        isWorkspaceWildcardVersion;
+
+      const isPrerelease: boolean =
+        !!prereleaseToken && prereleaseToken.hasValue && !allChanges.packageChanges.has(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
-      if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
+      if (
+        isPrerelease ||
+        isWorkspaceWildcardVersion ||
+        requiredVersion.versionSpecifier !== change.newRangeDependency
+      ) {
         let changeType: ChangeType | undefined;
-        if (changeType === undefined) {
-          // Propagate hotfix changes to dependencies
-          if (change.changeType === ChangeType.hotfix) {
-            changeType = ChangeType.hotfix;
-          } else {
-            // Either it already satisfies the new version, or doesn't.
-            // If not, the downstream dep needs to be republished.
-            // The downstream dep will also need to be republished if using `workspace:*` as this will publish
-            // as the exact version.
-            changeType =
-              semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
-              !isWorkspaceWildcardVersion
-                ? ChangeType.dependency
-                : ChangeType.patch;
-          }
+        // Propagate hotfix changes to dependencies
+        if (change.changeType === ChangeType.hotfix) {
+          changeType = ChangeType.hotfix;
+        } else {
+          // Either it already satisfies the new version, or doesn't.
+          // If not, the downstream dep needs to be republished.
+          // The downstream dep will also need to be republished if using `workspace:*` as this will publish
+          // as the exact version.
+          changeType =
+            !isWorkspaceWildcardVersion &&
+            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier)
+              ? ChangeType.dependency
+              : ChangeType.patch;
         }
 
         hasChanges = PublishUtilities._addChange({
@@ -817,7 +817,7 @@ export class PublishUtilities {
           projectsToExclude
         });
 
-        if (hasChanges || alwaysUpdate) {
+        if (hasChanges || isPrerelease) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
           // caused a version bump.
           hasChanges =

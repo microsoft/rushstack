@@ -79,6 +79,7 @@ export class PluginManager {
 
     tryAddBuiltInPlugin('rush-amazon-s3-build-cache-plugin');
     tryAddBuiltInPlugin('rush-azure-storage-build-cache-plugin');
+    tryAddBuiltInPlugin('rush-http-build-cache-plugin');
     // This is a secondary plugin inside the `@rushstack/rush-azure-storage-build-cache-plugin`
     // package. Because that package comes with Rush (for now), it needs to get registered here.
     // If the necessary config file doesn't exist, this plugin doesn't do anything.

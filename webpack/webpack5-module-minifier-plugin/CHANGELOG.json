@@ -2,6 +2,30 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.4.0",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.0",
+      "date": "Wed, 26 Apr 2023 00:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Emit metadata about character position of rendered modules."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.6",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.3.6",
+      "date": "Thu, 20 Apr 2023 15:16:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update webpack to v5.80.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.5",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.3.5",
       "date": "Fri, 07 Apr 2023 22:19:21 GMT",

@@ -41,7 +41,8 @@ import type {
   IPostProcessFragmentContext,
   IDehydratedAssets,
   IModuleStats,
-  IModuleMinifierPluginStats as IModuleMinifierPluginStats
+  IModuleMinifierPluginStats as IModuleMinifierPluginStats,
+  IAssetStats
 } from './ModuleMinifierPlugin.types';
 import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
@@ -75,6 +76,8 @@ interface ISourceCacheEntry {
   hash: string;
 }
 
+const compilationMetadataMap: WeakMap<Compilation, IModuleMinifierPluginStats> = new WeakMap();
+
 function hashCodeFragment(code: string): string {
   return createHash('sha256').update(code).digest('hex');
 }
@@ -91,11 +94,21 @@ function defaultRehydrateAssets(
 ): IDehydratedAssets {
   const { assets, modules } = dehydratedAssets;
 
+  const compilationMetadata: IModuleMinifierPluginStats | undefined = compilationMetadataMap.get(compilation);
+  if (!compilationMetadata) {
+    throw new Error(`Could not get compilation metadata`);
+  }
+
+  const { metadataByAssetFileName } = compilationMetadata;
+
   // Now assets/modules contain fully minified code. Rehydrate.
   for (const [assetName, info] of assets) {
     const banner: string = info.type === 'javascript' ? generateLicenseFileForAsset(compilation, info) : '';
 
-    const replacementSource: sources.Source = rehydrateAsset(compilation, info, modules, banner);
+    const replacementSource: sources.Source = rehydrateAsset(compilation, info, modules, banner, true);
+    metadataByAssetFileName.set(assetName, {
+      positionByModuleId: info.renderInfo
+    });
     compilation.updateAsset(assetName, replacementSource);
   }
 
@@ -111,8 +124,6 @@ function isMinificationResultError(
 function isLicenseComment(comment: Comment): boolean {
   return LICENSE_COMMENT_REGEX.test(comment.value);
 }
-
-const compilationMetadataMap: WeakMap<Compilation, IModuleMinifierPluginStats> = new WeakMap();
 
 /**
  * Webpack plugin that minifies code on a per-module basis rather than per-asset. The actual minification is handled by the input `minifier` object.
@@ -217,8 +228,10 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
       const minifiedAssets: IAssetMap = new Map();
 
       const metadataByModule: WeakMap<Module, IModuleStats> = new WeakMap();
+      const metadataByAssetFileName: Map<string, IAssetStats> = new Map();
       const compilationStatistics: IModuleMinifierPluginStats = {
-        metadataByModule
+        metadataByModule,
+        metadataByAssetFileName
       };
       compilationMetadataMap.set(compilation, compilationStatistics);
       function getOrCreateMetadata(mod: Module): IModuleStats {
@@ -380,7 +393,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
                     minifiedModules.set(hash, {
                       source: cached,
-                      module: mod
+                      module: mod,
+                      id
                     });
                   } catch (err) {
                     compilation.errors.push(err);
@@ -473,6 +487,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                         source: new CachedSource(withIds),
                         chunk,
                         fileName: assetName,
+                        renderInfo: new Map(),
                         type: 'javascript'
                       });
                     } catch (err) {
@@ -494,6 +509,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                 }),
                 chunk,
                 fileName: assetName,
+                renderInfo: new Map(),
                 type: 'unknown'
               });
             }
