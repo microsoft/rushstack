@@ -188,6 +188,7 @@ export class PackageExtractor {
     const {
       terminal,
       projectConfigurations,
+      sourceRootFolder,
       targetRootFolder,
       mainProjectName,
       overwriteExisting,
@@ -245,7 +246,7 @@ export class PackageExtractor {
       foldersToCopy: new Set(),
       projectConfigurationsByName: new Map(projectConfigurations.map((p) => [p.projectName, p])),
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
-      symlinkAnalyzer: new SymlinkAnalyzer(),
+      symlinkAnalyzer: new SymlinkAnalyzer({ requiredSourceParentPath: sourceRootFolder }),
       archiver
     };
 
@@ -716,16 +717,6 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    // Do a check to make sure that the link target path is not outside the source folder
-    const { sourceRootFolder } = options;
-    const linkTargetPath: string = path.relative(sourceRootFolder, originalLinkInfo.targetPath);
-    if (linkTargetPath.startsWith('..')) {
-      throw new Error(
-        `Symlink targets not under source folder "${sourceRootFolder}": ` +
-          `${originalLinkInfo.linkPath} -> ${originalLinkInfo.targetPath}`
-      );
-    }
-
     const linkInfo: ILinkInfo = {
       kind: originalLinkInfo.kind,
       linkPath: this._remapPathForExtractorFolder(originalLinkInfo.linkPath, options),
@@ -830,11 +821,15 @@ export class PackageExtractor {
         const extractedProjectNodeModulesFolder: string = path.join(extractedProjectFolder, 'node_modules');
         const extractedProjectBinFolder: string = path.join(extractedProjectNodeModulesFolder, '.bin');
 
-        await pnpmLinkBins(extractedProjectNodeModulesFolder, extractedProjectBinFolder, {
-          warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
-        });
+        const linkedBinPackageNames: string[] = await pnpmLinkBins(
+          extractedProjectNodeModulesFolder,
+          extractedProjectBinFolder,
+          {
+            warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
+          }
+        );
 
-        if (state.archiver) {
+        if (linkedBinPackageNames.length && state.archiver) {
           const binFolderItems: string[] = await FileSystem.readFolderItemNamesAsync(
             extractedProjectBinFolder
           );

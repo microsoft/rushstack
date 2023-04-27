@@ -8,12 +8,7 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 
 // @public
-export class DeployManager {
-    deployAsync(options: IDeployOptions): Promise<void>;
-}
-
-// @public
-export interface IDeployOptions {
+export interface IExtractorOptions {
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
     folderToCopy?: string;
@@ -23,8 +18,7 @@ export interface IDeployOptions {
     mainProjectName: string;
     overwriteExisting: boolean;
     pnpmInstallFolder?: string;
-    projectConfigurations: IDeployProjectConfiguration[];
-    scenarioName: string;
+    projectConfigurations: IExtractorProjectConfiguration[];
     sourceRootFolder: string;
     targetRootFolder: string;
     terminal: ITerminal;
@@ -32,12 +26,17 @@ export interface IDeployOptions {
 }
 
 // @public
-export interface IDeployProjectConfiguration {
+export interface IExtractorProjectConfiguration {
     additionalDependenciesToInclude?: string[];
     additionalProjectsToInclude?: string[];
     dependenciesToExclude?: string[];
     projectFolder: string;
     projectName: string;
+}
+
+// @public
+export class PackageExtractor {
+    extractAsync(options: IExtractorOptions): Promise<void>;
 }
 
 // (No @packageDocumentation comment for this package)

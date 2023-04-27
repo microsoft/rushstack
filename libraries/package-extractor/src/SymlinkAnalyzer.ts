@@ -56,12 +56,22 @@ export interface ILinkInfo {
   targetPath: string;
 }
 
+export interface ISymlinkAnalyzerOptions {
+  requiredSourceParentPath?: string;
+}
+
 export class SymlinkAnalyzer {
+  private readonly _requiredSourceParentPath: string | undefined;
+
   // The directory tree discovered so far
   private readonly _nodesByPath: Map<string, PathNode> = new Map<string, PathNode>();
 
   // The symlinks that we encountered while building the directory tree
   private readonly _linkInfosByPath: Map<string, ILinkInfo> = new Map<string, ILinkInfo>();
+
+  public constructor(options: ISymlinkAnalyzerOptions = {}) {
+    this._requiredSourceParentPath = options.requiredSourceParentPath;
+  }
 
   public async analyzePathAsync(inputPath: string, preserveLinks: boolean = false): Promise<PathNode> {
     // First, try to short-circuit the analysis if we've already analyzed this path
@@ -91,6 +101,21 @@ export class SymlinkAnalyzer {
           // Link target paths can be relative or absolute, so we need to resolve them
           const linkTargetPath: string = await FileSystem.readLinkAsync(currentPath);
           const resolvedLinkTargetPath: string = path.resolve(path.dirname(currentPath), linkTargetPath);
+
+          // Do a check to make sure that the link target path is not outside the source folder
+          if (this._requiredSourceParentPath) {
+            const relativeLinkTargetPath: string = path.relative(
+              this._requiredSourceParentPath,
+              resolvedLinkTargetPath
+            );
+            if (relativeLinkTargetPath.startsWith('..')) {
+              throw new Error(
+                `Symlink targets not under folder "${this._requiredSourceParentPath}": ` +
+                  `${currentPath} -> ${resolvedLinkTargetPath}`
+              );
+            }
+          }
+
           currentNode = {
             kind: 'link',
             nodePath: currentPath,

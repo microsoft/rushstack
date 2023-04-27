@@ -4,10 +4,10 @@
 import * as path from 'path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
-import type {
-  DeployManager,
-  IDeployProjectConfiguration
-} from '@rushstack/package-extractor/lib/DeployManager';
+import {
+  PackageExtractor,
+  IExtractorProjectConfiguration
+} from '@rushstack/package-extractor/lib/PackageExtractor';
 
 import { BaseRushAction } from './BaseRushAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -158,7 +158,7 @@ export class DeployAction extends BaseRushAction {
     }
 
     // Construct the project list for the deployer
-    const projectConfigurations: IDeployProjectConfiguration[] = [];
+    const projectConfigurations: IExtractorProjectConfiguration[] = [];
     for (const project of this.rushConfiguration.projects) {
       const scenarioProjectJson: IDeployScenarioProjectJson | undefined =
         scenarioConfiguration.projectJsonsByName.get(project.packageName);
@@ -172,14 +172,13 @@ export class DeployAction extends BaseRushAction {
     }
 
     // Call the deploy manager
-    const { DeployManager } = await import(
+    const { PackageExtractor } = await import(
       /* webpackChunkName: 'DeployManager' */
-      '@rushstack/package-extractor/lib/DeployManager'
+      '@rushstack/package-extractor/lib/PackageExtractor'
     );
-    const deployManager: DeployManager = new DeployManager();
-    await deployManager.deployAsync({
+    const deployManager: PackageExtractor = new PackageExtractor();
+    await deployManager.extractAsync({
       terminal: this._logger.terminal,
-      scenarioName: path.basename(scenarioFilePath),
       overwriteExisting: !!this._overwrite.value,
       includeDevDependencies: scenarioConfiguration.json.includeDevDependencies,
       includeNpmIgnoreFiles: scenarioConfiguration.json.includeNpmIgnoreFiles,
