@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

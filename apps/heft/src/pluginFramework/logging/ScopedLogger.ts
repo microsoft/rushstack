@@ -1,10 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ITerminal, Terminal, ITerminalProvider } from '@rushstack/node-core-library';
+import {
+  PrefixProxyTerminalProvider,
+  Terminal,
+  type ITerminalProvider,
+  type ITerminal
+} from '@rushstack/node-core-library';
 
 import { IHeftPlugin } from '../IHeftPlugin';
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { LoggingManager } from './LoggingManager';
 
 export interface IScopedLoggerOptions {
@@ -71,10 +75,10 @@ export class ScopedLogger implements IScopedLogger {
     this._requestingPlugin = options.requestingPlugin;
     this.loggerName = options.loggerName;
 
-    this.terminalProvider = new PrefixProxyTerminalProvider(
-      options.terminalProvider,
-      `[${this.loggerName}] `
-    );
+    this.terminalProvider = new PrefixProxyTerminalProvider({
+      terminalProvider: options.terminalProvider,
+      prefix: `[${this.loggerName}] `
+    });
     this.terminal = new Terminal(this.terminalProvider);
   }
 

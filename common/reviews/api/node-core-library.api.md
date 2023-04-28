@@ -636,6 +636,12 @@ export interface IPeerDependenciesMetaTable {
     };
 }
 
+// @beta
+export interface IPrefixProxyTerminalProviderOptions {
+    prefix: string;
+    terminalProvider: ITerminalProvider;
+}
+
 // @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
@@ -850,6 +856,17 @@ export enum PosixModeBits {
     UserExecute = 64,
     UserRead = 256,
     UserWrite = 128
+}
+
+// @beta
+export class PrefixProxyTerminalProvider implements ITerminalProvider {
+    constructor(options: IPrefixProxyTerminalProviderOptions);
+    // @override (undocumented)
+    get eolCharacter(): string;
+    // @override (undocumented)
+    get supportsColor(): boolean;
+    // @override (undocumented)
+    write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public

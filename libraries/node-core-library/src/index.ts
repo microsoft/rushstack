@@ -104,5 +104,9 @@ export {
   StringBufferTerminalProvider,
   IStringBufferOutputOptions
 } from './Terminal/StringBufferTerminalProvider';
+export {
+  PrefixProxyTerminalProvider,
+  IPrefixProxyTerminalProviderOptions
+} from './Terminal/PrefixProxyTerminalProvider';
 export { TerminalWritable, ITerminalWritableOptions } from './Terminal/TerminalWritable';
 export { TypeUuid } from './TypeUuid';
