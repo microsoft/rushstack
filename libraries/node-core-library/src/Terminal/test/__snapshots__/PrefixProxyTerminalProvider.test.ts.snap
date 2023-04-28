@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PrefixProxyTerminalProvider write writes a message 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] test message",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider write writes a message with newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1[n][prefix] message 2[n][prefix] message 3",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider write writes a message with provider newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1[n][prefix] message 2[n][prefix] message 3",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider write writes a mix of messages with and without newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1message 2[n][prefix] message 3[n][prefix] message 4message 5[n][prefix] message 6",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider write writes messages without newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1message 2message 3",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider writeLine writes a message line 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] test message[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider writeLine writes a message line with newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1[n][prefix] message 2[n][prefix] message 3[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider writeLine writes a message line with provider newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1[n][prefix] message 2[n][prefix] message 3[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider writeLine writes a mix of message lines with and without newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix] message 1[n][prefix] message 2[n][prefix] message 3[n][prefix] [n][prefix] message 4[n][prefix] message 5[n][prefix] message 6[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
