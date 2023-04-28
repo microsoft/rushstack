@@ -694,11 +694,8 @@ export interface ITerminalProvider {
 
 // @beta
 export interface ITerminalWritableOptions {
-    // (undocumented)
     severity: TerminalProviderSeverity;
-    // (undocumented)
     terminal: ITerminal;
-    // (undocumented)
     writableOptions?: WritableOptions;
 }
 
