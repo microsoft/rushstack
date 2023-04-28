@@ -8,6 +8,8 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
+import { Writable } from 'stream';
+import { WritableOptions } from 'stream';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -690,6 +692,13 @@ export interface ITerminalProvider {
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
+// @beta
+export interface ITerminalWritableOptions {
+    severity: TerminalProviderSeverity;
+    terminal: ITerminal;
+    writableOptions?: WritableOptions;
+}
+
 // @public
 export class JsonFile {
     // @internal (undocumented)
@@ -923,6 +932,13 @@ export enum TerminalProviderSeverity {
     verbose = 3,
     // (undocumented)
     warning = 1
+}
+
+// @beta
+export class TerminalWritable extends Writable {
+    constructor(options: ITerminalWritableOptions);
+    // (undocumented)
+    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
 }
 
 // @public
