@@ -34,13 +34,14 @@ function escapeRegExp(literal: string): string {
 export class PrefixProxyTerminalProvider implements ITerminalProvider {
   private _parentTerminalProvider: ITerminalProvider;
   private _prefix: string;
-  private _isNewline: boolean = true;
+  private _currentPrefix: string;
   private _newlineRegex: RegExp;
 
   public constructor(options: IPrefixProxyTerminalProviderOptions) {
     const { terminalProvider, prefix } = options;
     this._parentTerminalProvider = terminalProvider;
     this._prefix = prefix;
+    this._currentPrefix = prefix;
     // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
     this._newlineRegex = new RegExp(`${escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
   }
@@ -65,21 +66,18 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
       // Extract the line, add the prefix, and write it out with the newline
       const newlineIndex: number = newlineMatch.index;
       const newIndex: number = newlineIndex + newlineMatch[0].length;
-      const dataToWrite: string = `${this._isNewline ? this._prefix : ''}${data.substring(
-        currentIndex,
-        newIndex
-      )}`;
+      const dataToWrite: string = `${this._currentPrefix}${data.substring(currentIndex, newIndex)}`;
       this._parentTerminalProvider.write(dataToWrite, severity);
       // Update the currentIndex to start the search from the char after the newline
       currentIndex = newIndex;
-      this._isNewline = true;
+      this._currentPrefix = this._prefix;
     }
 
     // The remaining data is not postfixed by a newline, so write out the data and set _isNewline to false
     const remainingData: string = data.substring(currentIndex);
     if (remainingData.length) {
-      this._parentTerminalProvider.write(`${this._isNewline ? this._prefix : ''}${remainingData}`, severity);
-      this._isNewline = false;
+      this._parentTerminalProvider.write(`${this._currentPrefix}${remainingData}`, severity);
+      this._currentPrefix = '';
     }
   }
 }
