@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import type { ITerminal } from './ITerminal';
 import { TerminalProviderSeverity } from './ITerminalProvider';
 import { Writable, type WritableOptions } from 'stream';
