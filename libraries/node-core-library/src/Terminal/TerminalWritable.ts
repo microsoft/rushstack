@@ -1,53 +1,65 @@
 import type { ITerminal } from './ITerminal';
+import { TerminalProviderSeverity } from './ITerminalProvider';
 import { Writable, type WritableOptions } from 'stream';
-
-/**
- * Supported output types for {@link TerminalWritable}. The selected output type
- * determines how the data is written to the terminal.
- *
- * @public
- */
-export type TerminalOutputType = 'info' | 'error';
 
 /**
  * Options for {@link TerminalWritable}.
  *
- * @public
+ * @beta
  */
 export interface ITerminalWritableOptions {
   terminal: ITerminal;
-  type: TerminalOutputType;
+  severity: TerminalProviderSeverity;
   writableOptions?: WritableOptions;
 }
 
 /**
  * A adapter to allow writing to a provided terminal using Writable streams.
  *
- * @public
+ * @beta
  */
 export class TerminalWritable extends Writable {
   private _writeMethod: (data: string) => void;
 
   public constructor(options: ITerminalWritableOptions) {
-    const { terminal, type, writableOptions } = options;
+    const { terminal, severity, writableOptions } = options;
     super(writableOptions);
 
     this._writev = undefined;
-    switch (type) {
-      case 'info':
+    switch (severity) {
+      case TerminalProviderSeverity.log:
         this._writeMethod = terminal.write.bind(terminal);
         break;
-      case 'error':
+      case TerminalProviderSeverity.verbose:
+        this._writeMethod = terminal.writeVerbose.bind(terminal);
+        break;
+      case TerminalProviderSeverity.debug:
+        this._writeMethod = terminal.writeDebug.bind(terminal);
+        break;
+      case TerminalProviderSeverity.warning:
+        this._writeMethod = terminal.writeWarning.bind(terminal);
+        break;
+      case TerminalProviderSeverity.error:
         this._writeMethod = terminal.writeError.bind(terminal);
         break;
       default:
-        throw new Error(`Unsupported output type: ${type}`);
+        throw new Error(`Unknown severity: ${severity}`);
     }
   }
 
-  public _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: () => void): void {
-    const chunkData: string | Buffer = typeof chunk === 'string' ? chunk : Buffer.from(chunk);
-    this._writeMethod(chunkData.toString());
+  public _write(
+    chunk: string | Buffer | Uint8Array,
+    encoding: string,
+    // eslint-disable-next-line @rushstack/no-new-null
+    callback: (error?: Error | null) => void
+  ): void {
+    try {
+      const chunkData: string | Buffer = typeof chunk === 'string' ? chunk : Buffer.from(chunk);
+      this._writeMethod(chunkData.toString());
+    } catch (e: unknown) {
+      callback(e as Error);
+      return;
+    }
     callback();
   }
 }

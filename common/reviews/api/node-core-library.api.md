@@ -692,14 +692,12 @@ export interface ITerminalProvider {
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
-// @public
+// @beta
 export interface ITerminalWritableOptions {
-    // Warning: (ae-incompatible-release-tags) The symbol "terminal" is marked as @public, but its signature references "ITerminal" which is marked as @beta
-    //
+    // (undocumented)
+    severity: TerminalProviderSeverity;
     // (undocumented)
     terminal: ITerminal;
-    // (undocumented)
-    type: TerminalOutputType;
     // (undocumented)
     writableOptions?: WritableOptions;
 }
@@ -925,9 +923,6 @@ export class Terminal implements ITerminal {
     writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
 }
 
-// @public
-export type TerminalOutputType = 'info' | 'error';
-
 // @beta
 export enum TerminalProviderSeverity {
     // (undocumented)
@@ -942,11 +937,11 @@ export enum TerminalProviderSeverity {
     warning = 1
 }
 
-// @public
+// @beta
 export class TerminalWritable extends Writable {
     constructor(options: ITerminalWritableOptions);
     // (undocumented)
-    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: () => void): void;
+    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
 }
 
 // @public

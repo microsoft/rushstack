@@ -97,7 +97,6 @@ export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
 export { ITerminal } from './Terminal/ITerminal';
 export { Terminal } from './Terminal/Terminal';
-export { TerminalWritable, ITerminalWritableOptions, TerminalOutputType } from './Terminal/TerminalWritable';
 export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Terminal/Colors';
 export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './Terminal/ConsoleTerminalProvider';
@@ -105,4 +104,5 @@ export {
   StringBufferTerminalProvider,
   IStringBufferOutputOptions
 } from './Terminal/StringBufferTerminalProvider';
+export { TerminalWritable, ITerminalWritableOptions } from './Terminal/TerminalWritable';
 export { TypeUuid } from './TypeUuid';
