@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/package-extractor_v0.1.1",
+      "date": "Fri, 28 Apr 2023 19:36:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix typings reference in package.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/package-extractor_v0.1.0",
       "date": "Thu, 27 Apr 2023 17:18:42 GMT",
