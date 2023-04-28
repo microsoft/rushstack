@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "lib/index.js",
-  "typings": "dist/deploy-manager.d.ts",
+  "typings": "dist/package-extractor.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "libraries/deploy-manager"
+    "directory": "libraries/package-extractor"
   },
   "scripts": {
     "build": "heft build --clean",
