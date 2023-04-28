@@ -8,6 +8,8 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
+import { Writable } from 'stream';
+import { WritableOptions } from 'stream';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -691,6 +693,18 @@ export interface ITerminalProvider {
 }
 
 // @public
+export interface ITerminalWritableOptions {
+    // Warning: (ae-incompatible-release-tags) The symbol "terminal" is marked as @public, but its signature references "ITerminal" which is marked as @beta
+    //
+    // (undocumented)
+    terminal: ITerminal;
+    // (undocumented)
+    type: TerminalOutputType;
+    // (undocumented)
+    writableOptions?: WritableOptions;
+}
+
+// @public
 export class JsonFile {
     // @internal (undocumented)
     static _formatPathForError: (path: string) => string;
@@ -911,6 +925,9 @@ export class Terminal implements ITerminal {
     writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
 }
 
+// @public
+export type TerminalOutputType = 'info' | 'error';
+
 // @beta
 export enum TerminalProviderSeverity {
     // (undocumented)
@@ -923,6 +940,13 @@ export enum TerminalProviderSeverity {
     verbose = 3,
     // (undocumented)
     warning = 1
+}
+
+// @public
+export class TerminalWritable extends Writable {
+    constructor(options: ITerminalWritableOptions);
+    // (undocumented)
+    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: () => void): void;
 }
 
 // @public
