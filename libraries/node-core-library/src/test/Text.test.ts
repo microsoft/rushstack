@@ -98,4 +98,25 @@ describe(Text.name, () => {
       expect(Text.convertToLf('\r \n')).toEqual('\n \n');
     });
   });
+
+  describe(Text.escapeRegExp.name, () => {
+    it('escapes special characters', () => {
+      expect(Text.escapeRegExp('')).toEqual('');
+      expect(Text.escapeRegExp('abc')).toEqual('abc');
+      expect(Text.escapeRegExp('a.c')).toEqual('a\\.c');
+      expect(Text.escapeRegExp('a*c')).toEqual('a\\*c');
+      expect(Text.escapeRegExp('a?c')).toEqual('a\\?c');
+      expect(Text.escapeRegExp('a+c')).toEqual('a\\+c');
+      expect(Text.escapeRegExp('a{c')).toEqual('a\\{c');
+      expect(Text.escapeRegExp('a}c')).toEqual('a\\}c');
+      expect(Text.escapeRegExp('a(c')).toEqual('a\\(c');
+      expect(Text.escapeRegExp('a)c')).toEqual('a\\)c');
+      expect(Text.escapeRegExp('a[c')).toEqual('a\\[c');
+      expect(Text.escapeRegExp('a]c')).toEqual('a\\]c');
+      expect(Text.escapeRegExp('a|c')).toEqual('a\\|c');
+      expect(Text.escapeRegExp('a^c')).toEqual('a\\^c');
+      expect(Text.escapeRegExp('a$c')).toEqual('a\\$c');
+      expect(Text.escapeRegExp('a\\c')).toEqual('a\\\\c');
+    });
+  });
 });

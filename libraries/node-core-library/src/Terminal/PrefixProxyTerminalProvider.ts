@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import { Text } from '../Text';
 
 /**
  * Options for {@link PrefixProxyTerminalProvider}.
@@ -18,11 +19,6 @@ export interface IPrefixProxyTerminalProviderOptions {
    * The prefix that should be added to each line of output.
    */
   prefix: string;
-}
-
-function escapeRegExp(literal: string): string {
-  // Perform a cheap escape of the literal string so that it can be used in a RegExp
-  return literal.replace(/[^A-Za-z0-9_]/g, '\\$&');
 }
 
 /**
@@ -43,7 +39,7 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
     this._prefix = prefix;
     this._currentPrefix = prefix;
     // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
-    this._newlineRegex = new RegExp(`${escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
+    this._newlineRegex = new RegExp(`${Text.escapeRegExp(terminalProvider.eolCharacter)}|\\n`, 'g');
   }
 
   /** @override */
