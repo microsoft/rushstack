@@ -135,6 +135,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-example-plugin-01](./build-tests/heft-example-plugin-01/) | This is an example heft plugin that exposes hooks for other plugins |
 | [/build-tests/heft-example-plugin-02](./build-tests/heft-example-plugin-02/) | This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01 |
 | [/build-tests/heft-fastify-test](./build-tests/heft-fastify-test/) | This project tests Heft support for the Fastify framework for Node.js services |
+| [/build-tests/heft-jest-preset-test](./build-tests/heft-jest-preset-test/) | This project illustrates configuring a Jest preset in a minimal Heft project |
 | [/build-tests/heft-jest-reporters-test](./build-tests/heft-jest-reporters-test/) | This project illustrates configuring Jest reporters in a minimal Heft project |
 | [/build-tests/heft-minimal-rig-test](./build-tests/heft-minimal-rig-test/) | This is a minimal rig package that is imported by the 'heft-minimal-rig-usage-test' project |
 | [/build-tests/heft-minimal-rig-usage-test](./build-tests/heft-minimal-rig-usage-test/) | A test project for Heft that resolves its compiler from the 'heft-minimal-rig-test' package |

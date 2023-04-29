@@ -24,7 +24,7 @@ export type IConfigurationFileOptions<TConfigurationFile> = IConfigurationFileOp
 
 // @beta (undocumented)
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
-    jsonPathMetadata?: IJsonPathsMetadata;
+    jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
     projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
     propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
@@ -45,8 +45,8 @@ export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFil
 }
 
 // @beta
-export interface ICustomJsonPathMetadata {
-    customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
+export interface ICustomJsonPathMetadata<TConfigurationFile> {
+    customResolver?: (resolverOptions: IJsonPathMetadataResolverOptions<TConfigurationFile>) => string;
     pathResolutionMethod?: PathResolutionMethod.custom;
 }
 
@@ -56,12 +56,20 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
 }
 
 // @beta (undocumented)
-export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
+export type IJsonPathMetadata<T> = ICustomJsonPathMetadata<T> | INonCustomJsonPathMetadata;
 
 // @beta
-export interface IJsonPathsMetadata {
+export interface IJsonPathMetadataResolverOptions<TConfigurationFile> {
+    configurationFile: Partial<TConfigurationFile>;
+    configurationFilePath: string;
+    propertyName: string;
+    propertyValue: string;
+}
+
+// @beta
+export interface IJsonPathsMetadata<TConfigurationFile> {
     // (undocumented)
-    [jsonPath: string]: IJsonPathMetadata;
+    [jsonPath: string]: IJsonPathMetadata<TConfigurationFile>;
 }
 
 // @beta (undocumented)
