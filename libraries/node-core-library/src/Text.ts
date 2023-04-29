@@ -171,4 +171,11 @@ export class Text {
     }
     return s + newlineKind; // no, add it
   }
+
+  /**
+   * Escapes a string so that it can be treated as a literal string when used in a regular expression.
+   */
+  public static escapeRegExp(literal: string): string {
+    return literal.replace(/[^A-Za-z0-9_]/g, '\\$&');
+  }
 }

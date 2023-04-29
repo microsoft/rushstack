@@ -5,8 +5,7 @@ import minimatch from 'minimatch';
 import * as path from 'path';
 import * as Webpack from 'webpack';
 import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
-import { NewlineKind } from '@rushstack/node-core-library';
-import * as lodash from 'lodash';
+import { NewlineKind, Text } from '@rushstack/node-core-library';
 import { IgnoreStringFunction } from '@rushstack/localization-utilities';
 
 import { Constants } from './utilities/Constants';
@@ -24,7 +23,7 @@ export interface IWebpackConfigurationUpdaterOptions {
   ignoreString: IgnoreStringFunction | undefined;
 }
 
-const FILE_TOKEN_REGEX: RegExp = new RegExp(lodash.escapeRegExp('[file]'));
+const FILE_TOKEN_REGEX: RegExp = new RegExp(Text.escapeRegExp('[file]'));
 
 export class WebpackConfigurationUpdater {
   public static amendWebpackConfigurationForMultiLocale(options: IWebpackConfigurationUpdaterOptions): void {
