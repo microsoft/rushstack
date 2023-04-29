@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 27 Apr 2023 17:18:42 GMT and should not be manually modified.
+This log was last generated on Sat, 29 Apr 2023 00:23:02 GMT and should not be manually modified.
+
+## 3.57.0
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Minor changes
+
+- Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider
+- Add a Writable stream adapter for ITerminal to allow writing to a terminal as a stream
 
 ## 3.56.0
 Thu, 27 Apr 2023 17:18:42 GMT
