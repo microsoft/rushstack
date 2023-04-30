@@ -170,7 +170,7 @@ export class DeployAction extends BaseRushAction {
 
     // Call the deploy manager
     const { PackageExtractor } = await import(
-      /* webpackChunkName: 'DeployManager' */
+      /* webpackChunkName: 'PackageExtractor' */
       '@rushstack/package-extractor'
     );
     const deployManager: PackageExtractor = new PackageExtractor();
