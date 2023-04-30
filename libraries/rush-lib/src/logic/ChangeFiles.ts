@@ -132,7 +132,7 @@ export class ChangeFiles {
 
       const files: string[] = await this.getFilesAsync();
       const filesToDelete: string[] = files.filter((filePath) => {
-        const changeRequest: IChangeInfo = JsonFile.load(filePath);
+        const changeRequest: IChangeInfo = await JsonFile.loadAsync(filePath);
         for (const changeInfo of changeRequest.changes!) {
           if (!packagesToInclude.has(changeInfo.packageName)) {
             return false;
