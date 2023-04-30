@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonSchema, Import } from '@rushstack/node-core-library';
+import { JsonFile, JsonSchema, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
 import schemaJson from '../schemas/change-file.schema.json';
-
-const glob: typeof import('glob') = Import.lazy('glob', require);
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -104,9 +102,11 @@ export class ChangeFiles {
   /**
    * Get the array of absolute paths of change files.
    */
-  public getFiles(): string[] {
+  public async getFilesAsync(): Promise<string[]> {
     if (!this._files) {
-      this._files = glob.sync(`${this._changesPath}/**/*.json`) || [];
+      const { default: glob } = await import('glob');
+      this._files =
+        (await LegacyAdapters.convertCallbackToPromise(glob, `${this._changesPath}/**/*.json`)) || [];
     }
 
     return this._files;
@@ -122,7 +122,7 @@ export class ChangeFiles {
   /**
    * Delete all change files
    */
-  public deleteAll(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): number {
+  public async deleteAllAsync(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): Promise<number> {
     if (updatedChangelogs) {
       // Skip changes files if the package's change log is not updated.
       const packagesToInclude: Set<string> = new Set<string>();
@@ -130,7 +130,8 @@ export class ChangeFiles {
         packagesToInclude.add(changelog.name);
       });
 
-      const filesToDelete: string[] = this.getFiles().filter((filePath) => {
+      const files: string[] = await this.getFilesAsync();
+      const filesToDelete: string[] = files.filter((filePath) => {
         const changeRequest: IChangeInfo = JsonFile.load(filePath);
         for (const changeInfo of changeRequest.changes!) {
           if (!packagesToInclude.has(changeInfo.packageName)) {
@@ -143,7 +144,8 @@ export class ChangeFiles {
       return this._deleteFiles(filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
-      return this._deleteFiles(this.getFiles(), shouldDelete);
+      const files: string[] = await this.getFilesAsync();
+      return this._deleteFiles(files, shouldDelete);
     }
   }
 

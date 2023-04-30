@@ -12,7 +12,6 @@ import {
   Executable,
   FileConstants,
   FileSystem,
-  Import,
   ITerminal,
   ITerminalProvider,
   JsonFile,
@@ -29,9 +28,6 @@ import type { SpawnSyncReturns } from 'child_process';
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
-const semver: typeof import('semver') = Import.lazy('semver', require);
-
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
 /**
@@ -43,6 +39,25 @@ export interface IRushPnpmCommandLineParserOptions {
   terminalProvider?: ITerminalProvider;
 }
 
+function _reportErrorAndSetExitCode(error: Error, terminal: ITerminal, debugEnabled: boolean): never {
+  if (!(error instanceof AlreadyReportedError)) {
+    const prefix: string = 'ERROR: ';
+    terminal.writeErrorLine('\n' + PrintUtilities.wrapWords(prefix + error.message));
+  }
+
+  if (debugEnabled) {
+    // If catchSyncErrors() called this, then show a call stack similar to what Node.js
+    // would show for an uncaught error
+    terminal.writeErrorLine('\n' + error.stack);
+  }
+
+  if (process.exitCode !== undefined) {
+    process.exit(process.exitCode);
+  } else {
+    process.exit(1);
+  }
+}
+
 export class RushPnpmCommandLineParser {
   private _terminal: ITerminal;
   private _rushConfiguration!: RushConfiguration;
@@ -51,77 +66,97 @@ export class RushPnpmCommandLineParser {
   private _debugEnabled: boolean;
   private _verboseEnabled: boolean;
 
-  public constructor(options: IRushPnpmCommandLineParserOptions) {
+  private constructor(
+    options: IRushPnpmCommandLineParserOptions,
+    terminal: ITerminal,
+    debugEnabled: boolean,
+    verboseEnabled: boolean
+  ) {
+    this._debugEnabled = debugEnabled;
+    this._verboseEnabled = verboseEnabled;
+    this._terminal = terminal;
+
+    // Are we in a Rush repo?
+    let rushConfiguration: RushConfiguration | undefined = undefined;
+    if (RushConfiguration.tryFindRushJsonLocation()) {
+      // showVerbose is false because the logging message may break JSON output
+      rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
+    }
+
+    NodeJsCompatibility.warnAboutCompatibilityIssues({
+      isRushLib: true,
+      alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
+      rushConfiguration
+    });
+
+    if (!rushConfiguration) {
+      throw new Error(
+        'The "rush-pnpm" command must be executed in a folder that is under a Rush workspace folder'
+      );
+    }
+    this._rushConfiguration = rushConfiguration;
+
+    if (rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error(
+        'The "rush-pnpm" command requires your rush.json to be configured to use the PNPM package manager'
+      );
+    }
+
+    if (!rushConfiguration.pnpmOptions.useWorkspaces) {
+      const pnpmConfigFilename: string = rushConfiguration.pnpmOptions.jsonFilename || 'rush.json';
+      throw new Error(
+        `The "rush-pnpm" command requires the "useWorkspaces" setting to be enabled in ${pnpmConfigFilename}`
+      );
+    }
+
+    const workspaceFolder: string = rushConfiguration.commonTempFolder;
+    const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
+
+    if (!FileSystem.exists(workspaceFilePath)) {
+      this._terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
+      this._terminal.writeErrorLine(`  ${workspaceFilePath}\n`);
+      this._terminal.writeLine(Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
+      throw new AlreadyReportedError();
+    }
+
+    if (!FileSystem.exists(rushConfiguration.packageManagerToolFilename)) {
+      this._terminal.writeErrorLine('Error: The PNPM local binary has not been installed yet.');
+      this._terminal.writeLine('\n' + Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
+      throw new AlreadyReportedError();
+    }
+
+    // 0 = node.exe
+    // 1 = rush-pnpm
+    const pnpmArgs: string[] = process.argv.slice(2);
+
+    this._pnpmArgs = pnpmArgs;
+  }
+
+  public static async initializeAsync(
+    options: IRushPnpmCommandLineParserOptions
+  ): Promise<RushPnpmCommandLineParser> {
     const { terminalProvider } = options;
-    this._debugEnabled = process.argv.indexOf('--debug') >= 0;
-    this._verboseEnabled = process.argv.indexOf('--verbose') >= 0;
+    const debugEnabled: boolean = process.argv.indexOf('--debug') >= 0;
+    const verboseEnabled: boolean = process.argv.indexOf('--verbose') >= 0;
     const localTerminalProvider: ITerminalProvider =
       terminalProvider ??
       new ConsoleTerminalProvider({
-        debugEnabled: this._debugEnabled,
-        verboseEnabled: this._verboseEnabled
+        debugEnabled,
+        verboseEnabled
       });
-    this._terminal = new Terminal(localTerminalProvider);
+    const terminal: ITerminal = new Terminal(localTerminalProvider);
 
     try {
-      // Are we in a Rush repo?
-      let rushConfiguration: RushConfiguration | undefined = undefined;
-      if (RushConfiguration.tryFindRushJsonLocation()) {
-        // showVerbose is false because the logging message may break JSON output
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
-      }
-
-      NodeJsCompatibility.warnAboutCompatibilityIssues({
-        isRushLib: true,
-        alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
-        rushConfiguration
-      });
-
-      if (!rushConfiguration) {
-        throw new Error(
-          'The "rush-pnpm" command must be executed in a folder that is under a Rush workspace folder'
-        );
-      }
-      this._rushConfiguration = rushConfiguration;
-
-      if (rushConfiguration.packageManager !== 'pnpm') {
-        throw new Error(
-          'The "rush-pnpm" command requires your rush.json to be configured to use the PNPM package manager'
-        );
-      }
-
-      if (!rushConfiguration.pnpmOptions.useWorkspaces) {
-        const pnpmConfigFilename: string = rushConfiguration.pnpmOptions.jsonFilename || 'rush.json';
-        throw new Error(
-          `The "rush-pnpm" command requires the "useWorkspaces" setting to be enabled in ${pnpmConfigFilename}`
-        );
-      }
-
-      const workspaceFolder: string = rushConfiguration.commonTempFolder;
-      const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
-
-      if (!FileSystem.exists(workspaceFilePath)) {
-        this._terminal.writeErrorLine('Error: The PNPM workspace file has not been generated:');
-        this._terminal.writeErrorLine(`  ${workspaceFilePath}\n`);
-        this._terminal.writeLine(Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
-        throw new AlreadyReportedError();
-      }
-
-      if (!FileSystem.exists(rushConfiguration.packageManagerToolFilename)) {
-        this._terminal.writeErrorLine('Error: The PNPM local binary has not been installed yet.');
-        this._terminal.writeLine('\n' + Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
-        throw new AlreadyReportedError();
-      }
-
-      // 0 = node.exe
-      // 1 = rush-pnpm
-      const pnpmArgs: string[] = process.argv.slice(2);
-
-      this._validatePnpmUsage(pnpmArgs);
-
-      this._pnpmArgs = pnpmArgs;
+      const rushPnpmCommandLineParser: RushPnpmCommandLineParser = new RushPnpmCommandLineParser(
+        options,
+        terminal,
+        debugEnabled,
+        verboseEnabled
+      );
+      await rushPnpmCommandLineParser._validatePnpmUsageAsync(rushPnpmCommandLineParser._pnpmArgs);
+      return rushPnpmCommandLineParser;
     } catch (error) {
-      this._reportErrorAndSetExitCode(error as Error);
+      _reportErrorAndSetExitCode(error as Error, terminal, debugEnabled);
     }
   }
 
@@ -137,7 +172,7 @@ export class RushPnpmCommandLineParser {
     }
   }
 
-  private _validatePnpmUsage(pnpmArgs: string[]): void {
+  private async _validatePnpmUsageAsync(pnpmArgs: string[]): Promise<void> {
     if (pnpmArgs[0] === RUSH_SKIP_CHECKS_PARAMETER) {
       pnpmArgs.shift();
       // Ignore other checks
@@ -247,6 +282,7 @@ export class RushPnpmCommandLineParser {
 
         // Know safe after validation
         case 'patch': {
+          const semver: typeof import('semver') = await import('semver');
           /**
            * If you were to accidentally attempt to use rush-pnpm patch with a pnpmVersion < 7.4.0, pnpm patch may fallback to the system patch command.
            * For instance, /usr/bin/patch which may just hangs forever
@@ -377,7 +413,8 @@ export class RushPnpmCommandLineParser {
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
-        if (!lodash.isEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
+        const { isEqual } = await import('lodash');
+        if (!isEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
           const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
@@ -449,25 +486,6 @@ export class RushPnpmCommandLineParser {
       await installManager.doInstallAsync();
     } finally {
       purgeManager.deleteAll();
-    }
-  }
-
-  private _reportErrorAndSetExitCode(error: Error): void {
-    if (!(error instanceof AlreadyReportedError)) {
-      const prefix: string = 'ERROR: ';
-      this._terminal.writeErrorLine('\n' + PrintUtilities.wrapWords(prefix + error.message));
-    }
-
-    if (this._debugEnabled) {
-      // If catchSyncErrors() called this, then show a call stack similar to what Node.js
-      // would show for an uncaught error
-      this._terminal.writeErrorLine('\n' + error.stack);
-    }
-
-    if (process.exitCode !== undefined) {
-      process.exit(process.exitCode);
-    } else {
-      process.exit(1);
     }
   }
 }

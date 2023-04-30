@@ -241,7 +241,7 @@ export class PublishAction extends BaseRushAction {
         this._suffix.value,
         this._partialPrerelease.value
       );
-      this._publishChanges(git, publishGit, allPackages);
+      await this._publishChangesAsync(git, publishGit, allPackages);
     }
 
     console.log('\n' + colors.green('Rush publish finished successfully.'));
@@ -262,13 +262,13 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _publishChanges(
+  private async _publishChangesAsync(
     git: Git,
     publishGit: PublishGit,
     allPackages: Map<string, RushConfigurationProject>
-  ): void {
+  ): Promise<void> {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
-    changeManager.load(
+    await changeManager.loadAsync(
       this.rushConfiguration.changesFolder,
       this._prereleaseToken,
       this._addCommitDetails.value
@@ -285,7 +285,7 @@ export class PublishAction extends BaseRushAction {
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
-      changeManager.updateChangelog(this._apply.value);
+      await changeManager.updateChangelogAsync(this._apply.value);
 
       this._setDependenciesBeforeCommit();
 
