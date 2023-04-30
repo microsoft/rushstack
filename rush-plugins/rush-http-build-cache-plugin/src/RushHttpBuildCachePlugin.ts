@@ -1,11 +1,8 @@
-import { Import } from '@rushstack/node-core-library';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 import type { HttpBuildCacheProvider, IHttpBuildCacheProviderOptions } from './HttpBuildCacheProvider';
-
-const HttpBuildCacheProviderModule: typeof import('./HttpBuildCacheProvider') = Import.lazy(
-  './HttpBuildCacheProvider',
-  require
-);
 
 const PLUGIN_NAME: string = 'HttpBuildCachePlugin';
 
@@ -56,31 +53,29 @@ export class RushHttpBuildCachePlugin implements IRushPlugin {
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(this.pluginName, () => {
-      rushSession.registerCloudBuildCacheProviderFactory(
-        'http',
-        (buildCacheConfig): HttpBuildCacheProvider => {
-          const config: IRushHttpBuildCachePluginConfig = (
-            buildCacheConfig as typeof buildCacheConfig & {
-              httpConfiguration: IRushHttpBuildCachePluginConfig;
-            }
-          ).httpConfiguration;
+      rushSession.registerCloudBuildCacheProviderFactory('http', async (buildCacheConfig) => {
+        const config: IRushHttpBuildCachePluginConfig = (
+          buildCacheConfig as typeof buildCacheConfig & {
+            httpConfiguration: IRushHttpBuildCachePluginConfig;
+          }
+        ).httpConfiguration;
 
-          const { url, uploadMethod, headers, tokenHandler, cacheKeyPrefix, isCacheWriteAllowed } = config;
+        const { url, uploadMethod, headers, tokenHandler, cacheKeyPrefix, isCacheWriteAllowed } = config;
 
-          const options: IHttpBuildCacheProviderOptions = {
-            pluginName: this.pluginName,
-            rushProjectRoot: rushConfig.rushJsonFolder,
-            url: url,
-            uploadMethod: uploadMethod,
-            headers: headers,
-            tokenHandler: tokenHandler,
-            cacheKeyPrefix: cacheKeyPrefix,
-            isCacheWriteAllowed: !!isCacheWriteAllowed
-          };
+        const options: IHttpBuildCacheProviderOptions = {
+          pluginName: this.pluginName,
+          rushProjectRoot: rushConfig.rushJsonFolder,
+          url: url,
+          uploadMethod: uploadMethod,
+          headers: headers,
+          tokenHandler: tokenHandler,
+          cacheKeyPrefix: cacheKeyPrefix,
+          isCacheWriteAllowed: !!isCacheWriteAllowed
+        };
 
-          return new HttpBuildCacheProviderModule.HttpBuildCacheProvider(options, rushSession);
-        }
-      );
+        const { HttpBuildCacheProvider } = await import('./HttpBuildCacheProvider');
+        return new HttpBuildCacheProvider(options, rushSession);
+      });
     });
   }
 }

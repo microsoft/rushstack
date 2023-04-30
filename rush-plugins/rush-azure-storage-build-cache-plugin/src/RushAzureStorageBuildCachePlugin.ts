@@ -1,14 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import } from '@rushstack/node-core-library';
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 import type { AzureEnvironmentName } from './AzureAuthenticationBase';
-
-const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
-  './AzureStorageBuildCacheProvider',
-  require
-);
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 
@@ -50,12 +44,13 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
-      rushSession.registerCloudBuildCacheProviderFactory('azure-blob-storage', (buildCacheConfig) => {
+      rushSession.registerCloudBuildCacheProviderFactory('azure-blob-storage', async (buildCacheConfig) => {
         type IBuildCache = typeof buildCacheConfig & {
           azureBlobStorageConfiguration: IAzureBlobStorageConfigurationJson;
         };
         const { azureBlobStorageConfiguration } = buildCacheConfig as IBuildCache;
-        return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
+        const { AzureStorageBuildCacheProvider } = await import('./AzureStorageBuildCacheProvider');
+        return new AzureStorageBuildCacheProvider({
           storageAccountName: azureBlobStorageConfiguration.storageAccountName,
           storageContainerName: azureBlobStorageConfiguration.storageContainerName,
           azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
