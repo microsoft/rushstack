@@ -14,6 +14,7 @@ import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
+import { VersionManifest } from '../../logic/VersionManifest';
 
 import type * as VersionManagerType from '../../logic/VersionManager';
 
@@ -30,6 +31,7 @@ export class VersionAction extends BaseRushAction {
   private readonly _overwriteBump: CommandLineStringParameter;
   private readonly _prereleaseIdentifier: CommandLineStringParameter;
   private readonly _ignoreGitHooksParameter: CommandLineFlagParameter;
+  private readonly _manifestFileParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -91,6 +93,11 @@ export class VersionAction extends BaseRushAction {
       parameterLongName: '--ignore-git-hooks',
       description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
+    this._manifestFileParameter = this.defineStringParameter({
+      parameterLongName: '--manifest-file',
+      argumentName: 'FILEPATH',
+      description: 'Create a version manifest file containing the results of this versioning event.'
+    });
   }
 
   protected async runAsync(): Promise<void> {
@@ -125,12 +132,19 @@ export class VersionAction extends BaseRushAction {
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
-      await versionManager.bumpAsync(
+      const updatedPackages: Map<string, IPackageJson> | undefined = await versionManager.bumpAsync(
         this._versionPolicy.value,
         this._overwriteBump.value ? Enum.getValueByKey(BumpType, this._overwriteBump.value) : undefined,
         this._prereleaseIdentifier.value,
         true
       );
+      if (updatedPackages && this._manifestFileParameter.value) {
+        const manifest: VersionManifest = VersionManifest.fromUpdatedProjects(
+          this.rushConfiguration,
+          updatedPackages
+        );
+        await manifest.saveAsync(this._manifestFileParameter.value);
+      }
       this._gitProcess(tempBranch, this._targetBranch.value);
     }
   }

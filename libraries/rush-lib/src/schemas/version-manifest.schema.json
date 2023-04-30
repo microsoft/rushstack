@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Version manifest output file format",
+  "description": "A version manifest is an output file produced by the 'rush version' command in Rush, describing the set of projects that have new versions and should be published and/or deployed.",
+  "type": "object",
+  "required": ["projects"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "projects": {
+      "description": "A list of versioned projects.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "relativeFolderPath", "version"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "The name of the versioned project.",
+            "type": "string"
+          },
+          "relativeFolderPath": {
+            "description": "The path to the folder containing this project, relative to the root of the monorepo.",
+            "type": "string"
+          },
+          "version": {
+            "description": "The new version of the project to be published and/or deployed.",
+            "type": "string"
+          },
+          "previousVersion": {
+            "description": "(Optional) The previous version of this project.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
