@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 29 Apr 2023 00:23:02 GMT and should not be manually modified.
+This log was last generated on Mon, 01 May 2023 15:23:19 GMT and should not be manually modified.
+
+## 3.58.0
+Mon, 01 May 2023 15:23:19 GMT
+
+### Minor changes
+
+- Expose a `Text.escapeRegExp` function to escape regexp special characters.
 
 ## 3.57.0
 Sat, 29 Apr 2023 00:23:02 GMT
