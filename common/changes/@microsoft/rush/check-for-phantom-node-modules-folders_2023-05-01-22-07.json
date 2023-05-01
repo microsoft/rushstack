@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a \"forbidPhantomResolvableNodeModuleFolders\" experiment that forbids node_modules folders in the repo root and in parent folders.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
