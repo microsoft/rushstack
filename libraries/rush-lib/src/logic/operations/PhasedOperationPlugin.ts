@@ -84,6 +84,7 @@ function createOperations(
           result: OperationStatus.Skipped,
           silent: true
         });
+        operation.weight = 0.01;
       } else if (changedProjects.has(project)) {
         operationsWithWork.add(operation);
       }

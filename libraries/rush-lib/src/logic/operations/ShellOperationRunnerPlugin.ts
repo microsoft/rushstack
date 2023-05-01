@@ -95,6 +95,7 @@ function createShellOperations(
           result: OperationStatus.NoOp,
           silent: false
         });
+        operation.weight = 0.01;
       }
     }
   }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow operations to have variable weight for concurrency purposes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

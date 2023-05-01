@@ -216,9 +216,11 @@ export class OperationExecutionManager {
       executionQueue,
       async (operation: OperationExecutionRecord) => {
         await operation.executeAsync(onOperationComplete);
+        executionQueue.assignOperations();
       },
       {
-        concurrency: maxParallelism
+        concurrency: maxParallelism,
+        useWeight: true
       }
     );
 
