@@ -6,8 +6,6 @@ interface ILockfileEntryGroup {
 }
 
 export const linter = (entries: LockfileEntry[]) => {
-  console.log('in the linter');
-
   const packageEntries = entries.filter((entry) => entry.kind === LockfileEntryFilter.Package);
   const projectEntries = entries.filter((entry) => entry.kind === LockfileEntryFilter.Project);
 
@@ -81,13 +79,31 @@ export const linter = (entries: LockfileEntry[]) => {
               !connectedProjectsToClusters[projectEntry.entryPackageName][dep.name].has(dep.version)
             ) {
               if (clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName]) {
-                clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([...parentStack]);
+                clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([
+                  ...parentStack,
+                  dep.version
+                ]);
               } else {
-                clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [[...parentStack]];
+                clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [
+                  [...parentStack, dep.version]
+                ];
               }
             } else {
               if (!connectedProjectsToClusters[projectEntry.entryPackageName][dep.name]) {
                 connectedProjectsToClusters[projectEntry.entryPackageName][dep.name] = new Set();
+
+                if (connectedProjectsToClusters[projectEntry.entryPackageName][dep.name]) {
+                  if (clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName]) {
+                    clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([
+                      ...parentStack,
+                      dep.version
+                    ]);
+                  } else {
+                    clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [
+                      [...parentStack, dep.version]
+                    ];
+                  }
+                }
               }
             }
             connectedProjectsToClusters[projectEntry.entryPackageName][dep.name].add(dep.version);
@@ -184,7 +200,39 @@ export const linter = (entries: LockfileEntry[]) => {
 
   // getNewFilteredNodes('eslint', filteredNodes['eslint'])
 
+  console.log('DEBUG MODE');
+  console.log(`
+In debug mode, additional information is included that may not appear in the final version of the linting report, such as: \n\n
+- The set of not connected packages (These are packages that are filtered out because they are only "connected" projects in the sense that one of their dependent projects is a "connected" project
+- The path trace from the "connected" project to the side-by-side cluster node, including the version
+- The exact versions of the duplicateVersions (final report may only indicate the number of duplicated versions)
+  `);
+  console.log('Number of clusters: ', Object.keys(filteredNodes).length);
+  console.log(`
+How to read the linting object:
+
+Example key value pair in the below output:
+
+"eslint": {
+  "duplicateVersions":{ 1.0.0, 2.0.0, 3.0.0 },
+  "allowedConnected":{
+    "project1":[["project1","dependency1","1.0.0"], ["project1","dependency2","2.0.0"], ["project1","dependency3","3.0.0"]]
+  },
+  "notConnected":{
+    "project2":[["project2","project1","dependency1","1.0.0"],"project2","project1","dependency2","2.0.0"],"project2","project1","dependency3","3.0.0"]]
+  }
+}
+
+
+objectKey: The cluster node dependency name
+
+duplicateVersions: This is a Set of the side-by-side versions of this package that are cluster nodes
+allowedConnected: This is an object where the key is the project name and the value is an array of paths from the project to the cluster node dependency instance and it's version
+
+notConnected: This object has the same information as the allowedConnected object, but are a collection of projects that were filtered out from that list. They were filtered because
+their dependencies consist entirely of other allowedConnected projects and do not contribute to more connected projects themselves.
+  `);
   console.log(filteredNodes2);
-  console.log(Object.keys(filteredNodes).length);
-  console.log(connectedProjectsToClusters);
+  // console.log(connectedProjectsToClusters)
+  // console.log(connectedProjectsToClusters);
 };
