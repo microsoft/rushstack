@@ -18,6 +18,21 @@ export interface IAsyncParallelismOptions {
 }
 
 /**
+ * Options for controlling the parallelism of asynchronous operations that have a property `weight?: number`.
+ *
+ * @remarks
+ * Used with {@link Async.forEachAsync}.
+ *
+ * @beta
+ */
+export interface IAsyncParallelismOptionsWithWeight extends IAsyncParallelismOptions {
+  /**
+   * If set, then will use `item.weight` instead of `1` as the parallelism consumed by a given iteration.
+   */
+  useWeight?: boolean;
+}
+
+/**
  * @remarks
  * Used with {@link Async.runWithRetriesAsync}.
  *
@@ -94,68 +109,54 @@ export class Async {
   public static async forEachAsync<TEntry>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
-    options?: IAsyncParallelismOptions | undefined
+    options?: TEntry extends { weight?: number }
+      ? IAsyncParallelismOptionsWithWeight
+      : IAsyncParallelismOptions | undefined
   ): Promise<void> {
-    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      const concurrency: number =
-        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-      let operationsInProgress: number = 0;
+    const concurrency: number =
+      options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
 
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-      ).call(iterable);
+    const useWeight: boolean | undefined = (options as IAsyncParallelismOptionsWithWeight)?.useWeight;
 
-      let arrayIndex: number = 0;
-      let iteratorIsComplete: boolean = false;
-      let promiseHasResolvedOrRejected: boolean = false;
+    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+      (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+      (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+    ).call(iterable);
 
-      async function queueOperationsAsync(): Promise<void> {
-        while (operationsInProgress < concurrency && !iteratorIsComplete && !promiseHasResolvedOrRejected) {
-          // Increment the concurrency while waiting for the iterator.
-          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
-          operationsInProgress++;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
-          // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!currentIteratorResult.done;
+    let arrayIndex: number = 0;
+    let usedCapacity: number = 0;
 
-          if (!iteratorIsComplete) {
-            Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
-              .then(async () => {
-                operationsInProgress--;
-                await onOperationCompletionAsync();
-              })
-              .catch((error) => {
-                promiseHasResolvedOrRejected = true;
-                reject(error);
-              });
-          } else {
-            // The iterator is complete and there wasn't a value, so untrack the waiting state.
-            operationsInProgress--;
-          }
-        }
+    const pending: Set<Promise<void>> = new Set();
 
-        if (iteratorIsComplete) {
-          await onOperationCompletionAsync();
-        }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+      if (currentIteratorResult.done) {
+        break;
       }
 
-      async function onOperationCompletionAsync(): Promise<void> {
-        if (!promiseHasResolvedOrRejected) {
-          if (operationsInProgress === 0 && iteratorIsComplete) {
-            promiseHasResolvedOrRejected = true;
-            resolve();
-          } else if (!iteratorIsComplete) {
-            await queueOperationsAsync();
-          }
-        }
+      const { value } = currentIteratorResult;
+      const weight: number = useWeight ? (value as { weight?: number })?.weight ?? 1 : 1;
+      if (weight < 0) {
+        throw new Error(`Invalid weight ${weight}. Weights must be greater than or equal to 0.`);
       }
 
-      queueOperationsAsync().catch((error) => {
-        promiseHasResolvedOrRejected = true;
-        reject(error);
+      usedCapacity += weight;
+      const promise: Promise<void> = Promise.resolve(callback(value, arrayIndex++)).then(() => {
+        usedCapacity -= weight;
+        pending.delete(promise);
       });
-    });
+      pending.add(promise);
+
+      // eslint-disable-next-line no-unmodified-loop-condition
+      while (usedCapacity >= concurrency && pending.size > 0) {
+        await Promise.race(Array.from(pending));
+      }
+    }
+
+    if (pending.size > 0) {
+      await Promise.all(Array.from(pending));
+    }
   }
 
   /**

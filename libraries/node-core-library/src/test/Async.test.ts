@@ -249,7 +249,7 @@ describe(Async.name, () => {
       ).rejects.toThrow(expectedError);
     });
 
-    it('does not exceed the maxiumum concurrency for an async iterator', async () => {
+    it('only has at most 1 waiting iterator, regardless of concurrency', async () => {
       let waitingIterators: number = 0;
 
       let resolve2!: (value: { done: true; value: undefined }) => void;
@@ -286,9 +286,58 @@ describe(Async.name, () => {
 
       // Wait for all the instant resolutions to be done
       await Async.sleep(1);
-      expect(waitingIterators).toEqual(expectedConcurrency);
+      expect(waitingIterators).toEqual(1);
       resolve2({ done: true, value: undefined });
       await finalPromise;
+    });
+
+    it('if concurrency and useWeight are set, ensures no more than N/weight operations occur in parallel', async () => {
+      interface INumberWithWeight {
+        n: number;
+        weight: number;
+      }
+
+      interface ITestCase {
+        concurrency: number;
+        weight: number;
+        expectedConcurrency: number;
+      }
+
+      const cases: ITestCase[] = [
+        {
+          concurrency: 2,
+          weight: 0.5,
+          expectedConcurrency: 4
+        },
+        {
+          concurrency: 1,
+          weight: 0.4,
+          expectedConcurrency: 3
+        },
+        {
+          concurrency: 1,
+          weight: 0.17,
+          expectedConcurrency: 6
+        }
+      ];
+
+      for (const { concurrency, weight, expectedConcurrency } of cases) {
+        let running: number = 0;
+        let maxRunning: number = 0;
+
+        const array: INumberWithWeight[] = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ n, weight }));
+
+        const fn: (item: INumberWithWeight) => Promise<void> = jest.fn(async (item) => {
+          running++;
+          await Async.sleep(1);
+          maxRunning = Math.max(maxRunning, running);
+          running--;
+        });
+
+        await Async.forEachAsync(array, fn, { concurrency, useWeight: true });
+        expect(fn).toHaveBeenCalledTimes(8);
+        expect(maxRunning).toEqual(expectedConcurrency);
+      }
     });
 
     it('rejects if an async iterator rejects', async () => {

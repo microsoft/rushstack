@@ -9,7 +9,13 @@
 
 export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
-export { Async, AsyncQueue, IAsyncParallelismOptions, IRunWithRetriesOptions } from './Async';
+export {
+  Async,
+  AsyncQueue,
+  IAsyncParallelismOptions,
+  IAsyncParallelismOptionsWithWeight,
+  IRunWithRetriesOptions
+} from './Async';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
