@@ -51,11 +51,7 @@ function _reportErrorAndSetExitCode(error: Error, terminal: ITerminal, debugEnab
     terminal.writeErrorLine('\n' + error.stack);
   }
 
-  if (process.exitCode !== undefined) {
-    process.exit(process.exitCode);
-  } else {
-    process.exit(1);
-  }
+  process.exit(process.exitCode ?? 1);
 }
 
 export class RushPnpmCommandLineParser {
