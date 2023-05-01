@@ -12,11 +12,11 @@ module.exports = () => {
     entry: {
       [PathConstants.createLinksScriptFilename]: {
         import: `${__dirname}/lib-esnext/scripts/create-links.js`,
-        filename: `${PathConstants.scriptsFolderName}/[name]`
+        filename: `[name]`
       }
     },
     output: {
-      path: `${__dirname}/lib`,
+      path: PathConstants.scriptsFolderPath,
       filename: '[name].js',
       chunkFilename: 'chunks/[name].js', // TODO: Don't allow any chunks to be created
       library: {

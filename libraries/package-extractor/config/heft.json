@@ -6,15 +6,6 @@
 
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
-  "eventActions": [
-    {
-      "actionId": "delete-lib-scripts-folder",
-      "actionKind": "deleteGlobs",
-      "heftEvent": "bundle", // Potential race condition - update this to always run before the webpack step in Heft vNext
-      "globsToDelete": ["lib/scripts/**/*"]
-    }
-  ],
-
   "heftPlugins": [
     {
       "plugin": "@rushstack/heft-webpack5-plugin"
