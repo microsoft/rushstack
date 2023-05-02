@@ -150,9 +150,9 @@ export function linter(entries: LockfileEntry[]): void {
       }
       // In this case, currMax can represent two things:
       // If it is 0, it means there are no other projects further down the chain from this project
-      // Otherwise, if it is > 0, then that number indicates the max number of clusters the child has
+      // Otherwise, if it is > 0, then that number indicates the max number of clusters any child has
       // If the child of any path has a higher Max than the count for this package, then there is no point in listing this package.
-      if (currMax > connectedProjectsToClusters[projectName][packageName].size || currMax === 0) {
+      if (currMax < connectedProjectsToClusters[projectName][packageName].size || currMax === 0) {
         newConnected[projectName] = parentPaths;
       } else {
         notConnected[projectName] = parentPaths;
