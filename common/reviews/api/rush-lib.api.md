@@ -303,7 +303,7 @@ export interface IExecutionResult {
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
-    forbidPhantomResolvableNodeModuleFolders?: boolean;
+    forbidPhantomResolvableNodeModulesFolders?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;

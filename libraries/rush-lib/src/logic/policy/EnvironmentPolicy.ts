@@ -14,7 +14,7 @@ export async function validateAsync(
   rushConfiguration: RushConfiguration,
   options: IPolicyValidatorOptions
 ): Promise<void> {
-  if (rushConfiguration.experimentsConfiguration.configuration.forbidPhantomResolvableNodeModuleFolders) {
+  if (rushConfiguration.experimentsConfiguration.configuration.forbidPhantomResolvableNodeModulesFolders) {
     const pathParts: string[] = rushConfiguration.rushJsonFolder.split(/[\/\\]/);
     const existingNodeModulesPaths: string[] = [];
     await Async.forEachAsync(
