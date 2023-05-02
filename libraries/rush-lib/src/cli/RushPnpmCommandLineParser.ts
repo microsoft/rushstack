@@ -55,21 +55,19 @@ function _reportErrorAndSetExitCode(error: Error, terminal: ITerminal, debugEnab
 }
 
 export class RushPnpmCommandLineParser {
-  private _terminal: ITerminal;
-  private _rushConfiguration!: RushConfiguration;
-  private _pnpmArgs!: string[];
+  private readonly _terminal: ITerminal;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _pnpmArgs: string[];
   private _commandName: string | undefined;
-  private _debugEnabled: boolean;
-  private _verboseEnabled: boolean;
+  private readonly _debugEnabled: boolean;
 
   private constructor(
     options: IRushPnpmCommandLineParserOptions,
     terminal: ITerminal,
-    debugEnabled: boolean,
-    verboseEnabled: boolean
+    debugEnabled: boolean
   ) {
     this._debugEnabled = debugEnabled;
-    this._verboseEnabled = verboseEnabled;
+
     this._terminal = terminal;
 
     // Are we in a Rush repo?
@@ -131,11 +129,10 @@ export class RushPnpmCommandLineParser {
   public static async initializeAsync(
     options: IRushPnpmCommandLineParserOptions
   ): Promise<RushPnpmCommandLineParser> {
-    const { terminalProvider } = options;
     const debugEnabled: boolean = process.argv.indexOf('--debug') >= 0;
     const verboseEnabled: boolean = process.argv.indexOf('--verbose') >= 0;
     const localTerminalProvider: ITerminalProvider =
-      terminalProvider ??
+      options.terminalProvider ??
       new ConsoleTerminalProvider({
         debugEnabled,
         verboseEnabled
@@ -146,8 +143,7 @@ export class RushPnpmCommandLineParser {
       const rushPnpmCommandLineParser: RushPnpmCommandLineParser = new RushPnpmCommandLineParser(
         options,
         terminal,
-        debugEnabled,
-        verboseEnabled
+        debugEnabled
       );
       await rushPnpmCommandLineParser._validatePnpmUsageAsync(rushPnpmCommandLineParser._pnpmArgs);
       return rushPnpmCommandLineParser;

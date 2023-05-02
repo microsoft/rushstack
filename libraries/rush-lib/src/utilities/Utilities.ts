@@ -233,22 +233,6 @@ export class Utilities {
   }
 
   /**
-   * Determines if the path points to a file and that it exists.
-   */
-  public static fileExists(filePath: string): boolean {
-    let exists: boolean = false;
-
-    try {
-      const lstat: FileSystemStats = FileSystem.getLinkStatistics(filePath);
-      exists = lstat.isFile();
-    } catch (e) {
-      /* no-op */
-    }
-
-    return exists;
-  }
-
-  /**
    * Determines if a path points to a directory and that it exists.
    */
   public static directoryExists(directoryPath: string): boolean {
@@ -277,16 +261,6 @@ export class Utilities {
         `${(e as Error).message}\nOften this is caused by a file lock from a process ` +
           'such as your text editor, command prompt, or a filesystem watcher'
       );
-    }
-  }
-
-  /**
-   * Attempts to delete a file. If it does not exist, or the path is not a file, it no-ops.
-   */
-  public static deleteFile(filePath: string): void {
-    if (Utilities.fileExists(filePath)) {
-      console.log(`Deleting: ${filePath}`);
-      FileSystem.deleteFile(filePath);
     }
   }
 

@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonSchema, LegacyAdapters } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, JsonSchema, LegacyAdapters } from '@rushstack/node-core-library';
 
-import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -131,36 +130,50 @@ export class ChangeFiles {
       });
 
       const files: string[] = await this.getFilesAsync();
-      const filesToDelete: string[] = files.filter((filePath) => {
-        const changeRequest: IChangeInfo = await JsonFile.loadAsync(filePath);
-        for (const changeInfo of changeRequest.changes!) {
-          if (!packagesToInclude.has(changeInfo.packageName)) {
-            return false;
+      const filesToDelete: string[] = [];
+      await Async.forEachAsync(
+        files,
+        async (filePath) => {
+          const changeRequest: IChangeInfo = await JsonFile.loadAsync(filePath);
+          let shouldDelete: boolean = true;
+          for (const changeInfo of changeRequest.changes!) {
+            if (!packagesToInclude.has(changeInfo.packageName)) {
+              shouldDelete = false;
+              break;
+            }
           }
-        }
-        return true;
-      });
 
-      return this._deleteFiles(filesToDelete, shouldDelete);
+          if (shouldDelete) {
+            filesToDelete.push(filePath);
+          }
+        },
+        { concurrency: 5 }
+      );
+
+      return await this._deleteFilesAsync(filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
       const files: string[] = await this.getFilesAsync();
-      return this._deleteFiles(files, shouldDelete);
+      return await this._deleteFilesAsync(files, shouldDelete);
     }
   }
 
-  private _deleteFiles(files: string[], shouldDelete: boolean): number {
+  private async _deleteFilesAsync(files: string[], shouldDelete: boolean): Promise<number> {
     if (files.length) {
       console.log(`\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`);
 
-      for (const filePath of files) {
-        console.log(` - ${filePath}`);
-
-        if (shouldDelete) {
-          Utilities.deleteFile(filePath);
-        }
-      }
+      await Async.forEachAsync(
+        files,
+        async (filePath) => {
+          console.log(` - ${filePath}`);
+          if (shouldDelete) {
+            await FileSystem.deleteFileAsync(filePath);
+          }
+        },
+        { concurrency: 5 }
+      );
     }
+
     return files.length;
   }
 }
