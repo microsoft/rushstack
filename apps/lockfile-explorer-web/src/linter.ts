@@ -1,58 +1,54 @@
 import { LockfileEntry, LockfileEntryFilter } from './parsing/LockfileEntry';
 
-interface ILockfileEntryGroup {
-  entryName: string;
-  versions: LockfileEntry[];
-}
-
-export const linter = (entries: LockfileEntry[]) => {
-  const packageEntries = entries.filter((entry) => entry.kind === LockfileEntryFilter.Package);
-  const projectEntries = entries.filter((entry) => entry.kind === LockfileEntryFilter.Project);
-
+export function linter(entries: LockfileEntry[]): void {
+  const projectEntries: LockfileEntry[] = [];
   // Get the list of side-by-side versions
-  const reducedEntries = packageEntries.reduce((groups: { [key in string]: LockfileEntry[] }, item) => {
-    const group = groups[item.entryPackageName] || [];
-    group.push(item);
-    groups[item.entryPackageName] = group;
-    return groups;
-  }, {});
-  let groupedEntries: ILockfileEntryGroup[] = [];
-  for (const [packageName, entries] of Object.entries(reducedEntries)) {
-    groupedEntries.push({
-      entryName: packageName,
-      versions: entries
-    });
+  const groupedPackageEntries: Map<string, LockfileEntry[]> = new Map();
+  const sideBySidePackageNames: Set<string> = new Set();
+  for (const entry of entries) {
+    switch (entry.kind) {
+      case LockfileEntryFilter.Package: {
+        let groupedEntries: LockfileEntry[] | undefined = groupedPackageEntries.get(entry.entryPackageName);
+        if (!groupedEntries) {
+          groupedEntries = [];
+          groupedPackageEntries.set(entry.entryPackageName, groupedEntries);
+        }
+        groupedEntries.push(entry);
+        if (groupedEntries.length > 1) {
+          sideBySidePackageNames.add(entry.entryPackageName);
+        }
+        break;
+      }
+      case LockfileEntryFilter.Project: {
+        projectEntries.push(entry);
+        break;
+      }
+    }
   }
-
-  const sideBySide = groupedEntries.filter((entry) => entry.versions.length > 1);
-  const sideBySidePackageNames = new Set(sideBySide.map((s) => s.entryName));
 
   // set of package names that we need to log, calculated by going from project root downwards until we encounter a
   // side by side version
-  const clusterNodes: {
-    [key in string]: {
+  const clusterNodes: Record<
+    string,
+    {
       duplicateVersions: Set<string>;
-      allowedConnected: {
-        [key in string]: string[][];
-      };
-    };
-  } = {};
+      allowedConnected: Record<string, string[][]>;
+    }
+  > = {};
 
   // Mapping of projectName -> dep.name -> set of versions that it has
-  const connectedProjectsToClusters: { [key in string]: { [key in string]: Set<string> } } = {};
+  const connectedProjectsToClusters: Record<string, Record<string, Set<string>>> = {};
 
   for (const projectEntry of projectEntries) {
     const visited = new Set<LockfileEntry>();
     connectedProjectsToClusters[projectEntry.entryPackageName] = {};
 
-    // This keeps track of any side-by-side dependencies we encounter in this project
-    // We save only one version because if we encounter any other versions for the same side-by-side dependency in the same project
-    // Then we know that this project contains more than one side-by-side dependency in it's tree
-    const seenSideBySide: { [key in string]: string } = {};
     // Keep track of the lockfile entries we visit when traversing the graph
     const parentStack: string[] = [];
 
-    function helper(currNode: LockfileEntry) {
+    // This function recursively enters lockfile entries and searches the dependencies for any cluster nodes
+    // It also keeps track of the recursion path to compile a folder path from the projectEntry to the side-by-side cluster node detected
+    function traverseEntryRecursively(currNode: LockfileEntry) {
       parentStack.push(currNode.entryPackageName);
       if (currNode?.dependencies) {
         // Search dependencies of current node
@@ -66,6 +62,8 @@ export const linter = (entries: LockfileEntry[]) => {
             // If we are here, it means this dependency is a "clusterNode"
             // which means it is a dependency that has no side-by-side dependency parents, as we skip checking side-by-side
             // dependency's child trees.
+
+            // Record the cluster node version in duplicateVersions
             if (clusterNodes[dep.name]) {
               clusterNodes[dep.name].duplicateVersions.add(dep.version);
             } else {
@@ -74,84 +72,53 @@ export const linter = (entries: LockfileEntry[]) => {
                 allowedConnected: {}
               };
             }
-            if (
-              connectedProjectsToClusters[projectEntry.entryPackageName][dep.name] &&
-              !connectedProjectsToClusters[projectEntry.entryPackageName][dep.name].has(dep.version)
-            ) {
-              if (clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName]) {
-                clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([
-                  ...parentStack,
-                  dep.version
-                ]);
-              } else {
-                clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [
-                  [...parentStack, dep.version]
-                ];
-              }
-            } else {
-              if (!connectedProjectsToClusters[projectEntry.entryPackageName][dep.name]) {
-                connectedProjectsToClusters[projectEntry.entryPackageName][dep.name] = new Set();
 
-                if (connectedProjectsToClusters[projectEntry.entryPackageName][dep.name]) {
-                  if (clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName]) {
-                    clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([
-                      ...parentStack,
-                      dep.version
-                    ]);
-                  } else {
-                    clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [
-                      [...parentStack, dep.version]
-                    ];
-                  }
-                }
-              }
+            // If we haven't seen this dependency for this project yet, create a Set to keep track of any future versions
+            if (!connectedProjectsToClusters[projectEntry.entryPackageName][dep.name]) {
+              connectedProjectsToClusters[projectEntry.entryPackageName][dep.name] = new Set();
+            }
+
+            // If the dependency version is the same as we've seen before for this project, ignore it.
+            if (connectedProjectsToClusters[projectEntry.entryPackageName][dep.name].has(dep.version)) {
+              continue;
             }
             connectedProjectsToClusters[projectEntry.entryPackageName][dep.name].add(dep.version);
-            // // If we have previously seen this side-by-side dependency and it's version is NOT the same as before
-            // if (seenSideBySide[dep.name] && seenSideBySide[dep.name] !== dep.version) {
-            //   // There are more than one side by side versions in the same project
-            //   // We want to also save the "parentStack", which is the path of parent lockfile entries it took to get to this side-by-side version
-            //   // (for debugging)
-            //   if (clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName]) {
-            //     clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([...parentStack]);
-            //   } else {
-            //     clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [[...parentStack]];
-            //   }
-            // } else {
-            //   // Otherwise, we want to save this dependency version so we know if we encounter a different one later on
-            //   seenSideBySide[dep.name] = dep.version;
-            // }
+
+            // Add this new connected dependency to the project, alongside the parent path trace
+            if (clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName]) {
+              clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName].push([
+                ...parentStack,
+                dep.version
+              ]);
+            } else {
+              clusterNodes[dep.name].allowedConnected[projectEntry.entryPackageName] = [
+                [...parentStack, dep.version]
+              ];
+            }
           } else {
+            // This current entry isn't a side-by-side dep, so we need to recursively check it's dependencies to look for any others
             visited.add(dep.resolvedEntry);
-            helper(dep.resolvedEntry);
+            traverseEntryRecursively(dep.resolvedEntry);
           }
         }
       }
       parentStack.pop();
     }
 
-    helper(projectEntry);
-  }
-
-  const filteredNodes: typeof clusterNodes = {};
-  for (const [key, val] of Object.entries(clusterNodes)) {
-    if (val.duplicateVersions.size === 1) continue;
-    filteredNodes[key] = val;
+    traverseEntryRecursively(projectEntry);
   }
 
   // For each cluster node, go through the allowedConnected list's projects and look for any projects that:
   // Have the same origin project
-  const filteredNodes2: {
-    [key in string]: {
+  const fullDependencyClustersLint: Record<
+    string,
+    {
       duplicateVersions: Set<string>;
-      allowedConnected: {
-        [key in string]: string[][];
-      };
-      notConnected: {
-        [key in string]: string[][];
-      };
-    };
-  } = {};
+      allowedConnected: Record<string, string[][]>;
+      notConnected: Record<string, string[][]>;
+    }
+  > = {};
+
   function getNewFilteredNodes(
     packageName: string,
     val: {
@@ -166,6 +133,10 @@ export const linter = (entries: LockfileEntry[]) => {
     const notConnected: typeof val.allowedConnected = {};
     // Look through the current allowedConnected object (which is an object of { [projectName]: parentPath[] }
     for (const [projectName, parentPaths] of Object.entries(val.allowedConnected)) {
+      // If there's only one parent path (occurs when there is only one cluster node in this project), skip it
+      if (parentPaths.length === 1) {
+        continue;
+      }
       let currMax = 0;
       for (const parentPath of parentPaths) {
         const rootParent = parentPath[1]; // As parentPath[0] is the current projectName
@@ -187,18 +158,16 @@ export const linter = (entries: LockfileEntry[]) => {
         notConnected[projectName] = parentPaths;
       }
     }
-    filteredNodes2[packageName] = {
+    fullDependencyClustersLint[packageName] = {
       ...val,
       allowedConnected: newConnected,
       notConnected: notConnected
     };
   }
-  for (const [packageName, val] of Object.entries(filteredNodes)) {
+  for (const [packageName, val] of Object.entries(clusterNodes)) {
+    if (val.duplicateVersions.size === 1) continue;
     getNewFilteredNodes(packageName, val);
   }
-  // console.log('eslint: ', filteredNodes['eslint']);
-
-  // getNewFilteredNodes('eslint', filteredNodes['eslint'])
 
   console.log('DEBUG MODE');
   console.log(`
@@ -207,7 +176,7 @@ In debug mode, additional information is included that may not appear in the fin
 - The path trace from the "connected" project to the side-by-side cluster node, including the version
 - The exact versions of the duplicateVersions (final report may only indicate the number of duplicated versions)
   `);
-  console.log('Number of clusters: ', Object.keys(filteredNodes).length);
+  console.log('Number of clusters: ', Object.keys(fullDependencyClustersLint).length);
   console.log(`
 How to read the linting object:
 
@@ -232,7 +201,5 @@ allowedConnected: This is an object where the key is the project name and the va
 notConnected: This object has the same information as the allowedConnected object, but are a collection of projects that were filtered out from that list. They were filtered because
 their dependencies consist entirely of other allowedConnected projects and do not contribute to more connected projects themselves.
   `);
-  console.log(filteredNodes2);
-  // console.log(connectedProjectsToClusters)
-  // console.log(connectedProjectsToClusters);
-};
+  console.log(fullDependencyClustersLint);
+}
