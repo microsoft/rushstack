@@ -62,7 +62,7 @@ export interface IExperimentsJson {
   /**
    * If true, Rush will not allow node_modules in the repo folder or in parent folders.
    */
-  forbidPhantomResolvableNodeModuleFolders?: boolean;
+  forbidPhantomResolvableNodeModulesFolders?: boolean;
 }
 
 /**

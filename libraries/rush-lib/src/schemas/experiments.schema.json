@@ -42,7 +42,7 @@
       "description": "If true, print the outputs of shell commands defined in event hooks to the console.",
       "type": "boolean"
     },
-    "forbidPhantomResolvableNodeModuleFolders": {
+    "forbidPhantomResolvableNodeModulesFolders": {
       "description": "If true, Rush will not allow node_modules in the repo folder or in parent folders.",
       "type": "boolean"
     }
