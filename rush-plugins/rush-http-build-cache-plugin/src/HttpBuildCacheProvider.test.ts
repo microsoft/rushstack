@@ -16,7 +16,8 @@ const EXAMPLE_OPTIONS = {
   uploadMethod: 'POST',
   isCacheWriteAllowed: false,
   pluginName: 'example-plugin',
-  rushProjectRoot: '/repo'
+  rushProjectRoot: '/repo',
+  minHttpRetryDelayMs: 1
 };
 
 describe('HttpBuildCacheProvider', () => {
@@ -44,7 +45,8 @@ describe('HttpBuildCacheProvider', () => {
 
       const result = await provider.tryGetCacheEntryBufferByIdAsync(terminal, 'some-key');
       expect(result).toBe(undefined);
-      expect(fetch).toHaveBeenCalledWith('https://buildcache.example.acme.com/some-key', {
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenNthCalledWith(1, 'https://buildcache.example.acme.com/some-key', {
         body: undefined,
         headers: {},
         method: 'GET',
@@ -52,6 +54,57 @@ describe('HttpBuildCacheProvider', () => {
       });
       expect(terminalBuffer.getWarningOutput()).toMatchInlineSnapshot(
         `"Error getting cache entry: Error: Credentials for https://buildcache.example.acme.com/ have not been provided.[n]In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.[n][n]For local developers, run:[n][n]    rush update-cloud-credentials --interactive[n][n]"`
+      );
+    });
+
+    it('attempts up to 3 times to download a cache entry', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+
+      const session: RushSession = {} as RushSession;
+      const provider = new HttpBuildCacheProvider(EXAMPLE_OPTIONS, session);
+
+      mocked(fetch).mockResolvedValueOnce(
+        new Response('InternalServiceError', {
+          status: 500,
+          statusText: 'InternalServiceError'
+        })
+      );
+      mocked(fetch).mockResolvedValueOnce(
+        new Response('ServiceUnavailable', {
+          status: 503,
+          statusText: 'ServiceUnavailable'
+        })
+      );
+      mocked(fetch).mockResolvedValueOnce(
+        new Response('BadGateway', {
+          status: 504,
+          statusText: 'BadGateway'
+        })
+      );
+
+      const result = await provider.tryGetCacheEntryBufferByIdAsync(terminal, 'some-key');
+      expect(result).toBe(undefined);
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(fetch).toHaveBeenNthCalledWith(1, 'https://buildcache.example.acme.com/some-key', {
+        body: undefined,
+        headers: {},
+        method: 'GET',
+        redirect: 'follow'
+      });
+      expect(fetch).toHaveBeenNthCalledWith(2, 'https://buildcache.example.acme.com/some-key', {
+        body: undefined,
+        headers: {},
+        method: 'GET',
+        redirect: 'follow'
+      });
+      expect(fetch).toHaveBeenNthCalledWith(3, 'https://buildcache.example.acme.com/some-key', {
+        body: undefined,
+        headers: {},
+        method: 'GET',
+        redirect: 'follow'
+      });
+      expect(terminalBuffer.getWarningOutput()).toMatchInlineSnapshot(
+        `"Could not get cache entry: HTTP 504: BadGateway[n]"`
       );
     });
   });
