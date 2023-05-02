@@ -30,7 +30,7 @@ export async function validateAsync(
     );
 
     if (existingNodeModulesPaths.length > 0) {
-      const paths: string = existingNodeModulesPaths.join(', ');
+      const paths: string = existingNodeModulesPaths.sort().join(', ');
       let errorMessage: string =
         `The following node_modules folders exist in the path to the Rush repo: ${paths}. ` +
         `This is not supported, and may cause issues.`;
