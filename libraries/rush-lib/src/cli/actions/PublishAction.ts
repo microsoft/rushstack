@@ -21,7 +21,7 @@ import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
-import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
@@ -211,7 +211,7 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected async runAsync(): Promise<void> {
-    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, { bypassPolicy: false });
 
     // Example: "common\temp\publish-home"
     this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
