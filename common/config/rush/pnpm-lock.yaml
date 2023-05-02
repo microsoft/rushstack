@@ -1892,8 +1892,10 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/terminal': workspace:*
+      '@rushstack/webpack-preserve-dynamic-require-plugin': workspace:*
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
@@ -1902,6 +1904,7 @@ importers:
       ignore: ~5.1.6
       jszip: ~3.8.0
       npm-packlist: ~2.1.2
+      webpack: ~5.80.0
     dependencies:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/node-core-library': link:../node-core-library
@@ -1913,11 +1916,14 @@ importers:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/npm-packlist': 1.1.2
       eslint: 8.7.0
+      webpack: 5.80.0
 
   ../../libraries/rig-package:
     specifiers:
