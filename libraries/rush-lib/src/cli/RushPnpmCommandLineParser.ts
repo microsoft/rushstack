@@ -71,12 +71,10 @@ export class RushPnpmCommandLineParser {
     this._terminal = terminal;
 
     // Are we in a Rush repo?
-    let rushConfiguration: RushConfiguration | undefined = undefined;
-    if (RushConfiguration.tryFindRushJsonLocation()) {
+    const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
       // showVerbose is false because the logging message may break JSON output
-      rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
-    }
-
+      showVerbose: false
+    });
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
       alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,

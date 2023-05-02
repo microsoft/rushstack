@@ -935,6 +935,14 @@ export class RushConfiguration {
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
 
+  public static tryLoadFromDefaultLocation(
+    options?: ITryFindRushJsonLocationOptions
+  ): RushConfiguration | undefined {
+    if (RushConfiguration.tryFindRushJsonLocation()) {
+      return RushConfiguration.loadFromDefaultLocation(options);
+    }
+  }
+
   public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation(options);
 

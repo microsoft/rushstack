@@ -912,6 +912,8 @@ export class RushConfiguration {
     readonly tempShrinkwrapPreinstallFilename: string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
+    // (undocumented)
+    static tryLoadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration | undefined;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     // @beta (undocumented)
