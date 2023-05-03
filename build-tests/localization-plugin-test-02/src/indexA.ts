@@ -28,6 +28,11 @@ import(/* webpackChunkName: 'chunk-without-strings' */ './chunks/chunkWithoutStr
   }
 );
 
+// @ts-expect-error
+import('non-existent').then(() => {
+  // Do nothing.
+});
+
 console.log(strings5.string1);
 console.log(strings5.stringWithQuotes);
 console.log(strings5.stringWithTabsAndNewlines);
