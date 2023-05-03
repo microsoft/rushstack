@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/package-extractor_v0.2.0",
+      "date": "Wed, 03 May 2023 00:17:46 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bundle the `create-links` script to ensure any imports that are added in the future don't cause issues."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@rushstack/package-extractor_v0.1.3",
       "date": "Mon, 01 May 2023 15:23:19 GMT",

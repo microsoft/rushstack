@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Mon, 01 May 2023 15:23:19 GMT and should not be manually modified.
+This log was last generated on Wed, 03 May 2023 00:17:46 GMT and should not be manually modified.
+
+## 0.2.0
+Wed, 03 May 2023 00:17:46 GMT
+
+### Minor changes
+
+- Bundle the `create-links` script to ensure any imports that are added in the future don't cause issues.
 
 ## 0.1.3
 Mon, 01 May 2023 15:23:19 GMT
