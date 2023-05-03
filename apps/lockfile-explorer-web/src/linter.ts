@@ -48,7 +48,7 @@ export function linter(entries: LockfileEntry[]): void {
 
     // This function recursively enters lockfile entries and searches the dependencies for any cluster nodes
     // It also keeps track of the recursion path to compile a folder path from the projectEntry to the side-by-side cluster node detected
-    function traverseEntryRecursively(currNode: LockfileEntry) {
+    function traverseEntryRecursively(currNode: LockfileEntry): void {
       parentStack.push(currNode.entryPackageName);
       if (currNode?.dependencies) {
         // Search dependencies of current node
@@ -127,7 +127,7 @@ export function linter(entries: LockfileEntry[]): void {
         [x: string]: string[][];
       };
     }
-  ) {
+  ): void {
     // New filtered allowedConnected object
     const newConnected: typeof val.allowedConnected = {};
     const notConnected: typeof val.allowedConnected = {};
