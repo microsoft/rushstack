@@ -32,6 +32,14 @@ declare class WebpackImportDependency extends webpack.compilation.Dependency {
   };
 }
 
+interface IImportDependencyTemplate {
+  apply(
+    dependency: WebpackImportDependency,
+    source: ReplaceSource,
+    runtime: webpack.compilation.RuntimeTemplate
+  ): void;
+}
+
 interface IAsyncImportMetadata {
   chunkCount: number;
   chunkIds: number[];
@@ -182,39 +190,41 @@ export class AsyncImportCompressionPlugin implements Plugin {
               if (dep instanceof ImportDependency) {
                 const { module: targetModule } = dep;
 
-                let localAsyncImports: Map<string, ILocalImportMetadata> | undefined =
-                  asyncImportMap.get(module);
-                if (!localAsyncImports) {
-                  asyncImportMap.set(module, (localAsyncImports = new Map()));
+                if (targetModule) {
+                  let localAsyncImports: Map<string, ILocalImportMetadata> | undefined =
+                    asyncImportMap.get(module);
+                  if (!localAsyncImports) {
+                    asyncImportMap.set(module, (localAsyncImports = new Map()));
+                  }
+
+                  const chunkGroup: webpack.compilation.ChunkGroup = dep.block.chunkGroup;
+                  const chunkIds: number[] = chunkGroup
+                    ? chunkGroup.chunks.map((chunk) => chunk.id!).sort()
+                    : [];
+                  const idString: string = chunkIds.join(';');
+
+                  let meta: IAsyncImportMetadata | undefined = asyncImportGroups.get(idString);
+                  if (!meta) {
+                    asyncImportGroups.set(
+                      idString,
+                      (meta = {
+                        chunkCount: chunkIds.length,
+                        chunkIds: chunkIds,
+                        count: 0,
+                        index: -1
+                      })
+                    );
+                  }
+                  meta.count++;
+
+                  const stringKey: string = `${targetModule.id}`.replace(/[^A-Za-z0-9_$]/g, '_');
+
+                  const key: string = `${ASYNC_IMPORT_PREFIX}${stringKey}`;
+                  localAsyncImports.set(key, {
+                    meta,
+                    module: targetModule
+                  });
                 }
-
-                const chunkGroup: webpack.compilation.ChunkGroup = dep.block.chunkGroup;
-                const chunkIds: number[] = chunkGroup
-                  ? chunkGroup.chunks.map((chunk) => chunk.id!).sort()
-                  : [];
-                const idString: string = chunkIds.join(';');
-
-                let meta: IAsyncImportMetadata | undefined = asyncImportGroups.get(idString);
-                if (!meta) {
-                  asyncImportGroups.set(
-                    idString,
-                    (meta = {
-                      chunkCount: chunkIds.length,
-                      chunkIds: chunkIds,
-                      count: 0,
-                      index: -1
-                    })
-                  );
-                }
-                meta.count++;
-
-                const stringKey: string = `${targetModule.id}`.replace(/[^A-Za-z0-9_$]/g, '_');
-
-                const key: string = `${ASYNC_IMPORT_PREFIX}${stringKey}`;
-                localAsyncImports.set(key, {
-                  meta,
-                  module: targetModule
-                });
               }
             });
           }
@@ -242,16 +252,35 @@ export class AsyncImportCompressionPlugin implements Plugin {
 
         rankedImportGroups = rankedImports.map((x) => x[1]);
 
-        // Have to do this after the official plugin in order to override
-        compilation.dependencyTemplates.set(ImportDependency, {
-          apply(dep: WebpackImportDependency, source: ReplaceSource): void {
-            const stringKey: string = `${dep.module.id}`.replace(/[^A-Za-z0-9_$]/g, '_');
-            const key: string = `${ASYNC_IMPORT_PREFIX}${stringKey}`;
-            const content: string = `__webpack_require__.ee(${key})`;
-            source.replace(dep.block.range[0], dep.block.range[1] - 1, content);
+        const { dependencyTemplates } = compilation;
+
+        const defaultImplementation: IImportDependencyTemplate | undefined = dependencyTemplates.get(
+          ImportDependency
+        ) as unknown as IImportDependencyTemplate;
+        if (!defaultImplementation) {
+          compilation.errors.push(new Error(`Could not find ImportDependencyTemplate`));
+        }
+
+        const customTemplate: IImportDependencyTemplate = {
+          apply(
+            dep: WebpackImportDependency,
+            source: ReplaceSource,
+            runtime: webpack.compilation.RuntimeTemplate
+          ): void {
+            if (dep.module) {
+              const stringKey: string = `${dep.module.id}`.replace(/[^A-Za-z0-9_$]/g, '_');
+              const key: string = `${ASYNC_IMPORT_PREFIX}${stringKey}`;
+              const content: string = `__webpack_require__.ee(${key})`;
+              source.replace(dep.block.range[0], dep.block.range[1] - 1, content);
+            } else {
+              defaultImplementation?.apply(dep, source, runtime);
+            }
           }
-          // Typings in webpack are incorrect. This is a DependencyTemplate object
-        } as unknown as Tapable);
+        };
+
+        // Have to do this after the official plugin in order to override
+        // Typings in webpack are incorrect. This is a DependencyTemplate object
+        dependencyTemplates.set(ImportDependency, customTemplate as unknown as Tapable);
       });
 
       compilation.mainTemplate.hooks.requireExtensions.tap(

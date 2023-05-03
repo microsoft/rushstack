@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack4-module-minifier-plugin",
+      "comment": "Fix async import compressor erroring when encountering unresolved dependencies.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-module-minifier-plugin"
+}
