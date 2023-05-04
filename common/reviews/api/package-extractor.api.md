@@ -9,15 +9,8 @@ import { ITerminal } from '@rushstack/node-core-library';
 
 // @public
 export interface IExtractorMetadataJson {
-    // Warning: (ae-forgotten-export) The symbol "ILinkInfo" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     links: ILinkInfo[];
-    // (undocumented)
     mainProjectName: string;
-    // Warning: (ae-forgotten-export) The symbol "IProjectInfoJson" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     projects: IProjectInfoJson[];
 }
 
@@ -45,6 +38,19 @@ export interface IExtractorProjectConfiguration {
     additionalProjectsToInclude?: string[];
     dependenciesToExclude?: string[];
     projectFolder: string;
+    projectName: string;
+}
+
+// @public
+export interface ILinkInfo {
+    kind: 'fileLink' | 'folderLink';
+    linkPath: string;
+    targetPath: string;
+}
+
+// @public
+export interface IProjectInfoJson {
+    path: string;
     projectName: string;
 }
 
