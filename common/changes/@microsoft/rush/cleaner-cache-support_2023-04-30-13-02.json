@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update the `RushSession.registerCloudBuildCacheProviderFactory` API to allow a cache provider's factory function to return a function.",
+      "comment": "Update the `RushSession.registerCloudBuildCacheProviderFactory` API to allow a cache provider's factory function to return a promise.",
       "type": "none"
     }
   ],
