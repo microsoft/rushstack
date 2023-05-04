@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.26.8",
+      "tag": "@microsoft/api-extractor-model_v7.26.8",
+      "date": "Thu, 04 May 2023 00:20:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a mistake in the documentation for ApiParameterListMixin.overloadIndex"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.26.7",
       "tag": "@microsoft/api-extractor-model_v7.26.7",
       "date": "Mon, 01 May 2023 15:23:20 GMT",

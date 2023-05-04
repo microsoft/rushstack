@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 01 May 2023 15:23:20 GMT and should not be manually modified.
+This log was last generated on Thu, 04 May 2023 00:20:28 GMT and should not be manually modified.
+
+## 7.26.8
+Thu, 04 May 2023 00:20:28 GMT
+
+### Patches
+
+- Fix a mistake in the documentation for ApiParameterListMixin.overloadIndex
 
 ## 7.26.7
 Mon, 01 May 2023 15:23:20 GMT
