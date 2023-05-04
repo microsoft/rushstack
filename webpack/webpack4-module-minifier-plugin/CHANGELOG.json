@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
+      "version": "0.12.5",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.5",
+      "date": "Thu, 04 May 2023 15:17:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.4",
       "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.4",
       "date": "Thu, 04 May 2023 00:20:28 GMT",

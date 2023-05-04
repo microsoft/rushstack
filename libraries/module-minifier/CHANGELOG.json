@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.3.9",
+      "tag": "@rushstack/module-minifier_v0.3.9",
+      "date": "Thu, 04 May 2023 15:17:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Switch terser dependency to ^5.9.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.8",
       "tag": "@rushstack/module-minifier_v0.3.8",
       "date": "Thu, 04 May 2023 00:20:29 GMT",
