@@ -1818,12 +1818,12 @@ importers:
       '@types/serialize-javascript': 5.0.2
       serialize-javascript: 6.0.0
       source-map: ~0.7.3
-      terser: 5.16.1
+      terser: ^5.9.0
     dependencies:
       '@rushstack/worker-pool': link:../worker-pool
       serialize-javascript: 6.0.0
       source-map: 0.7.4
-      terser: 5.16.1
+      terser: 5.17.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -14642,7 +14642,7 @@ packages:
       he: 1.2.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.16.1
+      terser: 5.17.1
 
   /html-tags/3.2.0:
     resolution: {integrity: sha512-vy7ClnArOZwCnqZgvv+ddgHgJiAFXe3Ge9ML5/mBctVJoUoYPCdxVucOywjDARn6CVoh3dRSFdPHy2sX80L0Wg==}
@@ -21285,7 +21285,7 @@ packages:
       schema-utils: 3.1.2
       serialize-javascript: 5.0.1
       source-map: 0.6.1
-      terser: 5.16.1
+      terser: 5.17.1
       webpack: 4.44.2
       webpack-sources: 1.4.3
     dev: true
@@ -21310,7 +21310,7 @@ packages:
       jest-worker: 27.5.1
       schema-utils: 3.1.1
       serialize-javascript: 6.0.0
-      terser: 5.16.1
+      terser: 5.17.1
       webpack: 5.80.0
     dev: false
 
@@ -21344,16 +21344,6 @@ packages:
     dependencies:
       commander: 2.20.3
       source-map: 0.6.1
-      source-map-support: 0.5.21
-
-  /terser/5.16.1:
-    resolution: {integrity: sha512-xvQfyfA1ayT0qdK47zskQgRZeWLoOQ8JQ6mIgRGVNwZKdQMU+5FkCBjmv4QjcrTzyZquRw2FVtlJSRUmMKQslw==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      '@jridgewell/source-map': 0.3.2
-      acorn: 8.8.2
-      commander: 2.20.3
       source-map-support: 0.5.21
 
   /terser/5.17.1:
