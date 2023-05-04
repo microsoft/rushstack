@@ -8,6 +8,20 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 
 // @public
+export interface IExtractorMetadataJson {
+    // Warning: (ae-forgotten-export) The symbol "ILinkInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    links: ILinkInfo[];
+    // (undocumented)
+    mainProjectName: string;
+    // Warning: (ae-forgotten-export) The symbol "IProjectInfoJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    projects: IProjectInfoJson[];
+}
+
+// @public
 export interface IExtractorOptions {
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
