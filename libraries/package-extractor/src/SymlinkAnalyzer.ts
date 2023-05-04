@@ -40,13 +40,18 @@ export interface ILinkNode extends IPathNodeBase {
 export type PathNode = IFileNode | IFolderNode | ILinkNode;
 
 /**
- * Represents a symbolic link reported by {@link SymlinkAnalyzer.reportSymlinks}.
+ * Represents a symbolic link.
+ *
+ * @public
  */
 export interface ILinkInfo {
+  /**
+   * The type of link that was encountered.
+   */
   kind: 'fileLink' | 'folderLink';
 
   /**
-   * The path of the symbolic link.
+   * The path to the link, relative to the root of the extractor output folder.
    */
   linkPath: string;
 

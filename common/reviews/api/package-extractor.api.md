@@ -8,6 +8,13 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 
 // @public
+export interface IExtractorMetadataJson {
+    links: ILinkInfo[];
+    mainProjectName: string;
+    projects: IProjectInfoJson[];
+}
+
+// @public
 export interface IExtractorOptions {
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
@@ -31,6 +38,19 @@ export interface IExtractorProjectConfiguration {
     additionalProjectsToInclude?: string[];
     dependenciesToExclude?: string[];
     projectFolder: string;
+    projectName: string;
+}
+
+// @public
+export interface ILinkInfo {
+    kind: 'fileLink' | 'folderLink';
+    linkPath: string;
+    targetPath: string;
+}
+
+// @public
+export interface IProjectInfoJson {
+    path: string;
     projectName: string;
 }
 

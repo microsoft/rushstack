@@ -37,20 +37,37 @@ declare module 'npm-packlist' {
 
 /**
  * Part of the extractor-matadata.json file format. Represents an extracted project.
+ *
+ * @public
  */
-interface IProjectInfoJson {
+export interface IProjectInfoJson {
   /**
-   * This path is relative to the extractor target folder.
+   * The name of the project as specified in its package.json file.
+   */
+  projectName: string;
+  /**
+   * This path is relative to the root of the extractor output folder
    */
   path: string;
 }
 
 /**
  * The extractor-metadata.json file format.
+ *
+ * @public
  */
 export interface IExtractorMetadataJson {
+  /**
+   * The name of the main project the extraction was performed for.
+   */
   mainProjectName: string;
+  /**
+   * A list of all projects that were extracted.
+   */
   projects: IProjectInfoJson[];
+  /**
+   * A list of all links that are part of the extracted project.
+   */
   links: ILinkInfo[];
 }
 
@@ -779,9 +796,10 @@ export class PackageExtractor {
       links: []
     };
 
-    for (const projectFolder of projectConfigurationsByPath.keys()) {
+    for (const { projectFolder, projectName } of projectConfigurationsByPath.values()) {
       if (state.foldersToCopy.has(projectFolder)) {
         extractorMetadataJson.projects.push({
+          projectName,
           path: this._remapPathForExtractorMetadata(projectFolder, options)
         });
       }
