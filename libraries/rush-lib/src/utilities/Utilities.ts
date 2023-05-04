@@ -155,14 +155,6 @@ export class Utilities {
   }
 
   /**
-   * Returns the values from a Set<T>
-   */
-  public static getSetAsArray<T>(set: Set<T> | ReadonlySet<T>): T[] {
-    // When ES6 is supported, we can use Array.from() instead.
-    return Array.from(set);
-  }
-
-  /**
    * Retries a function until a timeout is reached. The function is expected to throw if it failed and
    *  should be retried.
    */
@@ -482,18 +474,6 @@ export class Utilities {
     } finally {
       disposable?.dispose();
     }
-  }
-
-  public static async readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
-    return await new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
-      const parts: Uint8Array[] = [];
-      stream.on('data', (chunk) => parts.push(chunk));
-      stream.on('error', (error) => reject(error));
-      stream.on('end', () => {
-        const result: Buffer = Buffer.concat(parts);
-        resolve(result);
-      });
-    });
   }
 
   private static _executeLifecycleCommandInternal<TCommandResult>(

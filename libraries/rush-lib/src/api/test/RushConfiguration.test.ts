@@ -7,7 +7,6 @@ import { JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { DependencyType } from '../PackageJsonEditor';
 
@@ -88,13 +87,13 @@ describe(RushConfiguration.name, () => {
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toEqual(true);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
+    expect(Array.from(approvedPackagesPolicy.reviewCategories)).toEqual([
       'first-party',
       'third-party',
       'prototype'
     ]);
 
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
+    expect(Array.from(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -165,12 +164,12 @@ describe(RushConfiguration.name, () => {
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toBe(true);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
+    expect(Array.from(approvedPackagesPolicy.reviewCategories)).toEqual([
       'first-party',
       'third-party',
       'prototype'
     ]);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
+    expect(Array.from(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
