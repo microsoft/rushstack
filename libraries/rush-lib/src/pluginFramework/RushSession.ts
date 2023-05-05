@@ -18,7 +18,9 @@ export interface IRushSessionOptions {
 /**
  * @beta
  */
-export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
+export type CloudBuildCacheProviderFactory = (
+  buildCacheJson: IBuildCacheJson
+) => ICloudBuildCacheProvider | Promise<ICloudBuildCacheProvider>;
 
 /**
  * @beta
@@ -60,6 +62,7 @@ export class RushSession {
     if (this._cloudBuildCacheProviderFactories.has(cacheProviderName)) {
       throw new Error(`A build cache provider factory for ${cacheProviderName} has already been registered`);
     }
+
     this._cloudBuildCacheProviderFactories.set(cacheProviderName, factory);
   }
 
