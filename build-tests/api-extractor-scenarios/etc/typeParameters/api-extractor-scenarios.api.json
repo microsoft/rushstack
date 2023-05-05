@@ -422,7 +422,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type GenericTypeAlias<T> = "
+              "text": "export type GenericTypeAlias<T> = "
             },
             {
               "kind": "Content",

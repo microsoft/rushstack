@@ -9,7 +9,7 @@ A type alias that has duplicate references.
 **Signature:**
 
 ```typescript
-export declare type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
 ```
 **References:** [SystemEvent](./api-documenter-test.systemevent.md)
 

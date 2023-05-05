@@ -9,7 +9,7 @@ Some interface-like type alias.
 **Signature:**
 
 ```typescript
-export declare type IInterfaceLikeTypeAlias = {
+export type IInterfaceLikeTypeAlias = {
     someProp: number;
 };
 ```

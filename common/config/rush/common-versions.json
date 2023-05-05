@@ -29,7 +29,7 @@
     // Preferring it avoids errors for indirect dependencies that request it as a peer dependency.
     // It's also the newest supported compiler, used by most build tests and used as the bundled compiler
     // engine for API Extractor.
-    "typescript": "~4.8.4",
+    "typescript": "~5.0.4",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~8.7.0"
@@ -69,7 +69,7 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
-      // "~4.7.4" is the (inferred, not alternative) range used by most projects in this repo
+      // "~5.0.4" is the (inferred, not alternative) range used by most projects in this repo
 
       // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
       "~2.9.2"

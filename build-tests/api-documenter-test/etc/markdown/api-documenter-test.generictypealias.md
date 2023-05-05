@@ -8,5 +8,5 @@
 **Signature:**
 
 ```typescript
-export declare type GenericTypeAlias<T> = T[];
+export type GenericTypeAlias<T> = T[];
 ```

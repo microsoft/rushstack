@@ -8,4 +8,4 @@ remarks: ''
 example: []
 isPreview: false
 isDeprecated: false
-syntax: export declare type ExampleTypeAlias = Promise<boolean>;
+syntax: export type ExampleTypeAlias = Promise<boolean>;
