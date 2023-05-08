@@ -106,9 +106,14 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
 
   protected lintingFinished(lintFailures: TEslint.ESLint.LintResult[]): void {
     let omittedRuleCount: number = 0;
-    for (const [ruleName, duration] of this._eslintTimings.entries()) {
+    const timings: [string, number][] = Array.from(this._eslintTimings).sort(
+      (x: [string, number], y: [string, number]) => {
+        return y[1] - x[1];
+      }
+    );
+    for (const [ruleName, duration] of timings) {
       if (duration > 0) {
-        this._terminal.writeVerboseLine(`Rule "${ruleName}" duration: ${duration}ms`);
+        this._terminal.writeVerboseLine(`Rule "${ruleName}" duration: ${duration.toFixed(3)} ms`);
       } else {
         omittedRuleCount++;
       }

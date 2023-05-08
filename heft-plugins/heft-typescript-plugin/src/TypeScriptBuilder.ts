@@ -580,7 +580,9 @@ export class TypeScriptBuilder {
     let innerProgram: TTypescript.Program;
 
     if (tsconfig.options.incremental) {
-      builderProgram = this._getCreateBuilderProgram(ts)(
+      // Use ts.createEmitAndSemanticDiagnositcsBuilderProgram directly because the customizations performed by
+      // _getCreateBuilderProgram duplicate those performed in this function for non-incremental build.
+      builderProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(
         tsconfig.fileNames,
         tsconfig.options,
         compilerHost,
