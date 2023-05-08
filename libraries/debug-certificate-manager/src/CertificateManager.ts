@@ -21,11 +21,7 @@ const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
  * The set of names the certificate should be generated for, by default.
  * @public
  */
-export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = [
-  'localhost',
-  'rushstack.localhost',
-  '127.0.0.1'
-];
+export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localhost'];
 
 /**
  * The interface for a debug certificate instance
@@ -70,10 +66,15 @@ interface ISubjectAltNameExtension {
   altNames: readonly IAltName[];
 }
 
-interface IAltName {
+interface IDNSName {
   type: 2;
   value: string;
 }
+interface IIPAddress {
+  type: 7;
+  ip: string;
+}
+type IAltName = IDNSName | IIPAddress;
 
 /**
  * Options to use if needing to generate a new certificate
@@ -120,6 +121,14 @@ export class CertificateManager {
 
     const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
 
+    if (process.env.DISABLE_DEV_CERT_GENERATION === '1') {
+      // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
+      terminal.writeLine(
+        `Found environment variable DISABLE_DEV_CERT_GENERATION=1, force disabling certificate generation.`
+      );
+      canGenerateNewCertificate = false;
+    }
+
     if (existingCert && existingKey) {
       const messages: string[] = [];
 
@@ -135,8 +144,8 @@ export class CertificateManager {
         );
       } else {
         const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
-        for (const { value } of altNamesExtension.altNames) {
-          missingSubjectNames.delete(value);
+        for (const altName of altNamesExtension.altNames) {
+          missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
         }
         if (missingSubjectNames.size) {
           messages.push(
@@ -210,7 +219,9 @@ export class CertificateManager {
           pemCaCertificate: caCertificateData,
           pemCertificate: existingCert,
           pemKey: existingKey,
-          subjectAltNames: altNamesExtension.altNames.map((entry) => entry.value)
+          subjectAltNames: altNamesExtension.altNames.map((entry) =>
+            isIPAddress(entry) ? entry.ip : entry.value
+          )
         };
       }
     } else if (canGenerateNewCertificate) {
@@ -414,10 +425,14 @@ export class CertificateManager {
     certificate.setSubject(subjectAttrs);
     certificate.setIssuer(issuerAttrs);
 
-    const subjectAltNames: readonly IAltName[] = subjectNames.map((subjectName) => ({
+    const subjectAltNames: IAltName[] = subjectNames.map((subjectName) => ({
       type: 2, // DNS
       value: subjectName
     }));
+    subjectAltNames.push({
+      type: 7, // IP
+      ip: '127.0.0.1'
+    });
 
     const issuerAltNames: readonly IAltName[] = [
       {
@@ -754,4 +769,8 @@ function applyDefaultOptions(
       options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
     )
   };
+}
+
+function isIPAddress(altName: IAltName): altName is IIPAddress {
+  return altName.type === 7;
 }
