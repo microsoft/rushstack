@@ -73,6 +73,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
+  deviceCodeCredentails?: DeviceCodeCredential;
 }
 
 /**
@@ -90,7 +91,7 @@ export abstract class AzureAuthenticationBase {
   protected abstract readonly _credentialNameForCache: string;
   protected abstract readonly _credentialKindForLogging: string;
   protected readonly _credentialUpdateCommandForLogging: string | undefined;
-
+  protected readonly _deviceCodeCredential: DeviceCodeCredential | undefined;
   protected readonly _azureEnvironment: AzureEnvironmentName;
 
   private __credentialCacheId: string | undefined;
@@ -111,6 +112,7 @@ export abstract class AzureAuthenticationBase {
   public constructor(options: IAzureAuthenticationBaseOptions) {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
+    this._deviceCodeCredential = options.deviceCodeCredentails || undefined;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
@@ -236,6 +238,10 @@ export abstract class AzureAuthenticationBase {
     const authorityHost: string | undefined = AzureAuthorityHosts[this._azureEnvironment];
     if (!authorityHost) {
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
+    }
+
+    if (this._deviceCodeCredential) {
+      return await this._getCredentialFromDeviceCodeAsync(terminal, this._deviceCodeCredential);
     }
 
     const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential({

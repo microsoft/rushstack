@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeviceCodeCredential, type DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
 import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@rushstack/rush-sdk';
 import type { AzureEnvironmentName } from './AzureAuthenticationBase';
+import { PrintUtilities } from '@rushstack/terminal';
+import { AzureStorageAuthentication } from './AzureStorageAuthentication';
+import { KeyVaultAuthentication } from './KeyVaultAuthentication';
 
 const PLUGIN_NAME: 'AzureInteractiveAuthPlugin' = 'AzureInteractiveAuthPlugin';
 
@@ -13,12 +17,12 @@ export interface IAzureInteractiveAuthOptions {
   /**
    * The name of the the Azure storage account to authenticate to.
    */
-  readonly storageAccountName: string;
+  readonly storageAccountName?: string;
 
   /**
    * The name of the container in the Azure storage account to authenticate to.
    */
-  readonly storageContainerName: string;
+  readonly storageContainerName?: string;
 
   /**
    * The Azure environment the storage account exists in. Defaults to AzureCloud.
@@ -40,6 +44,22 @@ export interface IAzureInteractiveAuthOptions {
    * The set of Rush phased commands before which credentials should be updated.
    */
   readonly phasedCommands?: string[];
+
+  /**
+   * The list of credentials to be retrieved from Azure.
+   */
+  readonly authList: IAzureAuthenticationConfiguration[];
+}
+
+/**
+ * @public
+ */
+export interface IAzureAuthenticationConfiguration {
+  readonly azureStorageType: string;
+  readonly storageAccountName: string;
+  readonly storageContainerName?: string;
+  readonly keyVaultSecretName?: string;
+  readonly keyVaultName?: string;
 }
 
 /**
@@ -62,42 +82,60 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
   }
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
-    const options: IAzureInteractiveAuthOptions | undefined = this._options;
+    const options: Array<IAzureInteractiveAuthOptions> | IAzureInteractiveAuthOptions | undefined =
+      this._options;
 
     if (!options) {
       // Plugin is not enabled.
       return;
     }
 
+    const { hooks } = rushSession;
+    const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
+
     const { globalCommands, phasedCommands } = options;
 
-    const { hooks } = rushSession;
-
     const handler: () => Promise<void> = async () => {
-      const { AzureStorageAuthentication } = await import('./AzureStorageAuthentication');
-      const {
-        storageAccountName,
-        storageContainerName,
-        azureEnvironment = 'AzurePublicCloud',
-        minimumValidityInMinutes
-      } = options;
-
-      const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
-      logger.terminal.writeLine(
-        `Authenticating to Azure container "${storageContainerName}" on account "${storageAccountName}" in environment "${azureEnvironment}".`
-      );
+      const { authList, azureEnvironment = 'AzurePublicCloud', minimumValidityInMinutes } = options;
+      const authorityHost: string | undefined = AzureAuthorityHosts[azureEnvironment];
 
       let minimumExpiry: Date | undefined;
       if (typeof minimumValidityInMinutes === 'number') {
         minimumExpiry = new Date(Date.now() + minimumValidityInMinutes * 60 * 1000);
       }
 
-      await new AzureStorageAuthentication({
-        storageAccountName: storageAccountName,
-        storageContainerName: storageContainerName,
-        azureEnvironment: options.azureEnvironment,
-        isCacheWriteAllowed: true
-      }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
+      const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential({
+        authorityHost: authorityHost,
+        userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+          PrintUtilities.printMessageInBox(deviceCodeInfo.message, logger.terminal);
+        }
+      });
+
+      for (const configuration of authList) {
+        const {
+          azureStorageType,
+          storageAccountName,
+          storageContainerName = 'dev',
+          keyVaultName = '',
+          keyVaultSecretName = ''
+        } = configuration;
+
+        if (azureStorageType === 'AzureBlobStorage') {
+          await new AzureStorageAuthentication({
+            storageAccountName: storageAccountName,
+            storageContainerName: storageContainerName,
+            azureEnvironment: options.azureEnvironment,
+            isCacheWriteAllowed: true,
+            deviceCodeCredentails: deviceCodeCredential
+          }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
+        } else if (azureStorageType === 'AzureKeyVault') {
+          await new KeyVaultAuthentication({
+            vaultName: keyVaultName,
+            secretName: keyVaultSecretName,
+            deviceCodeCredentails: deviceCodeCredential
+          }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
+        }
+      }
     };
 
     if (globalCommands) {

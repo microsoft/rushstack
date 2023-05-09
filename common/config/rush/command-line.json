@@ -53,6 +53,13 @@
         "watchPhases": ["_phase:build", "_phase:test"]
       }
     },
+    {
+      "name": "test-rush-interactive",
+      "commandKind": "global",
+      "summary": "Testing rush azure interactive",
+      "shellCommand": "node -e \"console.log('Done.');\"",
+      "safeForSimultaneousRushProcesses": true
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
