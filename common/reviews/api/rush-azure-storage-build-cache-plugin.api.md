@@ -25,6 +25,8 @@ export abstract class AzureAuthenticationBase {
     protected readonly _credentialUpdateCommandForLogging: string | undefined;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
+    // (undocumented)
+    protected readonly _deviceCodeCredential: DeviceCodeCredential | undefined;
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
     protected abstract _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
@@ -70,6 +72,8 @@ export interface IAzureAuthenticationBaseOptions {
     azureEnvironment?: AzureEnvironmentName;
     // (undocumented)
     credentialUpdateCommandForLogging?: string | undefined;
+    // (undocumented)
+    deviceCodeCredentails?: DeviceCodeCredential;
 }
 
 // @public (undocumented)
