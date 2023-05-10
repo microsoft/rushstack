@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Switch from sass to sass-embedded for better performance.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
