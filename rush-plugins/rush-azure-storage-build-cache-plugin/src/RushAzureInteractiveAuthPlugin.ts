@@ -99,10 +99,6 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
       const { authList, azureEnvironment = 'AzurePublicCloud', minimumValidityInMinutes } = options;
       const authorityHost: string | undefined = AzureAuthorityHosts[azureEnvironment];
 
-      // logger.terminal.writeLine(
-      //   `Authenticating to Azure container "${storageContainerName}" on account "${storageAccountName}" in environment "${azureEnvironment}".`
-      // );
-      logger.terminal.writeLine('was here too');
       let minimumExpiry: Date | undefined;
       if (typeof minimumValidityInMinutes === 'number') {
         minimumExpiry = new Date(Date.now() + minimumValidityInMinutes * 60 * 1000);
