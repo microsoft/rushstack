@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Changed rush-azure-storage-build-cache-plugin to handle multiple authenticaton requests to Azure Storage and Key Vault with one user login",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
