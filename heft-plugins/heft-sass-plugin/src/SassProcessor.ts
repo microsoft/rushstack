@@ -4,7 +4,7 @@
 
 import * as path from 'path';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
-import { CompileResult, Syntax, Exception, compileString } from 'sass';
+import { CompileResult, Syntax, Exception, compileStringAsync } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
 import { FileSystem, Sort } from '@rushstack/node-core-library';
@@ -212,7 +212,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     let result: CompileResult;
     const nodeModulesUrl: URL = pathToFileURL(`${buildFolder}/node_modules/`);
     try {
-      result = compileString(fileContents, {
+      result = await compileStringAsync(fileContents, {
         importers: [
           {
             findFileUrl: (url: string): URL | null => {
