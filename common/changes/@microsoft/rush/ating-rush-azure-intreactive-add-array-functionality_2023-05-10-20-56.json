@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Implemented feature for rush-azure-storage-build-cache-plugin to handle multiple authentications with one device login.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
