@@ -2,17 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { DeviceCodeCredential, type DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
-import type {
-  IRushPlugin,
-  RushSession,
-  RushConfiguration,
-  ILogger,
-  ICredentialCacheEntry
-} from '@rushstack/rush-sdk';
-import type { AzureEnvironmentName } from './AzureAuthenticationBase';
+import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@rushstack/rush-sdk';
+import type { AzureEnvironmentName, ICredentialResult } from './AzureAuthenticationBase';
 import { PrintUtilities } from '@rushstack/terminal';
 import { AzureStorageAuthentication } from './AzureStorageAuthentication';
-import { Terminal } from '@rushstack/node-core-library';
+import { Terminal, ITerminal } from '@rushstack/node-core-library';
+import { CredentialCache } from '@rushstack/rush-sdk';
 
 const PLUGIN_NAME: 'AzureInteractiveAuthPlugin' = 'AzureInteractiveAuthPlugin';
 
@@ -73,9 +68,13 @@ export interface IFetchCredentialsScripts {
   additionalCredentialFetchers: (
     deviceCodeCredential: DeviceCodeCredential,
     terminal: Terminal,
-    options: IAzureAuthenticationConfiguration,
-    minimumExpiry: Date | undefined
-  ) => Promise<ICredentialCacheEntry[]>;
+    options: IAzureAuthenticationConfiguration
+  ) => Promise<ICredentialResultWithId>;
+}
+
+export interface ICredentialResultWithId {
+  credentialId: string;
+  credential: ICredentialResult;
 }
 
 /**
@@ -95,6 +94,30 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
 
   public constructor(options: IAzureInteractiveAuthOptions | undefined) {
     this._options = options;
+  }
+
+  public async updateCachedCredentialAsync(
+    terminal: ITerminal,
+    credentialList: ICredentialResultWithId[]
+  ): Promise<void> {
+    await CredentialCache.usingAsync(
+      {
+        supportEditing: true
+      },
+      async (credentialsCache: CredentialCache) => {
+        for (const credential of credentialList) {
+          const credentialId: string = credential.credentialId;
+          const credentialCore: ICredentialResult = credential.credential;
+          credentialsCache.setCacheEntry(credentialId, {
+            credential: credentialCore.credentialString,
+            expires: credentialCore.expiresOn,
+            credentialMetadata: credentialCore.credentialMetadata
+          });
+        }
+
+        await credentialsCache.saveIfModifiedAsync();
+      }
+    );
   }
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
@@ -127,6 +150,8 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
         }
       });
 
+      const credentials: ICredentialResultWithId[] = [];
+
       for (const configuration of authList) {
         const {
           azureStorageType,
@@ -146,14 +171,17 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
         } else {
           const fetchers: IFetchCredentialsScripts = await import(filePath);
 
-          await fetchers.additionalCredentialFetchers(
+          const credential: ICredentialResultWithId = await fetchers.additionalCredentialFetchers(
             deviceCodeCredential,
             logger.terminal,
-            configuration,
-            minimumExpiry
+            configuration
           );
+
+          credentials.push(credential);
         }
       }
+
+      await this.updateCachedCredentialAsync(logger.terminal, credentials);
     };
 
     if (globalCommands) {
