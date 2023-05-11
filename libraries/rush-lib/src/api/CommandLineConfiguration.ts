@@ -26,6 +26,12 @@ export interface IShellCommandTokenContext {
 }
 
 /**
+ * The set of valid behaviors for a missing script in a project's package.json scripts for a given phase.
+ * @alpha
+ */
+export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
+
+/**
  * Metadata about a phase.
  * @alpha
  */
@@ -62,16 +68,15 @@ export interface IPhase {
   };
 
   /**
-   * Normally Rush requires that each project's package.json has a `"scripts"` entry matching the phase name.
-   * To disable this check, set `ignoreMissingScript` to true.
-   */
-  ignoreMissingScript: boolean;
-
-  /**
    * By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is
    * set to `true`, Rush will return a zero exit code if warnings occur during the execution of this phase.
    */
   allowWarningsOnSuccess: boolean;
+
+  /**
+   * What should happen if the script is not defined in a project's package.json scripts field. Default is "error".
+   */
+  missingScriptBehavior: IPhaseBehaviorForMissingScript;
 
   /**
    * (Optional) If the `shellCommand` field is set for a bulk command, Rush will invoke it for each
@@ -238,6 +243,14 @@ export class CommandLineConfiguration {
           );
         }
 
+        if (phase.ignoreMissingScript !== undefined && phase.missingScriptBehavior !== undefined) {
+          throw new Error(
+            `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s defines ` +
+              'both "ignoreMissingScript" and "missingScriptBehavior". If using the "missingScriptBehavior", ' +
+              `remove "ignoreMissingScript", since it subsumes the functionality.`
+          );
+        }
+
         // This is a completely fresh object. Avoid use of the `...` operator in its construction
         // to guarantee monomorphism.
         const processedPhase: IPhase = {
@@ -249,7 +262,7 @@ export class CommandLineConfiguration {
             self: new Set(),
             upstream: new Set()
           },
-          ignoreMissingScript: !!phase.ignoreMissingScript,
+          missingScriptBehavior: phase.missingScriptBehavior ?? (phase.ignoreMissingScript ? 'log' : 'error'),
           allowWarningsOnSuccess: !!phase.allowWarningsOnSuccess
         };
 
@@ -680,7 +693,7 @@ export class CommandLineConfiguration {
         self: new Set(),
         upstream: new Set()
       },
-      ignoreMissingScript: !!command.ignoreMissingScript,
+      missingScriptBehavior: command.ignoreMissingScript ? 'log' : 'error',
       allowWarningsOnSuccess: !!command.allowWarningsInSuccessfulBuild,
       shellCommand: command.shellCommand
     };

@@ -467,12 +467,15 @@ export interface IPhase {
         self: Set<IPhase>;
         upstream: Set<IPhase>;
     };
-    ignoreMissingScript: boolean;
     isSynthetic: boolean;
     logFilenameIdentifier: string;
+    missingScriptBehavior: IPhaseBehaviorForMissingScript;
     name: string;
     shellCommand?: string;
 }
+
+// @alpha
+export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 
 // @beta
 export interface IPhasedCommand extends IRushCommand {
