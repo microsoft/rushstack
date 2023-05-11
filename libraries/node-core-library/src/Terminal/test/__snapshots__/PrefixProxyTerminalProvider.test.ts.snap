@@ -1,6 +1,96 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PrefixProxyTerminalProvider write writes a message 1`] = `
+exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a message 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] test message",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a message with newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a message with provider newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a mix of messages with and without newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1message 2[n][prefix (1)] message 3[n][prefix (3)] message 4message 5[n][prefix (4)] message 6",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes messages without newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1message 2message 3",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a message line 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] test message[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a message line with newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a message line with provider newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a mix of message lines with and without newlines 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (1)] message 3[n][prefix (1)] [n][prefix (2)] message 4[n][prefix (3)] message 5[n][prefix (3)] message 6[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`PrefixProxyTerminalProvider With a static prefix write writes a message 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -10,7 +100,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider write writes a message with newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix write writes a message with newlines 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -20,7 +110,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider write writes a message with provider newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix write writes a message with provider newlines 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -30,7 +120,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider write writes a mix of messages with and without newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix write writes a mix of messages with and without newlines 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -40,7 +130,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider write writes messages without newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix write writes messages without newlines 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -50,7 +140,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider writeLine writes a message line 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a message line 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -60,7 +150,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider writeLine writes a message line with newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a message line with newlines 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -70,7 +160,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider writeLine writes a message line with provider newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a message line with provider newlines 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -80,7 +170,7 @@ Object {
 }
 `;
 
-exports[`PrefixProxyTerminalProvider writeLine writes a mix of message lines with and without newlines 1`] = `
+exports[`PrefixProxyTerminalProvider With a static prefix writeLine writes a mix of message lines with and without newlines 1`] = `
 Object {
   "debug": "",
   "error": "",

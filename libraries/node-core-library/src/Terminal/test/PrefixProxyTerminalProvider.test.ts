@@ -4,27 +4,27 @@
 import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { PrefixProxyTerminalProvider } from '../PrefixProxyTerminalProvider';
+import { ITerminalProvider } from '../ITerminalProvider';
 
-let terminal: Terminal;
-let provider: StringBufferTerminalProvider;
+function runTestsForTerminalProvider(
+  getTerminalProvider: (terminalProvider: ITerminalProvider) => PrefixProxyTerminalProvider
+): void {
+  let terminal: Terminal;
+  let baseProvider: StringBufferTerminalProvider;
 
-function verifyProvider(): void {
-  expect({
-    log: provider.getOutput(),
-    warning: provider.getWarningOutput(),
-    error: provider.getErrorOutput(),
-    verbose: provider.getVerbose(),
-    debug: provider.getDebugOutput()
-  }).toMatchSnapshot();
-}
+  function verifyProvider(): void {
+    expect({
+      log: baseProvider.getOutput(),
+      warning: baseProvider.getWarningOutput(),
+      error: baseProvider.getErrorOutput(),
+      verbose: baseProvider.getVerbose(),
+      debug: baseProvider.getDebugOutput()
+    }).toMatchSnapshot();
+  }
 
-describe(PrefixProxyTerminalProvider.name, () => {
   beforeEach(() => {
-    provider = new StringBufferTerminalProvider(true);
-    const prefixProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider({
-      terminalProvider: provider,
-      prefix: '[prefix] '
-    });
+    baseProvider = new StringBufferTerminalProvider(true);
+    const prefixProvider: PrefixProxyTerminalProvider = getTerminalProvider(baseProvider);
     terminal = new Terminal(prefixProvider);
   });
 
@@ -40,7 +40,7 @@ describe(PrefixProxyTerminalProvider.name, () => {
     });
 
     test('writes a message with provider newlines', () => {
-      terminal.write(`message 1${provider.eolCharacter}message 2${provider.eolCharacter}message 3`);
+      terminal.write(`message 1${baseProvider.eolCharacter}message 2${baseProvider.eolCharacter}message 3`);
       verifyProvider();
     });
 
@@ -72,7 +72,9 @@ describe(PrefixProxyTerminalProvider.name, () => {
     });
 
     test('writes a message line with provider newlines', () => {
-      terminal.writeLine(`message 1${provider.eolCharacter}message 2${provider.eolCharacter}message 3`);
+      terminal.writeLine(
+        `message 1${baseProvider.eolCharacter}message 2${baseProvider.eolCharacter}message 3`
+      );
       verifyProvider();
     });
 
@@ -82,6 +84,28 @@ describe(PrefixProxyTerminalProvider.name, () => {
       terminal.writeLine('message 4');
       terminal.writeLine('message 5\nmessage 6');
       verifyProvider();
+    });
+  });
+}
+
+describe(PrefixProxyTerminalProvider.name, () => {
+  describe('With a static prefix', () => {
+    runTestsForTerminalProvider(
+      (terminalProvider) =>
+        new PrefixProxyTerminalProvider({
+          terminalProvider,
+          prefix: '[prefix] '
+        })
+    );
+  });
+
+  describe('With a dynamic prefix', () => {
+    runTestsForTerminalProvider((terminalProvider) => {
+      let counter: number = 0;
+      return new PrefixProxyTerminalProvider({
+        terminalProvider,
+        getPrefix: () => `[prefix (${counter++})] `
+      });
     });
   });
 });
