@@ -106,7 +106,10 @@ export {
 } from './Terminal/StringBufferTerminalProvider';
 export {
   PrefixProxyTerminalProvider,
-  IPrefixProxyTerminalProviderOptions
+  IPrefixProxyTerminalProviderOptions,
+  IDynamicPrefixProxyTerminalProviderOptions,
+  IPrefixProxyTerminalProviderOptionsBase,
+  IStaticPrefixProxyTerminalProviderOptions
 } from './Terminal/PrefixProxyTerminalProvider';
 export { TerminalWritable, ITerminalWritableOptions } from './Terminal/TerminalWritable';
 export { TypeUuid } from './TypeUuid';

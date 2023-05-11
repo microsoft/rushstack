@@ -339,6 +339,11 @@ export interface IConsoleTerminalProviderOptions {
     verboseEnabled: boolean;
 }
 
+// @beta
+export interface IDynamicPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    getPrefix: () => string;
+}
+
 // @public
 export interface IEnvironmentEntry {
     name: string;
@@ -636,9 +641,11 @@ export interface IPeerDependenciesMetaTable {
     };
 }
 
-// @beta
-export interface IPrefixProxyTerminalProviderOptions {
-    prefix: string;
+// @beta (undocumented)
+export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProviderOptions | IDynamicPrefixProxyTerminalProviderOptions;
+
+// @beta (undocumented)
+export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
 }
 
@@ -657,6 +664,11 @@ export interface IRunWithRetriesOptions<TResult> {
     maxRetries: number;
     // (undocumented)
     retryDelayMs?: number;
+}
+
+// @beta
+export interface IStaticPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    prefix: string;
 }
 
 // @beta (undocumented)
