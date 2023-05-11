@@ -40,7 +40,31 @@
       "type": "array",
       "description": "An array with the credential details to be retrieved from each Azure Storage location",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "azureStorageType": {
+            "type": "string",
+            "description": "The type of the Azure storage",
+            "enum": ["AzureBlobStorage", "AzureKeyVault"]
+          },
+          "storageAccountName": {
+            "type": "string",
+            "description": "The name of the storage account"
+          },
+          "keyVaultSecretName": {
+            "type": "string",
+            "description": "The name of the secret being fetched within Key Vault if using Key Vault Storage"
+          },
+          "keyVaultName": {
+            "type": "string",
+            "description": "The name of the Key Vault if using Key Vault Storage"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "file path to script file that fetches credentials and returns them in type ICredentialCacheResult"
+          }
+        },
+        "required": ["storageAccountName", "storageContainerName"]
       }
     }
   }

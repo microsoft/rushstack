@@ -96,7 +96,7 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
     this._options = options;
   }
 
-  public async updateCachedCredentialAsync(
+  private async updateCachedCredentialListAsync(
     terminal: ITerminal,
     credentialList: ICredentialResultWithId[]
   ): Promise<void> {
@@ -181,7 +181,7 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
         }
       }
 
-      await this.updateCachedCredentialAsync(logger.terminal, credentials);
+      await this.updateCachedCredentialListAsync(logger.terminal, credentials);
     };
 
     if (globalCommands) {
