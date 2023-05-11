@@ -14,7 +14,7 @@ exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a messag
 Object {
   "debug": "",
   "error": "",
-  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3",
+  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (2)] message 3",
   "verbose": "",
   "warning": "",
 }
@@ -24,7 +24,7 @@ exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a messag
 Object {
   "debug": "",
   "error": "",
-  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3",
+  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (2)] message 3",
   "verbose": "",
   "warning": "",
 }
@@ -34,7 +34,7 @@ exports[`PrefixProxyTerminalProvider With a dynamic prefix write writes a mix of
 Object {
   "debug": "",
   "error": "",
-  "log": "[prefix (0)] message 1message 2[n][prefix (1)] message 3[n][prefix (3)] message 4message 5[n][prefix (4)] message 6",
+  "log": "[prefix (0)] message 1message 2[n][prefix (1)] message 3[n][prefix (2)] message 4message 5[n][prefix (3)] message 6",
   "verbose": "",
   "warning": "",
 }
@@ -64,7 +64,7 @@ exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a me
 Object {
   "debug": "",
   "error": "",
-  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3[n]",
+  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (2)] message 3[n]",
   "verbose": "",
   "warning": "",
 }
@@ -74,7 +74,7 @@ exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a me
 Object {
   "debug": "",
   "error": "",
-  "log": "[prefix (0)] message 1[n][prefix (0)] message 2[n][prefix (0)] message 3[n]",
+  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (2)] message 3[n]",
   "verbose": "",
   "warning": "",
 }
@@ -84,7 +84,7 @@ exports[`PrefixProxyTerminalProvider With a dynamic prefix writeLine writes a mi
 Object {
   "debug": "",
   "error": "",
-  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (1)] message 3[n][prefix (1)] [n][prefix (2)] message 4[n][prefix (3)] message 5[n][prefix (3)] message 6[n]",
+  "log": "[prefix (0)] message 1[n][prefix (1)] message 2[n][prefix (2)] message 3[n][prefix (3)] [n][prefix (4)] message 4[n][prefix (5)] message 5[n][prefix (6)] message 6[n]",
   "verbose": "",
   "warning": "",
 }

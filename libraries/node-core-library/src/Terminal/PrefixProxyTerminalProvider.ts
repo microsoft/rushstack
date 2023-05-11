@@ -93,34 +93,24 @@ export class PrefixProxyTerminalProvider implements ITerminalProvider {
     let currentIndex: number = 0;
     // eslint-disable-next-line @rushstack/no-new-null
     let newlineMatch: RegExpExecArray | null;
-    let isFirstLoop: boolean = true;
-    const startedOnNewLine: boolean = this._isOnNewline;
-    let currentPrefix: string = this._isOnNewline ? this._getPrefix() : '';
 
     while ((newlineMatch = this._newlineRegex.exec(data))) {
-      if (!isFirstLoop && !startedOnNewLine) {
-        currentPrefix = this._getPrefix();
-      }
-
       // Extract the line, add the prefix, and write it out with the newline
       const newlineIndex: number = newlineMatch.index;
       const newIndex: number = newlineIndex + newlineMatch[0].length;
-      const dataToWrite: string = `${currentPrefix}${data.substring(currentIndex, newIndex)}`;
+      const prefix: string = this._isOnNewline ? this._getPrefix() : '';
+      const dataToWrite: string = `${prefix}${data.substring(currentIndex, newIndex)}`;
       this._parentTerminalProvider.write(dataToWrite, severity);
       // Update the currentIndex to start the search from the char after the newline
       currentIndex = newIndex;
-      isFirstLoop = false;
       this._isOnNewline = true;
-    }
-
-    if (!isFirstLoop && !startedOnNewLine) {
-      currentPrefix = this._getPrefix();
     }
 
     // The remaining data is not postfixed by a newline, so write out the data and set _isNewline to false
     const remainingData: string = data.substring(currentIndex);
     if (remainingData.length) {
-      this._parentTerminalProvider.write(`${currentPrefix}${remainingData}`, severity);
+      const prefix: string = this._isOnNewline ? this._getPrefix() : '';
+      this._parentTerminalProvider.write(`${prefix}${remainingData}`, severity);
       this._isOnNewline = false;
     }
   }
