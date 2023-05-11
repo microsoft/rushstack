@@ -1,0 +1,23 @@
+{
+  "storageContainerName": "dev",
+  "storageAccountName": "odspwebdevdeploy",
+  "azureEnvironment": "AzurePublicCloud",
+  "minimumValidityInMinutes": 480,
+  "globalCommands": ["test-rush-interactive"],
+  "phasedCommands": [],
+  "authList": [
+    {
+      "azureStorageType": "AzureBlobStorage",
+      "storageAccountName": "odspwebdevdeploy",
+      "storageContainerName": "dev",
+      "filePath": "./test"
+    },
+    {
+      "azureStorageType": "AzureKeyVault",
+      "storageAccountName": "odspwebdevdeploy",
+      "keyVaultSecretName": "tab-spdf-creds",
+      "keyVaultName": "odsp-web-tests",
+      "filePath": "./test"
+    }
+  ]
+}

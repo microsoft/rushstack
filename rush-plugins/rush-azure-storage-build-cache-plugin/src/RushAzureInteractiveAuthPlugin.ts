@@ -2,11 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import { DeviceCodeCredential, type DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
-import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@rushstack/rush-sdk';
+import type {
+  IRushPlugin,
+  RushSession,
+  RushConfiguration,
+  ILogger,
+  ICredentialCacheEntry
+} from '@rushstack/rush-sdk';
 import type { AzureEnvironmentName } from './AzureAuthenticationBase';
 import { PrintUtilities } from '@rushstack/terminal';
 import { AzureStorageAuthentication } from './AzureStorageAuthentication';
-import { KeyVaultAuthentication } from './KeyVaultAuthentication';
+import { Terminal } from '@rushstack/node-core-library';
 
 const PLUGIN_NAME: 'AzureInteractiveAuthPlugin' = 'AzureInteractiveAuthPlugin';
 
@@ -60,6 +66,16 @@ export interface IAzureAuthenticationConfiguration {
   readonly storageContainerName?: string;
   readonly keyVaultSecretName?: string;
   readonly keyVaultName?: string;
+  readonly filePath: string;
+}
+
+export interface IFetchCredentialsScripts {
+  additionalCredentialFetchers: (
+    deviceCodeCredential: DeviceCodeCredential,
+    terminal: Terminal,
+    options: IAzureAuthenticationConfiguration,
+    minimumExpiry: Date | undefined
+  ) => Promise<ICredentialCacheEntry[]>;
 }
 
 /**
@@ -116,8 +132,7 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
           azureStorageType,
           storageAccountName,
           storageContainerName = 'dev',
-          keyVaultName = '',
-          keyVaultSecretName = ''
+          filePath
         } = configuration;
 
         if (azureStorageType === 'AzureBlobStorage') {
@@ -128,12 +143,15 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
             isCacheWriteAllowed: true,
             deviceCodeCredentails: deviceCodeCredential
           }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
-        } else if (azureStorageType === 'AzureKeyVault') {
-          await new KeyVaultAuthentication({
-            vaultName: keyVaultName,
-            secretName: keyVaultSecretName,
-            deviceCodeCredentails: deviceCodeCredential
-          }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
+        } else {
+          const fetchers: IFetchCredentialsScripts = await import(filePath);
+
+          await fetchers.additionalCredentialFetchers(
+            deviceCodeCredential,
+            logger.terminal,
+            configuration,
+            minimumExpiry
+          );
         }
       }
     };
