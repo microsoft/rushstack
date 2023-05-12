@@ -135,7 +135,13 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
     const { globalCommands, phasedCommands } = options;
 
     const handler: () => Promise<void> = async () => {
-      const { authList, azureEnvironment = 'AzurePublicCloud', minimumValidityInMinutes } = options;
+      const {
+        authList,
+        azureEnvironment = 'AzurePublicCloud',
+        minimumValidityInMinutes,
+        storageAccountName,
+        storageContainerName
+      } = options;
       const authorityHost: string | undefined = AzureAuthorityHosts[azureEnvironment];
 
       let minimumExpiry: Date | undefined;
@@ -150,37 +156,49 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
         }
       });
 
-      const credentials: ICredentialResultWithId[] = [];
-
-      for (const configuration of authList) {
-        const credentialType: string = configuration.credentialType;
-
-        if (credentialType === 'AzureBlobStorage') {
-          const { storageAccountName, storageContainerName = 'dev' } = configuration;
-
-          await new AzureStorageAuthentication({
-            storageAccountName: storageAccountName,
-            storageContainerName: storageContainerName,
-            azureEnvironment: options.azureEnvironment,
-            isCacheWriteAllowed: true,
-            deviceCodeCredential
-          }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
-        } else {
-          const filePath: string = configuration.filePath;
-
-          const fetchers: IFetchCredentialsScripts = await import(filePath);
-
-          const credential: ICredentialResultWithId = await fetchers.fetchCredentialsUsingDeviceCodeAsync(
-            deviceCodeCredential,
-            logger.terminal,
-            configuration
-          );
-
-          credentials.push(credential);
-        }
+      if (storageAccountName && storageContainerName) {
+        await new AzureStorageAuthentication({
+          storageAccountName: storageAccountName,
+          storageContainerName: storageContainerName,
+          azureEnvironment: azureEnvironment,
+          isCacheWriteAllowed: true,
+          deviceCodeCredential
+        }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
       }
 
-      await this._updateCachedCredentialListAsync(logger.terminal, credentials);
+      if (authList) {
+        const credentials: ICredentialResultWithId[] = [];
+
+        for (const configuration of authList) {
+          const credentialType: string = configuration.credentialType;
+
+          if (credentialType === 'AzureBlobStorage') {
+            const { storageAccountName, storageContainerName = 'dev' } = configuration;
+
+            await new AzureStorageAuthentication({
+              storageAccountName: storageAccountName,
+              storageContainerName: storageContainerName,
+              azureEnvironment: options.azureEnvironment,
+              isCacheWriteAllowed: true,
+              deviceCodeCredential
+            }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
+          } else {
+            const filePath: string = configuration.filePath;
+
+            const fetchers: IFetchCredentialsScripts = await import(filePath);
+
+            const credential: ICredentialResultWithId = await fetchers.fetchCredentialsUsingDeviceCodeAsync(
+              deviceCodeCredential,
+              logger.terminal,
+              configuration
+            );
+
+            credentials.push(credential);
+          }
+        }
+
+        await this._updateCachedCredentialListAsync(logger.terminal, credentials);
+      }
     };
 
     if (globalCommands) {

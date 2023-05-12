@@ -9,6 +9,16 @@
   "required": ["storageAccountName", "storageContainerName"],
 
   "properties": {
+    "storageAccountName": {
+      "type": "string",
+      "description": "(Required) The name of the the Azure storage account to authenticate to."
+    },
+
+    "storageContainerName": {
+      "type": "string",
+      "description": "(Required) The name of the container in the Azure storage account to authenticate to."
+    },
+
     "azureEnvironment": {
       "type": "string",
       "description": "The Azure environment the storage account exists in. Defaults to AzurePublicCloud.",
@@ -40,31 +50,50 @@
       "type": "array",
       "description": "An array with the credential details to be retrieved from each Azure Storage location",
       "items": {
-        "type": "object",
-        "properties": {
-          "credentialType": {
-            "type": "string",
-            "description": "The type of authentication to perform",
-            "enum": ["AzureBlobStorage", "Custom"]
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["storageAccountName", "storageContainerName"],
+            "properties": {
+              "credentialType": {
+                "type": "string",
+                "enum": ["AzureBlobStorage"]
+              },
+              "storageAccountName": {
+                "type": "string",
+                "description": "The name of the storage account"
+              },
+              "storageContainerName": {
+                "type": "string",
+                "description": "The name of the container in the Azure storage account to authenticate to."
+              }
+            }
           },
-          "storageAccountName": {
-            "type": "string",
-            "description": "The name of the storage account"
-          },
-          "keyVaultSecretName": {
-            "type": "string",
-            "description": "The name of the secret being fetched within Key Vault if using Key Vault Storage"
-          },
-          "keyVaultName": {
-            "type": "string",
-            "description": "The name of the Key Vault if using Key Vault Storage"
-          },
-          "filePath": {
-            "type": "string",
-            "description": "file path to script file that fetches credentials and returns them in type ICredentialCacheResult"
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["filePath"],
+            "properties": {
+              "credentialType": {
+                "type": "string",
+                "enum": ["Custom"]
+              },
+              "keyVaultSecretName": {
+                "type": "string",
+                "description": "The name of the secret being fetched within Key Vault if using Key Vault Storage"
+              },
+              "keyVaultName": {
+                "type": "string",
+                "description": "The name of the Key Vault if using Key Vault Storage"
+              },
+              "filePath": {
+                "type": "string",
+                "description": "file path to script file that fetches credentials and returns them in type ICredentialCacheResult"
+              }
+            }
           }
-        },
-        "required": ["storageAccountName", "storageContainerName"]
+        ]
       }
     }
   }

@@ -8,8 +8,6 @@
   "authList": [
     {
       "credentialType": "Custom",
-      "storageAccountName": "odspwebdevdeploy",
-      "storageContainerName": "dev",
       "keyVaultSecretName": "tab-edudf-creds",
       "keyVaultName": "odsp-web-tests",
       "filePath": "./test"
@@ -21,16 +19,12 @@
     },
     {
       "credentialType": "Custom",
-      "storageAccountName": "odspwebdevdeploy",
-      "storageContainerName": "dev",
       "keyVaultSecretName": "tab-spdf-creds",
       "keyVaultName": "odsp-web-tests",
       "filePath": "./test"
     },
     {
       "credentialType": "Custom",
-      "storageAccountName": "odspwebdevdeploy",
-      "storageContainerName": "dev",
       "keyVaultSecretName": "tab-sandbox-creds",
       "keyVaultName": "odsp-web-tests",
       "filePath": "./test"
