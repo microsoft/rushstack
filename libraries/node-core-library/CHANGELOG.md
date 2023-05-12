@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 01 May 2023 15:23:19 GMT and should not be manually modified.
+This log was last generated on Fri, 12 May 2023 00:23:05 GMT and should not be manually modified.
+
+## 3.59.0
+Fri, 12 May 2023 00:23:05 GMT
+
+### Minor changes
+
+- Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp.
 
 ## 3.58.0
 Mon, 01 May 2023 15:23:19 GMT

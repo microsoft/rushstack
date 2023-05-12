@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.59.0",
+      "tag": "@rushstack/node-core-library_v3.59.0",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.58.0",
       "tag": "@rushstack/node-core-library_v3.58.0",
       "date": "Mon, 01 May 2023 15:23:19 GMT",

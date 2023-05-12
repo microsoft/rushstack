@@ -2,6 +2,24 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.50.5",
+      "tag": "@rushstack/heft_v0.50.5",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.50.4",
       "tag": "@rushstack/heft_v0.50.4",
       "date": "Thu, 04 May 2023 00:20:28 GMT",
