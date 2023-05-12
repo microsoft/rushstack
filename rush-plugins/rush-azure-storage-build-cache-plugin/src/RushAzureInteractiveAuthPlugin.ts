@@ -56,7 +56,7 @@ export interface IAzureInteractiveAuthOptions {
  * @public
  */
 export interface IAzureAuthenticationConfiguration {
-  readonly azureStorageType: string;
+  readonly credentialType: string;
   readonly storageAccountName: string;
   readonly storageContainerName?: string;
   readonly keyVaultSecretName?: string;
@@ -65,7 +65,7 @@ export interface IAzureAuthenticationConfiguration {
 }
 
 export interface IFetchCredentialsScripts {
-  additionalCredentialFetchers: (
+  fetchCredentialsUsingDeviceCodeAsync: (
     deviceCodeCredential: DeviceCodeCredential,
     terminal: Terminal,
     options: IAzureAuthenticationConfiguration
@@ -153,25 +153,24 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
       const credentials: ICredentialResultWithId[] = [];
 
       for (const configuration of authList) {
-        const {
-          azureStorageType,
-          storageAccountName,
-          storageContainerName = 'dev',
-          filePath
-        } = configuration;
+        const credentialType: string = configuration.credentialType;
 
-        if (azureStorageType === 'AzureBlobStorage') {
+        if (credentialType === 'AzureBlobStorage') {
+          const { storageAccountName, storageContainerName = 'dev' } = configuration;
+
           await new AzureStorageAuthentication({
             storageAccountName: storageAccountName,
             storageContainerName: storageContainerName,
             azureEnvironment: options.azureEnvironment,
             isCacheWriteAllowed: true,
-            deviceCodeCredentails: deviceCodeCredential
+            deviceCodeCredential
           }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
         } else {
+          const filePath: string = configuration.filePath;
+
           const fetchers: IFetchCredentialsScripts = await import(filePath);
 
-          const credential: ICredentialResultWithId = await fetchers.additionalCredentialFetchers(
+          const credential: ICredentialResultWithId = await fetchers.fetchCredentialsUsingDeviceCodeAsync(
             deviceCodeCredential,
             logger.terminal,
             configuration

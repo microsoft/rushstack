@@ -4,7 +4,7 @@
 
   "type": "object",
 
-  "additionalProperties": false,
+  "additionalProperties": true,
 
   "required": ["storageAccountName", "storageContainerName"],
 
@@ -42,10 +42,10 @@
       "items": {
         "type": "object",
         "properties": {
-          "azureStorageType": {
+          "credentialType": {
             "type": "string",
-            "description": "The type of the Azure storage",
-            "enum": ["AzureBlobStorage", "AzureKeyVault"]
+            "description": "The type of authentication to perform",
+            "enum": ["AzureBlobStorage", "Custom"]
           },
           "storageAccountName": {
             "type": "string",

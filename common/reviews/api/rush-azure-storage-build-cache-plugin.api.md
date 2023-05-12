@@ -73,7 +73,7 @@ export interface IAzureAuthenticationBaseOptions {
     // (undocumented)
     credentialUpdateCommandForLogging?: string | undefined;
     // (undocumented)
-    deviceCodeCredentails?: DeviceCodeCredential;
+    deviceCodeCredential?: DeviceCodeCredential;
 }
 
 // @public (undocumented)

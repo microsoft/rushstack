@@ -73,7 +73,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
-  deviceCodeCredentails?: DeviceCodeCredential;
+  deviceCodeCredential?: DeviceCodeCredential;
 }
 
 /**
@@ -112,7 +112,7 @@ export abstract class AzureAuthenticationBase {
   public constructor(options: IAzureAuthenticationBaseOptions) {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
-    this._deviceCodeCredential = options.deviceCodeCredentails || undefined;
+    this._deviceCodeCredential = options.deviceCodeCredential;
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {

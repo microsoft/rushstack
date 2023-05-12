@@ -7,27 +7,30 @@
   "phasedCommands": [],
   "authList": [
     {
-      "azureStorageType": "AzureKeyVault",
+      "credentialType": "Custom",
       "storageAccountName": "odspwebdevdeploy",
+      "storageContainerName": "dev",
       "keyVaultSecretName": "tab-edudf-creds",
       "keyVaultName": "odsp-web-tests",
       "filePath": "./test"
     },
     {
-      "azureStorageType": "AzureBlobStorage",
+      "credentialType": "AzureBlobStorage",
       "storageAccountName": "odspwebdevdeploy",
       "storageContainerName": "dev"
     },
     {
-      "azureStorageType": "AzureKeyVault",
+      "credentialType": "Custom",
       "storageAccountName": "odspwebdevdeploy",
+      "storageContainerName": "dev",
       "keyVaultSecretName": "tab-spdf-creds",
       "keyVaultName": "odsp-web-tests",
       "filePath": "./test"
     },
     {
-      "azureStorageType": "AzureKeyVault",
+      "credentialType": "Custom",
       "storageAccountName": "odspwebdevdeploy",
+      "storageContainerName": "dev",
       "keyVaultSecretName": "tab-sandbox-creds",
       "keyVaultName": "odsp-web-tests",
       "filePath": "./test"
