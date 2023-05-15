@@ -28,7 +28,9 @@ export type CloudBuildCacheProviderFactory = (
 /**
  * @beta
  */
-export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider;
+export type CobuildLockProviderFactory = (
+  cobuildJson: ICobuildJson
+) => ICobuildLockProvider | Promise<ICobuildLockProvider>;
 
 /**
  * @beta

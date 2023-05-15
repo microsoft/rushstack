@@ -114,7 +114,7 @@ export class CobuildConfiguration {
 }
 
 // @beta (undocumented)
-export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider;
+export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider | Promise<ICobuildLockProvider>;
 
 // @public
 export class CommonVersionsConfiguration {

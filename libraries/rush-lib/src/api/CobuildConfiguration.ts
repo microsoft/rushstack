@@ -26,6 +26,7 @@ export interface ICobuildConfigurationOptions {
   cobuildJson: ICobuildJson;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
+  cobuildLockProvider: ICobuildLockProvider;
 }
 
 /**
@@ -63,7 +64,7 @@ export class CobuildConfiguration {
   public readonly cobuildLockProvider: ICobuildLockProvider;
 
   private constructor(options: ICobuildConfigurationOptions) {
-    const { cobuildJson } = options;
+    const { cobuildJson, cobuildLockProvider } = options;
 
     this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
@@ -73,12 +74,7 @@ export class CobuildConfiguration {
       this.cobuildEnabled = false;
     }
 
-    const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
-      options.rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
-    if (!cobuildLockProviderFactory) {
-      throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
-    }
-    this.cobuildLockProvider = cobuildLockProviderFactory(cobuildJson);
+    this.cobuildLockProvider = cobuildLockProvider;
   }
 
   /**
@@ -112,10 +108,19 @@ export class CobuildConfiguration {
       CobuildConfiguration._jsonSchema
     );
 
+    const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
+      rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
+    if (!cobuildLockProviderFactory) {
+      throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
+    }
+
+    const cobuildLockProvider: ICobuildLockProvider = await cobuildLockProviderFactory(cobuildJson);
+
     return new CobuildConfiguration({
       cobuildJson,
       rushConfiguration,
-      rushSession
+      rushSession,
+      cobuildLockProvider
     });
   }
 
