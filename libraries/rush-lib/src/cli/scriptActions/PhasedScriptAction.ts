@@ -320,7 +320,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.rushConfiguration,
         this.rushSession
       );
-      await cobuildConfiguration?.connectLockProviderAsync();
+      await cobuildConfiguration?.createLockProviderAsync();
     }
 
     const projectSelection: Set<RushConfigurationProject> =
@@ -399,7 +399,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       await this._runWatchPhases(internalOptions);
     }
 
-    await cobuildConfiguration?.disconnectLockProviderAsync();
+    await cobuildConfiguration?.destroyLockProviderAsync();
   }
 
   private async _runInitialPhases(options: IRunPhasesOptions): Promise<void> {

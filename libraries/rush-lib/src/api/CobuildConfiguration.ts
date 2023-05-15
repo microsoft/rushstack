@@ -26,7 +26,7 @@ export interface ICobuildConfigurationOptions {
   cobuildJson: ICobuildJson;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
-  cobuildLockProvider: ICobuildLockProvider;
+  cobuildLockProviderFactory: CobuildLockProviderFactory;
 }
 
 /**
@@ -61,10 +61,12 @@ export class CobuildConfiguration {
    */
   public readonly cobuildLeafProjectLogOnlyAllowed: boolean;
 
-  public readonly cobuildLockProvider: ICobuildLockProvider;
+  private _cobuildLockProvider: ICobuildLockProvider | undefined;
+  private readonly _cobuildLockProviderFactory: CobuildLockProviderFactory;
+  private readonly _cobuildJson: ICobuildJson;
 
   private constructor(options: ICobuildConfigurationOptions) {
-    const { cobuildJson, cobuildLockProvider } = options;
+    const { cobuildJson, cobuildLockProviderFactory } = options;
 
     this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
@@ -74,7 +76,8 @@ export class CobuildConfiguration {
       this.cobuildEnabled = false;
     }
 
-    this.cobuildLockProvider = cobuildLockProvider;
+    this._cobuildLockProviderFactory = cobuildLockProviderFactory;
+    this._cobuildJson = cobuildJson;
   }
 
   /**
@@ -114,13 +117,11 @@ export class CobuildConfiguration {
       throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
     }
 
-    const cobuildLockProvider: ICobuildLockProvider = await cobuildLockProviderFactory(cobuildJson);
-
     return new CobuildConfiguration({
       cobuildJson,
       rushConfiguration,
       rushSession,
-      cobuildLockProvider
+      cobuildLockProviderFactory
     });
   }
 
@@ -128,15 +129,26 @@ export class CobuildConfiguration {
     return this.cobuildContextId;
   }
 
-  public async connectLockProviderAsync(): Promise<void> {
+  public async createLockProviderAsync(): Promise<void> {
     if (this.cobuildEnabled) {
-      await this.cobuildLockProvider.connectAsync();
+      const cobuildLockProvider: ICobuildLockProvider = await this._cobuildLockProviderFactory(
+        this._cobuildJson
+      );
+      this._cobuildLockProvider = cobuildLockProvider;
+      await this._cobuildLockProvider.connectAsync();
     }
   }
 
-  public async disconnectLockProviderAsync(): Promise<void> {
+  public async destroyLockProviderAsync(): Promise<void> {
     if (this.cobuildEnabled) {
-      await this.cobuildLockProvider.disconnectAsync();
+      await this._cobuildLockProvider?.disconnectAsync();
     }
+  }
+
+  public get cobuildLockProvider(): ICobuildLockProvider {
+    if (!this._cobuildLockProvider) {
+      throw new Error(`Cobuild lock provider has not been created`);
+    }
+    return this._cobuildLockProvider;
   }
 }
