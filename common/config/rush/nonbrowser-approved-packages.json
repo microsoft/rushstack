@@ -3,10 +3,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
-      "name": "@azure/keyvault-secrets",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@azure/identity",
       "allowedCategories": [ "libraries" ]
     },
