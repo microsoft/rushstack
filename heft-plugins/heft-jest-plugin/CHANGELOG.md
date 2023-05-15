@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Fri, 12 May 2023 00:23:05 GMT and should not be manually modified.
+
+## 0.5.11
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.5.10
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.5.9
+Mon, 01 May 2023 15:23:19 GMT
+
+### Patches
+
+- Allow "preset" configuration value to be used when extending Jest configuration files
+
+## 0.5.8
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 0.5.7
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.5.6
 Tue, 04 Apr 2023 22:36:28 GMT

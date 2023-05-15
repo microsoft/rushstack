@@ -665,6 +665,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-jest-preset-test",
+      "projectFolder": "build-tests/heft-jest-preset-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-jest-reporters-test",
       "projectFolder": "build-tests/heft-jest-reporters-test",
       "reviewCategory": "tests",
@@ -874,6 +880,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/package-extractor",
+      "projectFolder": "libraries/package-extractor",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-config-file",
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",
@@ -1048,7 +1060,7 @@
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "rush"
     },
 
     // "webpack" folder (alphabetical order)

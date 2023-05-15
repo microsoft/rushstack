@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
+This log was last generated on Fri, 12 May 2023 00:23:05 GMT and should not be manually modified.
+
+## 0.50.5
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.50.4
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.50.3
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.50.2
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Patches
+
+- Fix issues where a terminal logging prefix may be added multiple times to the same line, or only to the first line
+
+## 0.50.1
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.50.0
 Sat, 18 Mar 2023 00:20:56 GMT

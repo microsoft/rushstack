@@ -275,4 +275,9 @@ export class RushConstants {
    * file system event occurs in this interval, the timeout will reset.
    */
   public static readonly defaultWatchDebounceMs: number = 1000;
+
+  /**
+   * The name of the parameter that can be used to bypass policies.
+   */
+  public static readonly bypassPolicyFlagLongName: '--bypass-policy' = '--bypass-policy';
 }

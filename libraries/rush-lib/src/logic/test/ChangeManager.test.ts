@@ -17,8 +17,8 @@ describe(ChangeManager.name, () => {
   });
 
   /* eslint-disable dot-notation */
-  it('can apply changes to the package.json files in the dictionary', () => {
-    changeManager.load(`${__dirname}/multipleChanges`);
+  it('can apply changes to the package.json files in the dictionary', async () => {
+    await changeManager.loadAsync(`${__dirname}/multipleChanges`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
@@ -32,8 +32,8 @@ describe(ChangeManager.name, () => {
     expect(changeManager.allPackages.get('f')!.packageJson.peerDependencies!['b']).toEqual('>=1.0.1 <2.0.0');
   });
 
-  it('can update explicit version dependency', () => {
-    changeManager.load(`${__dirname}/explicitVersionChange`);
+  it('can update explicit version dependency', async () => {
+    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
@@ -41,8 +41,8 @@ describe(ChangeManager.name, () => {
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.1');
   });
 
-  it('can update a project using lockStepVersion policy with no nextBump from changefiles', () => {
-    changeManager.load(`${__dirname}/lockstepWithoutNextBump`);
+  it('can update a project using lockStepVersion policy with no nextBump from changefiles', async () => {
+    await changeManager.loadAsync(`${__dirname}/lockstepWithoutNextBump`);
     changeManager.apply(false);
 
     const policy: LockStepVersionPolicy = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
@@ -54,8 +54,8 @@ describe(ChangeManager.name, () => {
     expect(policy.version).toEqual('1.1.0');
   });
 
-  it('can update explicit cyclic dependency', () => {
-    changeManager.load(`${__dirname}/cyclicDepsExplicit`);
+  it('can update explicit cyclic dependency', async () => {
+    await changeManager.loadAsync(`${__dirname}/cyclicDepsExplicit`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
@@ -72,11 +72,11 @@ describe(ChangeManager.name, () => {
     ).toEqual('>=1.0.0 <2.0.0');
   });
 
-  it('can update root with patch change for prerelease', () => {
+  it('can update root with patch change for prerelease', async () => {
     const prereleaseName: string = 'alpha.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
@@ -91,11 +91,11 @@ describe(ChangeManager.name, () => {
     );
   });
 
-  it('can update non-root with patch change for prerelease', () => {
+  it('can update non-root with patch change for prerelease', async () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -108,11 +108,11 @@ describe(ChangeManager.name, () => {
     );
   });
 
-  it('can update cyclic dependency for non-explicit prerelease', () => {
+  it('can update cyclic dependency for non-explicit prerelease', async () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
@@ -129,11 +129,11 @@ describe(ChangeManager.name, () => {
     );
   });
 
-  it('can update root with patch change for adding version suffix', () => {
+  it('can update root with patch change for adding version suffix', async () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -144,11 +144,11 @@ describe(ChangeManager.name, () => {
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.0-' + suffix);
   });
 
-  it('can update non-root with patch change for version suffix', () => {
+  it('can update non-root with patch change for version suffix', async () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -159,11 +159,11 @@ describe(ChangeManager.name, () => {
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.0-' + suffix);
   });
 
-  it('can update cyclic dependency for non-explicit suffix', () => {
+  it('can update cyclic dependency for non-explicit suffix', async () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -189,8 +189,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
   });
 
   /* eslint-disable dot-notation */
-  it('can apply changes to the package.json files in the dictionary', () => {
-    changeManager.load(`${__dirname}/multipleChanges`);
+  it('can apply changes to the package.json files in the dictionary', async () => {
+    await changeManager.loadAsync(`${__dirname}/multipleChanges`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
@@ -212,8 +212,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     expect(changeManager.allPackages.get('f')!.packageJson.peerDependencies!['b']).toEqual('>=1.0.1 <2.0.0');
   });
 
-  it('can update explicit version dependency', () => {
-    changeManager.load(`${__dirname}/explicitVersionChange`);
+  it('can update explicit version dependency', async () => {
+    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
@@ -221,8 +221,8 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('workspace:1.0.1');
   });
 
-  it('can update explicit cyclic dependency', () => {
-    changeManager.load(`${__dirname}/cyclicDepsExplicit`);
+  it('can update explicit cyclic dependency', async () => {
+    await changeManager.loadAsync(`${__dirname}/cyclicDepsExplicit`);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
@@ -239,11 +239,11 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     ).toEqual('>=1.0.0 <2.0.0');
   });
 
-  it('can update root with patch change for prerelease', () => {
+  it('can update root with patch change for prerelease', async () => {
     const prereleaseName: string = 'alpha.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
@@ -258,11 +258,11 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     );
   });
 
-  it('can update non-root with patch change for prerelease', () => {
+  it('can update non-root with patch change for prerelease', async () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -277,11 +277,11 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     );
   });
 
-  it('can update cyclic dependency for non-explicit prerelease', () => {
+  it('can update cyclic dependency for non-explicit prerelease', async () => {
     const prereleaseName: string = 'beta.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(prereleaseName);
 
-    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
@@ -298,11 +298,11 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     );
   });
 
-  it('can update root with patch change for adding version suffix', () => {
+  it('can update root with patch change for adding version suffix', async () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(`${__dirname}/rootPatchChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/rootPatchChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
@@ -317,11 +317,11 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     );
   });
 
-  it('can update non-root with patch change for version suffix', () => {
+  it('can update non-root with patch change for version suffix', async () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(`${__dirname}/explicitVersionChange`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/explicitVersionChange`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
@@ -336,11 +336,11 @@ describe(`${ChangeManager.name} (workspace)`, () => {
     );
   });
 
-  it('can update cyclic dependency for non-explicit suffix', () => {
+  it('can update cyclic dependency for non-explicit suffix', async () => {
     const suffix: string = 'dk.1';
     const prereleaseToken: PrereleaseToken = new PrereleaseToken(undefined, suffix);
 
-    changeManager.load(`${__dirname}/cyclicDeps`, prereleaseToken);
+    await changeManager.loadAsync(`${__dirname}/cyclicDeps`, prereleaseToken);
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);

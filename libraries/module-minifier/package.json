@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/module-minifier",
-  "version": "0.3.4",
+  "version": "0.3.10",
   "description": "Wrapper for terser to support bulk parallel minification.",
   "main": "lib/index.js",
   "typings": "dist/module-minifier.d.ts",
@@ -19,7 +19,7 @@
     "@rushstack/worker-pool": "workspace:*",
     "serialize-javascript": "6.0.0",
     "source-map": "~0.7.3",
-    "terser": "5.16.1"
+    "terser": "^5.9.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

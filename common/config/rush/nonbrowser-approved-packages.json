@@ -171,6 +171,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/package-extractor",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-redis-cobuild-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -641,6 +645,10 @@
     {
       "name": "sass",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "sass-embedded",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "sass-loader",

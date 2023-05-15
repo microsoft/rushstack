@@ -2,6 +2,140 @@
   "name": "@rushstack/webpack4-module-minifier-plugin",
   "entries": [
     {
+      "version": "0.12.6",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.6",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.5",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.5",
+      "date": "Thu, 04 May 2023 15:17:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.4",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.4",
+      "date": "Thu, 04 May 2023 00:20:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix async import compressor erroring when encountering unresolved dependencies."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.3",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.3",
+      "date": "Mon, 01 May 2023 15:23:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.2",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.2",
+      "date": "Sat, 29 Apr 2023 00:23:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.1",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.1",
+      "date": "Thu, 27 Apr 2023 17:18:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.0",
+      "tag": "@rushstack/webpack4-module-minifier-plugin_v0.12.0",
+      "date": "Wed, 26 Apr 2023 00:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Emit metadata about character position of rendered modules."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.4",
       "tag": "@rushstack/webpack4-module-minifier-plugin_v0.11.4",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",

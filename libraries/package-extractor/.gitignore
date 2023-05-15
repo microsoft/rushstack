@@ -1,0 +1,2 @@
+# Keep temp folders in mocked 'repos' that are used for unit tests
+!**/test/**/temp

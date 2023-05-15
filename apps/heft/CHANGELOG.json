@@ -2,6 +2,95 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.50.5",
+      "tag": "@rushstack/heft_v0.50.5",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.4",
+      "tag": "@rushstack/heft_v0.50.4",
+      "date": "Thu, 04 May 2023 00:20:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.3",
+      "tag": "@rushstack/heft_v0.50.3",
+      "date": "Mon, 01 May 2023 15:23:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.2",
+      "tag": "@rushstack/heft_v0.50.2",
+      "date": "Sat, 29 Apr 2023 00:23:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issues where a terminal logging prefix may be added multiple times to the same line, or only to the first line"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.1",
+      "tag": "@rushstack/heft_v0.50.1",
+      "date": "Thu, 27 Apr 2023 17:18:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.56.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.50.0",
       "tag": "@rushstack/heft_v0.50.0",
       "date": "Sat, 18 Mar 2023 00:20:56 GMT",

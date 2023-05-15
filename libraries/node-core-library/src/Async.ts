@@ -190,3 +190,72 @@ export class Async {
     }
   }
 }
+
+function getSignal(): [Promise<void>, () => void] {
+  let resolver: () => void;
+  const promise: Promise<void> = new Promise<void>((resolve) => {
+    resolver = resolve;
+  });
+  return [promise, resolver!];
+}
+
+/**
+ * A queue that allows for asynchronous iteration. During iteration, the queue will wait until
+ * the next item is pushed into the queue before yielding. If instead all queue items are consumed
+ * and all callbacks have been called, the queue will return.
+ *
+ * @public
+ */
+export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
+  private _queue: T[];
+  private _onPushSignal: Promise<void>;
+  private _onPushResolve: () => void;
+
+  public constructor(iterable?: Iterable<T>) {
+    this._queue = iterable ? Array.from(iterable) : [];
+    const [promise, resolver] = getSignal();
+    this._onPushSignal = promise;
+    this._onPushResolve = resolver;
+  }
+
+  public async *[Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]> {
+    let activeIterations: number = 0;
+    let [callbackSignal, callbackResolve] = getSignal();
+    const callback: () => void = () => {
+      if (--activeIterations === 0) {
+        // Resolve whatever the latest callback promise is and create a new one
+        callbackResolve();
+        const [newCallbackSignal, newCallbackResolve] = getSignal();
+        callbackSignal = newCallbackSignal;
+        callbackResolve = newCallbackResolve;
+      }
+    };
+
+    let position: number = 0;
+    while (this._queue.length > position || activeIterations > 0) {
+      if (this._queue.length > position) {
+        activeIterations++;
+        yield [this._queue[position++], callback];
+      } else {
+        // On push, the item will be added to the queue and the onPushSignal will be resolved.
+        // On calling the callback, active iterations will be decremented by the callback and the
+        // callbackSignal will be resolved. This means that the loop will continue if there are
+        // active iterations or if there are items in the queue that haven't been yielded yet.
+        await Promise.race([this._onPushSignal, callbackSignal]);
+      }
+    }
+  }
+
+  /**
+   * Adds an item to the queue.
+   *
+   * @param item - The item to push into the queue.
+   */
+  public push(item: T): void {
+    this._queue.push(item);
+    this._onPushResolve();
+    const [onPushSignal, onPushResolve] = getSignal();
+    this._onPushSignal = onPushSignal;
+    this._onPushResolve = onPushResolve;
+  }
+}

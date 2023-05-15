@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { Async, Import, LegacyAdapters } from '@rushstack/node-core-library';
+
+import { Async, LegacyAdapters } from '@rushstack/node-core-library';
 import { getGitHashForFiles } from '@rushstack/package-deps-hash';
 import * as path from 'path';
 import type { IOptions } from 'glob';
 import type { IRawRepoState } from '../ProjectChangeAnalyzer';
-
-const glob: typeof import('glob') = Import.lazy('glob', require);
-
-const globAsync = (pattern: string, options: IOptions = {}): Promise<string[]> => {
-  return LegacyAdapters.convertCallbackToPromise(glob, pattern, options);
-};
 
 async function expandGlobPatternsAsync(
   globPatterns: Iterable<string>,
@@ -18,6 +13,10 @@ async function expandGlobPatternsAsync(
 ): Promise<string[]> {
   const allMatches: Set<string> = new Set<string>();
 
+  const { default: glob } = await import('glob');
+  const globAsync = (pattern: string, options: IOptions = {}): Promise<string[]> => {
+    return LegacyAdapters.convertCallbackToPromise(glob, pattern, options);
+  };
   await Async.forEachAsync(
     globPatterns,
     async (pattern) => {

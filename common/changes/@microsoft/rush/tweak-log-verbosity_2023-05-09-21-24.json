@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Flatten watch status into a single line with TTY rewrites.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -67,8 +67,7 @@ describe(RushXCommandLine.name, () => {
         return projects.find((project) => project.projectFolder === path);
       }
     } as RushConfiguration;
-    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockReturnValue('rush.json');
-    jest.spyOn(RushConfiguration, 'loadFromDefaultLocation').mockReturnValue(rushConfiguration);
+    jest.spyOn(RushConfiguration, 'tryLoadFromDefaultLocation').mockReturnValue(rushConfiguration);
 
     // Mock command execution
     executeLifecycleCommandMock = jest.spyOn(Utilities, 'executeLifecycleCommand');

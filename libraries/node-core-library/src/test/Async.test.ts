@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async } from '../Async';
+import { Async, AsyncQueue } from '../Async';
 
 describe(Async.name, () => {
   describe(Async.mapAsync.name, () => {
@@ -457,5 +457,149 @@ describe(Async.name, () => {
       expect(sleepSpy).toHaveBeenCalledTimes(1);
       expect(sleepSpy).toHaveBeenLastCalledWith(5);
     });
+  });
+});
+
+describe(AsyncQueue.name, () => {
+  it('Can enqueue and dequeue items', async () => {
+    const expectedItems: Set<number> = new Set([1, 2, 3]);
+    const expectedSeenItems: number = 3;
+
+    let seenItems: number = 0;
+    const queue: AsyncQueue<number> = new AsyncQueue<number>(expectedItems);
+
+    for await (const [item, callback] of queue) {
+      seenItems++;
+      expect(expectedItems.has(item)).toBe(true);
+      expectedItems.delete(item);
+      callback();
+    }
+
+    expect(seenItems).toEqual(expectedSeenItems);
+    expect(expectedItems.size).toEqual(0);
+  });
+
+  it('Can dynamically enqueue and dequeue items', async () => {
+    const expectedItems: Set<number> = new Set([1, 2, 3]);
+    const expectedAdditionalItems = new Set([4, 5, 6]);
+    const expectedSeenItems: number = 6;
+
+    let seenItems: number = 0;
+    const queue: AsyncQueue<number> = new AsyncQueue<number>(expectedItems);
+
+    for await (const [item, callback] of queue) {
+      seenItems++;
+      if (item < 4) {
+        expect(expectedItems.has(item)).toBe(true);
+        expectedItems.delete(item);
+        queue.push(item + 3);
+      } else {
+        expect(expectedAdditionalItems.has(item)).toBe(true);
+        expectedAdditionalItems.delete(item);
+      }
+      callback();
+    }
+
+    expect(seenItems).toEqual(expectedSeenItems);
+    expect(expectedItems.size).toEqual(0);
+    expect(expectedAdditionalItems.size).toEqual(0);
+  });
+
+  it('Can enqueue and dequeue items concurrently', async () => {
+    const expectedItems: Set<number> = new Set([1, 2, 3]);
+    const expectedSeenItems: number = 3;
+
+    let seenItems: number = 0;
+    const queue: AsyncQueue<number> = new AsyncQueue<number>(expectedItems);
+
+    await Async.forEachAsync(
+      queue,
+      async ([item, callback]) => {
+        // Add an async tick to ensure that the queue is actually running concurrently
+        await Async.sleep(1);
+        seenItems++;
+        expect(expectedItems.has(item)).toBe(true);
+        expectedItems.delete(item);
+        callback();
+      },
+      {
+        concurrency: 10
+      }
+    );
+
+    expect(seenItems).toEqual(expectedSeenItems);
+    expect(expectedItems.size).toEqual(0);
+  });
+
+  it('Can dynamically enqueue and dequeue items concurrently', async () => {
+    const expectedItems: Set<number> = new Set([1, 2, 3]);
+    const expectedAdditionalItems = new Set([4, 5, 6]);
+    const expectedSeenItems: number = 6;
+
+    let seenItems: number = 0;
+    const queue: AsyncQueue<number> = new AsyncQueue<number>(expectedItems);
+
+    await Async.forEachAsync(
+      queue,
+      async ([item, callback]) => {
+        // Add an async tick to ensure that the queue is actually running concurrently
+        await Async.sleep(1);
+        seenItems++;
+        if (item < 4) {
+          expect(expectedItems.has(item)).toBe(true);
+          expectedItems.delete(item);
+          queue.push(item + 3);
+        } else {
+          expect(expectedAdditionalItems.has(item)).toBe(true);
+          expectedAdditionalItems.delete(item);
+        }
+        callback();
+      },
+      {
+        concurrency: 10
+      }
+    );
+
+    expect(seenItems).toEqual(expectedSeenItems);
+    expect(expectedItems.size).toEqual(0);
+    expect(expectedAdditionalItems.size).toEqual(0);
+  });
+
+  it('Can dynamically enqueue and dequeue items concurrently after reaching last item', async () => {
+    const expectedItems: Set<number> = new Set([1, 2, 3]);
+    const expectedAdditionalItems = new Set([4, 5, 6]);
+    const expectedSeenItems: number = 6;
+
+    let seenItems: number = 0;
+    const queue: AsyncQueue<number> = new AsyncQueue<number>(expectedItems);
+
+    await Async.forEachAsync(
+      queue,
+      async ([item, callback]) => {
+        // Add an async tick to ensure that the queue is actually running concurrently
+        await Async.sleep(1);
+        seenItems++;
+        if (item < 4) {
+          expect(expectedItems.has(item)).toBe(true);
+          expectedItems.delete(item);
+          if (item === 3) {
+            for (const additionalItem of expectedAdditionalItems) {
+              queue.push(additionalItem);
+            }
+          }
+        } else {
+          expect(expectedAdditionalItems.has(item)).toBe(true);
+          expectedAdditionalItems.delete(item);
+        }
+        callback();
+      },
+      {
+        concurrency: 10
+      }
+    );
+
+    expect(seenItems).toEqual(expectedSeenItems);
+    expect(expectedItems.size).toEqual(0);
+    expect(expectedAdditionalItems.size).toEqual(0);
   });
 });
