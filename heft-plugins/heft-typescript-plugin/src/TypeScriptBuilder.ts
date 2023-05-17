@@ -1200,7 +1200,8 @@ export class TypeScriptBuilder {
       this._getCreateBuilderProgram(ts),
       tool.reportDiagnostic,
       reportWatchStatus,
-      tsconfig.projectReferences
+      tsconfig.projectReferences,
+      tsconfig.watchOptions
     );
 
     compilerHost.clearTimeout = tool.clearTimeout;
