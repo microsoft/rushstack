@@ -3,7 +3,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './styles.scss';
-import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import { LockfileEntry, LockfileEntryFilter } from '../../shared/LockfileEntry';
 import { ReactNull } from '../../types/ReactNull';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {

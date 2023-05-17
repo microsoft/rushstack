@@ -1,5 +1,5 @@
 import { ISpecChange } from '../parsing/compareSpec';
-import { LockfileEntry } from '../parsing/LockfileEntry';
+import { LockfileEntry } from '../shared/LockfileEntry';
 
 export const isEntryModified = (
   entry: LockfileEntry | undefined,

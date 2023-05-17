@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import styles from './App.scss';
-import { readLockfileAsync } from './parsing/readLockfile';
+import { readLockfileAsync } from './shared/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
 import { PackageJsonViewer } from './containers/PackageJsonViewer';
 import { useAppDispatch } from './store/hooks';

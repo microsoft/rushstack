@@ -1,4 +1,4 @@
-import { LockfileEntry, LockfileEntryFilter } from './parsing/LockfileEntry';
+import { LockfileEntry, LockfileEntryFilter } from './shared/LockfileEntry';
 
 export function linter(entries: LockfileEntry[]): void {
   const projectEntries: LockfileEntry[] = [];

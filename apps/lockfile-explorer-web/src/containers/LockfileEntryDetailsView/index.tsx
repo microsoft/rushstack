@@ -5,11 +5,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { IDependencyType, LockfileDependency } from '../../parsing/LockfileDependency';
+import { IDependencyType, LockfileDependency } from '../../shared/LockfileDependency';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
-import { LockfileEntry } from '../../parsing/LockfileEntry';
+import { LockfileEntry } from '../../shared/LockfileEntry';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
 

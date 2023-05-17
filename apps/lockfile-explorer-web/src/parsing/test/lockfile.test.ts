@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { TEST_LOCKFILE } from './testLockfile';
-import { generateLockfileGraph } from '../readLockfile';
-import { LockfileEntry } from '../LockfileEntry';
+import { generateLockfileGraph } from '../../shared/readLockfile';
+import { LockfileEntry } from '../../shared/LockfileEntry';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {
