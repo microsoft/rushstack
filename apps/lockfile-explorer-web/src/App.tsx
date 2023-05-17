@@ -13,7 +13,7 @@ import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
 import { ConnectionModal } from './components/ConnectionModal';
-import { linter } from './linter';
+import { linter } from './shared/linter';
 
 /**
  * This React component renders the application page.

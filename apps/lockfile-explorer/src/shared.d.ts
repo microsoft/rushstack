@@ -1,1 +1,1 @@
-export * from '../node_modules/@rushstack/lockfile-explorer-web/lib/shared';
+export * from '@rushstack/lockfile-explorer-web/lib/shared';

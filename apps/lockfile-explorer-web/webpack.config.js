@@ -10,8 +10,15 @@ module.exports = function createConfig(env, argv) {
     projectRoot: __dirname,
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
-      entry: { app: './lib/start', shared: './lib/shared' },
-      output: { filename: '[name].js', path: __dirname + '/dist' },
+      entry: {
+        app: { import: './lib/start' },
+        shared: { import: './lib/shared', library: { type: 'umd' } }
+      },
+      output: {
+        filename: '[name].js',
+        path: __dirname + '/dist',
+        globalObject: 'this'
+      },
       optimization: {
         splitChunks: {
           chunks(chunk) {
