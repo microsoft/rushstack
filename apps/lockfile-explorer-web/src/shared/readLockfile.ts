@@ -5,8 +5,6 @@ import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 import { IDependencyType } from './LockfileDependency';
 import { Path } from '@lifaon/path';
 
-const serviceUrl: string = window.appContext.serviceUrl;
-
 export interface IPackageJsonType {
   name: string;
   dependencies: {
@@ -129,11 +127,4 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
   }
 
   return allEntries;
-}
-
-export async function readLockfileAsync(): Promise<LockfileEntry[]> {
-  const response = await fetch(`${serviceUrl}/api/lockfile`);
-  const lockfile: ILockfilePackageType = await response.json();
-
-  return generateLockfileGraph(lockfile);
 }

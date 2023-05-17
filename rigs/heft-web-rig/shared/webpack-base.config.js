@@ -218,7 +218,7 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride, extractCs
       port: 8080
     },
     // See here for documentation: https://webpack.js.org/configuration/devtool
-    devtool: production ? undefined : 'eval-source-map',
+    devtool: production ? undefined : 'source-map',
     optimization: {
       minimize: !!production,
       nodeEnv: production ? 'production' : 'development',

@@ -15,6 +15,9 @@ import { init } from './init';
 import type { IAppState } from './state';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
+import { LockfileEntry } from './shared';
+console.log(LockfileEntry);
+
 function startApp(debugMode: boolean): void {
   const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
   const appVersion: string = JsonFile.load(`${lockfileExplorerProjectRoot}/package.json`).version;

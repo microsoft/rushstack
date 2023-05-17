@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import styles from './App.scss';
-import { readLockfileAsync } from './shared/readLockfile';
+import { ILockfilePackageType, generateLockfileGraph } from './shared/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
 import { PackageJsonViewer } from './containers/PackageJsonViewer';
 import { useAppDispatch } from './store/hooks';
@@ -23,10 +23,16 @@ export const App = (): JSX.Element => {
 
   useEffect(() => {
     async function loadLockfileAsync(): Promise<void> {
-      const lockfile = await readLockfileAsync();
-      dispatch(loadEntries(lockfile));
+      const serviceUrl: string = window.appContext.serviceUrl;
 
-      linter(lockfile);
+      const response = await fetch(`${serviceUrl}/api/lockfile`);
+      const lockfile: ILockfilePackageType = await response.json();
+
+      const lockfileGraph = generateLockfileGraph(lockfile);
+
+      dispatch(loadEntries(lockfileGraph));
+
+      linter(lockfileGraph);
     }
     loadLockfileAsync().catch((e) => {
       console.log(`Failed to read lockfile: ${e}`);

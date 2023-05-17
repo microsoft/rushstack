@@ -10,6 +10,17 @@ module.exports = function createConfig(env, argv) {
     projectRoot: __dirname,
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
+      entry: { app: './lib/start', shared: './lib/shared' },
+      output: { filename: '[name].js', path: __dirname + '/dist' },
+      optimization: {
+        splitChunks: {
+          chunks(chunk) {
+            // exclude `my-excluded-chunk`
+            return false;
+          }
+        }
+      },
+      // plugins: [new webpackBaseConfig.optimize.CommonChunkPlugin('init.js')],
       resolve: {
         alias: {
           // Don't rebundle this large library
