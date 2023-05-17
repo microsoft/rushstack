@@ -70,6 +70,11 @@ export interface ITypeScriptConfigurationJson {
    */
   buildProjectReferences?: boolean;
 
+  /**
+   * If true, and the tsconfig has \"isolatedModules\": true, then transpilation will happen in parallel in a worker thread.
+   */
+  useTranspilerWorker?: boolean;
+
   /*
    * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the "project" argument for the 'tsc' and 'tslint' command line tools.
    *
@@ -362,6 +367,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       typeScriptToolPath: typeScriptToolPath,
 
       buildProjectReferences: typeScriptConfigurationJson?.buildProjectReferences,
+
+      useTranspilerWorker: typeScriptConfigurationJson?.useTranspilerWorker,
 
       tsconfigPath: getTsconfigFilePath(heftConfiguration, typeScriptConfigurationJson),
       additionalModuleKindsToEmit: typeScriptConfigurationJson?.additionalModuleKindsToEmit,

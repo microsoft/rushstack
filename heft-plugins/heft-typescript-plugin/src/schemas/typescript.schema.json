@@ -52,6 +52,11 @@
       "type": "boolean"
     },
 
+    "useTranspilerWorker": {
+      "description": "If true, and the tsconfig has \"isolatedModules\": true, then transpilation will happen in parallel in a worker thread.",
+      "type": "boolean"
+    },
+
     "project": {
       "description": "Specifies the tsconfig.json file that will be used for compilation. Equivalent to the \"project\" argument for the 'tsc' and 'tslint' command line tools. The default value is \"./tsconfig.json\".",
       "type": "string"

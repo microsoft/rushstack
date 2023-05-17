@@ -45,6 +45,14 @@ export interface IExtendedTypeScript {
     getCount(measureName: string): number;
   };
 
+  transpileOptionValueCompilerOptions: {
+    name: keyof TTypescript.CompilerOptions;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transpileOptionValue: any;
+  }[];
+
+  getNewLineCharacter(compilerOptions: TTypescript.CompilerOptions): string;
+
   /**
    * https://github.com/microsoft/TypeScript/blob/782c09d783e006a697b4ba6d1e7ec2f718ce8393/src/compiler/utilities.ts#L6540
    */
