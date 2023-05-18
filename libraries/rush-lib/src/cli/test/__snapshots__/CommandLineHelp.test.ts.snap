@@ -886,8 +886,9 @@ Optional arguments:
                         of the default value.
   --include-all         If this flag is specified, all packages with 
                         shouldPublish=true in rush.json or with a specified 
-                        version policy will be published if their version is 
-                        newer than published version.
+                        version policy (unless 
+                        shouldPublishTakesPrecedence=true) will be published 
+                        if their version is newer than published version.
   --version-policy POLICY
                         Version policy name. Only projects with this version 
                         policy will be published if used with --include-all.

@@ -330,6 +330,13 @@
   /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "tools", "frontend-team", "1.0.0-release" ],
 
   /**
+    * Indicates whether `versionPolicyName` should be ignored when
+    * `shouldPublish` is set to `false`.
+    * Default: false
+    */
+  /*[LINE "HYPOTHETICAL"]*/ "shouldPublishTakesPrecedence": false,
+
+  /**
    * (Required) This is the inventory of projects to be managed by Rush.
    *
    * Rush does not automatically scan for projects using wildcards, for a few reasons:

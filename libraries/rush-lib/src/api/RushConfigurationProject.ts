@@ -435,6 +435,9 @@ export class RushConfigurationProject {
    * should be published during `rush publish`.
    */
   public get shouldPublish(): boolean {
+    if (this.rushConfiguration.shouldPublishTakesPrecedence) {
+      return this._shouldPublish;
+    }
     return this._shouldPublish || !!this.versionPolicyName;
   }
 

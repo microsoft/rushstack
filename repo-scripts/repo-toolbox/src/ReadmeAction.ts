@@ -38,7 +38,7 @@ export class ReadmeAction extends CommandLineAction {
   }
 
   private static _isPublished(project: RushConfigurationProject): boolean {
-    return project.shouldPublish || !!project.versionPolicyName;
+    return project.shouldPublish;
   }
 
   protected async onExecute(): Promise<void> {

@@ -155,7 +155,7 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: undefined,
       description:
         'If this flag is specified, all packages with shouldPublish=true in rush.json ' +
-        'or with a specified version policy ' +
+        'or with a specified version policy (unless shouldPublishTakesPrecedence=true) ' +
         'will be published if their version is newer than published version.'
     });
     this._versionPolicy = this.defineStringParameter({
