@@ -55,5 +55,7 @@
     // "excludeGlobs": [
     //   "some/path/*.css"
     // ]
-  }
+  },
+
+  "useTranspilerWorker": true
 }

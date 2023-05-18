@@ -2,8 +2,9 @@ import { parentPort, workerData } from 'node:worker_threads';
 
 import * as TTypescript from 'typescript';
 import type {
+  ITranspilationErrorMessage,
   ITranspilationRequestMessage,
-  ITranspilationResponseMessage,
+  ITranspilationSuccessMessage,
   ITypescriptWorkerData
 } from './types';
 import type { ExtendedTypeScript } from './internalTypings/TypeScriptInternals';
@@ -18,6 +19,23 @@ function handleMessage(message: ITranspilationRequestMessage | false): void {
     process.exit(0);
   }
 
+  try {
+    const response: ITranspilationSuccessMessage = runTranspiler(message);
+    parentPort!.postMessage(response);
+  } catch (err) {
+    const errorResponse: ITranspilationErrorMessage = {
+      requestId: message.requestId,
+      type: 'error',
+      result: {
+        message: err.message,
+        ...Object.fromEntries(Object.entries(err))
+      }
+    };
+    parentPort!.postMessage(errorResponse);
+  }
+}
+
+function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuccessMessage {
   const { requestId, compilerOptions, moduleKindsToEmit, fileNames } = message;
 
   const fullySkipTypeCheck: boolean =
@@ -72,12 +90,13 @@ function handleMessage(message: ITranspilationRequestMessage | false): void {
 
   const result: TTypescript.EmitResult = program.emit(undefined, undefined, undefined, undefined, undefined);
 
-  const response: ITranspilationResponseMessage = {
+  const response: ITranspilationSuccessMessage = {
     requestId,
+    type: 'success',
     result
   };
 
-  parentPort!.postMessage(response);
+  return response;
 }
 
 parentPort!.on('message', handleMessage);

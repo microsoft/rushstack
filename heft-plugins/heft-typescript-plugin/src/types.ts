@@ -26,10 +26,22 @@ export interface ITranspilationRequestMessage {
   fileNames: string[];
 }
 
-export interface ITranspilationResponseMessage {
+export interface ITranspilationSuccessMessage {
   requestId: number;
+  type: 'success';
   result: TTypescript.EmitResult;
 }
+
+export interface ITranspilationErrorMessage {
+  requestId: number;
+  type: 'error';
+  result: {
+    message: string;
+    [key: string]: unknown;
+  };
+}
+
+export type ITranspilationResponseMessage = ITranspilationSuccessMessage | ITranspilationErrorMessage;
 
 export interface ICachedEmitModuleKind {
   moduleKind: TTypescript.ModuleKind;

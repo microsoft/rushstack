@@ -114,6 +114,11 @@ interface IPendingWork {
   (): void;
 }
 
+interface ITranspileSignal {
+  resolve: (result: TTypescript.EmitResult) => void;
+  reject: (error: Error) => void;
+}
+
 const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
@@ -137,8 +142,9 @@ interface ITypeScriptTool {
   executing: boolean;
 
   worker: Worker | undefined;
+  workerExitPromise: Promise<number> | undefined;
   pendingTranspilePromises: Map<number, Promise<TTypescript.EmitResult>>;
-  pendingTranspileResolves: Map<number, (result: TTypescript.EmitResult) => void>;
+  pendingTranspileSignals: Map<number, ITranspileSignal>;
 
   reportDiagnostic: TTypescript.DiagnosticReporter;
   clearTimeout: (timeout: IPendingWork) => void;
@@ -355,9 +361,10 @@ export class TypeScriptBuilder {
         },
 
         worker: undefined,
+        workerExitPromise: undefined,
 
         pendingTranspilePromises: new Map(),
-        pendingTranspileResolves: new Map()
+        pendingTranspileSignals: new Map()
       };
     }
 
@@ -1237,7 +1244,7 @@ export class TypeScriptBuilder {
     compilerOptions: TTypescript.CompilerOptions,
     fileNames: string[]
   ): void {
-    const { pendingTranspilePromises, pendingTranspileResolves } = tool;
+    const { pendingTranspilePromises, pendingTranspileSignals } = tool;
     let maybeWorker: Worker | undefined = tool.worker;
     if (!maybeWorker) {
       const workerData: ITypescriptWorkerData = {
@@ -1248,17 +1255,43 @@ export class TypeScriptBuilder {
       });
 
       maybeWorker.on('message', (response: ITranspilationResponseMessage) => {
-        const { requestId: resolvingRequestId, result } = response;
-        const resolve: ((result: TTypescript.EmitResult) => void) | undefined =
-          pendingTranspileResolves.get(resolvingRequestId);
-        if (resolve) {
-          resolve(result);
+        const { requestId: resolvingRequestId, type, result } = response;
+        const signal: ITranspileSignal | undefined = pendingTranspileSignals.get(resolvingRequestId);
+
+        if (type === 'error') {
+          const error: Error = Object.assign(new Error(result.message), result);
+          if (signal) {
+            signal.reject(error);
+          } else {
+            this._typescriptTerminal.writeErrorLine(
+              `Unexpected worker rejection for request with id ${resolvingRequestId}: ${error}`
+            );
+          }
+        } else if (signal) {
+          signal.resolve(result);
         } else {
           this._typescriptTerminal.writeErrorLine(
             `Unexpected worker resolution for request with id ${resolvingRequestId}`
           );
         }
+
+        pendingTranspileSignals.delete(resolvingRequestId);
+        pendingTranspilePromises.delete(resolvingRequestId);
       });
+
+      tool.workerExitPromise = new Promise(
+        (resolve: (exitCode: number) => void, reject: (err: Error) => void) => {
+          maybeWorker!.once('exit', resolve);
+
+          maybeWorker!.once('error', (err: Error) => {
+            for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
+              rejectTranspile(err);
+            }
+            pendingTranspileSignals.clear();
+            reject(err);
+          });
+        }
+      );
     }
 
     // make linter happy
@@ -1267,7 +1300,7 @@ export class TypeScriptBuilder {
     const requestId: number = ++this._nextRequestId;
     const transpilePromise: Promise<TTypescript.EmitResult> = new Promise(
       (resolve: (result: TTypescript.EmitResult) => void, reject: (err: Error) => void) => {
-        pendingTranspileResolves.set(requestId, resolve);
+        pendingTranspileSignals.set(requestId, { resolve, reject });
 
         this._typescriptTerminal.writeLine(`Asynchronously transpiling ${compilerOptions.configFilePath}`);
         const request: ITranspilationRequestMessage = {
@@ -1285,14 +1318,18 @@ export class TypeScriptBuilder {
   }
 
   private async _cleanupWorkerAsync(): Promise<void> {
-    const worker: Worker | undefined = this._tool?.worker;
-    if (worker) {
+    const tool: ITypeScriptTool | undefined = this._tool;
+    if (!tool) {
+      return;
+    }
+
+    const { worker, workerExitPromise } = tool;
+    if (worker && workerExitPromise) {
+      worker.postMessage(false);
       this._typescriptTerminal.writeLine(`Waiting for worker to exit`);
-      await new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-        worker.on('exit', resolve);
-        this._tool!.worker = undefined;
-        worker.postMessage(false);
-      });
+      await workerExitPromise;
+      tool.worker = undefined;
+      tool.workerExitPromise = undefined;
     }
   }
 }
@@ -1305,7 +1342,7 @@ function getFilesToTranspileFromBuilderProgram(builderProgram: TTypescript.Build
   for (const fileName of changedFilesSet) {
     const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);
     if (sourceFile && !sourceFile.isDeclarationFile) {
-      fileNames.push(fileName);
+      fileNames.push(sourceFile.fileName);
     }
   }
   return fileNames;

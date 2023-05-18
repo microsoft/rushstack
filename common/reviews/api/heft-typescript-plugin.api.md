@@ -59,6 +59,7 @@ export interface ITypeScriptConfigurationJson {
     // (undocumented)
     project?: string;
     staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
+    useTranspilerWorker?: boolean;
 }
 
 // @beta (undocumented)
