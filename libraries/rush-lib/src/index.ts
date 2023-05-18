@@ -37,7 +37,10 @@ export {
   IFileSystemBuildCacheProviderOptions
 } from './logic/buildCache/FileSystemBuildCacheProvider';
 
-export { IPhase, IPhaseBehaviorForMissingScript } from './api/CommandLineConfiguration';
+export {
+  IPhase,
+  PhaseBehaviorForMissingScript as IPhaseBehaviorForMissingScript
+} from './api/CommandLineConfiguration';
 
 export {
   EnvironmentConfiguration,

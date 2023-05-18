@@ -29,7 +29,7 @@ export interface IShellCommandTokenContext {
  * The set of valid behaviors for a missing script in a project's package.json scripts for a given phase.
  * @alpha
  */
-export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
+export type PhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 
 /**
  * Metadata about a phase.
@@ -76,7 +76,7 @@ export interface IPhase {
   /**
    * What should happen if the script is not defined in a project's package.json scripts field. Default is "error".
    */
-  missingScriptBehavior: IPhaseBehaviorForMissingScript;
+  missingScriptBehavior: PhaseBehaviorForMissingScript;
 
   /**
    * (Optional) If the `shellCommand` field is set for a bulk command, Rush will invoke it for each
