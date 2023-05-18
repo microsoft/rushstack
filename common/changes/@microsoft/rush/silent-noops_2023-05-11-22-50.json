@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING API CHANGE) Add a property `missingScriptBehavior` to phase definitions that can be used to silence missing scripts to reduce log noise. This replaces the `ignoreMissingScript` property visible to the plugin API, although the `ignoreMissingScript` property is still supported in the `common/config/rush/command-line.json` config file for backwards compatibility.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
