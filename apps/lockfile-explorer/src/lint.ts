@@ -1,14 +1,12 @@
 import { FileSystem, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
+import { RushConfiguration } from '@microsoft/rush-lib';
 import yaml from 'js-yaml';
+import path from 'path';
 
 import { init } from './init';
 import { IAppState } from './state';
 
-import { generateLockfileGraph, linter, test } from './shared';
-
-console.log('LINTING');
-
-test();
+import { generateLockfileGraph, linter } from './shared';
 
 async function lintLockfile(): Promise<void> {
   const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
@@ -20,9 +18,10 @@ async function lintLockfile(): Promise<void> {
   const doc = yaml.load(pnpmLockfileText);
 
   const lockfileGraph = generateLockfileGraph(doc);
-  linter(lockfileGraph);
+  const output = linter(lockfileGraph, false) as string;
+  const workspaceRoot = path.dirname(RushConfiguration.tryFindRushJsonLocation() as string);
+
+  await FileSystem.writeFileAsync(`${workspaceRoot}/lockfileLint.json`, output);
 }
 
-lintLockfile()
-  .then(() => console.log())
-  .catch((e) => {});
+lintLockfile().catch((e) => {});

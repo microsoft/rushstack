@@ -1,6 +1,6 @@
 import { LockfileEntry, LockfileEntryFilter } from './LockfileEntry';
 
-export function linter(entries: LockfileEntry[]): void {
+export function linter(entries: LockfileEntry[], debugMode: boolean): void | string {
   const projectEntries: LockfileEntry[] = [];
   // Get the list of side-by-side versions
   const groupedPackageEntries: Map<string, LockfileEntry[]> = new Map();
@@ -169,27 +169,29 @@ export function linter(entries: LockfileEntry[]): void {
     getNewFilteredNodes(packageName, val);
   }
 
-  console.log('DEBUG MODE');
-  console.log(`
+  if (debugMode) {
+    // Debug mode, output to console
+    console.log('DEBUG MODE');
+    console.log(`
 In debug mode, additional information is included that may not appear in the final version of the linting report, such as: \n\n
 - The set of not connected packages (These are packages that are filtered out because they are only "connected" projects in the sense that one of their dependent projects is a "connected" project
 - The path trace from the "connected" project to the side-by-side cluster node, including the version
 - The exact versions of the duplicateVersions (final report may only indicate the number of duplicated versions)
-  `);
-  console.log('Number of clusters: ', Object.keys(fullDependencyClustersLint).length);
-  console.log(`
+    `);
+    console.log('Number of clusters: ', Object.keys(fullDependencyClustersLint).length);
+    console.log(`
 How to read the linting object:
 
 Example key value pair in the below output:
 
 "eslint": {
-  "duplicateVersions":{ 1.0.0, 2.0.0, 3.0.0 },
-  "allowedConnected":{
-    "project1":[["project1","dependency1","1.0.0"], ["project1","dependency2","2.0.0"], ["project1","dependency3","3.0.0"]]
-  },
-  "notConnected":{
-    "project2":[["project2","project1","dependency1","1.0.0"],"project2","project1","dependency2","2.0.0"],"project2","project1","dependency3","3.0.0"]]
-  }
+"duplicateVersions":{ 1.0.0, 2.0.0, 3.0.0 },
+"allowedConnected":{
+  "project1":[["project1","dependency1","1.0.0"], ["project1","dependency2","2.0.0"], ["project1","dependency3","3.0.0"]]
+},
+"notConnected":{
+  "project2":[["project2","project1","dependency1","1.0.0"],"project2","project1","dependency2","2.0.0"],"project2","project1","dependency3","3.0.0"]]
+}
 }
 
 
@@ -200,6 +202,23 @@ allowedConnected: This is an object where the key is the project name and the va
 
 notConnected: This object has the same information as the allowedConnected object, but are a collection of projects that were filtered out from that list. They were filtered because
 their dependencies consist entirely of other allowedConnected projects and do not contribute to more connected projects themselves.
-  `);
-  console.log(fullDependencyClustersLint);
+    `);
+    console.log(fullDependencyClustersLint);
+  } else {
+    // Calculate simplified output
+    const simplifiedClusterLint: Record<
+      string,
+      {
+        duplicateVersions: number;
+        allowedConnected: string[];
+      }
+    > = {};
+    for (const [key, value] of Object.entries(fullDependencyClustersLint)) {
+      simplifiedClusterLint[key] = {
+        duplicateVersions: value.duplicateVersions.size,
+        allowedConnected: Object.keys(value.allowedConnected)
+      };
+    }
+    return JSON.stringify(simplifiedClusterLint, null, '  ');
+  }
 }

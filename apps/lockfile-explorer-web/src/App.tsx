@@ -32,7 +32,7 @@ export const App = (): JSX.Element => {
 
       dispatch(loadEntries(lockfileGraph));
 
-      linter(lockfileGraph);
+      linter(lockfileGraph, true);
     }
     loadLockfileAsync().catch((e) => {
       console.log(`Failed to read lockfile: ${e}`);
