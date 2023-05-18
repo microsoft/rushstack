@@ -2,39 +2,10 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Launch Program",
-			"program": "${workspaceFolder}/app.js",
-			"request": "launch",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
-			"type": "node"
-		},
-		{
 			"name": "Rush Debug",
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/apps/rush/lib/start-dev.js",
-			"stopOnEntry": true,
-			"args": [
-				"start"
-			],
-			"cwd": "${workspaceRoot}",
-			"runtimeExecutable": null,
-			"runtimeArgs": [
-				"--nolazy",
-				"--inspect-brk"
-			],
-			"env": {
-				"NODE_ENV": "development"
-			},
-			"sourceMaps": true
-		},
-		{
-			"name": "Lint Debug",
-			"type": "node",
-			"request": "launch",
-			"program": "${workspaceRoot}/apps/lockfile-explorer/lib/lint.js",
 			"stopOnEntry": true,
 			"args": [
 				"start"

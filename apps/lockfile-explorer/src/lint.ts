@@ -3,11 +3,11 @@ import yaml from 'js-yaml';
 
 import { init } from './init';
 import { IAppState } from './state';
-debugger;
+
 import { generateLockfileGraph, linter, test } from './shared';
 
 console.log('LINTING');
-debugger;
+
 test();
 
 async function lintLockfile(): Promise<void> {

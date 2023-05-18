@@ -21,13 +21,13 @@ module.exports = function createConfig(env, argv) {
       },
       optimization: {
         splitChunks: {
-          chunks(chunk) {
-            // exclude `my-excluded-chunk`
+          // We don't want to split common code into chunks as we need a seperate
+          // shared.js and app.js file that can act independently from each other
+          chunks() {
             return false;
           }
         }
       },
-      // plugins: [new webpackBaseConfig.optimize.CommonChunkPlugin('init.js')],
       resolve: {
         alias: {
           // Don't rebundle this large library
