@@ -3,8 +3,10 @@
 
 import * as crypto from 'crypto';
 import * as path from 'path';
+import { Worker } from 'worker_threads';
+
 import * as semver from 'semver';
-import * as TTypescript from 'typescript';
+import type * as TTypescript from 'typescript';
 import {
   type ITerminal,
   JsonFile,
@@ -26,7 +28,6 @@ import type {
   ITypescriptWorkerData
 } from './types';
 import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
-import { Worker } from 'worker_threads';
 
 export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
   /**
