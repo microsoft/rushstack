@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "The HTTP build cache plugin will retry up to 3 times",
+      "comment": "",
       "type": "none"
     }
   ],
