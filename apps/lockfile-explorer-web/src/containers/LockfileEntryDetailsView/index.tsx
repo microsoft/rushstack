@@ -55,8 +55,10 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
       setDirectRefsPackageJSON(referrersJsonMap);
     }
-    loadPackageJson(selectedEntry?.referrers || []);
 
+    loadPackageJson(selectedEntry?.referrers || []).catch((e) => {
+      console.error(`Failed to load referrers package.json: ${e}`);
+    });
     if (selectedEntry) {
       setInspectDependency(null);
     }
