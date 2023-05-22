@@ -40,6 +40,24 @@
 			"internalConsoleOptions": "neverOpen"
 		},
 		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Build in Selected Project (Heft)",
+			"cwd": "${fileDirname}",
+			"runtimeArgs": [
+				"--nolazy",
+				"--inspect-brk",
+				"${workspaceFolder}/apps/heft/lib/start.js",
+				"--debug",
+				"build"
+			],
+			"skipFiles": ["<node_internals>/**"],
+			"outFiles": [],
+			"sourceMaps": true,
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
+		},
+		{
 			"name": "Attach",
 			"type": "node",
 			"request": "attach",

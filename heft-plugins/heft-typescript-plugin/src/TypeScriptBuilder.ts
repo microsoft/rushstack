@@ -3,6 +3,8 @@
 
 import * as crypto from 'crypto';
 import * as path from 'path';
+import { Worker } from 'worker_threads';
+
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
 import {
@@ -11,8 +13,7 @@ import {
   type IPackageJson,
   Path,
   Async,
-  FileError,
-  InternalError
+  FileError
 } from '@rushstack/node-core-library';
 import type { IScopedLogger } from '@rushstack/heft';
 
@@ -20,24 +21,13 @@ import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTyp
 import { TypeScriptCachedFileSystem } from './fileSystem/TypeScriptCachedFileSystem';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
 import type { PerformanceMeasurer, PerformanceMeasurerAsync } from './Performance';
-
-interface ICachedEmitModuleKind {
-  moduleKind: TTypescript.ModuleKind;
-
-  outFolderPath: string;
-
-  /**
-   * File extension to use instead of '.js' for emitted ECMAScript files.
-   * For example, '.cjs' to indicate commonjs content, or '.mjs' to indicate ECMAScript modules.
-   */
-  jsExtensionOverride: string | undefined;
-
-  /**
-   * Set to true if this is the emit kind that is specified in the tsconfig.json.
-   * Declarations are only emitted for the primary module kind.
-   */
-  isPrimary: boolean;
-}
+import type {
+  ICachedEmitModuleKind,
+  ITranspilationRequestMessage,
+  ITranspilationResponseMessage,
+  ITypescriptWorkerData
+} from './types';
+import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
 
 export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfigurationJson {
   /**
@@ -125,15 +115,16 @@ interface IPendingWork {
   (): void;
 }
 
+interface ITranspileSignal {
+  resolve: (result: TTypescript.EmitResult) => void;
+  reject: (error: Error) => void;
+}
+
 const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
 const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
 
 const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 5;
 const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 0;
-
-// symbols for attaching hidden metadata to ts.Program instances.
-const INNER_GET_COMPILER_OPTIONS_SYMBOL: unique symbol = Symbol('getCompilerOptions');
-const INNER_EMIT_SYMBOL: unique symbol = Symbol('emit');
 
 interface ITypeScriptTool {
   ts: ExtendedTypeScript;
@@ -150,6 +141,11 @@ interface ITypeScriptTool {
   pendingOperations: Set<IPendingWork>;
 
   executing: boolean;
+
+  worker: Worker | undefined;
+  workerExitPromise: Promise<number> | undefined;
+  pendingTranspilePromises: Map<number, Promise<TTypescript.EmitResult>>;
+  pendingTranspileSignals: Map<number, ITranspileSignal>;
 
   reportDiagnostic: TTypescript.DiagnosticReporter;
   clearTimeout: (timeout: IPendingWork) => void;
@@ -174,6 +170,8 @@ export class TypeScriptBuilder {
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   private _tool: ITypeScriptTool | undefined = undefined;
+
+  private _nextRequestId: number = 0;
 
   private get _tsCacheFilePath(): string {
     if (!this.__tsCacheFilePath) {
@@ -361,7 +359,13 @@ export class TypeScriptBuilder {
             onChangeDetected();
           }
           return timeout;
-        }
+        },
+
+        worker: undefined,
+        workerExitPromise: undefined,
+
+        pendingTranspilePromises: new Map(),
+        pendingTranspileSignals: new Map()
       };
     }
 
@@ -371,147 +375,22 @@ export class TypeScriptBuilder {
     performance.enable();
 
     if (onChangeDetected !== undefined) {
-      this._runWatch(this._tool);
+      await this._runWatchAsync(this._tool);
     } else if (this._useSolutionBuilder) {
-      this._runSolutionBuild(this._tool);
+      await this._runSolutionBuildAsync(this._tool);
     } else {
       await this._runBuildAsync(this._tool);
     }
   }
 
-  private _configureProgramForMultiEmit(
-    innerProgram: TTypescript.Program,
-    ts: ExtendedTypeScript
-  ): { changedFiles: Set<TTypescript.SourceFile> } {
-    interface IProgramWithMultiEmit extends TTypescript.Program {
-      // Attach the originals to the Program instance to avoid modifying the same Program twice.
-      // Don't use WeakMap because this Program could theoretically get a { ... } applied to it.
-      [INNER_GET_COMPILER_OPTIONS_SYMBOL]?: TTypescript.Program['getCompilerOptions'];
-      [INNER_EMIT_SYMBOL]?: TTypescript.Program['emit'];
-    }
-
-    const program: IProgramWithMultiEmit = innerProgram;
-
-    // Check to see if this Program has already been modified.
-    let { [INNER_EMIT_SYMBOL]: innerEmit, [INNER_GET_COMPILER_OPTIONS_SYMBOL]: innerGetCompilerOptions } =
-      program;
-
-    if (!innerGetCompilerOptions) {
-      program[INNER_GET_COMPILER_OPTIONS_SYMBOL] = innerGetCompilerOptions = program.getCompilerOptions;
-    }
-
-    if (!innerEmit) {
-      program[INNER_EMIT_SYMBOL] = innerEmit = program.emit;
-    }
-
-    let foundPrimary: boolean = false;
-    let defaultModuleKind: TTypescript.ModuleKind;
-
-    const multiEmitMap: Map<ICachedEmitModuleKind, TTypescript.CompilerOptions> = new Map();
-    for (const moduleKindToEmit of this._moduleKindsToEmit) {
-      const kindCompilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
-        ? {
-            ...innerGetCompilerOptions()
-          }
-        : {
-            ...innerGetCompilerOptions(),
-            module: moduleKindToEmit.moduleKind,
-            outDir: moduleKindToEmit.outFolderPath,
-
-            // Don't emit declarations for secondary module kinds
-            declaration: false,
-            declarationMap: false
-          };
-      if (!kindCompilerOptions.outDir) {
-        throw new InternalError('Expected compilerOptions.outDir to be assigned');
-      }
-      multiEmitMap.set(moduleKindToEmit, kindCompilerOptions);
-
-      if (moduleKindToEmit.isPrimary) {
-        if (foundPrimary) {
-          throw new Error('Multiple primary module emit kinds encountered.');
-        } else {
-          foundPrimary = true;
-        }
-
-        defaultModuleKind = moduleKindToEmit.moduleKind;
-      }
-    }
-
-    const changedFiles: Set<TTypescript.SourceFile> = new Set();
-
-    program.emit = (
-      targetSourceFile?: TTypescript.SourceFile,
-      writeFile?: TTypescript.WriteFileCallback,
-      cancellationToken?: TTypescript.CancellationToken,
-      emitOnlyDtsFiles?: boolean,
-      customTransformers?: TTypescript.CustomTransformers
-    ) => {
-      if (emitOnlyDtsFiles) {
-        return program[INNER_EMIT_SYMBOL]!(
-          targetSourceFile,
-          writeFile,
-          cancellationToken,
-          emitOnlyDtsFiles,
-          customTransformers
-        );
-      }
-
-      if (targetSourceFile && changedFiles) {
-        changedFiles.add(targetSourceFile);
-      }
-
-      const originalCompilerOptions: TTypescript.CompilerOptions =
-        program[INNER_GET_COMPILER_OPTIONS_SYMBOL]!();
-
-      let defaultModuleKindResult: TTypescript.EmitResult;
-      const diagnostics: TTypescript.Diagnostic[] = [];
-      let emitSkipped: boolean = false;
-      try {
-        for (const [moduleKindToEmit, kindCompilerOptions] of multiEmitMap) {
-          program.getCompilerOptions = () => kindCompilerOptions;
-          // Need to mutate the compiler options for the `module` field specifically, because emitWorker() captures
-          // options in the closure and passes it to `ts.getTransformers()`
-          originalCompilerOptions.module = moduleKindToEmit.moduleKind;
-          const flavorResult: TTypescript.EmitResult = program[INNER_EMIT_SYMBOL]!(
-            targetSourceFile,
-            writeFile && wrapWriteFile(writeFile, moduleKindToEmit.jsExtensionOverride),
-            cancellationToken,
-            emitOnlyDtsFiles,
-            customTransformers
-          );
-
-          emitSkipped = emitSkipped || flavorResult.emitSkipped;
-          // Need to aggregate diagnostics because some are impacted by the target module type
-          for (const diagnostic of flavorResult.diagnostics) {
-            diagnostics.push(diagnostic);
-          }
-
-          if (moduleKindToEmit.moduleKind === defaultModuleKind) {
-            defaultModuleKindResult = flavorResult;
-          }
-        }
-
-        const mergedDiagnostics: readonly TTypescript.Diagnostic[] =
-          ts.sortAndDeduplicateDiagnostics(diagnostics);
-
-        return {
-          ...defaultModuleKindResult!,
-          changedSourceFiles: changedFiles,
-          diagnostics: mergedDiagnostics,
-          emitSkipped
-        };
-      } finally {
-        // Restore the original compiler options and module kind for future calls
-        program.getCompilerOptions = program[INNER_GET_COMPILER_OPTIONS_SYMBOL]!;
-        originalCompilerOptions.module = defaultModuleKind;
-      }
-    };
-    return { changedFiles };
-  }
-
-  public _runWatch(tool: ITypeScriptTool): void {
-    const { ts, measureSync: measureTsPerformance, pendingOperations, rawDiagnostics } = tool;
+  public async _runWatchAsync(tool: ITypeScriptTool): Promise<void> {
+    const {
+      ts,
+      measureSync: measureTsPerformance,
+      pendingOperations,
+      rawDiagnostics,
+      pendingTranspilePromises
+    } = tool;
 
     if (!tool.solutionBuilder && !tool.watchProgram) {
       //#region CONFIGURE
@@ -547,13 +426,27 @@ export class TypeScriptBuilder {
         pendingOperations.delete(operation);
         operation();
       }
+      if (pendingTranspilePromises.size) {
+        const emitResults: TTypescript.EmitResult[] = await Promise.all(pendingTranspilePromises.values());
+        for (const { diagnostics } of emitResults) {
+          for (const diagnostic of diagnostics) {
+            rawDiagnostics.push(diagnostic);
+          }
+        }
+      }
+      // eslint-disable-next-line require-atomic-updates
       tool.executing = false;
     }
     this._logDiagnostics(ts, rawDiagnostics);
   }
 
   public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
-    const { ts, measureSync: measureTsPerformance, measureAsync: measureTsPerformanceAsync } = tool;
+    const {
+      ts,
+      measureSync: measureTsPerformance,
+      measureAsync: measureTsPerformanceAsync,
+      pendingTranspilePromises
+    } = tool;
 
     //#region CONFIGURE
     const {
@@ -579,17 +472,26 @@ export class TypeScriptBuilder {
     let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
     let innerProgram: TTypescript.Program;
 
+    const isolatedModules: boolean =
+      !!this._configuration.useTranspilerWorker && !!tsconfig.options.isolatedModules;
+    const mode: 'both' | 'declaration' = isolatedModules ? 'declaration' : 'both';
+
+    let fileNames: string[] | undefined;
+
     if (tsconfig.options.incremental) {
       // Use ts.createEmitAndSemanticDiagnositcsBuilderProgram directly because the customizations performed by
       // _getCreateBuilderProgram duplicate those performed in this function for non-incremental build.
+      const oldProgram: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram | undefined =
+        ts.readBuilderProgram(tsconfig.options, compilerHost);
       builderProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(
         tsconfig.fileNames,
         tsconfig.options,
         compilerHost,
-        ts.readBuilderProgram(tsconfig.options, compilerHost),
+        oldProgram,
         ts.getConfigFileParsingDiagnostics(tsconfig),
         tsconfig.projectReferences
       );
+      fileNames = getFilesToTranspileFromBuilderProgram(builderProgram);
       innerProgram = builderProgram.getProgram();
     } else {
       innerProgram = ts.createProgram({
@@ -600,6 +502,7 @@ export class TypeScriptBuilder {
         oldProgram: undefined,
         configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
       });
+      fileNames = getFilesToTranspileFromProgram(innerProgram);
     }
 
     // Prefer the builder program, since it is what gives us incremental builds
@@ -607,6 +510,11 @@ export class TypeScriptBuilder {
 
     this._logReadPerformance(ts);
     //#endregion
+
+    if (isolatedModules) {
+      // Kick the transpilation worker.
+      this._queueTranspileInWorker(tool, genericProgram.getCompilerOptions(), fileNames);
+    }
 
     //#region ANALYSIS
     const { duration: diagnosticsDurationMs, diagnostics: preDiagnostics } = measureTsPerformance(
@@ -632,7 +540,7 @@ export class TypeScriptBuilder {
       filesToWrite.push({ filePath, data });
     };
 
-    const { changedFiles } = this._configureProgramForMultiEmit(innerProgram, ts);
+    const { changedFiles } = configureProgramForMultiEmit(innerProgram, ts, this._moduleKindsToEmit, mode);
 
     const emitResult: TTypescript.EmitResult = genericProgram.emit(undefined, writeFileCallback);
     //#endregion
@@ -657,6 +565,17 @@ export class TypeScriptBuilder {
     );
     //#endregion
 
+    this._configuration.emitChangedFilesCallback(innerProgram, changedFiles);
+
+    if (pendingTranspilePromises.size) {
+      const emitResults: TTypescript.EmitResult[] = await Promise.all(pendingTranspilePromises.values());
+      for (const { diagnostics } of emitResults) {
+        for (const diagnostic of diagnostics) {
+          rawDiagnostics.push(diagnostic);
+        }
+      }
+    }
+
     const { duration: writeDuration } = await writePromise;
     this._typescriptTerminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
 
@@ -664,13 +583,14 @@ export class TypeScriptBuilder {
     // Reset performance counters in case any are used in the callback
     ts.performance.disable();
     ts.performance.enable();
-    this._configuration.emitChangedFilesCallback(innerProgram, changedFiles);
+
+    await this._cleanupWorkerAsync();
   }
 
-  public _runSolutionBuild(tool: ITypeScriptTool): void {
+  public async _runSolutionBuildAsync(tool: ITypeScriptTool): Promise<void> {
     this._typescriptTerminal.writeVerboseLine(`Using solution mode`);
 
-    const { ts, measureSync, rawDiagnostics } = tool;
+    const { ts, measureSync, rawDiagnostics, pendingTranspilePromises } = tool;
     rawDiagnostics.length = 0;
 
     if (!tool.solutionBuilder) {
@@ -705,7 +625,18 @@ export class TypeScriptBuilder {
     tool.solutionBuilder.build();
     //#endregion
 
+    if (pendingTranspilePromises.size) {
+      const emitResults: TTypescript.EmitResult[] = await Promise.all(pendingTranspilePromises.values());
+      for (const { diagnostics } of emitResults) {
+        for (const diagnostic of diagnostics) {
+          rawDiagnostics.push(diagnostic);
+        }
+      }
+    }
+
     this._logDiagnostics(ts, rawDiagnostics);
+
+    await this._cleanupWorkerAsync();
   }
 
   private _logDiagnostics(ts: ExtendedTypeScript, rawDiagnostics: TTypescript.Diagnostic[]): void {
@@ -1084,6 +1015,16 @@ export class TypeScriptBuilder {
 
       this._logReadPerformance(ts);
 
+      const isolatedModules: boolean =
+        !!this._configuration.useTranspilerWorker && !!compilerOptions!.isolatedModules;
+      const mode: 'both' | 'declaration' = isolatedModules ? 'declaration' : 'both';
+
+      if (isolatedModules) {
+        // Kick the transpilation worker.
+        const fileNamesToTranspile: string[] = getFilesToTranspileFromBuilderProgram(newProgram);
+        this._queueTranspileInWorker(this._tool!, compilerOptions!, fileNamesToTranspile);
+      }
+
       const { emit: originalEmit } = newProgram;
 
       const emit: TTypescript.Program['emit'] = (
@@ -1097,7 +1038,12 @@ export class TypeScriptBuilder {
 
         const innerCompilerOptions: TTypescript.CompilerOptions = innerProgram.getCompilerOptions();
 
-        const { changedFiles } = this._configureProgramForMultiEmit(innerProgram, ts);
+        const { changedFiles } = configureProgramForMultiEmit(
+          innerProgram,
+          ts,
+          this._moduleKindsToEmit,
+          mode
+        );
 
         const result: TTypescript.EmitResult = originalEmit.call(
           newProgram,
@@ -1294,32 +1240,122 @@ export class TypeScriptBuilder {
         throw new Error(`"${moduleKindName}" is not a valid module kind name.`);
     }
   }
-}
 
-const JS_EXTENSION_REGEX: RegExp = /\.js(\.map)?$/;
+  private _queueTranspileInWorker(
+    tool: ITypeScriptTool,
+    compilerOptions: TTypescript.CompilerOptions,
+    fileNames: string[]
+  ): void {
+    const { pendingTranspilePromises, pendingTranspileSignals } = tool;
+    let maybeWorker: Worker | undefined = tool.worker;
+    if (!maybeWorker) {
+      const workerData: ITypescriptWorkerData = {
+        typeScriptToolPath: this._configuration.typeScriptToolPath
+      };
+      tool.worker = maybeWorker = new Worker(require.resolve('./TranspilerWorker.js'), {
+        workerData: workerData
+      });
 
-function wrapWriteFile(
-  baseWriteFile: TTypescript.WriteFileCallback,
-  jsExtensionOverride: string | undefined
-): TTypescript.WriteFileCallback {
-  if (!jsExtensionOverride) {
-    return baseWriteFile;
+      maybeWorker.on('message', (response: ITranspilationResponseMessage) => {
+        const { requestId: resolvingRequestId, type, result } = response;
+        const signal: ITranspileSignal | undefined = pendingTranspileSignals.get(resolvingRequestId);
+
+        if (type === 'error') {
+          const error: Error = Object.assign(new Error(result.message), result);
+          if (signal) {
+            signal.reject(error);
+          } else {
+            this._typescriptTerminal.writeErrorLine(
+              `Unexpected worker rejection for request with id ${resolvingRequestId}: ${error}`
+            );
+          }
+        } else if (signal) {
+          signal.resolve(result);
+        } else {
+          this._typescriptTerminal.writeErrorLine(
+            `Unexpected worker resolution for request with id ${resolvingRequestId}`
+          );
+        }
+
+        pendingTranspileSignals.delete(resolvingRequestId);
+        pendingTranspilePromises.delete(resolvingRequestId);
+      });
+
+      tool.workerExitPromise = new Promise(
+        (resolve: (exitCode: number) => void, reject: (err: Error) => void) => {
+          maybeWorker!.once('exit', resolve);
+
+          maybeWorker!.once('error', (err: Error) => {
+            for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
+              rejectTranspile(err);
+            }
+            pendingTranspileSignals.clear();
+            reject(err);
+          });
+        }
+      );
+    }
+
+    // make linter happy
+    const worker: Worker = maybeWorker;
+
+    const requestId: number = ++this._nextRequestId;
+    const transpilePromise: Promise<TTypescript.EmitResult> = new Promise(
+      (resolve: (result: TTypescript.EmitResult) => void, reject: (err: Error) => void) => {
+        pendingTranspileSignals.set(requestId, { resolve, reject });
+
+        this._typescriptTerminal.writeLine(`Asynchronously transpiling ${compilerOptions.configFilePath}`);
+        const request: ITranspilationRequestMessage = {
+          compilerOptions,
+          fileNames,
+          moduleKindsToEmit: this._moduleKindsToEmit,
+          requestId
+        };
+
+        worker.postMessage(request);
+      }
+    );
+
+    pendingTranspilePromises.set(requestId, transpilePromise);
   }
 
-  const replacementExtension: string = `${jsExtensionOverride}$1`;
-  return (
-    fileName: string,
-    data: string,
-    writeBOM: boolean,
-    onError?: ((message: string) => void) | undefined,
-    sourceFiles?: readonly TTypescript.SourceFile[] | undefined
-  ) => {
-    return baseWriteFile(
-      fileName.replace(JS_EXTENSION_REGEX, replacementExtension),
-      data,
-      writeBOM,
-      onError,
-      sourceFiles
-    );
-  };
+  private async _cleanupWorkerAsync(): Promise<void> {
+    const tool: ITypeScriptTool | undefined = this._tool;
+    if (!tool) {
+      return;
+    }
+
+    const { worker, workerExitPromise } = tool;
+    if (worker && workerExitPromise) {
+      worker.postMessage(false);
+      this._typescriptTerminal.writeLine(`Waiting for worker to exit`);
+      await workerExitPromise;
+      tool.worker = undefined;
+      tool.workerExitPromise = undefined;
+    }
+  }
+}
+
+function getFilesToTranspileFromBuilderProgram(builderProgram: TTypescript.BuilderProgram): string[] {
+  const changedFilesSet: Set<string> = (
+    builderProgram as unknown as { getState(): { changedFilesSet: Set<string> } }
+  ).getState().changedFilesSet;
+  const fileNames: string[] = [];
+  for (const fileName of changedFilesSet) {
+    const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);
+    if (sourceFile && !sourceFile.isDeclarationFile) {
+      fileNames.push(sourceFile.fileName);
+    }
+  }
+  return fileNames;
+}
+
+function getFilesToTranspileFromProgram(program: TTypescript.Program): string[] {
+  const fileNames: string[] = [];
+  for (const sourceFile of program.getSourceFiles()) {
+    if (!sourceFile.isDeclarationFile) {
+      fileNames.push(sourceFile.fileName);
+    }
+  }
+  return fileNames;
 }
