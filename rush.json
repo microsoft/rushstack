@@ -731,6 +731,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-typescript-multi-extends-test",
+      "projectFolder": "build-tests/heft-typescript-multi-extends-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-typescript-v2-test",
       "projectFolder": "build-tests/heft-typescript-v2-test",
       "reviewCategory": "tests",
