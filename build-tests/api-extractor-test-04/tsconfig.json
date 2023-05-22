@@ -11,7 +11,8 @@
     "esModuleInterop": true,
     "types": [],
     "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
-    "outDir": "lib"
+    "outDir": "lib",
+    "allowArbitraryExtensions": true
   },
-  "include": ["src/**/*.ts", "typings/tsd.d.ts"]
+  "include": ["src/**/*.ts", "typings/tsd.d.ts", "src/AlphaClass.tsz"]
 }

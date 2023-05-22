@@ -100,6 +100,8 @@ export const enum ExtractorMessageId {
   /**
    * "Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension.
    * Troubleshooting tips: `https://api-extractor.com/link/dts-error`"
+   *
+   * Note that this is suppressed by the allowArbitraryExtensions TSConfig option
    */
   WrongInputFileType = 'ae-wrong-input-file-type'
 }
