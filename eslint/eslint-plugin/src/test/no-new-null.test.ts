@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { noNewNullRule } from './no-new-null';
+import { noNewNullRule } from '../no-new-null';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({

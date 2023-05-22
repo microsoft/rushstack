@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { hoistJestMock } from './hoist-jest-mock';
+import { hoistJestMock } from '../hoist-jest-mock';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
