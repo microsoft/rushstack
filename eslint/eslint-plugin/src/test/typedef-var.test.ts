@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { typedefVar } from './typedef-var';
+import { typedefVar } from '../typedef-var';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({

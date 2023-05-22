@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Upgrade the @typescript-eslint/* dependencies to ~5.59.2",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config"
+}

@@ -1,6 +1,6 @@
 {
-  "name": "typescript-newest-test",
-  "description": "Building this project tests Heft with the newest supported TypeScript compiler version",
+  "name": "typescript-v4-test",
+  "description": "Building this project tests Heft with TypeScript v4",
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
@@ -11,7 +11,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "*",
     "@rushstack/heft": "*",
-    "typescript": "~4.8.4",
+    "typescript": "~4.7.0",
     "tslint": "~5.20.1",
     "eslint": "~8.7.0"
   }

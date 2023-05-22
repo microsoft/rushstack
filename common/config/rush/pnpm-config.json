@@ -93,7 +93,8 @@
     // "example2": "npm:@company/example2@^1.0.0"
     // TODO: Remove once https://github.com/dylang/npm-check/issues/499
     // has been closed and a new version of `npm-check` is published.
-    "package-json": "^7"
+    "package-json": "^7",
+    "@rushstack/heft-node-rig>typescript": "~5.0.4"
   },
 
   /**
