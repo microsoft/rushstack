@@ -2,6 +2,35 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/trace-import_v0.2.0",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the TypeScript dependency to ~5.0.4"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.13.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.18",
       "tag": "@rushstack/trace-import_v0.1.18",
       "date": "Fri, 12 May 2023 00:23:05 GMT",
