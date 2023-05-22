@@ -6,9 +6,16 @@
 
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
-  "heftPlugins": [
-    {
-      "plugin": "@rushstack/heft-webpack5-plugin"
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        }
+      }
     }
-  ]
+  }
 }

@@ -35,7 +35,6 @@ import {
   Path,
   Import,
   JsonFile,
-  JsonSchema,
   PackageName,
   type ITerminal
 } from '@rushstack/node-core-library';
@@ -124,7 +123,7 @@ interface IExtendedHeftJestConfiguration extends IHeftJestConfiguration {
   extends: string | undefined;
 }
 
-const PLUGIN_NAME: 'jest-plugin' = 'JestPlugin';
+const PLUGIN_NAME: 'jest-plugin' = 'jest-plugin';
 const PLUGIN_PACKAGE_NAME: '@rushstack/heft-jest-plugin' = '@rushstack/heft-jest-plugin';
 const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
 const JEST_CONFIGURATION_LOCATION: 'config/jest.config.json' = `config/jest.config.json`;

@@ -7,7 +7,7 @@
   "typings": "./lib/index.d.ts",
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
+    "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {

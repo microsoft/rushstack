@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "test": "heft test --clean",
-    "start": "heft start --sst",
+    "start": "heft build-watch --sst",
     "build": "heft build --clean",
     "deploy": "sst deploy",
     "remove": "sst remove",

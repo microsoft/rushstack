@@ -17,8 +17,8 @@
   // We suggest this setting for any heft project (in a monorepo or not).
   "clearMocks": true,
 
-  // "Adding '<rootDir>/src' here enables src/__mocks__ to be used for mocking Node.js system modules
-  "roots": ["<rootDir>/src"],
+  // "Adding '<rootDir>/lib' here enables lib/__mocks__ to be used for mocking Node.js system modules
+  "roots": ["<rootDir>/lib"],
 
   // Retain pre-Jest 29 snapshot behavior
   "snapshotFormat": {
@@ -30,7 +30,7 @@
     "url": "http://localhost/"
   },
 
-  "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
+  "testMatch": ["<rootDir>/lib/**/*.test.cjs"],
   "testPathIgnorePatterns": ["/node_modules/"],
 
   // Code coverage tracking is disabled by default; set this to true to enable it
@@ -40,37 +40,34 @@
   "coverageDirectory": "<rootDir>/temp/coverage",
 
   "collectCoverageFrom": [
-    "src/**/*.{ts,tsx}",
-    "!src/**/*.d.ts",
-    "!src/**/*.test.{ts,tsx}",
-    "!src/**/test/**",
-    "!src/**/__tests__/**",
-    "!src/**/__fixtures__/**",
-    "!src/**/__mocks__/**"
+    "lib/**/*.cjs",
+    "!lib/**/*.test.cjs",
+    "!lib/**/test/**",
+    "!lib/**/__tests__/**",
+    "!lib/**/__fixtures__/**",
+    "!lib/**/__mocks__/**"
   ],
   "coveragePathIgnorePatterns": ["/node_modules/"],
 
-  "transformIgnorePatterns": [],
+  "transformIgnorePatterns": ["\\.c?js$"],
 
   // jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module
   // jest-string-mock-transform returns the filename, where Webpack would return a URL
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
   "transform": {
-    "\\.(ts|tsx)$": "../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-build-transform.js",
-
     "\\.(css|sass|scss)$": "../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-identity-mock-transform.js",
 
     "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-string-mock-transform.js"
   },
 
   // The modulePathIgnorePatterns below accepts these sorts of paths:
-  //   - <rootDir>/src
-  //   - <rootDir>/src/file.ts
+  //   - <rootDir>/lib
+  //   - <rootDir>/lib/file.ts
   // ...and ignores anything else under <rootDir>
   "modulePathIgnorePatterns": [],
 
-  // Prefer .cjs to .js to catch explicit commonjs output. Optimize for local files, which will be .ts or .tsx
-  "moduleFileExtensions": ["ts", "tsx", "cjs", "js", "json", "node"],
+  // Prefer .cjs to .js to catch explicit commonjs output. Optimize for local files, which will be .cjs
+  "moduleFileExtensions": ["cjs", "js", "json", "node"],
 
   // When using the heft-jest-plugin, these will be replaced with the resolved module location
   "setupFiles": ["../node_modules/@rushstack/heft-jest-plugin/lib/exports/jest-global-setup.js"],
