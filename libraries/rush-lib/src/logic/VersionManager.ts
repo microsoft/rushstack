@@ -87,13 +87,13 @@ export class VersionManager {
       this._getManuallyVersionedProjects()
     );
 
-    changeManager.load(this._rushConfiguration.changesFolder);
+    await changeManager.loadAsync(this._rushConfiguration.changesFolder);
     if (changeManager.hasChanges()) {
       changeManager.validateChanges(this._versionPolicyConfiguration);
       changeManager.apply(!!shouldCommit)!.forEach((packageJson) => {
         this.updatedProjects.set(packageJson.name, packageJson);
       });
-      changeManager.updateChangelog(!!shouldCommit);
+      await changeManager.updateChangelogAsync(!!shouldCommit);
     }
 
     // Refresh rush configuration again, since we've further modified the package.json files

@@ -4,5 +4,9 @@
 export {
   PackageExtractor,
   type IExtractorOptions,
-  type IExtractorProjectConfiguration
+  type IExtractorProjectConfiguration,
+  type IExtractorMetadataJson,
+  type IProjectInfoJson
 } from './PackageExtractor';
+
+export type { ILinkInfo } from './SymlinkAnalyzer';

@@ -1,13 +1,13 @@
 {
   "name": "@rushstack/package-extractor",
-  "version": "0.1.0",
+  "version": "0.2.4",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "lib/index.js",
-  "typings": "dist/deploy-manager.d.ts",
+  "typings": "dist/package-extractor.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "libraries/deploy-manager"
+    "directory": "libraries/package-extractor"
   },
   "scripts": {
     "build": "heft build --clean",
@@ -27,11 +27,14 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
     "@types/npm-packlist": "~1.1.1",
-    "eslint": "~8.7.0"
+    "eslint": "~8.7.0",
+    "webpack": "~5.80.0"
   }
 }

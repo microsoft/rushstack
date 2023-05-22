@@ -13,5 +13,5 @@ console.log(config.commonFolder);
 console.log('Calling an internal API...');
 
 // Use a path-based import to access an internal API (do so at your own risk!)
-import { GitEmailPolicy } from '@rushstack/rush-sdk/lib/logic/policy/GitEmailPolicy';
+import * as GitEmailPolicy from '@rushstack/rush-sdk/lib/logic/policy/GitEmailPolicy';
 console.log(GitEmailPolicy.getEmailExampleLines(config));

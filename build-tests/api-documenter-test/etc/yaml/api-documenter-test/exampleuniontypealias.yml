@@ -8,4 +8,4 @@ remarks: ''
 example: []
 isPreview: false
 isDeprecated: false
-syntax: export declare type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+syntax: export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;

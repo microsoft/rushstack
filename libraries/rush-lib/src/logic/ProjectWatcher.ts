@@ -3,9 +3,10 @@
 
 import * as fs from 'fs';
 import * as os from 'os';
+import * as readline from 'readline';
 import { once } from 'events';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
-import { Path, ITerminal, FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import { Colors, Path, ITerminal, FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 
 import { Git } from './Git';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
@@ -55,6 +56,8 @@ export class ProjectWatcher {
   private _initialState: ProjectChangeAnalyzer | undefined;
   private _previousState: ProjectChangeAnalyzer | undefined;
 
+  private _hasRenderedStatus: boolean;
+
   public constructor(options: IProjectWatcherOptions) {
     const { debounceMs = 1000, rushConfiguration, projectsToWatch, terminal, initialState } = options;
 
@@ -68,6 +71,8 @@ export class ProjectWatcher {
 
     this._initialState = initialState;
     this._previousState = initialState;
+
+    this._hasRenderedStatus = false;
   }
 
   /**
@@ -128,7 +133,11 @@ export class ProjectWatcher {
         let timeout: NodeJS.Timeout | undefined;
         let terminated: boolean = false;
 
+        const terminal: ITerminal = this._terminal;
+
         const debounceMs: number = this._debounceMs;
+
+        this._hasRenderedStatus = false;
 
         const resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
@@ -137,15 +146,15 @@ export class ProjectWatcher {
           }
 
           try {
-            this._terminal.writeLine(`Evaluating changes to tracked files...`);
+            this._setStatus(`Evaluating changes to tracked files...`);
             const result: IProjectChangeResult = await this._computeChanged();
-            this._terminal.writeLine(`Finished analyzing.`);
+            this._setStatus(`Finished analyzing.`);
 
             // Need an async tick to allow for more file system events to be handled
             process.nextTick(() => {
               if (timeout) {
                 // If another file has changed, wait for another pass.
-                this._terminal.writeLine(`More file changes detected, aborting.`);
+                this._setStatus(`More file changes detected, aborting.`);
                 return;
               }
 
@@ -153,14 +162,16 @@ export class ProjectWatcher {
 
               if (result.changedProjects.size) {
                 terminated = true;
+                terminal.writeLine();
                 resolve(result);
               } else {
-                this._terminal.writeLine(`No changes detected to tracked files.`);
+                this._setStatus(`No changes detected to tracked files.`);
               }
             });
           } catch (err) {
             // eslint-disable-next-line require-atomic-updates
             terminated = true;
+            terminal.writeLine();
             reject(err as NodeJS.ErrnoException);
           }
         };
@@ -179,6 +190,7 @@ export class ProjectWatcher {
           }
 
           terminated = true;
+          terminal.writeLine();
           reject(err);
         }
 
@@ -242,6 +254,7 @@ export class ProjectWatcher {
             timeout = setTimeout(resolveIfChanged, debounceMs);
           } catch (err) {
             terminated = true;
+            terminal.writeLine();
             reject(err as NodeJS.ErrnoException);
           }
         }
@@ -265,6 +278,16 @@ export class ProjectWatcher {
     await Promise.all(closePromises);
 
     return watchedResult;
+  }
+
+  private _setStatus(status: string): void {
+    if (this._hasRenderedStatus) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0);
+    } else {
+      this._hasRenderedStatus = true;
+    }
+    this._terminal.write(Colors.bold(Colors.cyan(`Watch Status: ${status}`)));
   }
 
   /**

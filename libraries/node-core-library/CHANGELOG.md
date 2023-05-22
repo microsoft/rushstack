@@ -1,6 +1,33 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 27 Apr 2023 17:18:42 GMT and should not be manually modified.
+This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+
+## 3.59.1
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 3.59.0
+Fri, 12 May 2023 00:23:05 GMT
+
+### Minor changes
+
+- Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp.
+
+## 3.58.0
+Mon, 01 May 2023 15:23:19 GMT
+
+### Minor changes
+
+- Expose a `Text.escapeRegExp` function to escape regexp special characters.
+
+## 3.57.0
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Minor changes
+
+- Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider
+- Add a Writable stream adapter for ITerminal to allow writing to a terminal as a stream
 
 ## 3.56.0
 Thu, 27 Apr 2023 17:18:42 GMT

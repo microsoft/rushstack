@@ -1,51 +1,33 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 27 Apr 2023 17:25:53 GMT and should not be manually modified.
+This log was last generated on Mon, 22 May 2023 06:34:32 GMT and should not be manually modified.
 
-## 1.13.0-rc.5
-Thu, 27 Apr 2023 17:25:52 GMT
+## 1.13.0
+Mon, 22 May 2023 06:34:32 GMT
 
-### Prerelease Changes
+### Minor changes
 
-- Update with latest main.
+- Upgrade TypeScript to ~5.0.4
 
-## 1.13.0-rc.4
-Wed, 15 Mar 2023 20:22:44 GMT
+## 1.12.11
+Fri, 12 May 2023 00:23:05 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix an issue with `watchGlobAsync`
+## 1.12.10
+Thu, 04 May 2023 00:20:28 GMT
 
-## 1.13.0-rc.3
-Fri, 20 Jan 2023 20:13:16 GMT
+_Version update only_
 
-### Prerelease Changes
+## 1.12.9
+Mon, 01 May 2023 15:23:19 GMT
 
-- Fix issues with SASS incremental builds.
-- Add support for TypeScript solution incremental builds.
-- Improve responsiveness of watcher loop.
+_Version update only_
 
-## 1.12.0-rc.2
-Fri, 2 Dec 2022 05:28:24 GMT
+## 1.12.8
+Sat, 29 Apr 2023 00:23:02 GMT
 
-### Prerelease Changes
-
-- Improve watch mode performance.
-- Improve logging output.
-
-## 1.12.0-rc.1
-Fri, 18 Nov 2022 02:34:26 GMT
-
-### Prerelease Changes
-
-- Fix incremental TypeScript compilation.
-
-## 1.12.0-rc.0
-Tue, 15 Nov 2022 22:59:35 GMT
-
-### Prerelease Changes
-
-- General fixes and improvements, in preparation for a general release.
+_Version update only_
 
 ## 1.12.7
 Thu, 27 Apr 2023 17:18:42 GMT

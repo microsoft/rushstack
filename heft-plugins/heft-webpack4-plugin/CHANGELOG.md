@@ -1,51 +1,31 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Thu, 27 Apr 2023 17:25:53 GMT and should not be manually modified.
+This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
 
-## 0.6.0-rc.5
-Thu, 27 Apr 2023 17:25:52 GMT
+## 0.5.47
+Mon, 22 May 2023 06:34:33 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Update with latest main.
+## 0.5.46
+Fri, 12 May 2023 00:23:05 GMT
 
-## 0.6.0-rc.4
-Wed, 15 Mar 2023 20:22:44 GMT
+_Version update only_
 
-### Prerelease Changes
+## 0.5.45
+Thu, 04 May 2023 00:20:28 GMT
 
-- Fix an issue with `watchGlobAsync`
+_Version update only_
 
-## 0.6.0-rc.3
-Fri, 20 Jan 2023 20:13:16 GMT
+## 0.5.44
+Mon, 01 May 2023 15:23:19 GMT
 
-### Prerelease Changes
+_Version update only_
 
-- Fix issues with SASS incremental builds.
-- Add support for TypeScript solution incremental builds.
-- Improve responsiveness of watcher loop.
+## 0.5.43
+Sat, 29 Apr 2023 00:23:03 GMT
 
-## 0.6.0-rc.2
-Fri, 2 Dec 2022 05:28:24 GMT
-
-### Prerelease Changes
-
-- Improve watch mode performance.
-- Improve logging output.
-
-## 0.6.0-rc.1
-Fri, 18 Nov 2022 02:34:26 GMT
-
-### Prerelease Changes
-
-- Fix incremental TypeScript compilation.
-
-## 0.6.0-rc.0
-Tue, 15 Nov 2022 22:59:35 GMT
-
-### Prerelease Changes
-
-- General fixes and improvements, in preparation for a general release.
+_Version update only_
 
 ## 0.5.42
 Thu, 27 Apr 2023 17:18:43 GMT

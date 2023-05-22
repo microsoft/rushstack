@@ -17,7 +17,11 @@
       "moduleKind": "umd",
       "outFolderName": "lib-umd"
     }
-  ]
+  ],
+
+  "staticAssetsToCopy": {
+    "fileExtensions": [".txt"]
+  }
 
   /**
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.

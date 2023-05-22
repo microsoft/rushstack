@@ -1,6 +1,33 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 27 Apr 2023 17:18:42 GMT and should not be manually modified.
+This log was last generated on Mon, 22 May 2023 06:34:32 GMT and should not be manually modified.
+
+## 7.35.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the TypeScript dependency to ~5.0.4
+
+## 7.34.9
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 7.34.8
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 7.34.7
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 7.34.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
 
 ## 7.34.5
 Thu, 27 Apr 2023 17:18:42 GMT

@@ -8,6 +8,8 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
+import { Writable } from 'stream';
+import { WritableOptions } from 'stream';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -337,6 +339,11 @@ export interface IConsoleTerminalProviderOptions {
     verboseEnabled: boolean;
 }
 
+// @beta
+export interface IDynamicPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    getPrefix: () => string;
+}
+
 // @public
 export interface IEnvironmentEntry {
     name: string;
@@ -634,6 +641,14 @@ export interface IPeerDependenciesMetaTable {
     };
 }
 
+// @beta (undocumented)
+export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProviderOptions | IDynamicPrefixProxyTerminalProviderOptions;
+
+// @beta (undocumented)
+export interface IPrefixProxyTerminalProviderOptionsBase {
+    terminalProvider: ITerminalProvider;
+}
+
 // @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
@@ -649,6 +664,11 @@ export interface IRunWithRetriesOptions<TResult> {
     maxRetries: number;
     // (undocumented)
     retryDelayMs?: number;
+}
+
+// @beta
+export interface IStaticPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    prefix: string;
 }
 
 // @beta (undocumented)
@@ -688,6 +708,13 @@ export interface ITerminalProvider {
     eolCharacter: string;
     supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
+}
+
+// @beta
+export interface ITerminalWritableOptions {
+    severity: TerminalProviderSeverity;
+    terminal: ITerminal;
+    writableOptions?: WritableOptions;
 }
 
 // @public
@@ -843,6 +870,17 @@ export enum PosixModeBits {
     UserWrite = 128
 }
 
+// @beta
+export class PrefixProxyTerminalProvider implements ITerminalProvider {
+    constructor(options: IPrefixProxyTerminalProviderOptions);
+    // @override (undocumented)
+    get eolCharacter(): string;
+    // @override (undocumented)
+    get supportsColor(): boolean;
+    // @override (undocumented)
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 export class ProtectableMap<K, V> {
     constructor(parameters: IProtectableMapParameters<K, V>);
@@ -925,12 +963,20 @@ export enum TerminalProviderSeverity {
     warning = 1
 }
 
+// @beta
+export class TerminalWritable extends Writable {
+    constructor(options: ITerminalWritableOptions);
+    // (undocumented)
+    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
+}
+
 // @public
 export class Text {
     static convertTo(input: string, newlineKind: NewlineKind): string;
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+    static escapeRegExp(literal: string): string;
     static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;

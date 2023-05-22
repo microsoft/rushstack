@@ -2,82 +2,123 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
-      "version": "0.6.0-rc.5",
-      "tag": "@rushstack/heft-jest-plugin_v0.6.0-rc.5",
-      "date": "Thu, 27 Apr 2023 17:25:52 GMT",
+      "version": "0.5.12",
+      "tag": "@rushstack/heft-jest-plugin_v0.5.12",
+      "date": "Mon, 22 May 2023 06:34:32 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "Update with latest main."
-          }
-        ]
-      }
-    },
-    {
-      "version": "0.6.0-rc.4",
-      "tag": "@rushstack/heft-jest-plugin_v0.6.0-rc.4",
-      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Fix an issue with `watchGlobAsync`"
-          }
-        ]
-      }
-    },
-    {
-      "version": "0.6.0-rc.3",
-      "tag": "@rushstack/heft-jest-plugin_v0.6.0-rc.3",
-      "date": "Fri, 20 Jan 2023 20:13:16 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Fix issues with SASS incremental builds."
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.2`"
           },
           {
-            "comment": "Add support for TypeScript solution incremental builds."
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.1`"
           },
           {
-            "comment": "Improve responsiveness of watcher loop."
-          }
-        ]
-      }
-    },
-    {
-      "version": "0.5.6-rc.2",
-      "tag": "@rushstack/heft-jest-plugin_v0.5.6-rc.2",
-      "date": "Fri, 2 Dec 2022 05:28:24 GMT",
-      "comments": {
-        "minor": [
-          {
-            "comment": "Improve watch mode performance."
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.0`"
           },
           {
-            "comment": "Improve logging output."
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.5` to `^0.50.6`"
           }
         ]
       }
     },
     {
-      "version": "0.5.6-rc.1",
-      "tag": "@rushstack/heft-jest-plugin_v0.5.6-rc.1",
-      "date": "Fri, 18 Nov 2022 02:34:26 GMT",
+      "version": "0.5.11",
+      "tag": "@rushstack/heft-jest-plugin_v0.5.11",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "Fix incremental TypeScript compilation."
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.4` to `^0.50.5`"
           }
         ]
       }
     },
     {
-      "version": "0.5.6-rc.0",
-      "tag": "@rushstack/heft-jest-plugin_v0.5.6-rc.0",
-      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "version": "0.5.10",
+      "tag": "@rushstack/heft-jest-plugin_v0.5.10",
+      "date": "Thu, 04 May 2023 00:20:28 GMT",
       "comments": {
-        "minor": [
+        "dependency": [
           {
-            "comment": "General fixes and improvements, in preparation for a general release."
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.3` to `^0.50.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.9",
+      "tag": "@rushstack/heft-jest-plugin_v0.5.9",
+      "date": "Mon, 01 May 2023 15:23:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow \"preset\" configuration value to be used when extending Jest configuration files"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.2` to `^0.50.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.8",
+      "tag": "@rushstack/heft-jest-plugin_v0.5.8",
+      "date": "Sat, 29 Apr 2023 00:23:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.11.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.34.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.1` to `^0.50.2`"
           }
         ]
       }

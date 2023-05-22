@@ -1,6 +1,4 @@
-function escapeRegExp(literal: string): string {
-  return literal.replace(/[^A-Za-z0-9_]/g, '\\$&');
-}
+import { Text } from '@rushstack/node-core-library';
 
 export function matchesWithStar(patternWithStar: string, input: string): boolean {
   // Map "@types/*" --> "^\@types\/.*$"
@@ -8,7 +6,7 @@ export function matchesWithStar(patternWithStar: string, input: string): boolean
     '^' +
     patternWithStar
       .split('*')
-      .map((x) => escapeRegExp(x))
+      .map((x) => Text.escapeRegExp(x))
       .join('.*') +
     '$';
   // eslint-disable-next-line @rushstack/security/no-unsafe-regexp

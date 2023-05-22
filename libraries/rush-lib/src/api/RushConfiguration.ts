@@ -935,11 +935,21 @@ export class RushConfiguration {
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
 
-  public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration {
+  public static tryLoadFromDefaultLocation(
+    options?: ITryFindRushJsonLocationOptions
+  ): RushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation(options);
-
     if (rushJsonLocation) {
       return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
+    }
+  }
+
+  public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration {
+    const rushConfiguration: RushConfiguration | undefined =
+      RushConfiguration.tryLoadFromDefaultLocation(options);
+
+    if (rushConfiguration) {
+      return rushConfiguration;
     } else {
       throw Utilities.getRushConfigNotFoundError();
     }
