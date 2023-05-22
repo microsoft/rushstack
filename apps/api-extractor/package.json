@@ -52,8 +52,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.50.4",
-    "@rushstack/heft-node-rig": "1.12.10",
+    "@rushstack/heft": "0.50.6",
+    "@rushstack/heft-node-rig": "1.13.0",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "14.18.36",
