@@ -14,5 +14,5 @@
     "outDir": "lib",
     "allowArbitraryExtensions": true
   },
-  "include": ["src/**/*.ts", "typings/tsd.d.ts", "src/AlphaClass.tsz"]
+  "include": ["src/**/*.ts", "typings/tsd.d.ts"]
 }
