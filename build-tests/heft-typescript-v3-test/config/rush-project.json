@@ -1,0 +1,8 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "build",
+      "outputFolderNames": ["dist", "lib", "lib-esnext", "lib-umd"]
+    }
+  ]
+}
