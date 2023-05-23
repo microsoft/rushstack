@@ -70,9 +70,9 @@ export class CoreConfigFiles {
     rigConfig?: RigConfig | undefined
   ): Promise<IHeftConfigurationJson> {
     if (!CoreConfigFiles._heftConfigFileLoader) {
-      const pluginPackageResolver: (options: IJsonPathMetadataResolverOptions<unknown>) => string = (
-        options: IJsonPathMetadataResolverOptions<unknown>
-      ) => {
+      const pluginPackageResolver: (
+        options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>
+      ) => string = (options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>) => {
         const { propertyValue, configurationFilePath } = options;
         const configurationFileDirectory: string = path.dirname(configurationFilePath);
         return Import.resolvePackage({

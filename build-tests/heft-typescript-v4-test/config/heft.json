@@ -22,6 +22,12 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-lint-plugin"
           }
+        },
+        "api-extractor": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-api-extractor-plugin"
+          }
         }
       }
     },

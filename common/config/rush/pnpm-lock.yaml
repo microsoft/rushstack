@@ -1195,6 +1195,7 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-typescript-plugin': workspace:*
@@ -1206,6 +1207,7 @@ importers:
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
@@ -1219,6 +1221,7 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-typescript-plugin': workspace:*
@@ -1230,6 +1233,7 @@ importers:
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
@@ -1244,6 +1248,7 @@ importers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-api-extractor-plugin': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-lint-plugin': workspace:*
       '@rushstack/heft-typescript-plugin': workspace:*
@@ -1257,6 +1262,7 @@ importers:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': link:../../heft-plugins/heft-api-extractor-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
