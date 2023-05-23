@@ -40,6 +40,7 @@ export interface ICertificate {
 // @public
 export interface ICertificateGenerationOptions {
     subjectAltNames?: ReadonlyArray<string>;
+    subjectIpAddresses?: ReadonlyArray<string>;
     validityInDays?: number;
 }
 

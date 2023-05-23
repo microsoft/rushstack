@@ -24,6 +24,12 @@ const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
 export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localhost'];
 
 /**
+ * The set of ip addresses the certificate should be generated for, by default.
+ * @public
+ */
+export const DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES: ReadonlyArray<string> = ['127.0.0.1'];
+
+/**
  * The interface for a debug certificate instance
  *
  * @public
@@ -66,15 +72,21 @@ interface ISubjectAltNameExtension {
   altNames: readonly IAltName[];
 }
 
-interface IDNSName {
+/**
+ * Fields for a Subject Alternative Name of type DNS Name
+ */
+interface IDnsAltName {
   type: 2;
   value: string;
 }
-interface IIPAddress {
+/**
+ * Fields for a Subject Alternative Name of type IP Address
+ */
+interface IIPAddressAltName {
   type: 7;
   ip: string;
 }
-type IAltName = IDNSName | IIPAddress;
+type IAltName = IDnsAltName | IIPAddressAltName;
 
 /**
  * Options to use if needing to generate a new certificate
@@ -82,9 +94,13 @@ type IAltName = IDNSName | IIPAddress;
  */
 export interface ICertificateGenerationOptions {
   /**
-   * The DNS Subject names to issue the certificate for.
+   * The DNS Subject names to issue the certificate for. Defaults to ['localhost'].
    */
   subjectAltNames?: ReadonlyArray<string>;
+  /**
+   * The IP Address Subject names to issue the certificate for. Defaults to ['127.0.0.1'].
+   */
+  subjectIpAddresses?: ReadonlyArray<string>;
   /**
    * How many days the certificate should be valid for.
    */
@@ -121,10 +137,10 @@ export class CertificateManager {
 
     const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
 
-    if (process.env.DISABLE_DEV_CERT_GENERATION === '1') {
+    if (process.env.RUSHSTACK_DISABLE_DEV_CERT_GENERATION === '1') {
       // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
       terminal.writeLine(
-        `Found environment variable DISABLE_DEV_CERT_GENERATION=1, force disabling certificate generation.`
+        `Found environment variable RUSHSTACK_DISABLE_DEV_CERT_GENERATION=1, disabling certificate generation.`
       );
       canGenerateNewCertificate = false;
     }
@@ -401,7 +417,7 @@ export class CertificateManager {
     certificate.publicKey = keys.publicKey;
     certificate.serialNumber = TLS_SERIAL_NUMBER;
 
-    const { subjectAltNames: subjectNames, validityInDays } = options;
+    const { subjectAltNames: subjectNames, subjectIpAddresses, validityInDays } = options;
 
     const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
       validityInDays,
@@ -425,14 +441,16 @@ export class CertificateManager {
     certificate.setSubject(subjectAttrs);
     certificate.setIssuer(issuerAttrs);
 
-    const subjectAltNames: IAltName[] = subjectNames.map((subjectName) => ({
-      type: 2, // DNS
-      value: subjectName
-    }));
-    subjectAltNames.push({
-      type: 7, // IP
-      ip: '127.0.0.1'
-    });
+    const subjectAltNames: IAltName[] = [
+      ...subjectNames.map<IDnsAltName>((subjectName) => ({
+        type: 2, // DNS
+        value: subjectName
+      })),
+      ...subjectIpAddresses.map<IIPAddressAltName>((ip) => ({
+        type: 7, // IP
+        ip
+      }))
+    ];
 
     const issuerAltNames: readonly IAltName[] = [
       {
@@ -762,8 +780,12 @@ function applyDefaultOptions(
   options: ICertificateGenerationOptions | undefined
 ): Required<ICertificateGenerationOptions> {
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
+  const subjectIpAddresses: ReadonlyArray<string> | undefined = options?.subjectIpAddresses;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
+    subjectIpAddresses: subjectIpAddresses?.length
+      ? subjectIpAddresses
+      : DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES,
     validityInDays: Math.min(
       MAX_CERTIFICATE_VALIDITY_DAYS,
       options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
@@ -771,6 +793,6 @@ function applyDefaultOptions(
   };
 }
 
-function isIPAddress(altName: IAltName): altName is IIPAddress {
+function isIPAddress(altName: IAltName): altName is IIPAddressAltName {
   return altName.type === 7;
 }
