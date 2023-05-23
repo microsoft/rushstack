@@ -17,7 +17,7 @@
     "types": ["heft-jest", "webpack-env"],
 
     "isolatedModules": true,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
 
     "module": "esnext",
     "moduleResolution": "node",
