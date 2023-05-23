@@ -84,6 +84,7 @@ interface IDnsAltName {
 }
 /**
  * Fields for a Subject Alternative Name of type IP Address
+ * `node-forge` requires the field name to be "ip" instead of "value", likely due to subtle encoding differences.
  */
 interface IIPAddressAltName {
   type: 7;
@@ -103,7 +104,7 @@ export interface ICertificateGenerationOptions {
   /**
    * The IP Address Subject names to issue the certificate for. Defaults to ['127.0.0.1'].
    */
-  subjectIpAddresses?: ReadonlyArray<string>;
+  subjectIPAddresses?: ReadonlyArray<string>;
   /**
    * How many days the certificate should be valid for.
    */
@@ -420,7 +421,7 @@ export class CertificateManager {
     certificate.publicKey = keys.publicKey;
     certificate.serialNumber = TLS_SERIAL_NUMBER;
 
-    const { subjectAltNames: subjectNames, subjectIpAddresses, validityInDays } = options;
+    const { subjectAltNames: subjectNames, subjectIPAddresses: subjectIpAddresses, validityInDays } = options;
 
     const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
       validityInDays,
@@ -783,10 +784,10 @@ function applyDefaultOptions(
   options: ICertificateGenerationOptions | undefined
 ): Required<ICertificateGenerationOptions> {
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
-  const subjectIpAddresses: ReadonlyArray<string> | undefined = options?.subjectIpAddresses;
+  const subjectIpAddresses: ReadonlyArray<string> | undefined = options?.subjectIPAddresses;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
-    subjectIpAddresses: subjectIpAddresses?.length
+    subjectIPAddresses: subjectIpAddresses?.length
       ? subjectIpAddresses
       : DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES,
     validityInDays: Math.min(
