@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "serve": "heft build-watch --clean",
+    "serve": "heft build-watch --serve",
     "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
