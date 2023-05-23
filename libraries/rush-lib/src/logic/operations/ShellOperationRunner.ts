@@ -187,6 +187,16 @@ export class ShellOperationRunner implements IOperationRunner {
       });
       const terminal: Terminal = new Terminal(terminalProvider);
 
+      // Controls the log for the cache subsystem
+      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(context.collatedWriter);
+      const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        buildCacheCollatedTerminal,
+        {
+          debugEnabled: context.debugMode
+        }
+      );
+      const buildCacheTerminal: Terminal = new Terminal(buildCacheTerminalProvider);
+
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
       let lastProjectDeps: IProjectDeps | undefined = undefined;
@@ -266,14 +276,14 @@ export class ShellOperationRunner implements IOperationRunner {
       let buildCacheReadAttempted: boolean = false;
       if (this._isCacheReadAllowed) {
         const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
-          terminal,
+          terminal: buildCacheTerminal,
           trackedProjectFiles,
           operationMetadataManager: context._operationMetadataManager
         });
 
         buildCacheReadAttempted = !!projectBuildCache;
         const restoreFromCacheSuccess: boolean | undefined =
-          await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
+          await projectBuildCache?.tryRestoreFromCacheAsync(buildCacheTerminal);
 
         if (restoreFromCacheSuccess) {
           // Restore the original state of the operation without cache
@@ -366,6 +376,15 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       );
 
+      // projectLogWritable should be closed before copy the logs to build cache
+      normalizeNewlineTransform.close();
+
+      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+      // have closed projectLogWritable.
+      if (projectLogWritable.isOpen) {
+        throw new InternalError('The output file handle was not closed');
+      }
+
       const taskIsSuccessful: boolean =
         status === OperationStatus.Success ||
         (status === OperationStatus.SuccessWithWarning &&
@@ -392,28 +411,20 @@ export class ShellOperationRunner implements IOperationRunner {
         const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
           ? (
               await this._tryGetProjectBuildCacheAsync({
-                terminal,
+                terminal: buildCacheTerminal,
                 trackedProjectFiles,
                 operationMetadataManager: context._operationMetadataManager
               })
-            )?.trySetCacheEntryAsync(terminal)
+            )?.trySetCacheEntryAsync(buildCacheTerminal)
           : undefined;
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
-        if (terminalProvider.hasErrors) {
+        if (buildCacheTerminalProvider.hasErrors) {
           status = OperationStatus.Failure;
         } else if (cacheWriteSuccess === false) {
           status = OperationStatus.SuccessWithWarning;
         }
-      }
-
-      normalizeNewlineTransform.close();
-
-      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
-      // have closed projectLogWritable.
-      if (projectLogWritable.isOpen) {
-        throw new InternalError('The output file handle was not closed');
       }
 
       return status;
