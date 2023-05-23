@@ -49,7 +49,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       description: 'Perform "rush purge" before starting the installation'
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
-      parameterLongName: '--bypass-policy',
+      parameterLongName: RushConstants.bypassPolicyFlagLongName,
       description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
     });
     this._noLinkParameter = this.defineFlagParameter({

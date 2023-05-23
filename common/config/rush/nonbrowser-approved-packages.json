@@ -659,6 +659,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "sass-embedded",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "sass-loader",
       "allowedCategories": [ "libraries", "tests" ]
     },

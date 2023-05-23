@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as Webpack from 'webpack';
-import * as lodash from 'lodash';
 
 import { Constants } from './utilities/Constants';
 import { ILocaleElementMap } from './interfaces';
@@ -123,7 +122,7 @@ export class AssetProcessor {
 
     const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
     for (const [locale, { source, size }] of reconstructedAsset.result) {
-      const newAsset: IAsset = lodash.clone(options.asset);
+      const newAsset: IAsset = { ...options.asset };
       newAsset.source = () => source;
       newAsset.size = () => size;
 
@@ -189,7 +188,7 @@ export class AssetProcessor {
       );
     }
 
-    const newAsset: IAsset = lodash.clone(options.asset);
+    const newAsset: IAsset = { ...options.asset };
     newAsset.source = () => reconstructedAsset.result.source;
     newAsset.size = () => reconstructedAsset.result.size;
     return {

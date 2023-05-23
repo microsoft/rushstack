@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
+    "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
@@ -18,7 +18,7 @@
     "@types/webpack-env": "1.18.0",
     "eslint": "~8.7.0",
     "html-webpack-plugin": "~4.5.2",
-    "typescript": "~4.8.4",
+    "typescript": "~5.0.4",
     "webpack": "~4.44.2"
   }
 }

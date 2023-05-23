@@ -653,6 +653,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-jest-preset-test",
+      "projectFolder": "build-tests/heft-jest-preset-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-jest-reporters-test",
       "projectFolder": "build-tests/heft-jest-reporters-test",
       "reviewCategory": "tests",
@@ -709,6 +715,24 @@
     {
       "packageName": "heft-typescript-composite-test",
       "projectFolder": "build-tests/heft-typescript-composite-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v2-test",
+      "projectFolder": "build-tests/heft-typescript-v2-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v3-test",
+      "projectFolder": "build-tests/heft-typescript-v3-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v4-test",
+      "projectFolder": "build-tests/heft-typescript-v4-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

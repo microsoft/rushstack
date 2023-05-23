@@ -215,7 +215,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "declare type DuplicateName = "
+              "text": "type DuplicateName = "
             },
             {
               "kind": "Content",
@@ -241,7 +241,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type DuplicateName = "
+              "text": "export type DuplicateName = "
             },
             {
               "kind": "Content",
@@ -332,7 +332,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "declare type ForgottenExport2 = "
+              "text": "type ForgottenExport2 = "
             },
             {
               "kind": "Content",

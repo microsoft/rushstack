@@ -2,6 +2,57 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.59.1",
+      "tag": "@rushstack/node-core-library_v3.59.1",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.0",
+      "tag": "@rushstack/node-core-library_v3.59.0",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.58.0",
+      "tag": "@rushstack/node-core-library_v3.58.0",
+      "date": "Mon, 01 May 2023 15:23:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose a `Text.escapeRegExp` function to escape regexp special characters."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.57.0",
+      "tag": "@rushstack/node-core-library_v3.57.0",
+      "date": "Sat, 29 Apr 2023 00:23:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider"
+          },
+          {
+            "comment": "Add a Writable stream adapter for ITerminal to allow writing to a terminal as a stream"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.56.0",
       "tag": "@rushstack/node-core-library_v3.56.0",
       "date": "Thu, 27 Apr 2023 17:18:42 GMT",

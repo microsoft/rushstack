@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
+    "start": "heft build-watch",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },
@@ -21,6 +21,6 @@
     "eslint": "~8.7.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
-    "typescript": "~4.8.4"
+    "typescript": "~5.0.4"
   }
 }

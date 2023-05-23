@@ -1,6 +1,7 @@
 # @rushstack/heft-sass-plugin
 
-This is a Heft plugin for using node-sass during the "build" stage.
+This is a Heft plugin for using sass-embedded during the "build" stage.
+If `sass-embedded` is not supported on your platform, you can override the dependency via npm alias to use the `sass` package instead.
 
 ## Links
 

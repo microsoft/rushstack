@@ -16,6 +16,7 @@ export {
   IConfigurationFileOptions,
   ICustomJsonPathMetadata,
   ICustomPropertyInheritance,
+  IJsonPathMetadataResolverOptions,
   IJsonPathMetadata,
   IJsonPathsMetadata,
   InheritanceType,

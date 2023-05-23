@@ -883,7 +883,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type IInterfaceLikeTypeAlias = "
+              "text": "export type IInterfaceLikeTypeAlias = "
             },
             {
               "kind": "Content",

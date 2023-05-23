@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import {
+  ConfigurationFile,
+  IJsonPathMetadataResolverOptions,
+  InheritanceType,
+  PathResolutionMethod
+} from '@rushstack/heft-config-file';
 import { Import, ITerminal } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
@@ -66,10 +71,9 @@ export class CoreConfigFiles {
   ): Promise<IHeftConfigurationJson> {
     if (!CoreConfigFiles._heftConfigFileLoader) {
       const pluginPackageResolver: (
-        configurationFilePath: string,
-        propertyName: string,
-        propertyValue: string
-      ) => string = (configurationFilePath: string, propertyName: string, propertyValue: string) => {
+        options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>
+      ) => string = (options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>) => {
+        const { propertyValue, configurationFilePath } = options;
         const configurationFileDirectory: string = path.dirname(configurationFilePath);
         return Import.resolvePackage({
           packageName: propertyValue,

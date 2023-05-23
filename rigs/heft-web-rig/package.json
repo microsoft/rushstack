@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-web-rig",
-  "version": "0.15.0-rc.5",
+  "version": "0.15.0",
   "description": "A rig package for web browser projects that build using Heft",
   "license": "MIT",
   "scripts": {
@@ -13,7 +13,7 @@
     "directory": "rigs/heft-web-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "0.51.0-rc.5"
+    "@rushstack/heft": "^0.50.6"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
@@ -38,7 +38,7 @@
     "source-map-loader": "~3.0.1",
     "style-loader": "~3.3.1",
     "terser-webpack-plugin": "~5.3.1",
-    "typescript": "~4.8.4",
+    "typescript": "~5.0.4",
     "url-loader": "~4.1.1",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-merge": "~5.8.0",

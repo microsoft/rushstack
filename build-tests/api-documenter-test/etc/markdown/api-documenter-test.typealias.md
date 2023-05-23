@@ -8,5 +8,5 @@
 **Signature:**
 
 ```typescript
-export declare type TypeAlias = number;
+export type TypeAlias = number;
 ```

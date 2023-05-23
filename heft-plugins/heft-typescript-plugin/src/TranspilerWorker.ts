@@ -41,7 +41,8 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
   const { requestId, compilerOptions, moduleKindsToEmit, fileNames } = message;
 
   const fullySkipTypeCheck: boolean =
-    compilerOptions.importsNotUsedAsValues === ts.ImportsNotUsedAsValues.Error;
+    /* TypeScript 5+ */ compilerOptions.verbatimModuleSyntax ||
+    /* TypeScript 4 */ compilerOptions.importsNotUsedAsValues === ts.ImportsNotUsedAsValues.Error;
 
   for (const [option, value] of Object.entries(ts.getDefaultCompilerOptions())) {
     if (compilerOptions[option] === undefined) {
