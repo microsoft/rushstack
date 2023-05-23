@@ -29,6 +29,9 @@ export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localh
  */
 export const DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES: ReadonlyArray<string> = ['127.0.0.1'];
 
+const DISABLE_CERT_GENERATION_VARIABLE_NAME: 'RUSHSTACK_DISABLE_DEV_CERT_GENERATION' =
+  'RUSHSTACK_DISABLE_DEV_CERT_GENERATION';
+
 /**
  * The interface for a debug certificate instance
  *
@@ -137,10 +140,10 @@ export class CertificateManager {
 
     const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
 
-    if (process.env.RUSHSTACK_DISABLE_DEV_CERT_GENERATION === '1') {
+    if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
       // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
       terminal.writeLine(
-        `Found environment variable RUSHSTACK_DISABLE_DEV_CERT_GENERATION=1, disabling certificate generation.`
+        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation.`
       );
       canGenerateNewCertificate = false;
     }
