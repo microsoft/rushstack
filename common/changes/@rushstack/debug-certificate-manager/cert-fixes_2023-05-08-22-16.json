@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Add environment variable to force disable certificate generation. Correctly encode 127.0.0.1 as an IP Address in subjectAltNames field during certificate generation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager"
+}
