@@ -760,6 +760,7 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 export class PhasedCommandHooks {
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
+    readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly waitingForChanges: SyncHook<void>;
