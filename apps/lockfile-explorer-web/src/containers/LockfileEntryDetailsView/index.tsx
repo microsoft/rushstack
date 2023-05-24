@@ -21,9 +21,9 @@ enum DependencyType {
 }
 
 enum DependencyKey {
-  DEP = 'dependencies',
-  DEVDEP = 'devDependencies',
-  PEERDEP = 'peerDependencies'
+  Regular = 'dependencies',
+  Dev = 'devDependencies',
+  Peer = 'peerDependencies'
 }
 
 interface IInfluencerType {
@@ -265,7 +265,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     const packageJson = directRefsPackageJSON.get(rawEntryId);
     if (!packageJson) return undefined;
 
-    const dependencyTypes = [DependencyKey.DEP, DependencyKey.DEVDEP, DependencyKey.PEERDEP];
+    const dependencyTypes = [DependencyKey.Regular, DependencyKey.Dev, DependencyKey.Peer];
 
     for (const type of dependencyTypes) {
       const version = packageJson[type]?.[entryPackageName];
