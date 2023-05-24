@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.28",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.28",
+      "date": "Wed, 24 May 2023 00:19:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add environment variable to force disable certificate generation. Correctly encode 127.0.0.1 as an IP Address in subjectAltNames field during certificate generation."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.27",
       "tag": "@rushstack/debug-certificate-manager_v1.2.27",
       "date": "Mon, 22 May 2023 06:34:33 GMT",

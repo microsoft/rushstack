@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Wed, 24 May 2023 00:19:12 GMT and should not be manually modified.
+
+## 1.2.28
+Wed, 24 May 2023 00:19:12 GMT
+
+### Patches
+
+- Add environment variable to force disable certificate generation. Correctly encode 127.0.0.1 as an IP Address in subjectAltNames field during certificate generation.
 
 ## 1.2.27
 Mon, 22 May 2023 06:34:33 GMT
