@@ -17,7 +17,11 @@
       "moduleKind": "umd",
       "outFolderName": "lib-umd"
     }
-  ]
+  ],
+
+  "staticAssetsToCopy": {
+    "fileExtensions": [".txt"]
+  }
 
   /**
    * If set to "true", the TSlint task will not be invoked.

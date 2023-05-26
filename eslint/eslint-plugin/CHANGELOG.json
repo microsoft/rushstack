@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.12.0",
+      "tag": "@rushstack/eslint-plugin_v0.12.0",
+      "date": "Mon, 22 May 2023 06:34:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the @typescript-eslint/* dependencies to ~5.59.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.0",
       "tag": "@rushstack/eslint-plugin_v0.11.0",
       "date": "Thu, 29 Sep 2022 07:13:06 GMT",

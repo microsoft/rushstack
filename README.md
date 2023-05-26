@@ -146,6 +146,9 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-parameter-plugin-test](./build-tests/heft-parameter-plugin-test/) | This project exercises a built-in Heft action with a custom parameter |
 | [/build-tests/heft-sass-test](./build-tests/heft-sass-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
 | [/build-tests/heft-typescript-composite-test](./build-tests/heft-typescript-composite-test/) | Building this project tests behavior of Heft when the tsconfig.json file uses project references. |
+| [/build-tests/heft-typescript-v2-test](./build-tests/heft-typescript-v2-test/) | Building this project tests building with TypeScript v2 |
+| [/build-tests/heft-typescript-v3-test](./build-tests/heft-typescript-v3-test/) | Building this project tests building with TypeScript v3 |
+| [/build-tests/heft-typescript-v4-test](./build-tests/heft-typescript-v4-test/) | Building this project tests building with TypeScript v4 |
 | [/build-tests/heft-web-rig-library-test](./build-tests/heft-web-rig-library-test/) | A test project for Heft that exercises the '@rushstack/heft-web-rig' package |
 | [/build-tests/heft-webpack4-everything-test](./build-tests/heft-webpack4-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 4 |
 | [/build-tests/heft-webpack5-everything-test](./build-tests/heft-webpack5-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 5 |

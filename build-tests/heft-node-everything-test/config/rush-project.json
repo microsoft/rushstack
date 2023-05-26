@@ -2,7 +2,7 @@
   "operationSettings": [
     {
       "operationName": "build",
-      "outputFolderNames": ["lib", "dist"]
+      "outputFolderNames": ["dist", "lib", "lib-esnext", "lib-umd"]
     }
   ]
 }

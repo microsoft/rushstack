@@ -16,6 +16,7 @@ import type {
 } from '../logic/operations/IOperationExecutionResult';
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
+import type { ITelemetryData } from '../logic/Telemetry';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -140,4 +141,10 @@ export class PhasedCommandHooks {
    * Only relevant when running in watch mode.
    */
   public readonly waitingForChanges: SyncHook<void> = new SyncHook(undefined, 'waitingForChanges');
+
+  /**
+   * Hook invoked after executing operations and before waitingForChanges. Allows the caller
+   * to augment or modify the log entry about to be written.
+   */
+  public readonly beforeLog: SyncHook<ITelemetryData, void> = new SyncHook(['telemetryData'], 'beforeLog');
 }

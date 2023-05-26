@@ -111,7 +111,6 @@ export class OperationMetadataManager {
     await this.stateFile.tryRestoreAsync();
 
     // Append cached log into current log file
-    terminal.writeLine('');
     terminal.writeLine(`Restoring cached log file at ${this._logPath}`);
     try {
       const logReadStream: fs.ReadStream = fs.createReadStream(this._logPath, {

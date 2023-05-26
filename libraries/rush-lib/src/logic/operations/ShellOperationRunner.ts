@@ -307,13 +307,14 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       );
 
-      // Save the metadata to disk
-      const { duration: durationInSeconds } = context.stopwatch;
-      await context._operationMetadataManager?.saveAsync({
-        durationInSeconds,
-        logPath: projectLogWritable.logPath,
-        errorLogPath: projectLogWritable.errorLogPath
-      });
+      // projectLogWritable should be closed before copy the logs to build cache
+      normalizeNewlineTransform.close();
+
+      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+      // have closed projectLogWritable.
+      if (projectLogWritable.isOpen) {
+        throw new InternalError('The output file handle was not closed');
+      }
 
       const taskIsSuccessful: boolean =
         status === OperationStatus.Success ||
@@ -348,14 +349,6 @@ export class ShellOperationRunner implements IOperationRunner {
 
       if (terminalProvider.hasErrors) {
         status = OperationStatus.Failure;
-      }
-
-      normalizeNewlineTransform.close();
-
-      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
-      // have closed projectLogWritable.
-      if (projectLogWritable.isOpen) {
-        throw new InternalError('The output file handle was not closed');
       }
 
       return status;

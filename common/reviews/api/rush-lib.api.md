@@ -537,12 +537,15 @@ export interface IPhase {
         self: Set<IPhase>;
         upstream: Set<IPhase>;
     };
-    ignoreMissingScript: boolean;
     isSynthetic: boolean;
     logFilenameIdentifier: string;
+    missingScriptBehavior: IPhaseBehaviorForMissingScript;
     name: string;
     shellCommand?: string;
 }
+
+// @alpha
+export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 
 // @beta
 export interface IPhasedCommand extends IRushCommand {
@@ -831,6 +834,7 @@ export class PhasedCommandHooks {
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
+    readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly waitingForChanges: SyncHook<void>;

@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ColorValue, InternalError, ITerminal, JsonObject } from '@rushstack/node-core-library';
+import { ColorValue, InternalError, ITerminal, JsonObject, Terminal } from '@rushstack/node-core-library';
+import { CollatedTerminal } from '@rushstack/stream-collator';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { ShellOperationRunner } from './ShellOperationRunner';
 import { OperationStatus } from './OperationStatus';
 import { CobuildLock, ICobuildCompletedState } from '../cobuild/CobuildLock';
@@ -37,6 +39,8 @@ export interface IOperationBuildCacheContext {
   isSkipAllowed: boolean;
   projectBuildCache: ProjectBuildCache | undefined;
   cobuildLock: CobuildLock | undefined;
+  // Controls the log for the cache subsystem
+  buildCacheTerminal: ITerminal | undefined;
 }
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
@@ -62,7 +66,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isCacheReadAllowed: isIncrementalBuildAllowed,
               isSkipAllowed: isIncrementalBuildAllowed,
               projectBuildCache: undefined,
-              cobuildLock: undefined
+              cobuildLock: undefined,
+              buildCacheTerminal: undefined
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this._buildCacheContextByOperationRunner.set(operation.runner, buildCacheContext);
@@ -170,6 +175,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             });
           }
 
+          const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(context.collatedWriter);
+          const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+            buildCacheCollatedTerminal,
+            {
+              debugEnabled: context.debugMode
+            }
+          );
+          const buildCacheTerminal: ITerminal = new Terminal(buildCacheTerminalProvider);
+          buildCacheContext.buildCacheTerminal = buildCacheTerminal;
+
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheConfiguration,
             runner,
@@ -179,7 +194,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             projectChangeAnalyzer,
             commandName,
             commandToRun,
-            terminal,
+            terminal: buildCacheTerminal,
             trackedProjectFiles,
             operationMetadataManager: context._operationMetadataManager
           });
@@ -202,16 +217,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 projectChangeAnalyzer,
                 commandName,
                 commandToRun,
-                terminal,
+                terminal: buildCacheTerminal,
                 trackedProjectFiles,
                 operationMetadataManager: context._operationMetadataManager
               });
               if (projectBuildCache) {
-                terminal.writeVerboseLine(
+                buildCacheTerminal.writeVerboseLine(
                   `Log files only build cache is enabled for the project "${rushProject.packageName}" because the cobuild leaf project log only is allowed`
                 );
               } else {
-                terminal.writeWarningLine(
+                buildCacheTerminal.writeWarningLine(
                   `Failed to get log files only build cache for the project "${rushProject.packageName}"`
                 );
               }
@@ -256,7 +271,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               const { status, cacheId } = cobuildCompletedState;
 
               const restoreFromCacheSuccess: boolean | undefined =
-                await cobuildLock.projectBuildCache.tryRestoreFromCacheAsync(terminal, cacheId);
+                await cobuildLock.projectBuildCache.tryRestoreFromCacheAsync(buildCacheTerminal, cacheId);
 
               if (restoreFromCacheSuccess) {
                 // Restore the original state of the operation without cache
@@ -274,7 +289,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           } else if (buildCacheContext.isCacheReadAllowed) {
             buildCacheReadAttempted = !!projectBuildCache;
             const restoreFromCacheSuccess: boolean | undefined =
-              await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
+              await projectBuildCache?.tryRestoreFromCacheAsync(buildCacheTerminal);
 
             if (restoreFromCacheSuccess) {
               // Restore the original state of the operation without cache
@@ -324,9 +339,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     runner.hooks.afterExecute.tapPromise(
       PLUGIN_NAME,
       async (afterExecuteContext: IOperationRunnerAfterExecuteContext) => {
-        const { context, terminal, status, taskIsSuccessful } = afterExecuteContext;
+        const { context, status, taskIsSuccessful } = afterExecuteContext;
 
-        const { cobuildLock, projectBuildCache, isCacheWriteAllowed } = buildCacheContext;
+        const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal } = buildCacheContext;
+
+        if (!buildCacheTerminal) {
+          // This should not happen
+          throw new InternalError(`Build Cache Terminal is not created`);
+        }
 
         let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
         let setCacheEntryPromise: Promise<boolean> | undefined;
@@ -357,7 +377,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 });
               };
               setCacheEntryPromise = cobuildLock.projectBuildCache.trySetCacheEntryAsync(
-                terminal,
+                buildCacheTerminal,
                 finalCacheId
               );
             }
@@ -367,7 +387,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
         if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && projectBuildCache) {
-          setCacheEntryPromise = projectBuildCache.trySetCacheEntryAsync(terminal);
+          setCacheEntryPromise = projectBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
         }
         const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise;
         await setCompletedStatePromiseFunction?.();

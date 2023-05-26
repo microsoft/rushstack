@@ -62,7 +62,7 @@ function createShellOperations(
         phase.shellCommand
       );
 
-      if (commandToRun === undefined && !phase.ignoreMissingScript) {
+      if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
         throw new Error(
           `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
         );
@@ -86,7 +86,7 @@ function createShellOperations(
         operation.runner = new NullOperationRunner({
           name: displayName,
           result: OperationStatus.NoOp,
-          silent: false
+          silent: phase.missingScriptBehavior === 'silent'
         });
       }
     }

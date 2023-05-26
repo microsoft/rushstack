@@ -731,6 +731,24 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-typescript-v2-test",
+      "projectFolder": "build-tests/heft-typescript-v2-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v3-test",
+      "projectFolder": "build-tests/heft-typescript-v3-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v4-test",
+      "projectFolder": "build-tests/heft-typescript-v4-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-web-rig-library-test",
       "projectFolder": "build-tests/heft-web-rig-library-test",
       "reviewCategory": "tests",

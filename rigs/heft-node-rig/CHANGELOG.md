@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Fri, 12 May 2023 00:23:05 GMT and should not be manually modified.
+This log was last generated on Mon, 22 May 2023 06:34:32 GMT and should not be manually modified.
+
+## 1.13.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade TypeScript to ~5.0.4
 
 ## 1.12.11
 Fri, 12 May 2023 00:23:05 GMT
