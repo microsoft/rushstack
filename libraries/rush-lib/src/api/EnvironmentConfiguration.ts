@@ -164,6 +164,18 @@ export const EnvironmentVariableNames = {
   RUSH_COBUILD_CONTEXT_ID: 'RUSH_COBUILD_CONTEXT_ID',
 
   /**
+   * Explicitly specifies a name for each participating cobuild runner.
+   *
+   * Setting this environment variable opt into running with cobuilds.
+   *
+   * @remarks
+   * This environment variable is optional, if it is not provided, a random id is used.
+   *
+   * If there is no cobuild configured, then this environment variable is ignored.
+   */
+  RUSH_COBUILD_RUNNER_ID: 'RUSH_COBUILD_RUNNER_ID',
+
+  /**
    * If this variable is set to "1", When getting distributed builds, Rush will automatically handle the leaf project
    * with build cache "disabled" by writing to the cache in a special "log files only mode". This is useful when you
    * want to use Cobuilds to improve the performance in CI validations and the leaf projects have not enabled cache.
@@ -232,6 +244,8 @@ export class EnvironmentConfiguration {
   private static _cobuildEnabled: boolean | undefined;
 
   private static _cobuildContextId: string | undefined;
+
+  private static _cobuildRunnerId: string | undefined;
 
   private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
 
@@ -348,6 +362,15 @@ export class EnvironmentConfiguration {
   public static get cobuildContextId(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._cobuildContextId;
+  }
+
+  /**
+   * Provides a determined cobuild runner id if configured
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID}
+   */
+  public static get cobuildRunnerId(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildRunnerId;
   }
 
   /**
@@ -500,6 +523,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
             EnvironmentConfiguration._cobuildContextId = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID: {
+            EnvironmentConfiguration._cobuildRunnerId = value;
             break;
           }
 

@@ -102,10 +102,11 @@ export class CobuildConfiguration {
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
     // (undocumented)
     get cobuildLockProvider(): ICobuildLockProvider;
+    readonly cobuildRunnerId: string;
     // (undocumented)
     get contextId(): string | undefined;
     // (undocumented)
-    createLockProviderAsync(): Promise<void>;
+    createLockProviderAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
     destroyLockProviderAsync(): Promise<void>;
     // (undocumented)
@@ -173,6 +174,7 @@ export class EnvironmentConfiguration {
     static get cobuildContextId(): string | undefined;
     static get cobuildEnabled(): boolean | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
+    static get cobuildRunnerId(): string | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -207,6 +209,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_BUILD_CACHE_WRITE_ALLOWED: "RUSH_BUILD_CACHE_WRITE_ALLOWED";
     readonly RUSH_COBUILD_ENABLED: "RUSH_COBUILD_ENABLED";
     readonly RUSH_COBUILD_CONTEXT_ID: "RUSH_COBUILD_CONTEXT_ID";
+    readonly RUSH_COBUILD_RUNNER_ID: "RUSH_COBUILD_RUNNER_ID";
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
@@ -452,6 +455,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @alpha
 export interface IOperationExecutionResult {
+    readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly status: OperationStatus;
@@ -461,6 +465,10 @@ export interface IOperationExecutionResult {
 
 // @internal (undocumented)
 export interface _IOperationMetadata {
+    // (undocumented)
+    cobuildContextId: string | undefined;
+    // (undocumented)
+    cobuildRunnerId: string | undefined;
     // (undocumented)
     durationInSeconds: number;
     // (undocumented)
@@ -520,6 +528,10 @@ export interface _IOperationStateFileOptions {
 
 // @internal (undocumented)
 export interface _IOperationStateJson {
+    // (undocumented)
+    cobuildContextId: string | undefined;
+    // (undocumented)
+    cobuildRunnerId: string | undefined;
     // (undocumented)
     nonCachedDurationMs: number;
 }
@@ -725,7 +737,7 @@ export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
     get relativeFilepaths(): string[];
     // (undocumented)
-    saveAsync({ durationInSeconds, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)

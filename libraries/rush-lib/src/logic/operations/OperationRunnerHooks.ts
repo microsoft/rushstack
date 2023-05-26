@@ -45,6 +45,8 @@ export interface IOperationRunnerAfterExecuteContext {
   exitCode: number;
   status: OperationStatus;
   taskIsSuccessful: boolean;
+  logPath: string;
+  errorLogPath: string;
 }
 
 /**

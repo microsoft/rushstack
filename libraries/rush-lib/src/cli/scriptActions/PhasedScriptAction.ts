@@ -320,7 +320,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.rushConfiguration,
         this.rushSession
       );
-      await cobuildConfiguration?.createLockProviderAsync();
+      await cobuildConfiguration?.createLockProviderAsync(terminal);
     }
 
     const projectSelection: Set<RushConfigurationProject> =

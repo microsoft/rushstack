@@ -339,9 +339,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     runner.hooks.afterExecute.tapPromise(
       PLUGIN_NAME,
       async (afterExecuteContext: IOperationRunnerAfterExecuteContext) => {
-        const { context, status, taskIsSuccessful } = afterExecuteContext;
+        const { context, status, taskIsSuccessful, logPath, errorLogPath } = afterExecuteContext;
 
         const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal } = buildCacheContext;
+
+        // Save the metadata to disk
+        const { duration: durationInSeconds } = context.stopwatch;
+        await context._operationMetadataManager?.saveAsync({
+          durationInSeconds,
+          cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
+          cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
+          logPath,
+          errorLogPath
+        });
 
         if (!buildCacheTerminal) {
           // This should not happen

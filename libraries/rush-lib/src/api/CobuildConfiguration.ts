@@ -7,6 +7,7 @@ import schemaJson from '../schemas/cobuild.schema.json';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
 import { RushConstants } from '../logic/RushConstants';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
@@ -54,6 +55,12 @@ export class CobuildConfiguration {
    * The cobuild feature won't be enabled until the context id is provided as an non-empty string.
    */
   public readonly cobuildContextId: string | undefined;
+
+  /**
+   * This is a name of the participating cobuild runner. It can be specified by the environment variable
+   * RUSH_COBUILD_RUNNER_ID. If it is not provided, a random id will be generated to identify the runner.
+   */
+  public readonly cobuildRunnerId: string;
   /**
    * If true, Rush will automatically handle the leaf project with build cache "disabled" by writing
    * to the cache in a special "log files only mode". This is useful when you want to use Cobuilds
@@ -70,6 +77,7 @@ export class CobuildConfiguration {
 
     this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
+    this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
     if (!this.cobuildContextId) {
@@ -129,8 +137,9 @@ export class CobuildConfiguration {
     return this.cobuildContextId;
   }
 
-  public async createLockProviderAsync(): Promise<void> {
+  public async createLockProviderAsync(terminal: ITerminal): Promise<void> {
     if (this.cobuildEnabled) {
+      terminal.writeLine(`Running cobuild (runner ${this.cobuildContextId}/${this.cobuildRunnerId})`);
       const cobuildLockProvider: ICobuildLockProvider = await this._cobuildLockProviderFactory(
         this._cobuildJson
       );

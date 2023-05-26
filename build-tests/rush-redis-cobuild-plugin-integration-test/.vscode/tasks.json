@@ -34,7 +34,7 @@
     {
       "type": "shell",
       "label": "build 1",
-      "command": "node ../../lib/runRush.js --debug cobuild --parallelism 1 --verbose",
+      "command": "node ../../lib/runRush.js --debug cobuild --timeline --parallelism 1 --verbose",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/sandbox/repo",
@@ -57,7 +57,7 @@
     {
       "type": "shell",
       "label": "build 2",
-      "command": "node ../../lib/runRush.js --debug cobuild --parallelism 1 --verbose",
+      "command": "node ../../lib/runRush.js --debug cobuild --timeline --parallelism 1 --verbose",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/sandbox/repo",

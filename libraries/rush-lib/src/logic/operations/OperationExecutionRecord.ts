@@ -142,6 +142,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.nonCachedDurationMs;
   }
 
+  public get cobuildRunnerId(): string | undefined {
+    // Lazy calculated because the state file is created/restored later on
+    return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
+  }
+
   public async executeAsync(onResult: (record: OperationExecutionRecord) => Promise<void>): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();

@@ -35,6 +35,10 @@ export interface IOperationExecutionResult {
    * The value indicates the duration of the same operation without cache hit.
    */
   readonly nonCachedDurationMs: number | undefined;
+  /**
+   * The id of the runner which actually runs the building process in cobuild mode.
+   */
+  readonly cobuildRunnerId: string | undefined;
 }
 
 /**

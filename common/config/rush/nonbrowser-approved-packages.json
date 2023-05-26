@@ -175,10 +175,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/rush-redis-cobuild-plugin",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@rushstack/rig-package",
       "allowedCategories": [ "libraries" ]
     },
@@ -193,6 +189,10 @@
     {
       "name": "@rushstack/rush-http-build-cache-plugin",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-redis-cobuild-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/rush-sdk",
@@ -736,6 +736,10 @@
     },
     {
       "name": "url-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "uuid",
       "allowedCategories": [ "libraries" ]
     },
     {

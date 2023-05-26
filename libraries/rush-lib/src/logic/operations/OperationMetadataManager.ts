@@ -26,6 +26,8 @@ export interface IOperationMetaData {
   durationInSeconds: number;
   logPath: string;
   errorLogPath: string;
+  cobuildContextId: string | undefined;
+  cobuildRunnerId: string | undefined;
 }
 
 /**
@@ -70,9 +72,17 @@ export class OperationMetadataManager {
     return [this.stateFile.relativeFilepath, this._relativeLogPath, this._relativeErrorLogPath];
   }
 
-  public async saveAsync({ durationInSeconds, logPath, errorLogPath }: IOperationMetaData): Promise<void> {
+  public async saveAsync({
+    durationInSeconds,
+    cobuildContextId,
+    cobuildRunnerId,
+    logPath,
+    errorLogPath
+  }: IOperationMetaData): Promise<void> {
     const state: IOperationStateJson = {
-      nonCachedDurationMs: durationInSeconds * 1000
+      nonCachedDurationMs: durationInSeconds * 1000,
+      cobuildContextId,
+      cobuildRunnerId
     };
     await this.stateFile.writeAsync(state);
 

@@ -335,7 +335,9 @@ export class ShellOperationRunner implements IOperationRunner {
         terminal,
         exitCode,
         status,
-        taskIsSuccessful
+        taskIsSuccessful,
+        logPath: projectLogWritable.logPath,
+        errorLogPath: projectLogWritable.errorLogPath
       };
 
       await this.hooks.afterExecute.promise(afterExecuteContext);

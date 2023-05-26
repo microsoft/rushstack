@@ -2068,6 +2068,7 @@ importers:
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
+      '@types/uuid': ~8.3.4
       '@types/webpack-env': 1.18.0
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
@@ -2094,6 +2095,7 @@ importers:
       tapable: 2.2.1
       tar: ~6.1.11
       true-case-path: ~2.2.1
+      uuid: ~8.3.2
       webpack: ~5.80.0
     dependencies:
       '@pnpm/link-bins': 5.3.25
@@ -2131,6 +2133,7 @@ importers:
       tapable: 2.2.1
       tar: 6.1.13
       true-case-path: 2.2.1
+      uuid: 8.3.2
     devDependencies:
       '@pnpm/logger': 4.0.0
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -2152,6 +2155,7 @@ importers:
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
+      '@types/uuid': 8.3.4
       '@types/webpack-env': 1.18.0
       webpack: 5.80.0
 
@@ -6827,7 +6831,7 @@ packages:
       js-string-escape: 1.0.1
       loader-utils: 2.0.4
       lodash: 4.17.21
-      nanoid: 3.3.4
+      nanoid: 3.3.6
       p-limit: 3.1.0
       prettier: 2.3.0
       prop-types: 15.8.1
@@ -8869,6 +8873,10 @@ packages:
   /@types/use-sync-external-store/0.0.3:
     resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
     dev: false
+
+  /@types/uuid/8.3.4:
+    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
+    dev: true
 
   /@types/webpack-env/1.18.0:
     resolution: {integrity: sha512-56/MAlX5WMsPVbOg7tAxnYvNYMMWr/QJiIp6BxVSW3JJXUVzzOn64qW8TzQyMSqSUFM2+PVI4aUHcHOzIz/1tg==}
@@ -16914,8 +16922,8 @@ packages:
     requiresBuild: true
     optional: true
 
-  /nanoid/3.3.4:
-    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
+  /nanoid/3.3.6:
+    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -18274,7 +18282,7 @@ packages:
     resolution: {integrity: sha512-tP7u/Sn/dVxK2NnruI4H9BG+x+Wxz6oeZ1cJ8P6G/PZY0IKk4k/63TDsQf2kQq3+qoJeLm2kIBUNlZe3zgb4Zg==}
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
-      nanoid: 3.3.4
+      nanoid: 3.3.6
       picocolors: 1.0.0
       source-map-js: 1.0.2
 

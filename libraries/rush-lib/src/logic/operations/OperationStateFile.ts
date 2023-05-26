@@ -16,6 +16,8 @@ export interface IOperationStateFileOptions {
  */
 export interface IOperationStateJson {
   nonCachedDurationMs: number;
+  cobuildContextId: string | undefined;
+  cobuildRunnerId: string | undefined;
 }
 
 /**
