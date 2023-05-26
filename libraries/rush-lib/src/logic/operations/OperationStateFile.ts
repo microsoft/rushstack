@@ -55,7 +55,7 @@ export class OperationStateFile {
   }
 
   public async writeAsync(json: IOperationStateJson): Promise<void> {
-    await JsonFile.saveAsync(json, this.filepath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(json, this.filepath, { ensureFolderExists: true, ignoreUndefinedValues: true });
     this._state = json;
   }
 
