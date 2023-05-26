@@ -306,8 +306,6 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   </Text>
                   <div>
                     <Text type="p">Entry ID: {referrer.rawEntryId}</Text>
-                  </div>
-                  <div>
                     <Text type="p">
                       {'Dependency version: '}
                       {getDependencyInfo(referrer.rawEntryId, selectedEntry.entryPackageName)?.version}
