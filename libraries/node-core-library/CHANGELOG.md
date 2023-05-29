@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Mon, 29 May 2023 15:21:15 GMT and should not be manually modified.
+
+## 3.59.2
+Mon, 29 May 2023 15:21:15 GMT
+
+### Patches
+
+- Remove extraneous string encode/decode of final output during `JsonFile.save`/`JsonFile.saveAsync`.
 
 ## 3.59.1
 Mon, 22 May 2023 06:34:33 GMT
