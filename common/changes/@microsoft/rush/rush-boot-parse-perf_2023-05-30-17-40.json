@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
