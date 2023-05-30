@@ -134,7 +134,6 @@ interface ITypeScriptTool {
   executing: boolean;
 
   worker: Worker | undefined;
-  workerExitPromise: Promise<number> | undefined;
   pendingTranspilePromises: Map<number, Promise<TTypescript.EmitResult>>;
   pendingTranspileSignals: Map<number, ITranspileSignal>;
 
@@ -334,7 +333,6 @@ export class TypeScriptBuilder {
         },
 
         worker: undefined,
-        workerExitPromise: undefined,
 
         pendingTranspilePromises: new Map(),
         pendingTranspileSignals: new Map()
@@ -510,6 +508,8 @@ export class TypeScriptBuilder {
       undefined,
       undefined
     );
+
+    this._cleanupWorker();
     //#endregion
 
     this._logEmitPerformance(ts);
@@ -534,8 +534,6 @@ export class TypeScriptBuilder {
     // Reset performance counters in case any are used in the callback
     ts.performance.disable();
     ts.performance.enable();
-
-    await this._cleanupWorkerAsync();
   }
 
   public async _runSolutionBuildAsync(tool: ITypeScriptTool): Promise<void> {
@@ -574,6 +572,7 @@ export class TypeScriptBuilder {
     //#region EMIT
     // Ignoring the exit status because we only care about presence of diagnostics
     tool.solutionBuilder.build();
+    this._cleanupWorker();
     //#endregion
 
     if (pendingTranspilePromises.size) {
@@ -586,8 +585,6 @@ export class TypeScriptBuilder {
     }
 
     this._logDiagnostics(ts, rawDiagnostics);
-
-    await this._cleanupWorkerAsync();
   }
 
   private _logDiagnostics(ts: ExtendedTypeScript, rawDiagnostics: TTypescript.Diagnostic[]): void {
@@ -1219,19 +1216,22 @@ export class TypeScriptBuilder {
         pendingTranspilePromises.delete(resolvingRequestId);
       });
 
-      tool.workerExitPromise = new Promise(
-        (resolve: (exitCode: number) => void, reject: (err: Error) => void) => {
-          maybeWorker!.once('exit', resolve);
-
-          maybeWorker!.once('error', (err: Error) => {
-            for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
-              rejectTranspile(err);
-            }
-            pendingTranspileSignals.clear();
-            reject(err);
-          });
+      maybeWorker.once('exit', (exitCode: number) => {
+        if (pendingTranspileSignals.size) {
+          const error: Error = new Error(`Worker exited unexpectedly with code ${exitCode}.`);
+          for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
+            rejectTranspile(error);
+          }
+          pendingTranspileSignals.clear();
         }
-      );
+      });
+
+      maybeWorker.once('error', (err: Error) => {
+        for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
+          rejectTranspile(err);
+        }
+        pendingTranspileSignals.clear();
+      });
     }
 
     // make linter happy
@@ -1257,19 +1257,16 @@ export class TypeScriptBuilder {
     pendingTranspilePromises.set(requestId, transpilePromise);
   }
 
-  private async _cleanupWorkerAsync(): Promise<void> {
+  private _cleanupWorker(): void {
     const tool: ITypeScriptTool | undefined = this._tool;
     if (!tool) {
       return;
     }
 
-    const { worker, workerExitPromise } = tool;
-    if (worker && workerExitPromise) {
+    const { worker } = tool;
+    if (worker) {
       worker.postMessage(false);
-      this._typescriptTerminal.writeLine(`Waiting for worker to exit`);
-      await workerExitPromise;
       tool.worker = undefined;
-      tool.workerExitPromise = undefined;
     }
   }
 }
