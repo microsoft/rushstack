@@ -25,7 +25,7 @@ export interface ITranspilationRequestMessage {
   /**
    * The set of files to build.
    */
-  fileNames: string[];
+  filesToTranspile: Map<string, string>;
 }
 
 export interface ITranspilationSuccessMessage {

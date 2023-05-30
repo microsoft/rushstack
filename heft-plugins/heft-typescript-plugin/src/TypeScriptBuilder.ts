@@ -476,7 +476,7 @@ export class TypeScriptBuilder {
       !!this._configuration.useTranspilerWorker && !!tsconfig.options.isolatedModules;
     const mode: 'both' | 'declaration' = isolatedModules ? 'declaration' : 'both';
 
-    let fileNames: string[] | undefined;
+    let filesToTranspile: Map<string, string> | undefined;
 
     if (tsconfig.options.incremental) {
       // Use ts.createEmitAndSemanticDiagnositcsBuilderProgram directly because the customizations performed by
@@ -491,7 +491,7 @@ export class TypeScriptBuilder {
         ts.getConfigFileParsingDiagnostics(tsconfig),
         tsconfig.projectReferences
       );
-      fileNames = getFilesToTranspileFromBuilderProgram(builderProgram);
+      filesToTranspile = getFilesToTranspileFromBuilderProgram(builderProgram);
       innerProgram = builderProgram.getProgram();
     } else {
       innerProgram = ts.createProgram({
@@ -502,7 +502,7 @@ export class TypeScriptBuilder {
         oldProgram: undefined,
         configFileParsingDiagnostics: ts.getConfigFileParsingDiagnostics(tsconfig)
       });
-      fileNames = getFilesToTranspileFromProgram(innerProgram);
+      filesToTranspile = getFilesToTranspileFromProgram(innerProgram);
     }
 
     // Prefer the builder program, since it is what gives us incremental builds
@@ -513,7 +513,7 @@ export class TypeScriptBuilder {
 
     if (isolatedModules) {
       // Kick the transpilation worker.
-      this._queueTranspileInWorker(tool, genericProgram.getCompilerOptions(), fileNames);
+      this._queueTranspileInWorker(tool, genericProgram.getCompilerOptions(), filesToTranspile);
     }
 
     //#region ANALYSIS
@@ -1021,8 +1021,8 @@ export class TypeScriptBuilder {
 
       if (isolatedModules) {
         // Kick the transpilation worker.
-        const fileNamesToTranspile: string[] = getFilesToTranspileFromBuilderProgram(newProgram);
-        this._queueTranspileInWorker(this._tool!, compilerOptions!, fileNamesToTranspile);
+        const filesToTranspile: Map<string, string> = getFilesToTranspileFromBuilderProgram(newProgram);
+        this._queueTranspileInWorker(this._tool!, compilerOptions!, filesToTranspile);
       }
 
       const { emit: originalEmit } = newProgram;
@@ -1244,7 +1244,7 @@ export class TypeScriptBuilder {
   private _queueTranspileInWorker(
     tool: ITypeScriptTool,
     compilerOptions: TTypescript.CompilerOptions,
-    fileNames: string[]
+    filesToTranspile: Map<string, string>
   ): void {
     const { pendingTranspilePromises, pendingTranspileSignals } = tool;
     let maybeWorker: Worker | undefined = tool.worker;
@@ -1307,7 +1307,7 @@ export class TypeScriptBuilder {
         this._typescriptTerminal.writeLine(`Asynchronously transpiling ${compilerOptions.configFilePath}`);
         const request: ITranspilationRequestMessage = {
           compilerOptions,
-          fileNames,
+          filesToTranspile,
           moduleKindsToEmit: this._moduleKindsToEmit,
           requestId
         };
@@ -1336,26 +1336,28 @@ export class TypeScriptBuilder {
   }
 }
 
-function getFilesToTranspileFromBuilderProgram(builderProgram: TTypescript.BuilderProgram): string[] {
+function getFilesToTranspileFromBuilderProgram(
+  builderProgram: TTypescript.BuilderProgram
+): Map<string, string> {
   const changedFilesSet: Set<string> = (
     builderProgram as unknown as { getState(): { changedFilesSet: Set<string> } }
   ).getState().changedFilesSet;
-  const fileNames: string[] = [];
+  const filesToTranspile: Map<string, string> = new Map();
   for (const fileName of changedFilesSet) {
     const sourceFile: TTypescript.SourceFile | undefined = builderProgram.getSourceFile(fileName);
     if (sourceFile && !sourceFile.isDeclarationFile) {
-      fileNames.push(sourceFile.fileName);
+      filesToTranspile.set(sourceFile.fileName, sourceFile.text);
     }
   }
-  return fileNames;
+  return filesToTranspile;
 }
 
-function getFilesToTranspileFromProgram(program: TTypescript.Program): string[] {
-  const fileNames: string[] = [];
+function getFilesToTranspileFromProgram(program: TTypescript.Program): Map<string, string> {
+  const filesToTranspile: Map<string, string> = new Map();
   for (const sourceFile of program.getSourceFiles()) {
     if (!sourceFile.isDeclarationFile) {
-      fileNames.push(sourceFile.fileName);
+      filesToTranspile.set(sourceFile.fileName, sourceFile.text);
     }
   }
-  return fileNames;
+  return filesToTranspile;
 }
