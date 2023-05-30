@@ -38,7 +38,7 @@ function handleMessage(message: ITranspilationRequestMessage | false): void {
 }
 
 function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuccessMessage {
-  const { requestId, compilerOptions, moduleKindsToEmit, fileNames } = message;
+  const { requestId, compilerOptions, moduleKindsToEmit, filesToTranspile } = message;
 
   const fullySkipTypeCheck: boolean =
     /* TypeScript 5+ */ compilerOptions.verbatimModuleSyntax ||
@@ -62,12 +62,13 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
 
   const sourceFileByPath: Map<string, TTypescript.SourceFile> = new Map();
 
-  for (const fileName of fileNames) {
-    const sourceText: string | undefined = ts.sys.readFile(fileName);
+  const includedFiles: string[] = [];
+  for (const [fileName, sourceText] of filesToTranspile) {
     if (sourceText) {
       const sourceFile: TTypescript.SourceFile = ts.createSourceFile(fileName, sourceText, rawTarget!);
       sourceFile.hasNoDefaultLib = fullySkipTypeCheck;
       sourceFileByPath.set(fileName, sourceFile);
+      includedFiles.push(fileName);
     }
   }
 
@@ -87,7 +88,7 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
     getDirectories: () => []
   };
 
-  const program: TTypescript.Program = ts.createProgram(fileNames, compilerOptions, compilerHost);
+  const program: TTypescript.Program = ts.createProgram(includedFiles, compilerOptions, compilerHost);
 
   configureProgramForMultiEmit(program, ts, moduleKindsToEmit, 'transpile');
 
