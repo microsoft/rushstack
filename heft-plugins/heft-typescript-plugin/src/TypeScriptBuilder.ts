@@ -503,7 +503,8 @@ export class TypeScriptBuilder {
 
     const emitResult: TTypescript.EmitResult = genericProgram.emit(
       undefined,
-      undefined,
+      // The writeFile callback must be provided for the multi-emit redirector
+      ts.sys.writeFile,
       undefined,
       undefined,
       undefined
