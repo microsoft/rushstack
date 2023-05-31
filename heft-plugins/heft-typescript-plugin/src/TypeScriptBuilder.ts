@@ -7,20 +7,12 @@ import { Worker } from 'worker_threads';
 
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
-import {
-  type ITerminal,
-  JsonFile,
-  type IPackageJson,
-  Path,
-  Async,
-  FileError
-} from '@rushstack/node-core-library';
+import { type ITerminal, JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-core-library';
 import type { IScopedLogger } from '@rushstack/heft';
 
 import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';
-import { TypeScriptCachedFileSystem } from './fileSystem/TypeScriptCachedFileSystem';
 import type { ITypeScriptConfigurationJson } from './TypeScriptPlugin';
-import type { PerformanceMeasurer, PerformanceMeasurerAsync } from './Performance';
+import type { PerformanceMeasurer } from './Performance';
 import type {
   ICachedEmitModuleKind,
   ITranspilationRequestMessage,
@@ -129,7 +121,6 @@ const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 0;
 interface ITypeScriptTool {
   ts: ExtendedTypeScript;
   measureSync: PerformanceMeasurer;
-  measureAsync: PerformanceMeasurerAsync;
 
   sourceFileCache: Map<string, TTypescript.SourceFile>;
 
@@ -143,7 +134,6 @@ interface ITypeScriptTool {
   executing: boolean;
 
   worker: Worker | undefined;
-  workerExitPromise: Promise<number> | undefined;
   pendingTranspilePromises: Map<number, Promise<TTypescript.EmitResult>>;
   pendingTranspileSignals: Map<number, ITranspileSignal>;
 
@@ -167,7 +157,6 @@ export class TypeScriptBuilder {
   private readonly _suppressedDiagnosticCodes: Set<number> = new Set();
 
   private __tsCacheFilePath: string | undefined;
-  private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   private _tool: ITypeScriptTool | undefined = undefined;
 
@@ -302,23 +291,6 @@ export class TypeScriptBuilder {
         };
       };
 
-      const measureTsPerformanceAsync: PerformanceMeasurerAsync = async <TResult extends object | void>(
-        measurementName: string,
-        fn: () => Promise<TResult>
-      ) => {
-        const beforeName: string = `before${measurementName}`;
-        ts.performance.mark(beforeName);
-        const resultPromise: Promise<TResult> = fn();
-        const result: TResult = await resultPromise;
-        const afterName: string = `after${measurementName}`;
-        ts.performance.mark(afterName);
-        ts.performance.measure(measurementName, beforeName, afterName);
-        return {
-          ...result,
-          duration: ts.performance.getDuration(measurementName)
-        };
-      };
-
       this._typescriptTerminal.writeLine(`Using TypeScript version ${ts.version}`);
 
       const rawDiagnostics: TTypescript.Diagnostic[] = [];
@@ -329,7 +301,6 @@ export class TypeScriptBuilder {
         ts,
 
         measureSync: measureTsPerformance,
-        measureAsync: measureTsPerformanceAsync,
 
         sourceFileCache: new Map(),
 
@@ -362,7 +333,6 @@ export class TypeScriptBuilder {
         },
 
         worker: undefined,
-        workerExitPromise: undefined,
 
         pendingTranspilePromises: new Map(),
         pendingTranspileSignals: new Map()
@@ -441,12 +411,7 @@ export class TypeScriptBuilder {
   }
 
   public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
-    const {
-      ts,
-      measureSync: measureTsPerformance,
-      measureAsync: measureTsPerformanceAsync,
-      pendingTranspilePromises
-    } = tool;
+    const { ts, measureSync: measureTsPerformance, pendingTranspilePromises } = tool;
 
     //#region CONFIGURE
     const {
@@ -534,15 +499,17 @@ export class TypeScriptBuilder {
     //#endregion
 
     //#region EMIT
-    const filesToWrite: IFileToWrite[] = [];
-
-    const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
-      filesToWrite.push({ filePath, data });
-    };
-
     const { changedFiles } = configureProgramForMultiEmit(innerProgram, ts, this._moduleKindsToEmit, mode);
 
-    const emitResult: TTypescript.EmitResult = genericProgram.emit(undefined, writeFileCallback);
+    const emitResult: TTypescript.EmitResult = genericProgram.emit(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
+
+    this._cleanupWorker();
     //#endregion
 
     this._logEmitPerformance(ts);
@@ -550,19 +517,6 @@ export class TypeScriptBuilder {
     //#region FINAL_ANALYSIS
     // Need to ensure that we include emit diagnostics, since they might not be part of the other sets
     const rawDiagnostics: TTypescript.Diagnostic[] = [...preDiagnostics, ...emitResult.diagnostics];
-    //#endregion
-
-    //#region WRITE
-    // Using async file system I/O for theoretically better peak performance
-    // Also allows to run concurrently with linting
-    const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
-      Async.forEachAsync(
-        filesToWrite,
-        async ({ filePath, data }: { filePath: string; data: string }) =>
-          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true }),
-        { concurrency: this._configuration.maxWriteParallelism }
-      )
-    );
     //#endregion
 
     this._configuration.emitChangedFilesCallback(innerProgram, changedFiles);
@@ -576,15 +530,10 @@ export class TypeScriptBuilder {
       }
     }
 
-    const { duration: writeDuration } = await writePromise;
-    this._typescriptTerminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
-
     this._logDiagnostics(ts, rawDiagnostics);
     // Reset performance counters in case any are used in the callback
     ts.performance.disable();
     ts.performance.enable();
-
-    await this._cleanupWorkerAsync();
   }
 
   public async _runSolutionBuildAsync(tool: ITypeScriptTool): Promise<void> {
@@ -623,6 +572,7 @@ export class TypeScriptBuilder {
     //#region EMIT
     // Ignoring the exit status because we only care about presence of diagnostics
     tool.solutionBuilder.build();
+    this._cleanupWorker();
     //#endregion
 
     if (pendingTranspilePromises.size) {
@@ -635,8 +585,6 @@ export class TypeScriptBuilder {
     }
 
     this._logDiagnostics(ts, rawDiagnostics);
-
-    await this._cleanupWorkerAsync();
   }
 
   private _logDiagnostics(ts: ExtendedTypeScript, rawDiagnostics: TTypescript.Diagnostic[]): void {
@@ -670,6 +618,11 @@ export class TypeScriptBuilder {
     );
     this._typescriptTerminal.writeVerboseLine(
       `Emit: ${ts.performance.getDuration('Emit')}ms (Includes Print)`
+    );
+    this._typescriptTerminal.writeVerboseLine(
+      `I/O Write: ${ts.performance.getDuration('I/O Write')}ms (${ts.performance.getCount(
+        'beforeIOWrite'
+      )} files)`
     );
   }
 
@@ -938,34 +891,16 @@ export class TypeScriptBuilder {
   private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
       this._configuration.tsconfigPath,
-      this._cachedFileSystem.readFile
+      ts.sys.readFile
     );
 
     const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
     const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
       parsedConfigFile.config,
       {
-        fileExists: this._cachedFileSystem.exists,
-        readFile: this._cachedFileSystem.readFile,
-        readDirectory: (
-          folderPath: string,
-          extensions?: ReadonlyArray<string>,
-          excludes?: ReadonlyArray<string>,
-          includes?: ReadonlyArray<string>,
-          depth?: number
-        ) =>
-          ts.matchFiles(
-            folderPath,
-            extensions,
-            excludes,
-            includes,
-            /* useCaseSensitiveFileNames */ true,
-            currentFolder,
-            depth,
-            this._cachedFileSystem.readFolderFilesAndDirectories.bind(this._cachedFileSystem),
-            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem),
-            this._cachedFileSystem.directoryExists.bind(this._cachedFileSystem)
-          ),
+        fileExists: ts.sys.fileExists,
+        readFile: ts.sys.readFile,
+        readDirectory: ts.sys.readDirectory,
         useCaseSensitiveFileNames: true
       },
       currentFolder,
@@ -1281,19 +1216,22 @@ export class TypeScriptBuilder {
         pendingTranspilePromises.delete(resolvingRequestId);
       });
 
-      tool.workerExitPromise = new Promise(
-        (resolve: (exitCode: number) => void, reject: (err: Error) => void) => {
-          maybeWorker!.once('exit', resolve);
-
-          maybeWorker!.once('error', (err: Error) => {
-            for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
-              rejectTranspile(err);
-            }
-            pendingTranspileSignals.clear();
-            reject(err);
-          });
+      maybeWorker.once('exit', (exitCode: number) => {
+        if (pendingTranspileSignals.size) {
+          const error: Error = new Error(`Worker exited unexpectedly with code ${exitCode}.`);
+          for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
+            rejectTranspile(error);
+          }
+          pendingTranspileSignals.clear();
         }
-      );
+      });
+
+      maybeWorker.once('error', (err: Error) => {
+        for (const { reject: rejectTranspile } of pendingTranspileSignals.values()) {
+          rejectTranspile(err);
+        }
+        pendingTranspileSignals.clear();
+      });
     }
 
     // make linter happy
@@ -1319,19 +1257,16 @@ export class TypeScriptBuilder {
     pendingTranspilePromises.set(requestId, transpilePromise);
   }
 
-  private async _cleanupWorkerAsync(): Promise<void> {
+  private _cleanupWorker(): void {
     const tool: ITypeScriptTool | undefined = this._tool;
     if (!tool) {
       return;
     }
 
-    const { worker, workerExitPromise } = tool;
-    if (worker && workerExitPromise) {
+    const { worker } = tool;
+    if (worker) {
       worker.postMessage(false);
-      this._typescriptTerminal.writeLine(`Waiting for worker to exit`);
-      await workerExitPromise;
       tool.worker = undefined;
-      tool.workerExitPromise = undefined;
     }
   }
 }
