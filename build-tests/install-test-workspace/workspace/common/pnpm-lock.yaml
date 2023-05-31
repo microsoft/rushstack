@@ -40,17 +40,17 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.3.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.50.6.tgz
-      '@rushstack/heft-lint-plugin': file:rushstack-heft-lint-plugin-0.1.0-rc.5.tgz
-      '@rushstack/heft-typescript-plugin': file:rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.51.0-rc.6.tgz
+      '@rushstack/heft-lint-plugin': file:rushstack-heft-lint-plugin-0.2.0-rc.6.tgz
+      '@rushstack/heft-typescript-plugin': file:rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~5.0.4
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.3.0.tgz_ucoohk2w7gukx6ccuul7rl7pnq
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.50.6.tgz
-      '@rushstack/heft-lint-plugin': file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0-rc.5.tgz_@rushstack+heft@0.50.6
-      '@rushstack/heft-typescript-plugin': file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz_@rushstack+heft@0.50.6
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.51.0-rc.6.tgz
+      '@rushstack/heft-lint-plugin': file:../temp/tarballs/rushstack-heft-lint-plugin-0.2.0-rc.6.tgz_wxym7eeh2orq2erkdjmqo7gjvm
+      '@rushstack/heft-typescript-plugin': file:../temp/tarballs/rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz_wxym7eeh2orq2erkdjmqo7gjvm
       eslint: 8.7.0
       tslint: 5.20.1_typescript@5.0.4
       typescript: 5.0.4
@@ -58,17 +58,17 @@ importers:
   typescript-v4-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-3.3.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.50.6.tgz
-      '@rushstack/heft-lint-plugin': file:rushstack-heft-lint-plugin-0.1.0-rc.5.tgz
-      '@rushstack/heft-typescript-plugin': file:rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.51.0-rc.6.tgz
+      '@rushstack/heft-lint-plugin': file:rushstack-heft-lint-plugin-0.2.0-rc.6.tgz
+      '@rushstack/heft-typescript-plugin': file:rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz
       eslint: ~8.7.0
       tslint: ~5.20.1
       typescript: ~4.7.0
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-3.3.0.tgz_valmiib6gbzc7jhcbpocdsabay
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.50.6.tgz
-      '@rushstack/heft-lint-plugin': file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0-rc.5.tgz_@rushstack+heft@0.50.6
-      '@rushstack/heft-typescript-plugin': file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz_@rushstack+heft@0.50.6
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.51.0-rc.6.tgz
+      '@rushstack/heft-lint-plugin': file:../temp/tarballs/rushstack-heft-lint-plugin-0.2.0-rc.6.tgz_wxym7eeh2orq2erkdjmqo7gjvm
+      '@rushstack/heft-typescript-plugin': file:../temp/tarballs/rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz_wxym7eeh2orq2erkdjmqo7gjvm
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.7.4
       typescript: 4.7.4
@@ -4107,10 +4107,10 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.50.6.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.50.6.tgz}
+  file:../temp/tarballs/rushstack-heft-0.51.0-rc.6.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.51.0-rc.6.tgz}
     name: '@rushstack/heft'
-    version: 0.50.6
+    version: 0.51.0-rc.6
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
@@ -4157,30 +4157,30 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0-rc.5.tgz_@rushstack+heft@0.50.6:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0-rc.5.tgz}
-    id: file:../temp/tarballs/rushstack-heft-lint-plugin-0.1.0-rc.5.tgz
+  file:../temp/tarballs/rushstack-heft-lint-plugin-0.2.0-rc.6.tgz_wxym7eeh2orq2erkdjmqo7gjvm:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-lint-plugin-0.2.0-rc.6.tgz}
+    id: file:../temp/tarballs/rushstack-heft-lint-plugin-0.2.0-rc.6.tgz
     name: '@rushstack/heft-lint-plugin'
-    version: 0.1.0-rc.5
+    version: 0.2.0-rc.6
     peerDependencies:
       '@rushstack/heft': '*'
     dependencies:
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.50.6.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.51.0-rc.6.tgz
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.59.1.tgz
       semver: 7.3.8
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz_@rushstack+heft@0.50.6:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz}
-    id: file:../temp/tarballs/rushstack-heft-typescript-plugin-0.1.0-rc.5.tgz
+  file:../temp/tarballs/rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz_wxym7eeh2orq2erkdjmqo7gjvm:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz}
+    id: file:../temp/tarballs/rushstack-heft-typescript-plugin-0.2.0-rc.6.tgz
     name: '@rushstack/heft-typescript-plugin'
-    version: 0.1.0-rc.5
+    version: 0.2.0-rc.6
     peerDependencies:
       '@rushstack/heft': '*'
     dependencies:
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.50.6.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.51.0-rc.6.tgz
       '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.12.2.tgz
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.59.1.tgz
       '@types/tapable': 1.0.6
