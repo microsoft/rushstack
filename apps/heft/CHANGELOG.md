@@ -1,6 +1,60 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Wed, 31 May 2023 06:32:56 GMT and should not be manually modified.
+
+## 0.51.0-rc.6
+Wed, 31 May 2023 06:32:56 GMT
+
+### Prerelease Changes
+
+- For TypeScript: Fix double execution of callback.
+- For TypeScript: Add missing support for `watchOptions` in tsconfig.
+- For TypeScript: Add `useTranspilerWorker` option for running transpilation in parallel with type-checking.
+
+## 0.51.0-rc.5
+Thu, 27 Apr 2023 17:25:52 GMT
+
+### Prerelease Changes
+
+- Update with latest main.
+
+## 0.51.0-rc.4
+Wed, 15 Mar 2023 20:22:44 GMT
+
+### Prerelease Changes
+
+- Fix an issue with `watchGlobAsync`
+
+## 0.51.0-rc.3
+Fri, 20 Jan 2023 20:13:16 GMT
+
+### Prerelease Changes
+
+- Fix issues with SASS incremental builds.
+- Add support for TypeScript solution incremental builds.
+- Improve responsiveness of watcher loop.
+
+## 0.50.0-rc.2
+Fri, 2 Dec 2022 05:28:24 GMT
+
+### Prerelease Changes
+
+- Improve watch mode performance.
+- Improve logging output.
+
+## 0.50.0-rc.1
+Fri, 18 Nov 2022 02:34:26 GMT
+
+### Prerelease Changes
+
+- Fix incremental TypeScript compilation.
+
+## 0.50.0-rc.0
+Tue, 15 Nov 2022 22:59:35 GMT
+
+### Prerelease Changes
+
+- General fixes and improvements, in preparation for a general release.
 
 ## 0.50.6
 Mon, 22 May 2023 06:34:33 GMT
@@ -491,7 +545,7 @@ Wed, 06 Oct 2021 15:08:25 GMT
 
 ### Patches
 
-- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters.
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
 
 ## 0.41.1
 Wed, 06 Oct 2021 02:41:48 GMT
@@ -1112,7 +1166,7 @@ Sat, 24 Oct 2020 00:11:18 GMT
 
 ### Patches
 
-- Add fileExtensions config to SassTypingsGenerator.
+- Add fileExtensions config to SassTypingsGenerator. 
 
 ## 0.17.1
 Wed, 21 Oct 2020 05:09:44 GMT
