@@ -2,6 +2,105 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.6.0-rc.6",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.6",
+      "date": "Wed, 31 May 2023 06:32:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "For TypeScript: Fix double execution of callback."
+          },
+          {
+            "comment": "For TypeScript: Add missing support for `watchOptions` in tsconfig."
+          },
+          {
+            "comment": "For TypeScript: Add `useTranspilerWorker` option for running transpilation in parallel with type-checking."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0-rc.5",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.5",
+      "date": "Thu, 27 Apr 2023 17:25:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update with latest main."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0-rc.4",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.4",
+      "date": "Wed, 15 Mar 2023 20:22:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue with `watchGlobAsync`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0-rc.3",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.3",
+      "date": "Fri, 20 Jan 2023 20:13:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix issues with SASS incremental builds."
+          },
+          {
+            "comment": "Add support for TypeScript solution incremental builds."
+          },
+          {
+            "comment": "Improve responsiveness of watcher loop."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0-rc.2",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.2",
+      "date": "Fri, 2 Dec 2022 05:28:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve watch mode performance."
+          },
+          {
+            "comment": "Improve logging output."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0-rc.1",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.1",
+      "date": "Fri, 18 Nov 2022 02:34:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix incremental TypeScript compilation."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0-rc.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.0-rc.0",
+      "date": "Tue, 15 Nov 2022 22:59:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "General fixes and improvements, in preparation for a general release."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.47",
       "tag": "@rushstack/heft-webpack4-plugin_v0.5.47",
       "date": "Mon, 22 May 2023 06:34:33 GMT",

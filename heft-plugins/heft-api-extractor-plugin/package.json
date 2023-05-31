@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-api-extractor-plugin",
-  "version": "0.1.0-rc.5",
+  "version": "0.2.0-rc.6",
   "description": "A Heft plugin for API Extractor",
   "repository": {
     "type": "git",
