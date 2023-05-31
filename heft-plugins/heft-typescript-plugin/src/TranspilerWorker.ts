@@ -92,7 +92,14 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
 
   configureProgramForMultiEmit(program, ts, moduleKindsToEmit, 'transpile');
 
-  const result: TTypescript.EmitResult = program.emit(undefined, undefined, undefined, undefined, undefined);
+  const result: TTypescript.EmitResult = program.emit(
+    undefined,
+    // The writeFile callback must be provided for the multi-emit redirector
+    ts.sys.writeFile,
+    undefined,
+    undefined,
+    undefined
+  );
 
   const response: ITranspilationSuccessMessage = {
     requestId,
