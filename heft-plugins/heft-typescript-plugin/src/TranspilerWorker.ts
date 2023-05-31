@@ -58,7 +58,12 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
 
   compilerOptions.suppressOutputPathCheck = true;
   compilerOptions.skipDefaultLibCheck = true;
-  compilerOptions.preserveValueImports = true;
+  // To fully disable the type checker, we have to set `hasNoDefaultLib: true` on every source file.
+  // However, doing so loses the information about which imports are used.
+  // To retain the imports, we use `preserveValueImports`. However, if some imports are only used for types,
+  // this will produce invalid runtime output unless said imports are marked with `type `.
+  // Thus we can only enable this optimization if `verbatimModuleSyntax` is enabled (or equivalent).
+  compilerOptions.preserveValueImports = fullySkipTypeCheck;
 
   const sourceFileByPath: Map<string, TTypescript.SourceFile> = new Map();
 
