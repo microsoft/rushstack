@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
