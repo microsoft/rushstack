@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-lint-plugin",
-      "comment": "Sort rule timings by duration, descending.",
-      "type": "none"
+      "comment": "Prepare for official release.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-lint-plugin"

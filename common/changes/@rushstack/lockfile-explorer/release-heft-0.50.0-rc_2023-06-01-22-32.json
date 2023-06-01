@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Convert to multi-phase Heft",
+      "type": "none",
+      "packageName": "@rushstack/lockfile-explorer"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

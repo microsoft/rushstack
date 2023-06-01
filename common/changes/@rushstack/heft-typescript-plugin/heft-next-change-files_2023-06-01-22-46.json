@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-typescript-plugin",
-      "comment": "Fix double-execution of `accessor.onChangedFilesHook`.",
-      "type": "none"
+      "comment": "Prepare for official release.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-typescript-plugin"

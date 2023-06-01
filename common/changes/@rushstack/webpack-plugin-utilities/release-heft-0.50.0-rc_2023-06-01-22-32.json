@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Convert to multi-phase Heft",
+      "type": "none",
+      "packageName": "@rushstack/webpack-plugin-utilities"
+    }
+  ],
+  "packageName": "@rushstack/webpack-plugin-utilities",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
