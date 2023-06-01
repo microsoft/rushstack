@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Convert to multi-phase Heft",
+      "type": "none",
+      "packageName": "@rushstack/webpack4-localization-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-localization-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
