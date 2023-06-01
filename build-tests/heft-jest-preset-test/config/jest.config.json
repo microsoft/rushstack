@@ -62,7 +62,7 @@
 
   // The modulePathIgnorePatterns below accepts these sorts of paths:
   //   - <rootDir>/lib
-  //   - <rootDir>/lib/file.ts
+  //   - <rootDir>/lib/file.js
   // ...and ignores anything else under <rootDir>
   "modulePathIgnorePatterns": [],
 
