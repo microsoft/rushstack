@@ -62,11 +62,6 @@
       "type": "string"
     },
 
-    "maxWriteParallelism": {
-      "description": "Set this to change the maximum write parallelism. The default is 50.",
-      "type": "number"
-    },
-
     "staticAssetsToCopy": {
       "description": "Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example so that these files can be resolved by import statements.",
       "type": "object",

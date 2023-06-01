@@ -45,12 +45,6 @@ export interface ITypeScriptBuilderConfiguration extends ITypeScriptConfiguratio
   tsconfigPath: string;
 
   /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
-   */
-  maxWriteParallelism: number;
-
-  /**
    * The scoped logger that the builder will log to.
    */
   scopedLogger: IScopedLogger;

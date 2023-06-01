@@ -55,7 +55,6 @@ export interface ITypeScriptConfigurationJson {
     buildProjectReferences?: boolean;
     emitCjsExtensionForCommonJS?: boolean | undefined;
     emitMjsExtensionForESModule?: boolean | undefined;
-    maxWriteParallelism?: number;
     // (undocumented)
     project?: string;
     staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
