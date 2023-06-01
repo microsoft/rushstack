@@ -325,21 +325,21 @@ In updating to the new version of Heft, plugins will also need to be updated for
 - The `folderNameForTests` and `extensionForTests` properties have been removed and should instead be addressed via the `testMatch` property in `jest.config.json`
 
 #### Testing on Your Own Project
-The new version of Heft and all related plugins are available in the following prerelease packages:
-- `@rushstack/heft@0.51.0-rc.6`
-- `@rushstack/heft-typescript-plugin@0.2.0-rc.6`
-- `@rushstack/heft-lint-plugin@0.2.0-rc.6`
-- `@rushstack/heft-api-extractor-plugin@0.2.0-rc.6`
-- `@rushstack/heft-jest-plugin@0.6.0-rc.6`
-- `@rushstack/heft-sass-plugin@0.10.0-rc.6`
-- `@rushstack/heft-storybook-plugin@0.3.0-rc.6`
-- `@rushstack/heft-webpack4-plugin@0.6.0-rc.6`
-- `@rushstack/heft-webpack5-plugin@0.7.0-rc.6`
-- `@rushstack/heft-dev-cert-plugin@0.3.0-rc.6`
+The new version of Heft and all related plugins are available in the following packages:
+- `@rushstack/heft@0.51.0`
+- `@rushstack/heft-typescript-plugin@0.1.0`
+- `@rushstack/heft-lint-plugin@0.1.0`
+- `@rushstack/heft-api-extractor-plugin@0.1.0`
+- `@rushstack/heft-jest-plugin@0.6.0`
+- `@rushstack/heft-sass-plugin@0.10.0`
+- `@rushstack/heft-storybook-plugin@0.3.0`
+- `@rushstack/heft-webpack4-plugin@0.6.0`
+- `@rushstack/heft-webpack5-plugin@0.7.0`
+- `@rushstack/heft-dev-cert-plugin@0.3.0`
 
 Additionally, Rushstack-provided rigs have been updated to be compatible with the new version of Heft:
-- `@rushstack/heft-node-rig@1.14.0-rc.6`
-- `@rushstack/heft-web-rig@0.16.0-rc.6`
+- `@rushstack/heft-node-rig@1.14.0`
+- `@rushstack/heft-web-rig@0.16.0`
 
 If you have any issues with the prerelease packages or the new changes to Heft, please [file an issue](https://github.com/microsoft/rushstack/issues/new?assignees=&labels=&template=heft.md&title=%5Bheft%2Frc%2f0%5D+).
 
