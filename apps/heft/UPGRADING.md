@@ -331,7 +331,7 @@ The new version of Heft and all related plugins are available in the following p
 - `@rushstack/heft-lint-plugin@0.1.0`
 - `@rushstack/heft-api-extractor-plugin@0.1.0`
 - `@rushstack/heft-jest-plugin@0.6.0`
-- `@rushstack/heft-sass-plugin@0.10.0`
+- `@rushstack/heft-sass-plugin@0.11.0`
 - `@rushstack/heft-storybook-plugin@0.3.0`
 - `@rushstack/heft-webpack4-plugin@0.6.0`
 - `@rushstack/heft-webpack5-plugin@0.7.0`
