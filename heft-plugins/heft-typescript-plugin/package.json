@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-typescript-plugin",
-  "version": "0.2.0-rc.6",
+  "version": "0.0.0",
   "description": "Heft plugin for TypeScript",
   "repository": {
     "type": "git",
