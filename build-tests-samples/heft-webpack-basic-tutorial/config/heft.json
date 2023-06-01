@@ -34,10 +34,7 @@
       "tasksByName": {
         "jest": {
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-jest-plugin",
-            "options": {
-              "folderNameForTests": "lib-commonjs"
-            }
+            "pluginPackage": "@rushstack/heft-jest-plugin"
           }
         }
       }

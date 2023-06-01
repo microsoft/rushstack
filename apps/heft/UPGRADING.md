@@ -1,6 +1,6 @@
 # Upgrade notes for @rushstack/heft
 
-### Heft 0.50.0-rc.4
+### Heft 0.51.0
 
 Multi-phase Heft is a complete re-write of the `@rushstack/heft` project with the intention of being more closely compatible with multi-phase Rush builds. In addition, this update brings greater customizability and improved parallel process handling to Heft.
 
@@ -89,7 +89,7 @@ Lifecycle plugins are specified in the top-level `heftPlugins` array. Plugins ca
 ##### Phase, Task, and Task Plugin Specification
 All phases are defined within the top-level `phasesByName` property. Each phase may specify `phaseDependencies` to define the order of phase execution when running a selection of Heft phases. Phases may also provide the `cleanFiles` option, which accepts an array of deletion operations to perform when running with the `--clean` flag.
 
-Within the phase specification, `tasksByName` defines all tasks that run while executing a phase. Each task may specify `taskDependencies` to define the order of task execution. All tasks defined in `taskDependencies` must exist within the same phase. For CLI-availability reasons, phase names, task names, plugin names, and parameter scopes, must be `kabob-cased`.
+Within the phase specification, `tasksByName` defines all tasks that run while executing a phase. Each task may specify `taskDependencies` to define the order of task execution. All tasks defined in `taskDependencies` must exist within the same phase. For CLI-availability reasons, phase names, task names, plugin names, and parameter scopes, must be `kebab-cased`.
 
 The following is an example "heft.json" file defining both a "build" and a "test" phase:
 ```json
@@ -322,30 +322,26 @@ In updating to the new version of Heft, plugins will also need to be updated for
 - Path-related variables have been renamed to clarify they are paths (ex. `HeftConfiguration.buildFolder` is now `HeftConfiguration.buildFolderPath`)
 - The `runIncremental` hook can now be utilized to add ensure that watch mode rebuilds occur in proper dependency order
 - The `clean` hook was removed in favor of the `cleanFiles` option in "heft.json" in order to make it obvious what files are being cleaned and when
-- The `folderNameForTests` and `extensionForTests` properties are now specified in the `@rushstack/heft-jest-plugin` options in "heft.json" instead of in "typescript.json"
+- The `folderNameForTests` and `extensionForTests` properties have been removed and should instead be addressed via the `testMatch` property in `jest.config.json`
 
 #### Testing on Your Own Project
 The new version of Heft and all related plugins are available in the following prerelease packages:
-- `@rushstack/heft@0.49.0-rc.1`
-- `@rushstack/heft-typescript-plugin@0.1.0-rc.1`
-- `@rushstack/heft-lint-plugin@0.1.0-rc.1`
-- `@rushstack/heft-api-extractor-plugin@0.1.0-rc.1`
-- `@rushstack/heft-jest-plugin@0.4.0-rc.1`
-- `@rushstack/heft-sass-plugin@0.8.0-rc.1`
-- `@rushstack/heft-storybook-plugin@0.2.0-rc.1`
-- `@rushstack/heft-webpack4-plugin@0.6.0-rc.1`
-- `@rushstack/heft-webpack5-plugin@0.6.0-rc.1`
-- `@rushstack/heft-dev-cert-plugin@0.3.0-rc.1`
+- `@rushstack/heft@0.51.0-rc.6`
+- `@rushstack/heft-typescript-plugin@0.2.0-rc.6`
+- `@rushstack/heft-lint-plugin@0.2.0-rc.6`
+- `@rushstack/heft-api-extractor-plugin@0.2.0-rc.6`
+- `@rushstack/heft-jest-plugin@0.6.0-rc.6`
+- `@rushstack/heft-sass-plugin@0.10.0-rc.6`
+- `@rushstack/heft-storybook-plugin@0.3.0-rc.6`
+- `@rushstack/heft-webpack4-plugin@0.6.0-rc.6`
+- `@rushstack/heft-webpack5-plugin@0.7.0-rc.6`
+- `@rushstack/heft-dev-cert-plugin@0.3.0-rc.6`
 
 Additionally, Rushstack-provided rigs have been updated to be compatible with the new version of Heft:
-- `@rushstack/heft-node-rig@1.12.0-rc.0`
-- `@rushstack/heft-web-rig@0.13.0-rc.0`
+- `@rushstack/heft-node-rig@1.14.0-rc.6`
+- `@rushstack/heft-web-rig@0.16.0-rc.6`
 
 If you have any issues with the prerelease packages or the new changes to Heft, please [file an issue](https://github.com/microsoft/rushstack/issues/new?assignees=&labels=&template=heft.md&title=%5Bheft%2Frc%2f0%5D+).
-
-#### Known Issues
-- TypeScript solution mode is not supported in watch mode
-- TypeScript plugin copies all static assets when in watch mode
 
 ### Heft 0.35.0
 

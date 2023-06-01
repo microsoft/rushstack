@@ -100,10 +100,7 @@ export interface IJestPluginOptions {
   detectOpenHandles?: boolean;
   disableCodeCoverage?: boolean;
   disableConfigurationModuleResolution?: boolean;
-  extensionForTests?: '.js' | '.cjs' | '.mjs';
   findRelatedTests?: string[];
-  folderNameForTests?: string;
-  folderNameForSnapshots?: string;
   maxWorkers?: string;
   passWithNoTests?: boolean;
   silent?: boolean;

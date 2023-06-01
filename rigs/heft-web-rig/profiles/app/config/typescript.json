@@ -44,10 +44,9 @@
   // "emitMjsExtensionForESModule": true,
 
   /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
+   * If true and "isolatedModules" is configured in tsconfig.json, use a worker thread to run transpilation concurrently with type checking and declaration emit.
    */
-  // "maxWriteParallelism": 50,
+  // "useTranspilerWorker": true
 
   /**
    * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example

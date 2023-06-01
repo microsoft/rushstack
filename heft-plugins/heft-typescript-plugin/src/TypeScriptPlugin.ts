@@ -87,12 +87,6 @@ export interface ITypeScriptConfigurationJson {
    * so that these files can be resolved by import statements.
    */
   staticAssetsToCopy?: IStaticAssetsCopyConfiguration;
-
-  /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
-   */
-  maxWriteParallelism?: number;
 }
 
 /**
@@ -374,8 +368,6 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       additionalModuleKindsToEmit: typeScriptConfigurationJson?.additionalModuleKindsToEmit,
       emitCjsExtensionForCommonJS: !!typeScriptConfigurationJson?.emitCjsExtensionForCommonJS,
       emitMjsExtensionForESModule: !!typeScriptConfigurationJson?.emitMjsExtensionForESModule,
-      // watchMode: watchMode,
-      maxWriteParallelism: typeScriptConfigurationJson?.maxWriteParallelism || 50,
       scopedLogger: taskSession.logger,
       emitChangedFilesCallback: (
         program: TTypescript.Program,

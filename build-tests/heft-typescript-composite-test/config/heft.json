@@ -28,10 +28,7 @@
       "tasksByName": {
         "jest": {
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-jest-plugin",
-            "options": {
-              "extensionForTests": ".cjs"
-            }
+            "pluginPackage": "@rushstack/heft-jest-plugin"
           }
         }
       }
