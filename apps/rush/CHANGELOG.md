@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 21 May 2023 00:18:35 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Jun 2023 22:08:29 GMT and should not be manually modified.
+
+## 5.99.0
+Fri, 02 Jun 2023 22:08:28 GMT
+
+### Updates
+
+- Use a separate temrinal for logging cache subsystem
+- Expose beforeLog hook
+- Convert to multi-phase Heft
+- Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance.
 
 ## 5.98.0
 Sun, 21 May 2023 00:18:35 GMT
