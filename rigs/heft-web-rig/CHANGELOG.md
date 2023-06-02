@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 02 Jun 2023 00:24:45 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Jun 2023 02:01:12 GMT and should not be manually modified.
+
+## 0.16.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
 
 ## 0.15.2
 Fri, 02 Jun 2023 00:24:45 GMT

@@ -2,6 +2,26 @@
   "name": "@rushstack/webpack-plugin-utilities",
   "entries": [
     {
+      "version": "0.2.12",
+      "tag": "@rushstack/webpack-plugin-utilities_v0.2.12",
+      "date": "Fri, 02 Jun 2023 02:01:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert to multi-phase Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.11",
       "tag": "@rushstack/webpack-plugin-utilities_v0.2.11",
       "date": "Mon, 29 May 2023 15:21:15 GMT",

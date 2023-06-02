@@ -2,6 +2,44 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.16.0",
+      "tag": "@rushstack/heft-web-rig_v0.16.0",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.7` to `^0.51.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.2",
       "tag": "@rushstack/heft-web-rig_v0.15.2",
       "date": "Fri, 02 Jun 2023 00:24:45 GMT",

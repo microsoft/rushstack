@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Mon, 29 May 2023 15:21:15 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Jun 2023 02:01:12 GMT and should not be manually modified.
+
+## 2.0.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Breaking changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
 
 ## 1.13.1
 Mon, 29 May 2023 15:21:15 GMT

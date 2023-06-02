@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 29 May 2023 15:21:15 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Jun 2023 02:01:12 GMT and should not be manually modified.
+
+## 0.51.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Overhaul to support splitting single-project builds into more phases than "build" and "test", to align with Rush phased commands. See UPGRADING.md for details.
 
 ## 0.50.7
 Mon, 29 May 2023 15:21:15 GMT

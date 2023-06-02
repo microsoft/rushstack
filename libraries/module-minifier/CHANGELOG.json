@@ -2,6 +2,29 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.3.13",
+      "tag": "@rushstack/module-minifier_v0.3.13",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert to multi-phase Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.12",
       "tag": "@rushstack/module-minifier_v0.3.12",
       "date": "Mon, 29 May 2023 15:21:15 GMT",

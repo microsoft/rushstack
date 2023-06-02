@@ -2,6 +2,32 @@
   "name": "@microsoft/webpack5-load-themed-styles-loader",
   "entries": [
     {
+      "version": "0.1.27",
+      "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.27",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert to multi-phase Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.0.45`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.0.44` to `^2.0.45`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.26",
       "tag": "@microsoft/webpack5-load-themed-styles-loader_v0.1.26",
       "date": "Fri, 02 Jun 2023 00:24:45 GMT",

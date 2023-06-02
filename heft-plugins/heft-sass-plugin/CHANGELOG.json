@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.11.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.11.0",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.50.7` to `^0.51.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@rushstack/heft-sass-plugin_v0.10.0",
       "date": "Fri, 02 Jun 2023 00:24:45 GMT",
