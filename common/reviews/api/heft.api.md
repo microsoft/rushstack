@@ -5,271 +5,112 @@
 ```ts
 
 import { AsyncParallelHook } from 'tapable';
-import { AsyncSeriesBailHook } from 'tapable';
-import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
-import { CommandLineAction } from '@rushstack/ts-command-line';
+import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';
+import { CommandLineChoiceParameter } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineIntegerListParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
-import { CommandLineParser } from '@rushstack/ts-command-line';
+import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { FileLocationStyle } from '@rushstack/node-core-library';
-import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
-import { ICommandLineChoiceDefinition } from '@rushstack/ts-command-line';
-import { ICommandLineChoiceListDefinition } from '@rushstack/ts-command-line';
-import { ICommandLineFlagDefinition } from '@rushstack/ts-command-line';
-import { ICommandLineIntegerDefinition } from '@rushstack/ts-command-line';
-import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
-import { ICommandLineStringListDefinition } from '@rushstack/ts-command-line';
-import { IFileErrorFormattingOptions } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
-import { JsonSchema } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
-import { SyncHook } from 'tapable';
-
-// @public (undocumented)
-export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
-    // (undocumented)
-    readonly bundle: SyncHook<IBundleSubstage>;
-    // (undocumented)
-    readonly compile: SyncHook<ICompileSubstage>;
-    // (undocumented)
-    readonly postBuild: SyncHook<IPostBuildSubstage>;
-    // (undocumented)
-    readonly preCompile: SyncHook<IPreCompileSubstage>;
-}
-
-// @public (undocumented)
-export class BuildSubstageHooksBase {
-    // (undocumented)
-    readonly run: AsyncParallelHook;
-}
-
-// @public (undocumented)
-export class BundleSubstageHooks extends BuildSubstageHooksBase {
-    // (undocumented)
-    readonly afterConfigureWebpack: AsyncSeriesHook;
-    // (undocumented)
-    readonly configureWebpack: AsyncSeriesWaterfallHook<unknown>;
-}
-
-// @public (undocumented)
-export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
-    // (undocumented)
-    readonly run: AsyncParallelHook;
-}
-
-// @public (undocumented)
-export class CompileSubstageHooks extends BuildSubstageHooksBase {
-    readonly afterCompile: AsyncParallelHook;
-    readonly afterRecompile: AsyncParallelHook;
-}
-
-// @beta (undocumented)
-export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 // @beta
-export class HeftCommandLine {
+export class CancellationToken {
     // @internal
-    constructor(commandLineParser: CommandLineParser, terminal: ITerminal);
-    registerChoiceListParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>): IHeftChoiceListParameter;
-    registerChoiceParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceDefinition>): IHeftChoiceParameter;
-    registerFlagParameter(options: IHeftRegisterParameterOptions<ICommandLineFlagDefinition>): IHeftFlagParameter;
-    registerIntegerParameter(options: IHeftRegisterParameterOptions<ICommandLineIntegerDefinition>): IHeftIntegerParameter;
-    registerStringListParameter(options: IHeftRegisterParameterOptions<ICommandLineStringListDefinition>): IHeftStringListParameter;
-    registerStringParameter(options: IHeftRegisterParameterOptions<ICommandLineStringDefinition>): IHeftStringParameter;
+    constructor(options?: _ICancellationTokenOptions);
+    get isCancelled(): boolean;
+    get onCancelledPromise(): Promise<void>;
 }
+
+// @beta
+export class CancellationTokenSource {
+    constructor(options?: ICancellationTokenSourceOptions);
+    cancel(): void;
+    get isCancelled(): boolean;
+    // @internal (undocumented)
+    get _onCancelledPromise(): Promise<void>;
+    get token(): CancellationToken;
+}
+
+export { CommandLineChoiceListParameter }
+
+export { CommandLineChoiceParameter }
+
+export { CommandLineFlagParameter }
+
+export { CommandLineIntegerListParameter }
+
+export { CommandLineIntegerParameter }
+
+export { CommandLineParameter }
+
+export { CommandLineStringListParameter }
+
+export { CommandLineStringParameter }
+
+// @public
+export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<string[]>;
 
 // @public (undocumented)
 export class HeftConfiguration {
-    get buildCacheFolder(): string;
-    get buildFolder(): string;
+    get buildFolderPath(): string;
+    get cacheFolderPath(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
     get globalTerminal(): ITerminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
-    get projectConfigFolder(): string;
-    get projectHeftDataFolder(): string;
+    get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
+    get rigPackageResolver(): IRigPackageResolver;
+    get tempFolderPath(): string;
     get terminalProvider(): ITerminalProvider;
 }
 
-// @internal (undocumented)
-export class _HeftLifecycleHooks {
-    // (undocumented)
-    toolStart: AsyncParallelHook;
+// @internal
+export interface _ICancellationTokenOptions {
+    cancellationTokenSource?: CancellationTokenSource;
+    isCancelled?: boolean;
 }
 
-// @public (undocumented)
-export class HeftSession {
-    // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "IInternalHeftSessionOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
-    // @beta
-    readonly commandLine: HeftCommandLine;
-    get debugMode(): boolean;
-    // (undocumented)
-    readonly hooks: IHeftSessionHooks;
-    // @internal (undocumented)
-    readonly metricsCollector: _MetricsCollector;
-    // @beta (undocumented)
-    readonly registerAction: RegisterAction;
-    // @beta
-    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
-    requestScopedLogger(loggerName: string): ScopedLogger;
-}
-
-// @public (undocumented)
-export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuildStageProperties> {
-}
-
-// @public (undocumented)
-export interface IBuildStageProperties {
-    // @beta (undocumented)
-    emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
-    // @beta (undocumented)
-    emitFolderNameForTests?: string;
-    // @beta (undocumented)
-    isTypeScriptProject?: boolean;
-    // (undocumented)
-    lite: boolean;
-    // (undocumented)
-    locales?: ReadonlyArray<string>;
-    // (undocumented)
-    maxOldSpaceSize?: string;
-    // (undocumented)
-    production: boolean;
-    // (undocumented)
-    serveMode: boolean;
-    // (undocumented)
-    watchMode: boolean;
-    // (undocumented)
-    webpackStats?: unknown;
-}
-
-// @public (undocumented)
-export interface IBuildSubstage<TBuildSubstageHooks extends BuildSubstageHooksBase, TBuildSubstageProperties extends object> {
-    // (undocumented)
-    hooks: TBuildSubstageHooks;
-    // (undocumented)
-    properties: TBuildSubstageProperties;
-}
-
-// @public (undocumented)
-export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBundleSubstageProperties> {
-}
-
-// @public (undocumented)
-export interface IBundleSubstageProperties {
-    webpackConfiguration?: unknown;
-    webpackDevServerVersion?: string | undefined;
-    webpackVersion?: string | undefined;
-}
-
-// @public (undocumented)
-export interface ICleanStageContext extends IStageContext<CleanStageHooks, ICleanStageProperties> {
-}
-
-// @public (undocumented)
-export interface ICleanStageProperties {
-    // (undocumented)
-    deleteCache: boolean;
-    // (undocumented)
-    pathsToDelete: Set<string>;
-}
-
-// @public (undocumented)
-export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
-}
-
-// @public (undocumented)
-export interface ICompileSubstageProperties {
-    // (undocumented)
-    typescriptMaxWriteParallelism: number | undefined;
-}
-
-// @beta (undocumented)
-export interface ICustomActionOptions<TParameters> {
-    // (undocumented)
-    actionName: string;
-    // (undocumented)
-    callback: (parameters: TParameters) => void | Promise<void>;
-    // (undocumented)
-    documentation: string;
-    // (undocumented)
-    parameters?: {
-        [K in keyof TParameters]: ICustomActionParameter<TParameters[K]>;
-    };
-    // (undocumented)
-    summary?: string;
-}
-
-// @beta (undocumented)
-export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
-
-// @beta (undocumented)
-export interface ICustomActionParameterBase<CustomActionParameterType> {
-    // (undocumented)
-    description: string;
-    // (undocumented)
-    kind: 'flag' | 'integer' | 'string' | 'stringList';
-    // (undocumented)
-    parameterLongName: string;
-}
-
-// @beta (undocumented)
-export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
-    // (undocumented)
-    kind: 'flag';
-}
-
-// @beta (undocumented)
-export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
-    // (undocumented)
-    kind: 'integer';
-}
-
-// @beta (undocumented)
-export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
-    // (undocumented)
-    kind: 'string';
-}
-
-// @beta (undocumented)
-export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
-    // (undocumented)
-    kind: 'stringList';
+// @beta
+export interface ICancellationTokenSourceOptions {
+    delayMs?: number;
 }
 
 // @public
-export interface IHeftActionConfiguration {
+export interface ICopyOperation extends IFileSelectionSpecifier {
+    destinationFolders: string[];
+    flatten?: boolean;
+    hardlink?: boolean;
 }
 
 // @public
-export interface IHeftActionConfigurationOptions {
-    mergeArrays?: boolean;
+export interface IDeleteOperation extends IFileSelectionSpecifier {
 }
 
-// @beta
-export interface IHeftBaseParameter<TValue, TCommandLineDefinition extends IBaseCommandLineDefinition> {
-    readonly actionAssociated: boolean;
-    readonly definition: IHeftRegisterParameterOptions<TCommandLineDefinition>;
-    readonly value?: TValue;
+// @public
+export interface IFileSelectionSpecifier {
+    excludeGlobs?: string[];
+    fileExtensions?: string[];
+    includeGlobs?: string[];
+    sourcePath: string;
 }
 
-// @beta
-export type IHeftChoiceListParameter = IHeftBaseParameter<readonly string[], ICommandLineChoiceListDefinition>;
-
-// @beta
-export type IHeftChoiceParameter = IHeftBaseParameter<string, ICommandLineChoiceDefinition>;
+// @public
+export interface IGlobOptions {
+    absolute?: boolean;
+    cwd?: string;
+    dot?: boolean;
+    ignore?: string[];
+}
 
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
@@ -277,52 +118,122 @@ export interface _IHeftConfigurationInitializationOptions {
     terminalProvider: ITerminalProvider;
 }
 
-// @beta
-export type IHeftFlagParameter = IHeftBaseParameter<boolean, ICommandLineFlagDefinition>;
-
-// @beta
-export type IHeftIntegerParameter = IHeftBaseParameter<number, ICommandLineIntegerDefinition>;
-
-// @internal (undocumented)
-export interface _IHeftLifecycle {
-    // (undocumented)
-    hooks: _HeftLifecycleHooks;
+// @public
+export interface IHeftDefaultParameters {
+    readonly clean: boolean;
+    readonly cleanCache: boolean;
+    readonly debug: boolean;
+    readonly locales: Iterable<string>;
+    readonly production: boolean;
+    readonly verbose: boolean;
+    readonly watch: boolean;
 }
 
-// @public (undocumented)
-export interface IHeftPlugin<TOptions = void> {
+// @public
+export interface IHeftLifecycleCleanHookOptions {
+    addDeleteOperations: (...deleteOperations: IDeleteOperation[]) => void;
+}
+
+// @public
+export interface IHeftLifecycleHooks {
+    clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
     // (undocumented)
+    recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
+    toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
+}
+
+// @public
+export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeftLifecycleSession, TOptions> {
+}
+
+// @public
+export interface IHeftLifecycleSession {
+    readonly cacheFolderPath: string;
+    readonly hooks: IHeftLifecycleHooks;
+    readonly logger: IScopedLogger;
+    readonly parameters: IHeftParameters;
+    requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
+    readonly tempFolderPath: string;
+}
+
+// @public
+export interface IHeftLifecycleToolFinishHookOptions {
+}
+
+// @public
+export interface IHeftLifecycleToolStartHookOptions {
+}
+
+// @public
+export interface IHeftParameters extends IHeftDefaultParameters {
+    getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
+    getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
+    getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
+    getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
+    getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
+    getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
+    getStringParameter(parameterLongName: string): CommandLineStringParameter;
+}
+
+// @public
+export interface IHeftPlugin<TSession extends IHeftLifecycleSession | IHeftTaskSession = IHeftLifecycleSession | IHeftTaskSession, TOptions = void> {
     readonly accessor?: object;
-    // (undocumented)
-    apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
-    // (undocumented)
-    readonly optionsSchema?: JsonSchema;
-    // (undocumented)
-    readonly pluginName: string;
+    apply(session: TSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
 }
-
-// @beta
-export type IHeftRegisterParameterOptions<TCommandLineDefinition extends IBaseCommandLineDefinition> = TCommandLineDefinition & IParameterAssociatedActionNames;
 
 // @public (undocumented)
-export interface IHeftSessionHooks {
+export interface IHeftRecordMetricsHookOptions {
     // (undocumented)
-    build: SyncHook<IBuildStageContext>;
+    metricData: IMetricsData;
     // (undocumented)
-    clean: SyncHook<ICleanStageContext>;
-    // @internal (undocumented)
-    heftLifecycle: SyncHook<_IHeftLifecycle>;
-    // (undocumented)
-    metricsCollector: MetricsCollectorHooks;
-    // (undocumented)
-    test: SyncHook<ITestStageContext>;
+    metricName: string;
 }
 
-// @beta
-export type IHeftStringListParameter = IHeftBaseParameter<readonly string[], ICommandLineStringListDefinition>;
+// @public
+export interface IHeftTaskFileOperations {
+    copyOperations: Set<ICopyOperation>;
+    deleteOperations: Set<IDeleteOperation>;
+}
 
-// @beta
-export type IHeftStringParameter = IHeftBaseParameter<string, ICommandLineStringDefinition>;
+// @public
+export interface IHeftTaskHooks {
+    readonly registerFileOperations: AsyncSeriesWaterfallHook<IHeftTaskFileOperations>;
+    readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
+    readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
+}
+
+// @public
+export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskSession, TOptions> {
+}
+
+// @public
+export interface IHeftTaskRunHookOptions {
+    // @beta
+    readonly cancellationToken: CancellationToken;
+}
+
+// @public
+export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOptions {
+    readonly requestRun: () => void;
+    readonly watchGlobAsync: WatchGlobFn;
+}
+
+// @public
+export interface IHeftTaskSession {
+    readonly cacheFolderPath: string;
+    readonly hooks: IHeftTaskHooks;
+    readonly logger: IScopedLogger;
+    readonly parameters: IHeftParameters;
+    requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
+    readonly taskName: string;
+    readonly tempFolderPath: string;
+}
+
+// @public
+export interface IIncrementalCopyOperation extends ICopyOperation {
+    onlyIfChanged?: boolean;
+}
 
 // @public (undocumented)
 export interface IMetricsData {
@@ -337,11 +248,6 @@ export interface IMetricsData {
     taskTotalExecutionMs: number;
 }
 
-// @beta
-export interface IParameterAssociatedActionNames {
-    associatedActionNames: string[];
-}
-
 // @internal (undocumented)
 export interface _IPerformanceData {
     // (undocumented)
@@ -350,115 +256,53 @@ export interface _IPerformanceData {
     taskTotalExecutionMs: number;
 }
 
-// @public (undocumented)
-export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
-}
-
-// @public (undocumented)
-export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
+// @public
+export interface IRigPackageResolver {
+    // (undocumented)
+    resolvePackageAsync(packageName: string, terminal: ITerminal): Promise<string>;
 }
 
 // @beta
-export interface IRunScriptOptions<TStageProperties> {
-    // (undocumented)
-    debugMode: boolean;
+export interface IRunScript {
+    runAsync: (options: IRunScriptOptions) => Promise<void>;
+}
+
+// @beta
+export interface IRunScriptOptions {
     // (undocumented)
     heftConfiguration: HeftConfiguration;
     // (undocumented)
-    properties: TStageProperties;
+    heftTaskSession: IHeftTaskSession;
     // (undocumented)
-    scopedLogger: ScopedLogger;
+    runOptions: IHeftTaskRunHookOptions;
     // (undocumented)
-    scriptOptions: Record<string, any>;
+    scriptOptions: Record<string, unknown>;
 }
 
-// @public (undocumented)
+// @public
 export interface IScopedLogger {
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
-    // (undocumented)
+    readonly hasErrors: boolean;
+    readonly loggerName: string;
+    resetErrorsAndWarnings(): void;
     readonly terminal: ITerminal;
 }
 
-// @public (undocumented)
-export interface IStageContext<TStageHooks extends StageHooksBase<TStageProperties>, TStageProperties extends object> {
-    // (undocumented)
-    hooks: TStageHooks;
-    // (undocumented)
-    properties: TStageProperties;
-}
-
-// @public (undocumented)
-export interface ITestStageContext extends IStageContext<TestStageHooks, ITestStageProperties> {
-}
-
-// @public (undocumented)
-export interface ITestStageProperties {
-    // (undocumented)
-    watchMode: boolean;
+// @public
+export interface IWatchedFileState {
+    changed: boolean;
 }
 
 // @internal
 export class _MetricsCollector {
-    flushAndTeardownAsync(): Promise<void>;
-    flushAsync(): Promise<void>;
+    recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
     // (undocumented)
-    readonly hooks: MetricsCollectorHooks;
-    record(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): void;
+    readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     setStartTime(): void;
 }
 
 // @public
-export class MetricsCollectorHooks {
-    flush: AsyncParallelHook;
-    flushAndTeardown: AsyncParallelHook;
-    recordMetric: SyncHook<string, IMetricsData>;
-}
-
-// @beta (undocumented)
-export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
-
-// @beta (undocumented)
-export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
-
-// @public (undocumented)
-export class ScopedLogger implements IScopedLogger {
-    // Warning: (ae-forgotten-export) The symbol "IScopedLoggerOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IScopedLoggerOptions);
-    emitError(error: Error): void;
-    emitWarning(warning: Error): void;
-    // (undocumented)
-    get errors(): ReadonlyArray<Error>;
-    // (undocumented)
-    readonly loggerName: string;
-    // @internal (undocumented)
-    readonly _requestingPlugin: IHeftPlugin;
-    // (undocumented)
-    readonly terminal: ITerminal;
-    // (undocumented)
-    readonly terminalProvider: ITerminalProvider;
-    // (undocumented)
-    get warnings(): ReadonlyArray<Error>;
-}
-
-// @public (undocumented)
-export abstract class StageHooksBase<TStageProperties extends object> {
-    // (undocumented)
-    readonly afterLoadStageConfiguration: AsyncSeriesHook;
-    // (undocumented)
-    readonly loadStageConfiguration: AsyncSeriesHook;
-    // @beta
-    readonly overrideStage: AsyncSeriesBailHook<TStageProperties>;
-}
-
-// @public (undocumented)
-export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
-    // (undocumented)
-    readonly configureTest: AsyncSeriesHook;
-    // (undocumented)
-    readonly run: AsyncParallelHook;
-}
+export type WatchGlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<Map<string, IWatchedFileState>>;
 
 ```

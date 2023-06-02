@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Convert to multi-phase Heft",
+      "type": "none",
+      "packageName": "@microsoft/loader-load-themed-styles"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

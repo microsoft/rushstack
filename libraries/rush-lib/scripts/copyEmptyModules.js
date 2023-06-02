@@ -6,7 +6,12 @@ const JS_FILE_EXTENSION = '.js';
 const DTS_FILE_EXTENSION = '.d.ts';
 
 module.exports = {
-  runAsync: async ({ scopedLogger: { terminal }, heftConfiguration: { buildFolder } }) => {
+  runAsync: async ({
+    heftTaskSession: {
+      logger: { terminal }
+    },
+    heftConfiguration: { buildFolderPath }
+  }) => {
     // We're using a Webpack plugin called `@rushstack/webpack-preserve-dynamic-require-plugin` to
     // examine all of the modules that are imported by the entrypoints (index, and the start* scripts)
     // to `rush-lib` and generate stub JS files in the `lib` folder that reference the original modules
@@ -38,9 +43,9 @@ module.exports = {
       return resultLines.join('\n');
     }
 
-    const jsInFolderPath = `${buildFolder}/lib-esnext`;
-    const dtsInFolderPath = `${buildFolder}/lib-commonjs`;
-    const outFolderPath = `${buildFolder}/lib`;
+    const jsInFolderPath = `${buildFolderPath}/lib-esnext`;
+    const dtsInFolderPath = `${buildFolderPath}/lib-commonjs`;
+    const outFolderPath = `${buildFolderPath}/lib`;
     async function searchAsync(relativeFolderPath) {
       const folderItems = await FileSystem.readFolderItemsAsync(
         relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath

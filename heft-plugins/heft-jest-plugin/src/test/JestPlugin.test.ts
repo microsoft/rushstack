@@ -3,10 +3,62 @@
 
 import * as path from 'path';
 import type { Config } from '@jest/types';
+import type { IHeftTaskSession, HeftConfiguration, CommandLineParameter } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
-import { Import, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { Import, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
-import { IHeftJestConfiguration, JestPlugin } from '../JestPlugin';
+import { default as JestPlugin, IHeftJestConfiguration } from '../JestPlugin';
+
+interface IPartialHeftPluginJson {
+  taskPlugins?: {
+    parameters?: {
+      longName: string;
+    }[];
+  }[];
+}
+
+describe('JestPlugin', () => {
+  it('loads and requests all specified plugin parameters', async () => {
+    const requestedParameters: Set<string> = new Set();
+    function mockGetParameter<T extends CommandLineParameter>(parameterLongName: string): T {
+      requestedParameters.add(parameterLongName);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return { value: undefined, values: [] } as any as T;
+    }
+    const mockTaskSession: IHeftTaskSession = {
+      hooks: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        run: { tapPromise: () => {} } as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        runIncremental: { tapPromise: () => {} } as any
+      },
+      parameters: {
+        getChoiceParameter: mockGetParameter,
+        getChoiceListParameter: mockGetParameter,
+        getFlagParameter: mockGetParameter,
+        getIntegerParameter: mockGetParameter,
+        getIntegerListParameter: mockGetParameter,
+        getStringParameter: mockGetParameter,
+        getStringListParameter: mockGetParameter
+      }
+    } as IHeftTaskSession;
+    const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
+
+    const plugin = new JestPlugin();
+    plugin.apply(mockTaskSession, mockHeftConfiguration, undefined);
+
+    // Load up all the allowed parameters
+    const heftPluginJson: IPartialHeftPluginJson = await JsonFile.loadAsync(
+      `${__dirname}/../../heft-plugin.json`
+    );
+
+    // Verify that all parameters were requested
+    expect(requestedParameters.size).toBe(heftPluginJson.taskPlugins![0].parameters!.length);
+    for (const parameter of heftPluginJson.taskPlugins![0].parameters!) {
+      expect(requestedParameters.has(parameter.longName)).toBe(true);
+    }
+  });
+});
 
 describe('JestConfigLoader', () => {
   let terminalProvider: StringBufferTerminalProvider;

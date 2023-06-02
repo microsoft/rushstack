@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
     "@rushstack/set-webpack-public-path-plugin": "^3.3.106",

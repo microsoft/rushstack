@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Webpack 5 Plugin Configuration",
+  "description": "Defines options for Webpack 5 plugin execution.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "devConfigurationPath": {
+      "description": "Specifies a relative path to the Webpack dev configuration, which is used in \"serve\" mode. The default value is \"./webpack.dev.config.js\".",
+      "type": "string"
+    },
+
+    "configurationPath": {
+      "description": "Specifies a relative path to the Webpack configuration. The default value is \"./webpack.config.js\".",
+      "type": "string"
+    }
+  }
+}

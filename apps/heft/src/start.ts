@@ -14,6 +14,6 @@ parser
     process.exit(process.exitCode === undefined ? 0 : process.exitCode);
   })
   .catch((error) => {
-    parser.terminal.writeErrorLine(error.toString());
+    parser.globalTerminal.writeErrorLine(error.toString());
     process.exit(1);
   });

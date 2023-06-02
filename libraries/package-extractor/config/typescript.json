@@ -6,7 +6,5 @@
       "moduleKind": "esnext",
       "outFolderName": "lib-esnext"
     }
-  ],
-
-  "emitFolderNameForTests": "lib"
+  ]
 }

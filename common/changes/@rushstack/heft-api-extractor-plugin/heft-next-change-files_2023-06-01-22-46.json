@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "comment": "Prepare for official release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-api-extractor-plugin"
+}

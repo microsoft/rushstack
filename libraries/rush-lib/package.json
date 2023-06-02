@@ -16,9 +16,9 @@
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",
-    "test": "heft test --no-build",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "test": "heft test --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "license": "MIT",
   "dependencies": {
@@ -68,7 +68,6 @@
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/cli-table": "0.3.0",
     "@types/glob": "7.1.1",
-    "@types/heft-jest": "1.0.1",
     "@types/inquirer": "7.3.1",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",

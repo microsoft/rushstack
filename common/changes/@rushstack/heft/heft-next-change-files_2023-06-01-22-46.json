@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Overhaul to support splitting single-project builds into more phases than \"build\" and \"test\", to align with Rush phased commands. See UPGRADING.md for details.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

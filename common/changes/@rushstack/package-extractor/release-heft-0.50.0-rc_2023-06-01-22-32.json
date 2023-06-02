@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Convert to multi-phase Heft",
+      "type": "none",
+      "packageName": "@rushstack/package-extractor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

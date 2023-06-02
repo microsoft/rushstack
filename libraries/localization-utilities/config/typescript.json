@@ -1,0 +1,14 @@
+{
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/typescript.json",
+
+  /**
+   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
+   * so that these files can be resolved by import statements.
+   */
+  "staticAssetsToCopy": {
+    /**
+     * File extensions that should be copied from the src folder to the destination folder(s).
+     */
+    "fileExtensions": [".resx"]
+  }
+}
