@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush-amazon-s3-build-cache-plugin] Read credentials from common AWS_* env vars.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

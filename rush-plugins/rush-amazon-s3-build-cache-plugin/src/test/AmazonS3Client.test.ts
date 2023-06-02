@@ -5,8 +5,9 @@ import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library'
 import { Response, ResponseInit } from 'node-fetch';
 
 import { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
-import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
+import { AmazonS3Client } from '../AmazonS3Client';
 import { WebClient } from '../WebClient';
+import { IAmazonS3Credentials } from '../AmazonS3Credentials';
 
 const webClient = new WebClient();
 

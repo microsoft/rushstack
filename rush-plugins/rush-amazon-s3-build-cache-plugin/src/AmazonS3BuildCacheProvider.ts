@@ -12,8 +12,9 @@ import {
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 
-import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
+import { AmazonS3Client } from './AmazonS3Client';
 import { WebClient } from './WebClient';
+import { IAmazonS3Credentials, fromAmazonEnv, fromRushEnv } from './AmazonS3Credentials';
 
 /**
  * @public
@@ -45,7 +46,6 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     | IAmazonS3BuildCacheProviderOptionsSimple
     | IAmazonS3BuildCacheProviderOptionsAdvanced;
   private readonly _s3Prefix: string | undefined;
-  private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
   private __credentialCacheId: string | undefined;
   private _rushSession: RushSession;
@@ -63,7 +63,6 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
     this._rushSession = rushSession;
     this._options = options;
     this._s3Prefix = options.s3Prefix;
-    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
   }
 
@@ -99,11 +98,11 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
 
   private async _getS3ClientAsync(terminal: ITerminal): Promise<AmazonS3Client> {
     if (!this.__s3Client) {
-      let credentials: IAmazonS3Credentials | undefined = AmazonS3Client.tryDeserializeCredentials(
-        this._environmentCredential
-      );
+      let credentials: IAmazonS3Credentials | undefined = fromAmazonEnv() ?? fromRushEnv();
 
       if (!credentials) {
+        terminal.writeDebugLine('No credentials found in env. Trying cloud credentials.');
+
         let cacheEntry: ICredentialCacheEntry | undefined;
         await CredentialCache.usingAsync(
           {
@@ -122,7 +121,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
                 `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}".`
             );
           } else {
-            credentials = AmazonS3Client.tryDeserializeCredentials(cacheEntry?.credential);
+            credentials = fromAmazonEnv() ?? fromRushEnv(cacheEntry?.credential);
           }
         } else if (this._isCacheWriteAllowedByConfiguration) {
           throw new Error(
