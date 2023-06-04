@@ -24,17 +24,15 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
  */
 export enum BumpType {
   // No version bump
-  'none',
+  'none' = 0,
   // Prerelease version bump
-  'prerelease',
+  'prerelease' = 1,
   // Patch version bump
-  'patch',
-  // Preminor version bump
-  'preminor',
+  'patch' = 2,
   // Minor version bump
-  'minor',
+  'minor' = 4,
   // Major version bump
-  'major'
+  'major' = 5
 }
 
 /**
