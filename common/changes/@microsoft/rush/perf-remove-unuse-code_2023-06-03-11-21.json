@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "remove unused code",
+      "comment": "",
       "type": "none"
     }
   ],
