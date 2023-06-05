@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-lint-plugin_v0.1.1",
+      "date": "Mon, 05 Jun 2023 21:45:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression that caused this error: \"[build:lint] The create() function for rule ___ did not return an object.\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/heft-lint-plugin_v0.1.0",
       "date": "Fri, 02 Jun 2023 02:01:12 GMT",
