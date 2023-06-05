@@ -12,10 +12,10 @@
   "types": "dist/heft-typescript-plugin.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged build --clean",
-    "start": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --clean --watch",
-    "_phase:build": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged build --clean",
-    "_phase:test": "node ./node_modules/@rushstack/heft-legacy/bin/heft --unmanaged test --no-build"
+    "build": "heft test --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
     "@rushstack/heft": "0.51.0"
@@ -30,8 +30,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-legacy": "npm:@rushstack/heft@0.50.6",
-    "@rushstack/heft-node-rig": "1.13.0",
+    "@rushstack/heft-node-rig": "2.0.1",
     "@types/node": "14.18.36",
     "@types/semver": "7.3.5",
     "typescript": "~5.0.4"
