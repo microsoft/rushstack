@@ -173,7 +173,8 @@ function getTsconfigFilePath(
   typeScriptConfigurationJson?: ITypeScriptConfigurationJson
 ): string {
   return Path.convertToSlashes(
-    `${heftConfiguration.buildFolderPath}/${typeScriptConfigurationJson?.project || './tsconfig.json'}`
+    // Use path.resolve because the path can start with `./` or `../`
+    path.resolve(heftConfiguration.buildFolderPath, typeScriptConfigurationJson?.project || './tsconfig.json')
   );
 }
 
