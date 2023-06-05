@@ -168,16 +168,17 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private _patchTimer(eslintPackagePath: string): void {
     const timing: IEslintTiming = require(path.join(eslintPackagePath, 'lib', 'linter', 'timing'));
     timing.enabled = true;
-    const patchedTime: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void = (
+    const patchedTime: (
       key: string,
-      fn: (...args: unknown[]) => void
-    ) => {
+      fn: (...args: unknown[]) => unknown
+    ) => (...args: unknown[]) => unknown = (key: string, fn: (...args: unknown[]) => unknown) => {
       return (...args: unknown[]) => {
         const startTime: number = performance.now();
-        fn(...args);
+        const result: unknown = fn(...args);
         const endTime: number = performance.now();
         const existingTiming: number = this._eslintTimings.get(key) || 0;
         this._eslintTimings.set(key, existingTiming + endTime - startTime);
+        return result;
       };
     };
     timing.time = patchedTime;
