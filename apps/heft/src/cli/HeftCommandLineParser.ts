@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { ArgumentParser } from 'argparse';
-import { CommandLineParser, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import {
+  CommandLineParser,
+  AliasCommandLineAction,
+  type CommandLineFlagParameter,
+  type CommandLineAction
+} from '@rushstack/ts-command-line';
 import {
   Terminal,
   InternalError,
@@ -20,6 +25,7 @@ import { CleanAction } from './actions/CleanAction';
 import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
+import { AliasAction } from './actions/AliasAction';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -29,6 +35,8 @@ interface IPreInitializationArgumentValues {
   debug?: boolean;
   unmanaged?: boolean;
 }
+
+const HEFT_TOOL_FILENAME: 'heft' = 'heft';
 
 export class HeftCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
@@ -43,7 +51,7 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   public constructor() {
     super({
-      toolFilename: 'heft',
+      toolFilename: HEFT_TOOL_FILENAME,
       toolDescription: 'Heft is a pluggable build system designed for web projects.'
     });
 
@@ -125,6 +133,33 @@ export class HeftCommandLineParser extends CommandLineParser {
       this.addAction(new RunAction({ ...actionOptions, watch: true }));
       for (const phase of internalHeftSession.phases) {
         this.addAction(new PhaseAction({ ...actionOptions, phase, watch: true }));
+      }
+
+      // Add the action aliases last, since we need the targets to be defined before we can add the aliases
+      const aliasActions: AliasCommandLineAction[] = [];
+      for (const [
+        aliasName,
+        { actionName, defaultArguments }
+      ] of internalHeftSession.actionReferencesByAlias) {
+        const targetAction: CommandLineAction | undefined = this.tryGetAction(actionName);
+        if (!targetAction) {
+          throw new Error(
+            `The action "${actionName}" referred to by alias "${aliasName}" could not be found.`
+          );
+        }
+        aliasActions.push(
+          new AliasAction({
+            terminal: this.globalTerminal,
+            toolFilename: HEFT_TOOL_FILENAME,
+            aliasName,
+            targetAction,
+            defaultArguments
+          })
+        );
+      }
+      // Add the alias actions. Do this in a second pass to disallow aliases that refer to other aliases.
+      for (const aliasAction of aliasActions) {
+        this.addAction(aliasAction);
       }
 
       return await super.execute(args);

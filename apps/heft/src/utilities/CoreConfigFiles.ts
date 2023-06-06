@@ -17,6 +17,15 @@ import { Constants } from './Constants';
 
 export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript' | 'nodeService';
 
+export interface IHeftConfigurationJsonActionReference {
+  actionName: string;
+  defaultArguments?: string[];
+}
+
+export interface IHeftConfigurationJsonAliases {
+  [aliasName: string]: IHeftConfigurationJsonActionReference;
+}
+
 export interface IHeftConfigurationJsonEventSpecifier {
   eventKind: HeftEventKind;
   options?: object;
@@ -52,6 +61,7 @@ export interface IHeftConfigurationJsonPhases {
 
 export interface IHeftConfigurationJson {
   heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
+  aliasesByName?: IHeftConfigurationJsonAliases;
   phasesByName?: IHeftConfigurationJsonPhases;
 }
 

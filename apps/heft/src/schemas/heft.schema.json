@@ -108,6 +108,34 @@
       "items": { "$ref": "#/definitions/heft-plugin" }
     },
 
+    "aliasesByName": {
+      "type": "object",
+      "description": "Defines aliases for existing Heft actions, and allows them to be invoked by name with default parameters.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9]*([-][a-z0-9]+)*$": {
+          "description": "Defines a Heft action alias.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["actionName"],
+          "properties": {
+            "actionName": {
+              "description": "The name of the Heft action to invoke.",
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
+            },
+            "defaultArguments": {
+              "description": "Arguments to pass to the Heft action by default.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+
     "phasesByName": {
       "type": "object",
       "description": "Heft phases that can be run during an execution of Heft.",
