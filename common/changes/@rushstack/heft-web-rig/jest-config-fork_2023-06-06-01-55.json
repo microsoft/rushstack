@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Update Jest environment \"customExportConditions\" to [\"require\", \"node\", \"umd\"]",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

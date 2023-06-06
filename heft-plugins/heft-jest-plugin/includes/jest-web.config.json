@@ -1,0 +1,24 @@
+{
+  "extends": "./jest-shared.config.json",
+
+  "roots": ["<rootDir>/lib-commonjs"],
+
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
+
+  "testEnvironment": "jest-environment-jsdom",
+
+  "testEnvironmentOptions": {
+    "url": "http://localhost/",
+    "customExportConditions": ["require", "node", "umd"]
+  },
+
+  "collectCoverageFrom": [
+    "lib-commonjs/**/*.js",
+    "!lib-commonjs/**/*.d.ts",
+    "!lib-commonjs/**/*.test.js",
+    "!lib-commonjs/**/test/**",
+    "!lib-commonjs/**/__tests__/**",
+    "!lib-commonjs/**/__fixtures__/**",
+    "!lib-commonjs/**/__mocks__/**"
+  ]
+}
