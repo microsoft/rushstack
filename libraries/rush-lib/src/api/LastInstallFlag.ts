@@ -3,12 +3,11 @@
 
 import * as path from 'path';
 
-import { FileSystem, JsonFile, JsonObject, Import, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonObject, Path } from '@rushstack/node-core-library';
 
 import { PackageManagerName } from './packageManager/PackageManager';
 import { RushConfiguration } from './RushConfiguration';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -89,7 +88,7 @@ export class LastInstallFlag {
       }
     }
 
-    if (!lodash.isEqual(oldState, newState)) {
+    if (!objectsAreDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
