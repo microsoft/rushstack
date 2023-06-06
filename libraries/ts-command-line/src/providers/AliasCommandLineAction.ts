@@ -62,7 +62,7 @@ export class AliasCommandLineAction extends CommandLineAction {
    */
   public readonly defaultArguments: ReadonlyArray<string>;
 
-  private _parameterKeyMap: Map<string, string> = new Map<string, string>();
+  private _parameterKeyMap: Map<string, string> = new Map();
 
   public constructor(options: IAliasCommandLineActionOptions) {
     const toolFilename: string = options.toolFilename;
