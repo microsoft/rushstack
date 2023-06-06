@@ -23,12 +23,12 @@ export class AliasAction extends AliasCommandLineAction {
     const toolFilename: string = this._toolFilename;
     const actionName: string = this.actionName;
     const targetAction: CommandLineAction = this.targetAction;
-    const defaultArguments: ReadonlyArray<string> = this.defaultArguments;
-    const defaultArgumentsString: string = defaultArguments.join(' ');
+    const defaultParameters: ReadonlyArray<string> = this.defaultParameters;
+    const defaultParametersString: string = defaultParameters.join(' ');
 
     this._terminal.writeLine(
       `The "${toolFilename} ${actionName}" alias was expanded to "${toolFilename} ${targetAction.actionName}` +
-        `${defaultArgumentsString ? ` ${defaultArgumentsString}` : ''}".`
+        `${defaultParametersString ? ` ${defaultParametersString}` : ''}".`
     );
 
     await super.onExecute();
