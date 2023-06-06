@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-web-rig",
       "comment": "Update Jest environment \"customExportConditions\" to [\"require\", \"node\", \"umd\"]",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-web-rig"
