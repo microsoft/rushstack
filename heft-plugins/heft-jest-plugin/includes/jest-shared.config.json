@@ -18,7 +18,7 @@
   // "Adding '<rootDir>/lib' here enables lib/__mocks__ to be used for mocking Node.js system modules
   "roots": ["<rootDir>/lib"],
 
-  "testMatch": ["<rootDir>/lib/**/*.test.js"],
+  "testMatch": ["<rootDir>/lib/**/*.test.{cjs,js}"],
   "testPathIgnorePatterns": ["/node_modules/"],
 
   // Code coverage tracking is disabled by default; set this to true to enable it
@@ -30,9 +30,9 @@
   "coverageProvider": "v8",
 
   "collectCoverageFrom": [
-    "lib/**/*.js",
+    "lib/**/*.{cjs,js}",
     "!lib/**/*.d.ts",
-    "!lib/**/*.test.js",
+    "!lib/**/*.test.{cjs,js}",
     "!lib/**/test/**",
     "!lib/**/__tests__/**",
     "!lib/**/__fixtures__/**",
@@ -40,8 +40,11 @@
   ],
   "coveragePathIgnorePatterns": ["/node_modules/"],
 
+  "testEnvironment": "jest-environment-node",
+
   "testEnvironmentOptions": {
-    "url": "http://localhost/"
+    "url": "http://localhost/",
+    "customExportConditions": ["require", "node"]
   },
 
   // Retain pre-Jest 29 snapshot behavior
