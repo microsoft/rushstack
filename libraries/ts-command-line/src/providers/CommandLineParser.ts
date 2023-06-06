@@ -4,8 +4,9 @@
 import * as argparse from 'argparse';
 import colors from 'colors';
 
-import { CommandLineAction } from './CommandLineAction';
-import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import type { CommandLineAction } from './CommandLineAction';
+import type { AliasCommandLineAction } from './AliasCommandLineAction';
+import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
 
@@ -204,29 +205,41 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
       }
-      if (this.actions.length > 0 && args.length === 0) {
-        // Parsers that use actions should print help when 0 args are provided. Allow
-        // actionless parsers to continue on zero args.
-        this._argumentParser.printHelp();
-        return;
+      if (this.actions.length > 0) {
+        if (args.length === 0) {
+          // Parsers that use actions should print help when 0 args are provided. Allow
+          // actionless parsers to continue on zero args.
+          this._argumentParser.printHelp();
+          return;
+        }
+        // Alias actions may provide a list of default params to add after the action name.
+        // Since we don't know which params are required and which are optional, perform a
+        // manual search for the action name to obtain the default params and insert them if
+        // any are found. We will guess that the action name is the first arg that doesn't
+        // start with a hyphen.
+        const actionNameIndex: number | undefined = args.findIndex((x) => !x.startsWith('-'));
+        if (actionNameIndex !== undefined) {
+          const actionName: string = args[actionNameIndex];
+          const action: CommandLineAction | undefined = this.tryGetAction(actionName);
+          const aliasAction: AliasCommandLineAction | undefined = action as AliasCommandLineAction;
+          if (aliasAction?.defaultArguments?.length) {
+            const insertIndex: number = actionNameIndex + 1;
+            args = args.slice(0, insertIndex).concat(aliasAction.defaultArguments, args.slice(insertIndex));
+          }
+        }
       }
 
       const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
       this._processParsedData(this._options, data);
 
-      for (const action of this._actions) {
-        if (action.actionName === data.action) {
-          this.selectedAction = action;
-          action._processParsedData(this._options, data);
-          break;
-        }
-      }
+      this.selectedAction = this.tryGetAction(data.action);
       if (this.actions.length > 0 && !this.selectedAction) {
         const actions: string[] = this.actions.map((x) => x.actionName);
         throw new Error(`An action must be specified (${actions.join(', ')})`);
       }
 
+      this.selectedAction?._processParsedData(this._options, data);
       return this.onExecute();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {

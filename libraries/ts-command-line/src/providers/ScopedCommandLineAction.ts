@@ -12,6 +12,7 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
   readonly actionOptions: ICommandLineActionOptions;
   readonly unscopedActionParameters: ReadonlyArray<CommandLineParameter>;
   readonly onDefineScopedParameters: (commandLineParameterProvider: CommandLineParameterProvider) => void;
+  readonly aliasAction?: string;
 }
 
 /**
@@ -27,17 +28,25 @@ class InternalScopedCommandLineParser extends CommandLineParser {
   }
 
   public constructor(options: IInternalScopedCommandLineParserOptions) {
-    // We can run the parser directly because we are not going to use it for any other actions,
-    // so construct a special options object to make the "--help" text more useful.
+    const { actionOptions, unscopedActionParameters, toolFilename, aliasAction } = options;
+
+    const toolCommand: string = `${toolFilename} ${actionOptions.actionName}`;
+    // When coming from an alias command, we want to show the alias command name in the help text
+    const toolCommandForLogging: string = `${toolFilename} ${aliasAction ?? actionOptions.actionName}`;
     const scopingArgs: string[] = [];
-    for (const parameter of options.unscopedActionParameters) {
+    for (const parameter of unscopedActionParameters) {
       parameter.appendToArgList(scopingArgs);
     }
-    const unscopedToolName: string = `${options.toolFilename} ${options.actionOptions.actionName}`;
+    const scope: string = scopingArgs.join(' ');
+
+    // We can run the parser directly because we are not going to use it for any other actions,
+    // so construct a special options object to make the "--help" text more useful.
     const scopedCommandLineParserOptions: ICommandLineParserOptions = {
-      toolFilename: `${unscopedToolName}${scopingArgs.length ? ' ' + scopingArgs.join(' ') : ''} --`,
-      toolDescription: options.actionOptions.documentation,
-      toolEpilog: `For more information on available unscoped parameters, use "${unscopedToolName} --help"`,
+      // Strip the scoping args if coming from an alias command, since they are not applicable
+      // to the alias command itself
+      toolFilename: `${toolCommandForLogging}${scope && !aliasAction ? ` ${scope} --` : ''}`,
+      toolDescription: actionOptions.documentation,
+      toolEpilog: `For more information on available unscoped parameters, use "${toolCommand} --help"`,
       enableTabCompletionAction: false
     };
 
@@ -121,6 +130,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     this._scopedCommandLineParser = new InternalScopedCommandLineParser({
       ...parserOptions,
       actionOptions: this._options,
+      aliasAction: data.aliasAction,
       unscopedActionParameters: this.parameters,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });
