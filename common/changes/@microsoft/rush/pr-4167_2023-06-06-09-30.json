@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "fix typo in docs for `startingFolder`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

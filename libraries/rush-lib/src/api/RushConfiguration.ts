@@ -194,7 +194,7 @@ export interface ITryFindRushJsonLocationOptions {
   showVerbose?: boolean; // Defaults to false (inverse of old `verbose` parameter)
 
   /**
-   * The folder path where the search will start.  Defaults tot he current working directory.
+   * The folder path where the search will start.  Defaults to the current working directory.
    */
   startingFolder?: string; // Defaults to cwd
 }
