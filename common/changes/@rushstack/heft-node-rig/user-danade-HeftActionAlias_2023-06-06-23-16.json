@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-node-rig",
       "comment": "Add \"heft start\" alias that maps to \"heft build-watch --serve\"",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-node-rig"
