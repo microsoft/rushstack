@@ -150,6 +150,11 @@ export class ShellOperationRunner implements IOperationRunner {
       context.collatedWriter.terminal,
       this._logFilenameIdentifier
     );
+    const cacheProjectLogWritable: ProjectLogWritable = new ProjectLogWritable(
+      this._rushProject,
+      context.collatedWriter.terminal,
+      `${this._logFilenameIdentifier}.cache`
+    );
 
     try {
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
@@ -188,9 +193,18 @@ export class ShellOperationRunner implements IOperationRunner {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       // Controls the log for the cache subsystem
-      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(
-        context.quietMode ? discardTransform : context.collatedWriter
-      );
+      const cacheDiscardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
+        destination: context.collatedWriter
+      });
+
+      const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
+        destinations: [
+          context.quietMode ? cacheDiscardTransform : context.collatedWriter,
+          cacheProjectLogWritable
+        ]
+      });
+
+      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
       const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
         buildCacheCollatedTerminal,
         {
@@ -421,6 +435,13 @@ export class ShellOperationRunner implements IOperationRunner {
           : undefined;
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
+
+        cacheSplitterTransform.close();
+        // If the pipeline is wired up correctly, then closing cacheSplitterTransform should
+        // have closed projectLogWritable.
+        if (cacheProjectLogWritable.isOpen) {
+          throw new InternalError('The output file handle was not closed');
+        }
 
         if (buildCacheTerminalProvider.hasErrors) {
           status = OperationStatus.Failure;
