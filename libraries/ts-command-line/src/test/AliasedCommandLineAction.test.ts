@@ -12,11 +12,11 @@ import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter
 class TestAliasAction extends AliasCommandLineAction {
   public done: boolean = false;
 
-  public constructor(targetAction: CommandLineAction, defaultArguments?: string[]) {
+  public constructor(targetAction: CommandLineAction, defaultParameters?: string[]) {
     super({
       toolFilename: 'example',
       aliasName: 'alias-action',
-      defaultArguments,
+      defaultParameters,
       targetAction
     });
   }

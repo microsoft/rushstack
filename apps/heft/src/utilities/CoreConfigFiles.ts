@@ -19,7 +19,7 @@ export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript' | 'nodeSer
 
 export interface IHeftConfigurationJsonActionReference {
   actionName: string;
-  defaultArguments?: string[];
+  defaultParameters?: string[];
 }
 
 export interface IHeftConfigurationJsonAliases {

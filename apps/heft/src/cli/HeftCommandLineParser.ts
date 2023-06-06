@@ -139,7 +139,7 @@ export class HeftCommandLineParser extends CommandLineParser {
       const aliasActions: AliasCommandLineAction[] = [];
       for (const [
         aliasName,
-        { actionName, defaultArguments }
+        { actionName, defaultParameters }
       ] of internalHeftSession.actionReferencesByAlias) {
         const targetAction: CommandLineAction | undefined = this.tryGetAction(actionName);
         if (!targetAction) {
@@ -153,7 +153,7 @@ export class HeftCommandLineParser extends CommandLineParser {
             toolFilename: HEFT_TOOL_FILENAME,
             aliasName,
             targetAction,
-            defaultArguments
+            defaultParameters
           })
         );
       }

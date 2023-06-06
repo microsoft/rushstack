@@ -10,7 +10,13 @@
    */
   // "extends": "base-project/config/heft.json",
 
-  // TODO: Add comments
+  "aliasesByName": {
+    "start": {
+      "actionName": "build-watch",
+      "defaultParameters": ["--serve"]
+    }
+  },
+
   "phasesByName": {
     "build": {
       "cleanFiles": [

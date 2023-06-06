@@ -124,8 +124,8 @@
               "type": "string",
               "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
             },
-            "defaultArguments": {
-              "description": "Arguments to pass to the Heft action by default.",
+            "defaultParameters": {
+              "description": "Parameters to pass to the Heft action by default.",
               "type": "array",
               "items": {
                 "type": "string"

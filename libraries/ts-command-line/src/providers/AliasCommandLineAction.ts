@@ -33,7 +33,7 @@ export interface IAliasCommandLineActionOptions {
   /**
    * A list of default parameters to pass to the target action.
    */
-  defaultArguments?: string[];
+  defaultParameters?: string[];
 
   /**
    * The action that this alias invokes.
@@ -60,16 +60,16 @@ export class AliasCommandLineAction extends CommandLineAction {
   /**
    * A list of default arguments to pass to the target action.
    */
-  public readonly defaultArguments: ReadonlyArray<string>;
+  public readonly defaultParameters: ReadonlyArray<string>;
 
   private _parameterKeyMap: Map<string, string> = new Map<string, string>();
 
   public constructor(options: IAliasCommandLineActionOptions) {
     const toolFilename: string = options.toolFilename;
     const targetActionName: string = options.targetAction.actionName;
-    const defaultArguments: string = (options.defaultArguments || []).join(' ');
+    const defaultParametersString: string = (options.defaultParameters || []).join(' ');
     const summary: string = `An alias for "${toolFilename} ${targetActionName}${
-      defaultArguments ? ` ${defaultArguments}` : ''
+      defaultParametersString ? ` ${defaultParametersString}` : ''
     }".`;
 
     super({
@@ -81,7 +81,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     });
 
     this.targetAction = options.targetAction;
-    this.defaultArguments = options.defaultArguments || [];
+    this.defaultParameters = options.defaultParameters || [];
   }
 
   /** @internal */

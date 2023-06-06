@@ -222,9 +222,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           const actionName: string = args[actionNameIndex];
           const action: CommandLineAction | undefined = this.tryGetAction(actionName);
           const aliasAction: AliasCommandLineAction | undefined = action as AliasCommandLineAction;
-          if (aliasAction?.defaultArguments?.length) {
+          if (aliasAction?.defaultParameters?.length) {
             const insertIndex: number = actionNameIndex + 1;
-            args = args.slice(0, insertIndex).concat(aliasAction.defaultArguments, args.slice(insertIndex));
+            args = args.slice(0, insertIndex).concat(aliasAction.defaultParameters, args.slice(insertIndex));
           }
         }
       }
