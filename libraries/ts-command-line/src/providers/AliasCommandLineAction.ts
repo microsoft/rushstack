@@ -161,7 +161,8 @@ export class AliasCommandLineAction extends CommandLineAction {
     // Re-map the parsed data to the target action's parameters and execute the target action processor.
     const targetData: ICommandLineParserData = {
       action: this.targetAction.actionName,
-      aliasAction: data.action
+      aliasAction: data.action,
+      aliasDocumentation: this.documentation
     };
     for (const [key, value] of Object.entries(data)) {
       // If we have a mapping for the specified key, then use it. Otherwise, use the key as-is.

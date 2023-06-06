@@ -332,6 +332,8 @@ export interface _ICommandLineParserData {
     action: string;
     // (undocumented)
     aliasAction?: string;
+    // (undocumented)
+    aliasDocumentation?: string;
 }
 
 // @public
