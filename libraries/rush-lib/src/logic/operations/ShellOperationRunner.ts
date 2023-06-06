@@ -188,7 +188,9 @@ export class ShellOperationRunner implements IOperationRunner {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       // Controls the log for the cache subsystem
-      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(context.collatedWriter);
+      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(
+        context.quietMode ? discardTransform : context.collatedWriter
+      );
       const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
         buildCacheCollatedTerminal,
         {
