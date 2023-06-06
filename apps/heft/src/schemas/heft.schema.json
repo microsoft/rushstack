@@ -125,7 +125,7 @@
               "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
             },
             "defaultParameters": {
-              "description": "Parameters to pass to the Heft action by default.",
+              "description": "Parameters to pass to the Heft action by default. These parameters will be appended after the specified action and before any user-specified parameters.",
               "type": "array",
               "items": {
                 "type": "string"
