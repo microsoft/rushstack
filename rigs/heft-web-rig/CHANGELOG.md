@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Mon, 05 Jun 2023 21:45:21 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Jun 2023 02:52:51 GMT and should not be manually modified.
+
+## 0.17.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Update Jest environment "customExportConditions" to ["require", "node", "umd"]
 
 ## 0.16.1
 Mon, 05 Jun 2023 21:45:21 GMT

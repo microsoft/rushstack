@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.7.0",
+      "date": "Tue, 06 Jun 2023 02:52:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adds a new base config for web projects, jest-web.config.json. Adds the \"customExportConditions\" field to both base configs with sensible defaults."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@rushstack/heft-jest-plugin_v0.6.0",
       "date": "Fri, 02 Jun 2023 02:01:12 GMT",

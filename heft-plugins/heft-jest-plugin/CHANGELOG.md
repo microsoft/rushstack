@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 02 Jun 2023 02:01:12 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Jun 2023 02:52:51 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Adds a new base config for web projects, jest-web.config.json. Adds the "customExportConditions" field to both base configs with sensible defaults.
 
 ## 0.6.0
 Fri, 02 Jun 2023 02:01:12 GMT
