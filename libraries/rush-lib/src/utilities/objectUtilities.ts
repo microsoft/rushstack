@@ -36,8 +36,7 @@ export function objectsAreDeepEqual<TObject>(a: TObject, b: TObject): boolean {
             return false;
           } else {
             for (const property of aObjectProperties) {
-              if (bObjectProperties.has(property)) {
-                bObjectProperties.delete(property);
+              if (bObjectProperties.delete(property)) {
                 if (
                   !objectsAreDeepEqual(
                     (a as Record<string, unknown>)[property],
