@@ -110,9 +110,7 @@ class TestCommandLine extends CommandLineParser {
 describe(AliasCommandLineAction.name, () => {
   it('executes the aliased action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'action'
-    )! as TestAction;
+    const targetAction: TestAction = commandLineParser.getAction('action') as TestAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction);
     commandLineParser.addAction(aliasAction);
 
@@ -125,9 +123,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('executes the aliased action with provided default arguments', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'action'
-    )! as TestAction;
+    const targetAction: TestAction = commandLineParser.getAction('action') as TestAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction, ['--flag']);
     commandLineParser.addAction(aliasAction);
 
@@ -140,9 +136,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('executes the aliased scoped action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestScopedAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    const targetAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction);
     commandLineParser.addAction(aliasAction);
 
@@ -156,9 +150,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('executes the aliased scoped action with provided default scoping arguments', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestScopedAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    const targetAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction, ['--scope', 'foo', '--']);
     commandLineParser.addAction(aliasAction);
 
@@ -172,9 +164,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('prints the action parameter map', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'action'
-    )! as TestAction;
+    const targetAction: TestAction = commandLineParser.getAction('action') as TestAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction);
     commandLineParser.addAction(aliasAction);
 
@@ -191,9 +181,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('prints the unscoped action parameter map', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestScopedAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    const targetAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction);
     commandLineParser.addAction(aliasAction);
 
@@ -210,9 +198,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('prints the unscoped action parameter map with provided default arguments', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const targetAction: TestScopedAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    const targetAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     const aliasAction: TestAliasAction = new TestAliasAction(targetAction, ['--verbose']);
     commandLineParser.addAction(aliasAction);
 
@@ -229,9 +215,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('prints the scoped action parameter map', async () => {
     let commandLineParser: TestCommandLine = new TestCommandLine();
-    let targetAction: TestScopedAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    let targetAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     let aliasAction: TestAliasAction = new TestAliasAction(targetAction);
     commandLineParser.addAction(aliasAction);
 
@@ -249,9 +233,7 @@ describe(AliasCommandLineAction.name, () => {
     expect(parameterStringMap).toMatchSnapshot();
 
     commandLineParser = new TestCommandLine();
-    targetAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    targetAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     aliasAction = new TestAliasAction(targetAction);
     commandLineParser.addAction(aliasAction);
 
@@ -272,9 +254,7 @@ describe(AliasCommandLineAction.name, () => {
 
   it('prints the scoped action parameter map with provided default scoping arguments', async () => {
     let commandLineParser: TestCommandLine = new TestCommandLine();
-    let targetAction: TestScopedAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    let targetAction: TestScopedAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     let aliasAction: TestAliasAction = new TestAliasAction(targetAction, ['--scope', 'foo', '--']);
     commandLineParser.addAction(aliasAction);
 
@@ -292,9 +272,7 @@ describe(AliasCommandLineAction.name, () => {
     expect(parameterStringMap).toMatchSnapshot();
 
     commandLineParser = new TestCommandLine();
-    targetAction = commandLineParser.actions.find(
-      (a) => a.actionName === 'scoped-action'
-    )! as TestScopedAction;
+    targetAction = commandLineParser.getAction('scoped-action') as TestScopedAction;
     aliasAction = new TestAliasAction(targetAction, ['--scope', 'foo', '--']);
     commandLineParser.addAction(aliasAction);
 
