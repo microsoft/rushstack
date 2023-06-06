@@ -176,18 +176,9 @@ export class AliasCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * Invoked by CommandLineParser.onExecute().
-   * @internal
+   * Executes the target action.
    */
-  public async _execute(): Promise<void> {
-    /* override */
+  protected async onExecute(): Promise<void> {
     await this.targetAction._execute();
-  }
-
-  /**
-   * Unused. Alias actions override the CommandLineAction._execute() method.
-   */
-  protected onExecute(): Promise<void> {
-    throw new Error('AliasCommandLineAction.onExecute() should not be called.');
   }
 }

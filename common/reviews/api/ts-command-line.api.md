@@ -10,8 +10,6 @@ import * as argparse from 'argparse';
 export class AliasCommandLineAction extends CommandLineAction {
     constructor(options: IAliasCommandLineActionOptions);
     readonly defaultArguments: ReadonlyArray<string>;
-    // @internal
-    _execute(): Promise<void>;
     protected onExecute(): Promise<void>;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
