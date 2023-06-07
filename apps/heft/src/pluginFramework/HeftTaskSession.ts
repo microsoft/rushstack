@@ -14,6 +14,50 @@ import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { CancellationToken } from './CancellationToken';
 import { WatchGlobFn } from '../plugins/FileGlobSpecifier';
+import { InternalError } from '@rushstack/node-core-library';
+
+/**
+ * The type of {@link IHeftTaskSession.parsedCommandLine}, which exposes details about the
+ * command line that was used to invoke Heft.
+ * @public
+ */
+export interface IHeftParsedCommandLine {
+  /**
+   * Returns the subcommand passed on the Heft command line, before any aliases have been expanded.
+   * This can be useful when printing error messages that need to refer to the invoked command line.
+   *
+   * @remarks
+   * For example, if the invoked command was `heft test --verbose`, then `commandName`
+   * would be `test`.
+   *
+   * Suppose the invoked command was `heft start` which is an alias for `heft build-watch --serve`.
+   * In this case, the `commandName` would be `start`.  To get the expanded name `build-watch`,
+   * use {@link IHeftParsedCommandLine.unaliasedCommandName} instead.
+   *
+   * When invoking phases directly using `heft run`, the `commandName` is `run`.
+   *
+   * @see {@link IHeftParsedCommandLine.unaliasedCommandName}
+   */
+  readonly commandName: string;
+
+  /**
+   * Returns the subcommand passed on the Heft command line, after any aliases have been expanded.
+   * This can be useful when printing error messages that need to refer to the invoked command line.
+   *
+   * @remarks
+   * For example, if the invoked command was `heft test --verbose`, then `unaliasedCommandName`
+   * would be `test`.
+   *
+   * Suppose the invoked command was `heft start` which is an alias for `heft build-watch --serve`.
+   * In this case, the `unaliasedCommandName` would be `build-watch`.  To get the alias name
+   * `start`, use @see {@link IHeftParsedCommandLine.commandName} instead.
+   *
+   * When invoking phases directly using `heft run`, the `unaliasedCommandName` is `run`.
+   *
+   * @see {@link IHeftParsedCommandLine.commandName}
+   */
+  readonly unaliasedCommandName: string;
+}
 
 /**
  * The task session is responsible for providing session-specific information to Heft task plugins.
@@ -45,6 +89,12 @@ export interface IHeftTaskSession {
    * @public
    */
   readonly parameters: IHeftParameters;
+
+  /**
+   * Exposes details about the command line that was used to invoke Heft.
+   * This value is initially `undefined` and later filled in after the command line has been parsed.
+   */
+  readonly parsedCommandLine: IHeftParsedCommandLine;
 
   /**
    * The cache folder for the task. This folder is unique for each task, and will not be
@@ -190,6 +240,7 @@ export class HeftTaskSession implements IHeftTaskSession {
 
   private readonly _options: IHeftTaskSessionOptions;
   private _parameters: IHeftParameters | undefined;
+  private _parsedCommandLine: IHeftParsedCommandLine;
 
   /**
    * @internal
@@ -206,6 +257,10 @@ export class HeftTaskSession implements IHeftTaskSession {
     return this._parameters;
   }
 
+  public get parsedCommandLine(): IHeftParsedCommandLine {
+    return this._parsedCommandLine;
+  }
+
   public constructor(options: IHeftTaskSessionOptions) {
     const {
       internalHeftSession: {
@@ -217,6 +272,12 @@ export class HeftTaskSession implements IHeftTaskSession {
       task
     } = options;
 
+    if (!options.internalHeftSession.parsedCommandLine) {
+      // This should not happen
+      throw new InternalError('Attempt to construct HeftTaskSession before command line has been parsed');
+    }
+    this._parsedCommandLine = options.internalHeftSession.parsedCommandLine;
+
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
     this.metricsCollector = metricsCollector;
     this.taskName = task.taskName;
@@ -226,7 +287,7 @@ export class HeftTaskSession implements IHeftTaskSession {
       registerFileOperations: new AsyncSeriesWaterfallHook(['fileOperations'])
     };
 
-    // Guranteed to be unique since phases are uniquely named, tasks are uniquely named within
+    // Guaranteed to be unique since phases are uniquely named, tasks are uniquely named within
     // phases, and neither can have '.' in their names. We will also use the phase name and
     // task name as the folder name (instead of the plugin name) since we want to enable re-use
     // of plugins in multiple phases and tasks while maintaining unique temp/cache folders for

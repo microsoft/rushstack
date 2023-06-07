@@ -72,7 +72,16 @@ function _getNodeServicePluginDefinition(): HeftTaskPluginDefinition {
     _nodeServicePluginDefinition = HeftTaskPluginDefinition.loadFromObject({
       heftPluginDefinitionJson: {
         pluginName: 'node-service-plugin',
-        entryPoint: './lib/plugins/NodeServicePlugin'
+        entryPoint: './lib/plugins/NodeServicePlugin',
+        parameterScope: 'node-service',
+        parameters: [
+          {
+            longName: '--serve',
+            parameterKind: 'flag',
+            description:
+              'Start a local web server for testing purposes.  This parameter is only available when running in watch mode.'
+          }
+        ]
       },
       packageRoot: `${__dirname}/../..`,
       packageName: '@rushstack/heft'

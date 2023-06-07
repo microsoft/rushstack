@@ -177,6 +177,12 @@ export interface IHeftParameters extends IHeftDefaultParameters {
 }
 
 // @public
+export interface IHeftParsedCommandLine {
+    readonly commandName: string;
+    readonly unaliasedCommandName: string;
+}
+
+// @public
 export interface IHeftPlugin<TSession extends IHeftLifecycleSession | IHeftTaskSession = IHeftLifecycleSession | IHeftTaskSession, TOptions = void> {
     readonly accessor?: object;
     apply(session: TSession, heftConfiguration: HeftConfiguration, pluginOptions?: TOptions): void;
@@ -225,6 +231,7 @@ export interface IHeftTaskSession {
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
+    readonly parsedCommandLine: IHeftParsedCommandLine;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;

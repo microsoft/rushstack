@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Fix a regression where heft-node-rig was not loading the NodeServicePlugin",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}

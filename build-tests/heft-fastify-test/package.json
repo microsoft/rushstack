@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft serve-watch",
+    "start": "heft build-watch --serve",
     "serve": "node lib/start.js",
     "_phase:build": "heft run --only build -- --clean"
   },
