@@ -23,6 +23,8 @@ import {
   PrintUtilities
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+import type { TerminalWritable } from '@rushstack/terminal';
+
 import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
@@ -138,25 +140,57 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    // TERMINAL PIPELINE:
-    //
-    //                             +--> quietModeTransform? --> collatedWriter
-    //                             |
-    // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-    //                                                        |
-    //                                                        +--> stdioSummarizer
+    // Only open the *.cache.log file(s) if the cache is enabled.
+    const cacheProjectLogWritable: ProjectLogWritable | undefined = this._buildCacheConfiguration
+      ? new ProjectLogWritable(
+          this._rushProject,
+          context.collatedWriter.terminal,
+          `${this._logFilenameIdentifier}.cache`
+        )
+      : undefined;
+
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal,
       this._logFilenameIdentifier
     );
-    const cacheProjectLogWritable: ProjectLogWritable = new ProjectLogWritable(
-      this._rushProject,
-      context.collatedWriter.terminal,
-      `${this._logFilenameIdentifier}.cache`
-    );
 
     try {
+      //#region CACHE LOGGING
+      const cacheDiscardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
+        destination: context.collatedWriter
+      });
+
+      let cacheCollatedTerminal: CollatedTerminal;
+      const cacheConsoleWritable: TerminalWritable = context.quietMode
+        ? cacheDiscardTransform
+        : context.collatedWriter;
+      if (cacheProjectLogWritable) {
+        const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
+          destinations: [cacheConsoleWritable, cacheProjectLogWritable]
+        });
+        cacheCollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
+      } else {
+        cacheCollatedTerminal = new CollatedTerminal(cacheConsoleWritable);
+      }
+
+      const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        cacheCollatedTerminal,
+        {
+          debugEnabled: context.debugMode
+        }
+      );
+      const buildCacheTerminal: Terminal | undefined = new Terminal(buildCacheTerminalProvider);
+      //#endregion
+
+      //#region OPERATION LOGGING
+      // TERMINAL PIPELINE:
+      //
+      //                             +--> quietModeTransform? --> collatedWriter
+      //                             |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+      //                                                        |
+      //                                                        +--> stdioSummarizer
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: projectLogWritable,
         removeColors: true,
@@ -191,27 +225,7 @@ export class ShellOperationRunner implements IOperationRunner {
         debugEnabled: context.debugMode
       });
       const terminal: Terminal = new Terminal(terminalProvider);
-
-      // Controls the log for the cache subsystem
-      const cacheDiscardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
-        destination: context.collatedWriter
-      });
-
-      const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
-        destinations: [
-          context.quietMode ? cacheDiscardTransform : context.collatedWriter,
-          cacheProjectLogWritable
-        ]
-      });
-
-      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
-      const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
-        buildCacheCollatedTerminal,
-        {
-          debugEnabled: context.debugMode
-        }
-      );
-      const buildCacheTerminal: Terminal = new Terminal(buildCacheTerminalProvider);
+      //#endregion
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -436,14 +450,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
-        cacheSplitterTransform.close();
-        // If the pipeline is wired up correctly, then closing cacheSplitterTransform should
-        // have closed projectLogWritable.
-        if (cacheProjectLogWritable.isOpen) {
-          throw new InternalError('The output file handle was not closed');
-        }
-
-        if (buildCacheTerminalProvider.hasErrors) {
+        if (terminalProvider.hasErrors) {
           status = OperationStatus.Failure;
         } else if (cacheWriteSuccess === false) {
           status = OperationStatus.SuccessWithWarning;
@@ -453,6 +460,7 @@ export class ShellOperationRunner implements IOperationRunner {
       return status;
     } finally {
       projectLogWritable.close();
+      cacheProjectLogWritable?.close();
     }
   }
 
