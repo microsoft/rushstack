@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Write cache logs to their own file(s).",
+      "comment": "Fix an issue where cache logging data was always written to stdout.",
       "type": "none"
     }
   ],
