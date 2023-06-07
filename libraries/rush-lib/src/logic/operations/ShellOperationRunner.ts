@@ -157,14 +157,16 @@ export class ShellOperationRunner implements IOperationRunner {
 
     try {
       //#region CACHE LOGGING
-      const cacheDiscardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
-        destination: context.collatedWriter
-      });
+      let cacheConsoleWritable: TerminalWritable;
+      if (context.quietMode) {
+        cacheConsoleWritable = new DiscardStdoutTransform({
+          destination: context.collatedWriter
+        });
+      } else {
+        cacheConsoleWritable = context.collatedWriter;
+      }
 
       let cacheCollatedTerminal: CollatedTerminal;
-      const cacheConsoleWritable: TerminalWritable = context.quietMode
-        ? cacheDiscardTransform
-        : context.collatedWriter;
       if (cacheProjectLogWritable) {
         const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
           destinations: [cacheConsoleWritable, cacheProjectLogWritable]
@@ -180,7 +182,7 @@ export class ShellOperationRunner implements IOperationRunner {
           debugEnabled: context.debugMode
         }
       );
-      const buildCacheTerminal: Terminal | undefined = new Terminal(buildCacheTerminalProvider);
+      const buildCacheTerminal: Terminal = new Terminal(buildCacheTerminalProvider);
       //#endregion
 
       //#region OPERATION LOGGING
@@ -450,7 +452,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
-        if (terminalProvider.hasErrors) {
+        if (buildCacheTerminalProvider.hasErrors) {
           status = OperationStatus.Failure;
         } else if (cacheWriteSuccess === false) {
           status = OperationStatus.SuccessWithWarning;
