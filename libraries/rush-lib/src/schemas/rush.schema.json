@@ -344,6 +344,34 @@
           "items": {
             "type": "string"
           }
+        },
+        "preRushAdd": {
+          "description": "The list of scripts to run before the Rush add command starts.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postRushAdd": {
+          "description": "The list of scripts to run after the Rush add command finishes.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preRushRemove": {
+          "description": "The list of scripts to run before the Rush remove command starts.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postRushRemove": {
+          "description": "The list of scripts to run after the Rush remove command finishes.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false

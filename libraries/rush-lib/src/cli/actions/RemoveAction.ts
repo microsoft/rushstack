@@ -4,6 +4,7 @@
 import { ConsoleTerminalProvider, Terminal, ITerminal } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
+import { Event } from '../../api/EventHooks';
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -14,6 +15,7 @@ import type {
 
 export class RemoveAction extends BaseAddAndRemoveAction {
   protected readonly _allFlag: CommandLineFlagParameter;
+  protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
   protected readonly _packageNameList: CommandLineStringListParameter;
   private _terminalProvider: ConsoleTerminalProvider;
   private _terminal: ITerminal;
@@ -45,6 +47,10 @@ export class RemoveAction extends BaseAddAndRemoveAction {
     this._allFlag = this.defineFlagParameter({
       parameterLongName: '--all',
       description: 'If specified, the dependency will be removed from all projects that declare it.'
+    });
+    this._ignoreHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-hooks',
+      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
   }
 
@@ -84,5 +90,22 @@ export class RemoveAction extends BaseAddAndRemoveAction {
       debugInstall: this.parser.isDebug,
       actionName: this.actionName
     };
+  }
+
+  // @override
+  public async runAsync(): Promise<void> {
+    await this.eventHooksManager.handle(
+      Event.preRushRemove,
+      this.parser.isDebug,
+      this._ignoreHooksParameter.value
+    );
+
+    await super.runAsync();
+
+    await this.eventHooksManager.handle(
+      Event.postRushRemove,
+      this.parser.isDebug,
+      this._ignoreHooksParameter.value
+    );
   }
 }
