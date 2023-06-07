@@ -15,10 +15,7 @@ const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
 
 // error: "The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received ''"
 const isInvalidImporterPath: (ex: unknown) => boolean = (ex) =>
-  typeof ex === 'object' &&
-  !!ex &&
-  'code' in ex &&
-  (ex as { code: unknown }).code === 'ERR_INVALID_ARG_VALUE';
+  (ex as { code: unknown } | undefined)?.code === 'ERR_INVALID_ARG_VALUE';
 
 // Module path for eslintrc.cjs
 // Example: ".../@eslint/eslintrc/dist/eslintrc.cjs"
