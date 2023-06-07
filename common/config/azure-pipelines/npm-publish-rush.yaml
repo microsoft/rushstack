@@ -11,22 +11,22 @@ steps:
   - checkout: self
     persistCredentials: true
   - template: templates/build.yaml
-  - template: templates/bump-versions.yaml
-    parameters:
-      VersionPolicyName: noRush
-      BranchName: $(SourceBranch)
-  - template: templates/bump-versions.yaml
-    parameters:
-      VersionPolicyName: rush
-      BranchName: $(SourceBranch)
+  # - template: templates/bump-versions.yaml
+  #   parameters:
+  #     VersionPolicyName: noRush
+  #     BranchName: $(SourceBranch)
+  # - template: templates/bump-versions.yaml
+  #   parameters:
+  #     VersionPolicyName: rush
+  #     BranchName: $(SourceBranch)
   - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
     displayName: 'Prepublish workaround for rush-lib'
-  - template: templates/publish.yaml
-    parameters:
-      VersionPolicyName: noRush
-      BranchName: $(SourceBranch)
+  # - template: templates/publish.yaml
+  #   parameters:
+  #     VersionPolicyName: noRush
+  #     BranchName: $(SourceBranch)
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: rush
       BranchName: $(SourceBranch)
-  - template: templates/record-published-versions.yaml
+  # - template: templates/record-published-versions.yaml
