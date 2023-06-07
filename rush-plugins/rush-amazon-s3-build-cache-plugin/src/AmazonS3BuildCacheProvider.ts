@@ -98,7 +98,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
 
   private async _getS3ClientAsync(terminal: ITerminal): Promise<AmazonS3Client> {
     if (!this.__s3Client) {
-      let credentials: IAmazonS3Credentials | undefined = fromAmazonEnv() ?? fromRushEnv();
+      let credentials: IAmazonS3Credentials | undefined = fromRushEnv() ?? fromAmazonEnv();
 
       if (!credentials) {
         terminal.writeDebugLine('No credentials found in env. Trying cloud credentials.');
@@ -121,7 +121,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
                 `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}".`
             );
           } else {
-            credentials = fromAmazonEnv() ?? fromRushEnv(cacheEntry?.credential);
+            credentials = fromRushEnv(cacheEntry?.credential);
           }
         } else if (this._isCacheWriteAllowedByConfiguration) {
           throw new Error(
