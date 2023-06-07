@@ -2,6 +2,33 @@
   "name": "@rushstack/heft-dev-cert-plugin",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.3.3",
+      "date": "Wed, 07 Jun 2023 22:45:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.33`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.51.0` to `^0.52.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/heft-dev-cert-plugin_v0.3.2",
       "date": "Tue, 06 Jun 2023 02:52:51 GMT",

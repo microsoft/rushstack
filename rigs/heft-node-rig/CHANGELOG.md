@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 06 Jun 2023 02:52:51 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+
+## 2.2.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add "heft start" alias that maps to "heft build-watch --serve"
+
+### Patches
+
+- Fix a regression where heft-node-rig was not loading the NodeServicePlugin
 
 ## 2.1.0
 Tue, 06 Jun 2023 02:52:51 GMT

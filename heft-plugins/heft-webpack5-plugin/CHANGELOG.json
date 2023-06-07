@@ -2,6 +2,38 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.7.3",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.7.3",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the error message when the \"--serve\" is incorrectly specified"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.51.0` to `^0.52.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.2",
       "tag": "@rushstack/heft-webpack5-plugin_v0.7.2",
       "date": "Tue, 06 Jun 2023 02:52:51 GMT",

@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 02 Jun 2023 02:01:12 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+
+## 0.52.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add a new API IHeftTaskSession.parsedCommandLine for accessing the invoked command name
+- The built-in task NodeServicePlugin now supports the "--serve" mode with semantics similar to heft-webpack5-plugin
+
+### Patches
+
+- Add action aliases support. Action aliases can be used to create custom "heft <alias>" commands which call existing Heft commands with optional default arguments.
 
 ## 0.51.0
 Fri, 02 Jun 2023 02:01:12 GMT
