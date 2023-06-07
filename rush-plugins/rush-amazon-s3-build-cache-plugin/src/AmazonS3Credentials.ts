@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { EnvironmentConfiguration } from '@rushstack/rush-sdk';
 
 export const AWS_ACCESS_KEY_ID: 'AWS_ACCESS_KEY_ID' = 'AWS_ACCESS_KEY_ID';
