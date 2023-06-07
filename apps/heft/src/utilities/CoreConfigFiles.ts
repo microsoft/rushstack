@@ -61,6 +61,10 @@ export class CoreConfigFiles {
     | ConfigurationFile<INodeServicePluginConfiguration>
     | undefined;
 
+  public static heftConfigurationProjectRelativeFilePath: string = `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`;
+
+  public static nodeServiceConfigurationProjectRelativeFilePath: string = `${Constants.projectConfigFolderName}/${Constants.nodeServiceConfigurationFilename}`;
+
   /**
    * Returns the loader for the `config/heft.json` config file.
    */
@@ -81,10 +85,10 @@ export class CoreConfigFiles {
         });
       };
 
-      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
+      const schemaObject: object = await import('../schemas/heft.schema.json');
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
-        projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`,
-        jsonSchemaPath: schemaPath,
+        projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
+        jsonSchemaObject: schemaObject,
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
           object: { inheritanceType: InheritanceType.merge }
@@ -119,7 +123,10 @@ export class CoreConfigFiles {
         rigConfig
       );
     } catch (e: unknown) {
-      if (!(e as Error).message.startsWith('Resolved configuration object does not match schema')) {
+      if (
+        !(e instanceof Error) ||
+        !e.message.startsWith('Resolved configuration object does not match schema')
+      ) {
         throw e;
       }
 
@@ -128,10 +135,10 @@ export class CoreConfigFiles {
         // match the legacy schema. We don't need to worry about the resulting object, we just
         // want to see if it parses. We will use the ConfigurationFile class to load it to ensure
         // that we follow the "extends" chain for the entire config file.
-        const legacySchemaPath: string = path.join(__dirname, '..', 'schemas', 'heft-legacy.schema.json');
+        const legacySchemaObject: object = await import('../schemas/heft-legacy.schema.json');
         const legacyConfigFileLoader: ConfigurationFile<unknown> = new ConfigurationFile<unknown>({
-          projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`,
-          jsonSchemaPath: legacySchemaPath
+          projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
+          jsonSchemaObject: legacySchemaObject
         });
         await legacyConfigFileLoader.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
       } catch (e2) {
@@ -174,15 +181,26 @@ export class CoreConfigFiles {
     return configurationFile;
   }
 
-  public static get nodeServiceConfigurationFile(): ConfigurationFile<INodeServicePluginConfiguration> {
+  public static async tryLoadNodeServiceConfigurationFileAsync(
+    terminal: ITerminal,
+    projectPath: string,
+    rigConfig?: RigConfig | undefined
+  ): Promise<INodeServicePluginConfiguration | undefined> {
     if (!CoreConfigFiles._nodeServiceConfigurationLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'node-service.schema.json');
+      const schemaObject: object = await import('../schemas/node-service.schema.json');
       CoreConfigFiles._nodeServiceConfigurationLoader =
         new ConfigurationFile<INodeServicePluginConfiguration>({
-          projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.nodeServiceConfigurationFilename}`,
-          jsonSchemaPath: schemaPath
+          projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
+          jsonSchemaObject: schemaObject
         });
     }
-    return CoreConfigFiles._nodeServiceConfigurationLoader;
+
+    const configurationFile: INodeServicePluginConfiguration | undefined =
+      await CoreConfigFiles._nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectPath,
+        rigConfig
+      );
+    return configurationFile;
   }
 }

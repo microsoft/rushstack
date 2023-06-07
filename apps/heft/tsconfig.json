@@ -3,6 +3,7 @@
 
   "compilerOptions": {
     "types": ["heft-jest", "node"],
-    "lib": ["ES2020"]
+    "lib": ["ES2020"],
+    "resolveJsonModule": true
   }
 }

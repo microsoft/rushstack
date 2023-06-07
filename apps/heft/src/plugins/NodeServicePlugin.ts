@@ -125,12 +125,11 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     if (!this._rawConfiguration) {
-      this._rawConfiguration =
-        await CoreConfigFiles.nodeServiceConfigurationFile.tryLoadConfigurationFileForProjectAsync(
-          taskSession.logger.terminal,
-          heftConfiguration.buildFolderPath,
-          heftConfiguration.rigConfig
-        );
+      this._rawConfiguration = await CoreConfigFiles.tryLoadNodeServiceConfigurationFileAsync(
+        taskSession.logger.terminal,
+        heftConfiguration.buildFolderPath,
+        heftConfiguration.rigConfig
+      );
 
       // defaults
       this._configuration = {
@@ -178,7 +177,7 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
       } else {
         throw new Error(
           'The node service cannot be started because the task config file was not found: ' +
-            CoreConfigFiles.nodeServiceConfigurationFile.projectRelativeFilePath
+            CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath
         );
       }
     }
