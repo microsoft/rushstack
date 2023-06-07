@@ -14,8 +14,6 @@ export class Constants {
 
   public static cleanParameterLongName: string = '--clean';
 
-  public static cleanCacheParameterLongName: string = '--clean-cache';
-
   public static debugParameterLongName: string = '--debug';
 
   public static localesParameterLongName: string = '--locales';

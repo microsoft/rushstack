@@ -63,22 +63,6 @@ export class HeftConfiguration {
   }
 
   /**
-   * The project's cache folder.
-   *
-   * @remarks This folder exists at \<project root\>/.cache. In general, this folder is used to store
-   * cached output from tasks under task-specific subfolders, and is not intended to be directly
-   * written to. Instead, plugins should write to the directory provided by
-   * HeftTaskSession.taskCacheFolderPath
-   */
-  public get cacheFolderPath(): string {
-    if (!this._cacheFolderPath) {
-      this._cacheFolderPath = path.join(this.buildFolderPath, Constants.cacheFolderName);
-    }
-
-    return this._cacheFolderPath;
-  }
-
-  /**
    * The project's temporary folder.
    *
    * @remarks This folder exists at \<project root\>/temp. In general, this folder is used to store temporary
