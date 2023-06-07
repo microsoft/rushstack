@@ -12,10 +12,20 @@ import { EnvironmentConfiguration } from '@rushstack/rush-sdk';
 
 describe('Amazon S3 Credentials', () => {
   describe(fromAmazonEnv.name, () => {
+    let oldEnvAwsAccessKeyId: string | undefined;
+    let oldEnvAwsSecretAccessKey: string | undefined;
+    let oldEnvAwsSessionToken: string | undefined;
+    
+    beforeEach(() => {
+      oldEnvAwsAccessKeyId = process.env[AWS_ACCESS_KEY_ID];
+      oldEnvAwsSecretAccessKey = process.env[AWS_SECRET_ACCESS_KEY];
+      oldEnvAwsSessionToken = process.env[AWS_SESSION_TOKEN];
+    });
+    
     afterEach(() => {
-      delete process.env[AWS_ACCESS_KEY_ID];
-      delete process.env[AWS_SECRET_ACCESS_KEY];
-      delete process.env[AWS_SESSION_TOKEN];
+      process.env[AWS_ACCESS_KEY_ID] = oldEnvAwsAccessKeyId;
+      process.env[AWS_SECRET_ACCESS_KEY] = oldEnvAwsSecretAccessKey;
+      process.env[AWS_SESSION_TOKEN] = oldEnvAwsSessionToken;
     });
 
     it('returns AWS vars when present in env', () => {
