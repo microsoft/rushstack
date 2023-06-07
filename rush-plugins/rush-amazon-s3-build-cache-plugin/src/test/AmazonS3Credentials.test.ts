@@ -12,24 +12,44 @@ import { EnvironmentConfiguration } from '@rushstack/rush-sdk';
 
 describe('Amazon S3 Credentials', () => {
   describe(fromAmazonEnv.name, () => {
+    let isOldEnvAwsAccessKeyIdSet: boolean;
     let oldEnvAwsAccessKeyId: string | undefined;
+    let isOldEnvAwsSecretAccessKeySet: boolean;
     let oldEnvAwsSecretAccessKey: string | undefined;
+    let isOldEnvAwsSessionTokenSet: boolean;
     let oldEnvAwsSessionToken: string | undefined;
-    
+
     beforeEach(() => {
+      isOldEnvAwsAccessKeyIdSet = AWS_ACCESS_KEY_ID in process.env;
       oldEnvAwsAccessKeyId = process.env[AWS_ACCESS_KEY_ID];
+      isOldEnvAwsSecretAccessKeySet = AWS_SECRET_ACCESS_KEY in process.env;
       oldEnvAwsSecretAccessKey = process.env[AWS_SECRET_ACCESS_KEY];
+      isOldEnvAwsSessionTokenSet = AWS_SESSION_TOKEN in process.env;
       oldEnvAwsSessionToken = process.env[AWS_SESSION_TOKEN];
-      
+
       delete process.env[AWS_ACCESS_KEY_ID];
       delete process.env[AWS_SECRET_ACCESS_KEY];
       delete process.env[AWS_SESSION_TOKEN];
     });
-    
+
     afterEach(() => {
-      process.env[AWS_ACCESS_KEY_ID] = oldEnvAwsAccessKeyId;
-      process.env[AWS_SECRET_ACCESS_KEY] = oldEnvAwsSecretAccessKey;
-      process.env[AWS_SESSION_TOKEN] = oldEnvAwsSessionToken;
+      if (isOldEnvAwsAccessKeyIdSet) {
+        process.env[AWS_ACCESS_KEY_ID] = oldEnvAwsAccessKeyId;
+      } else {
+        delete process.env[AWS_ACCESS_KEY_ID];
+      }
+
+      if (isOldEnvAwsSecretAccessKeySet) {
+        process.env[AWS_SECRET_ACCESS_KEY] = oldEnvAwsSecretAccessKey;
+      } else {
+        delete process.env[AWS_SECRET_ACCESS_KEY];
+      }
+
+      if (isOldEnvAwsSessionTokenSet) {
+        process.env[AWS_SESSION_TOKEN] = oldEnvAwsSessionToken;
+      } else {
+        delete process.env[AWS_SESSION_TOKEN];
+      }
     });
 
     it('returns AWS vars when present in env', () => {
@@ -59,11 +79,11 @@ describe('Amazon S3 Credentials', () => {
 
     it('returns undefined if access key and secret are not both present', () => {
       process.env[AWS_ACCESS_KEY_ID] = AWS_ACCESS_KEY_ID;
-      expect(() => fromAmazonEnv()).toThrowErrorMatchingSnapshot();
+      expect(() => fromAmazonEnv()).toThrowErrorMatchingInlineSnapshot(`"The \\"AWS_ACCESS_KEY_ID\\" env variable is set, but the \\"AWS_SECRET_ACCESS_KEY\\" env variable is not set. Both or neither must be provided."`);
 
       delete process.env[AWS_ACCESS_KEY_ID];
       process.env[AWS_SECRET_ACCESS_KEY] = AWS_SECRET_ACCESS_KEY;
-      expect(() => fromAmazonEnv()).toThrowErrorMatchingSnapshot();
+      expect(() => fromAmazonEnv()).toThrowErrorMatchingInlineSnapshot(`"The \\"AWS_SECRET_ACCESS_KEY\\" env variable is set, but the \\"AWS_ACCESS_KEY_ID\\" env variable is not set. Both or neither must be provided."`);
     });
   });
 
