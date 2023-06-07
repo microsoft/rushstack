@@ -77,11 +77,13 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions
   ): void {
     this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
-    if (!taskSession.parameters.watch && this._isServeMode) {
+    if (this._isServeMode && !taskSession.parameters.watch) {
       throw new Error(
         `The ${JSON.stringify(
           SERVE_PARAMETER_LONG_NAME
-        )} parameter is only available when running in watch mode.`
+        )} parameter is only available when running in watch mode.` +
+          ` Try replacing "${taskSession.parsedCommandLine?.unaliasedCommandName}" with` +
+          ` "${taskSession.parsedCommandLine?.unaliasedCommandName}-watch" in your Heft command line.`
       );
     }
 
