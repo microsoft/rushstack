@@ -6,7 +6,7 @@ import {
   CommandLineParser,
   AliasCommandLineAction,
   type CommandLineFlagParameter,
-  type CommandLineAction
+  CommandLineAction
 } from '@rushstack/ts-command-line';
 import {
   Terminal,
@@ -180,18 +180,24 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   protected async onExecute(): Promise<void> {
     try {
-      if (this.selectedAction) {
-        this._internalHeftSession!.parsedCommandLine = {
-          commandName: this.selectedAction.actionName,
-          // TODO: Update this when we merge with https://github.com/microsoft/rushstack/pull/4168
-          unaliasedCommandName: this.selectedAction.actionName
-        };
-      } else {
-        this._internalHeftSession!.parsedCommandLine = {
-          commandName: '',
-          unaliasedCommandName: ''
-        };
+      const selectedAction: CommandLineAction | undefined = this.selectedAction;
+
+      let commandName: string = '';
+      let unaliasedCommandName: string = '';
+
+      if (selectedAction) {
+        commandName = selectedAction.actionName;
+        if (selectedAction instanceof AliasAction) {
+          unaliasedCommandName = selectedAction.targetAction.actionName;
+        } else {
+          unaliasedCommandName = selectedAction.actionName;
+        }
       }
+
+      this._internalHeftSession!.parsedCommandLine = {
+        commandName,
+        unaliasedCommandName
+      };
       await super.onExecute();
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);
