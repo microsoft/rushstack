@@ -141,10 +141,17 @@ export class HeftCommandLineParser extends CommandLineParser {
         aliasName,
         { actionName, defaultParameters }
       ] of internalHeftSession.actionReferencesByAlias) {
+        const existingAction: CommandLineAction | undefined = this.tryGetAction(aliasName);
+        if (existingAction) {
+          throw new Error(
+            `The alias "${aliasName}" specified in heft.json cannot be used because an action ` +
+              'with that name already exists.'
+          );
+        }
         const targetAction: CommandLineAction | undefined = this.tryGetAction(actionName);
         if (!targetAction) {
           throw new Error(
-            `The action "${actionName}" referred to by alias "${aliasName}" could not be found.`
+            `The action "${actionName}" referred to by alias "${aliasName}" in heft.json could not be found.`
           );
         }
         aliasActions.push(
