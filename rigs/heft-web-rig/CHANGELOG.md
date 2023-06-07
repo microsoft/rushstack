@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 06 Jun 2023 02:52:51 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+
+## 0.18.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add "heft start" alias that maps to "heft build-watch --serve"
 
 ## 0.17.0
 Tue, 06 Jun 2023 02:52:51 GMT

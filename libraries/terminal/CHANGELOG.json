@@ -2,6 +2,27 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.5.15",
+      "tag": "@rushstack/terminal_v0.5.15",
+      "date": "Wed, 07 Jun 2023 22:45:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.14",
       "tag": "@rushstack/terminal_v0.5.14",
       "date": "Tue, 06 Jun 2023 02:52:51 GMT",

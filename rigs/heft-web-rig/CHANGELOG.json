@@ -2,6 +2,47 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.18.0",
+      "tag": "@rushstack/heft-web-rig_v0.18.0",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"heft start\" alias that maps to \"heft build-watch --serve\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.11.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.7.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.51.0` to `^0.52.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.0",
       "tag": "@rushstack/heft-web-rig_v0.17.0",
       "date": "Tue, 06 Jun 2023 02:52:51 GMT",

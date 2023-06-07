@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+
+## 4.14.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add AliasCommandLineAction, a CommandLineAction that can be used to redirect commands with optional default arguments to existing commands.
 
 ## 4.13.3
 Mon, 22 May 2023 06:34:33 GMT
