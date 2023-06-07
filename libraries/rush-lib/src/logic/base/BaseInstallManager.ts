@@ -16,7 +16,8 @@ import {
   FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider
+  ITerminalProvider,
+  Path
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -450,11 +451,37 @@ export abstract class BaseInstallManager {
         // Clear the currently installed git hooks and install fresh copies
         FileSystem.ensureEmptyFolder(hookDestination);
 
+        // Find the relative path from Git hooks directory to the directory storing the actual scripts.
+        const hookRelativePath: string = Path.convertToSlashes(path.relative(hookDestination, hookSource));
+
         // Only copy files that look like Git hook names
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
-          // Copy the file.  Important: For Bash scripts, the EOL must not be CRLF.
-          const hookFileContent: string = FileSystem.readFile(path.join(hookSource, filename));
+          // Make sure the actual script in the hookSource directory has required permission bits
+          const hookFilePath: string = path.join(hookSource, filename);
+          const originalPosixModeBits: PosixModeBits = FileSystem.getPosixModeBits(hookFilePath);
+          FileSystem.changePosixModeBits(
+            hookFilePath,
+            // eslint-disable-next-line no-bitwise
+            originalPosixModeBits | PosixModeBits.UserRead | PosixModeBits.UserExecute
+          );
+
+          const hookFileContent: string = `#!/bin/bash
+SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
+
+if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
+  exec "$SCRIPT_IMPLEMENTATION_PATH"
+else
+  echo "The ${filename} Git hook no longer exists in your version of the repo. Run 'rush install' or 'rush update' to refresh your installed Git hooks." >&2
+fi
+
+# Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
+if command -v git-lfs &> /dev/null; then
+  git lfs pre-push "$@"
+fi
+`;
+          // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
           FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
             convertLineEndings: NewlineKind.Lf
           });
