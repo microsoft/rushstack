@@ -7,7 +7,7 @@ import * as fetch from 'node-fetch';
 
 import { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
 import { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
-import { IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
+import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
