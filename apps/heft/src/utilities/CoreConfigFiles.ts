@@ -111,12 +111,42 @@ export class CoreConfigFiles {
       });
     }
 
-    const configurationFile: IHeftConfigurationJson =
-      await CoreConfigFiles._heftConfigFileLoader.loadConfigurationFileForProjectAsync(
+    let configurationFile: IHeftConfigurationJson;
+    try {
+      configurationFile = await CoreConfigFiles._heftConfigFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
         projectPath,
         rigConfig
       );
+    } catch (e: unknown) {
+      if (!(e as Error).message.startsWith('Resolved configuration object does not match schema')) {
+        throw e;
+      }
+
+      try {
+        // If the config file doesn't match the schema, then we should check to see if it does
+        // match the legacy schema. We don't need to worry about the resulting object, we just
+        // want to see if it parses. We will use the ConfigurationFile class to load it to ensure
+        // that we follow the "extends" chain for the entire config file.
+        const legacySchemaPath: string = path.join(__dirname, '..', 'schemas', 'heft-legacy.schema.json');
+        const legacyConfigFileLoader: ConfigurationFile<unknown> = new ConfigurationFile<unknown>({
+          projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`,
+          jsonSchemaPath: legacySchemaPath
+        });
+        await legacyConfigFileLoader.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
+      } catch (e2) {
+        // It doesn't match the legacy schema either. Throw the original error.
+        throw e;
+      }
+      // Matches the legacy schema, so throw a more helpful error.
+      throw new Error(
+        "This project's Heft configuration appears to be using an outdated schema.\n\n" +
+          'Heft 0.51.0 introduced a major breaking change for Heft configuration files. ' +
+          'Your project appears to be using the older file format. You will need to ' +
+          'migrate your project to the new format. Follow these instructions: ' +
+          'https://rushstack.io/link/heft-0.51'
+      );
+    }
 
     // The pluginPackage field was resolved to the root of the package, but we also want to have
     // the original plugin package name in the config file. Gather all the plugin specifiers so we can
