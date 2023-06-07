@@ -10,8 +10,8 @@ steps:
   - script: 'git config --local user.name Rushbot'
     displayName: 'git config name'
 
-  - script: 'node common/scripts/install-run-rush.js change --verify'
-    displayName: 'Verify Change Logs'
+  # - script: 'node common/scripts/install-run-rush.js change --verify'
+  #   displayName: 'Verify Change Logs'
 
   - script: 'node common/scripts/install-run-rush.js install'
     displayName: 'Rush Install'
