@@ -14,7 +14,7 @@ import {
 
 import { AmazonS3Client } from './AmazonS3Client';
 import { WebClient } from './WebClient';
-import { IAmazonS3Credentials, fromAmazonEnv, fromRushEnv } from './AmazonS3Credentials';
+import { type IAmazonS3Credentials, fromAmazonEnv, fromRushEnv } from './AmazonS3Credentials';
 
 /**
  * @public
