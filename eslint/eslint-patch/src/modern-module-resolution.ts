@@ -13,6 +13,13 @@ const fs = require('fs');
 const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';
 
+// error: "The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received ''"
+const isInvalidImporterPath: (ex: unknow) => boolean = (ex) =>
+  typeof ex === 'object' &&
+  !!ex &&
+  'code' in ex &&
+  (ex as { code: unknown }).code === 'ERR_INVALID_ARG_VALUE';
+
 // Module path for eslintrc.cjs
 // Example: ".../@eslint/eslintrc/dist/eslintrc.cjs"
 let eslintrcBundlePath: string | undefined = undefined;
@@ -213,7 +220,7 @@ if (!ConfigArrayFactory.__patched) {
             // resolve using importerPath instead of relativeToPath
             return originalResolve.call(this, moduleName, importerPath);
           } catch (e) {
-            if (isModuleResolutionError(e)) {
+            if (isModuleResolutionError(e) || isInvalidImporterPath(e)) {
               return originalResolve.call(this, moduleName, relativeToPath);
             }
             throw e;
