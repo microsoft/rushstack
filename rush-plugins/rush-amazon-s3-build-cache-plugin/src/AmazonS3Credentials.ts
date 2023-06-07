@@ -32,9 +32,19 @@ export const fromAmazonEnv = (): IAmazonS3Credentials | undefined => {
       secretAccessKey,
       sessionToken
     };
+  } else if (accessKeyId) {
+    throw new Error(
+      `The "${AWS_ACCESS_KEY_ID}" env variable is set, but the "${AWS_SECRET_ACCESS_KEY}" `+
+      `env variable is not set. Both or neither must be provided.`
+    );
+  } else if (secretAccessKey) {
+    throw new Error(
+      `The "${AWS_SECRET_ACCESS_KEY}" env variable is set, but the "${AWS_ACCESS_KEY_ID}" `+
+      `env variable is not set. Both or neither must be provided.`
+    );
+  } else {
+    return undefined;
   }
-
-  return undefined;
 };
 
 /**

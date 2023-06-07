@@ -20,6 +20,10 @@ describe('Amazon S3 Credentials', () => {
       oldEnvAwsAccessKeyId = process.env[AWS_ACCESS_KEY_ID];
       oldEnvAwsSecretAccessKey = process.env[AWS_SECRET_ACCESS_KEY];
       oldEnvAwsSessionToken = process.env[AWS_SESSION_TOKEN];
+      
+      delete process.env[AWS_ACCESS_KEY_ID];
+      delete process.env[AWS_SECRET_ACCESS_KEY];
+      delete process.env[AWS_SESSION_TOKEN];
     });
     
     afterEach(() => {
@@ -55,10 +59,11 @@ describe('Amazon S3 Credentials', () => {
 
     it('returns undefined if access key and secret are not both present', () => {
       process.env[AWS_ACCESS_KEY_ID] = AWS_ACCESS_KEY_ID;
+      expect(() => fromAmazonEnv()).toThrowErrorMatchingSnapshot();
 
-      const credentials = fromAmazonEnv();
-
-      expect(credentials).toBeUndefined();
+      delete process.env[AWS_ACCESS_KEY_ID];
+      process.env[AWS_SECRET_ACCESS_KEY] = AWS_SECRET_ACCESS_KEY;
+      expect(() => fromAmazonEnv()).toThrowErrorMatchingSnapshot();
     });
   });
 
