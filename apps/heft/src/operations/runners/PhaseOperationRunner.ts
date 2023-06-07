@@ -31,7 +31,7 @@ export class PhaseOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     const { internalHeftSession, phase } = this._options;
-    const { clean, cleanCache, watch } = internalHeftSession.parameterManager.defaultParameters;
+    const { clean, watch } = internalHeftSession.parameterManager.defaultParameters;
 
     // Load and apply the plugins for this phase only
     const phaseSession: HeftPhaseSession = internalHeftSession.getSessionForPhase(phase);
@@ -56,11 +56,6 @@ export class PhaseOperationRunner implements IOperationRunner {
       for (const task of phase.tasks) {
         const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
         deleteOperations.push({ sourcePath: taskSession.tempFolderPath });
-
-        // Also delete the cache folder if requested
-        if (cleanCache) {
-          deleteOperations.push({ sourcePath: taskSession.cacheFolderPath });
-        }
       }
 
       // Delete the files if any were specified

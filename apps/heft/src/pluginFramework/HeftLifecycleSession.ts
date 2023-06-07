@@ -37,11 +37,9 @@ export interface IHeftLifecycleSession {
   readonly parameters: IHeftParameters;
 
   /**
-   * The cache folder for the lifecycle plugin. This folder is unique for each lifecycle plugin,
-   * and will not be cleaned when Heft is run with `--clean`. However, it will be cleaned when
-   * Heft is run with `--clean` and `--clean-cache`.
+   * The cache folder for the lifecycle plugin. This is an alias for tempFolderPath.
    *
-   * @public
+   * @deprecated Use `tempFolderPath` instead.
    */
   readonly cacheFolderPath: string;
 
@@ -177,11 +175,11 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
     // and lifecycle plugin names are enforced to be unique.
     const uniquePluginFolderName: string = `lifecycle.${options.pluginDefinition.pluginName}`;
 
-    // <projectFolder>/.cache/<phaseName>.<taskName>
-    this.cacheFolderPath = path.join(options.heftConfiguration.cacheFolderPath, uniquePluginFolderName);
-
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolderPath = path.join(options.heftConfiguration.tempFolderPath, uniquePluginFolderName);
+
+    // Preserved for cyclic dependency issues
+    this.cacheFolderPath = this.tempFolderPath;
 
     this._pluginHost = options.pluginHost;
   }

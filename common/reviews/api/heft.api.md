@@ -59,7 +59,6 @@ export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undef
 // @public (undocumented)
 export class HeftConfiguration {
     get buildFolderPath(): string;
-    get cacheFolderPath(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
     get globalTerminal(): ITerminal;
@@ -121,7 +120,6 @@ export interface _IHeftConfigurationInitializationOptions {
 // @public
 export interface IHeftDefaultParameters {
     readonly clean: boolean;
-    readonly cleanCache: boolean;
     readonly debug: boolean;
     readonly locales: Iterable<string>;
     readonly production: boolean;
@@ -149,6 +147,7 @@ export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeft
 
 // @public
 export interface IHeftLifecycleSession {
+    // @deprecated
     readonly cacheFolderPath: string;
     readonly hooks: IHeftLifecycleHooks;
     readonly logger: IScopedLogger;
@@ -227,6 +226,7 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 
 // @public
 export interface IHeftTaskSession {
+    // @deprecated
     readonly cacheFolderPath: string;
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;

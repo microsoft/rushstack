@@ -40,7 +40,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     const { internalHeftSession, type } = this._options;
-    const { clean, cleanCache, watch } = internalHeftSession.parameterManager.defaultParameters;
+    const { clean, watch } = internalHeftSession.parameterManager.defaultParameters;
 
     if (watch) {
       // Avoid running the lifecycle operation when in watch mode
@@ -73,11 +73,6 @@ export class LifecycleOperationRunner implements IOperationRunner {
             const lifecycleSession: IHeftLifecycleSession =
               await lifecycle.getSessionForPluginDefinitionAsync(pluginDefinition);
             deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
-
-            // Also delete the cache folder if requested
-            if (cleanCache) {
-              deleteOperations.push({ sourcePath: lifecycleSession.cacheFolderPath });
-            }
           }
 
           // Create the options and provide a utility method to obtain paths to delete

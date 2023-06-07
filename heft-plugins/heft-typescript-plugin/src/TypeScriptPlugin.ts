@@ -355,9 +355,8 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
     // Build out the configuration
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolderPath: heftConfiguration.buildFolderPath,
-      // Use tempFolderPath instead of cacheFolderPath. Running a clean will delete build outputs
-      // which the metadata file will imply are unchanged, causing typescript to avoid building
-      // these files. Since cleaning will delete files in the temp folder path, place it there.
+      // Build metadata is just another build output, but we put it in the temp folder because it will
+      // usually be discarded when published.
       buildMetadataFolderPath: taskSession.tempFolderPath,
       typeScriptToolPath: typeScriptToolPath,
 

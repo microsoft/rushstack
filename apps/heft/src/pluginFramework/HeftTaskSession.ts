@@ -97,11 +97,9 @@ export interface IHeftTaskSession {
   readonly parsedCommandLine: IHeftParsedCommandLine;
 
   /**
-   * The cache folder for the task. This folder is unique for each task, and will not be
-   * cleaned when Heft is run with `--clean`. However, it will be cleaned when Heft is run
-   * with `--clean` and `--clean-cache`.
+   * The cache folder for the task. This is an alias for the temp folder.
    *
-   * @public
+   * @deprecated Use `tempFolderPath` instead.
    */
   readonly cacheFolderPath: string;
 
@@ -264,7 +262,7 @@ export class HeftTaskSession implements IHeftTaskSession {
   public constructor(options: IHeftTaskSessionOptions) {
     const {
       internalHeftSession: {
-        heftConfiguration: { cacheFolderPath: cacheFolder, tempFolderPath: tempFolder },
+        heftConfiguration: { tempFolderPath: tempFolder },
         loggingManager,
         metricsCollector
       },
@@ -294,11 +292,11 @@ export class HeftTaskSession implements IHeftTaskSession {
     // each task.
     const uniqueTaskFolderName: string = `${phase.phaseName}.${task.taskName}`;
 
-    // <projectFolder>/.cache/<phaseName>.<taskName>
-    this.cacheFolderPath = path.join(cacheFolder, uniqueTaskFolderName);
-
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
+
+    // Preserved for backwards compatibility due to cyclic dependencies.
+    this.cacheFolderPath = this.tempFolderPath;
 
     this._options = options;
   }

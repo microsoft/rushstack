@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Remove the concept of the cache folder, since it mostly just causes bugs.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

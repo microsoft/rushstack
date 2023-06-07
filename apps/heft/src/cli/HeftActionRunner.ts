@@ -210,18 +210,11 @@ export class HeftActionRunner {
     });
 
     let cleanFlag: CommandLineFlagParameter | undefined;
-    let cleanCacheFlag: CommandLineFlagParameter | undefined;
     if (!this._action.watch) {
       // Only enable the clean flags in non-watch mode
       cleanFlag = parameterProvider.defineFlagParameter({
         parameterLongName: Constants.cleanParameterLongName,
         description: 'If specified, clean the outputs before running each phase.'
-      });
-      cleanCacheFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: Constants.cleanCacheParameterLongName,
-        description:
-          'If specified, clean the cache before running each phase. To use this flag, the ' +
-          `${JSON.stringify(Constants.cleanParameterLongName)} flag must also be provided.`
       });
     }
 
@@ -231,8 +224,7 @@ export class HeftActionRunner {
       getIsProduction: () => productionFlag.value,
       getIsWatch: () => this._action.watch,
       getLocales: () => localesParameter.values,
-      getIsClean: () => !!cleanFlag?.value,
-      getIsCleanCache: () => !!cleanCacheFlag?.value
+      getIsClean: () => !!cleanFlag?.value
     });
 
     // Add all the lifecycle parameters for the action
@@ -399,16 +391,6 @@ export class HeftActionRunner {
 
   private _generateOperations(): Set<Operation> {
     const { selectedPhases } = this._action;
-    const {
-      defaultParameters: { clean, cleanCache }
-    } = this.parameterManager;
-
-    if (cleanCache && !clean) {
-      throw new Error(
-        `The ${JSON.stringify(Constants.cleanCacheParameterLongName)} option can only be used in ` +
-          `conjunction with ${JSON.stringify(Constants.cleanParameterLongName)}.`
-      );
-    }
 
     const operations: Map<string, Operation> = new Map();
     const internalHeftSession: InternalHeftSession = this._internalHeftSession;

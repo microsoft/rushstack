@@ -158,7 +158,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
       eslintPackagePath: eslintToolPath,
       linterConfigFilePath: eslintConfigFilePath,
       buildFolderPath: heftConfiguration.buildFolderPath,
-      buildMetadataFolderPath: taskSession.cacheFolderPath
+      buildMetadataFolderPath: taskSession.tempFolderPath
     });
 
     eslint.printVersionHeader();
@@ -184,7 +184,7 @@ export default class LintPlugin implements IHeftTaskPlugin {
       tslintPackagePath: tslintToolPath,
       linterConfigFilePath: tslintConfigFilePath,
       buildFolderPath: heftConfiguration.buildFolderPath,
-      buildMetadataFolderPath: taskSession.cacheFolderPath
+      buildMetadataFolderPath: taskSession.tempFolderPath
     });
 
     tslint.printVersionHeader();

@@ -35,13 +35,6 @@ export interface IHeftDefaultParameters {
   readonly clean: boolean;
 
   /**
-   * Whether or not the `--clean-cache` flag was passed to Heft.
-   *
-   * @public
-   */
-  readonly cleanCache: boolean;
-
-  /**
    * Whether or not the `--debug` flag was passed to Heft.
    *
    * @public
@@ -133,7 +126,6 @@ export interface IHeftParameters extends IHeftDefaultParameters {
 
 export interface IHeftParameterManagerOptions {
   getIsClean: () => boolean;
-  getIsCleanCache: () => boolean;
   getIsDebug: () => boolean;
   getIsVerbose: () => boolean;
   getIsProduction: () => boolean;
@@ -162,7 +154,6 @@ export class HeftParameterManager {
     if (!this._defaultParameters) {
       this._defaultParameters = {
         clean: this._options.getIsClean(),
-        cleanCache: this._options.getIsCleanCache(),
         debug: this._options.getIsDebug(),
         verbose: this._options.getIsVerbose(),
         production: this._options.getIsProduction(),
