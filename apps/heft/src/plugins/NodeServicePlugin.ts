@@ -15,6 +15,7 @@ import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 
 const PLUGIN_NAME: 'node-service-plugin' = 'node-service-plugin';
+const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 
 export interface INodeServicePluginCompleteConfiguration {
   commandName: string;
@@ -92,9 +93,24 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     // Set this immediately to make it available to the internal methods that use it
     this._logger = taskSession.logger;
 
-    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-      taskSession.logger.terminal.writeWarningLine('Node services can only be run in watch mode.');
-    });
+    const isServeMode: boolean = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
+
+    if (isServeMode && !taskSession.parameters.watch) {
+      throw new Error(
+        `The ${JSON.stringify(
+          SERVE_PARAMETER_LONG_NAME
+        )} parameter is only available when running in watch mode.` +
+          ` Try replacing "${taskSession.parsedCommandLine?.unaliasedCommandName}" with` +
+          ` "${taskSession.parsedCommandLine?.unaliasedCommandName}-watch" in your Heft command line.`
+      );
+    }
+
+    if (!isServeMode) {
+      taskSession.logger.terminal.writeVerboseLine(
+        `Not launching the service because the "${SERVE_PARAMETER_LONG_NAME}" parameter was not specified`
+      );
+      return;
+    }
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
@@ -148,20 +164,20 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
         if (this._shellCommand === undefined) {
           if (this._configuration.ignoreMissingScript) {
             taskSession.logger.terminal.writeLine(
-              `The plugin is disabled because the project's package.json` +
+              `The node service cannot be started because the project's package.json` +
                 ` does not have a "${this._configuration.commandName}" script`
             );
           } else {
             throw new Error(
-              `The node-service task cannot start because the project's package.json ` +
+              `The node service cannot be started because the project's package.json ` +
                 `does not have a "${this._configuration.commandName}" script`
             );
           }
           this._pluginEnabled = false;
         }
       } else {
-        taskSession.logger.terminal.writeVerboseLine(
-          'The plugin is disabled because its config file was not found: ' +
+        throw new Error(
+          'The node service cannot be started because the task config file was not found: ' +
             CoreConfigFiles.nodeServiceConfigurationFile.projectRelativeFilePath
         );
       }

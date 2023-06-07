@@ -17,11 +17,13 @@ import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { HeftTask } from './HeftTask';
 import type { HeftParameterManager } from './HeftParameterManager';
+import type { IHeftParsedCommandLine } from './HeftTaskSession';
 
 export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
+
   debug: boolean;
 }
 
@@ -45,6 +47,8 @@ export class InternalHeftSession {
   public readonly loggingManager: LoggingManager;
 
   public readonly metricsCollector: MetricsCollector;
+
+  public parsedCommandLine: IHeftParsedCommandLine | undefined;
 
   public readonly debug: boolean;
 

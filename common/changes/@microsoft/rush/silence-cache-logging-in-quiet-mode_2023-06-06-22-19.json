@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where cache logging data was always written to stdout.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

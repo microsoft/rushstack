@@ -19,14 +19,9 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-lint-plugin"
           }
-        }
-      }
-    },
-
-    "serve": {
-      "phaseDependencies": ["build"],
-      "tasksByName": {
-        "fastify": {
+        },
+        "node-service": {
+          "taskDependencies": ["typescript"],
           "taskEvent": {
             "eventKind": "nodeService"
           }

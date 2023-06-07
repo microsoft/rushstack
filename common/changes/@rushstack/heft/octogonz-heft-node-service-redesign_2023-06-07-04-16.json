@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "The built-in task NodeServicePlugin now supports the \"--serve\" mode with semantics similar to heft-webpack5-plugin",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

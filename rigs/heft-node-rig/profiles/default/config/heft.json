@@ -37,6 +37,12 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-api-extractor-plugin"
           }
+        },
+        "node-service": {
+          "taskDependencies": ["typescript"],
+          "taskEvent": {
+            "eventKind": "nodeService"
+          }
         }
       }
     },

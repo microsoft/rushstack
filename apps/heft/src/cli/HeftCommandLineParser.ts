@@ -48,6 +48,7 @@ export class HeftCommandLineParser extends CommandLineParser {
   private readonly _loggingManager: LoggingManager;
   private readonly _metricsCollector: MetricsCollector;
   private readonly _heftConfiguration: HeftConfiguration;
+  private _internalHeftSession: InternalHeftSession | undefined;
 
   public constructor() {
     super({
@@ -113,6 +114,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         loggingManager: this._loggingManager,
         metricsCollector: this._metricsCollector
       });
+      this._internalHeftSession = internalHeftSession;
 
       const actionOptions: IHeftActionOptions = {
         internalHeftSession: internalHeftSession,
@@ -178,6 +180,18 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   protected async onExecute(): Promise<void> {
     try {
+      if (this.selectedAction) {
+        this._internalHeftSession!.parsedCommandLine = {
+          commandName: this.selectedAction.actionName,
+          // TODO: Update this when we merge with https://github.com/microsoft/rushstack/pull/4168
+          unaliasedCommandName: this.selectedAction.actionName
+        };
+      } else {
+        this._internalHeftSession!.parsedCommandLine = {
+          commandName: '',
+          unaliasedCommandName: ''
+        };
+      }
       await super.onExecute();
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);
