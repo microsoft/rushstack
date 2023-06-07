@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush-amazon-s3-build-cache-plugin] Read credentials from common AWS_* env vars.",
+      "comment": "Add functionality for the Amazon S3 Build Cache Plugin to read credentials from common AWS_* environment variables.",
       "type": "none"
     }
   ],
