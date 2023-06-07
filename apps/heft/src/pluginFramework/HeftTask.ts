@@ -73,6 +73,7 @@ function _getNodeServicePluginDefinition(): HeftTaskPluginDefinition {
       heftPluginDefinitionJson: {
         pluginName: 'node-service-plugin',
         entryPoint: './lib/plugins/NodeServicePlugin',
+        parameterScope: 'node-service',
         parameters: [
           {
             longName: '--serve',

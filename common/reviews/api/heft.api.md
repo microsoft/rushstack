@@ -231,7 +231,7 @@ export interface IHeftTaskSession {
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
-    readonly parsedCommandLine: IHeftParsedCommandLine | undefined;
+    readonly parsedCommandLine: IHeftParsedCommandLine;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;

@@ -94,7 +94,7 @@ export interface IHeftTaskSession {
    * Exposes details about the command line that was used to invoke Heft.
    * This value is initially `undefined` and later filled in after the command line has been parsed.
    */
-  readonly parsedCommandLine: IHeftParsedCommandLine | undefined;
+  readonly parsedCommandLine: IHeftParsedCommandLine;
 
   /**
    * The cache folder for the task. This folder is unique for each task, and will not be

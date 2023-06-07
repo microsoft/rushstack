@@ -13,7 +13,7 @@ import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { HeftTask } from './HeftTask';
 import type { HeftParameterManager } from './HeftParameterManager';
-import { IHeftParsedCommandLine } from './HeftTaskSession';
+import type { IHeftParsedCommandLine } from './HeftTaskSession';
 
 export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;
