@@ -14,7 +14,7 @@ const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';
 
 // error: "The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received ''"
-const isInvalidImporterPath: (ex: unknow) => boolean = (ex) =>
+const isInvalidImporterPath: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' &&
   !!ex &&
   'code' in ex &&
