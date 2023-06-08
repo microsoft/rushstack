@@ -478,7 +478,7 @@ fi
 
 # Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
 if command -v git-lfs &> /dev/null; then
-  git lfs pre-push "$@"
+  git lfs ${filename} "$@"
 fi
 `;
           // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
