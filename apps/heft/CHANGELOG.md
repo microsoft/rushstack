@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 08 Jun 2023 00:20:02 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2023 15:21:17 GMT and should not be manually modified.
+
+## 0.52.2
+Thu, 08 Jun 2023 15:21:17 GMT
+
+### Patches
+
+- Provide a useful error message when encountering legacy Heft configurations
 
 ## 0.52.1
 Thu, 08 Jun 2023 00:20:02 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.52.2",
+      "tag": "@rushstack/heft_v0.52.2",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Provide a useful error message when encountering legacy Heft configurations"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.52.1",
       "tag": "@rushstack/heft_v0.52.1",
       "date": "Thu, 08 Jun 2023 00:20:02 GMT",
