@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2023 00:20:02 GMT and should not be manually modified.
+
+## 0.52.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+### Patches
+
+- Remove the concept of the cache folder, since it mostly just causes bugs.
 
 ## 0.52.0
 Wed, 07 Jun 2023 22:45:16 GMT

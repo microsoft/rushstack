@@ -2,6 +2,27 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "2.0.47",
+      "tag": "@microsoft/loader-load-themed-styles_v2.0.47",
+      "date": "Thu, 08 Jun 2023 00:20:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.0.49`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `^2.0.48` to `^2.0.49`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.46",
       "tag": "@microsoft/loader-load-themed-styles_v2.0.46",
       "date": "Wed, 07 Jun 2023 22:45:16 GMT",
