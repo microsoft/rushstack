@@ -1,5 +1,37 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.53.0
+The `taskEvent` configuration option in heft.json has been removed, and use of any `taskEvent`-based functionality is now accomplished by referencing the plugins directly within the `@rushstack/heft` package.
+
+Plugin name mappings for previously-existing task events are:
+- `copyFiles` -> `copy-files-plugin`
+- `deleteFiles` -> `delete-files-plugin`
+- `runScript` -> `run-script-plugin`
+- `nodeService` -> `node-service-plugin`
+
+Example diff of a heft.json file that uses the `copyFiles` task event:
+```diff
+{
+  "phasesByName": {
+    "build": {
+      "tasksbyName": {
+        "perform-copy": {
+-          "taskEvent": {
+-            "eventKind": "copyFiles",
++          "taskPlugin": {
++            "pluginPackage": "@rushstack/heft",
++            "pluginName": "copy-files-plugin",
+            "options": {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ### Heft 0.52.0
 
 The `nodeService` built-in plugin now supports the `--serve` parameter, to be consistent with the `@rushstack/heft-webpack5-plugin` dev server.
@@ -86,13 +118,13 @@ Lifecycle plugins are specified in the top-level `heftPlugins` array. Plugins ca
 
   "heftPlugins": [
     {
-      "packageName": "@rushstack/heft-metrics-reporter",
+      "pluginPackage": "@rushstack/heft-metrics-reporter",
       "options": {
         "disableMetrics": true
       }
     },
     {
-      "packageName": "@rushstack/heft-initialization-plugin",
+      "pluginPackage": "@rushstack/heft-initialization-plugin",
       "pluginName": "my-lifecycle-plugin"
     }
   ]
@@ -113,7 +145,7 @@ The following is an example "heft.json" file defining both a "build" and a "test
   // "heftPlugins" can be used alongside "phasesByName"
   "heftPlugins": [
     {
-      "packageName": "@rushstack/heft-metrics-reporter"
+      "pluginPackage": "@rushstack/heft-metrics-reporter"
     }
   ],
 
@@ -141,8 +173,9 @@ The following is an example "heft.json" file defining both a "build" and a "test
           }
         },
         "copy-assets": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {

@@ -8,8 +8,9 @@
       "cleanFiles": [{ "sourcePath": "src" }],
       "tasksByName": {
         "create-src": {
-          "taskEvent": {
-            "eventKind": "runScript",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
             "options": {
               "scriptPath": "./scripts/createSrc.js"
             }
@@ -17,8 +18,9 @@
         },
 
         "copy-src-typings": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {
