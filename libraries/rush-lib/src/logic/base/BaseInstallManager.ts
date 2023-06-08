@@ -458,7 +458,7 @@ export abstract class BaseInstallManager {
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
           // Make sure the actual script in the hookSource directory has required permission bits
-          const hookFilePath: string = path.join(hookSource, filename);
+          const hookFilePath: string = `${hookSource}/${filename}`;
           const originalPosixModeBits: PosixModeBits = FileSystem.getPosixModeBits(hookFilePath);
           FileSystem.changePosixModeBits(
             hookFilePath,
