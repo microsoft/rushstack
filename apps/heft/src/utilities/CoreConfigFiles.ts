@@ -8,7 +8,7 @@ import {
   PathResolutionMethod,
   type IJsonPathMetadataResolverOptions
 } from '@rushstack/heft-config-file';
-import { Import, type ITerminal } from '@rushstack/node-core-library';
+import { Import, PackageJsonLookup, type ITerminal, InternalError } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
@@ -80,12 +80,27 @@ export class CoreConfigFiles {
         options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>
       ) => string = (options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>) => {
         const { propertyValue, configurationFilePath } = options;
-        const configurationFileDirectory: string = path.dirname(configurationFilePath);
-        return Import.resolvePackage({
-          packageName: propertyValue,
-          baseFolderPath: configurationFileDirectory,
-          allowSelfReference: true
-        });
+        if (propertyValue === '@rushstack/heft') {
+          // If the value is "@rushstack/heft", then resolve to the Heft package that is
+          // installed in the project folder. This avoids issues with mismatched versions
+          // between the project and the globally installed Heft. Use the PackageJsonLookup
+          // class to find the package folder to avoid hardcoding the path for compatibility
+          // with bundling.
+          const pluginPackageFolder: string | undefined =
+            PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
+          if (!pluginPackageFolder) {
+            // This should never happen
+            throw new InternalError('Unable to find the @rushstack/heft package folder');
+          }
+          return pluginPackageFolder;
+        } else {
+          const configurationFileDirectory: string = path.dirname(configurationFilePath);
+          return Import.resolvePackage({
+            packageName: propertyValue,
+            baseFolderPath: configurationFileDirectory,
+            allowSelfReference: true
+          });
+        }
       };
 
       const schemaObject: object = await import('../schemas/heft.schema.json');
