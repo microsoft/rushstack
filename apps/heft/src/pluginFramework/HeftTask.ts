@@ -130,13 +130,15 @@ export class HeftTask {
     );
     const pluginDefinition: HeftPluginDefinitionBase =
       pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
-    if (!pluginConfiguration.taskPluginDefinitions.has(pluginDefinition)) {
+
+    const isTaskPluginDefinition: boolean = pluginConfiguration.isTaskPluginDefinition(pluginDefinition);
+    if (!isTaskPluginDefinition) {
       throw new Error(
         `Plugin ${JSON.stringify(pluginSpecifier.pluginName)} specified by task ` +
           `${JSON.stringify(this._taskName)} is not a task plugin.`
       );
     }
-    return pluginDefinition as HeftTaskPluginDefinition;
+    return pluginDefinition;
   }
 
   private _validate(): void {
