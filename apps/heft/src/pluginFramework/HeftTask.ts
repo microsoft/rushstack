@@ -4,9 +4,9 @@
 import { InternalError } from '@rushstack/node-core-library';
 
 import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';
-import {
+import type {
   HeftTaskPluginDefinition,
-  type HeftPluginDefinitionBase
+  HeftPluginDefinitionBase
 } from '../configuration/HeftPluginDefinition';
 import type { HeftPhase } from './HeftPhase';
 import type {
@@ -17,78 +17,6 @@ import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 const RESERVED_TASK_NAMES: Set<string> = new Set(['clean']);
-
-let _copyFilesPluginDefinition: HeftTaskPluginDefinition | undefined;
-function _getCopyFilesPluginDefinition(): HeftTaskPluginDefinition {
-  if (!_copyFilesPluginDefinition) {
-    _copyFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
-      heftPluginDefinitionJson: {
-        pluginName: 'copy-files-plugin',
-        entryPoint: './lib/plugins/CopyFilesPlugin',
-        optionsSchema: './lib/schemas/copy-files-options.schema.json'
-      },
-      packageRoot: `${__dirname}/../..`,
-      packageName: '@rushstack/heft'
-    });
-  }
-  return _copyFilesPluginDefinition;
-}
-
-let _deleteFilesPluginDefinition: HeftTaskPluginDefinition | undefined;
-function _getDeleteFilesPluginDefinition(): HeftTaskPluginDefinition {
-  if (!_deleteFilesPluginDefinition) {
-    _deleteFilesPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
-      heftPluginDefinitionJson: {
-        pluginName: 'delete-files-plugin',
-        entryPoint: './lib/plugins/DeleteFilesPlugin',
-        optionsSchema: './lib/schemas/delete-files-options.schema.json'
-      },
-      packageRoot: `${__dirname}/../..`,
-      packageName: '@rushstack/heft'
-    });
-  }
-  return _deleteFilesPluginDefinition;
-}
-
-let _runScriptPluginDefinition: HeftTaskPluginDefinition | undefined;
-function _getRunScriptPluginDefinition(): HeftTaskPluginDefinition {
-  if (!_runScriptPluginDefinition) {
-    _runScriptPluginDefinition = HeftTaskPluginDefinition.loadFromObject({
-      heftPluginDefinitionJson: {
-        pluginName: 'run-script-plugin',
-        entryPoint: './lib/plugins/RunScriptPlugin',
-        optionsSchema: './lib/schemas/run-script-options.schema.json'
-      },
-      packageRoot: `${__dirname}/../..`,
-      packageName: '@rushstack/heft'
-    });
-  }
-  return _runScriptPluginDefinition;
-}
-
-let _nodeServicePluginDefinition: HeftTaskPluginDefinition | undefined;
-function _getNodeServicePluginDefinition(): HeftTaskPluginDefinition {
-  if (!_nodeServicePluginDefinition) {
-    _nodeServicePluginDefinition = HeftTaskPluginDefinition.loadFromObject({
-      heftPluginDefinitionJson: {
-        pluginName: 'node-service-plugin',
-        entryPoint: './lib/plugins/NodeServicePlugin',
-        parameterScope: 'node-service',
-        parameters: [
-          {
-            longName: '--serve',
-            parameterKind: 'flag',
-            description:
-              'Start a local web server for testing purposes.  This parameter is only available when running in watch mode.'
-          }
-        ]
-      },
-      packageRoot: `${__dirname}/../..`,
-      packageName: '@rushstack/heft'
-    });
-  }
-  return _nodeServicePluginDefinition;
-}
 
 /**
  * @internal
@@ -141,7 +69,7 @@ export class HeftTask {
   }
 
   public get pluginOptions(): object | undefined {
-    return this._taskSpecifier.taskEvent?.options || this._taskSpecifier.taskPlugin?.options;
+    return this._taskSpecifier.taskPlugin.options;
   }
 
   public get dependencyTasks(): Set<HeftTask> {
@@ -193,57 +121,24 @@ export class HeftTask {
   }
 
   private async _loadTaskPluginDefintionAsync(): Promise<HeftTaskPluginDefinition> {
-    if (this._taskSpecifier.taskEvent && this._taskSpecifier.taskPlugin) {
-      // This is validated in the schema so this shouldn't happen, but throw just in case.
-      throw new Error(
-        `Task ${JSON.stringify(this._taskName)} has both a taskEvent and a taskPlugin. ` +
-          `Only one of these can be specified.`
-      );
-    }
+    // taskPlugin.pluginPackage should already be resolved to the package root.
+    // See CoreConfigFiles.heftConfigFileLoader
+    const pluginSpecifier: IHeftConfigurationJsonPluginSpecifier = this._taskSpecifier.taskPlugin;
+    const pluginConfiguration: HeftPluginConfiguration = await HeftPluginConfiguration.loadFromPackageAsync(
+      pluginSpecifier.pluginPackageRoot,
+      pluginSpecifier.pluginPackage
+    );
+    const pluginDefinition: HeftPluginDefinitionBase =
+      pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
 
-    if (this._taskSpecifier.taskEvent) {
-      switch (this._taskSpecifier.taskEvent.eventKind) {
-        case 'copyFiles': {
-          return _getCopyFilesPluginDefinition();
-        }
-        case 'deleteFiles': {
-          return _getDeleteFilesPluginDefinition();
-        }
-        case 'runScript': {
-          return _getRunScriptPluginDefinition();
-        }
-        case 'nodeService': {
-          return _getNodeServicePluginDefinition();
-        }
-        default: {
-          throw new InternalError(
-            `Unknown task event kind ${JSON.stringify(this._taskSpecifier.taskEvent.eventKind)}`
-          );
-        }
-      }
-    } else if (this._taskSpecifier.taskPlugin) {
-      // taskPlugin.pluginPackage should already be resolved to the package root.
-      // See CoreConfigFiles.heftConfigFileLoader
-      const pluginSpecifier: IHeftConfigurationJsonPluginSpecifier = this._taskSpecifier.taskPlugin;
-      const pluginConfiguration: HeftPluginConfiguration = await HeftPluginConfiguration.loadFromPackageAsync(
-        pluginSpecifier.pluginPackageRoot,
-        pluginSpecifier.pluginPackage
-      );
-      const pluginDefinition: HeftPluginDefinitionBase =
-        pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
-      if (!pluginConfiguration.taskPluginDefinitions.has(pluginDefinition)) {
-        throw new Error(
-          `Plugin ${JSON.stringify(pluginSpecifier.pluginName)} specified by task ` +
-            `${JSON.stringify(this._taskName)} is not a task plugin.`
-        );
-      }
-      return pluginDefinition as HeftTaskPluginDefinition;
-    } else {
-      // This is validated in the schema so this shouldn't happen, but throw just in case
-      throw new InternalError(
-        `Task ${JSON.stringify(this._taskName)} has no specified task event or task plugin.`
+    const isTaskPluginDefinition: boolean = pluginConfiguration.isTaskPluginDefinition(pluginDefinition);
+    if (!isTaskPluginDefinition) {
+      throw new Error(
+        `Plugin ${JSON.stringify(pluginSpecifier.pluginName)} specified by task ` +
+          `${JSON.stringify(this._taskName)} is not a task plugin.`
       );
     }
+    return pluginDefinition;
   }
 
   private _validate(): void {
@@ -252,8 +147,8 @@ export class HeftTask {
         `Task name ${JSON.stringify(this.taskName)} is reserved and cannot be used as a task name.`
       );
     }
-    if (!this._taskSpecifier.taskEvent && !this._taskSpecifier.taskPlugin) {
-      throw new Error(`Task ${JSON.stringify(this.taskName)} has no specified task event or task plugin.`);
+    if (!this._taskSpecifier.taskPlugin) {
+      throw new Error(`Task ${JSON.stringify(this.taskName)} has no specified task plugin.`);
     }
   }
 }

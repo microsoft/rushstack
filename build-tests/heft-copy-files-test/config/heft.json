@@ -39,8 +39,9 @@
 
       "tasksByName": {
         "perform-copy": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {

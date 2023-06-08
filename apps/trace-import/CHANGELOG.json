@@ -2,6 +2,21 @@
   "name": "@rushstack/trace-import",
   "entries": [
     {
+      "version": "0.2.7",
+      "tag": "@rushstack/trace-import_v0.2.7",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.6",
       "tag": "@rushstack/trace-import_v0.2.6",
       "date": "Thu, 08 Jun 2023 00:20:03 GMT",

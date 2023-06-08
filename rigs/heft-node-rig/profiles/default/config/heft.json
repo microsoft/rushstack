@@ -40,8 +40,9 @@
         },
         "node-service": {
           "taskDependencies": ["typescript"],
-          "taskEvent": {
-            "eventKind": "nodeService"
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "node-service-plugin"
           }
         }
       }

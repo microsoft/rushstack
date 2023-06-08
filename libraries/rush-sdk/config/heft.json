@@ -17,8 +17,9 @@
 
       "tasksByName": {
         "copy-rush-lib-types": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {
@@ -37,8 +38,9 @@
 
         "generate-stubs": {
           "taskDependencies": ["typescript"],
-          "taskEvent": {
-            "eventKind": "runScript",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
             "options": {
               "scriptPath": "./lib-shim/generate-stubs.js"
             }

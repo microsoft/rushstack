@@ -175,29 +175,9 @@
                   "type": "object",
                   "description": "Defines a Heft task.",
                   "additionalProperties": false,
-                  "oneOf": [
-                    {
-                      "required": ["taskPlugin"],
-                      "properties": {
-                        "taskPlugin": { "$ref": "#/definitions/heft-plugin" }
-                      }
-                    },
-                    {
-                      "required": ["taskEvent"],
-                      "properties": {
-                        "taskEvent": { "$ref": "#/definitions/heft-event" }
-                      }
-                    }
-                  ],
+                  "required": ["taskPlugin"],
                   "properties": {
-                    "taskPlugin": {
-                      "description": "A plugin that can be used to extend Heft functionality.",
-                      "type": "object"
-                    },
-                    "taskEvent": {
-                      "description": "An event that can be used to extend Heft functionality.",
-                      "type": "object"
-                    },
+                    "taskPlugin": { "$ref": "#/definitions/heft-plugin" },
 
                     "taskDependencies": {
                       "type": "array",

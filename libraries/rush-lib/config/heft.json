@@ -12,8 +12,9 @@
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {
@@ -36,8 +37,9 @@
 
         "copy-empty-modules": {
           "taskDependencies": ["typescript"],
-          "taskEvent": {
-            "eventKind": "runScript",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
             "options": {
               "scriptPath": "./scripts/copyEmptyModules.js"
             }

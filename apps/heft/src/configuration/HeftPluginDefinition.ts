@@ -211,7 +211,7 @@ export abstract class HeftPluginDefinitionBase {
     }
 
     // Ensure that plugin names are unique. Main reason for this restriction is to ensure that command-line
-    // parameter conflicts can be handled/undocumented synonms can be provided in all scenarios
+    // parameter conflicts can be handled/undocumented synonyms can be provided in all scenarios
     const existingPluginPath: string | undefined = HeftPluginDefinitionBase._loadedPluginPathsByName.get(
       this.pluginName
     );
