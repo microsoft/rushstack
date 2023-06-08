@@ -23,6 +23,8 @@ import {
   PrintUtilities
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+import type { TerminalWritable } from '@rushstack/terminal';
+
 import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
@@ -138,13 +140,15 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    // TERMINAL PIPELINE:
-    //
-    //                             +--> quietModeTransform? --> collatedWriter
-    //                             |
-    // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-    //                                                        |
-    //                                                        +--> stdioSummarizer
+    // Only open the *.cache.log file(s) if the cache is enabled.
+    const cacheProjectLogWritable: ProjectLogWritable | undefined = this._buildCacheConfiguration
+      ? new ProjectLogWritable(
+          this._rushProject,
+          context.collatedWriter.terminal,
+          `${this._logFilenameIdentifier}.cache`
+        )
+      : undefined;
+
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal,
@@ -152,6 +156,43 @@ export class ShellOperationRunner implements IOperationRunner {
     );
 
     try {
+      //#region CACHE LOGGING
+      let cacheConsoleWritable: TerminalWritable;
+      if (context.quietMode) {
+        cacheConsoleWritable = new DiscardStdoutTransform({
+          destination: context.collatedWriter
+        });
+      } else {
+        cacheConsoleWritable = context.collatedWriter;
+      }
+
+      let cacheCollatedTerminal: CollatedTerminal;
+      if (cacheProjectLogWritable) {
+        const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
+          destinations: [cacheConsoleWritable, cacheProjectLogWritable]
+        });
+        cacheCollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
+      } else {
+        cacheCollatedTerminal = new CollatedTerminal(cacheConsoleWritable);
+      }
+
+      const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        cacheCollatedTerminal,
+        {
+          debugEnabled: context.debugMode
+        }
+      );
+      const buildCacheTerminal: Terminal = new Terminal(buildCacheTerminalProvider);
+      //#endregion
+
+      //#region OPERATION LOGGING
+      // TERMINAL PIPELINE:
+      //
+      //                             +--> quietModeTransform? --> collatedWriter
+      //                             |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+      //                                                        |
+      //                                                        +--> stdioSummarizer
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: projectLogWritable,
         removeColors: true,
@@ -186,16 +227,7 @@ export class ShellOperationRunner implements IOperationRunner {
         debugEnabled: context.debugMode
       });
       const terminal: Terminal = new Terminal(terminalProvider);
-
-      // Controls the log for the cache subsystem
-      const buildCacheCollatedTerminal: CollatedTerminal = new CollatedTerminal(context.collatedWriter);
-      const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
-        buildCacheCollatedTerminal,
-        {
-          debugEnabled: context.debugMode
-        }
-      );
-      const buildCacheTerminal: Terminal = new Terminal(buildCacheTerminalProvider);
+      //#endregion
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -430,6 +462,7 @@ export class ShellOperationRunner implements IOperationRunner {
       return status;
     } finally {
       projectLogWritable.close();
+      cacheProjectLogWritable?.close();
     }
   }
 

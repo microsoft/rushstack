@@ -1,9 +1,12 @@
 import * as path from 'path';
 import { GitUtilities, type GitignoreFilterFn } from '../GitUtilities';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 describe('GitUtilities', () => {
   describe('checkIgnoreAsync', () => {
-    const testFoldersBasePath: string = path.join(__dirname, 'checkIgnoreTests');
+    const projectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+
+    const testFoldersBasePath: string = `${projectRoot}/src/utilities/test/checkIgnoreTests`;
 
     it('returns all files are ignored', async () => {
       const testFolderPath: string = path.join(testFoldersBasePath, 'allIgnored');
@@ -37,13 +40,12 @@ describe('GitUtilities', () => {
 
     it('returns ignored files specified in the repo gitignore', async () => {
       // <repoRoot>/apps/heft
-      const testFolderPath: string = path.resolve(__dirname, '..', '..', '..');
-      const git = new GitUtilities(testFolderPath);
+      const git = new GitUtilities(projectRoot);
       const isUnignoredAsync: GitignoreFilterFn = (await git.tryCreateGitignoreFilterAsync())!;
-      expect(await isUnignoredAsync(path.join(testFolderPath, 'lib', 'a.txt'))).toEqual(false);
-      expect(await isUnignoredAsync(path.join(testFolderPath, 'temp', 'a.txt'))).toEqual(false);
-      expect(await isUnignoredAsync(path.join(testFolderPath, 'dist', 'a.txt'))).toEqual(false);
-      expect(await isUnignoredAsync(path.join(testFolderPath, 'src', 'a.txt'))).toEqual(true);
+      expect(await isUnignoredAsync(path.join(projectRoot, 'lib', 'a.txt'))).toEqual(false);
+      expect(await isUnignoredAsync(path.join(projectRoot, 'temp', 'a.txt'))).toEqual(false);
+      expect(await isUnignoredAsync(path.join(projectRoot, 'dist', 'a.txt'))).toEqual(false);
+      expect(await isUnignoredAsync(path.join(projectRoot, 'src', 'a.txt'))).toEqual(true);
 
       const ignoredFolderPath: string = path.join(testFoldersBasePath, 'allIgnored');
       expect(await isUnignoredAsync(path.join(ignoredFolderPath, 'a.txt'))).toEqual(false);

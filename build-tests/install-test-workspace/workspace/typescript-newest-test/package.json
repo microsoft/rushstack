@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "heft build --clean --clean-cache"
+    "build": "heft build --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "*",

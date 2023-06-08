@@ -54,6 +54,8 @@ export interface IScopedLongNameParseResult {
  */
 export interface ICommandLineParserData {
   action: string;
+  aliasAction?: string;
+  aliasDocumentation?: string;
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 

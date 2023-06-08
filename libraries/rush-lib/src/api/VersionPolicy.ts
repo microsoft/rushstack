@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, Import, Enum } from '@rushstack/node-core-library';
+import { IPackageJson, Enum } from '@rushstack/node-core-library';
 
 import {
   IVersionPolicyJson,
@@ -15,8 +15,7 @@ import {
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConfiguration } from './RushConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { cloneDeep } from '../utilities/objectUtilities';
 
 /**
  * Type of version bumps
@@ -24,17 +23,15 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
  */
 export enum BumpType {
   // No version bump
-  'none',
+  'none' = 0,
   // Prerelease version bump
-  'prerelease',
+  'prerelease' = 1,
   // Patch version bump
-  'patch',
-  // Preminor version bump
-  'preminor',
+  'patch' = 2,
   // Minor version bump
-  'minor',
+  'minor' = 4,
   // Major version bump
-  'major'
+  'major' = 5
 }
 
 /**
@@ -326,7 +323,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   }
 
   private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
-    const updatedProject: IPackageJson = lodash.cloneDeep(project);
+    const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
@@ -381,7 +378,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
-        const updatedProject: IPackageJson = lodash.cloneDeep(project);
+        const updatedProject: IPackageJson = cloneDeep(project);
         updatedProject.version = `${this.lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {

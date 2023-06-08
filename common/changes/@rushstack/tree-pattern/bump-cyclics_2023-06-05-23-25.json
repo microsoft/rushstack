@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/eslint-patch"
+      "packageName": "@rushstack/tree-pattern"
     }
   ],
-  "packageName": "@rushstack/eslint-patch",
+  "packageName": "@rushstack/tree-pattern",
   "email": "iclanton@users.noreply.github.com"
 }

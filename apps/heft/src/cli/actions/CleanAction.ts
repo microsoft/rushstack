@@ -30,7 +30,6 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
   private readonly _toParameter: CommandLineStringListParameter;
   private readonly _toExceptParameter: CommandLineStringListParameter;
   private readonly _onlyParameter: CommandLineStringListParameter;
-  private readonly _cleanCacheFlag: CommandLineFlagParameter;
   private _selectedPhases: ReadonlySet<HeftPhase> | undefined;
 
   public constructor(options: IHeftActionOptions) {
@@ -53,12 +52,6 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
       parameterLongName: Constants.verboseParameterLongName,
       parameterShortName: Constants.verboseParameterShortName,
       description: 'If specified, log information useful for debugging.'
-    });
-    this._cleanCacheFlag = this.defineFlagParameter({
-      parameterLongName: Constants.cleanCacheParameterLongName,
-      description:
-        'If specified, clean the cache directories in addition to the temp directories and provided ' +
-        'clean operations.'
     });
   }
 
@@ -107,9 +100,6 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
       for (const task of phase.tasks) {
         const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
         deleteOperations.push({ sourcePath: taskSession.tempFolderPath });
-        if (this._cleanCacheFlag.value) {
-          deleteOperations.push({ sourcePath: taskSession.cacheFolderPath });
-        }
       }
       // Add the manually specified clean operations
       deleteOperations.push(...phase.cleanFiles);

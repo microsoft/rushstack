@@ -59,7 +59,6 @@ export type GlobFn = (pattern: string | string[], options?: IGlobOptions | undef
 // @public (undocumented)
 export class HeftConfiguration {
     get buildFolderPath(): string;
-    get cacheFolderPath(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
     get globalTerminal(): ITerminal;
@@ -121,7 +120,6 @@ export interface _IHeftConfigurationInitializationOptions {
 // @public
 export interface IHeftDefaultParameters {
     readonly clean: boolean;
-    readonly cleanCache: boolean;
     readonly debug: boolean;
     readonly locales: Iterable<string>;
     readonly production: boolean;
@@ -149,6 +147,7 @@ export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeft
 
 // @public
 export interface IHeftLifecycleSession {
+    // @deprecated
     readonly cacheFolderPath: string;
     readonly hooks: IHeftLifecycleHooks;
     readonly logger: IScopedLogger;
@@ -174,6 +173,12 @@ export interface IHeftParameters extends IHeftDefaultParameters {
     getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
     getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
+}
+
+// @public
+export interface IHeftParsedCommandLine {
+    readonly commandName: string;
+    readonly unaliasedCommandName: string;
 }
 
 // @public
@@ -221,10 +226,12 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 
 // @public
 export interface IHeftTaskSession {
+    // @deprecated
     readonly cacheFolderPath: string;
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
+    readonly parsedCommandLine: IHeftParsedCommandLine;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;

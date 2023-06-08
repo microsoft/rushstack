@@ -7,23 +7,24 @@ import { Constants } from '../utilities/Constants';
 import { HeftLifecycle } from './HeftLifecycle';
 import { HeftPhaseSession } from './HeftPhaseSession';
 import { HeftPhase } from './HeftPhase';
-import { CoreConfigFiles, type IHeftConfigurationJson } from '../utilities/CoreConfigFiles';
+import {
+  CoreConfigFiles,
+  type IHeftConfigurationJson,
+  type IHeftConfigurationJsonActionReference
+} from '../utilities/CoreConfigFiles';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { HeftTask } from './HeftTask';
 import type { HeftParameterManager } from './HeftParameterManager';
+import type { IHeftParsedCommandLine } from './HeftTaskSession';
 
 export interface IInternalHeftSessionOptions {
   heftConfiguration: HeftConfiguration;
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
-  debug: boolean;
-}
 
-export interface IHeftSessionWatchOptions {
-  ignoredSourceFileGlobs: readonly string[];
-  forbiddenSourceFileGlobs: readonly string[];
+  debug: boolean;
 }
 
 function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
@@ -35,17 +36,19 @@ function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
 export class InternalHeftSession {
   private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
   private readonly _heftConfigurationJson: IHeftConfigurationJson;
+  private _actionReferencesByAlias: ReadonlyMap<string, IHeftConfigurationJsonActionReference> | undefined;
   private _lifecycle: HeftLifecycle | undefined;
   private _phases: Set<HeftPhase> | undefined;
   private _phasesByName: Map<string, HeftPhase> | undefined;
   private _parameterManager: HeftParameterManager | undefined;
-  private _watchOptions: IHeftSessionWatchOptions | undefined;
 
   public readonly heftConfiguration: HeftConfiguration;
 
   public readonly loggingManager: LoggingManager;
 
   public readonly metricsCollector: MetricsCollector;
+
+  public parsedCommandLine: IHeftParsedCommandLine | undefined;
 
   public readonly debug: boolean;
 
@@ -95,6 +98,15 @@ export class InternalHeftSession {
 
   public set parameterManager(value: HeftParameterManager) {
     this._parameterManager = value;
+  }
+
+  public get actionReferencesByAlias(): ReadonlyMap<string, IHeftConfigurationJsonActionReference> {
+    if (!this._actionReferencesByAlias) {
+      this._actionReferencesByAlias = new Map(
+        Object.entries(this._heftConfigurationJson.aliasesByName || {})
+      );
+    }
+    return this._actionReferencesByAlias;
   }
 
   public get lifecycle(): HeftLifecycle {

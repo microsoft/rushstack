@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { ArgumentParser } from 'argparse';
-import { CommandLineParser, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import {
+  CommandLineParser,
+  AliasCommandLineAction,
+  type CommandLineFlagParameter,
+  CommandLineAction
+} from '@rushstack/ts-command-line';
 import {
   Terminal,
   InternalError,
@@ -20,6 +25,7 @@ import { CleanAction } from './actions/CleanAction';
 import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
+import { AliasAction } from './actions/AliasAction';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -29,6 +35,8 @@ interface IPreInitializationArgumentValues {
   debug?: boolean;
   unmanaged?: boolean;
 }
+
+const HEFT_TOOL_FILENAME: 'heft' = 'heft';
 
 export class HeftCommandLineParser extends CommandLineParser {
   public readonly globalTerminal: ITerminal;
@@ -40,10 +48,11 @@ export class HeftCommandLineParser extends CommandLineParser {
   private readonly _loggingManager: LoggingManager;
   private readonly _metricsCollector: MetricsCollector;
   private readonly _heftConfiguration: HeftConfiguration;
+  private _internalHeftSession: InternalHeftSession | undefined;
 
   public constructor() {
     super({
-      toolFilename: 'heft',
+      toolFilename: HEFT_TOOL_FILENAME,
       toolDescription: 'Heft is a pluggable build system designed for web projects.'
     });
 
@@ -105,6 +114,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         loggingManager: this._loggingManager,
         metricsCollector: this._metricsCollector
       });
+      this._internalHeftSession = internalHeftSession;
 
       const actionOptions: IHeftActionOptions = {
         internalHeftSession: internalHeftSession,
@@ -127,6 +137,40 @@ export class HeftCommandLineParser extends CommandLineParser {
         this.addAction(new PhaseAction({ ...actionOptions, phase, watch: true }));
       }
 
+      // Add the action aliases last, since we need the targets to be defined before we can add the aliases
+      const aliasActions: AliasCommandLineAction[] = [];
+      for (const [
+        aliasName,
+        { actionName, defaultParameters }
+      ] of internalHeftSession.actionReferencesByAlias) {
+        const existingAction: CommandLineAction | undefined = this.tryGetAction(aliasName);
+        if (existingAction) {
+          throw new Error(
+            `The alias "${aliasName}" specified in heft.json cannot be used because an action ` +
+              'with that name already exists.'
+          );
+        }
+        const targetAction: CommandLineAction | undefined = this.tryGetAction(actionName);
+        if (!targetAction) {
+          throw new Error(
+            `The action "${actionName}" referred to by alias "${aliasName}" in heft.json could not be found.`
+          );
+        }
+        aliasActions.push(
+          new AliasAction({
+            terminal: this.globalTerminal,
+            toolFilename: HEFT_TOOL_FILENAME,
+            aliasName,
+            targetAction,
+            defaultParameters
+          })
+        );
+      }
+      // Add the alias actions. Do this in a second pass to disallow aliases that refer to other aliases.
+      for (const aliasAction of aliasActions) {
+        this.addAction(aliasAction);
+      }
+
       return await super.execute(args);
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);
@@ -136,6 +180,24 @@ export class HeftCommandLineParser extends CommandLineParser {
 
   protected async onExecute(): Promise<void> {
     try {
+      const selectedAction: CommandLineAction | undefined = this.selectedAction;
+
+      let commandName: string = '';
+      let unaliasedCommandName: string = '';
+
+      if (selectedAction) {
+        commandName = selectedAction.actionName;
+        if (selectedAction instanceof AliasAction) {
+          unaliasedCommandName = selectedAction.targetAction.actionName;
+        } else {
+          unaliasedCommandName = selectedAction.actionName;
+        }
+      }
+
+      this._internalHeftSession!.parsedCommandLine = {
+        commandName,
+        unaliasedCommandName
+      };
       await super.onExecute();
     } catch (e) {
       await this._reportErrorAndSetExitCode(e as Error);

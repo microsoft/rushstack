@@ -17,6 +17,15 @@ import { Constants } from './Constants';
 
 export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript' | 'nodeService';
 
+export interface IHeftConfigurationJsonActionReference {
+  actionName: string;
+  defaultParameters?: string[];
+}
+
+export interface IHeftConfigurationJsonAliases {
+  [aliasName: string]: IHeftConfigurationJsonActionReference;
+}
+
 export interface IHeftConfigurationJsonEventSpecifier {
   eventKind: HeftEventKind;
   options?: object;
@@ -52,6 +61,7 @@ export interface IHeftConfigurationJsonPhases {
 
 export interface IHeftConfigurationJson {
   heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
+  aliasesByName?: IHeftConfigurationJsonAliases;
   phasesByName?: IHeftConfigurationJsonPhases;
 }
 
@@ -60,6 +70,10 @@ export class CoreConfigFiles {
   private static _nodeServiceConfigurationLoader:
     | ConfigurationFile<INodeServicePluginConfiguration>
     | undefined;
+
+  public static heftConfigurationProjectRelativeFilePath: string = `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`;
+
+  public static nodeServiceConfigurationProjectRelativeFilePath: string = `${Constants.projectConfigFolderName}/${Constants.nodeServiceConfigurationFilename}`;
 
   /**
    * Returns the loader for the `config/heft.json` config file.
@@ -81,10 +95,10 @@ export class CoreConfigFiles {
         });
       };
 
-      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
+      const schemaObject: object = await import('../schemas/heft.schema.json');
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
-        projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.heftConfigurationFilename}`,
-        jsonSchemaPath: schemaPath,
+        projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
+        jsonSchemaObject: schemaObject,
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
           object: { inheritanceType: InheritanceType.merge }
@@ -111,12 +125,45 @@ export class CoreConfigFiles {
       });
     }
 
-    const configurationFile: IHeftConfigurationJson =
-      await CoreConfigFiles._heftConfigFileLoader.loadConfigurationFileForProjectAsync(
+    let configurationFile: IHeftConfigurationJson;
+    try {
+      configurationFile = await CoreConfigFiles._heftConfigFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
         projectPath,
         rigConfig
       );
+    } catch (e: unknown) {
+      if (
+        !(e instanceof Error) ||
+        !e.message.startsWith('Resolved configuration object does not match schema')
+      ) {
+        throw e;
+      }
+
+      try {
+        // If the config file doesn't match the schema, then we should check to see if it does
+        // match the legacy schema. We don't need to worry about the resulting object, we just
+        // want to see if it parses. We will use the ConfigurationFile class to load it to ensure
+        // that we follow the "extends" chain for the entire config file.
+        const legacySchemaObject: object = await import('../schemas/heft-legacy.schema.json');
+        const legacyConfigFileLoader: ConfigurationFile<unknown> = new ConfigurationFile<unknown>({
+          projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
+          jsonSchemaObject: legacySchemaObject
+        });
+        await legacyConfigFileLoader.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
+      } catch (e2) {
+        // It doesn't match the legacy schema either. Throw the original error.
+        throw e;
+      }
+      // Matches the legacy schema, so throw a more helpful error.
+      throw new Error(
+        "This project's Heft configuration appears to be using an outdated schema.\n\n" +
+          'Heft 0.51.0 introduced a major breaking change for Heft configuration files. ' +
+          'Your project appears to be using the older file format. You will need to ' +
+          'migrate your project to the new format. Follow these instructions: ' +
+          'https://rushstack.io/link/heft-0.51'
+      );
+    }
 
     // The pluginPackage field was resolved to the root of the package, but we also want to have
     // the original plugin package name in the config file. Gather all the plugin specifiers so we can
@@ -144,15 +191,26 @@ export class CoreConfigFiles {
     return configurationFile;
   }
 
-  public static get nodeServiceConfigurationFile(): ConfigurationFile<INodeServicePluginConfiguration> {
+  public static async tryLoadNodeServiceConfigurationFileAsync(
+    terminal: ITerminal,
+    projectPath: string,
+    rigConfig?: RigConfig | undefined
+  ): Promise<INodeServicePluginConfiguration | undefined> {
     if (!CoreConfigFiles._nodeServiceConfigurationLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'node-service.schema.json');
+      const schemaObject: object = await import('../schemas/node-service.schema.json');
       CoreConfigFiles._nodeServiceConfigurationLoader =
         new ConfigurationFile<INodeServicePluginConfiguration>({
-          projectRelativeFilePath: `${Constants.projectConfigFolderName}/${Constants.nodeServiceConfigurationFilename}`,
-          jsonSchemaPath: schemaPath
+          projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
+          jsonSchemaObject: schemaObject
         });
     }
-    return CoreConfigFiles._nodeServiceConfigurationLoader;
+
+    const configurationFile: INodeServicePluginConfiguration | undefined =
+      await CoreConfigFiles._nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectPath,
+        rigConfig
+      );
+    return configurationFile;
   }
 }

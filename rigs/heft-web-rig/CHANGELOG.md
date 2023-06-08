@@ -1,6 +1,30 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 02 Jun 2023 02:01:12 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2023 00:20:02 GMT and should not be manually modified.
+
+## 0.18.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.18.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add "heft start" alias that maps to "heft build-watch --serve"
+
+## 0.17.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Update Jest environment "customExportConditions" to ["require", "node", "umd"]
+
+## 0.16.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
 
 ## 0.16.0
 Fri, 02 Jun 2023 02:01:12 GMT

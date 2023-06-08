@@ -80,8 +80,6 @@ export enum BumpType {
     // (undocumented)
     'patch' = 2,
     // (undocumented)
-    'preminor' = 3,
-    // (undocumented)
     'prerelease' = 1
 }
 

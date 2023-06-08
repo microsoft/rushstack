@@ -1,5 +1,18 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.52.0
+
+The `nodeService` built-in plugin now supports the `--serve` parameter, to be consistent with the `@rushstack/heft-webpack5-plugin` dev server.
+
+Old behavior:
+- `nodeService` was always enabled, but would have no effect unless Heft was in watch mode (`heft start`)
+- If `config/node-service.json` was omitted, the plugin would silently be disabled
+
+New behavior:
+- `nodeService` is always loaded by `@rushstack/heft-node-rig` but for a custom `heft.json` you need to load it manually
+- `nodeService` has no effect unless you specify `--serve`, for example: `heft build-watch --serve`
+- If `--serve` is specified and `config/node-service.json` is omitted, then Heft fails with a hard error
+
 ### Heft 0.51.0
 
 Multi-phase Heft is a complete re-write of the `@rushstack/heft` project with the intention of being more closely compatible with multi-phase Rush builds. In addition, this update brings greater customizability and improved parallel process handling to Heft.
@@ -92,7 +105,7 @@ All phases are defined within the top-level `phasesByName` property. Each phase 
 Within the phase specification, `tasksByName` defines all tasks that run while executing a phase. Each task may specify `taskDependencies` to define the order of task execution. All tasks defined in `taskDependencies` must exist within the same phase. For CLI-availability reasons, phase names, task names, plugin names, and parameter scopes, must be `kebab-cased`.
 
 The following is an example "heft.json" file defining both a "build" and a "test" phase:
-```json
+```js
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
   "extends": "base-project/config/heft.json",
@@ -133,7 +146,8 @@ The following is an example "heft.json" file defining both a "build" and a "test
             "options": {
               "copyOperations": [
                 {
-                  "sourceFolder": "src/assets",
+                  // NOTE: THIS WAS CALLED "sourceFolder" IN PREVIOUS HEFT VERSIONS
+                  "sourcePath": "src/assets",
                   "destinationFolders": [ "dist/assets" ]
                 }
               ]
@@ -183,8 +197,9 @@ Once an object is set to a `inheritanceType` of override, all sub-property `inhe
 One thing to note is that different mergeBehavior verbs are used for the merging of keyed objects and arrays. This is to make it explicit that arrays will be appended as-is, and no additional processing (eg. deduping if the array is intended to be a set) is done during merge. If such behavior is required, it can be done on the implementation side. Deduping arrays within the @rushstack/heft-config-file package doesn't quite make sense, since deduping arrays of non-primitive objects is not easily defined.
 
 ##### Example "heft.json" Comparison
-###### "heft.json" in `@rushstack/heft@0.49.0-rc.1`
-```json
+###### "heft.json" OBSOLETE FILE FORMAT from `@rushstack/heft@0.49.0-rc.1`
+```js
+// * * * DO NOT USE -- THIS IS THE OLD FILE FORMAT * * *
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 

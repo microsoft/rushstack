@@ -36,6 +36,7 @@ export type {
 } from './pluginFramework/HeftLifecycleSession';
 
 export type {
+  IHeftParsedCommandLine,
   IHeftTaskSession,
   IHeftTaskHooks,
   IHeftTaskFileOperations,

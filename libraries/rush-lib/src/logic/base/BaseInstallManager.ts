@@ -50,6 +50,8 @@ export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompat
 const pnpmCacheDirParameter: string = '--config.cacheDir';
 const pnpmStateDirParameter: string = '--config.stateDir';
 
+const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit', 'post-merge', 'pre-push']);
+
 /**
  * This class implements common logic between "rush install" and "rush update".
  */
@@ -458,7 +460,7 @@ export abstract class BaseInstallManager {
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
           // Make sure the actual script in the hookSource directory has required permission bits
-          const hookFilePath: string = path.join(hookSource, filename);
+          const hookFilePath: string = `${hookSource}/${filename}`;
           const originalPosixModeBits: PosixModeBits = FileSystem.getPosixModeBits(hookFilePath);
           FileSystem.changePosixModeBits(
             hookFilePath,
@@ -466,20 +468,25 @@ export abstract class BaseInstallManager {
             originalPosixModeBits | PosixModeBits.UserRead | PosixModeBits.UserExecute
           );
 
+          const gitLfsHookHandling: string = gitLfsHooks.has(filename)
+            ? `
+# Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
+if command -v git-lfs &> /dev/null; then
+  git lfs ${filename} "$@"
+fi
+`
+            : '';
+
           const hookFileContent: string = `#!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
 
 if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
-  exec "$SCRIPT_IMPLEMENTATION_PATH"
+  "$SCRIPT_IMPLEMENTATION_PATH"
 else
   echo "The ${filename} Git hook no longer exists in your version of the repo. Run 'rush install' or 'rush update' to refresh your installed Git hooks." >&2
 fi
-
-# Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
-if command -v git-lfs &> /dev/null; then
-  git lfs pre-push "$@"
-fi
+${gitLfsHookHandling}
 `;
           // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
           FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {

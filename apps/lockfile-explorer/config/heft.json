@@ -33,17 +33,6 @@
           }
         }
       }
-    },
-
-    "serve": {
-      "phaseDependencies": ["build"],
-      "tasksByName": {
-        "express": {
-          "taskEvent": {
-            "eventKind": "nodeService"
-          }
-        }
-      }
     }
   }
 }
