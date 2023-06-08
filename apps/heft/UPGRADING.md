@@ -1,5 +1,48 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.53.0
+The `taskEvent` configuration option in heft.json has been removed, and use of any `taskEvent`-based functionality is now accomplished by referencing the plugins directly within the `@rushstack/heft` package.
+
+Old format:
+```json
+{
+  "phasesByName": {
+    "build": {
+      "tasksbyName": {
+        "perform-copy": {
+          "taskEvent": {
+            "eventKind": "copyFiles",
+            "options": {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+New format:
+```json
+{
+  "phasesByName": {
+    "build": {
+      "tasksbyName": {
+        "perform-copy": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ### Heft 0.52.0
 
 The `nodeService` built-in plugin now supports the `--serve` parameter, to be consistent with the `@rushstack/heft-webpack5-plugin` dev server.
@@ -141,8 +184,9 @@ The following is an example "heft.json" file defining both a "build" and a "test
           }
         },
         "copy-assets": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "packageName": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {

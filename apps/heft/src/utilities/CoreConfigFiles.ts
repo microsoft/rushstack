@@ -4,18 +4,16 @@
 import * as path from 'path';
 import {
   ConfigurationFile,
-  IJsonPathMetadataResolverOptions,
   InheritanceType,
-  PathResolutionMethod
+  PathResolutionMethod,
+  type IJsonPathMetadataResolverOptions
 } from '@rushstack/heft-config-file';
-import { Import, ITerminal } from '@rushstack/node-core-library';
+import { Import, type ITerminal } from '@rushstack/node-core-library';
 import type { RigConfig } from '@rushstack/rig-package';
 
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
 import { Constants } from './Constants';
-
-export type HeftEventKind = 'copyFiles' | 'deleteFiles' | 'runScript' | 'nodeService';
 
 export interface IHeftConfigurationJsonActionReference {
   actionName: string;
@@ -24,11 +22,6 @@ export interface IHeftConfigurationJsonActionReference {
 
 export interface IHeftConfigurationJsonAliases {
   [aliasName: string]: IHeftConfigurationJsonActionReference;
-}
-
-export interface IHeftConfigurationJsonEventSpecifier {
-  eventKind: HeftEventKind;
-  options?: object;
 }
 
 export interface IHeftConfigurationJsonPluginSpecifier {
@@ -40,8 +33,7 @@ export interface IHeftConfigurationJsonPluginSpecifier {
 
 export interface IHeftConfigurationJsonTaskSpecifier {
   taskDependencies?: string[];
-  taskEvent?: IHeftConfigurationJsonEventSpecifier;
-  taskPlugin?: IHeftConfigurationJsonPluginSpecifier;
+  taskPlugin: IHeftConfigurationJsonPluginSpecifier;
 }
 
 export interface IHeftConfigurationJsonTasks {
@@ -91,7 +83,8 @@ export class CoreConfigFiles {
         const configurationFileDirectory: string = path.dirname(configurationFilePath);
         return Import.resolvePackage({
           packageName: propertyValue,
-          baseFolderPath: configurationFileDirectory
+          baseFolderPath: configurationFileDirectory,
+          allowSelfReference: true
         });
       };
 
@@ -115,12 +108,7 @@ export class CoreConfigFiles {
           '$.phasesByName.*.tasksByName.*.taskPlugin.pluginPackage': {
             pathResolutionMethod: PathResolutionMethod.custom,
             customResolver: pluginPackageResolver
-          },
-          // Special handling for "runScript" task events to resolve the script path
-          '$.phasesByName.*.tasksByName[?(@.taskEvent && @.taskEvent.eventKind == "runScript")].taskEvent.options.scriptPath':
-            {
-              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-            }
+          }
         }
       });
     }
