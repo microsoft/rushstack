@@ -4,6 +4,7 @@
   "compilerOptions": {
     "types": ["heft-jest", "node"],
     // express hackery makes this necessary
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   }
 }
