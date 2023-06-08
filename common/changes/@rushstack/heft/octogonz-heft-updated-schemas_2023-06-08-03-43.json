@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Update UPGRADING.md with new JSON schema URLs",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
