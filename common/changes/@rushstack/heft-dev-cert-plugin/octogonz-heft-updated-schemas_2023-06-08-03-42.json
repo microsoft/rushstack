@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-dev-cert-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-dev-cert-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
