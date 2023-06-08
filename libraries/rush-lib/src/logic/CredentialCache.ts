@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, JsonFile, JsonSchema, LockFile, Import } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import schemaJson from '../schemas/credentials.schema.json';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
 const CACHE_FILENAME: string = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
@@ -106,7 +105,7 @@ export class CredentialCache /* implements IDisposable */ {
     if (
       existingCacheEntry?.credential !== credential ||
       existingCacheEntry?.expires !== expiresMilliseconds ||
-      !lodash.isEqual(existingCacheEntry?.credentialMetadata, credentialMetadata)
+      !objectsAreDeepEqual(existingCacheEntry?.credentialMetadata, credentialMetadata)
     ) {
       this._modified = true;
       this._cacheEntries.set(cacheId, {

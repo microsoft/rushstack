@@ -1,6 +1,38 @@
 # Change Log - @rushstack/heft-dev-cert-plugin
 
-This log was last generated on Wed, 24 May 2023 00:19:12 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2023 00:20:02 GMT and should not be manually modified.
+
+## 0.3.4
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.3.3
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.3.2
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.3.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.3.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.2.32
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 0.2.31
 Wed, 24 May 2023 00:19:12 GMT

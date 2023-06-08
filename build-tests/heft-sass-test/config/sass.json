@@ -1,5 +1,4 @@
 {
-  "cssOutputFolders": ["lib"],
-  "preserveSCSSExtension": true,
+  "cssOutputFolders": ["lib", "lib-commonjs"],
   "secondaryGeneratedTsFolders": ["lib"]
 }

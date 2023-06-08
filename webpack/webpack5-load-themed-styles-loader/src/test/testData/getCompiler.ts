@@ -4,8 +4,8 @@ import type { Compiler, Stats } from 'webpack';
 import { createFsFromVolume, Volume } from 'memfs';
 import { ILoadThemedStylesLoaderOptions } from '../..';
 
-// webpack5-loader-load-themed-styles/src/LoadThemedStylesLoader.ts
-const LOADER_PATH: string = path.resolve(__dirname, '../../index.ts');
+// webpack5-loader-load-themed-styles/lib/LoadThemedStylesLoader.js
+const LOADER_PATH: string = path.resolve(__dirname, '../../index.js');
 
 export default function getCompiler(
   fixture: string,

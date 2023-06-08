@@ -5,7 +5,7 @@ const { FileSystem, Import } = require('@rushstack/node-core-library');
 const DTS_EXTENSION = '.d.ts';
 
 module.exports = {
-  runAsync: async ({ heftConfiguration: { buildFolder } }) => {
+  runAsync: async ({ heftConfiguration: { buildFolderPath } }) => {
     const rushLibPath = Import.resolvePackage({
       packageName: '@microsoft/rush-lib',
       baseFolderPath: __dirname
@@ -31,7 +31,7 @@ module.exports = {
       indexFileLines.push(`import '${dtsPath}';`);
     }
 
-    const srcFolderPath = `${buildFolder}/src`;
+    const srcFolderPath = `${buildFolderPath}/src`;
     await FileSystem.writeFileAsync(`${srcFolderPath}/index.ts`, indexFileLines.join('\n'), {
       ensureFolderExists: true
     });

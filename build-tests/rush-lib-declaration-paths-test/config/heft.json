@@ -3,30 +3,38 @@
 
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
-  "eventActions": [
-    {
-      "actionKind": "deleteGlobs",
-      "actionId": "deleteSrc",
-      "heftEvent": "clean",
-      "globsToDelete": ["src/**/*"]
-    },
-    {
-      "actionKind": "copyFiles",
-      "heftEvent": "pre-compile",
-      "actionId": "createSrc",
-      "copyOperations": [
-        {
-          "sourceFolder": "node_modules/@microsoft/rush-lib/src",
-          "destinationFolders": ["src"],
-          "includeGlobs": ["npm-check-typings.d.ts"]
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "sourcePath": "src" }],
+      "tasksByName": {
+        "create-src": {
+          "taskEvent": {
+            "eventKind": "runScript",
+            "options": {
+              "scriptPath": "./scripts/createSrc.js"
+            }
+          }
+        },
+
+        "copy-src-typings": {
+          "taskEvent": {
+            "eventKind": "copyFiles",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "node_modules/@microsoft/rush-lib/src",
+                  "destinationFolders": ["src"],
+                  "includeGlobs": ["npm-check-typings.d.ts"]
+                }
+              ]
+            }
+          }
+        },
+
+        "typescript": {
+          "taskDependencies": ["create-src", "copy-src-typings"]
         }
-      ]
-    },
-    {
-      "actionKind": "runScript",
-      "heftEvent": "pre-compile",
-      "actionId": "createSrc",
-      "scriptPath": "./scripts/createSrc.js"
+      }
     }
-  ]
+  }
 }

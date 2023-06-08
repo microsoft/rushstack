@@ -9,10 +9,7 @@ import inquirer from 'inquirer';
 import colors from 'colors/safe';
 import CliTable from 'cli-table';
 import Separator from 'inquirer/lib/objects/separator';
-import { Import } from '@rushstack/node-core-library';
 import type * as NpmCheck from 'npm-check';
-
-const _: typeof import('lodash') = Import.lazy('lodash', require);
 
 export interface IUIGroup {
   title: string;
@@ -120,10 +117,18 @@ function unselectable(options?: { title: string }): Separator {
 }
 
 function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup): ChoiceTable {
-  const filteredChoices: NpmCheck.INpmCheckPackage[] = _.filter(
-    packages,
-    options.filter
-  ) as NpmCheck.INpmCheckPackage[];
+  const { filter } = options;
+  const filteredChoices: NpmCheck.INpmCheckPackage[] = packages.filter((pkg: NpmCheck.INpmCheckPackage) => {
+    if ('mismatch' in filter && pkg.mismatch !== filter.mismatch) {
+      return false;
+    } else if ('bump' in filter && pkg.bump !== filter.bump) {
+      return false;
+    } else if ('notInstalled' in filter && pkg.notInstalled !== filter.notInstalled) {
+      return false;
+    } else {
+      return true;
+    }
+  }) as NpmCheck.INpmCheckPackage[];
 
   const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
     .map(choice)
@@ -150,15 +155,21 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
     colWidths: [50, 10, 3, 10, 100]
   });
 
-  cliTable.push(..._.map(choices, 'name'));
+  for (const choice of choices) {
+    if (typeof choice === 'object' && 'name' in choice) {
+      cliTable.push(choice.name);
+    }
+  }
 
   const choicesAsATable: string[] = cliTable.toString().split('\n');
-  const choicesWithTableFormatting: boolean[] = _.map(choices, (choice: IUpgradeInteractiveDepChoice, i) => {
-    choice.name = choicesAsATable[i];
-    return choice;
-  });
+  for (let i: number = 0; i < choices.length; i++) {
+    const choice: IUpgradeInteractiveDepChoice | Separator | boolean | undefined = choices[i];
+    if (typeof choice === 'object' && 'name' in choice) {
+      choice.name = choicesAsATable[i];
+    }
+  }
 
-  if (choicesWithTableFormatting.length) {
+  if (choices.length > 0) {
     choices.unshift(unselectable(options));
     choices.unshift(unselectable());
     return choices;
@@ -170,7 +181,12 @@ export const upgradeInteractive = async (
 ): Promise<IDepsToUpgradeAnswers> => {
   const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(pkgs, group)).filter(Boolean);
 
-  const choices: ChoiceTable = _.flatten(choicesGrouped);
+  const choices: ChoiceTable = [];
+  for (const choiceGroup of choicesGrouped) {
+    if (choiceGroup) {
+      choices.push(...choiceGroup);
+    }
+  }
 
   if (!choices.length) {
     console.log('All dependencies are up to date!');

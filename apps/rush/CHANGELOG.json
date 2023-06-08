@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.99.0",
+      "tag": "@microsoft/rush_v5.99.0",
+      "date": "Fri, 02 Jun 2023 22:08:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use a separate temrinal for logging cache subsystem"
+          },
+          {
+            "comment": "Expose beforeLog hook"
+          },
+          {
+            "comment": "Convert to multi-phase Heft"
+          },
+          {
+            "comment": "Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.98.0",
       "tag": "@microsoft/rush_v5.98.0",
       "date": "Sun, 21 May 2023 00:18:35 GMT",

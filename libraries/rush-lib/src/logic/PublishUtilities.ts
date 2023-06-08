@@ -338,7 +338,6 @@ export class PublishUtilities {
       case 'patch':
         return ChangeType.patch;
       case 'premajor':
-      case 'preminor':
       case 'prepatch':
       case 'prerelease':
         return ChangeType.hotfix;

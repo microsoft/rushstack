@@ -9,6 +9,7 @@
 !/lib-*/**
 !/dist/**
 !ThirdPartyNotice.txt
+!heft-plugin.json
 
 # Ignore certain patterns that should not get published.
 /dist/*.stats.*

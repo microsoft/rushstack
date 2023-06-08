@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Mon, 22 May 2023 06:34:32 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+
+## 1.3.1
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Patches
+
+- Add test for invalid importer path to fallback to relative path when loading eslint 6 plugins
 
 ## 1.3.0
 Mon, 22 May 2023 06:34:32 GMT

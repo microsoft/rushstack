@@ -17,17 +17,6 @@
   "project": "./tsconfig.json",
 
   /**
-   * If set to "true", the TSlint task will not be invoked.
-   */
-  // "disableTslint": true,
-
-  /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
-   */
-  // "maxWriteParallelism": 50,
-
-  /**
    * Describes the way files should be statically coped from src to TS output folders
    */
   "staticAssetsToCopy": {

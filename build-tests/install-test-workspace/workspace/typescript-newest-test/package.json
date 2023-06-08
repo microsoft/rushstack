@@ -6,11 +6,13 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "heft clean --clear-cache && heft build"
+    "build": "heft build --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "*",
     "@rushstack/heft": "*",
+    "@rushstack/heft-lint-plugin": "*",
+    "@rushstack/heft-typescript-plugin": "*",
     "typescript": "~5.0.4",
     "tslint": "~5.20.1",
     "eslint": "~8.7.0"

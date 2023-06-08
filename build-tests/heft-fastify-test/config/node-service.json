@@ -29,16 +29,6 @@
   // "ignoreMissingScript": false,
 
   /**
-   * Customizes the number of milliseconds to wait before restarting the child process,
-   * as measured from when the previous process exited.  If this interval is too small, then
-   * the new process may start while the developer is still saving changes, or while
-   * other monitoring processes are still holding OS locks.
-   *
-   * Default value: 2000
-   */
-  // "waitBeforeRestartMs": 2000,
-
-  /**
    * Customizes the number of milliseconds to wait for the child process to be terminated (SIGTERM)
    * before forcibly killing it.
    *

@@ -1,6 +1,46 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Mon, 22 May 2023 06:34:32 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2023 00:20:02 GMT and should not be manually modified.
+
+## 2.2.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 2.2.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add "heft start" alias that maps to "heft build-watch --serve"
+
+### Patches
+
+- Fix a regression where heft-node-rig was not loading the NodeServicePlugin
+
+## 2.1.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Updated Jest environment "customExportConditions" to ["require", "node"]
+
+## 2.0.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 2.0.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Breaking changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 1.13.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 1.13.0
 Mon, 22 May 2023 06:34:32 GMT

@@ -635,18 +635,6 @@
 
     // heft-* projects
     {
-      "packageName": "heft-action-plugin",
-      "projectFolder": "build-tests/heft-action-plugin",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-action-plugin-test",
-      "projectFolder": "build-tests/heft-action-plugin-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-copy-files-test",
       "projectFolder": "build-tests/heft-copy-files-test",
       "reviewCategory": "tests",
@@ -835,6 +823,13 @@
 
     // "heft-plugins" folder (alphabetical order)
     {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "projectFolder": "heft-plugins/heft-api-extractor-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+    },
+    {
       "packageName": "@rushstack/heft-dev-cert-plugin",
       "projectFolder": "heft-plugins/heft-dev-cert-plugin",
       "reviewCategory": "libraries",
@@ -844,7 +839,15 @@
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+    },
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "projectFolder": "heft-plugins/heft-lint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
     },
     {
       "packageName": "@rushstack/heft-sass-plugin",
@@ -863,6 +866,13 @@
       "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "projectFolder": "heft-plugins/heft-typescript-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
     },
     {
       "packageName": "@rushstack/heft-webpack4-plugin",

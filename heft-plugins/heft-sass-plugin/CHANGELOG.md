@@ -1,6 +1,45 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jun 2023 00:20:03 GMT and should not be manually modified.
+
+## 0.11.4
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.11.3
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.11.2
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.11.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.11.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.10.0
+Fri, 02 Jun 2023 00:24:45 GMT
+
+### Minor changes
+
+- Update to sass-embedded ~1.62.0
+
+## 0.9.3
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 0.9.2
 Mon, 22 May 2023 06:34:33 GMT

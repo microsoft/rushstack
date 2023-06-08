@@ -16,6 +16,9 @@
     "noUnusedLocals": true,
     "types": ["heft-jest", "webpack-env"],
 
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es5",
