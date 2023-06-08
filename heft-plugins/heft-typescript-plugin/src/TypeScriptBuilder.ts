@@ -401,7 +401,7 @@ export class TypeScriptBuilder {
       // eslint-disable-next-line require-atomic-updates
       tool.executing = false;
     }
-    this._logDiagnostics(ts, rawDiagnostics);
+    this._logDiagnostics(ts, rawDiagnostics, this._useSolutionBuilder);
   }
 
   public async _runBuildAsync(tool: ITypeScriptTool): Promise<void> {
@@ -579,13 +579,20 @@ export class TypeScriptBuilder {
       }
     }
 
-    this._logDiagnostics(ts, rawDiagnostics);
+    this._logDiagnostics(ts, rawDiagnostics, true);
   }
 
-  private _logDiagnostics(ts: ExtendedTypeScript, rawDiagnostics: TTypescript.Diagnostic[]): void {
+  private _logDiagnostics(
+    ts: ExtendedTypeScript,
+    rawDiagnostics: TTypescript.Diagnostic[],
+    isSolutionMode?: boolean
+  ): void {
     const diagnostics: readonly TTypescript.Diagnostic[] = ts.sortAndDeduplicateDiagnostics(rawDiagnostics);
 
     if (diagnostics.length > 0) {
+      let warningCount: number = 0;
+      let hasError: boolean = false;
+
       this._typescriptTerminal.writeLine(
         `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
@@ -595,7 +602,22 @@ export class TypeScriptBuilder {
           ts
         );
 
+        if (diagnosticCategory === ts.DiagnosticCategory.Warning) {
+          warningCount++;
+        } else if (diagnosticCategory === ts.DiagnosticCategory.Error) {
+          hasError = true;
+        }
+
         this._printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
+      }
+
+      if (warningCount > 0 && !hasError) {
+        this._typescriptLogger.emitError(
+          new Error(
+            `TypeScript encountered ${warningCount} warning${warningCount === 1 ? '' : 's'} ` +
+              `and is configured to build project references. As a result, no files were emitted. Please fix the reported warnings to proceed.`
+          )
+        );
       }
     }
   }
