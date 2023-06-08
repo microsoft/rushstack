@@ -9,35 +9,18 @@ Plugin name mappings for previously-existing task events are:
 - `runScript` -> `run-script-plugin`
 - `nodeService` -> `node-service-plugin`
 
-Old format:
-```json
+Example diff of a heft.json file that uses the `copyFiles` task event:
+```diff
 {
   "phasesByName": {
     "build": {
       "tasksbyName": {
         "perform-copy": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
-            "options": {
-              ...
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
-New format:
-```json
-{
-  "phasesByName": {
-    "build": {
-      "tasksbyName": {
-        "perform-copy": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft",
-            "pluginName": "copy-files-plugin",
+-          "taskEvent": {
+-            "eventKind": "copyFiles",
++          "taskPlugin": {
++            "pluginPackage": "@rushstack/heft",
++            "pluginName": "copy-files-plugin",
             "options": {
               ...
             }
