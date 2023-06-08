@@ -118,13 +118,13 @@ Lifecycle plugins are specified in the top-level `heftPlugins` array. Plugins ca
 
   "heftPlugins": [
     {
-      "packageName": "@rushstack/heft-metrics-reporter",
+      "pluginPackage": "@rushstack/heft-metrics-reporter",
       "options": {
         "disableMetrics": true
       }
     },
     {
-      "packageName": "@rushstack/heft-initialization-plugin",
+      "pluginPackage": "@rushstack/heft-initialization-plugin",
       "pluginName": "my-lifecycle-plugin"
     }
   ]
@@ -145,7 +145,7 @@ The following is an example "heft.json" file defining both a "build" and a "test
   // "heftPlugins" can be used alongside "phasesByName"
   "heftPlugins": [
     {
-      "packageName": "@rushstack/heft-metrics-reporter"
+      "pluginPackage": "@rushstack/heft-metrics-reporter"
     }
   ],
 
@@ -174,7 +174,7 @@ The following is an example "heft.json" file defining both a "build" and a "test
         },
         "copy-assets": {
           "taskPlugin": {
-            "packageName": "@rushstack/heft",
+            "pluginPackage": "@rushstack/heft",
             "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
