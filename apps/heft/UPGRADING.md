@@ -3,6 +3,12 @@
 ### Heft 0.53.0
 The `taskEvent` configuration option in heft.json has been removed, and use of any `taskEvent`-based functionality is now accomplished by referencing the plugins directly within the `@rushstack/heft` package.
 
+Plugin name mappings for previously-existing task events are:
+- `copyFiles` -> `copy-files-plugin`
+- `deleteFiles` -> `delete-files-plugin`
+- `runScript` -> `run-script-plugin`
+- `nodeService` -> `node-service-plugin`
+
 Old format:
 ```json
 {
