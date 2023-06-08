@@ -468,7 +468,7 @@ export abstract class BaseInstallManager {
             originalPosixModeBits | PosixModeBits.UserRead | PosixModeBits.UserExecute
           );
 
-          const gitLfsHookHandling = gitLfsHooks.has(filename)
+          const gitLfsHookHandling: string = gitLfsHooks.has(filename)
             ? `
 # Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
 if command -v git-lfs &> /dev/null; then
