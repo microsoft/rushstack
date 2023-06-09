@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-extractor",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "lib/index.js",
   "typings": "dist/package-extractor.d.ts",
