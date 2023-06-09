@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a `--peer` flag to the `rush add` command to add the specified dependency as a `peerDependency`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -20,6 +20,7 @@ export class AddAction extends BaseAddAndRemoveAction {
   private readonly _exactFlag: CommandLineFlagParameter;
   private readonly _caretFlag: CommandLineFlagParameter;
   private readonly _devDependencyFlag: CommandLineFlagParameter;
+  private readonly _peerDependencyFlag: CommandLineFlagParameter;
   private readonly _makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
@@ -68,6 +69,11 @@ export class AddAction extends BaseAddAndRemoveAction {
       description:
         'If specified, the package will be added to the "devDependencies" section of the package.json'
     });
+    this._peerDependencyFlag = this.defineFlagParameter({
+      parameterLongName: '--peer',
+      description:
+        'If specified, the package will be added to the "peerDependencies" section of the package.json'
+    });
     this._makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
       parameterShortName: '-m',
@@ -87,6 +93,12 @@ export class AddAction extends BaseAddAndRemoveAction {
     if (this._caretFlag.value && this._exactFlag.value) {
       throw new Error(
         `Only one of "${this._caretFlag.longName}" and "${this._exactFlag.longName}" should be specified`
+      );
+    }
+
+    if (this._devDependencyFlag.value && this._peerDependencyFlag.value) {
+      throw new Error(
+        `Only one of "${this._devDependencyFlag.longName}" and "${this._peerDependencyFlag.longName}" should be specified`
       );
     }
 
@@ -147,6 +159,7 @@ export class AddAction extends BaseAddAndRemoveAction {
       projects: projects,
       packagesToUpdate: packagesToAdd,
       devDependency: this._devDependencyFlag.value,
+      peerDependency: this._peerDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,

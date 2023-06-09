@@ -132,8 +132,15 @@ export class PackageJsonUpdater {
 
     const dependenciesToUpdate: Record<string, string> = {};
     const devDependenciesToUpdate: Record<string, string> = {};
+    const peerDependenciesToUpdate: Record<string, string> = {};
 
-    for (const { moduleName, latest: latestVersion, packageJson, devDependency } of packagesToAdd) {
+    for (const {
+      moduleName,
+      latest: latestVersion,
+      packageJson,
+      devDependency,
+      peerDependency
+    } of packagesToAdd) {
       const inferredRangeStyle: SemVerStyle = this._cheaplyDetectSemVerRangeStyle(packageJson);
       const implicitlyPreferredVersion: string | undefined =
         implicitlyPreferredVersionByPackageName.get(moduleName);
@@ -152,6 +159,8 @@ export class PackageJsonUpdater {
 
       if (devDependency) {
         devDependenciesToUpdate[moduleName] = version;
+      } else if (peerDependency) {
+        peerDependenciesToUpdate[moduleName] = version;
       } else {
         dependenciesToUpdate[moduleName] = version;
       }
@@ -183,7 +192,8 @@ export class PackageJsonUpdater {
     const allPackageUpdates: Map<string, VersionMismatchFinderEntity> = new Map();
     const allDependenciesToUpdate: [string, string][] = [
       ...Object.entries(dependenciesToUpdate),
-      ...Object.entries(devDependenciesToUpdate)
+      ...Object.entries(devDependenciesToUpdate),
+      ...Object.entries(peerDependenciesToUpdate)
     ];
 
     for (const project of projects) {
@@ -201,10 +211,17 @@ export class PackageJsonUpdater {
         dependencyType: DependencyType.Dev
       };
 
+      const currentProjectPeerDepUpdate: IUpdateProjectOptions = {
+        project: mismatchFinderProject,
+        dependenciesToAddOrUpdateOrRemove: peerDependenciesToUpdate,
+        dependencyType: DependencyType.Peer
+      };
+
       allPackageUpdates.set(mismatchFinderProject.filePath, mismatchFinderProject);
 
       this.updateProject(currentProjectDepUpdate);
       this.updateProject(currentProjectDevDepUpdate);
+      this.updateProject(currentProjectPeerDepUpdate);
     }
 
     if (updateOtherPackages) {
@@ -318,7 +335,8 @@ export class PackageJsonUpdater {
   private async _doRushAddAsync(
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { projects, packagesToUpdate, devDependency, updateOtherPackages, variant } = options;
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages, variant } =
+      options;
 
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
@@ -353,7 +371,7 @@ export class PackageJsonUpdater {
 
       dependenciesToAddOrUpdate[packageName] = version;
       this._terminal.writeLine(
-        Colors.green('Updating projects to use'),
+        Colors.green('Updating projects to use '),
         `${packageName}@`,
         Colors.cyan(version)
       );
@@ -384,7 +402,11 @@ export class PackageJsonUpdater {
       const currentProjectUpdate: IUpdateProjectOptions = {
         project: new VersionMismatchFinderProject(project),
         dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,
-        dependencyType: devDependency ? DependencyType.Dev : undefined
+        dependencyType: devDependency
+          ? DependencyType.Dev
+          : peerDependency
+          ? DependencyType.Peer
+          : DependencyType.Regular
       };
       this.updateProject(currentProjectUpdate);
 
