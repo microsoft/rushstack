@@ -13,7 +13,7 @@
         ],
         "minor": [
           {
-            "comment": "Remove \"taskEvents\" heft.json configuration option, and replace it with directly referencing the included plugins. More information on this change can be found at https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
+            "comment": "(BREAKING CHANGE) Remove \"taskEvents\" heft.json configuration option, and replace it with directly referencing the included plugins. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
           }
         ]
       }
@@ -52,7 +52,7 @@
             "comment": "Add a new API IHeftTaskSession.parsedCommandLine for accessing the invoked command name"
           },
           {
-            "comment": "The built-in task NodeServicePlugin now supports the \"--serve\" mode with semantics similar to heft-webpack5-plugin"
+            "comment": "(BREAKING CHANGE) The built-in task NodeServicePlugin now supports the \"--serve\" mode with semantics similar to heft-webpack5-plugin. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
           }
         ],
         "patch": [
@@ -89,7 +89,7 @@
       "comments": {
         "minor": [
           {
-            "comment": "Overhaul to support splitting single-project builds into more phases than \"build\" and \"test\", to align with Rush phased commands. See UPGRADING.md for details."
+            "comment": "(BREAKING CHANGE) Overhaul to support splitting single-project builds into more phases than \"build\" and \"test\", to align with Rush phased commands. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
           }
         ]
       }
