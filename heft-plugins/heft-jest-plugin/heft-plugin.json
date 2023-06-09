@@ -54,6 +54,12 @@
           "description": "Run only tests with a name that matches a regular expression.  The REGEXP is matched against the full name, which is a combination of the test name and all its surrounding describe blocks.  This corresponds to the \"--testNamePattern\" parameter in Jest's documentation."
         },
         {
+          "longName": "--test-path-ignore-patterns",
+          "parameterKind": "string",
+          "argumentName": "REGEXP",
+          "description": "Avoid running tests with a source file path that matches one ore more regular expressions.  On Windows you will need to use \"/\" instead of \"\\\".  This corresponds to the \"--testPathIgnorePatterns\" parameter in Jest's documentation."
+        },
+        {
           "longName": "--test-path-pattern",
           "parameterKind": "string",
           "argumentName": "REGEXP",
