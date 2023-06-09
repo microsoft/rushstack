@@ -459,8 +459,13 @@ export abstract class BaseInstallManager {
         // Only copy files that look like Git hook names
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
-          // Make sure the actual script in the hookSource directory has required permission bits
           const hookFilePath: string = `${hookSource}/${filename}`;
+          // Make sure the actual script in the hookSource directory has correct Linux compatible line endings
+          const originalHookFileContent: string = FileSystem.readFile(hookFilePath);
+          FileSystem.writeFile(hookFilePath, originalHookFileContent, {
+            convertLineEndings: NewlineKind.Lf
+          });
+          // Make sure the actual script in the hookSource directory has required permission bits
           const originalPosixModeBits: PosixModeBits = FileSystem.getPosixModeBits(hookFilePath);
           FileSystem.changePosixModeBits(
             hookFilePath,
