@@ -1,13 +1,20 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 18:05:34 GMT and should not be manually modified.
+
+## 0.53.1
+Fri, 09 Jun 2023 18:05:34 GMT
+
+### Patches
+
+- Revise CHANGELOG.md to more clearly identify the breaking changes
 
 ## 0.53.0
 Fri, 09 Jun 2023 00:19:49 GMT
 
 ### Minor changes
 
-- Remove "taskEvents" heft.json configuration option, and replace it with directly referencing the included plugins. More information on this change can be found at https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
+- (BREAKING CHANGE) Remove "taskEvents" heft.json configuration option, and replace it with directly referencing the included plugins. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
 
 ### Patches
 
@@ -33,7 +40,7 @@ Wed, 07 Jun 2023 22:45:16 GMT
 ### Minor changes
 
 - Add a new API IHeftTaskSession.parsedCommandLine for accessing the invoked command name
-- The built-in task NodeServicePlugin now supports the "--serve" mode with semantics similar to heft-webpack5-plugin
+- (BREAKING CHANGE) The built-in task NodeServicePlugin now supports the "--serve" mode with semantics similar to heft-webpack5-plugin. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
 
 ### Patches
 
@@ -44,7 +51,7 @@ Fri, 02 Jun 2023 02:01:12 GMT
 
 ### Minor changes
 
-- Overhaul to support splitting single-project builds into more phases than "build" and "test", to align with Rush phased commands. See UPGRADING.md for details.
+- (BREAKING CHANGE) Overhaul to support splitting single-project builds into more phases than "build" and "test", to align with Rush phased commands. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
 
 ## 0.50.7
 Mon, 29 May 2023 15:21:15 GMT

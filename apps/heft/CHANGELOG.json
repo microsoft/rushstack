@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.53.1",
+      "tag": "@rushstack/heft_v0.53.1",
+      "date": "Fri, 09 Jun 2023 18:05:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revise CHANGELOG.md to more clearly identify the breaking changes"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.53.0",
       "tag": "@rushstack/heft_v0.53.0",
       "date": "Fri, 09 Jun 2023 00:19:49 GMT",

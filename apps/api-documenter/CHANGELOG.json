@@ -2,6 +2,21 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.22.16",
+      "tag": "@microsoft/api-documenter_v7.22.16",
+      "date": "Fri, 09 Jun 2023 18:05:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.22.15",
       "tag": "@microsoft/api-documenter_v7.22.15",
       "date": "Fri, 09 Jun 2023 15:23:15 GMT",
