@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Revise CHANGELOG.md to more clearly identify the breaking changes",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
