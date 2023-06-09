@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Added --test-path-ignore-patterns support for subtractive test selection to complement existing additive support.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
