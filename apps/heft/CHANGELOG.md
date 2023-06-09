@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 08 Jun 2023 15:21:17 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+
+## 0.53.0
+Fri, 09 Jun 2023 00:19:49 GMT
+
+### Minor changes
+
+- Remove "taskEvents" heft.json configuration option, and replace it with directly referencing the included plugins. More information on this change can be found at https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
+
+### Patches
+
+- Update UPGRADING.md with new JSON schema URLs
 
 ## 0.52.2
 Thu, 08 Jun 2023 15:21:17 GMT

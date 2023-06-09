@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.53.0",
+      "tag": "@rushstack/heft_v0.53.0",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update UPGRADING.md with new JSON schema URLs"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Remove \"taskEvents\" heft.json configuration option, and replace it with directly referencing the included plugins. More information on this change can be found at https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.52.2",
       "tag": "@rushstack/heft_v0.52.2",
       "date": "Thu, 08 Jun 2023 15:21:17 GMT",
