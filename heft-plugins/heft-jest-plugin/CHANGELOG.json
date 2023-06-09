@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.7.5",
+      "tag": "@rushstack/heft-jest-plugin_v0.7.5",
+      "date": "Fri, 09 Jun 2023 15:23:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added --test-path-ignore-patterns support for subtractive test selection to complement existing additive support."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.4",
       "tag": "@rushstack/heft-jest-plugin_v0.7.4",
       "date": "Fri, 09 Jun 2023 00:19:49 GMT",

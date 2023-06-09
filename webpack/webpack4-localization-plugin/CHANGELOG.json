@@ -2,6 +2,27 @@
   "name": "@rushstack/webpack4-localization-plugin",
   "entries": [
     {
+      "version": "0.17.25",
+      "tag": "@rushstack/webpack4-localization-plugin_v0.17.25",
+      "date": "Fri, 09 Jun 2023 15:23:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.63`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.114`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.113` to `^3.3.114`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.24",
       "tag": "@rushstack/webpack4-localization-plugin_v0.17.24",
       "date": "Fri, 09 Jun 2023 00:19:49 GMT",

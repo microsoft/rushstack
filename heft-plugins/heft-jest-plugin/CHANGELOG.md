@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 15:23:15 GMT and should not be manually modified.
+
+## 0.7.5
+Fri, 09 Jun 2023 15:23:15 GMT
+
+### Patches
+
+- Added --test-path-ignore-patterns support for subtractive test selection to complement existing additive support.
 
 ## 0.7.4
 Fri, 09 Jun 2023 00:19:49 GMT
