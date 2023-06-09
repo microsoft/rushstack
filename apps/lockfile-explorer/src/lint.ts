@@ -1,4 +1,4 @@
-import { FileSystem, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
+import { AlreadyReportedError, FileSystem, JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 import path from 'path';
 import colors from 'colors';
@@ -58,4 +58,15 @@ async function lintLockfile(): Promise<void> {
   console.log(colors.green(`Lockfile created at: ${lintingFile}`));
 }
 
-lintLockfile().catch((e) => {});
+const debugMode: boolean = process.argv.indexOf('--debug') >= 0;
+
+lintLockfile().catch((error) => {
+  if (!(error instanceof AlreadyReportedError)) {
+    console.error();
+    if (debugMode) {
+      console.error(colors.red('ERROR: ' + (error.stack ?? error.message)));
+    } else {
+      console.error(colors.red('ERROR: ' + error.message));
+    }
+  }
+});
