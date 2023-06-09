@@ -2,7 +2,7 @@
  * Defines configuration used by core Heft.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
   /**
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
@@ -15,8 +15,9 @@
       "tasksByName": {
         "copy-stub": {
           "taskDependencies": ["typescript"],
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {

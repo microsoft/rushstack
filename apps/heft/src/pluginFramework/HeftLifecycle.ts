@@ -8,7 +8,10 @@ import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguratio
 import { HeftPluginHost } from './HeftPluginHost';
 import type { InternalHeftSession } from './InternalHeftSession';
 import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
-import type { HeftLifecyclePluginDefinition } from '../configuration/HeftPluginDefinition';
+import type {
+  HeftLifecyclePluginDefinition,
+  HeftPluginDefinitionBase
+} from '../configuration/HeftPluginDefinition';
 import type { IHeftLifecyclePlugin, IHeftPlugin } from './IHeftPlugin';
 import {
   HeftLifecycleSession,
@@ -144,11 +147,12 @@ export class HeftLifecycle extends HeftPluginHost {
       let pluginConfigurationIndex: number = 0;
       for (const pluginSpecifier of this._lifecyclePluginSpecifiers) {
         const pluginConfiguration: HeftPluginConfiguration = pluginConfigurations[pluginConfigurationIndex++];
-        const pluginDefinition: HeftLifecyclePluginDefinition =
+        const pluginDefinition: HeftPluginDefinitionBase =
           pluginConfiguration.getPluginDefinitionBySpecifier(pluginSpecifier);
 
         // Ensure the plugin is a lifecycle plugin
-        if (!pluginConfiguration.lifecyclePluginDefinitions.has(pluginDefinition)) {
+        const isLifecyclePlugin: boolean = pluginConfiguration.isLifecyclePluginDefinition(pluginDefinition);
+        if (!isLifecyclePlugin) {
           throw new Error(
             `Plugin ${JSON.stringify(pluginDefinition.pluginName)} from package ` +
               `${JSON.stringify(pluginSpecifier.pluginPackage)} is not a lifecycle plugin.`

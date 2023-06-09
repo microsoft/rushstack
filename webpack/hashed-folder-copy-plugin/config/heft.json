@@ -1,4 +1,6 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
   "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
   // TODO: Add comments
@@ -12,8 +14,9 @@
 
       "tasksByName": {
         "copy-ambient-types": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {

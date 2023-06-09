@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskRunHookOptions } from '../pluginFramework/HeftTaskSession';
@@ -53,10 +54,10 @@ export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPlugin
     pluginOptions: IRunScriptPluginOptions,
     runOptions: IHeftTaskRunHookOptions
   ): Promise<void> {
-    // The scriptPath property should be fully resolved since it is included in the resolution logic used by
-    // HeftConfiguration
-    const resolvedModulePath: string = pluginOptions.scriptPath;
-
+    const resolvedModulePath: string = path.resolve(
+      heftConfiguration.buildFolderPath,
+      pluginOptions.scriptPath
+    );
     const runScript: IRunScript = await import(resolvedModulePath);
     if (!runScript.runAsync) {
       throw new Error(

@@ -105,6 +105,7 @@ export interface IJestPluginOptions {
   passWithNoTests?: boolean;
   silent?: boolean;
   testNamePattern?: string;
+  testPathIgnorePatterns?: string;
   testPathPattern?: string;
   testTimeout?: number;
   updateSnapshots?: boolean;
@@ -183,6 +184,9 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const maxWorkersParameter: CommandLineStringParameter = parameters.getStringParameter('--max-workers');
     const testNamePatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-name-pattern');
+    const testPathIgnorePatternsParameter: CommandLineStringParameter = parameters.getStringParameter(
+      '--test-path-ignore-patterns'
+    );
     const testPathPatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-path-pattern');
 
@@ -208,6 +212,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       passWithNoTests: true,
       silent: silentParameter.value || pluginOptions?.silent,
       testNamePattern: testNamePatternParameter.value || pluginOptions?.testNamePattern,
+      testPathIgnorePatterns: testPathIgnorePatternsParameter.value || pluginOptions?.testPathIgnorePatterns,
       testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
       testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
       updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
@@ -564,6 +569,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       silent: options.silent || false,
       testNamePattern: options.testNamePattern,
+      testPathIgnorePatterns: options.testPathIgnorePatterns ? [options.testPathIgnorePatterns] : undefined,
       testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
       testTimeout: options.testTimeout,
       maxWorkers: options.maxWorkers,

@@ -2,6 +2,48 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.6.6",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.6",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.52.2` to `^0.53.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.5",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.6.5",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.52.1` to `^0.52.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.4",
       "tag": "@rushstack/heft-webpack4-plugin_v0.6.4",
       "date": "Thu, 08 Jun 2023 00:20:02 GMT",

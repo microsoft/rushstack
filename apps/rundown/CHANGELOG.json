@@ -2,6 +2,36 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.258",
+      "tag": "@rushstack/rundown_v1.0.258",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.257",
+      "tag": "@rushstack/rundown_v1.0.257",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.256",
       "tag": "@rushstack/rundown_v1.0.256",
       "date": "Thu, 08 Jun 2023 00:20:03 GMT",

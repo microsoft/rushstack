@@ -2,7 +2,7 @@
  * Configures the TypeScript plugin for Heft.  This plugin also manages linting.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
 
   /**
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard

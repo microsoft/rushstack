@@ -1,5 +1,37 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.53.0
+The `taskEvent` configuration option in heft.json has been removed, and use of any `taskEvent`-based functionality is now accomplished by referencing the plugins directly within the `@rushstack/heft` package.
+
+Plugin name mappings for previously-existing task events are:
+- `copyFiles` -> `copy-files-plugin`
+- `deleteFiles` -> `delete-files-plugin`
+- `runScript` -> `run-script-plugin`
+- `nodeService` -> `node-service-plugin`
+
+Example diff of a heft.json file that uses the `copyFiles` task event:
+```diff
+{
+  "phasesByName": {
+    "build": {
+      "tasksbyName": {
+        "perform-copy": {
+-          "taskEvent": {
+-            "eventKind": "copyFiles",
++          "taskPlugin": {
++            "pluginPackage": "@rushstack/heft",
++            "pluginName": "copy-files-plugin",
+            "options": {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ### Heft 0.52.0
 
 The `nodeService` built-in plugin now supports the `--serve` parameter, to be consistent with the `@rushstack/heft-webpack5-plugin` dev server.
@@ -77,22 +109,27 @@ Plugins available for access are restricted based on scope. For lifecycle plugin
 #### heft.json
 The "heft.json" file is where phases and tasks are defined. Since contains the relationships between the phases and tasks, it defines the order of operations for the execution of a Heft action.
 
+Note that as of Heft 0.52.0, the `"$schema"` URL has changed to reflect the breaking changes:
+
+- Old: `"$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json"`
+- New: `"$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json"`
+
 ##### Lifecycle Plugin Specification
 Lifecycle plugins are specified in the top-level `heftPlugins` array. Plugins can be referenced by providing a package name and a plugin name. Optionally, if a package contains only a single plugin, a plugin can be referenced by providing only the package name and Heft will resolve to the only exported plugin. Lifecycle plugins can also be provided options to modify the default behavior.
 ```json
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
   "extends": "base-project/config/heft.json",
 
   "heftPlugins": [
     {
-      "packageName": "@rushstack/heft-metrics-reporter",
+      "pluginPackage": "@rushstack/heft-metrics-reporter",
       "options": {
         "disableMetrics": true
       }
     },
     {
-      "packageName": "@rushstack/heft-initialization-plugin",
+      "pluginPackage": "@rushstack/heft-initialization-plugin",
       "pluginName": "my-lifecycle-plugin"
     }
   ]
@@ -107,13 +144,13 @@ Within the phase specification, `tasksByName` defines all tasks that run while e
 The following is an example "heft.json" file defining both a "build" and a "test" phase:
 ```js
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
   "extends": "base-project/config/heft.json",
 
   // "heftPlugins" can be used alongside "phasesByName"
   "heftPlugins": [
     {
-      "packageName": "@rushstack/heft-metrics-reporter"
+      "pluginPackage": "@rushstack/heft-metrics-reporter"
     }
   ],
 
@@ -141,8 +178,9 @@ The following is an example "heft.json" file defining both a "build" and a "test
           }
         },
         "copy-assets": {
-          "taskEvent": {
-            "eventKind": "copyFiles",
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
             "options": {
               "copyOperations": [
                 {
@@ -197,11 +235,10 @@ Once an object is set to a `inheritanceType` of override, all sub-property `inhe
 One thing to note is that different mergeBehavior verbs are used for the merging of keyed objects and arrays. This is to make it explicit that arrays will be appended as-is, and no additional processing (eg. deduping if the array is intended to be a set) is done during merge. If such behavior is required, it can be done on the implementation side. Deduping arrays within the @rushstack/heft-config-file package doesn't quite make sense, since deduping arrays of non-primitive objects is not easily defined.
 
 ##### Example "heft.json" Comparison
-###### "heft.json" OBSOLETE FILE FORMAT from `@rushstack/heft@0.49.0-rc.1`
+###### "heft.json" NEW FILE FORMAT
 ```js
-// * * * DO NOT USE -- THIS IS THE OLD FILE FORMAT * * *
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
   "phasesByName": {
     "build": {
@@ -243,8 +280,9 @@ One thing to note is that different mergeBehavior verbs are used for the merging
   }
 }
 ```
-###### "heft.json" in `@rushstack/heft@0.48.8`
-```json
+###### "heft.json" OBSOLETE FILE FORMAT `@rushstack/heft@0.48.8`
+```js
+// * * * DO NOT USE -- THIS IS THE OLD FILE FORMAT * * *
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
@@ -270,7 +308,7 @@ The new heft-plugin.json file is a new, required manifest file specified at the 
 The following is an example "heft-plugin.json" file defining a lifecycle plugin and a task plugin:
 ```json
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-plugin.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
 
   "lifecyclePlugins": [
     {
