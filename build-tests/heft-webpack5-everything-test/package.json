@@ -5,15 +5,17 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
@@ -23,7 +25,7 @@
     "html-webpack-plugin": "~5.5.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
-    "typescript": "~4.8.4",
+    "typescript": "~5.0.4",
     "webpack": "~5.80.0"
   }
 }

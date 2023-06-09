@@ -1,6 +1,78 @@
 # Change Log - @rushstack/trace-import
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+
+## 0.2.8
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.2.7
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.2.6
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.2.5
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.2.4
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.2.3
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.2.2
+Fri, 02 Jun 2023 02:01:13 GMT
+
+_Version update only_
+
+## 0.2.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.2.0
+Mon, 22 May 2023 06:34:33 GMT
+
+### Minor changes
+
+- Upgrade the TypeScript dependency to ~5.0.4
+
+## 0.1.18
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.1.17
+Thu, 04 May 2023 00:20:29 GMT
+
+_Version update only_
+
+## 0.1.16
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 0.1.15
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.1.14
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
 
 ## 0.1.13
 Tue, 04 Apr 2023 22:36:28 GMT

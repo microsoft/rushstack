@@ -2,6 +2,57 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.99.0",
+      "tag": "@microsoft/rush_v5.99.0",
+      "date": "Fri, 02 Jun 2023 22:08:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use a separate temrinal for logging cache subsystem"
+          },
+          {
+            "comment": "Expose beforeLog hook"
+          },
+          {
+            "comment": "Convert to multi-phase Heft"
+          },
+          {
+            "comment": "Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.98.0",
+      "tag": "@microsoft/rush_v5.98.0",
+      "date": "Sun, 21 May 2023 00:18:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"forbidPhantomResolvableNodeModuleFolders\" experiment that forbids node_modules folders in the repo root and in parent folders."
+          },
+          {
+            "comment": "Update the `RushSession.registerCloudBuildCacheProviderFactory` API to allow a cache provider's factory function to return a promise."
+          },
+          {
+            "comment": "Add built-in plugin rush-http-build-cache-plugin"
+          },
+          {
+            "comment": "Fix an issue where the last character in a project's path is ignored when determining which files contribute to the project's cache ID."
+          },
+          {
+            "comment": "Fix a performance bug in `rush version` when using `workspace:` protocol."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Add a property `missingScriptBehavior` to phase definitions that can be used to silence missing scripts to reduce log noise. This replaces the `ignoreMissingScript` property visible to the plugin API, although the `ignoreMissingScript` property is still supported in the `common/config/rush/command-line.json` config file for backwards compatibility."
+          },
+          {
+            "comment": "Flatten watch status into a single line with TTY rewrites."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.97.1",
       "tag": "@microsoft/rush_v5.97.1",
       "date": "Tue, 18 Apr 2023 16:39:03 GMT",

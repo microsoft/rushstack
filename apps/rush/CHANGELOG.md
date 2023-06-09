@@ -1,6 +1,29 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 18 Apr 2023 16:39:03 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Jun 2023 22:08:29 GMT and should not be manually modified.
+
+## 5.99.0
+Fri, 02 Jun 2023 22:08:28 GMT
+
+### Updates
+
+- Use a separate temrinal for logging cache subsystem
+- Expose beforeLog hook
+- Convert to multi-phase Heft
+- Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance.
+
+## 5.98.0
+Sun, 21 May 2023 00:18:35 GMT
+
+### Updates
+
+- Add a "forbidPhantomResolvableNodeModuleFolders" experiment that forbids node_modules folders in the repo root and in parent folders.
+- Update the `RushSession.registerCloudBuildCacheProviderFactory` API to allow a cache provider's factory function to return a promise.
+- Add built-in plugin rush-http-build-cache-plugin
+- Fix an issue where the last character in a project's path is ignored when determining which files contribute to the project's cache ID.
+- Fix a performance bug in `rush version` when using `workspace:` protocol.
+- (BREAKING API CHANGE) Add a property `missingScriptBehavior` to phase definitions that can be used to silence missing scripts to reduce log noise. This replaces the `ignoreMissingScript` property visible to the plugin API, although the `ignoreMissingScript` property is still supported in the `common/config/rush/command-line.json` config file for backwards compatibility.
+- Flatten watch status into a single line with TTY rewrites.
 
 ## 5.97.1
 Tue, 18 Apr 2023 16:39:03 GMT

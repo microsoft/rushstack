@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.50.0",
+  "version": "0.53.0",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -30,8 +30,8 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
@@ -42,26 +42,23 @@
     "argparse": "~1.0.9",
     "chokidar": "~3.4.0",
     "fast-glob": "~3.2.4",
-    "glob": "~7.0.5",
-    "glob-escape": "~0.0.2",
-    "prettier": "~2.3.0",
-    "semver": "~7.3.0",
+    "git-repo-info": "~2.1.0",
+    "ignore": "~5.1.6",
     "tapable": "1.1.3",
-    "true-case-path": "~2.2.1"
+    "true-case-path": "~2.2.1",
+    "watchpack": "2.4.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@nodelib/fs.scandir": "2.1.5",
+    "@nodelib/fs.stat": "2.0.5",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.49.3",
-    "@rushstack/heft-node-rig": "1.11.14",
+    "@rushstack/heft": "0.51.0",
+    "@rushstack/heft-node-rig": "2.0.1",
     "@types/argparse": "1.0.38",
-    "@types/eslint": "8.2.0",
-    "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
-    "@types/semver": "7.3.5",
-    "colors": "~1.2.1",
-    "tslint": "~5.20.1",
-    "typescript": "~4.8.4"
+    "@types/watchpack": "2.4.0",
+    "typescript": "~5.0.4"
   }
 }

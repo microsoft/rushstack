@@ -9,5 +9,5 @@ A type alias
 **Signature:**
 
 ```typescript
-export declare type ExampleTypeAlias = Promise<boolean>;
+export type ExampleTypeAlias = Promise<boolean>;
 ```

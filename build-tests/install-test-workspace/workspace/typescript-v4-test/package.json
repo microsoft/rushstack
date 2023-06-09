@@ -1,0 +1,20 @@
+{
+  "name": "typescript-v4-test",
+  "description": "Building this project tests Heft with TypeScript v4",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "*",
+    "@rushstack/heft": "*",
+    "@rushstack/heft-lint-plugin": "*",
+    "@rushstack/heft-typescript-plugin": "*",
+    "typescript": "~4.7.0",
+    "tslint": "~5.20.1",
+    "eslint": "~8.7.0"
+  }
+}

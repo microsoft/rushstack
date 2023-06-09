@@ -1,80 +1,150 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SyncHook } from 'tapable';
+import { Async, InternalError } from '@rushstack/node-core-library';
 
-import { IHeftPlugin } from './IHeftPlugin';
-import { HeftSession, RegisterAction } from './HeftSession';
-import { BuildStage } from '../stages/BuildStage';
-import { CleanStage } from '../stages/CleanStage';
-import { TestStage } from '../stages/TestStage';
-import { MetricsCollector } from '../metrics/MetricsCollector';
-import { LoggingManager } from './logging/LoggingManager';
-import { IHeftLifecycle } from './HeftLifecycle';
-import { HeftCommandLine } from '../cli/HeftCommandLine';
+import { Constants } from '../utilities/Constants';
+import { HeftLifecycle } from './HeftLifecycle';
+import { HeftPhaseSession } from './HeftPhaseSession';
+import { HeftPhase } from './HeftPhase';
+import {
+  CoreConfigFiles,
+  type IHeftConfigurationJson,
+  type IHeftConfigurationJsonActionReference
+} from '../utilities/CoreConfigFiles';
+import type { MetricsCollector } from '../metrics/MetricsCollector';
+import type { LoggingManager } from './logging/LoggingManager';
+import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { HeftTask } from './HeftTask';
+import type { HeftParameterManager } from './HeftParameterManager';
+import type { IHeftParsedCommandLine } from './HeftTaskSession';
 
-/**
- * @internal
- */
 export interface IInternalHeftSessionOptions {
-  heftLifecycleHook: SyncHook<IHeftLifecycle>;
-  buildStage: BuildStage;
-  cleanStage: CleanStage;
-  testStage: TestStage;
-
-  metricsCollector: MetricsCollector;
+  heftConfiguration: HeftConfiguration;
   loggingManager: LoggingManager;
-  getIsDebugMode(): boolean;
-  registerAction: RegisterAction;
-  commandLine: HeftCommandLine;
+  metricsCollector: MetricsCollector;
+
+  debug: boolean;
 }
 
-/**
- * @internal
- */
+function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
+  for (const phase of phases) {
+    yield* phase.tasks;
+  }
+}
+
 export class InternalHeftSession {
-  private readonly _options: IInternalHeftSessionOptions;
-  private _pluginHooks: Map<string, SyncHook<object>> = new Map<string, SyncHook<object>>();
+  private readonly _phaseSessionsByPhase: Map<HeftPhase, HeftPhaseSession> = new Map();
+  private readonly _heftConfigurationJson: IHeftConfigurationJson;
+  private _actionReferencesByAlias: ReadonlyMap<string, IHeftConfigurationJsonActionReference> | undefined;
+  private _lifecycle: HeftLifecycle | undefined;
+  private _phases: Set<HeftPhase> | undefined;
+  private _phasesByName: Map<string, HeftPhase> | undefined;
+  private _parameterManager: HeftParameterManager | undefined;
 
-  public constructor(options: IInternalHeftSessionOptions) {
-    this._options = options;
+  public readonly heftConfiguration: HeftConfiguration;
+
+  public readonly loggingManager: LoggingManager;
+
+  public readonly metricsCollector: MetricsCollector;
+
+  public parsedCommandLine: IHeftParsedCommandLine | undefined;
+
+  public readonly debug: boolean;
+
+  private constructor(heftConfigurationJson: IHeftConfigurationJson, options: IInternalHeftSessionOptions) {
+    this.heftConfiguration = options.heftConfiguration;
+    this.loggingManager = options.loggingManager;
+    this.metricsCollector = options.metricsCollector;
+    this.debug = options.debug;
+    this._heftConfigurationJson = heftConfigurationJson;
   }
 
-  public getSessionForPlugin(thisPlugin: IHeftPlugin): HeftSession {
-    return new HeftSession(
-      {
-        plugin: thisPlugin,
-        requestAccessToPluginByName: (
-          pluginToAccessName: string,
-          pluginApplyFn: (pluginAccessor: object) => void
-        ) => {
-          let pluginHook: SyncHook<object> | undefined = this._pluginHooks.get(pluginToAccessName);
-          if (!pluginHook) {
-            pluginHook = new SyncHook<object>(['pluginAccessor']);
-            this._pluginHooks.set(pluginToAccessName, pluginHook);
-          }
+  public static async initializeAsync(options: IInternalHeftSessionOptions): Promise<InternalHeftSession> {
+    // Initialize the rig. Must be done before the HeftConfiguration.rigConfig is used.
+    await options.heftConfiguration._checkForRigAsync();
 
-          pluginHook.tap(thisPlugin.pluginName, pluginApplyFn);
-        }
+    const heftConfigurationJson: IHeftConfigurationJson =
+      await CoreConfigFiles.loadHeftConfigurationFileForProjectAsync(
+        options.heftConfiguration.globalTerminal,
+        options.heftConfiguration.buildFolderPath,
+        options.heftConfiguration.rigConfig
+      );
+
+    const internalHeftSession: InternalHeftSession = new InternalHeftSession(heftConfigurationJson, options);
+
+    // Initialize the lifecycle and the tasks. This will ensure that we throw an error if a plugin is improperly
+    // specified, or if the options provided to a plugin are invalid. We will avoid loading the actual plugins
+    // until they are needed.
+    await internalHeftSession.lifecycle.ensureInitializedAsync();
+    const tasks: Iterable<HeftTask> = getAllTasks(internalHeftSession.phases);
+    await Async.forEachAsync(
+      tasks,
+      async (task: HeftTask) => {
+        await task.ensureInitializedAsync();
       },
-      this._options
+      { concurrency: Constants.maxParallelism }
     );
+
+    return internalHeftSession;
   }
 
-  public applyPluginHooks(plugin: IHeftPlugin): void {
-    const pluginHook: SyncHook<object> | undefined = this._pluginHooks.get(plugin.pluginName);
-    const accessor: object | undefined = plugin.accessor;
-    if (pluginHook && pluginHook.taps.length > 0) {
-      if (!accessor) {
-        const accessingPlugins: Set<string> = new Set<string>(pluginHook.taps.map((x) => x.name));
-        throw new Error(
-          `Plugin "${plugin.pluginName}" does not provide an accessor property, so it does not provide ` +
-            `access to other plugins. Plugins requesting access to "${plugin.pluginName}: ` +
-            Array.from(accessingPlugins).join(', ')
-        );
-      } else {
-        pluginHook.call(accessor);
+  public get parameterManager(): HeftParameterManager {
+    if (!this._parameterManager) {
+      throw new InternalError('A parameter manager for the session has not been provided.');
+    }
+    return this._parameterManager;
+  }
+
+  public set parameterManager(value: HeftParameterManager) {
+    this._parameterManager = value;
+  }
+
+  public get actionReferencesByAlias(): ReadonlyMap<string, IHeftConfigurationJsonActionReference> {
+    if (!this._actionReferencesByAlias) {
+      this._actionReferencesByAlias = new Map(
+        Object.entries(this._heftConfigurationJson.aliasesByName || {})
+      );
+    }
+    return this._actionReferencesByAlias;
+  }
+
+  public get lifecycle(): HeftLifecycle {
+    if (!this._lifecycle) {
+      this._lifecycle = new HeftLifecycle(this, this._heftConfigurationJson.heftPlugins || []);
+    }
+    return this._lifecycle;
+  }
+
+  public get phases(): ReadonlySet<HeftPhase> {
+    this._ensurePhases();
+    return this._phases!;
+  }
+
+  public get phasesByName(): ReadonlyMap<string, HeftPhase> {
+    this._ensurePhases();
+    return this._phasesByName!;
+  }
+
+  public getSessionForPhase(phase: HeftPhase): HeftPhaseSession {
+    let phaseSession: HeftPhaseSession | undefined = this._phaseSessionsByPhase.get(phase);
+    if (!phaseSession) {
+      phaseSession = new HeftPhaseSession({ internalHeftSession: this, phase });
+      this._phaseSessionsByPhase.set(phase, phaseSession);
+    }
+    return phaseSession;
+  }
+
+  private _ensurePhases(): void {
+    if (!this._phases || !this._phasesByName) {
+      this._phasesByName = new Map();
+      for (const [phaseName, phaseSpecifier] of Object.entries(
+        this._heftConfigurationJson.phasesByName || {}
+      )) {
+        const phase: HeftPhase = new HeftPhase(this, phaseName, phaseSpecifier);
+        this._phasesByName.set(phaseName, phase);
       }
+      this._phases = new Set(this._phasesByName.values());
     }
   }
 }

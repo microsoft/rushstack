@@ -66,6 +66,7 @@ export class UpdateAction extends BaseInstallAction {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
+      bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,

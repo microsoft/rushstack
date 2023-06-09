@@ -1,6 +1,58 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+
+## 3.59.3
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 3.59.2
+Mon, 29 May 2023 15:21:15 GMT
+
+### Patches
+
+- Remove extraneous string encode/decode of final output during `JsonFile.save`/`JsonFile.saveAsync`.
+
+## 3.59.1
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 3.59.0
+Fri, 12 May 2023 00:23:05 GMT
+
+### Minor changes
+
+- Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp.
+
+## 3.58.0
+Mon, 01 May 2023 15:23:19 GMT
+
+### Minor changes
+
+- Expose a `Text.escapeRegExp` function to escape regexp special characters.
+
+## 3.57.0
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Minor changes
+
+- Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider
+- Add a Writable stream adapter for ITerminal to allow writing to a terminal as a stream
+
+## 3.56.0
+Thu, 27 Apr 2023 17:18:42 GMT
+
+### Minor changes
+
+- Adds the AsyncQueue class, a queue type that allows for iterating and concurrently adding to the queue
+- Adds support for async Import.resolve* APIs
+
+### Patches
+
+- Fix a typings issue in FileSystem.copyFilesAsync
+- Fix issues with Import.resolve* APIs when attempting to resolve system modules paths (ex. 'fs/promises') and self-referencing module paths
 
 ## 3.55.2
 Fri, 10 Feb 2023 01:18:51 GMT

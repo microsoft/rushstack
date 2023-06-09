@@ -36,7 +36,7 @@ import { RushConstants } from '../RushConstants';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
-import { PolicyValidator } from '../policy/PolicyValidator';
+import * as PolicyValidator from '../policy/PolicyValidator';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
@@ -256,7 +256,7 @@ export abstract class BaseInstallManager {
     npmrcHash: string | undefined;
   }> {
     // Check the policies
-    PolicyValidator.validatePolicy(this.rushConfiguration, this.options);
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, this.options);
 
     this._installGitHooks();
 
@@ -438,7 +438,8 @@ export abstract class BaseInstallManager {
           console.error(
             color(
               [
-                '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
+                '(Or, to temporarily ignore this problem, invoke Rush with the ' +
+                  `"${RushConstants.bypassPolicyFlagLongName}" option.)`,
                 ' '
               ].join('\n')
             )
@@ -747,7 +748,8 @@ export abstract class BaseInstallManager {
         console.error();
         console.error(
           colors.bold(
-            '==> Please run "rush setup" to update your NPM token.  (Or append "--bypass-policy" to proceed anyway.)'
+            '==> Please run "rush setup" to update your NPM token. ' +
+              `(Or append "${RushConstants.bypassPolicyFlagLongName}" to proceed anyway.)`
           )
         );
         throw new AlreadyReportedError();

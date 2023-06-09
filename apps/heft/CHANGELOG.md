@@ -1,6 +1,87 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 18 Mar 2023 00:20:56 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+
+## 0.53.0
+Fri, 09 Jun 2023 00:19:49 GMT
+
+### Minor changes
+
+- Remove "taskEvents" heft.json configuration option, and replace it with directly referencing the included plugins. More information on this change can be found at https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
+
+### Patches
+
+- Update UPGRADING.md with new JSON schema URLs
+
+## 0.52.2
+Thu, 08 Jun 2023 15:21:17 GMT
+
+### Patches
+
+- Provide a useful error message when encountering legacy Heft configurations
+
+## 0.52.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+### Patches
+
+- Remove the concept of the cache folder, since it mostly just causes bugs.
+
+## 0.52.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add a new API IHeftTaskSession.parsedCommandLine for accessing the invoked command name
+- The built-in task NodeServicePlugin now supports the "--serve" mode with semantics similar to heft-webpack5-plugin
+
+### Patches
+
+- Add action aliases support. Action aliases can be used to create custom "heft <alias>" commands which call existing Heft commands with optional default arguments.
+
+## 0.51.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Overhaul to support splitting single-project builds into more phases than "build" and "test", to align with Rush phased commands. See UPGRADING.md for details.
+
+## 0.50.7
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.50.6
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.50.5
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.50.4
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.50.3
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.50.2
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Patches
+
+- Fix issues where a terminal logging prefix may be added multiple times to the same line, or only to the first line
+
+## 0.50.1
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.50.0
 Sat, 18 Mar 2023 00:20:56 GMT

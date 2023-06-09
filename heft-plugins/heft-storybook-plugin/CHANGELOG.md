@@ -1,6 +1,78 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+
+## 0.3.6
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.3.5
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.3.4
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.3.3
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.3.2
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.3.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.3.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.2.12
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.2.11
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.2.10
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.2.9
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.2.8
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.2.7
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.2.6
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
 
 ## 0.2.5
 Tue, 04 Apr 2023 22:36:28 GMT

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Write cache logs to their own file(s).",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

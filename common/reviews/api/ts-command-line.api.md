@@ -7,6 +7,18 @@
 import * as argparse from 'argparse';
 
 // @public
+export class AliasCommandLineAction extends CommandLineAction {
+    constructor(options: IAliasCommandLineActionOptions);
+    readonly defaultParameters: ReadonlyArray<string>;
+    protected onExecute(): Promise<void>;
+    // @internal
+    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // @internal (undocumented)
+    _registerDefinedParameters(): void;
+    readonly targetAction: CommandLineAction;
+}
+
+// @public
 export abstract class CommandLineAction extends CommandLineParameterProvider {
     constructor(options: ICommandLineActionOptions);
     readonly actionName: string;
@@ -254,6 +266,14 @@ export class DynamicCommandLineParser extends CommandLineParser {
 }
 
 // @public
+export interface IAliasCommandLineActionOptions {
+    aliasName: string;
+    defaultParameters?: string[];
+    targetAction: CommandLineAction;
+    toolFilename: string;
+}
+
+// @public
 export interface IBaseCommandLineDefinition {
     description: string;
     environmentVariable?: string;
@@ -310,6 +330,10 @@ export interface _ICommandLineParserData {
     [key: string]: any;
     // (undocumented)
     action: string;
+    // (undocumented)
+    aliasAction?: string;
+    // (undocumented)
+    aliasDocumentation?: string;
 }
 
 // @public

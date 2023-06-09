@@ -36,7 +36,7 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
 import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
-import type { ITelemetryOperationResult } from '../../logic/Telemetry';
+import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
 
 /**
@@ -639,13 +639,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }
       }
 
-      this.parser.telemetry.log({
+      const logEntry: ITelemetryData = {
         name: this.actionName,
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData,
         operationResults
-      });
+      };
+
+      this.hooks.beforeLog.call(logEntry);
+
+      this.parser.telemetry.log(logEntry);
 
       this.parser.flushTelemetry();
     }

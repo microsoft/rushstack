@@ -34,10 +34,16 @@ export class ProjectLogWritable extends TerminalWritable {
       projectFolder: string,
       logFilenameIdentifier: string,
       logFolder?: string
-    ): { logPath: string; errorLogPath: string; relativeLogPath: string; relativeErrorLogPath: string } {
+    ): {
+      logPath: string;
+      errorLogPath: string;
+      relativeLogPath: string;
+      relativeErrorLogPath: string;
+    } {
       const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-      const logFilename: string = `${unscopedProjectName}.${logFilenameIdentifier}.log`;
-      const errorLogFilename: string = `${unscopedProjectName}.${logFilenameIdentifier}.error.log`;
+      const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
+      const logFilename: string = `${logFileBaseName}.log`;
+      const errorLogFilename: string = `${logFileBaseName}.error.log`;
 
       const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
       const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;

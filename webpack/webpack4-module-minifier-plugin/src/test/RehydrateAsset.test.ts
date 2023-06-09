@@ -63,15 +63,20 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: ['a', 'b', '0b', '=', 'a0'],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
+    const result: string = rehydrateAsset(asset, modules, banner, true).source() as string;
     const expected: string = `/* fnord */\n<before>{a:foo,b:bar,"0b":baz,"=":bak,a0:bal}<after>`;
 
     if (result !== expected) {
       throw new Error(`Expected ${expected} but received ${result}`);
+    }
+    expect(asset.renderInfo.size).toEqual(asset.modules.length);
+    for (const [id, { charOffset, charLength }] of asset.renderInfo) {
+      expect(result.slice(charOffset, charOffset + charLength)).toEqual(modules.get(id)!.source.source());
     }
   });
 
@@ -80,6 +85,7 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [0, 25],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
@@ -97,6 +103,7 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [2],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
@@ -114,6 +121,7 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
@@ -131,6 +139,7 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
@@ -148,15 +157,20 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [0, 2, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
+    const result: string = rehydrateAsset(asset, modules, banner, true).source() as string;
     const expected: string = `/* fnord */\n<before>[fizz,,buzz].concat(Array(997),[b1000,b1001,b1002,b1003,b1004,b1005,b1006,b1007,b1008,b1009])<after>`;
 
     if (result !== expected) {
       throw new Error(`Expected ${expected} but received ${result}`);
+    }
+    expect(asset.renderInfo.size).toEqual(asset.modules.length);
+    for (const [id, { charOffset, charLength }] of asset.renderInfo) {
+      expect(result.slice(charOffset, charOffset + charLength)).toEqual(modules.get(id)!.source.source());
     }
   });
 
@@ -165,15 +179,21 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [2, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
+    const result: string = rehydrateAsset(asset, modules, banner, true).source() as string;
     const expected: string = `/* fnord */\n<before>[,,buzz].concat(Array(997),[b1000,b1001,b1002,b1003,b1004,b1005,b1006,b1007,b1008,b1009])<after>`;
 
     if (result !== expected) {
       throw new Error(`Expected ${expected} but received ${result}`);
+    }
+
+    expect(asset.renderInfo.size).toEqual(asset.modules.length);
+    for (const [id, { charOffset, charLength }] of asset.renderInfo) {
+      expect(result.slice(charOffset, charOffset + charLength)).toEqual(modules.get(id)!.source.source());
     }
   });
 
@@ -182,6 +202,7 @@ describe(rehydrateAsset.name, () => {
       source: new RawSource(`<before>${CHUNK_MODULES_TOKEN}<after>`),
       modules: [255],
       fileName: 'test',
+      renderInfo: new Map(),
       chunk: undefined!,
       externalNames: new Map([['__WEBPACK_EXTERNAL_MODULE_fizz__', 'TREBLE']])
     };

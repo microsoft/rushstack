@@ -2,6 +2,245 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "2.0.51",
+      "tag": "@microsoft/load-themed-styles_v2.0.51",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.50",
+      "tag": "@microsoft/load-themed-styles_v2.0.50",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.49",
+      "tag": "@microsoft/load-themed-styles_v2.0.49",
+      "date": "Thu, 08 Jun 2023 00:20:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.48",
+      "tag": "@microsoft/load-themed-styles_v2.0.48",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.47",
+      "tag": "@microsoft/load-themed-styles_v2.0.47",
+      "date": "Tue, 06 Jun 2023 02:52:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.17.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.46",
+      "tag": "@microsoft/load-themed-styles_v2.0.46",
+      "date": "Mon, 05 Jun 2023 21:45:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.16.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.45",
+      "tag": "@microsoft/load-themed-styles_v2.0.45",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert to multi-phase Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.16.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.44",
+      "tag": "@microsoft/load-themed-styles_v2.0.44",
+      "date": "Fri, 02 Jun 2023 00:24:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.15.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.43",
+      "tag": "@microsoft/load-themed-styles_v2.0.43",
+      "date": "Mon, 29 May 2023 15:21:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.15.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.42",
+      "tag": "@microsoft/load-themed-styles_v2.0.42",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.41",
+      "tag": "@microsoft/load-themed-styles_v2.0.41",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.40",
+      "tag": "@microsoft/load-themed-styles_v2.0.40",
+      "date": "Thu, 11 May 2023 00:17:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.39",
+      "tag": "@microsoft/load-themed-styles_v2.0.39",
+      "date": "Thu, 04 May 2023 00:20:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.38",
+      "tag": "@microsoft/load-themed-styles_v2.0.38",
+      "date": "Mon, 01 May 2023 15:23:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.37",
+      "tag": "@microsoft/load-themed-styles_v2.0.37",
+      "date": "Sat, 29 Apr 2023 00:23:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.36",
+      "tag": "@microsoft/load-themed-styles_v2.0.36",
+      "date": "Thu, 27 Apr 2023 17:18:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.14.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.35",
       "tag": "@microsoft/load-themed-styles_v2.0.35",
       "date": "Thu, 20 Apr 2023 15:16:55 GMT",

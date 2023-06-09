@@ -6,16 +6,24 @@ import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
 import { IDependencyType, LockfileDependency } from '../../shared/LockfileDependency';
+import { readPackageJsonAsync } from '../../parsing/getPackageFiles';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
 import { LockfileEntry } from '../../shared/LockfileEntry';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
+import { IPackageJson } from '../../types/IPackageJson';
 
 enum DependencyType {
   Determinant,
   TransitiveReferrer
+}
+
+enum DependencyKey {
+  Regular = 'dependencies',
+  Dev = 'devDependencies',
+  Peer = 'peerDependencies'
 }
 
 interface IInfluencerType {
@@ -30,8 +38,27 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
 
   const [inspectDependency, setInspectDependency] = useState<LockfileDependency | null>(null);
   const [influencers, setInfluencers] = useState<IInfluencerType[]>([]);
+  const [directRefsPackageJSON, setDirectRefsPackageJSON] = useState<Map<string, IPackageJson | undefined>>(
+    new Map()
+  );
 
   useEffect(() => {
+    async function loadPackageJson(referrers: LockfileEntry[]): Promise<void> {
+      const referrersJsonMap = new Map<string, IPackageJson | undefined>();
+      await Promise.all(
+        referrers.map(async (ref) => {
+          const packageJson = await readPackageJsonAsync(ref.packageJsonFolderPath);
+          referrersJsonMap.set(ref.rawEntryId, packageJson);
+          return packageJson;
+        })
+      );
+
+      setDirectRefsPackageJSON(referrersJsonMap);
+    }
+
+    loadPackageJson(selectedEntry?.referrers || []).catch((e) => {
+      console.error(`Failed to load referrers package.json: ${e}`);
+    });
     if (selectedEntry) {
       setInspectDependency(null);
     }
@@ -231,6 +258,24 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     );
   };
 
+  const getDependencyInfo = (
+    rawEntryId: string,
+    entryPackageName: string
+  ): { type: DependencyKey; version: string } | undefined => {
+    const packageJson = directRefsPackageJSON.get(rawEntryId);
+    if (!packageJson) return undefined;
+
+    const dependencyTypes = [DependencyKey.Regular, DependencyKey.Dev, DependencyKey.Peer];
+
+    for (const type of dependencyTypes) {
+      const version = packageJson[type]?.[entryPackageName];
+      if (version) {
+        return { type, version };
+      }
+    }
+    return undefined;
+  };
+
   if (!selectedEntry) {
     return (
       <div className={`${appStyles.ContainerCard} ${styles.InfluencerList}`}>
@@ -261,6 +306,10 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   </Text>
                   <div>
                     <Text type="p">Entry ID: {referrer.rawEntryId}</Text>
+                    <Text type="p">
+                      {'Dependency version: '}
+                      {getDependencyInfo(referrer.rawEntryId, selectedEntry.entryPackageName)?.version}
+                    </Text>
                   </div>
                 </div>
               ))}

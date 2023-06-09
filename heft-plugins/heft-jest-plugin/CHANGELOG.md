@@ -1,6 +1,77 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+
+## 0.7.4
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.7.3
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.7.2
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.7.1
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Adds a new base config for web projects, jest-web.config.json. Adds the "customExportConditions" field to both base configs with sensible defaults.
+
+## 0.6.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.5.13
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.5.12
+Mon, 22 May 2023 06:34:32 GMT
+
+_Version update only_
+
+## 0.5.11
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.5.10
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.5.9
+Mon, 01 May 2023 15:23:19 GMT
+
+### Patches
+
+- Allow "preset" configuration value to be used when extending Jest configuration files
+
+## 0.5.8
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 0.5.7
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.5.6
 Tue, 04 Apr 2023 22:36:28 GMT

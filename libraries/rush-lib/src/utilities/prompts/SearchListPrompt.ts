@@ -3,7 +3,6 @@
 
 import type { Interface } from 'readline';
 import colors from 'colors/safe';
-import { Import } from '@rushstack/node-core-library';
 
 // Modified from the choice list prompt in inquirer:
 // https://github.com/SBoudrias/Inquirer.js/blob/inquirer%407.3.3/packages/inquirer/lib/prompts/list.js
@@ -19,8 +18,6 @@ import type Choices from 'inquirer/lib/objects/choices';
 import figures from 'figures';
 
 import { map, takeUntil } from 'rxjs/operators';
-
-const _: typeof import('lodash') = Import.lazy('lodash', require);
 
 interface IKeyPressEvent {
   key: { name: string; ctrl: boolean; sequence?: string };
@@ -41,13 +38,10 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
       this.throwParamError('choices');
     }
 
-    if (
-      _.isNumber(this.opt.default) &&
-      this.opt.default >= 0 &&
-      this.opt.default < this.opt.choices.realLength
-    ) {
+    const isDefaultANumber: boolean = typeof this.opt.default === 'number';
+    if (isDefaultANumber && this.opt.default >= 0 && this.opt.default < this.opt.choices.realLength) {
       this._selected = this.opt.default;
-    } else if (!_.isNumber(this.opt.default) && this.opt.default !== null) {
+    } else if (!isDefaultANumber && this.opt.default !== null) {
       const index: number = this.opt.choices.realChoices.findIndex(({ value }) => value === this.opt.default);
       this._selected = Math.max(index, 0);
     }

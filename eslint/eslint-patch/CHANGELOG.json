@@ -2,6 +2,30 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.3.1",
+      "tag": "@rushstack/eslint-patch_v1.3.1",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add test for invalid importer path to fallback to relative path when loading eslint 6 plugins"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.0",
+      "tag": "@rushstack/eslint-patch_v1.3.0",
+      "date": "Mon, 22 May 2023 06:34:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the @typescript-eslint/* dependencies to ~5.59.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.0",
       "tag": "@rushstack/eslint-patch_v1.2.0",
       "date": "Thu, 15 Sep 2022 00:18:51 GMT",

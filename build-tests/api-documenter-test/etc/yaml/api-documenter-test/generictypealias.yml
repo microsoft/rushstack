@@ -8,4 +8,4 @@ remarks: ''
 example: []
 isPreview: false
 isDeprecated: false
-syntax: 'export declare type GenericTypeAlias<T> = T[];'
+syntax: 'export type GenericTypeAlias<T> = T[];'

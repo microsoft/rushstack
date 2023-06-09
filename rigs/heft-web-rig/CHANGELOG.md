@@ -1,6 +1,94 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Thu, 20 Apr 2023 15:16:55 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Jun 2023 00:19:49 GMT and should not be manually modified.
+
+## 0.18.3
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.18.2
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.18.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.18.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add "heft start" alias that maps to "heft build-watch --serve"
+
+## 0.17.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Update Jest environment "customExportConditions" to ["require", "node", "umd"]
+
+## 0.16.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.16.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.15.2
+Fri, 02 Jun 2023 00:24:45 GMT
+
+_Version update only_
+
+## 0.15.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.15.0
+Mon, 22 May 2023 06:34:33 GMT
+
+### Minor changes
+
+- Upgrade TypeScript to ~5.0.4
+
+## 0.14.17
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.14.16
+Thu, 11 May 2023 00:17:21 GMT
+
+_Version update only_
+
+## 0.14.15
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.14.14
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.14.13
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.14.12
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.14.11
 Thu, 20 Apr 2023 15:16:55 GMT

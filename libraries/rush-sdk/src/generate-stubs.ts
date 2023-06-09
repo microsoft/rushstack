@@ -48,7 +48,7 @@ function generateLibFilesRecursively(options: {
 }
 
 // Entry point invoked by "runScript" action from config/heft.json
-export function run(): void {
+export async function runAsync(): Promise<void> {
   const rushLibFolder: string = Import.resolvePackage({
     baseFolderPath: __dirname,
     packageName: '@microsoft/rush-lib'

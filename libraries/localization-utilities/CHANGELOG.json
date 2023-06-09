@@ -2,6 +2,284 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.8.62",
+      "tag": "@rushstack/localization-utilities_v0.8.62",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.61",
+      "tag": "@rushstack/localization-utilities_v0.8.61",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.60",
+      "tag": "@rushstack/localization-utilities_v0.8.60",
+      "date": "Thu, 08 Jun 2023 00:20:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.59",
+      "tag": "@rushstack/localization-utilities_v0.8.59",
+      "date": "Wed, 07 Jun 2023 22:45:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.58",
+      "tag": "@rushstack/localization-utilities_v0.8.58",
+      "date": "Tue, 06 Jun 2023 02:52:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.57",
+      "tag": "@rushstack/localization-utilities_v0.8.57",
+      "date": "Mon, 05 Jun 2023 21:45:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.56",
+      "tag": "@rushstack/localization-utilities_v0.8.56",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert to multi-phase Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.55",
+      "tag": "@rushstack/localization-utilities_v0.8.55",
+      "date": "Mon, 29 May 2023 15:21:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.13.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.54",
+      "tag": "@rushstack/localization-utilities_v0.8.54",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.13.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.53",
+      "tag": "@rushstack/localization-utilities_v0.8.53",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.52",
+      "tag": "@rushstack/localization-utilities_v0.8.52",
+      "date": "Thu, 04 May 2023 00:20:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.51",
+      "tag": "@rushstack/localization-utilities_v0.8.51",
+      "date": "Mon, 01 May 2023 15:23:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.50",
+      "tag": "@rushstack/localization-utilities_v0.8.50",
+      "date": "Sat, 29 Apr 2023 00:23:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.49",
+      "tag": "@rushstack/localization-utilities_v0.8.49",
+      "date": "Thu, 27 Apr 2023 17:18:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.56.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.48",
       "tag": "@rushstack/localization-utilities_v0.8.48",
       "date": "Tue, 04 Apr 2023 22:36:28 GMT",
