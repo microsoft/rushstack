@@ -15,14 +15,10 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@types/webpack": "^4.39.8",
-    "webpack": "^5.35.1"
+    "@types/webpack": "^4.39.8"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
-      "optional": true
-    },
-    "webpack": {
       "optional": true
     }
   },
