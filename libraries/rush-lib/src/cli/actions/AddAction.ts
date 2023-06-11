@@ -20,6 +20,7 @@ export class AddAction extends BaseAddAndRemoveAction {
   private readonly _exactFlag: CommandLineFlagParameter;
   private readonly _caretFlag: CommandLineFlagParameter;
   private readonly _devDependencyFlag: CommandLineFlagParameter;
+  private readonly _peerDependencyFlag: CommandLineFlagParameter;
   private readonly _makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
@@ -67,6 +68,11 @@ export class AddAction extends BaseAddAndRemoveAction {
       parameterLongName: '--dev',
       description:
         'If specified, the package will be added to the "devDependencies" section of the package.json'
+    });
+    this._peerDependencyFlag = this.defineFlagParameter({
+      parameterLongName: '--peer',
+      description:
+        'If specified, the package will be added to the "peerDependencies" section of the package.json'
     });
     this._makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
@@ -147,6 +153,7 @@ export class AddAction extends BaseAddAndRemoveAction {
       projects: projects,
       packagesToUpdate: packagesToAdd,
       devDependency: this._devDependencyFlag.value,
+      peerDependency: this._peerDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
