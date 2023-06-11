@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PnpmShrinkwrapFile workspace V5.3 lockfile verifies project dependencies: project1 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project1": "../../project1:D5ar2j+w6/zH15/eOoF37Nkdbamt2tX47iijyj7LVXk=:",
+      "/jquery/1.12.3": "sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==",
+      "/pad-left/1.0.2": "sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==",
+      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+    },
+    "project1/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V5.3 lockfile verifies project dependencies: project2 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project2": "../../project2:PQ2FvyHHwmt/FIUaiJBVAfpHv6hj9EGJrAw69+0IY50=:",
+      "/jquery/2.2.4": "sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==",
+      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
+    },
+    "project2/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V5.3 lockfile verifies project dependencies: project3 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project3": "../../project3:jomsZKvXG32qqYOfW3HUBGfWWSw6ybFV1WDf9c/kiP4=:",
+      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
+      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "example.pkgs.visualstudio.com/@scope/testDep/2.1.0": "example.pkgs.visualstudio.com/@scope/testDep/2.1.0:i5jbUOp/IxUgiN0dHYsTRzmimOVBwu7f9908rRaC9VY=:",
+    },
+    "project3/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V6.1 lockfile verifies project dependencies: project1 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project1": "../../project1:D5ar2j+w6/zH15/eOoF37Nkdbamt2tX47iijyj7LVXk=:",
+      "/jquery/1.12.3": "sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==",
+      "/pad-left/1.0.2": "sha512-saxSV1EYAytuZDtQYEwi0DPzooG6aN18xyHrnJtzwjVwmMauzkEecd7hynVJGolNGk1Pl9tltmZqfze4TZTCxg==",
+      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+    },
+    "project1/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V6.1 lockfile verifies project dependencies: project2 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project2": "../../project2:PQ2FvyHHwmt/FIUaiJBVAfpHv6hj9EGJrAw69+0IY50=:",
+      "/jquery/2.2.4": "sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==",
+      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
+    },
+    "project2/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;
+
+exports[`PnpmShrinkwrapFile workspace V6.1 lockfile verifies project dependencies: project3 1`] = `
+Array [
+  Array [
+    Object {
+      "../../project3": "../../project3:jomsZKvXG32qqYOfW3HUBGfWWSw6ybFV1WDf9c/kiP4=:",
+      "/q/1.5.1": "sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==",
+      "/repeat-string/1.6.1": "sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==",
+      "example.pkgs.visualstudio.com/@scope/testDep/2.1.0": "example.pkgs.visualstudio.com/@scope/testDep/2.1.0:i5jbUOp/IxUgiN0dHYsTRzmimOVBwu7f9908rRaC9VY=:",
+    },
+    "project3/.rush/temp/shrinkwrap-deps.json",
+    Object {
+      "ensureFolderExists": true,
+    },
+  ],
+]
+`;

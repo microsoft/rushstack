@@ -22,11 +22,12 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@pnpm/dependency-path": "~2.1.2",
     "@pnpm/link-bins": "~5.3.7",
-    "@rushstack/package-extractor": "workspace:*",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
+    "@rushstack/package-extractor": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/terminal": "workspace:*",
