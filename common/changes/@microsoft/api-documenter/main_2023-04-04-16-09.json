@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Read the `api-documenter.json` config file when generating markdown",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter"
+}
