@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for PNPM 8.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
