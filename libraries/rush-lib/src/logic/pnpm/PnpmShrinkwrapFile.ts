@@ -922,7 +922,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _getPackageId(name: string, versionSpecifier: IPnpmVersionSpecifier): string {
     const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
     if (this.shrinkwrapFileMajorVersion >= 6) {
-      return `/${name}@${version}`;
+      if (version.startsWith('@github')) {
+        // This is a github repo reference
+        return version;
+      } else {
+        return `/${name}@${version}`;
+      }
     } else {
       // Version can sometimes be in the form of a path that's already in the /name/version format.
       return version.indexOf('/') !== -1 ? version : `/${name}/${version}`;
