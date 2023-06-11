@@ -27,13 +27,14 @@ export class MarkdownAction extends BaseAction {
       // Otherwise try the standard "config" subfolder
       configFilePath = path.join(process.cwd(), 'config', DocumenterConfig.FILENAME);
       if (!FileSystem.exists(configFilePath)) {
-        throw new Error(
+        console.warn(
           `Unable to find ${DocumenterConfig.FILENAME} in the current folder or in a "config" subfolder`
         );
+        configFilePath = undefined;
       }
     }
 
-    const documenterConfig: DocumenterConfig = DocumenterConfig.loadFile(configFilePath);
+    const documenterConfig: DocumenterConfig = configFilePath ? DocumenterConfig.loadFile(configFilePath) : undefined;
     const { apiModel, outputFolder } = this.buildApiModel();
 
     const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({
