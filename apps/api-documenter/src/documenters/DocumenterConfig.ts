@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonSchema, JsonFile, NewlineKind } from '@rushstack/node-core-library';
-import { IConfigFile } from './IConfigFile';
+import { JsonSchema, JsonFile, NewlineKind, FileSystem } from '@rushstack/node-core-library';
+import type { IConfigFile } from './IConfigFile';
 
 /**
  * Helper for loading the api-documenter.json file format.  Later when the schema is more mature,
@@ -52,9 +52,47 @@ export class DocumenterConfig {
   /**
    * Load and validate an api-documenter.json file.
    */
-  public static loadFile(configFilePath: string): DocumenterConfig {
-    const configFile: IConfigFile = JsonFile.loadAndValidate(configFilePath, DocumenterConfig.jsonSchema);
+  public static async loadFileAsync(projectFolderPath: string): Promise<DocumenterConfig> {
+    const configFile: DocumenterConfig | undefined =
+      await DocumenterConfig.tryLoadFileFromDefaultLocationsAsync(projectFolderPath);
 
-    return new DocumenterConfig(path.resolve(configFilePath), configFile);
+    if (configFile) {
+      return configFile;
+    } else {
+      throw new Error(
+        `Unable to find ${DocumenterConfig.FILENAME} in the current folder or in a "config" subfolder`
+      );
+    }
+  }
+
+  /**
+   * Load and validate an api-documenter.json file if one exists at the default locations, otherwise
+   * return undefined.
+   */
+  public static async tryLoadFileFromDefaultLocationsAsync(
+    projectFolderPath: string
+  ): Promise<DocumenterConfig | undefined> {
+    // First try the current folder
+    let configFilePath: string = `${projectFolderPath}/${DocumenterConfig.FILENAME}`;
+    let configFile: IConfigFile | undefined = await DocumenterConfig._tryLoadConfigFileAsync(configFilePath);
+    if (!configFile) {
+      // Otherwise try the standard "config" subfolder
+      configFilePath = `${projectFolderPath}/config/${DocumenterConfig.FILENAME}`;
+      configFile = await DocumenterConfig._tryLoadConfigFileAsync(configFilePath);
+    }
+
+    if (configFile) {
+      return new DocumenterConfig(path.resolve(configFilePath), configFile);
+    }
+  }
+
+  private static async _tryLoadConfigFileAsync(configFilePath: string): Promise<IConfigFile | undefined> {
+    try {
+      return await JsonFile.loadAndValidateAsync(configFilePath, DocumenterConfig.jsonSchema);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
   }
 }
