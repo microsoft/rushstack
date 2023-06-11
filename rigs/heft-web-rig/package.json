@@ -42,7 +42,7 @@
     "url-loader": "~4.1.1",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-merge": "~5.8.0",
-    "webpack": "~5.80.0"
+    "webpack": "~5.82.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"

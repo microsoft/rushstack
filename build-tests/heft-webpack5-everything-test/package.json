@@ -26,6 +26,6 @@
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~5.0.4",
-    "webpack": "~5.80.0"
+    "webpack": "~5.82.1"
   }
 }
