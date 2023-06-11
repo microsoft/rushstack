@@ -20,7 +20,7 @@ export class MarkdownAction extends BaseAction {
   }
 
   protected async onExecute(): Promise<void> {
-    let configFilePath: string = path.join(process.cwd(), DocumenterConfig.FILENAME);
+    let configFilePath: string | undefined = path.join(process.cwd(), DocumenterConfig.FILENAME);
 
     // First try the current folder
     if (!FileSystem.exists(configFilePath)) {
@@ -34,7 +34,7 @@ export class MarkdownAction extends BaseAction {
       }
     }
 
-    const documenterConfig: DocumenterConfig = configFilePath ? DocumenterConfig.loadFile(configFilePath) : undefined;
+    const documenterConfig: DocumenterConfig | undefined = configFilePath ? DocumenterConfig.loadFile(configFilePath) : undefined;
     const { apiModel, outputFolder } = this.buildApiModel();
 
     const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({
