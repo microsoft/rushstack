@@ -8,6 +8,8 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { parsePnpmDependencyKey, PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { JsonFile } from '@rushstack/node-core-library';
 
 describe(NpmShrinkwrapFile.name, () => {
   const filename: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
@@ -44,46 +46,160 @@ describe(NpmShrinkwrapFile.name, () => {
 });
 
 describe(PnpmShrinkwrapFile.name, () => {
-  const filename: string = path.resolve(__dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml');
-  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', {}, filename)!;
+  describe('non-workspace', () => {
+    function validateNonWorkspaceLockfile(shrinkwrapFile: BaseShrinkwrapFile): void {
+      it('verifies root-level dependency', () => {
+        expect(
+          shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))
+        ).toEqual(false);
+      });
 
-  it('verifies root-level dependency', () => {
-    expect(shrinkwrapFile.hasCompatibleTopLevelDependency(new DependencySpecifier('q', '~1.5.0'))).toEqual(
-      false
-    );
+      it('verifies temp project dependencies', () => {
+        expect(
+          shrinkwrapFile.tryEnsureCompatibleDependency(
+            new DependencySpecifier('jquery', '>=1.0.0 <2.0.0'),
+            '@rush-temp/project1'
+          )
+        ).toEqual(true);
+        expect(
+          shrinkwrapFile.tryEnsureCompatibleDependency(
+            new DependencySpecifier('q', '~1.5.0'),
+            '@rush-temp/project2'
+          )
+        ).toEqual(true);
+        expect(
+          shrinkwrapFile.tryEnsureCompatibleDependency(
+            new DependencySpecifier('pad-left', '^2.0.0'),
+            '@rush-temp/project1'
+          )
+        ).toEqual(false);
+        expect(
+          shrinkwrapFile.tryEnsureCompatibleDependency(
+            new DependencySpecifier('@scope/testDep', '>=2.0.0 <3.0.0'),
+            '@rush-temp/project3'
+          )
+        ).toEqual(true);
+      });
+
+      it('extracts temp projects successfully', () => {
+        const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
+
+        expect(tempProjectNames).toEqual([
+          '@rush-temp/project1',
+          '@rush-temp/project2',
+          '@rush-temp/project3'
+        ]);
+      });
+    }
+
+    describe('V5.0 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.yaml'
+      );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+        'pnpm',
+        {},
+        filename
+      )!;
+
+      validateNonWorkspaceLockfile(shrinkwrapFile);
+    });
+
+    describe('V5.3 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v5.3.yaml'
+      );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+        'pnpm',
+        {},
+        filename
+      )!;
+
+      validateNonWorkspaceLockfile(shrinkwrapFile);
+    });
+
+    describe('V6.1 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/non-workspace-pnpm-lock-v6.1.yaml'
+      );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+        'pnpm',
+        {},
+        filename
+      )!;
+
+      validateNonWorkspaceLockfile(shrinkwrapFile);
+    });
   });
 
-  it('verifies temp project dependencies', () => {
-    expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
-        new DependencySpecifier('jquery', '>=2.0.0 <3.0.0'),
-        '@rush-temp/project1'
-      )
-    ).toEqual(true);
-    expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
-        new DependencySpecifier('q', '~1.5.0'),
-        '@rush-temp/project2'
-      )
-    ).toEqual(true);
-    expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
-        new DependencySpecifier('left-pad', '~9.9.9'),
-        '@rush-temp/project1'
-      )
-    ).toEqual(false);
-    expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
-        new DependencySpecifier('@scope/testDep', '>=1.0.0 <2.0.0'),
-        '@rush-temp/project3'
-      )
-    ).toEqual(true);
-  });
+  describe('workspace', () => {
+    let jsonSaveAsyncSpy: jest.SpyInstance;
+    beforeEach(() => {
+      jsonSaveAsyncSpy = jest.spyOn(JsonFile, 'saveAsync').mockImplementation(() => {
+        return Promise.resolve(true);
+      });
+    });
 
-  it('extracts temp projects successfully', () => {
-    const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
+    afterEach(() => {
+      jsonSaveAsyncSpy.mockRestore();
+    });
 
-    expect(tempProjectNames).toEqual(['@rush-temp/project1', '@rush-temp/project2', '@rush-temp/project3']);
+    function validateWorkspaceLockfile(shrinkwrapFile: BaseShrinkwrapFile): void {
+      it('verifies project dependencies', async () => {
+        const projectNames: string[] = ['project1', 'project2', 'project3'];
+        for (const projectName of projectNames) {
+          jsonSaveAsyncSpy.mockReset();
+          const rushConfigurationProject: RushConfigurationProject = {
+            projectRushTempFolder: `${projectName}/.rush/temp`,
+            projectFolder: projectName,
+            rushConfiguration: {
+              commonTempFolder: 'common/temp'
+            }
+          } as RushConfigurationProject;
+
+          const projectShrinkwrap = shrinkwrapFile.getProjectShrinkwrap(rushConfigurationProject);
+          await projectShrinkwrap?.updateProjectShrinkwrapAsync();
+          expect(jsonSaveAsyncSpy).toHaveBeenCalledTimes(1);
+          expect(jsonSaveAsyncSpy.mock.calls).toMatchSnapshot(projectName);
+        }
+      });
+
+      it('does not have any temp projects', () => {
+        const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
+        expect(tempProjectNames).toHaveLength(0);
+      });
+    }
+
+    describe('V5.3 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
+      );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+        'pnpm',
+        {},
+        filename
+      )!;
+
+      validateWorkspaceLockfile(shrinkwrapFile);
+    });
+
+    describe('V6.1 lockfile', () => {
+      const filename: string = path.resolve(
+        __dirname,
+        '../../../src/logic/test/shrinkwrapFile/workspace-pnpm-lock-v5.3.yaml'
+      );
+      const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+        'pnpm',
+        {},
+        filename
+      )!;
+
+      validateWorkspaceLockfile(shrinkwrapFile);
+    });
   });
 });
 

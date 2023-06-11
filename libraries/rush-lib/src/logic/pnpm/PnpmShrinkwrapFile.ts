@@ -111,7 +111,7 @@ export interface IPnpmShrinkwrapImporterYaml {
  */
 export interface IPnpmShrinkwrapYaml {
   /** The version of the lockfile format */
-  lockfileVersion?: string;
+  lockfileVersion?: string | number;
   /** The list of resolved version numbers for direct dependencies */
   dependencies: Record<string, string>;
   /** The list of importers for local workspace projects */
@@ -249,12 +249,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this._shrinkwrapJson = shrinkwrapJson;
 
     // Normalize the data
-    const lockfileVersion: string | undefined = shrinkwrapJson.lockfileVersion;
-    if (lockfileVersion) {
+    const lockfileVersion: string | number | undefined = shrinkwrapJson.lockfileVersion;
+    if (typeof lockfileVersion === 'string') {
       this.shrinkwrapFileMajorVersion = parseInt(
         lockfileVersion.substring(0, lockfileVersion.indexOf('.')),
         10
       );
+    } else if (typeof lockfileVersion === 'number') {
+      this.shrinkwrapFileMajorVersion = lockfileVersion;
     } else {
       this.shrinkwrapFileMajorVersion = 0;
     }
