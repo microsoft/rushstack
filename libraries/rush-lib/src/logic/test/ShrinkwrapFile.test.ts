@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { JsonFile } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
@@ -9,7 +10,6 @@ import { parsePnpmDependencyKey, PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwr
 import { DependencySpecifier } from '../DependencySpecifier';
 import { NpmShrinkwrapFile } from '../npm/NpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { JsonFile } from '@rushstack/node-core-library';
 
 describe(NpmShrinkwrapFile.name, () => {
   const filename: string = `${__dirname}/shrinkwrapFile/npm-shrinkwrap.json`;
@@ -138,9 +138,7 @@ describe(PnpmShrinkwrapFile.name, () => {
   describe('workspace', () => {
     let jsonSaveAsyncSpy: jest.SpyInstance;
     beforeEach(() => {
-      jsonSaveAsyncSpy = jest.spyOn(JsonFile, 'saveAsync').mockImplementation(() => {
-        return Promise.resolve(true);
-      });
+      jsonSaveAsyncSpy = jest.spyOn(JsonFile, 'saveAsync').mockReturnValue(Promise.resolve(true));
     });
 
     afterEach(() => {
@@ -151,7 +149,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       it('verifies project dependencies', async () => {
         const projectNames: string[] = ['project1', 'project2', 'project3'];
         for (const projectName of projectNames) {
-          jsonSaveAsyncSpy.mockReset();
+          jsonSaveAsyncSpy.mockClear();
           const rushConfigurationProject: RushConfigurationProject = {
             projectRushTempFolder: `${projectName}/.rush/temp`,
             projectFolder: projectName,
