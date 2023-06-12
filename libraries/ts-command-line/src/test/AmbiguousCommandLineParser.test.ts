@@ -143,12 +143,14 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
     });
     this._scope1Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--arg',
+      parameterShortName: '-a',
       parameterScope: 'scope1',
       argumentName: 'ARG',
       description: 'The argument'
     });
     this._scope2Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--arg',
+      parameterShortName: '-a',
       parameterScope: 'scope2',
       argumentName: 'ARG',
       description: 'The argument'
@@ -212,6 +214,14 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '-s'])
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails to execute when an ambiguous short name is provided to a scoping action with a matching ambiguous long name', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousScopedAction);
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '-a'])
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
