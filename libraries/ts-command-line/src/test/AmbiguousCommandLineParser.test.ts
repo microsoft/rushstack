@@ -157,6 +157,7 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
     });
     this._nonConflictingArg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--non-conflicting-arg',
+      parameterShortName: '-a',
       parameterScope: 'scope',
       argumentName: 'ARG',
       description: 'The argument'

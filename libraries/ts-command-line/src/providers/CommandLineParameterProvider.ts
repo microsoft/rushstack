@@ -489,30 +489,48 @@ export abstract class CommandLineParameterProvider {
     // Search for any ambiguous parameters and throw an error if any are found
     for (const [parserKey, parameterName] of this._ambiguousParameterNamesByParserKey.entries()) {
       if (data[parserKey]) {
-        // Determine if the ambiguous parameter is a short name or a long name, since the reasons for the
-        // ambiguity are different.
+        // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
+        // the non-ambiguous name is different for each.
         const duplicateShortNameParameters: CommandLineParameter[] | undefined =
           this._parametersByShortName.get(parameterName);
         if (duplicateShortNameParameters) {
-          const duplicateShortNameParameterNames: string[] = duplicateShortNameParameters.map(
-            (p) => p.longName
-          );
+          // We also need to make sure we get the non-ambiguous long name for the parameter, since it is
+          // possible for that the long name is ambiguous as well.
+          const nonAmbiguousLongNames: string[] = [];
+          for (const parameter of duplicateShortNameParameters) {
+            const matchingLongNameParameters: CommandLineParameter[] | undefined =
+              this._parametersByLongName.get(parameter.longName);
+            if (!matchingLongNameParameters) {
+              // This should never happen
+              throw new Error(
+                `Unable to find long name parameters for ambiguous short name parameter "${parameterName}".`
+              );
+            }
+            // If there is more than one matching long name parameter, then we know that we need to use the
+            // scoped long name for the parameter. While the scoped long name should always be provided,
+            // fallback to the long name just in case.
+            if (matchingLongNameParameters.length > 1) {
+              nonAmbiguousLongNames.push(parameter.scopedLongName || parameter.longName);
+            } else {
+              nonAmbiguousLongNames.push(parameter.longName);
+            }
+          }
           throw new Error(
             `The provided parameter "${parameterName}" is ambiguous. It could reference any of ` +
-              `the following parameters: ${duplicateShortNameParameterNames.join(', ')}.`
+              `the following parameters: ${nonAmbiguousLongNames.join(', ')}.`
           );
         }
 
         const duplicateLongNameParameters: CommandLineParameter[] | undefined =
           this._parametersByLongName.get(parameterName);
         if (duplicateLongNameParameters) {
-          const duplicateLongNameParameterScopedNames: string[] = duplicateLongNameParameters.map(
+          const nonAmbiguousLongNames: string[] = duplicateLongNameParameters.map(
             // While the scoped long name should always be provided, fallback to the long name just in case
             (p) => p.scopedLongName || p.longName
           );
           throw new Error(
             `The provided parameter "${parameterName}" is ambiguous. It could reference any of ` +
-              `the following parameters: ${duplicateLongNameParameterScopedNames.join(', ')}.`
+              `the following parameters: ${nonAmbiguousLongNames.join(', ')}.`
           );
         }
 

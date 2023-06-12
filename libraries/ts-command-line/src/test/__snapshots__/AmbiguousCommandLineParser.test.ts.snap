@@ -36,3 +36,5 @@ exports[`Ambiguous CommandLineParser fails to execute when an ambiguous short na
 exports[`Ambiguous scoping CommandLineParser fails to execute when an ambiguous long name is provided to a scoping action 1`] = `"The provided parameter \\"--arg\\" is ambiguous. It could reference any of the following parameters: --scope1:arg, --scope2:arg."`;
 
 exports[`Ambiguous scoping CommandLineParser fails to execute when an ambiguous short name is provided to a scoping action 1`] = `"The provided parameter \\"-s\\" is ambiguous. It could reference any of the following parameters: --short1, --short2."`;
+
+exports[`Ambiguous scoping CommandLineParser fails to execute when an ambiguous short name is provided to a scoping action with a matching ambiguous long name 1`] = `"The provided parameter \\"-a\\" is ambiguous. It could reference any of the following parameters: --scope1:arg, --scope2:arg, --non-conflicting-arg."`;
