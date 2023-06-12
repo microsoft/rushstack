@@ -49,6 +49,7 @@
         },
         {
           "longName": "--test-name-pattern",
+          "shortName": "-t",
           "parameterKind": "string",
           "argumentName": "REGEXP",
           "description": "Run only tests with a name that matches a regular expression.  The REGEXP is matched against the full name, which is a combination of the test name and all its surrounding describe blocks.  This corresponds to the \"--testNamePattern\" parameter in Jest's documentation."
@@ -73,6 +74,7 @@
         },
         {
           "longName": "--update-snapshots",
+          "shortName": "-u",
           "parameterKind": "flag",
           "description": "Update Jest snapshots while running the tests.  This corresponds to the \"--updateSnapshots\" parameter in Jest."
         }
