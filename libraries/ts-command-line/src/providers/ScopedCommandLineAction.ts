@@ -111,7 +111,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    */
   public get parameters(): ReadonlyArray<CommandLineParameter> {
     if (this._scopedCommandLineParser) {
-      return [...super.parameters, ...this._scopedCommandLineParser.parameters];
+      return ([] as CommandLineParameter[]).concat(
+        super.parameters,
+        this._scopedCommandLineParser.parameters
+      );
     } else {
       return super.parameters;
     }
@@ -167,7 +170,9 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
             `arguments: ${this.remainder.values[0]}.`
         );
       }
-      scopedArgs.push(...this.remainder.values.slice(1));
+      for (const scopedArg of this.remainder.values.slice(1)) {
+        scopedArgs.push(scopedArg);
+      }
     }
 
     // Call the scoped parser using only the scoped args to handle parsing
