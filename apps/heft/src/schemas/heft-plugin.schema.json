@@ -27,6 +27,12 @@
           "type": "string",
           "pattern": "^-(-[a-z0-9]+)+$"
         },
+        "shortName": {
+          "title": "Short Name",
+          "description": "A optional short form of the parameter (e.g. \"-v\" instead of \"--verbose\")",
+          "type": "string",
+          "pattern": "^-[a-zA-Z]$"
+        },
         "description": {
           "title": "Parameter Description",
           "description": "A detailed description of the parameter, which appears when requesting help for the command (e.g. \"heft phaseName --help my-command\").",
@@ -90,6 +96,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
@@ -145,6 +152,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
@@ -175,6 +183,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" }
           }
@@ -214,6 +223,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
@@ -251,6 +261,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
@@ -292,6 +303,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
@@ -329,6 +341,7 @@
           "properties": {
             "parameterKind": { "$ref": "#/definitions/anything" },
             "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
