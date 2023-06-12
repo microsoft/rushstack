@@ -415,9 +415,9 @@ export abstract class CommandLineParameterProvider {
 
     const ambiguousParameterNames: Set<string> = new Set();
 
-    // First, loop through all parameters with shortnames. If there are any duplicates, disable the shortnames
-    // since we can't prefix scopes to deduplicate them. The duplicate shortnames will be reported as errors
-    // if the user attempts to use them.
+    // First, loop through all parameters with short names. If there are any duplicates, disable the short names
+    // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
+    // be reported as errors if the user attempts to use them.
     for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
       if (shortNameParameters.length > 1) {
         for (const parameter of shortNameParameters) {
@@ -427,9 +427,9 @@ export abstract class CommandLineParameterProvider {
       }
     }
 
-    // Then loop through all parameters and register them. If there are any duplicates, ensure that they have
-    // provided a scope and register them with the scope. The original longname for these parameters will be
-    // reported as an error if the attempts tries to use it.
+    // Loop through all parameters and register them. If there are any duplicates, ensure that they have provided
+    // a scope and register them with the scope. The duplicate long names will be reported as an error if the
+    // user attempts to use them.
     for (const longNameParameters of this._parametersByLongName.values()) {
       const useScopedLongName: boolean = longNameParameters.length > 1;
       for (const parameter of longNameParameters) {
@@ -446,7 +446,7 @@ export abstract class CommandLineParameterProvider {
       }
     }
 
-    // Register silent parameters for the ambiguous shortnames and longnames to ensure that users are made
+    // Register silent parameters for the ambiguous short names and long names to ensure that users are made
     // aware that the provided argument is ambiguous.
     for (const ambiguousParameterName of ambiguousParameterNames) {
       this._registerAmbiguousParameter(ambiguousParameterName);
@@ -500,7 +500,7 @@ export abstract class CommandLineParameterProvider {
           for (const parameter of duplicateShortNameParameters) {
             const matchingLongNameParameters: CommandLineParameter[] | undefined =
               this._parametersByLongName.get(parameter.longName);
-            if (!matchingLongNameParameters) {
+            if (!matchingLongNameParameters?.length) {
               // This should never happen
               throw new Error(
                 `Unable to find long name parameters for ambiguous short name parameter "${parameterName}".`
