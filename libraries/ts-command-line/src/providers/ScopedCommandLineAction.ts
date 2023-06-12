@@ -111,10 +111,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
    */
   public get parameters(): ReadonlyArray<CommandLineParameter> {
     if (this._scopedCommandLineParser) {
-      return ([] as CommandLineParameter[]).concat(
-        super.parameters,
-        this._scopedCommandLineParser.parameters
-      );
+      return [...super.parameters, ...this._scopedCommandLineParser.parameters];
     } else {
       return super.parameters;
     }

@@ -487,7 +487,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Search for any ambiguous parameters and throw an error if any are found
-    for (const [parserKey, parameterName] of this._ambiguousParameterNamesByParserKey.entries()) {
+    for (const [parserKey, parameterName] of this._ambiguousParameterNamesByParserKey) {
       if (data[parserKey]) {
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
         // the non-ambiguous name is different for each.
@@ -507,10 +507,15 @@ export abstract class CommandLineParameterProvider {
               );
             }
             // If there is more than one matching long name parameter, then we know that we need to use the
-            // scoped long name for the parameter. While the scoped long name should always be provided,
-            // fallback to the long name just in case.
+            // scoped long name for the parameter. The scoped long name should always be provided.
             if (matchingLongNameParameters.length > 1) {
-              nonAmbiguousLongNames.push(parameter.scopedLongName || parameter.longName);
+              if (!parameter.scopedLongName) {
+                // This should never happen
+                throw new Error(
+                  `Unable to find scoped long name for ambiguous short name parameter "${parameterName}".`
+                );
+              }
+              nonAmbiguousLongNames.push(parameter.scopedLongName);
             } else {
               nonAmbiguousLongNames.push(parameter.longName);
             }
@@ -525,8 +530,16 @@ export abstract class CommandLineParameterProvider {
           this._parametersByLongName.get(parameterName);
         if (duplicateLongNameParameters) {
           const nonAmbiguousLongNames: string[] = duplicateLongNameParameters.map(
-            // While the scoped long name should always be provided, fallback to the long name just in case
-            (p) => p.scopedLongName || p.longName
+            (p: CommandLineParameter) => {
+              // The scoped long name should always be provided
+              if (!p.scopedLongName) {
+                // This should never happen
+                throw new Error(
+                  `Unable to find scoped long name for ambiguous long name parameter "${parameterName}".`
+                );
+              }
+              return p.scopedLongName;
+            }
           );
           throw new Error(
             `The provided parameter "${parameterName}" is ambiguous. It could reference any of ` +
