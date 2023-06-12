@@ -427,9 +427,9 @@ export abstract class CommandLineParameterProvider {
       }
     }
 
-    // Loop through all parameters and register them. If there are any duplicates, ensure that they have provided
-    // a scope and register them with the scope. The duplicate long names will be reported as an error if the
-    // user attempts to use them.
+    // Then, loop through all parameters and register them. If there are any duplicates, ensure that they have
+    // provided a scope and register them with the scope. The duplicate long names will be reported as an error
+    // if the user attempts to use them.
     for (const longNameParameters of this._parametersByLongName.values()) {
       const useScopedLongName: boolean = longNameParameters.length > 1;
       for (const parameter of longNameParameters) {
@@ -520,9 +520,14 @@ export abstract class CommandLineParameterProvider {
               nonAmbiguousLongNames.push(parameter.longName);
             }
           }
+
+          // Throw an error including the non-ambiguous long names for the parameters that have the ambiguous
+          // short name, ex.
+          // Error: The short parameter name "-p" is ambiguous. It could refer to any of the following
+          // parameters: "--param1", "--param2"
           throw new Error(
-            `The provided parameter "${parameterName}" is ambiguous. It could reference any of ` +
-              `the following parameters: ${nonAmbiguousLongNames.join(', ')}.`
+            `The short parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
+              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
           );
         }
 
@@ -541,14 +546,19 @@ export abstract class CommandLineParameterProvider {
               return p.scopedLongName;
             }
           );
+
+          // Throw an error including the non-ambiguous scoped long names for the parameters that have the
+          // ambiguous long name, ex.
+          // Error: The parameter name "--param" is ambiguous. It could refer to any of the following
+          // parameters: "--scope1:param", "--scope2:param"
           throw new Error(
-            `The provided parameter "${parameterName}" is ambiguous. It could reference any of ` +
-              `the following parameters: ${nonAmbiguousLongNames.join(', ')}.`
+            `The parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
+              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
           );
         }
 
         // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
-        throw new Error(`The provided parameter "${parameterName}" is ambiguous.`);
+        throw new Error(`The parameter name "${parameterName}" is ambiguous.`);
       }
     }
 
