@@ -266,8 +266,6 @@ export class HeftParameterManager {
       this._parametersByDefinition.get(pluginDefinition)!;
 
     for (const parameter of pluginDefinition.pluginParameters) {
-      // Short names are excluded since it would be difficult and confusing to de-dupe/handle shortname
-      // conflicts as well as longname conflicts
       let definedParameter: CommandLineParameter;
       switch (parameter.parameterKind) {
         case 'choiceList': {
