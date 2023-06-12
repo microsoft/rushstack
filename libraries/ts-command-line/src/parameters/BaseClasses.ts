@@ -56,6 +56,8 @@ const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
  * @public
  */
 export abstract class CommandLineParameter {
+  private _shortNameValue: string | undefined;
+
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
    * @internal
@@ -70,9 +72,6 @@ export abstract class CommandLineParameter {
    * including double dashes, eg. "--scope:do-something". Otherwise undefined.
    */
   public readonly scopedLongName: string | undefined;
-
-  /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
-  public readonly shortName: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterGroup} */
   public readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
@@ -95,7 +94,7 @@ export abstract class CommandLineParameter {
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
-    this.shortName = definition.parameterShortName;
+    this._shortNameValue = definition.parameterShortName;
     this.parameterGroup = definition.parameterGroup;
     this.parameterScope = definition.parameterScope;
     this.description = definition.description;
@@ -166,11 +165,24 @@ export abstract class CommandLineParameter {
     }
   }
 
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
+  public get shortName(): string | undefined {
+    return this._shortNameValue;
+  }
+
   /**
    * Called internally by CommandLineParameterProvider._processParsedData()
    * @internal
    */
   public abstract _setValue(data: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  /**
+   * Called internally by CommandLineParameterProvider._registerDefinedParameters()
+   * @internal
+   */
+  public _disableShortName(): void {
+    this._shortNameValue = undefined;
+  }
 
   /**
    * Returns additional text used by the help formatter.

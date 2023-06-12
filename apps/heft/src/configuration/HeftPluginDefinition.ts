@@ -20,6 +20,10 @@ export interface IBaseParameterJson {
    */
   longName: string;
   /**
+   * An optional short form of the parameter (e.g. \"-v\" instead of \"--verbose\").
+   */
+  shortName?: string;
+  /**
    * A detailed description of the parameter, which appears when requesting help for the command (e.g. \"rush --help my-command\").
    */
   description: string;

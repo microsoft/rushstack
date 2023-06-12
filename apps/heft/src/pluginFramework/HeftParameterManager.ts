@@ -266,8 +266,6 @@ export class HeftParameterManager {
       this._parametersByDefinition.get(pluginDefinition)!;
 
     for (const parameter of pluginDefinition.pluginParameters) {
-      // Short names are excluded since it would be difficult and confusing to de-dupe/handle shortname
-      // conflicts as well as longname conflicts
       let definedParameter: CommandLineParameter;
       switch (parameter.parameterKind) {
         case 'choiceList': {
@@ -276,6 +274,7 @@ export class HeftParameterManager {
             required: parameter.required,
             alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;
@@ -287,6 +286,7 @@ export class HeftParameterManager {
             alternatives: parameter.alternatives.map((p: IChoiceParameterAlternativeJson) => p.name),
             defaultValue: parameter.defaultValue,
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;
@@ -296,6 +296,7 @@ export class HeftParameterManager {
             description: parameter.description,
             required: parameter.required,
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;
@@ -306,6 +307,7 @@ export class HeftParameterManager {
             required: parameter.required,
             argumentName: parameter.argumentName,
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;
@@ -317,6 +319,7 @@ export class HeftParameterManager {
             argumentName: parameter.argumentName,
             defaultValue: parameter.defaultValue,
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;
@@ -327,6 +330,7 @@ export class HeftParameterManager {
             required: parameter.required,
             argumentName: parameter.argumentName,
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;
@@ -338,6 +342,7 @@ export class HeftParameterManager {
             argumentName: parameter.argumentName,
             defaultValue: parameter.defaultValue,
             parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
             parameterScope: pluginDefinition.pluginParameterScope
           });
           break;

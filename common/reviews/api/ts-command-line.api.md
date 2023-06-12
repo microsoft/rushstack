@@ -121,6 +121,8 @@ export abstract class CommandLineParameter {
     constructor(definition: IBaseCommandLineDefinition);
     abstract appendToArgList(argList: string[]): void;
     readonly description: string;
+    // @internal
+    _disableShortName(): void;
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -135,7 +137,7 @@ export abstract class CommandLineParameter {
     readonly scopedLongName: string | undefined;
     // @internal
     abstract _setValue(data: any): void;
-    readonly shortName: string | undefined;
+    get shortName(): string | undefined;
     readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
