@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add plugin support for parameter short-names.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
