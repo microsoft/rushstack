@@ -52,6 +52,9 @@ export interface IWebpackPluginAccessorParameters {
 // @public (undocumented)
 export const PluginName: 'webpack5-plugin';
 
+// @public
+export const STAGE_LOAD_LOCAL_CONFIG: 1000;
+
 // (No @packageDocumentation comment for this package)
 
 ```
