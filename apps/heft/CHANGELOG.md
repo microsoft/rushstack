@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 09 Jun 2023 18:05:34 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jun 2023 01:49:01 GMT and should not be manually modified.
+
+## 0.54.0
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Minor changes
+
+- Add plugin support for parameter short-names.
 
 ## 0.53.1
 Fri, 09 Jun 2023 18:05:34 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Fri, 09 Jun 2023 18:05:35 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jun 2023 01:49:01 GMT and should not be manually modified.
+
+## 4.0.0
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Breaking changes
+
+- Emit an error on Webpack 5 instead of a warning and remove the optional peerDependency on Webpack.
 
 ## 3.3.115
 Fri, 09 Jun 2023 18:05:35 GMT

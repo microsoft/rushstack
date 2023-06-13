@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.15.0",
+      "tag": "@rushstack/ts-command-line_v4.15.0",
+      "date": "Tue, 13 Jun 2023 01:49:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for handling ambiguous parameters when conflicting parameters are provided but they provide a non-conflicting alternative (e.g. parameters with the same short-name but different long-names, scoped parameters with the same long-name but different scopes). When using an ambiguous parameter on the CLI, an error message describing the ambiguous parameter usage will appear."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.14.0",
       "tag": "@rushstack/ts-command-line_v4.14.0",
       "date": "Wed, 07 Jun 2023 22:45:16 GMT",

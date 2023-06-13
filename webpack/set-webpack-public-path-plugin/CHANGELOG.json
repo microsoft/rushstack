@@ -2,6 +2,32 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v4.0.0",
+      "date": "Tue, 13 Jun 2023 01:49:01 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Emit an error on Webpack 5 instead of a warning and remove the optional peerDependency on Webpack."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.7.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.115",
       "tag": "@rushstack/set-webpack-public-path-plugin_v3.3.115",
       "date": "Fri, 09 Jun 2023 18:05:35 GMT",

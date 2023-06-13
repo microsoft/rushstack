@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 09 Jun 2023 18:05:35 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jun 2023 01:49:01 GMT and should not be manually modified.
+
+## 0.7.7
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Patches
+
+- Add support for using '-u' for the '--update-snapshots' parameter and '-t' for the '--test-name-pattern' parameter
 
 ## 0.7.6
 Fri, 09 Jun 2023 18:05:35 GMT
