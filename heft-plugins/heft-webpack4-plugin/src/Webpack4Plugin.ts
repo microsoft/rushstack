@@ -129,17 +129,16 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     requestRun?: () => void
   ): Promise<IWebpackConfiguration | undefined> {
     if (this._webpackConfiguration === false) {
-      const webpackConfiguration: IWebpackConfiguration | false | undefined =
-        await tryLoadWebpackConfigurationAsync(
-          {
-            taskSession,
-            heftConfiguration,
-            hooks: this.accessor.hooks,
-            serveMode: this._isServeMode,
-            loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
-          },
-          options
-        );
+      const webpackConfiguration: IWebpackConfiguration | undefined = await tryLoadWebpackConfigurationAsync(
+        {
+          taskSession,
+          heftConfiguration,
+          hooks: this.accessor.hooks,
+          serveMode: this._isServeMode,
+          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
+        },
+        options
+      );
 
       if (webpackConfiguration && requestRun) {
         const overrideWatchFSPlugin: OverrideNodeWatchFSPlugin = new OverrideNodeWatchFSPlugin(requestRun);
