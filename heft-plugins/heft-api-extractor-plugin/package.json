@@ -27,7 +27,7 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.2.5",
+    "@rushstack/heft-node-rig": "2.2.6",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
     "@types/semver": "7.3.5",
