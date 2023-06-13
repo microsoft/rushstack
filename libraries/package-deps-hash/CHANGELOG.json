@@ -2,6 +2,21 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.0.29",
+      "tag": "@rushstack/package-deps-hash_v4.0.29",
+      "date": "Tue, 13 Jun 2023 15:17:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.28",
       "tag": "@rushstack/package-deps-hash_v4.0.28",
       "date": "Tue, 13 Jun 2023 01:49:02 GMT",

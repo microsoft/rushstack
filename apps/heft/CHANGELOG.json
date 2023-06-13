@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.55.0",
+      "tag": "@rushstack/heft_v0.55.0",
+      "date": "Tue, 13 Jun 2023 15:17:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove the deprecated `cacheFolderPath` property from the session object."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.54.0",
       "tag": "@rushstack/heft_v0.54.0",
       "date": "Tue, 13 Jun 2023 01:49:01 GMT",

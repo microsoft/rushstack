@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 13 Jun 2023 01:49:01 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jun 2023 15:17:20 GMT and should not be manually modified.
+
+## 0.55.0
+Tue, 13 Jun 2023 15:17:20 GMT
+
+### Minor changes
+
+- Remove the deprecated `cacheFolderPath` property from the session object.
 
 ## 0.54.0
 Tue, 13 Jun 2023 01:49:01 GMT
