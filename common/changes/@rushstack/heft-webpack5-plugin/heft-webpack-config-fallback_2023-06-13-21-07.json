@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-webpack5-plugin",
-      "comment": "Moved loading of webpack config file into the `onLoadConfiguration` hook to allow other plugins to define fallback behavior, rather than only overriding the config file.",
+      "comment": "Move loading of webpack config file into the `onLoadConfiguration` hook to allow other plugins to define fallback behavior, rather than only overriding the config file.",
       "type": "minor"
     }
   ],

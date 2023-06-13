@@ -58,9 +58,9 @@ export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpac
 export interface IWebpackPluginAccessorHooks {
   /**
    * A hook that allows for loading custom configurations used by the Webpack
-   * plugin. If a tap returns a value other than `undefined` before stage `STAGE_LOAD_LOCAL_CONFIG`,
+   * plugin. If a tap returns a value other than `undefined` before stage {@link STAGE_LOAD_LOCAL_CONFIG},
    * it will suppress loading from the webpack config file. To provide a fallback behavior in the
-   * absence of a local config file, tap this hook with a `stage` value greater than `STAGE_LOAD_LOCAL_CONFIG`.
+   * absence of a local config file, tap this hook with a `stage` value greater than {@link STAGE_LOAD_LOCAL_CONFIG}.
    *
    * @remarks
    * Tapable event handlers can return `false` instead of `undefined` to suppress
