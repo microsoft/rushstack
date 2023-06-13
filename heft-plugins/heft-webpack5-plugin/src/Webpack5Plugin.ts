@@ -18,25 +18,24 @@ import type {
   IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 
-import type { IWebpackConfiguration, IWebpackPluginAccessor } from './shared';
-import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
+import {
+  type IWebpackConfiguration,
+  type IWebpackPluginAccessor,
+  PLUGIN_NAME,
+  IWebpackPluginAccessorHooks
+} from './shared';
+import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
 import { DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
 
 export interface IWebpackPluginOptions {
-  devConfigurationPath: string | undefined;
-  configurationPath: string | undefined;
+  devConfigurationPath?: string | undefined;
+  configurationPath?: string | undefined;
 }
-
-/**
- * @public
- */
-export const PLUGIN_NAME: 'webpack5-plugin' = 'webpack5-plugin';
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
 const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-dev-middleware';
-const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
 
 /**
  * @internal
@@ -46,7 +45,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   private _isServeMode: boolean = false;
   private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: TWebpack.Compiler | TWebpack.MultiCompiler | undefined;
-  private _webpackConfiguration: IWebpackConfiguration | undefined | typeof UNINITIALIZED = UNINITIALIZED;
+  private _webpackConfiguration: IWebpackConfiguration | undefined | false = false;
   private _webpackCompilationDonePromise: Promise<void> | undefined;
   private _webpackCompilationDonePromiseResolveFn: (() => void) | undefined;
   private _watchFileSystems: Set<DeferredWatchFileSystem> | undefined;
@@ -57,12 +56,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   public get accessor(): IWebpackPluginAccessor {
     if (!this._accessor) {
       this._accessor = {
-        hooks: {
-          onLoadConfiguration: new AsyncSeriesBailHook(),
-          onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
-          onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
-          onEmitStats: new AsyncParallelHook(['webpackStats'])
-        },
+        hooks: _createAccessorHooks(),
         parameters: {
           isServeMode: this._isServeMode
         }
@@ -74,7 +68,7 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IWebpackPluginOptions
+    options: IWebpackPluginOptions = {}
   ): void {
     this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
     if (this._isServeMode && !taskSession.parameters.watch) {
@@ -105,64 +99,35 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions,
     requestRun?: () => void
   ): Promise<IWebpackConfiguration | undefined> {
-    if (this._webpackConfiguration === UNINITIALIZED) {
-      // Obtain the webpack configuration by calling into the hook. If undefined
-      // is returned, load the default Webpack configuration.
-      taskSession.logger.terminal.writeVerboseLine(
-        'Attempting to load Webpack configuration via external plugins'
-      );
-      let webpackConfiguration: IWebpackConfiguration | false | undefined =
-        await this.accessor.hooks.onLoadConfiguration.promise();
-      if (webpackConfiguration === undefined) {
-        taskSession.logger.terminal.writeVerboseLine('Attempt to load the default Webpack configuration');
-        const configurationLoader: WebpackConfigurationLoader = new WebpackConfigurationLoader(
-          taskSession.logger,
-          taskSession.parameters.production,
-          taskSession.parameters.watch && this._isServeMode
-        );
-        webpackConfiguration = await configurationLoader.tryLoadWebpackConfigurationAsync({
-          ...options,
+    if (this._webpackConfiguration === false) {
+      const webpackConfiguration: IWebpackConfiguration | undefined = await tryLoadWebpackConfigurationAsync(
+        {
           taskSession,
           heftConfiguration,
+          hooks: this.accessor.hooks,
+          serveMode: this._isServeMode,
           loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
-        });
-      }
+        },
+        options
+      );
 
-      if (webpackConfiguration === false) {
-        taskSession.logger.terminal.writeLine('Webpack disabled by external plugin');
-        this._webpackConfiguration = undefined;
-      } else if (
-        webpackConfiguration === undefined ||
-        (Array.isArray(webpackConfiguration) && webpackConfiguration.length === 0)
-      ) {
-        taskSession.logger.terminal.writeLine('No Webpack configuration found');
-        this._webpackConfiguration = undefined;
-      } else {
-        if (this.accessor.hooks.onConfigure.isUsed()) {
-          // Allow for plugins to customise the configuration
-          await this.accessor.hooks.onConfigure.promise(webpackConfiguration);
-        }
-        if (this.accessor.hooks.onAfterConfigure.isUsed()) {
-          // Provide the finalized configuration
-          await this.accessor.hooks.onAfterConfigure.promise(webpackConfiguration);
-        }
-        this._webpackConfiguration = webpackConfiguration;
-
-        if (requestRun) {
-          const overrideWatchFSPlugin: OverrideNodeWatchFSPlugin = new OverrideNodeWatchFSPlugin(requestRun);
-          this._watchFileSystems = overrideWatchFSPlugin.fileSystems;
-          for (const config of Array.isArray(webpackConfiguration)
-            ? webpackConfiguration
-            : [webpackConfiguration]) {
-            if (!config.plugins) {
-              config.plugins = [overrideWatchFSPlugin];
-            } else {
-              config.plugins.unshift(overrideWatchFSPlugin);
-            }
+      if (webpackConfiguration && requestRun) {
+        const overrideWatchFSPlugin: OverrideNodeWatchFSPlugin = new OverrideNodeWatchFSPlugin(requestRun);
+        this._watchFileSystems = overrideWatchFSPlugin.fileSystems;
+        for (const config of Array.isArray(webpackConfiguration)
+          ? webpackConfiguration
+          : [webpackConfiguration]) {
+          if (!config.plugins) {
+            config.plugins = [overrideWatchFSPlugin];
+          } else {
+            config.plugins.unshift(overrideWatchFSPlugin);
           }
         }
       }
+
+      this._webpackConfiguration = webpackConfiguration;
     }
+
     return this._webpackConfiguration;
   }
 
@@ -510,4 +475,16 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       return new Error(error.message);
     }
   }
+}
+
+/**
+ * @internal
+ */
+export function _createAccessorHooks(): IWebpackPluginAccessorHooks {
+  return {
+    onLoadConfiguration: new AsyncSeriesBailHook(),
+    onConfigure: new AsyncSeriesHook(['webpackConfiguration']),
+    onAfterConfigure: new AsyncParallelHook(['webpackConfiguration']),
+    onEmitStats: new AsyncParallelHook(['webpackStats'])
+  };
 }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add MockScopedLogger to help plugin authors with unit testing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
