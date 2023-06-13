@@ -689,6 +689,34 @@ importers:
       fs-extra: 7.0.1
       typescript: 5.0.4
 
+  ../../build-tests/api-extractor-lib4-test:
+    specifiers:
+      '@microsoft/api-extractor': workspace:*
+      '@types/jest': 29.2.5
+      '@types/node': 14.18.36
+      fs-extra: ~7.0.1
+      typescript: ~5.0.4
+    devDependencies:
+      '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@types/jest': 29.2.5
+      '@types/node': 14.18.36
+      fs-extra: 7.0.1
+      typescript: 5.0.4
+
+  ../../build-tests/api-extractor-lib5-test:
+    specifiers:
+      '@microsoft/api-extractor': workspace:*
+      '@types/jest': 29.2.5
+      '@types/node': 14.18.36
+      fs-extra: ~7.0.1
+      typescript: ~5.0.4
+    devDependencies:
+      '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@types/jest': 29.2.5
+      '@types/node': 14.18.36
+      fs-extra: 7.0.1
+      typescript: 5.0.4
+
   ../../build-tests/api-extractor-scenarios:
     specifiers:
       '@microsoft/api-extractor': workspace:*

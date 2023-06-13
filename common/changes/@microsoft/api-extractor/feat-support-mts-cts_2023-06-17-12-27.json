@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "add support for cts and mts",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
