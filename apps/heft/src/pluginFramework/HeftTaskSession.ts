@@ -97,13 +97,6 @@ export interface IHeftTaskSession {
   readonly parsedCommandLine: IHeftParsedCommandLine;
 
   /**
-   * The cache folder for the task. This is an alias for the temp folder.
-   *
-   * @deprecated Use `tempFolderPath` instead.
-   */
-  readonly cacheFolderPath: string;
-
-  /**
    * The temp folder for the task. This folder is unique for each task, and will be cleaned
    * when Heft is run with `--clean`.
    *
@@ -232,7 +225,6 @@ export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
 export class HeftTaskSession implements IHeftTaskSession {
   public readonly taskName: string;
   public readonly hooks: IHeftTaskHooks;
-  public readonly cacheFolderPath: string;
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
 
@@ -294,9 +286,6 @@ export class HeftTaskSession implements IHeftTaskSession {
 
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
-
-    // Preserved for backwards compatibility due to cyclic dependencies.
-    this.cacheFolderPath = this.tempFolderPath;
 
     this._options = options;
   }

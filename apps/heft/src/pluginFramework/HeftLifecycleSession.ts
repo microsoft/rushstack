@@ -37,13 +37,6 @@ export interface IHeftLifecycleSession {
   readonly parameters: IHeftParameters;
 
   /**
-   * The cache folder for the lifecycle plugin. This is an alias for tempFolderPath.
-   *
-   * @deprecated Use `tempFolderPath` instead.
-   */
-  readonly cacheFolderPath: string;
-
-  /**
    * The temp folder for the lifecycle plugin. This folder is unique for each lifecycle plugin,
    * and will be cleaned when Heft is run with `--clean`.
    *
@@ -153,7 +146,6 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
 
   public readonly hooks: IHeftLifecycleHooks;
   public readonly parameters: IHeftParameters;
-  public readonly cacheFolderPath: string;
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
   public readonly debug: boolean;
@@ -177,9 +169,6 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
 
     // <projectFolder>/temp/<phaseName>.<taskName>
     this.tempFolderPath = path.join(options.heftConfiguration.tempFolderPath, uniquePluginFolderName);
-
-    // Preserved for cyclic dependency issues
-    this.cacheFolderPath = this.tempFolderPath;
 
     this._pluginHost = options.pluginHost;
   }

@@ -147,8 +147,6 @@ export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeft
 
 // @public
 export interface IHeftLifecycleSession {
-    // @deprecated
-    readonly cacheFolderPath: string;
     readonly hooks: IHeftLifecycleHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
@@ -226,8 +224,6 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 
 // @public
 export interface IHeftTaskSession {
-    // @deprecated
-    readonly cacheFolderPath: string;
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
