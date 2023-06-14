@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where Rush would attempt to open a project's log file for writing twice.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
