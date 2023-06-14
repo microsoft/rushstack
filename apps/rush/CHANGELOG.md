@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 13 Jun 2023 01:49:21 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jun 2023 19:42:12 GMT and should not be manually modified.
+
+## 5.100.1
+Wed, 14 Jun 2023 19:42:12 GMT
+
+### Updates
+
+- Fix an issue where Rush would attempt to open a project's log file for writing twice.
+- Fix an issue where arguments weren't passed to git hook scripts.
 
 ## 5.100.0
 Tue, 13 Jun 2023 01:49:21 GMT

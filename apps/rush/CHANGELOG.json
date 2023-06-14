@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.100.1",
+      "tag": "@microsoft/rush_v5.100.1",
+      "date": "Wed, 14 Jun 2023 19:42:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush would attempt to open a project's log file for writing twice."
+          },
+          {
+            "comment": "Fix an issue where arguments weren't passed to git hook scripts."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.100.0",
       "tag": "@microsoft/rush_v5.100.0",
       "date": "Tue, 13 Jun 2023 01:49:21 GMT",
