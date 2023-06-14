@@ -142,6 +142,7 @@ export class ShellOperationRunner implements IOperationRunner {
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     // Only open the *.cache.log file(s) if the cache is enabled.
     const cacheProjectLogWritable: ProjectLogWritable | undefined = this._buildCacheConfiguration
+      ?.buildCacheEnabled
       ? new ProjectLogWritable(
           this._rushProject,
           context.collatedWriter.terminal,
