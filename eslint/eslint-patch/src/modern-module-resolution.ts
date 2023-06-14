@@ -238,7 +238,7 @@ if (!ConfigArrayFactory.__patched) {
             // resolve using ctx.filePath instead of relativeToPath
             return originalResolve.call(this, moduleName, ctx.filePath);
           } catch (e) {
-            if (isModuleResolutionError(e)) {
+            if (isModuleResolutionError(e) || isInvalidImporterPath(e)) {
               return originalResolve.call(this, moduleName, relativeToPath);
             }
             throw e;
