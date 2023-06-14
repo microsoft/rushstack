@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 13 Jun 2023 15:17:20 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jun 2023 00:19:41 GMT and should not be manually modified.
+
+## 0.55.1
+Wed, 14 Jun 2023 00:19:41 GMT
+
+### Patches
+
+- Add MockScopedLogger to help plugin authors with unit testing.
 
 ## 0.55.0
 Tue, 13 Jun 2023 15:17:20 GMT

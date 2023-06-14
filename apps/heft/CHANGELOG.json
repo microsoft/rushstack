@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.55.1",
+      "tag": "@rushstack/heft_v0.55.1",
+      "date": "Wed, 14 Jun 2023 00:19:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add MockScopedLogger to help plugin authors with unit testing."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.55.0",
       "tag": "@rushstack/heft_v0.55.0",
       "date": "Tue, 13 Jun 2023 15:17:20 GMT",

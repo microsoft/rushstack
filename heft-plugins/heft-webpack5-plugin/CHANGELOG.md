@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Tue, 13 Jun 2023 15:17:20 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jun 2023 00:19:41 GMT and should not be manually modified.
+
+## 0.8.0
+Wed, 14 Jun 2023 00:19:41 GMT
+
+### Minor changes
+
+- Move loading of webpack config file into the `onLoadConfiguration` hook to allow other plugins to define fallback behavior, rather than only overriding the config file.
 
 ## 0.7.10
 Tue, 13 Jun 2023 15:17:20 GMT
