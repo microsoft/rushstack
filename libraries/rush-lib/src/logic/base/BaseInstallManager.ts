@@ -487,7 +487,7 @@ SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
 
 if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
-  "$SCRIPT_IMPLEMENTATION_PATH"
+  "$SCRIPT_IMPLEMENTATION_PATH" $@
 else
   echo "The ${filename} Git hook no longer exists in your version of the repo. Run 'rush install' or 'rush update' to refresh your installed Git hooks." >&2
 fi
