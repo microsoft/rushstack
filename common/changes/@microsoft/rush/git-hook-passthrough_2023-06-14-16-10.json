@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix git hook passthrough",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
