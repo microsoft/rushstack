@@ -1,5 +1,4 @@
 import { JsonFile } from '@rushstack/node-core-library';
-import { RushConfiguration } from './RushConfiguration';
 
 export interface IRushCustomTipsJson {
   prefix?: string;
@@ -7,12 +6,12 @@ export interface IRushCustomTipsJson {
 }
 
 export type TipLevel = 'error' | 'warn' | 'info';
-export type CustomTipItem = {
+export interface CustomTipItem {
   id: CustomTipId;
   prefix?: string;
   level: TipLevel;
   tip: '';
-};
+}
 
 // TODO: consider making this work with the plugin (e.g., the plugins are able to define their own customizable tips)
 export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
@@ -24,10 +23,10 @@ export class CustomTips {
   private static instance: CustomTips;
   private configLoaded: boolean = false;
   private _config: IRushCustomTipsJson;
-  private tipMap: Map<CustomTipId, CustomTipItem>;
+  private _tipMap: Map<CustomTipId, CustomTipItem>;
 
   private constructor() {
-    this.tipMap = new Map();
+    this._tipMap = new Map();
     this._config = {};
     this._loadConfig();
   }
@@ -53,8 +52,8 @@ export class CustomTips {
       return;
     }
 
-    for (let tipItem of this._config.customTips) {
-      this.tipMap.set(tipItem.id, tipItem);
+    for (const tipItem of this._config.customTips) {
+      this._tipMap.set(tipItem.id, tipItem);
     }
   }
 
@@ -66,15 +65,15 @@ export class CustomTips {
   public log(tipId: CustomTipId, originalMessage: string): void {
     console.log(originalMessage);
 
-    if (this.tipMap.has(tipId)) {
-      const customTipItem = this.tipMap.get(tipId);
-      const prefix = customTipItem?.prefix ? customTipItem?.prefix : this._config.prefix;
-      const tip = `${prefix}${customTipItem?.tip}`;
+    if (this._tipMap.has(tipId)) {
+      const customTipItem: CustomTipItem | undefined = this._tipMap.get(tipId);
+      const prefix: string | undefined = customTipItem?.prefix ? customTipItem?.prefix : this._config.prefix;
+      const tip = `${prefix !== undefined ? prefix : ''}${customTipItem?.tip}`;
       this._log(tip, customTipItem?.level);
     }
   }
 
-  private _log(tip: string, level?: TipLevel) {
+  private _log(tip: string, level?: TipLevel): void {
     switch (level) {
       case 'info':
         console.info(tip);
