@@ -10,6 +10,7 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
+import { CustomTips } from '../../api/CustomTips';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
@@ -128,7 +129,10 @@ export class VersionMismatchFinder {
         mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
-          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          CustomTips.getInstance().log(
+            'PNPM_MISMATCH_DEPENDENCY',
+            `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`
+          );
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
             console.log(
