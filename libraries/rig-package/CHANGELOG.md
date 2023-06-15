@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Wed, 07 Jun 2023 22:45:16 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+
+## 0.3.21
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
 
 ## 0.3.20
 Wed, 07 Jun 2023 22:45:16 GMT
