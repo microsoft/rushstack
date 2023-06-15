@@ -844,6 +844,12 @@ export class RushConfiguration {
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
+    // Warning: (ae-forgotten-export) The symbol "CustomTipsConfiguration" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly customTipsConfiguration: CustomTipsConfiguration;
+    // (undocumented)
+    readonly customTipsConfigurationFilePath: string;
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
@@ -977,6 +983,7 @@ export class RushConstants {
     static readonly commandLineFilename: string;
     static readonly commonFolderName: string;
     static readonly commonVersionsFilename: string;
+    static readonly customTipsFilename: string;
     static readonly defaultMaxInstallAttempts: number;
     static readonly defaultWatchDebounceMs: number;
     static readonly experimentsFilename: string;

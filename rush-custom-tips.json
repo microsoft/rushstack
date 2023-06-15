@@ -5,7 +5,7 @@
   "customTips": [
     {
       // "prefix": "[Jiawen's note] ", // Optional. It will overwrite the global "prefix"
-      // "level": "info", // Optional; options are "warn", "error", "info". Default to "error" for more visibility
+      // "severity": "error", // Optional; options are "warn", "error", "info". Default to "error" for more visibility
       "id": "PNPM_MISMATCH_DEPENDENCY",
       "tip": "This is so wrong my friend. Please read this doc for more information: google.com"
     }

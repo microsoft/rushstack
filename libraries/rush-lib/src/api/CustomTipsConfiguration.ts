@@ -1,36 +1,48 @@
-import { JsonFile } from '@rushstack/node-core-library';
+import {
+  ConsoleTerminalProvider,
+  ITerminal,
+  JsonFile,
+  PrefixProxyTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
 
 export interface IRushCustomTipsJson {
   prefix?: string;
-  customTips?: CustomTipItem[];
+  customTips?: ICustomTipItemJson[];
 }
 
-export type TipLevel = 'error' | 'warn' | 'info';
-export interface CustomTipItem {
+/** Similar to {@link TerminalProviderSeverity} but without "debug" and "verbose" */
+export enum TipSeverity {
+  log = 0,
+  warning = 1,
+  error = 2
+}
+
+export interface ICustomTipItemJson {
   id: CustomTipId;
+  tip: string;
   prefix?: string;
-  level: TipLevel;
-  tip: '';
+  severity?: TipSeverity;
 }
 
 // TODO: consider making this work with the plugin (e.g., the plugins are able to define their own customizable tips)
 export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
 
 export class CustomTipsConfiguration {
-  private configLoaded: boolean = false;
   private _config: IRushCustomTipsJson;
-  private _tipMap: Map<CustomTipId, CustomTipItem>;
+  private _tipMap: Map<CustomTipId, ICustomTipItemJson>;
+  private _terminal: ITerminal;
 
   public constructor(configFilename: string) {
     this._tipMap = new Map();
     this._config = {};
+    this._terminal = new Terminal(new ConsoleTerminalProvider());
     this._loadConfig(configFilename);
   }
 
   private _loadConfig(configFilename: string): void {
     this._config = JsonFile.load(configFilename);
 
-    // Do nothing if no custom tips
     if (!this._config || !this._config.customTips || this._config.customTips?.length === 0) {
       return;
     }
@@ -44,28 +56,30 @@ export class CustomTipsConfiguration {
    *
    * Log the `originalMessage` first. Then based on the `messageID`, find the user-defined tips from the file `rush-custom-tips.json`
    * @param tipId All the `tipId` options are in this doc: TODO: add link to doc
+   * todo: will change the signature of this function (should we even pass in the `originalMessage`?)
    */
-  public log(tipId: CustomTipId, originalMessage: string): void {
-    console.log(originalMessage);
+  public log(tipId: CustomTipId, severity: TipSeverity, originalMessage: string): void {
+    this._log(originalMessage, severity);
 
     if (this._tipMap.has(tipId)) {
-      const customTipItem: CustomTipItem | undefined = this._tipMap.get(tipId);
-      const prefix: string | undefined = customTipItem?.prefix ? customTipItem?.prefix : this._config.prefix;
-      const tip = `${prefix !== undefined ? prefix : ''}${customTipItem?.tip}`;
-      this._log(tip, customTipItem?.level);
+      const customTipItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
+      const prefix: string | undefined = customTipItem?.prefix ?? this._config.prefix;
+      const tip: string = `${prefix !== undefined ? prefix : ''}${customTipItem?.tip}`;
+      this._log(tip, customTipItem?.severity);
     }
   }
 
-  private _log(tip: string, level?: TipLevel): void {
-    switch (level) {
-      case 'info':
-        console.info(tip);
+  private _log(message: string, severity: TipSeverity = TipSeverity.error): void {
+    switch (severity) {
+      case TipSeverity.log:
+        this._terminal.writeLine(message);
         break;
-      case 'warn':
-        console.warn(tip);
+      case TipSeverity.warning:
+        this._terminal.writeWarningLine(message);
         break;
       default:
-        console.error(tip);
+        this._terminal.writeErrorLine(message);
+        break;
     }
   }
 }
