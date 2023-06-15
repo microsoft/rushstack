@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
@@ -10,7 +10,7 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
-import { CustomTips } from '../../api/CustomTips';
+import { CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
@@ -129,7 +129,7 @@ export class VersionMismatchFinder {
         mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
-          CustomTips.getInstance().log(
+          rushConfiguration.customTipsConfiguration.log(
             'PNPM_MISMATCH_DEPENDENCY',
             `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`
           );

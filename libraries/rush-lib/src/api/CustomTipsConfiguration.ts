@@ -16,36 +16,19 @@ export interface CustomTipItem {
 // TODO: consider making this work with the plugin (e.g., the plugins are able to define their own customizable tips)
 export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
 
-/**
- * Singleton. Should always be used with getInstance(). This is to avoid loading the config file (`rush-custom-tips.json`) multiple times.
- */
-export class CustomTips {
-  private static instance: CustomTips;
+export class CustomTipsConfiguration {
   private configLoaded: boolean = false;
   private _config: IRushCustomTipsJson;
   private _tipMap: Map<CustomTipId, CustomTipItem>;
 
-  private constructor() {
+  public constructor(configFilename: string) {
     this._tipMap = new Map();
     this._config = {};
-    this._loadConfig();
+    this._loadConfig(configFilename);
   }
 
-  public static getInstance(): CustomTips {
-    if (!CustomTips.instance) {
-      CustomTips.instance = new CustomTips();
-    }
-    return CustomTips.instance;
-  }
-
-  private _loadConfig(): void {
-    // Implement your logic to load configuration
-    this.configLoaded = true;
-
-    // todo: change this fixed path
-    this._config = JsonFile.load('/Users/bytedance/code/rushstack/rush-custom-tips.json');
-
-    this.configLoaded = true;
+  private _loadConfig(configFilename: string): void {
+    this._config = JsonFile.load(configFilename);
 
     // Do nothing if no custom tips
     if (!this._config || !this._config.customTips || this._config.customTips?.length === 0) {
