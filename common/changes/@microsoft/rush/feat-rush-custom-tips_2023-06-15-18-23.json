@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a config file \"rush-custom-tips\" #4207",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
