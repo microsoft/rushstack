@@ -2152,11 +2152,13 @@ importers:
       '@rushstack/webpack-preserve-dynamic-require-plugin': workspace:*
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
+      '@types/minimatch': 3.0.5
       '@types/node': 14.18.36
       '@types/npm-packlist': ~1.1.1
       eslint: ~8.7.0
       ignore: ~5.1.6
       jszip: ~3.8.0
+      minimatch: ~3.0.3
       npm-packlist: ~2.1.2
       webpack: ~5.82.1
     dependencies:
@@ -2165,6 +2167,7 @@ importers:
       '@rushstack/terminal': link:../terminal
       ignore: 5.1.9
       jszip: 3.8.0
+      minimatch: 3.0.8
       npm-packlist: 2.1.5
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -2174,6 +2177,7 @@ importers:
       '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
+      '@types/minimatch': 3.0.5
       '@types/node': 14.18.36
       '@types/npm-packlist': 1.1.2
       eslint: 8.7.0

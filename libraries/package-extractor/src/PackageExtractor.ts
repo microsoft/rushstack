@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
+import { IMinimatch, Minimatch } from 'minimatch';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { Ignore } from 'ignore';
@@ -94,12 +95,12 @@ export interface IExtractorProjectConfiguration {
    */
   projectFolder: string;
   /**
-   * A list of file patterns to include when extracting this project. If undefined,
+   * A list of glob patterns to include when extracting this project. If undefined,
    * all files will be included.
    */
   patternsToInclude?: string[];
   /**
-   * A list of file patterns to exclude when extracting this project. If undefined,
+   * A list of glob patterns to exclude when extracting this project. If undefined,
    * no files will be excluded.
    */
   patternsToExclude?: string[];
@@ -608,8 +609,8 @@ export class PackageExtractor {
     const { includeNpmIgnoreFiles, targetRootFolder } = options;
     const { projectConfigurationsByPath, archiver } = state;
     let useNpmIgnoreFilter: boolean = false;
-    let includeFilter: Ignore | undefined;
-    let excludeFilter: Ignore | undefined;
+    let includeFilters: IMinimatch[] | undefined;
+    let excludeFilters: IMinimatch[] | undefined;
 
     const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
     const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
@@ -620,26 +621,30 @@ export class PackageExtractor {
         useNpmIgnoreFilter = true;
       }
       if (sourceProjectConfiguration.patternsToInclude?.length) {
-        includeFilter = ignore().add(sourceProjectConfiguration.patternsToInclude);
+        includeFilters = sourceProjectConfiguration.patternsToInclude.map(
+          (p) => new Minimatch(p, { dot: true })
+        );
       }
       if (sourceProjectConfiguration.patternsToExclude?.length) {
-        excludeFilter = ignore().add(sourceProjectConfiguration.patternsToExclude);
+        excludeFilters = sourceProjectConfiguration.patternsToExclude.map(
+          (p) => new Minimatch(p, { dot: true })
+        );
       }
     }
 
     function isFileExcluded(filePath: string): boolean {
       // If we're not in a project folder, or if there are no filters, then we can't exclude anything.
-      if (!includeFilter && !excludeFilter) {
+      if (!includeFilters && !excludeFilters) {
         return false;
       }
 
       // Since the includeFilter is used to match against included files, if `includeFilter.ignores()`
       // returns true, we know that the file is included.
-      const isIncluded: boolean = !includeFilter || includeFilter.ignores(filePath);
+      const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
       // If the file is not included, then we don't need to check the excludeFilter. If it is included,
       // and there no exclude filter, then we know that the file is not excluded. If there is an exclude
       // filter, then we need to check it.
-      return !isIncluded || !!excludeFilter?.ignores(filePath);
+      return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
     }
 
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
