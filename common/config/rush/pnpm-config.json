@@ -112,6 +112,8 @@
     // "ignoreMissing": ["@eslint/*"],
     // "allowedVersions": { "react": "17" },
     // "allowAny": ["@babel/*"]
+    // TODO: Remove once Heft is 1.0.0
+    "allowAny": ["@rushstack/heft"]
   },
 
   /**

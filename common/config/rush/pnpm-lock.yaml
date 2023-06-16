@@ -1267,7 +1267,7 @@ importers:
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/jest': 29.5.2
-      '@types/node': 20.3.0
+      '@types/node': 20.3.1
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -6624,7 +6624,7 @@ packages:
   /@rushstack/heft-api-extractor-plugin/0.1.6_4dchqclsvvgybys5sefjzqvuhm:
     resolution: {integrity: sha512-JVfwQDNq/6IreyGjPhVFevSLMn+IWMRZCC4NTimDE74ZHBb0Sv0CXO0yWPQ5HzExfwuLw7q9/9cno/YzSyIA4g==}
     peerDependencies:
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-config-file': 0.12.4_@types+node@14.18.36
@@ -6637,7 +6637,7 @@ packages:
   /@rushstack/heft-api-extractor-plugin/0.1.6_nfozjgqil6u3mushzg237yh5re:
     resolution: {integrity: sha512-JVfwQDNq/6IreyGjPhVFevSLMn+IWMRZCC4NTimDE74ZHBb0Sv0CXO0yWPQ5HzExfwuLw7q9/9cno/YzSyIA4g==}
     peerDependencies:
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': 0.54.0_@types+node@14.18.36
       '@rushstack/heft-config-file': 0.12.4_@types+node@14.18.36
@@ -6661,7 +6661,7 @@ packages:
   /@rushstack/heft-jest-plugin/0.7.7_4dchqclsvvgybys5sefjzqvuhm:
     resolution: {integrity: sha512-R4cCsDf3r+lbJXjJaaJgkOGQ+DPQ0ZorWgR2lNG8JalOzsbUiYAbjgDsDYWcH3ciTYQUivzwz0YYre+00SCNwQ==}
     peerDependencies:
-      '@rushstack/heft': ^0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@jest/core': 29.5.0
       '@jest/reporters': 29.5.0
@@ -6683,7 +6683,7 @@ packages:
   /@rushstack/heft-jest-plugin/0.7.7_nfozjgqil6u3mushzg237yh5re:
     resolution: {integrity: sha512-R4cCsDf3r+lbJXjJaaJgkOGQ+DPQ0ZorWgR2lNG8JalOzsbUiYAbjgDsDYWcH3ciTYQUivzwz0YYre+00SCNwQ==}
     peerDependencies:
-      '@rushstack/heft': ^0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@jest/core': 29.5.0
       '@jest/reporters': 29.5.0
@@ -6705,7 +6705,7 @@ packages:
   /@rushstack/heft-lint-plugin/0.1.7_4dchqclsvvgybys5sefjzqvuhm:
     resolution: {integrity: sha512-U9Y7qHdUXdTMuKHBRB79P9T8uB4pSCaf57QNjUQJVGOO1TQN5I7PgPZrZfCARycNI7w8jAML2RwC9mqYdshgZA==}
     peerDependencies:
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/node-core-library': 3.59.3_@types+node@14.18.36
@@ -6717,7 +6717,7 @@ packages:
   /@rushstack/heft-lint-plugin/0.1.7_nfozjgqil6u3mushzg237yh5re:
     resolution: {integrity: sha512-U9Y7qHdUXdTMuKHBRB79P9T8uB4pSCaf57QNjUQJVGOO1TQN5I7PgPZrZfCARycNI7w8jAML2RwC9mqYdshgZA==}
     peerDependencies:
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': 0.54.0_@types+node@14.18.36
       '@rushstack/node-core-library': 3.59.3_@types+node@14.18.36
@@ -6729,7 +6729,7 @@ packages:
   /@rushstack/heft-node-rig/2.2.6_4dchqclsvvgybys5sefjzqvuhm:
     resolution: {integrity: sha512-gslmqOgtE4OfeLIAaMe6eI4VO0DwQ8nH0eaboqTdbud9MVk6mnU01CkLKQHTYI1KrHSO0WxkMnKfYNebDcrt8A==}
     peerDependencies:
-      '@rushstack/heft': ^0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@microsoft/api-extractor': 7.35.3_@types+node@14.18.36
       '@rushstack/heft': link:../../apps/heft
@@ -6751,7 +6751,7 @@ packages:
   /@rushstack/heft-node-rig/2.2.6_nfozjgqil6u3mushzg237yh5re:
     resolution: {integrity: sha512-gslmqOgtE4OfeLIAaMe6eI4VO0DwQ8nH0eaboqTdbud9MVk6mnU01CkLKQHTYI1KrHSO0WxkMnKfYNebDcrt8A==}
     peerDependencies:
-      '@rushstack/heft': ^0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@microsoft/api-extractor': 7.35.3_@types+node@14.18.36
       '@rushstack/heft': 0.54.0_@types+node@14.18.36
@@ -6773,7 +6773,7 @@ packages:
   /@rushstack/heft-typescript-plugin/0.1.7_4dchqclsvvgybys5sefjzqvuhm:
     resolution: {integrity: sha512-HswnuZT6hXONYwMFTNQRuvmJCi5BmwHYcxS6Dqfm7W9HqrJHlED/jHuxMQAJdTH+K2cdMdYdCCdwRbzBYonaJw==}
     peerDependencies:
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-config-file': 0.12.4_@types+node@14.18.36
@@ -6788,7 +6788,7 @@ packages:
   /@rushstack/heft-typescript-plugin/0.1.7_nfozjgqil6u3mushzg237yh5re:
     resolution: {integrity: sha512-HswnuZT6hXONYwMFTNQRuvmJCi5BmwHYcxS6Dqfm7W9HqrJHlED/jHuxMQAJdTH+K2cdMdYdCCdwRbzBYonaJw==}
     peerDependencies:
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': 0.54.0_@types+node@14.18.36
       '@rushstack/heft-config-file': 0.12.4_@types+node@14.18.36
@@ -9037,8 +9037,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.3.0:
-    resolution: {integrity: sha512-cumHmIAf6On83X7yP+LrsEyUOf/YlociZelmpRYaGFydoaPdxdt80MAbu6vWerQT2COCp2nPvHdsbD7tHn/YlQ==}
+  /@types/node/20.3.1:
+    resolution: {integrity: sha512-EhcH/wvidPy1WeML3TtYFGR83UzjxeWRen9V402T8aUGYsCHOmfoisV3ZSg03gAFIbLq8TnWOJ0f4cALtnSEUg==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:

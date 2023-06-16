@@ -94,6 +94,16 @@ export interface IExtractorProjectConfiguration {
    */
   projectFolder: string;
   /**
+   * A list of file patterns to include when extracting this project. If undefined,
+   * all files will be included.
+   */
+  patternsToInclude?: string[];
+  /**
+   * A list of file patterns to exclude when extracting this project. If undefined,
+   * no files will be excluded.
+   */
+  patternsToExclude?: string[];
+  /**
    * The names of additional projects to include when extracting this project.
    */
   additionalProjectsToInclude?: string[];
@@ -598,14 +608,38 @@ export class PackageExtractor {
     const { includeNpmIgnoreFiles, targetRootFolder } = options;
     const { projectConfigurationsByPath, archiver } = state;
     let useNpmIgnoreFilter: boolean = false;
+    let includeFilter: Ignore | undefined;
+    let excludeFilter: Ignore | undefined;
 
-    if (!includeNpmIgnoreFiles) {
-      const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
-      const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
-        projectConfigurationsByPath.get(sourceFolderRealPath);
-      if (sourceProjectConfiguration) {
+    const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
+    const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
+      projectConfigurationsByPath.get(sourceFolderRealPath);
+    if (sourceProjectConfiguration) {
+      if (!includeNpmIgnoreFiles) {
+        // Only use the npmignore filter if the project configuration explicitly asks for it
         useNpmIgnoreFilter = true;
       }
+      if (sourceProjectConfiguration.patternsToInclude?.length) {
+        includeFilter = ignore().add(sourceProjectConfiguration.patternsToInclude);
+      }
+      if (sourceProjectConfiguration.patternsToExclude?.length) {
+        excludeFilter = ignore().add(sourceProjectConfiguration.patternsToExclude);
+      }
+    }
+
+    function isFileExcluded(filePath: string): boolean {
+      // If we're not in a project folder, or if there are no filters, then we can't exclude anything.
+      if (!includeFilter && !excludeFilter) {
+        return false;
+      }
+
+      // Since the includeFilter is used to match against included files, if `includeFilter.ignores()`
+      // returns true, we know that the file is included.
+      const isIncluded: boolean = !includeFilter || includeFilter.ignores(filePath);
+      // If the file is not included, then we don't need to check the excludeFilter. If it is included,
+      // and there no exclude filter, then we know that the file is not excluded. If there is an exclude
+      // filter, then we need to check it.
+      return !isIncluded || !!excludeFilter?.ignores(filePath);
     }
 
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
@@ -628,6 +662,11 @@ export class PackageExtractor {
       await Async.forEachAsync(
         npmPackFiles,
         async (npmPackFile: string) => {
+          // Filter out files that are excluded by the project configuration.
+          if (isFileExcluded(npmPackFile)) {
+            return;
+          }
+
           // In issue https://github.com/microsoft/rushstack/issues/2121 we found that npm-packlist sometimes returns
           // duplicate file paths, for example:
           //
@@ -684,7 +723,10 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
+          if (
+            relativeSourcePath !== '' &&
+            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
+          ) {
             callback();
             return;
           }
