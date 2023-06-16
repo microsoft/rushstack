@@ -53,7 +53,7 @@ export class CustomTipsConfiguration {
   /**
    *
    * Log the `originalMessage` first. Then based on the `messageID`, find the user-defined tips from the file `rush-custom-tips.json`
-   * @param tipId All the `tipId` options are in this doc: TODO: add link to doc
+   * @param tipId - All the `tipId` options are in this doc: TODO: add link to doc
    * todo: will change the signature of this function (should we even pass in the `originalMessage`?)
    */
   public log(tipId: CustomTipId, severity: TipSeverity, originalMessage: string): void {
