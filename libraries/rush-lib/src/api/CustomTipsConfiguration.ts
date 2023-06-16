@@ -1,10 +1,4 @@
-import {
-  ConsoleTerminalProvider,
-  ITerminal,
-  JsonFile,
-  PrefixProxyTerminalProvider,
-  Terminal
-} from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, ITerminal, JsonFile, Terminal } from '@rushstack/node-core-library';
 
 export interface IRushCustomTipsJson {
   prefix?: string;
@@ -41,7 +35,11 @@ export class CustomTipsConfiguration {
   }
 
   private _loadConfig(configFilename: string): void {
-    this._config = JsonFile.load(configFilename);
+    try {
+      this._config = JsonFile.load(configFilename);
+    } catch (e) {
+      return;
+    }
 
     if (!this._config || !this._config.customTips || this._config.customTips?.length === 0) {
       return;
