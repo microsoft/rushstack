@@ -95,13 +95,15 @@ export interface IExtractorProjectConfiguration {
    */
   projectFolder: string;
   /**
-   * A list of glob patterns to include when extracting this project. If undefined,
-   * all files will be included.
+   * A list of glob patterns to include when extracting this project. If a path is
+   * matched by both "patternsToInclude" and "patternsToExclude", the path will be
+   * excluded. If undefined, all paths will be included.
    */
   patternsToInclude?: string[];
   /**
-   * A list of glob patterns to exclude when extracting this project. If undefined,
-   * no files will be excluded.
+   * A list of glob patterns to exclude when extracting this project. If a path is
+   * matched by both "patternsToInclude" and "patternsToExclude", the path will be
+   * excluded. If undefined, no paths will be excluded.
    */
   patternsToExclude?: string[];
   /**
@@ -638,12 +640,11 @@ export class PackageExtractor {
         return false;
       }
 
-      // Since the includeFilter is used to match against included files, if `includeFilter.ignores()`
-      // returns true, we know that the file is included.
       const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
-      // If the file is not included, then we don't need to check the excludeFilter. If it is included,
-      // and there no exclude filter, then we know that the file is not excluded. If there is an exclude
-      // filter, then we need to check it.
+
+      // If the file is not included, then we don't need to check the excludeFilter. If it is included
+      // and there is no exclude filter, then we know that the file is not excluded. If it is included
+      // and there is an exclude filter, then we need to check for a match.
       return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
     }
 
