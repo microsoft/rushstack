@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/package-extractor_v0.3.0",
+      "date": "Sat, 17 Jun 2023 00:21:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow for include and exclude filters to be provided for projects. This allows for an additional layer of filtering when extracting a package."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.18",
       "tag": "@rushstack/package-extractor_v0.2.18",
       "date": "Thu, 15 Jun 2023 00:21:02 GMT",

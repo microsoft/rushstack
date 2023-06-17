@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Thu, 15 Jun 2023 00:21:02 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Jun 2023 00:21:54 GMT and should not be manually modified.
+
+## 0.3.0
+Sat, 17 Jun 2023 00:21:54 GMT
+
+### Minor changes
+
+- Allow for include and exclude filters to be provided for projects. This allows for an additional layer of filtering when extracting a package.
 
 ## 0.2.18
 Thu, 15 Jun 2023 00:21:02 GMT
