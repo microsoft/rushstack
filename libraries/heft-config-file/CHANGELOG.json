@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/heft-config-file_v0.13.0",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": " Use the `IRigConfig` interface insteacd of the `RigConfig` class in the API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.5",
       "tag": "@rushstack/heft-config-file_v0.12.5",
       "date": "Thu, 15 Jun 2023 00:21:01 GMT",
