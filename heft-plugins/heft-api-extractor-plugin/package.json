@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-api-extractor-plugin",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A Heft plugin for API Extractor",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "0.55.2"
+    "@rushstack/heft": "0.56.0"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
