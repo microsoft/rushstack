@@ -11,7 +11,7 @@ import {
   FileSystem,
   ITerminal
 } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
+import type { IRigConfig } from '@rushstack/rig-package';
 
 interface IConfigurationJson {
   extends?: string;
@@ -329,7 +329,7 @@ export class ConfigurationFile<TConfigurationFile> {
   public async loadConfigurationFileForProjectAsync(
     terminal: ITerminal,
     projectPath: string,
-    rigConfig?: RigConfig
+    rigConfig?: IRigConfig
   ): Promise<TConfigurationFile> {
     const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
     return await this._loadConfigurationFileInnerWithCacheAsync(
@@ -347,7 +347,7 @@ export class ConfigurationFile<TConfigurationFile> {
   public async tryLoadConfigurationFileForProjectAsync(
     terminal: ITerminal,
     projectPath: string,
-    rigConfig?: RigConfig
+    rigConfig?: IRigConfig
   ): Promise<TConfigurationFile | undefined> {
     try {
       return await this.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
@@ -401,7 +401,7 @@ export class ConfigurationFile<TConfigurationFile> {
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: RigConfig | undefined
+    rigConfig: IRigConfig | undefined
   ): Promise<TConfigurationFile> {
     let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
       resolvedConfigurationFilePath
@@ -440,7 +440,7 @@ export class ConfigurationFile<TConfigurationFile> {
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: RigConfig | undefined
+    rigConfig: IRigConfig | undefined
   ): Promise<TConfigurationFile> {
     const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
       resolvedConfigurationFilePath
@@ -549,7 +549,7 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _tryLoadConfigurationFileInRigAsync(
     terminal: ITerminal,
-    rigConfig: RigConfig,
+    rigConfig: IRigConfig,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile | undefined> {
     if (rigConfig.rigFound) {
