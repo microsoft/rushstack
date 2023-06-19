@@ -15,9 +15,9 @@ import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
 
 // @beta
 export class CancellationToken {
@@ -67,7 +67,7 @@ export class HeftConfiguration {
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
     get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
-    get rigConfig(): RigConfig;
+    get rigConfig(): IRigConfig;
     get rigPackageResolver(): IRigPackageResolver;
     get tempFolderPath(): string;
     get terminalProvider(): ITerminalProvider;

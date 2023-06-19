@@ -9,7 +9,7 @@ import {
   type IJsonPathMetadataResolverOptions
 } from '@rushstack/heft-config-file';
 import { Import, PackageJsonLookup, type ITerminal, InternalError } from '@rushstack/node-core-library';
-import type { RigConfig } from '@rushstack/rig-package';
+import type { IRigConfig } from '@rushstack/rig-package';
 
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
@@ -73,7 +73,7 @@ export class CoreConfigFiles {
   public static async loadHeftConfigurationFileForProjectAsync(
     terminal: ITerminal,
     projectPath: string,
-    rigConfig?: RigConfig | undefined
+    rigConfig?: IRigConfig | undefined
   ): Promise<IHeftConfigurationJson> {
     if (!CoreConfigFiles._heftConfigFileLoader) {
       const pluginPackageResolver: (
@@ -197,7 +197,7 @@ export class CoreConfigFiles {
   public static async tryLoadNodeServiceConfigurationFileAsync(
     terminal: ITerminal,
     projectPath: string,
-    rigConfig?: RigConfig | undefined
+    rigConfig?: IRigConfig | undefined
   ): Promise<INodeServicePluginConfiguration | undefined> {
     if (!CoreConfigFiles._nodeServiceConfigurationLoader) {
       const schemaObject: object = await import('../schemas/node-service.schema.json');

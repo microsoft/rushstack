@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rig-package",
+      "comment": "Expose an `IRigConfig` interface that `RigConfig` implements.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rig-package"
+}

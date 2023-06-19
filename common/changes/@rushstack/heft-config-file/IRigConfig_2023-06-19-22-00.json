@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": " Use the `IRigConfig` interface insteacd of the `RigConfig` class in the API.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file"
+}
