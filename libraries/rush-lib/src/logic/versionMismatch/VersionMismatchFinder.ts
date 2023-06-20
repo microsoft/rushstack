@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, ITerminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
@@ -10,7 +10,6 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
-import { CustomTipSeverity } from '../../api/CustomTipsConfiguration';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
@@ -66,20 +65,24 @@ export class VersionMismatchFinder {
 
   public static rushCheck(
     rushConfiguration: RushConfiguration,
+    terminal: ITerminal,
     options: IVersionMismatchFinderRushCheckOptions = {}
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
+      terminal,
       isRushCheckCommand: true
     });
   }
 
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
+    terminal: ITerminal,
     options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
+      terminal,
       isRushCheckCommand: false,
       truncateLongPackageNameLists: true
     });
@@ -114,6 +117,7 @@ export class VersionMismatchFinder {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
       printAsJson?: boolean | undefined;
+      terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
@@ -129,11 +133,8 @@ export class VersionMismatchFinder {
         mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
-          rushConfiguration.customTipsConfiguration.log(
-            'PNPM_MISMATCH_DEPENDENCY',
-            CustomTipSeverity.error,
-            `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`
-          );
+          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          rushConfiguration.customTipsConfiguration.log('PNPM_MISMATCH_DEPENDENCY', options.terminal);
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
             console.log(

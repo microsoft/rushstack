@@ -1,18 +1,14 @@
 {
+  // "$schema": todo need a link
   // The prefix will be prepended to all the custom message.
-  "prefix": "[Web Arch & Infra note]: ",
+  "prefix": "⭐️ [Monorepo Infra team tip]: ",
 
   "customTips": [
     {
-      // "prefix": "[Jiawen's note] ", // Optional. It will overwrite the global "prefix"
-      // "severity": "error", // Optional; options are "warn", "error", "info". Default to "error" for more visibility
       "id": "PNPM_MISMATCH_DEPENDENCY",
       "tip": "This is so wrong my friend. Please read this doc for more information: google.com"
+      // "prefix": "" // override the global prefix.
+      // "severity": "error" // default to error for more visibility
     }
-    // {
-    //   "id": "WHATEVER_ID",
-    //   "mode": "replace", // TODO: Should we provide the "replace" mode? If so, those "child-process-printed" messages would be hard to replace.
-    //   "message": "This message will append to the message with WHATEVER_ID"
-    // }
   ]
 }

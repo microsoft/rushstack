@@ -133,7 +133,8 @@ export class CustomTipsConfiguration {
     constructor(configFilename: string);
     // (undocumented)
     readonly configuration: Readonly<IRushCustomTipsJson>;
-    log(tipId: CustomTipId, severity: CustomTipSeverity, originalMessage: string): void;
+    // (undocumented)
+    log(tipId: CustomTipId, terminal: ITerminal): void;
 }
 
 // @beta (undocumented)
