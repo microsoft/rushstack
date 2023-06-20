@@ -537,7 +537,7 @@ export class RushConfiguration {
   public readonly versionPolicyConfigurationFilePath: string;
 
   /**
-   *
+   * @beta
    */
   public readonly customTipsConfiguration: CustomTipsConfiguration;
 

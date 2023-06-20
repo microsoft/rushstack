@@ -125,6 +125,27 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
+// @beta
+export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
+
+// @beta (undocumented)
+export class CustomTipsConfiguration {
+    constructor(configFilename: string);
+    // (undocumented)
+    readonly configuration: Readonly<IRushCustomTipsJson>;
+    log(tipId: CustomTipId, severity: CustomTipSeverity, originalMessage: string): void;
+}
+
+// @beta (undocumented)
+export enum CustomTipSeverity {
+    // (undocumented)
+    error = 2,
+    // (undocumented)
+    log = 0,
+    // (undocumented)
+    warning = 1
+}
+
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -512,6 +533,16 @@ export interface IRushCommand {
 }
 
 // @beta (undocumented)
+export interface IRushCustomTipsJson {
+    // Warning: (ae-forgotten-export) The symbol "ICustomTipItemJson" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    customTips?: ICustomTipItemJson[];
+    // (undocumented)
+    prefix?: string;
+}
+
+// @beta (undocumented)
 export interface IRushPlugin {
     // (undocumented)
     apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void;
@@ -844,9 +875,7 @@ export class RushConfiguration {
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
-    // Warning: (ae-forgotten-export) The symbol "CustomTipsConfiguration" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
+    // @beta (undocumented)
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // (undocumented)
     readonly customTipsConfigurationFilePath: string;

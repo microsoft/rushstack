@@ -10,7 +10,7 @@ import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfigurati
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
-import { TipSeverity } from '../../api/CustomTipsConfiguration';
+import { CustomTipSeverity } from '../../api/CustomTipsConfiguration';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
@@ -131,7 +131,7 @@ export class VersionMismatchFinder {
         if (mismatchFinder.numberOfMismatches > 0) {
           rushConfiguration.customTipsConfiguration.log(
             'PNPM_MISMATCH_DEPENDENCY',
-            TipSeverity.error,
+            CustomTipSeverity.error,
             `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`
           );
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {

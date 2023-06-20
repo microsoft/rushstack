@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush rush-custom-tips.json config file",
+  "description": "The config file for adding tips to specific messages.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "prefix": {
+      "description": "The prefix will be prepended to all the custom message. It will be overridden by the `prefix` of each item (if exist).",
+      "type": "string"
+    },
+
+    "customTips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "tip"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The custom tip will append to the message with ths id. Full list can be found in this link: TODO"
+          },
+          "tip": {
+            "type": "string",
+            "description": "The tip to append to the message."
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Override the global prefix."
+          },
+          "severity": {
+            "description": "Default to `error` for more visibility",
+            "type": "string",
+            "enum": ["warning", "error", "info"]
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

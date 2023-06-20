@@ -1,3 +1,4 @@
+import { CustomTipsConfiguration, CustomTipId } from './api/CustomTipsConfiguration';
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
@@ -90,6 +91,12 @@ export { ILaunchOptions, Rush } from './api/Rush';
 export { RushInternals as _RushInternals } from './api/RushInternals';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
+export {
+  CustomTipsConfiguration,
+  CustomTipId,
+  IRushCustomTipsJson,
+  CustomTipSeverity
+} from './api/CustomTipsConfiguration';
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
