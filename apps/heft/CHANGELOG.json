@@ -2,6 +2,29 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.56.0",
+      "tag": "@rushstack/heft_v0.56.0",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use the `IRigConfig` interface in the `HeftConfiguration` object insteacd of the `RigConfig` class."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.55.2",
       "tag": "@rushstack/heft_v0.55.2",
       "date": "Thu, 15 Jun 2023 00:21:01 GMT",

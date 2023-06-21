@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
+import { IMinimatch, Minimatch } from 'minimatch';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { Ignore } from 'ignore';
@@ -93,6 +94,18 @@ export interface IExtractorProjectConfiguration {
    * The absolute path to the project.
    */
   projectFolder: string;
+  /**
+   * A list of glob patterns to include when extracting this project. If a path is
+   * matched by both "patternsToInclude" and "patternsToExclude", the path will be
+   * excluded. If undefined, all paths will be included.
+   */
+  patternsToInclude?: string[];
+  /**
+   * A list of glob patterns to exclude when extracting this project. If a path is
+   * matched by both "patternsToInclude" and "patternsToExclude", the path will be
+   * excluded. If undefined, no paths will be excluded.
+   */
+  patternsToExclude?: string[];
   /**
    * The names of additional projects to include when extracting this project.
    */
@@ -598,14 +611,41 @@ export class PackageExtractor {
     const { includeNpmIgnoreFiles, targetRootFolder } = options;
     const { projectConfigurationsByPath, archiver } = state;
     let useNpmIgnoreFilter: boolean = false;
+    let includeFilters: IMinimatch[] | undefined;
+    let excludeFilters: IMinimatch[] | undefined;
 
-    if (!includeNpmIgnoreFiles) {
-      const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
-      const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
-        projectConfigurationsByPath.get(sourceFolderRealPath);
-      if (sourceProjectConfiguration) {
+    const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
+    const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
+      projectConfigurationsByPath.get(sourceFolderRealPath);
+    if (sourceProjectConfiguration) {
+      if (!includeNpmIgnoreFiles) {
+        // Only use the npmignore filter if the project configuration explicitly asks for it
         useNpmIgnoreFilter = true;
       }
+      if (sourceProjectConfiguration.patternsToInclude?.length) {
+        includeFilters = sourceProjectConfiguration.patternsToInclude.map(
+          (p) => new Minimatch(p, { dot: true })
+        );
+      }
+      if (sourceProjectConfiguration.patternsToExclude?.length) {
+        excludeFilters = sourceProjectConfiguration.patternsToExclude.map(
+          (p) => new Minimatch(p, { dot: true })
+        );
+      }
+    }
+
+    function isFileExcluded(filePath: string): boolean {
+      // If we're not in a project folder, or if there are no filters, then we can't exclude anything.
+      if (!includeFilters && !excludeFilters) {
+        return false;
+      }
+
+      const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
+
+      // If the file is not included, then we don't need to check the excludeFilter. If it is included
+      // and there is no exclude filter, then we know that the file is not excluded. If it is included
+      // and there is an exclude filter, then we need to check for a match.
+      return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
     }
 
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
@@ -628,6 +668,11 @@ export class PackageExtractor {
       await Async.forEachAsync(
         npmPackFiles,
         async (npmPackFile: string) => {
+          // Filter out files that are excluded by the project configuration.
+          if (isFileExcluded(npmPackFile)) {
+            return;
+          }
+
           // In issue https://github.com/microsoft/rushstack/issues/2121 we found that npm-packlist sometimes returns
           // duplicate file paths, for example:
           //
@@ -684,7 +729,10 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
+          if (
+            relativeSourcePath !== '' &&
+            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
+          ) {
             callback();
             return;
           }

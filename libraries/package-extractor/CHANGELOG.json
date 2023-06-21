@@ -2,6 +2,42 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.3.1",
+      "tag": "@rushstack/package-extractor_v0.3.1",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.5.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.8.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.10.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/package-extractor_v0.3.0",
+      "date": "Sat, 17 Jun 2023 00:21:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow for include and exclude filters to be provided for projects. This allows for an additional layer of filtering when extracting a package."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.18",
       "tag": "@rushstack/package-extractor_v0.2.18",
       "date": "Thu, 15 Jun 2023 00:21:02 GMT",

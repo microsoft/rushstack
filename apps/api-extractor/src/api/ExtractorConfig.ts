@@ -16,7 +16,7 @@ import {
   Path,
   NewlineKind
 } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
+import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
@@ -71,7 +71,7 @@ export interface IExtractorConfigLoadForFolderOptions {
   /**
    * An already constructed `RigConfig` object.  If omitted, then a new `RigConfig` object will be constructed.
    */
-  rigConfig?: RigConfig;
+  rigConfig?: IRigConfig;
 }
 
 /**
@@ -426,7 +426,7 @@ export class ExtractorConfig {
         // If We didn't find it in <packageFolder>/api-extractor.json or <packageFolder>/config/api-extractor.json
         // then check for a rig package
         if (packageFolder) {
-          let rigConfig: RigConfig;
+          let rigConfig: IRigConfig;
           if (options.rigConfig) {
             // The caller provided an already solved RigConfig.  Double-check that it is for the right project.
             if (!Path.isEqual(options.rigConfig.projectFolderPath, packageFolder)) {

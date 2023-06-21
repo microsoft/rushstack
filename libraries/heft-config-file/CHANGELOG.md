@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 0.13.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+-  Use the `IRigConfig` interface insteacd of the `RigConfig` class in the API.
 
 ## 0.12.5
 Thu, 15 Jun 2023 00:21:01 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/rig-package",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/rig-package_v0.4.0",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose an `IRigConfig` interface that `RigConfig` implements."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.21",
       "tag": "@rushstack/rig-package_v0.3.21",
       "date": "Thu, 15 Jun 2023 00:21:01 GMT",
