@@ -162,8 +162,8 @@ function isMatchInner<TObject>(obj: TObject, source: TObject): boolean {
  */
 function isStrictComparable<T>(value: T): boolean {
   const type: string = typeof value;
-  // eslint-disable-next-line no-self-compare
   return (
+    // eslint-disable-next-line no-self-compare
     value === value && !(value !== null && value !== undefined && (type === 'object' || type === 'function'))
   );
 }
