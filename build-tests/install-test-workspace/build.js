@@ -26,7 +26,7 @@ function checkSpawnResult(result, commandName) {
         console.error('-----------------------');
       }
     }
-    throw new Error(`Failed to execute command "${commandName}" command`);
+    throw new Error(`Failed to execute command "${commandName}"`);
   }
 }
 

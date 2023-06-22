@@ -6,6 +6,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
+import { Constants } from './utilities/Constants';
 
 const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
 
@@ -46,14 +47,18 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  * Use "heft --unmanaged" to bypass this feature.
  */
 function tryStartLocalHeft(): boolean {
-  if (process.argv.indexOf('--unmanaged') >= 0) {
-    console.log('(Bypassing the Heft version selector because "--unmanaged" was specified.)');
+  if (process.argv.indexOf(Constants.unmanagedParameterLongName) >= 0) {
+    console.log(
+      `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
+        'was specified.'
+    );
     console.log();
     return false;
-  } else if (process.argv.indexOf('--debug') >= 0) {
+  } else if (process.argv.indexOf(Constants.debugParameterLongName) >= 0) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
-      'Searching for a locally installed version of Heft. Use the --unmanaged flag if you want to avoid this'
+      'Searching for a locally installed version of Heft. Use the ' +
+        `${JSON.stringify(Constants.unmanagedParameterLongName)} flag if you want to avoid this.`
     );
   }
 
@@ -88,8 +93,6 @@ function tryStartLocalHeft(): boolean {
       if (!fs.existsSync(heftEntryPoint)) {
         throw new Error('Unable to find Heft entry point: ' + heftEntryPoint);
       }
-      console.log(`Using local Heft from ${heftFolder}`);
-      console.log();
     } catch (error) {
       throw new Error('Error probing for local Heft version: ' + (error as Error).message);
     }

@@ -67,6 +67,18 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@nodelib/fs.scandir",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@nodelib/fs.stat",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/dependency-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@pnpm/link-bins",
       "allowedCategories": [ "libraries" ]
     },
@@ -107,6 +119,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-api-extractor-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "libraries" ]
     },
@@ -116,6 +132,10 @@
     },
     {
       "name": "@rushstack/heft-jest-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-lint-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
@@ -133,6 +153,10 @@
     {
       "name": "@rushstack/heft-storybook-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-typescript-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
@@ -164,6 +188,10 @@
     },
     {
       "name": "@rushstack/package-deps-hash",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/package-extractor",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -639,6 +667,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "sass-embedded",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "sass-loader",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -724,6 +756,10 @@
     },
     {
       "name": "url-loader",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "watchpack",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -21,11 +21,16 @@ const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
  * The set of names the certificate should be generated for, by default.
  * @public
  */
-export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = [
-  'localhost',
-  'rushstack.localhost',
-  '127.0.0.1'
-];
+export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localhost'];
+
+/**
+ * The set of ip addresses the certificate should be generated for, by default.
+ * @public
+ */
+export const DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES: ReadonlyArray<string> = ['127.0.0.1'];
+
+const DISABLE_CERT_GENERATION_VARIABLE_NAME: 'RUSHSTACK_DISABLE_DEV_CERT_GENERATION' =
+  'RUSHSTACK_DISABLE_DEV_CERT_GENERATION';
 
 /**
  * The interface for a debug certificate instance
@@ -70,10 +75,22 @@ interface ISubjectAltNameExtension {
   altNames: readonly IAltName[];
 }
 
-interface IAltName {
+/**
+ * Fields for a Subject Alternative Name of type DNS Name
+ */
+interface IDnsAltName {
   type: 2;
   value: string;
 }
+/**
+ * Fields for a Subject Alternative Name of type IP Address
+ * `node-forge` requires the field name to be "ip" instead of "value", likely due to subtle encoding differences.
+ */
+interface IIPAddressAltName {
+  type: 7;
+  ip: string;
+}
+type IAltName = IDnsAltName | IIPAddressAltName;
 
 /**
  * Options to use if needing to generate a new certificate
@@ -81,9 +98,13 @@ interface IAltName {
  */
 export interface ICertificateGenerationOptions {
   /**
-   * The DNS Subject names to issue the certificate for.
+   * The DNS Subject names to issue the certificate for. Defaults to ['localhost'].
    */
   subjectAltNames?: ReadonlyArray<string>;
+  /**
+   * The IP Address Subject names to issue the certificate for. Defaults to ['127.0.0.1'].
+   */
+  subjectIPAddresses?: ReadonlyArray<string>;
   /**
    * How many days the certificate should be valid for.
    */
@@ -120,6 +141,14 @@ export class CertificateManager {
 
     const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
 
+    if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
+      // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
+      terminal.writeLine(
+        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation.`
+      );
+      canGenerateNewCertificate = false;
+    }
+
     if (existingCert && existingKey) {
       const messages: string[] = [];
 
@@ -135,8 +164,8 @@ export class CertificateManager {
         );
       } else {
         const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
-        for (const { value } of altNamesExtension.altNames) {
-          missingSubjectNames.delete(value);
+        for (const altName of altNamesExtension.altNames) {
+          missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
         }
         if (missingSubjectNames.size) {
           messages.push(
@@ -210,7 +239,9 @@ export class CertificateManager {
           pemCaCertificate: caCertificateData,
           pemCertificate: existingCert,
           pemKey: existingKey,
-          subjectAltNames: altNamesExtension.altNames.map((entry) => entry.value)
+          subjectAltNames: altNamesExtension.altNames.map((entry) =>
+            isIPAddress(entry) ? entry.ip : entry.value
+          )
         };
       }
     } else if (canGenerateNewCertificate) {
@@ -390,7 +421,7 @@ export class CertificateManager {
     certificate.publicKey = keys.publicKey;
     certificate.serialNumber = TLS_SERIAL_NUMBER;
 
-    const { subjectAltNames: subjectNames, validityInDays } = options;
+    const { subjectAltNames: subjectNames, subjectIPAddresses: subjectIpAddresses, validityInDays } = options;
 
     const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
       validityInDays,
@@ -414,10 +445,16 @@ export class CertificateManager {
     certificate.setSubject(subjectAttrs);
     certificate.setIssuer(issuerAttrs);
 
-    const subjectAltNames: readonly IAltName[] = subjectNames.map((subjectName) => ({
-      type: 2, // DNS
-      value: subjectName
-    }));
+    const subjectAltNames: IAltName[] = [
+      ...subjectNames.map<IDnsAltName>((subjectName) => ({
+        type: 2, // DNS
+        value: subjectName
+      })),
+      ...subjectIpAddresses.map<IIPAddressAltName>((ip) => ({
+        type: 7, // IP
+        ip
+      }))
+    ];
 
     const issuerAltNames: readonly IAltName[] = [
       {
@@ -747,11 +784,19 @@ function applyDefaultOptions(
   options: ICertificateGenerationOptions | undefined
 ): Required<ICertificateGenerationOptions> {
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
+  const subjectIpAddresses: ReadonlyArray<string> | undefined = options?.subjectIPAddresses;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
+    subjectIPAddresses: subjectIpAddresses?.length
+      ? subjectIpAddresses
+      : DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES,
     validityInDays: Math.min(
       MAX_CERTIFICATE_VALIDITY_DAYS,
       options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
     )
   };
+}
+
+function isIPAddress(altName: IAltName): altName is IIPAddressAltName {
+  return altName.type === 7;
 }

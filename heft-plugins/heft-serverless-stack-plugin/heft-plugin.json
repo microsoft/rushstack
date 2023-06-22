@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "serverless-stack-plugin",
+      "entryPoint": "./lib/ServerlessStackPlugin",
+
+      "parameterScope": "serverless-stack",
+      "parameters": [
+        {
+          "longName": "--sst",
+          "description": "(EXPERIMENTAL) Invokes the SST postprocessing. Requires AWS credentials.",
+          "parameterKind": "flag"
+        },
+        {
+          "longName": "--sst-stage",
+          "argumentName": "STAGE_NAME",
+          "description": "Specifies the Serverless Stack stage; equivalent to to the \"--stage\" parameter from the \"sst\" CLI",
+          "parameterKind": "string"
+        }
+      ]
+    }
+  ]
+}

@@ -67,11 +67,9 @@ export class RushXCommandLine {
 
     try {
       // Are we in a Rush repo?
-      let rushConfiguration: RushConfiguration | undefined = undefined;
-      if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
-      }
-
+      const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
+        showVerbose: false
+      });
       NodeJsCompatibility.warnAboutCompatibilityIssues({
         isRushLib: true,
         alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,

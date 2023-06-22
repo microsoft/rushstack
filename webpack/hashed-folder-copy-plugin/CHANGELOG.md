@@ -1,6 +1,111 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Thu, 20 Apr 2023 15:16:55 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 0.2.31
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.2.30
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.2.29
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.2.28
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.2.27
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 0.2.26
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.2.25
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.2.24
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.2.23
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.2.22
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.2.21
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.2.20
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.2.19
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.2.18
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 0.2.17
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.2.16
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.2.15
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.2.14
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.2.13
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.2.12
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 0.2.11
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.2.10
 Thu, 20 Apr 2023 15:16:55 GMT

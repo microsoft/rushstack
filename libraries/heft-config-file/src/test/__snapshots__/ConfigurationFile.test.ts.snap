@@ -252,7 +252,7 @@ Object {
 
 exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 1`] = `
 "Resolved configuration object does not match schema: Error: JSON validation failed:
-<project root>/src/test/errorCases/invalidType/config.json
+<project root>/lib/test/errorCases/invalidType/config.json
 
 Error: #/filePaths
        Expected type array but found type string"
@@ -270,7 +270,7 @@ Object {
 
 exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema 1`] = `
 "Resolved configuration object does not match schema: Error: JSON validation failed:
-<project root>/src/test/errorCases/invalidCombinedFile/config1.json
+<project root>/lib/test/errorCases/invalidCombinedFile/config1.json
 
 Error: #/
        Data does not match any schemas from 'oneOf'
@@ -290,11 +290,11 @@ Object {
 }
 `;
 
-exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 1`] = `"File does not exist: <project root>/src/test/errorCases/folderThatDoesntExist/config.json"`;
+exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 1`] = `"File does not exist: <project root>/lib/test/errorCases/folderThatDoesntExist/config.json"`;
 
 exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 2`] = `
 Object {
-  "debug": "Configuration file \\"<project root>/src/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
+  "debug": "Configuration file \\"<project root>/lib/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
   "error": "",
   "log": "",
   "verbose": "",
@@ -302,11 +302,11 @@ Object {
 }
 `;
 
-exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 1`] = `"In file \\"<project root>/src/test/errorCases/extendsNotExist/config.json\\", file referenced in \\"extends\\" property (\\"./config2.json\\") cannot be resolved."`;
+exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 1`] = `"In file \\"<project root>/lib/test/errorCases/extendsNotExist/config.json\\", file referenced in \\"extends\\" property (\\"./config2.json\\") cannot be resolved."`;
 
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 2`] = `
 Object {
-  "debug": "Configuration file \\"<project root>/src/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
+  "debug": "Configuration file \\"<project root>/lib/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
   "error": "",
   "log": "",
   "verbose": "",
@@ -315,7 +315,7 @@ Object {
 `;
 
 exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `
-"In config file \\"<project root>/src/test/errorCases/invalidJson/config.json\\": SyntaxError: Unexpected token '}' at 2:19
+"In config file \\"<project root>/lib/test/errorCases/invalidJson/config.json\\": SyntaxError: Unexpected token '}' at 2:19
   \\"filePaths\\": \\"A
                  ^"
 `;
@@ -330,7 +330,7 @@ Object {
 }
 `;
 
-exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 1`] = `"A loop has been detected in the \\"extends\\" properties of configuration file at \\"<project root>/src/test/errorCases/circularReference/config1.json\\"."`;
+exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 1`] = `"A loop has been detected in the \\"extends\\" properties of configuration file at \\"<project root>/lib/test/errorCases/circularReference/config1.json\\"."`;
 
 exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 2`] = `
 Object {
@@ -344,7 +344,7 @@ Object {
 
 exports[`ConfigurationFile error cases returns undefined when the file doesn't exist for tryLoadConfigurationFileForProjectAsync 1`] = `
 Object {
-  "debug": "Configuration file \\"<project root>/src/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "debug": "Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
   "error": "",
   "log": "",
   "verbose": "",
@@ -352,11 +352,11 @@ Object {
 }
 `;
 
-exports[`ConfigurationFile error cases throws an error when the file doesn't exist 1`] = `"File does not exist: <project root>/src/test/errorCases/invalidType/notExist.json"`;
+exports[`ConfigurationFile error cases throws an error when the file doesn't exist 1`] = `"File does not exist: <project root>/lib/test/errorCases/invalidType/notExist.json"`;
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist 2`] = `
 Object {
-  "debug": "Configuration file \\"<project root>/src/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "debug": "Configuration file \\"<project root>/lib/test/errorCases/invalidType/notExist.json\\" not found.[n]",
   "error": "",
   "log": "",
   "verbose": "",
@@ -366,7 +366,7 @@ Object {
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig 1`] = `
 Object {
-  "debug": "Config file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]",
+  "debug": "Config file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]",
   "error": "",
   "log": "",
   "verbose": "",
@@ -376,7 +376,7 @@ Object {
 
 exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig via tryLoadConfigurationFileForProjectAsync 1`] = `
 Object {
-  "debug": "Config file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]",
+  "debug": "Config file \\"<project root>/lib/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]",
   "error": "",
   "log": "",
   "verbose": "",
@@ -384,11 +384,11 @@ Object {
 }
 `;
 
-exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 1`] = `"File does not exist: <project root>/src/test/project-referencing-rig/config/notExist.json"`;
+exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 1`] = `"File does not exist: <project root>/lib/test/project-referencing-rig/config/notExist.json"`;
 
 exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 2`] = `
 Object {
-  "debug": "Config file \\"<project root>/src/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig.[n]Configuration file \\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"config/notExist.json\\" not found in rig (\\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default\\")[n]",
+  "debug": "Config file \\"<project root>/lib/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig.[n]Configuration file \\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"config/notExist.json\\" not found in rig (\\"<project root>/lib/test/project-referencing-rig/node_modules/test-rig/profiles/default\\")[n]",
   "error": "",
   "log": "",
   "verbose": "",

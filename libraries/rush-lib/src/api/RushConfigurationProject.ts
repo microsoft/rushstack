@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { JsonFile, IPackageJson, FileSystem, FileConstants, JsonSyntax } from '@rushstack/node-core-library';
+import { IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
@@ -219,7 +219,9 @@ export class RushConfigurationProject {
     const packageJsonFilename: string = path.join(this.projectFolder, FileConstants.PackageJson);
 
     try {
-      this._packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
+      const packageJsonText: string = FileSystem.readFile(packageJsonFilename);
+      // JSON.parse is native and runs in less than 1/2 the time of jju.parse. package.json is required to be strict JSON by NodeJS.
+      this._packageJson = JSON.parse(packageJsonText);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(

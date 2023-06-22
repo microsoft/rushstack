@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { Import, InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+import { cloneDeep } from '../utilities/objectUtilities';
 
 /**
  * @public
@@ -286,7 +285,7 @@ export class PackageJsonEditor {
     // Only normalize if we need to
     const sourceData: IPackageJson = this._modified ? this._normalize(this._sourceData) : this._sourceData;
     // Provide a clone to avoid reference back to the original data object
-    return lodash.cloneDeep(sourceData);
+    return cloneDeep(sourceData);
   }
 
   private _onChange(): void {

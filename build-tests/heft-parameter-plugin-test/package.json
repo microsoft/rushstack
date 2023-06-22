@@ -5,16 +5,18 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep --custom-choice-parameter red --custom-choice-list-parameter totodile -y gudetama -y wobbuffet",
-    "_phase:build": "",
-    "_phase:test": "heft test --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep --custom-choice-parameter red --custom-choice-list-parameter totodile -y gudetama -y wobbuffet"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean --custom-parameter  --custom-integer-parameter 5 --custom-integer-list-parameter 6 --custom-integer-list-parameter 7 --custom-string-parameter test --custom-string-list-parameter eevee --custom-string-list-parameter togepi --custom-string-list-parameter mareep --custom-choice-parameter red --custom-choice-list-parameter totodile --custom-choice-list-parameter gudetama --custom-choice-list-parameter wobbuffet"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "heft-parameter-plugin": "workspace:*",
-    "typescript": "~4.8.4"
+    "typescript": "~5.0.4"
   }
 }

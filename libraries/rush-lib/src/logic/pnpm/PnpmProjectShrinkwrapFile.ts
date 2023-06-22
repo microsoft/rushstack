@@ -6,7 +6,11 @@ import * as path from 'path';
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
+import {
+  PnpmShrinkwrapFile,
+  IPnpmShrinkwrapDependencyYaml,
+  IPnpmVersionSpecifier
+} from './PnpmShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { RushConstants } from '../RushConstants';
 
@@ -122,7 +126,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
       this.shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
 
-    const allDependencies: [string, string][] = [
+    const allDependencies: [string, IPnpmVersionSpecifier][] = [
       ...Object.entries(parentShrinkwrapEntry.dependencies || {}),
       ...Object.entries(parentShrinkwrapEntry.optionalDependencies || {})
     ];
@@ -151,7 +155,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
   private _addDependencyRecursive(
     projectShrinkwrapMap: Map<string, string>,
     name: string,
-    version: string,
+    version: IPnpmVersionSpecifier,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {

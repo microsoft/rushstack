@@ -14,24 +14,24 @@ describe(ChangeFiles.name, () => {
     rushConfiguration = {} as RushConfiguration;
   });
 
-  describe(ChangeFiles.prototype.getFiles.name, () => {
-    it('returns correctly when there is one change file', () => {
+  describe(ChangeFiles.prototype.getFilesAsync.name, () => {
+    it('returns correctly when there is one change file', async () => {
       const changesPath: string = `${__dirname}/leafChange`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
       const expectedPath: string = Path.convertToSlashes(`${changesPath}/change1.json`);
-      expect(changeFiles.getFiles()).toEqual([expectedPath]);
+      expect(await changeFiles.getFilesAsync()).toEqual([expectedPath]);
     });
 
-    it('returns empty array when no change files', () => {
+    it('returns empty array when no change files', async () => {
       const changesPath: string = `${__dirname}/noChange`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles()).toHaveLength(0);
+      expect(await changeFiles.getFilesAsync()).toHaveLength(0);
     });
 
-    it('returns correctly when change files are categorized', () => {
+    it('returns correctly when change files are categorized', async () => {
       const changesPath: string = `${__dirname}/categorizedChanges`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      const files: string[] = changeFiles.getFiles();
+      const files: string[] = await changeFiles.getFilesAsync();
       expect(files).toHaveLength(3);
 
       const expectedPathA: string = Path.convertToSlashes(`${changesPath}/@ms/a/changeA.json`);
@@ -96,14 +96,14 @@ describe(ChangeFiles.name, () => {
     });
   });
 
-  describe(ChangeFiles.prototype.deleteAll.name, () => {
-    it('delete all files when there are no prerelease packages', () => {
+  describe(ChangeFiles.prototype.deleteAllAsync.name, () => {
+    it('delete all files when there are no prerelease packages', async () => {
       const changesPath: string = `${__dirname}/multipleChangeFiles`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.deleteAll(false)).toEqual(3);
+      expect(await changeFiles.deleteAllAsync(false)).toEqual(3);
     });
 
-    it('does not delete change files for package whose change logs do not get updated. ', () => {
+    it('does not delete change files for package whose change logs do not get updated. ', async () => {
       const changesPath: string = `${__dirname}/multipleChangeFiles`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
       const updatedChangelogs: IChangelog[] = [
@@ -116,13 +116,13 @@ describe(ChangeFiles.name, () => {
           entries: []
         }
       ];
-      expect(changeFiles.deleteAll(false, updatedChangelogs)).toEqual(2);
+      expect(await changeFiles.deleteAllAsync(false, updatedChangelogs)).toEqual(2);
     });
 
-    it('delete all files when there are hotfixes', () => {
+    it('delete all files when there are hotfixes', async () => {
       const changesPath: string = `${__dirname}/multipleHotfixChanges`;
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.deleteAll(false)).toEqual(3);
+      expect(await changeFiles.deleteAllAsync(false)).toEqual(3);
     });
   });
 });

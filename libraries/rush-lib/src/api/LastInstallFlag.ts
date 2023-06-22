@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, Import, IPackageJson, JsonObject, Path } from '@rushstack/node-core-library';
+import { JsonFile, IPackageJson, JsonObject, Path } from '@rushstack/node-core-library';
 
 import { BaseFlag } from './base/BaseFlag';
 import { PackageManagerName } from './packageManager/PackageManager';
 import { RushConfiguration } from './RushConfiguration';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import { Selection } from '../logic/Selection';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -118,7 +118,7 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
       }
     }
 
-    if (!lodash.isEqual(oldState, newState)) {
+    if (!objectsAreDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
@@ -161,7 +161,8 @@ export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
               // used to be a full install
               return true;
             } else if (
-              lodash.difference(newState.selectedProjectNames, oldState.selectedProjectNames).length === 0
+              Selection.union(newState.selectedProjectNames, oldState.selectedProjectNames).size ===
+              oldState.selectedProjectNames.length
             ) {
               // current selected projects are included in old selected projects
               return true;

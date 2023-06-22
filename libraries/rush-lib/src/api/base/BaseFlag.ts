@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Import, JsonFile, JsonObject } from '@rushstack/node-core-library';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
+import { isMatch, merge } from '../../utilities/objectUtilities';
 
 /**
  * A base class for flag file.
@@ -62,13 +61,13 @@ export class BaseFlag<T extends object = JsonObject> {
   }
 
   /**
-   * Merge new data into current state by lodash "merge"
+   * Merge new data into current state by "merge"
    */
   public mergeFromObject(data: JsonObject): void {
-    if (lodash.isMatch(this._state, data)) {
+    if (isMatch(this._state, data)) {
       return;
     }
-    lodash.merge(this._state, data);
+    merge(this._state, data);
     this._isModified = true;
   }
 

@@ -2,7 +2,7 @@
  * Configures the TypeScript plugin for Heft.  This plugin also manages linting.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
 
   /**
    * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
@@ -17,16 +17,9 @@
       "moduleKind": "umd",
       "outFolderName": "lib-umd"
     }
-  ]
+  ],
 
-  /**
-   * If set to "true", the TSlint task will not be invoked.
-   */
-  // "disableTslint": true,
-
-  /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
-   */
-  // "maxWriteParallelism": 50
+  "staticAssetsToCopy": {
+    "fileExtensions": [".txt"]
+  }
 }

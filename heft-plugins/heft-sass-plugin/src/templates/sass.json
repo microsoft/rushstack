@@ -2,7 +2,7 @@
  * Configuration for @rushstack/heft-sass-plugin
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-sass-plugin.schema.json"
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-sass-plugin.schema.json"
 
   /**
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard

@@ -30,7 +30,7 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
     localizationStats = stats;
   }
 
-  const resJsonLoader: string = resolve(__dirname, '../loaders/resjson-loader.ts');
+  const resJsonLoader: string = resolve(__dirname, '../loaders/resjson-loader.js');
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {

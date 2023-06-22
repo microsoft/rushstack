@@ -1,0 +1,35 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "lifecyclePlugins": [],
+
+  "taskPlugins": [
+    {
+      "pluginName": "copy-files-plugin",
+      "entryPoint": "./lib/plugins/CopyFilesPlugin",
+      "optionsSchema": "./lib/schemas/copy-files-options.schema.json"
+    },
+    {
+      "pluginName": "delete-files-plugin",
+      "entryPoint": "./lib/plugins/DeleteFilesPlugin",
+      "optionsSchema": "./lib/schemas/delete-files-options.schema.json"
+    },
+    {
+      "pluginName": "node-service-plugin",
+      "entryPoint": "./lib/plugins/NodeServicePlugin",
+      "parameterScope": "node-service",
+      "parameters": [
+        {
+          "longName": "--serve",
+          "parameterKind": "flag",
+          "description": "Start a local web server for testing purposes. This parameter is only available when running in watch mode."
+        }
+      ]
+    },
+    {
+      "pluginName": "run-script-plugin",
+      "entryPoint": "./lib/plugins/RunScriptPlugin",
+      "optionsSchema": "./lib/schemas/run-script-options.schema.json"
+    }
+  ]
+}

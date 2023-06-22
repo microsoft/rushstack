@@ -4,8 +4,8 @@
 
 ```ts
 
+import type { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
 
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
@@ -14,9 +14,9 @@ export class ConfigurationFile<TConfigurationFile> {
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
-    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;
-    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
+    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)
@@ -24,7 +24,7 @@ export type IConfigurationFileOptions<TConfigurationFile> = IConfigurationFileOp
 
 // @beta (undocumented)
 export interface IConfigurationFileOptionsBase<TConfigurationFile> {
-    jsonPathMetadata?: IJsonPathsMetadata;
+    jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
     projectRelativeFilePath: string;
     propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
     propertyInheritanceDefaults?: IPropertyInheritanceDefaults;
@@ -45,8 +45,8 @@ export interface IConfigurationFileOptionsWithJsonSchemaObject<TConfigurationFil
 }
 
 // @beta
-export interface ICustomJsonPathMetadata {
-    customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
+export interface ICustomJsonPathMetadata<TConfigurationFile> {
+    customResolver?: (resolverOptions: IJsonPathMetadataResolverOptions<TConfigurationFile>) => string;
     pathResolutionMethod?: PathResolutionMethod.custom;
 }
 
@@ -56,12 +56,20 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
 }
 
 // @beta (undocumented)
-export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
+export type IJsonPathMetadata<T> = ICustomJsonPathMetadata<T> | INonCustomJsonPathMetadata;
 
 // @beta
-export interface IJsonPathsMetadata {
+export interface IJsonPathMetadataResolverOptions<TConfigurationFile> {
+    configurationFile: Partial<TConfigurationFile>;
+    configurationFilePath: string;
+    propertyName: string;
+    propertyValue: string;
+}
+
+// @beta
+export interface IJsonPathsMetadata<TConfigurationFile> {
     // (undocumented)
-    [jsonPath: string]: IJsonPathMetadata;
+    [jsonPath: string]: IJsonPathMetadata<TConfigurationFile>;
 }
 
 // @beta (undocumented)

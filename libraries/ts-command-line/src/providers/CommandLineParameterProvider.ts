@@ -54,6 +54,8 @@ export interface IScopedLongNameParseResult {
  */
 export interface ICommandLineParserData {
   action: string;
+  aliasAction?: string;
+  aliasDocumentation?: string;
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
@@ -73,10 +75,12 @@ export abstract class CommandLineParameterProvider {
 
   private readonly _parameters: CommandLineParameter[];
   private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
+  private readonly _parametersByShortName: Map<string, CommandLineParameter[]>;
   private readonly _parameterGroupsByName: Map<
     string | typeof SCOPING_PARAMETER_GROUP,
     argparse.ArgumentGroup
   >;
+  private readonly _ambiguousParameterNamesByParserKey: Map<string, string>;
   private _parametersRegistered: boolean;
   private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
@@ -86,7 +90,9 @@ export abstract class CommandLineParameterProvider {
   public constructor() {
     this._parameters = [];
     this._parametersByLongName = new Map();
+    this._parametersByShortName = new Map();
     this._parameterGroupsByName = new Map();
+    this._ambiguousParameterNamesByParserKey = new Map();
     this._parametersRegistered = false;
     this._parametersProcessed = false;
   }
@@ -407,17 +413,43 @@ export abstract class CommandLineParameterProvider {
     }
     this._parametersRegistered = true;
 
+    const ambiguousParameterNames: Set<string> = new Set();
+
+    // First, loop through all parameters with short names. If there are any duplicates, disable the short names
+    // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
+    // be reported as errors if the user attempts to use them.
+    for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
+      if (shortNameParameters.length > 1) {
+        for (const parameter of shortNameParameters) {
+          ambiguousParameterNames.add(shortName);
+          parameter._disableShortName();
+        }
+      }
+    }
+
+    // Then, loop through all parameters and register them. If there are any duplicates, ensure that they have
+    // provided a scope and register them with the scope. The duplicate long names will be reported as an error
+    // if the user attempts to use them.
     for (const longNameParameters of this._parametersByLongName.values()) {
       const useScopedLongName: boolean = longNameParameters.length > 1;
       for (const parameter of longNameParameters) {
-        if (useScopedLongName && !parameter.parameterScope) {
-          throw new Error(
-            `The parameter "${parameter.longName}" is defined multiple times with the same long name. ` +
-              'Parameters with the same long name must define a scope.'
-          );
+        if (useScopedLongName) {
+          if (!parameter.parameterScope) {
+            throw new Error(
+              `The parameter "${parameter.longName}" is defined multiple times with the same long name. ` +
+                'Parameters with the same long name must define a scope.'
+            );
+          }
+          ambiguousParameterNames.add(parameter.longName);
         }
         this._registerParameter(parameter, useScopedLongName);
       }
+    }
+
+    // Register silent parameters for the ambiguous short names and long names to ensure that users are made
+    // aware that the provided argument is ambiguous.
+    for (const ambiguousParameterName of ambiguousParameterNames) {
+      this._registerAmbiguousParameter(ambiguousParameterName);
     }
 
     // Need to add the remainder parameter last
@@ -454,6 +486,82 @@ export abstract class CommandLineParameterProvider {
       throw new Error('Command Line Parser Data was already processed');
     }
 
+    // Search for any ambiguous parameters and throw an error if any are found
+    for (const [parserKey, parameterName] of this._ambiguousParameterNamesByParserKey) {
+      if (data[parserKey]) {
+        // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
+        // the non-ambiguous name is different for each.
+        const duplicateShortNameParameters: CommandLineParameter[] | undefined =
+          this._parametersByShortName.get(parameterName);
+        if (duplicateShortNameParameters) {
+          // We also need to make sure we get the non-ambiguous long name for the parameter, since it is
+          // possible for that the long name is ambiguous as well.
+          const nonAmbiguousLongNames: string[] = [];
+          for (const parameter of duplicateShortNameParameters) {
+            const matchingLongNameParameters: CommandLineParameter[] | undefined =
+              this._parametersByLongName.get(parameter.longName);
+            if (!matchingLongNameParameters?.length) {
+              // This should never happen
+              throw new Error(
+                `Unable to find long name parameters for ambiguous short name parameter "${parameterName}".`
+              );
+            }
+            // If there is more than one matching long name parameter, then we know that we need to use the
+            // scoped long name for the parameter. The scoped long name should always be provided.
+            if (matchingLongNameParameters.length > 1) {
+              if (!parameter.scopedLongName) {
+                // This should never happen
+                throw new Error(
+                  `Unable to find scoped long name for ambiguous short name parameter "${parameterName}".`
+                );
+              }
+              nonAmbiguousLongNames.push(parameter.scopedLongName);
+            } else {
+              nonAmbiguousLongNames.push(parameter.longName);
+            }
+          }
+
+          // Throw an error including the non-ambiguous long names for the parameters that have the ambiguous
+          // short name, ex.
+          // Error: The short parameter name "-p" is ambiguous. It could refer to any of the following
+          // parameters: "--param1", "--param2"
+          throw new Error(
+            `The short parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
+              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
+          );
+        }
+
+        const duplicateLongNameParameters: CommandLineParameter[] | undefined =
+          this._parametersByLongName.get(parameterName);
+        if (duplicateLongNameParameters) {
+          const nonAmbiguousLongNames: string[] = duplicateLongNameParameters.map(
+            (p: CommandLineParameter) => {
+              // The scoped long name should always be provided
+              if (!p.scopedLongName) {
+                // This should never happen
+                throw new Error(
+                  `Unable to find scoped long name for ambiguous long name parameter "${parameterName}".`
+                );
+              }
+              return p.scopedLongName;
+            }
+          );
+
+          // Throw an error including the non-ambiguous scoped long names for the parameters that have the
+          // ambiguous long name, ex.
+          // Error: The parameter name "--param" is ambiguous. It could refer to any of the following
+          // parameters: "--scope1:param", "--scope2:param"
+          throw new Error(
+            `The parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
+              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
+          );
+        }
+
+        // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
+        throw new Error(`The parameter name "${parameterName}" is ambiguous.`);
+      }
+    }
+
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
       const value: any = data[parameter._parserKey!]; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -487,6 +595,18 @@ export abstract class CommandLineParameterProvider {
       this._parametersByLongName.set(parameter.longName, longNameParameters);
     }
     longNameParameters.push(parameter);
+
+    // Collect all parameters with the same short name. We will perform conflict resolution at registration.
+    if (parameter.shortName) {
+      let shortNameParameters: CommandLineParameter[] | undefined = this._parametersByShortName.get(
+        parameter.shortName
+      );
+      if (!shortNameParameters) {
+        shortNameParameters = [];
+        this._parametersByShortName.set(parameter.shortName, shortNameParameters);
+      }
+      shortNameParameters.push(parameter);
+    }
   }
 
   /** @internal */
@@ -581,12 +701,26 @@ export abstract class CommandLineParameterProvider {
 
     argumentGroup.addArgument(names, { ...argparseOptions });
 
-    if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
+    if (parameter.undocumentedSynonyms?.length) {
       argumentGroup.addArgument(parameter.undocumentedSynonyms, {
         ...argparseOptions,
         help: argparse.Const.SUPPRESS
       });
     }
+  }
+
+  private _registerAmbiguousParameter(name: string): void {
+    const parserKey: string = this._generateKey();
+    this._ambiguousParameterNamesByParserKey.set(parserKey, name);
+
+    this._getArgumentParser().addArgument(name, {
+      dest: parserKey,
+      // We don't know if this argument takes parameters or not, so we need to accept any number of args
+      nargs: '*',
+      // Ensure that the argument is not shown in the help text, since these parameters are only included
+      // to inform the user that ambiguous parameters are present
+      help: argparse.Const.SUPPRESS
+    });
   }
 
   private _generateKey(): string {
@@ -608,11 +742,19 @@ export abstract class CommandLineParameterProvider {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }
 
-    const parameter: CommandLineParameter | undefined = parameters.find(
+    let parameter: CommandLineParameter | undefined = parameters.find(
       (p) => p.parameterScope === parameterScope
     );
     if (!parameter) {
-      throw new Error(`The parameter "${parameterLongName}" with scope "${parameterScope}" is not defined.`);
+      if (parameterScope !== undefined) {
+        throw new Error(
+          `The parameter "${parameterLongName}" with scope "${parameterScope}" is not defined.`
+        );
+      }
+      if (parameters.length !== 1) {
+        throw new Error(`The parameter "${parameterLongName}" is ambiguous. You must specify a scope.`);
+      }
+      parameter = parameters[0];
     }
 
     if (parameter.kind !== expectedKind) {
@@ -621,6 +763,7 @@ export abstract class CommandLineParameterProvider {
           ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`
       );
     }
+
     return parameter as T;
   }
 }

@@ -1,6 +1,28 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 0.4.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+- Expose an `IRigConfig` interface that `RigConfig` implements.
+
+## 0.3.21
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 0.3.20
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 0.3.19
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
 
 ## 0.3.18
 Fri, 10 Feb 2023 01:18:50 GMT
