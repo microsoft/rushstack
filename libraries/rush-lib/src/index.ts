@@ -91,11 +91,12 @@ export { RushInternals as _RushInternals } from './api/RushInternals';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 export {
-  CustomTipsConfiguration,
-  CustomTipId,
+  RushCustomTipsConfiguration,
+  RushCustomTipId,
+  RushCustomTipSeverity,
   IRushCustomTipsJson,
-  CustomTipSeverity
-} from './api/CustomTipsConfiguration';
+  IRushCustomTipItemJson
+} from './api/RushCustomTipsConfiguration';
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 

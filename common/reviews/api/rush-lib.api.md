@@ -125,28 +125,6 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
-// @beta
-export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
-
-// @beta (undocumented)
-export class CustomTipsConfiguration {
-    constructor(configFilename: string);
-    // (undocumented)
-    readonly configuration: Readonly<IRushCustomTipsJson>;
-    // (undocumented)
-    log(tipId: CustomTipId, terminal: ITerminal): void;
-}
-
-// @beta (undocumented)
-export enum CustomTipSeverity {
-    // (undocumented)
-    error = 2,
-    // (undocumented)
-    log = 0,
-    // (undocumented)
-    warning = 1
-}
-
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -534,11 +512,21 @@ export interface IRushCommand {
 }
 
 // @beta (undocumented)
-export interface IRushCustomTipsJson {
-    // Warning: (ae-forgotten-export) The symbol "ICustomTipItemJson" needs to be exported by the entry point index.d.ts
-    //
+export interface IRushCustomTipItemJson {
     // (undocumented)
-    customTips?: ICustomTipItemJson[];
+    id: RushCustomTipId;
+    // (undocumented)
+    prefix?: string;
+    // (undocumented)
+    severity?: RushCustomTipSeverity;
+    // (undocumented)
+    tip: string;
+}
+
+// @beta (undocumented)
+export interface IRushCustomTipsJson {
+    // (undocumented)
+    customTips?: IRushCustomTipItemJson[];
     // (undocumented)
     prefix?: string;
 }
@@ -877,7 +865,7 @@ export class RushConfiguration {
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
     // @beta (undocumented)
-    readonly customTipsConfiguration: CustomTipsConfiguration;
+    readonly customTipsConfiguration: RushCustomTipsConfiguration;
     // (undocumented)
     readonly customTipsConfigurationFilePath: string;
     readonly ensureConsistentVersions: boolean;
@@ -1052,6 +1040,28 @@ export class RushConstants {
     // (undocumented)
     static readonly versionPoliciesFilename: string;
     static readonly yarnShrinkwrapFilename: string;
+}
+
+// @beta
+export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
+
+// @beta (undocumented)
+export class RushCustomTipsConfiguration {
+    constructor(configFilename: string);
+    // (undocumented)
+    readonly configuration: Readonly<IRushCustomTipsJson>;
+    // (undocumented)
+    log(tipId: RushCustomTipId, terminal: ITerminal): void;
+}
+
+// @beta (undocumented)
+export enum RushCustomTipSeverity {
+    // (undocumented)
+    error = 2,
+    // (undocumented)
+    log = 0,
+    // (undocumented)
+    warning = 1
 }
 
 // @internal
