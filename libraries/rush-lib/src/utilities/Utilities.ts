@@ -256,6 +256,22 @@ export class Utilities {
     }
   }
 
+  /**
+   * BE VERY CAREFUL CALLING THIS FUNCTION!
+   * If you specify the wrong folderPath (e.g. "/"), it could potentially delete your entire
+   * hard disk.
+   */
+  public static async dangerouslyDeletePathAsync(folderPath: string): Promise<void> {
+    try {
+      await FileSystem.deleteFolderAsync(folderPath);
+    } catch (e) {
+      throw new Error(
+        `${(e as Error).message}\nOften this is caused by a file lock from a process ` +
+          'such as your text editor, command prompt, or a filesystem watcher'
+      );
+    }
+  }
+
   /*
    * Returns true if dateToCompare is more recent than all of the inputFilenames, which
    * would imply that we don't need to rebuild it. Returns false if any of the files
