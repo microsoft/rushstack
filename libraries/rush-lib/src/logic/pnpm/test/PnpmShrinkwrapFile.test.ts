@@ -1,5 +1,9 @@
+import * as path from 'path';
+
 import { DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
 import { PnpmShrinkwrapFile, parsePnpmDependencyKey } from '../PnpmShrinkwrapFile';
+import { RushConfiguration } from '../../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 
 const DEPENDENCY_NAME: string = 'dependency_name';
 const SCOPED_DEPENDENCY_NAME: string = '@scope/dependency_name';
@@ -109,4 +113,60 @@ describe(PnpmShrinkwrapFile.name, () => {
       }
     });
   });
+
+  describe('Check is workspace project modified', () => {
+    describe('pnpm lockfile major version 5', () => {
+      it('can detect not modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v5/not-modified.yaml')
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+
+      it('can detect modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v5/modified.yaml')
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+      });
+    });
+
+    describe('pnpm lockfile major version 6', () => {
+      it('can detect not modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v6/not-modified.yaml')
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+
+      it('can detect modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v6/modified.yaml')
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+      });
+    });
+  });
 });
+
+function getPnpmShrinkwrapFileFromFile(filepath: string): PnpmShrinkwrapFile {
+  const pnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(filepath);
+  if (!pnpmShrinkwrapFile) {
+    throw new Error(`Get PnpmShrinkwrapFileFromFile failed from ${filepath}`);
+  }
+  return pnpmShrinkwrapFile;
+}
+
+function getMockRushProject(): RushConfigurationProject {
+  const rushFilename: string = path.resolve(__dirname, 'repo', 'rush.json');
+  const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+  const project = rushConfiguration.projectsByName.get('foo');
+  if (!project) {
+    throw new Error(`Can not get project "foo"`);
+  }
+  return project;
+}
