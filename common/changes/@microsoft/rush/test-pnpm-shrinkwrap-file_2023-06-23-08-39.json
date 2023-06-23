@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add test for PnpmShrinkwrapFile#isWorkspaceProjectModifiedAsync",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
