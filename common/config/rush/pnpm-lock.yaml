@@ -8729,8 +8729,8 @@ packages:
       qs: 6.11.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
-      react-router: 6.13.0_qjwx5m6wssz3lnb35xwkc3pz6q
-      react-router-dom: 6.13.0_e4p5kqppx5gth2ijr2xdvk24ma
+      react-router: 6.9.0_qjwx5m6wssz3lnb35xwkc3pz6q
+      react-router-dom: 6.9.0_e4p5kqppx5gth2ijr2xdvk24ma
       ts-dedent: 2.2.0
     dev: true
 
@@ -19340,29 +19340,29 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /react-router-dom/6.13.0_e4p5kqppx5gth2ijr2xdvk24ma:
-    resolution: {integrity: sha512-6Nqoqd7fgwxxVGdbiMHTpDHCYPq62d7Wk1Of7B82vH7ZPwwsRaIa22zRZKPPg413R5REVNiyuQPKDG1bubcOFA==}
+  /react-router-dom/6.9.0_e4p5kqppx5gth2ijr2xdvk24ma:
+    resolution: {integrity: sha512-/seUAPY01VAuwkGyVBPCn1OXfVbaWGGu4QN9uj0kCPcTyNYgL1ldZpxZUpRU7BLheKQI4Twtl/OW2nHRF1u26Q==}
     engines: {node: '>=14'}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16.8'
       react-dom: '>=16.8'
     dependencies:
-      '@remix-run/router': 1.6.3
+      '@remix-run/router': 1.4.0
       '@types/react': 16.14.23
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
-      react-router: 6.13.0_qjwx5m6wssz3lnb35xwkc3pz6q
+      react-router: 6.9.0_qjwx5m6wssz3lnb35xwkc3pz6q
     dev: true
 
-  /react-router/6.13.0_qjwx5m6wssz3lnb35xwkc3pz6q:
-    resolution: {integrity: sha512-Si6KnfEnJw7gUQkNa70dlpI1bul46FuSxX5t5WwlUBxE25DAz2BjVkwaK8Y2s242bQrZPXCpmwLPtIO5pv4tXg==}
+  /react-router/6.9.0_qjwx5m6wssz3lnb35xwkc3pz6q:
+    resolution: {integrity: sha512-51lKevGNUHrt6kLuX3e/ihrXoXCa9ixY/nVWRLlob4r/l0f45x3SzBvYJe3ctleLUQQ5fVa4RGgJOTH7D9Umhw==}
     engines: {node: '>=14'}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16.8'
     dependencies:
-      '@remix-run/router': 1.6.3
+      '@remix-run/router': 1.4.0
       '@types/react': 16.14.23
       react: 16.13.1
     dev: true
