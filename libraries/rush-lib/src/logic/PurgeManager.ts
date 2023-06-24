@@ -8,6 +8,7 @@ import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { FileSystem } from '@rushstack/node-core-library';
 
 /**
  * This class implements the logic for "rush purge"
@@ -49,7 +50,13 @@ export class PurgeManager {
    */
   public deleteAll(): void {
     this.commonTempFolderRecycler.deleteAll();
-    this.commonTempSplitFolderRecycler.deleteAll();
+    try {
+      this.commonTempSplitFolderRecycler.deleteAll();
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
     this._rushUserFolderRecycler.deleteAll();
   }
 
@@ -67,7 +74,7 @@ export class PurgeManager {
 
     this.commonTempSplitFolderRecycler.moveAllItemsInFolder(
       this._rushConfiguration.commonTempSplitFolder,
-      this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
+      this._getMembersToExclude(this._rushConfiguration.commonTempSplitFolder, true)
     );
   }
 

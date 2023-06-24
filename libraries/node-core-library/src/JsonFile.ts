@@ -422,7 +422,7 @@ export class JsonFile {
       }
     }
 
-    FileSystem.writeFile(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
+    FileSystem.writeFile(jsonFilename, newBuffer, {
       ensureFolderExists: options.ensureFolderExists
     });
 
@@ -480,7 +480,7 @@ export class JsonFile {
       }
     }
 
-    await FileSystem.writeFileAsync(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
+    await FileSystem.writeFileAsync(jsonFilename, newBuffer, {
       ensureFolderExists: options.ensureFolderExists
     });
 

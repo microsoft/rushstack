@@ -1,6 +1,125 @@
 # Change Log - @rushstack/webpack4-module-minifier-plugin
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 0.12.22
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.12.21
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.12.20
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.12.19
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.12.18
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 0.12.17
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.12.16
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.12.15
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.12.14
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.12.13
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.12.12
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.12.11
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.12.10
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.12.9
+Fri, 02 Jun 2023 02:01:13 GMT
+
+_Version update only_
+
+## 0.12.8
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.12.7
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.12.6
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.12.5
+Thu, 04 May 2023 15:17:38 GMT
+
+_Version update only_
+
+## 0.12.4
+Thu, 04 May 2023 00:20:28 GMT
+
+### Patches
+
+- Fix async import compressor erroring when encountering unresolved dependencies.
+
+## 0.12.3
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 0.12.2
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.12.1
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
+
+## 0.12.0
+Wed, 26 Apr 2023 00:22:30 GMT
+
+### Minor changes
+
+- Emit metadata about character position of rendered modules.
 
 ## 0.11.4
 Tue, 04 Apr 2023 22:36:28 GMT

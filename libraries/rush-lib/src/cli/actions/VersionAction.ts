@@ -10,10 +10,11 @@ import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
+import { RushConstants } from '../../logic/RushConstants';
 
 import type * as VersionManagerType from '../../logic/VersionManager';
 
@@ -61,7 +62,7 @@ export class VersionAction extends BaseRushAction {
       description: 'Bumps package version based on version policies.'
     });
     this._bypassPolicy = this.defineFlagParameter({
-      parameterLongName: '--bypass-policy',
+      parameterLongName: RushConstants.bypassPolicyFlagLongName,
       description: 'Overrides "gitPolicy" enforcement (use honorably!)'
     });
     this._versionPolicy = this.defineStringParameter({
@@ -74,7 +75,7 @@ export class VersionAction extends BaseRushAction {
       argumentName: 'BUMPTYPE',
       description:
         'Overrides the bump type in the version-policy.json for the specified version policy. ' +
-        'Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. ' +
+        'Valid BUMPTYPE values include: prerelease, patch, minor, major. ' +
         'This setting only works for lock-step version policy in bump action.'
     });
     this._prereleaseIdentifier = this.defineStringParameter({
@@ -94,7 +95,10 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, {
+      bypassPolicyAllowed: true,
+      bypassPolicy: this._bypassPolicy.value
+    });
     const git: Git = new Git(this.rushConfiguration);
     const userEmail: string = git.getGitEmail();
 
@@ -193,7 +197,7 @@ export class VersionAction extends BaseRushAction {
     if (this._overwriteBump.value && !Enum.tryGetValueByKey(BumpType, this._overwriteBump.value)) {
       throw new Error(
         'The value of override-bump is not valid.  ' +
-          'Valid values include prerelease, patch, preminor, minor, and major'
+          'Valid values include prerelease, patch, minor, and major'
       );
     }
   }

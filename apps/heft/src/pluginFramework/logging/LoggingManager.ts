@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IHeftPlugin } from '../IHeftPlugin';
 import { ScopedLogger } from './ScopedLogger';
 import {
   FileError,
@@ -32,16 +31,19 @@ export class LoggingManager {
     this._shouldPrintStacks = true;
   }
 
-  public requestScopedLogger(plugin: IHeftPlugin, loggerName: string): ScopedLogger {
+  public resetScopedLoggerErrorsAndWarnings(): void {
+    this._hasAnyErrors = false;
+    for (const scopedLogger of this._scopedLoggers.values()) {
+      scopedLogger.resetErrorsAndWarnings();
+    }
+  }
+
+  public requestScopedLogger(loggerName: string): ScopedLogger {
     const existingScopedLogger: ScopedLogger | undefined = this._scopedLoggers.get(loggerName);
     if (existingScopedLogger) {
-      throw new Error(
-        `A named logger with name "${loggerName}" has already been requested ` +
-          `by plugin "${existingScopedLogger._requestingPlugin.pluginName}".`
-      );
+      throw new Error(`A named logger with name ${JSON.stringify(loggerName)} has already been requested.`);
     } else {
       const scopedLogger: ScopedLogger = new ScopedLogger({
-        requestingPlugin: plugin,
         loggerName,
         terminalProvider: this._options.terminalProvider,
         getShouldPrintStacks: () => this._shouldPrintStacks,

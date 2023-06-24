@@ -49,14 +49,14 @@ export class PublishUtilities {
    * @param changesPath Path to the changes folder.
    * @returns Dictionary of all change requests, keyed by package name.
    */
-  public static findChangeRequests(
+  public static async findChangeRequestsAsync(
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
-  ): IChangeRequests {
+  ): Promise<IChangeRequests> {
     const allChanges: IChangeRequests = {
       packageChanges: new Map<string, IChangeInfo>(),
       versionPolicyChanges: new Map<string, IVersionPolicyChangeInfo>()
@@ -64,7 +64,7 @@ export class PublishUtilities {
 
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
-    const files: string[] = changeFiles.getFiles();
+    const files: string[] = await changeFiles.getFilesAsync();
 
     // Add the minimum changes defined by the change descriptions.
     for (const changeFilePath of files) {
@@ -338,7 +338,6 @@ export class PublishUtilities {
       case 'patch':
         return ChangeType.patch;
       case 'premajor':
-      case 'preminor':
       case 'prepatch':
       case 'prerelease':
         return ChangeType.hotfix;

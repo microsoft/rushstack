@@ -11,6 +11,7 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
+import { ITelemetryData } from '../logic/Telemetry';
 import { IExecutionResult, IOperationExecutionResult } from '../logic/operations/IOperationExecutionResult';
 
 /**
@@ -118,4 +119,10 @@ export class PhasedCommandHooks {
    * Only relevant when running in watch mode.
    */
   public readonly waitingForChanges: SyncHook<void> = new SyncHook(undefined, 'waitingForChanges');
+
+  /**
+   * Hook invoked after executing operations and before waitingForChanges. Allows the caller
+   * to augment or modify the log entry about to be written.
+   */
+  public readonly beforeLog: SyncHook<ITelemetryData, void> = new SyncHook(['telemetryData'], 'beforeLog');
 }

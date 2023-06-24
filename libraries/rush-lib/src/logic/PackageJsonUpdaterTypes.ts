@@ -68,6 +68,10 @@ export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRu
    */
   devDependency: boolean;
   /**
+   * Whether or not this dependency should be added as a peerDependency or a regular dependency.
+   */
+  peerDependency: boolean;
+  /**
    * If specified, other packages that use this dependency will also have their package.json's updated.
    */
   updateOtherPackages: boolean;

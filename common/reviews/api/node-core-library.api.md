@@ -8,6 +8,8 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
+import { Writable } from 'stream';
+import { WritableOptions } from 'stream';
 
 // @public
 export enum AlreadyExistsBehavior {
@@ -35,6 +37,14 @@ export class Async {
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
+}
+
+// @public
+export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
+    // (undocumented)
+    [Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]>;
+    constructor(iterable?: Iterable<T>);
+    push(item: T): void;
 }
 
 // @public
@@ -215,7 +225,7 @@ export class FileSystem {
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
-    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -327,6 +337,11 @@ export interface IColorableSequence {
 export interface IConsoleTerminalProviderOptions {
     debugEnabled: boolean;
     verboseEnabled: boolean;
+}
+
+// @beta
+export interface IDynamicPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    getPrefix: () => string;
 }
 
 // @public
@@ -445,6 +460,16 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveAsyncOptions extends IImportResolveOptions {
+    getRealPathAsync?: (filePath: string) => Promise<string>;
+}
+
+// @public
+export interface IImportResolveModuleAsyncOptions extends IImportResolveAsyncOptions {
+    modulePath: string;
+}
+
+// @public
 export interface IImportResolveModuleOptions extends IImportResolveOptions {
     modulePath: string;
 }
@@ -453,7 +478,13 @@ export interface IImportResolveModuleOptions extends IImportResolveOptions {
 export interface IImportResolveOptions {
     allowSelfReference?: boolean;
     baseFolderPath: string;
+    getRealPath?: (filePath: string) => string;
     includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOptions {
+    packageName: string;
 }
 
 // @public
@@ -504,7 +535,9 @@ export interface IJsonSchemaValidateOptions {
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
     static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolveModuleAsync(options: IImportResolveModuleAsyncOptions): Promise<string>;
     static resolvePackage(options: IImportResolvePackageOptions): string;
+    static resolvePackageAsync(options: IImportResolvePackageAsyncOptions): Promise<string>;
 }
 
 // @public
@@ -608,6 +641,14 @@ export interface IPeerDependenciesMetaTable {
     };
 }
 
+// @beta (undocumented)
+export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProviderOptions | IDynamicPrefixProxyTerminalProviderOptions;
+
+// @beta (undocumented)
+export interface IPrefixProxyTerminalProviderOptionsBase {
+    terminalProvider: ITerminalProvider;
+}
+
 // @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
@@ -623,6 +664,11 @@ export interface IRunWithRetriesOptions<TResult> {
     maxRetries: number;
     // (undocumented)
     retryDelayMs?: number;
+}
+
+// @beta
+export interface IStaticPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
+    prefix: string;
 }
 
 // @beta (undocumented)
@@ -662,6 +708,13 @@ export interface ITerminalProvider {
     eolCharacter: string;
     supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
+}
+
+// @beta
+export interface ITerminalWritableOptions {
+    severity: TerminalProviderSeverity;
+    terminal: ITerminal;
+    writableOptions?: WritableOptions;
 }
 
 // @public
@@ -817,6 +870,17 @@ export enum PosixModeBits {
     UserWrite = 128
 }
 
+// @beta
+export class PrefixProxyTerminalProvider implements ITerminalProvider {
+    constructor(options: IPrefixProxyTerminalProviderOptions);
+    // @override (undocumented)
+    get eolCharacter(): string;
+    // @override (undocumented)
+    get supportsColor(): boolean;
+    // @override (undocumented)
+    write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 export class ProtectableMap<K, V> {
     constructor(parameters: IProtectableMapParameters<K, V>);
@@ -899,12 +963,20 @@ export enum TerminalProviderSeverity {
     warning = 1
 }
 
+// @beta
+export class TerminalWritable extends Writable {
+    constructor(options: ITerminalWritableOptions);
+    // (undocumented)
+    _write(chunk: string | Buffer | Uint8Array, encoding: string, callback: (error?: Error | null) => void): void;
+}
+
 // @public
 export class Text {
     static convertTo(input: string, newlineKind: NewlineKind): string;
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+    static escapeRegExp(literal: string): string;
     static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;

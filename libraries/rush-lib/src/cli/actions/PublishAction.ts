@@ -21,7 +21,7 @@ import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
-import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
@@ -211,7 +211,7 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected async runAsync(): Promise<void> {
-    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, { bypassPolicy: false });
 
     // FIXME: How to publish for packages in split workspace?
     // Or, maybe we can not publish packages in split workspace (?)
@@ -244,7 +244,7 @@ export class PublishAction extends BaseRushAction {
         this._suffix.value,
         this._partialPrerelease.value
       );
-      this._publishChanges(git, publishGit, allPackages);
+      await this._publishChangesAsync(git, publishGit, allPackages);
     }
 
     console.log('\n' + colors.green('Rush publish finished successfully.'));
@@ -265,13 +265,13 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _publishChanges(
+  private async _publishChangesAsync(
     git: Git,
     publishGit: PublishGit,
     allPackages: Map<string, RushConfigurationProject>
-  ): void {
+  ): Promise<void> {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
-    changeManager.load(
+    await changeManager.loadAsync(
       this.rushConfiguration.changesFolder,
       this._prereleaseToken,
       this._addCommitDetails.value
@@ -288,7 +288,7 @@ export class PublishAction extends BaseRushAction {
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
-      changeManager.updateChangelog(this._apply.value);
+      await changeManager.updateChangelogAsync(this._apply.value);
 
       this._setDependenciesBeforeCommit();
 

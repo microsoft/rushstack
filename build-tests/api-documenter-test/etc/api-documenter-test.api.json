@@ -1397,7 +1397,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type ExampleDuplicateTypeAlias = "
+              "text": "export type ExampleDuplicateTypeAlias = "
             },
             {
               "kind": "Reference",
@@ -1496,7 +1496,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type ExampleTypeAlias = "
+              "text": "export type ExampleTypeAlias = "
             },
             {
               "kind": "Reference",
@@ -1527,7 +1527,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type ExampleUnionTypeAlias = "
+              "text": "export type ExampleUnionTypeAlias = "
             },
             {
               "kind": "Reference",
@@ -1594,7 +1594,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type GenericTypeAlias<T> = "
+              "text": "export type GenericTypeAlias<T> = "
             },
             {
               "kind": "Content",
@@ -2725,7 +2725,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type TypeAlias = "
+              "text": "export type TypeAlias = "
             },
             {
               "kind": "Content",

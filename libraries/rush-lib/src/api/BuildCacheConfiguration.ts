@@ -56,6 +56,7 @@ interface IBuildCacheConfigurationOptions {
   rushConfiguration: RushConfiguration;
   rushUserConfiguration: RushUserConfiguration;
   rushSession: RushSession;
+  cloudCacheProvider: ICloudBuildCacheProvider | undefined;
 }
 
 /**
@@ -88,28 +89,23 @@ export class BuildCacheConfiguration {
    */
   public readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
 
-  private constructor(options: IBuildCacheConfigurationOptions) {
-    this.buildCacheEnabled =
-      EnvironmentConfiguration.buildCacheEnabled ?? options.buildCacheJson.buildCacheEnabled;
+  private constructor({
+    getCacheEntryId,
+    buildCacheJson,
+    rushUserConfiguration,
+    rushConfiguration,
+    cloudCacheProvider
+  }: IBuildCacheConfigurationOptions) {
+    this.buildCacheEnabled = EnvironmentConfiguration.buildCacheEnabled ?? buildCacheJson.buildCacheEnabled;
     this.cacheWriteEnabled =
       !!this.buildCacheEnabled && EnvironmentConfiguration.buildCacheWriteAllowed !== false;
 
-    this.getCacheEntryId = options.getCacheEntryId;
+    this.getCacheEntryId = getCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({
-      rushUserConfiguration: options.rushUserConfiguration,
-      rushConfiguration: options.rushConfiguration
+      rushUserConfiguration: rushUserConfiguration,
+      rushConfiguration: rushConfiguration
     });
-
-    const { buildCacheJson } = options;
-    // Don't configure a cloud cache provider if local-only
-    if (buildCacheJson.cacheProvider !== 'local-only') {
-      const cloudCacheProviderFactory: CloudBuildCacheProviderFactory | undefined =
-        options.rushSession.getCloudBuildCacheProviderFactory(buildCacheJson.cacheProvider);
-      if (!cloudCacheProviderFactory) {
-        throw new Error(`Unexpected cache provider: ${buildCacheJson.cacheProvider}`);
-      }
-      this.cloudCacheProvider = cloudCacheProviderFactory(buildCacheJson as ICloudBuildCacheJson);
-    }
+    this.cloudCacheProvider = cloudCacheProvider;
   }
 
   /**
@@ -192,12 +188,24 @@ export class BuildCacheConfiguration {
       throw new AlreadyReportedError();
     }
 
+    let cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+    // Don't configure a cloud cache provider if local-only
+    if (buildCacheJson.cacheProvider !== 'local-only') {
+      const cloudCacheProviderFactory: CloudBuildCacheProviderFactory | undefined =
+        rushSession.getCloudBuildCacheProviderFactory(buildCacheJson.cacheProvider);
+      if (!cloudCacheProviderFactory) {
+        throw new Error(`Unexpected cache provider: ${buildCacheJson.cacheProvider}`);
+      }
+      cloudCacheProvider = await cloudCacheProviderFactory(buildCacheJson as ICloudBuildCacheJson);
+    }
+
     return new BuildCacheConfiguration({
       buildCacheJson,
       getCacheEntryId,
       rushConfiguration,
       rushUserConfiguration,
-      rushSession
+      rushSession,
+      cloudCacheProvider
     });
   }
 }

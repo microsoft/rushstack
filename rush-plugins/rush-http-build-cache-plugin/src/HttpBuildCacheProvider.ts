@@ -1,4 +1,4 @@
-import { ITerminal, Executable } from '@rushstack/node-core-library';
+import { ITerminal, Executable, Async } from '@rushstack/node-core-library';
 import {
   ICloudBuildCacheProvider,
   ICredentialCacheEntry,
@@ -34,12 +34,16 @@ export interface IHttpBuildCacheProviderOptions {
   url: string;
   tokenHandler?: IHttpBuildCacheTokenHandler;
   uploadMethod?: string;
+  minHttpRetryDelayMs?: number;
   headers?: Record<string, string>;
   cacheKeyPrefix?: string;
   isCacheWriteAllowed: boolean;
   pluginName: string;
   rushProjectRoot: string;
 }
+
+const MAX_HTTP_CACHE_ATTEMPTS: number = 3;
+const DEFAULT_MIN_HTTP_RETRY_DELAY_MS = 2500;
 
 export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _pluginName: string;
@@ -52,6 +56,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _headers: Record<string, string>;
   private readonly _cacheKeyPrefix: string;
   private readonly _tokenHandler: IHttpBuildCacheTokenHandler | undefined;
+  private readonly _minHttpRetryDelayMs: number;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
@@ -70,6 +75,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     this._headers = options.headers ?? {};
     this._tokenHandler = options.tokenHandler;
     this._cacheKeyPrefix = options.cacheKeyPrefix ?? '';
+    this._minHttpRetryDelayMs = options.minHttpRetryDelayMs ?? DEFAULT_MIN_HTTP_RETRY_DELAY_MS;
   }
 
   public async tryGetCacheEntryBufferByIdAsync(
@@ -83,7 +89,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         method: 'GET',
         body: undefined,
         warningText: 'Could not get cache entry',
-        readBody: true
+        readBody: true,
+        maxAttempts: MAX_HTTP_CACHE_ATTEMPTS
       });
 
       return Buffer.isBuffer(result) ? result : undefined;
@@ -112,7 +119,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         method: this._uploadMethod,
         body: objectBuffer,
         warningText: 'Could not write cache entry',
-        readBody: false
+        readBody: false,
+        maxAttempts: MAX_HTTP_CACHE_ATTEMPTS
       });
 
       return result !== false;
@@ -197,6 +205,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     body: BodyInit | undefined;
     warningText: string;
     readBody: boolean;
+    maxAttempts: number;
     credentialOptions?: CredentialsOptions;
   }): Promise<Buffer | boolean> {
     const { terminal, relUrl, method, body, warningText, readBody, credentialOptions } = options;
@@ -227,11 +236,31 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     });
 
     if (!response.ok) {
-      if (typeof credentials !== 'string' && safeCredentialOptions === CredentialsOptions.Optional) {
-        // We tried fetching the resource without credentials and that did not work out
-        // Try again but require credentials this time
-        // This will trigger the provider to request credentials
+      const isNonCredentialResponse = response.status >= 500 && response.status < 600;
+
+      if (
+        !isNonCredentialResponse &&
+        typeof credentials !== 'string' &&
+        safeCredentialOptions === CredentialsOptions.Optional
+      ) {
+        // If we don't already have credentials yet, and we got a response from the server
+        // that is a "normal" failure (4xx), then we assume that credentials are probably
+        // required. Re-attempt the request, requiring credentials this time.
+        //
+        // This counts as part of the "first attempt", so it is not included in the max attempts
         return await this._http({ ...options, credentialOptions: CredentialsOptions.Required });
+      }
+
+      if (options.maxAttempts > 1) {
+        // Pause a bit before retrying in case the server is busy
+        // Add some random jitter to the retry so we can spread out load on the remote service
+        // A proper solution might add exponential back off in case the retry count is high (10 or more)
+        const factor = 1.0 + Math.random(); // A random number between 1.0 and 2.0
+        const retryDelay = Math.floor(factor * this._minHttpRetryDelayMs);
+
+        await Async.sleep(retryDelay);
+
+        return await this._http({ ...options, maxAttempts: options.maxAttempts - 1 });
       }
 
       this._reportFailure(terminal, method, response, false, warningText);

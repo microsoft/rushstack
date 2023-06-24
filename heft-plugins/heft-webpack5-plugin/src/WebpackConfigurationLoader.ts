@@ -2,130 +2,187 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { type FolderItem, FileSystem } from '@rushstack/node-core-library';
-import type * as webpack from 'webpack';
-import type { IBuildStageProperties, ScopedLogger } from '@rushstack/heft';
+import type * as TWebpack from 'webpack';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { IHeftTaskSession, HeftConfiguration } from '@rushstack/heft';
 
-import { IWebpackConfiguration } from './shared';
+import type { IWebpackPluginOptions } from './Webpack5Plugin';
+import {
+  PLUGIN_NAME,
+  STAGE_LOAD_LOCAL_CONFIG,
+  type IWebpackConfiguration,
+  type IWebpackConfigurationFnEnvironment,
+  type IWebpackPluginAccessorHooks
+} from './shared';
 
-/**
- * See https://webpack.js.org/api/cli/#environment-options
- */
-interface IWebpackConfigFunctionEnv {
-  prod: boolean;
-  production: boolean;
-}
 type IWebpackConfigJsExport =
-  | webpack.Configuration
-  | webpack.Configuration[]
-  | Promise<webpack.Configuration>
-  | Promise<webpack.Configuration[]>
-  | ((env: IWebpackConfigFunctionEnv) => webpack.Configuration | webpack.Configuration[])
-  | ((env: IWebpackConfigFunctionEnv) => Promise<webpack.Configuration | webpack.Configuration[]>);
+  | TWebpack.Configuration
+  | TWebpack.Configuration[]
+  | Promise<TWebpack.Configuration>
+  | Promise<TWebpack.Configuration[]>
+  | ((env: IWebpackConfigurationFnEnvironment) => TWebpack.Configuration | TWebpack.Configuration[])
+  | ((env: IWebpackConfigurationFnEnvironment) => Promise<TWebpack.Configuration | TWebpack.Configuration[]>);
 type IWebpackConfigJs = IWebpackConfigJsExport | { default: IWebpackConfigJsExport };
 
-interface IWebpackConfigFileNames {
-  dev: string | undefined;
-  prod: string | undefined;
+/**
+ * @internal
+ */
+export interface ILoadWebpackConfigurationOptions {
+  taskSession: IHeftTaskSession;
+  heftConfiguration: HeftConfiguration;
+  serveMode: boolean;
+  loadWebpackAsyncFn: () => Promise<typeof TWebpack>;
+  hooks: Pick<IWebpackPluginAccessorHooks, 'onLoadConfiguration' | 'onConfigure' | 'onAfterConfigure'>;
+
+  _tryLoadConfigFileAsync?: typeof tryLoadWebpackConfigurationFileAsync;
 }
 
-export class WebpackConfigurationLoader {
-  public static async tryLoadWebpackConfigAsync(
-    logger: ScopedLogger,
-    buildFolder: string,
-    buildProperties: IBuildStageProperties
-  ): Promise<IWebpackConfiguration | undefined> {
-    // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
-    // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
+const DEFAULT_WEBPACK_CONFIG_PATH: './webpack.config.js' = './webpack.config.js';
+const DEFAULT_WEBPACK_DEV_CONFIG_PATH: './webpack.dev.config.js' = './webpack.dev.config.js';
 
-    const webpackConfigFiles: IWebpackConfigFileNames | undefined = await findWebpackConfigAsync(buildFolder);
-    const webpackDevConfigFilename: string | undefined = webpackConfigFiles.dev;
-    const webpackConfigFilename: string | undefined = webpackConfigFiles.prod;
+/**
+ * @internal
+ */
+export async function tryLoadWebpackConfigurationAsync(
+  options: ILoadWebpackConfigurationOptions,
+  pluginOptions: IWebpackPluginOptions
+): Promise<IWebpackConfiguration | undefined> {
+  const { taskSession, hooks, _tryLoadConfigFileAsync = tryLoadWebpackConfigurationFileAsync } = options;
+  const { logger } = taskSession;
+  const { terminal } = logger;
 
-    let webpackConfigJs: IWebpackConfigJs | undefined;
+  // Apply default behavior. Due to the state of `this._webpackConfiguration`, this code
+  // will execute exactly once.
+  hooks.onLoadConfiguration.tapPromise(
+    {
+      name: PLUGIN_NAME,
+      stage: STAGE_LOAD_LOCAL_CONFIG
+    },
+    async () => {
+      terminal.writeVerboseLine(`Attempting to load Webpack configuration from local file`);
+      const webpackConfiguration: IWebpackConfiguration | undefined = await _tryLoadConfigFileAsync(
+        options,
+        pluginOptions
+      );
 
-    try {
-      if (buildProperties.serveMode && webpackDevConfigFilename) {
-        logger.terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${webpackDevConfigFilename}".`
-        );
-        webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
-          buildFolder,
-          webpackDevConfigFilename
-        );
+      if (webpackConfiguration) {
+        terminal.writeVerboseLine(`Loaded Webpack configuration from local file.`);
       }
 
-      if (!webpackConfigJs && webpackConfigFilename) {
-        logger.terminal.writeVerboseLine(
-          `Attempting to load webpack configuration from "${webpackConfigFilename}".`
-        );
-        webpackConfigJs = WebpackConfigurationLoader._tryLoadWebpackConfiguration(
-          buildFolder,
-          webpackConfigFilename
-        );
-      }
-    } catch (error) {
-      logger.emitError(error as Error);
+      return webpackConfiguration;
     }
+  );
 
-    if (webpackConfigJs) {
-      const webpackConfig: IWebpackConfigJsExport =
-        (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
+  // Obtain the webpack configuration by calling into the hook.
+  // The local configuration is loaded at STAGE_LOAD_LOCAL_CONFIG
+  terminal.writeVerboseLine('Attempting to load Webpack configuration');
+  let webpackConfiguration: IWebpackConfiguration | false | undefined =
+    await hooks.onLoadConfiguration.promise();
 
-      if (typeof webpackConfig === 'function') {
-        return webpackConfig({ prod: buildProperties.production, production: buildProperties.production });
-      } else {
-        return webpackConfig;
-      }
-    } else {
-      return undefined;
+  if (webpackConfiguration === false) {
+    terminal.writeLine('Webpack disabled by external plugin');
+    webpackConfiguration = undefined;
+  } else if (
+    webpackConfiguration === undefined ||
+    (Array.isArray(webpackConfiguration) && webpackConfiguration.length === 0)
+  ) {
+    terminal.writeLine('No Webpack configuration found');
+    webpackConfiguration = undefined;
+  } else {
+    if (hooks.onConfigure.isUsed()) {
+      // Allow for plugins to customise the configuration
+      await hooks.onConfigure.promise(webpackConfiguration);
     }
-  }
-
-  private static _tryLoadWebpackConfiguration(
-    buildFolder: string,
-    configurationFilename: string
-  ): IWebpackConfigJs | undefined {
-    const fullWebpackConfigPath: string = path.join(buildFolder, configurationFilename);
-    if (FileSystem.exists(fullWebpackConfigPath)) {
-      try {
-        return require(fullWebpackConfigPath);
-      } catch (e) {
-        throw new Error(`Error loading webpack configuration at "${fullWebpackConfigPath}": ${e}`);
-      }
-    } else {
-      return undefined;
+    if (hooks.onAfterConfigure.isUsed()) {
+      // Provide the finalized configuration
+      await hooks.onAfterConfigure.promise(webpackConfiguration);
     }
   }
+  return webpackConfiguration;
 }
 
-async function findWebpackConfigAsync(buildFolder: string): Promise<IWebpackConfigFileNames> {
+/**
+ * @internal
+ */
+export async function tryLoadWebpackConfigurationFileAsync(
+  options: ILoadWebpackConfigurationOptions,
+  pluginOptions: IWebpackPluginOptions
+): Promise<IWebpackConfiguration | undefined> {
+  // TODO: Eventually replace this custom logic with a call to this utility in in webpack-cli:
+  // https://github.com/webpack/webpack-cli/blob/next/packages/webpack-cli/lib/groups/ConfigGroup.js
+
+  const { taskSession, heftConfiguration, loadWebpackAsyncFn, serveMode } = options;
+  const {
+    logger,
+    parameters: { production }
+  } = taskSession;
+  const { terminal } = logger;
+  const { configurationPath, devConfigurationPath } = pluginOptions;
+  let webpackConfigJs: IWebpackConfigJs | undefined;
+
   try {
-    const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(buildFolder);
-    const dev: string[] = [];
-    const prod: string[] = [];
+    const buildFolderPath: string = heftConfiguration.buildFolderPath;
+    if (serveMode) {
+      const devConfigPath: string = path.resolve(
+        buildFolderPath,
+        devConfigurationPath || DEFAULT_WEBPACK_DEV_CONFIG_PATH
+      );
+      terminal.writeVerboseLine(`Attempting to load webpack configuration from "${devConfigPath}".`);
+      webpackConfigJs = await _tryLoadWebpackConfigurationFileInnerAsync(devConfigPath);
+    }
 
-    for (const folderItem of folderItems) {
-      if (folderItem.isFile()) {
-        if (folderItem.name.match(/^webpack.dev.config\.(cjs|js|mjs)$/)) {
-          dev.push(folderItem.name);
-        } else if (folderItem.name.match(/^webpack.config\.(cjs|js|mjs)$/)) {
-          prod.push(folderItem.name);
-        }
+    if (!webpackConfigJs) {
+      const configPath: string = path.resolve(
+        buildFolderPath,
+        configurationPath || DEFAULT_WEBPACK_CONFIG_PATH
+      );
+      terminal.writeVerboseLine(`Attempting to load webpack configuration from "${configPath}".`);
+      webpackConfigJs = await _tryLoadWebpackConfigurationFileInnerAsync(configPath);
+    }
+  } catch (error) {
+    logger.emitError(error as Error);
+  }
+
+  if (webpackConfigJs) {
+    const webpackConfig: IWebpackConfigJsExport =
+      (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
+
+    if (typeof webpackConfig === 'function') {
+      // Defer loading of webpack until we know for sure that we will need it
+      return webpackConfig({
+        prod: production,
+        production,
+        taskSession,
+        heftConfiguration,
+        webpack: await loadWebpackAsyncFn()
+      });
+    } else {
+      return webpackConfig;
+    }
+  } else {
+    return undefined;
+  }
+}
+
+/**
+ * @internal
+ */
+export async function _tryLoadWebpackConfigurationFileInnerAsync(
+  configurationPath: string
+): Promise<IWebpackConfigJs | undefined> {
+  const configExists: boolean = await FileSystem.existsAsync(configurationPath);
+  if (configExists) {
+    try {
+      return await import(configurationPath);
+    } catch (e) {
+      const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
+      if (error.code === 'ERR_MODULE_NOT_FOUND') {
+        // No configuration found, return undefined.
+        return undefined;
       }
+      throw new Error(`Error loading webpack configuration at "${configurationPath}": ${e}`);
     }
-
-    if (dev.length > 1) {
-      throw new Error(`Error: Found more than one dev webpack configuration file.`);
-    } else if (prod.length > 1) {
-      throw new Error(`Error: Found more than one non-dev webpack configuration file.`);
-    }
-
-    return {
-      dev: dev[0],
-      prod: prod[0]
-    };
-  } catch (e) {
-    throw new Error(`Error finding webpack configuration: ${e}`);
+  } else {
+    return undefined;
   }
 }

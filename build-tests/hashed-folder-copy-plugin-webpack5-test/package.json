@@ -5,17 +5,19 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "serve": "heft start --clean",
-    "_phase:build": "heft build --clean"
+    "serve": "heft build-watch --serve",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
     "@rushstack/hashed-folder-copy-plugin": "workspace:*",
-    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@types/webpack-env": "1.18.0",
     "html-webpack-plugin": "~4.5.2",
-    "typescript": "~4.8.4",
+    "typescript": "~5.0.4",
     "webpack-bundle-analyzer": "~4.5.0",
-    "webpack": "~5.80.0"
+    "webpack": "~5.82.1"
   }
 }

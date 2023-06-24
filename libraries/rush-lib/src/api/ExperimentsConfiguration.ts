@@ -64,6 +64,11 @@ export interface IExperimentsJson {
    * If true, print the outputs of shell commands defined in event hooks to the console.
    */
   printEventHooksOutputToConsole?: boolean;
+
+  /**
+   * If true, Rush will not allow node_modules in the repo folder or in parent folders.
+   */
+  forbidPhantomResolvableNodeModulesFolders?: boolean;
 }
 
 /**

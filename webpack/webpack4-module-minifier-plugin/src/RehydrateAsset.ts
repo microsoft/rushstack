@@ -11,9 +11,15 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
  * @param asset - The asset
  * @param moduleMap - The minified modules
  * @param banner - A banner to inject for license information
+ * @param emitRenderInfo - If set, provide information about module offsets
  * @public
  */
-export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
+export function rehydrateAsset(
+  asset: IAssetInfo,
+  moduleMap: IModuleMap,
+  banner: string,
+  emitRenderInfo?: boolean
+): Source {
   const { source: assetSource, modules } = asset;
 
   const assetCode: string = assetSource.source() as string;
@@ -40,6 +46,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
   const validIdRegex: RegExp = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
   const source: ConcatSource = new ConcatSource(banner, prefix);
+  let charOffset: number = source.size();
 
   const firstModuleId: string | number = modules[0];
   const lastModuleId: string | number = modules[modules.length - 1];
@@ -92,12 +99,26 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
       // If the id is legal to use as a key in a JavaScript object literal, use as-is
       const javascriptId: string | number =
         typeof id !== 'string' || validIdRegex.test(id) ? id : JSON.stringify(id);
-      source.add(`${separator}${javascriptId}:`);
+      const currentSeparator: string = `${separator}${javascriptId}:`;
+
+      source.add(currentSeparator);
+      charOffset += currentSeparator.length;
+
       separator = ',';
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
       const moduleCode: Source | string = item ? item.source : emptyFunction;
+      const charLength: number = typeof moduleCode === 'string' ? moduleCode.length : moduleCode.size();
+
+      if (emitRenderInfo) {
+        asset.renderInfo.set(id, {
+          charOffset,
+          charLength
+        });
+      }
+
       source.add(moduleCode);
+      charOffset += charLength;
     }
 
     source.add('}');
@@ -120,19 +141,38 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
       const moduleCode: Source | string = item ? item.source : emptyFunction;
+      const charLength: number = typeof moduleCode === 'string' ? moduleCode.length : moduleCode.size();
 
       if (useConcat && delta + 1 > fillerArrayThreshold) {
         if (concatInserted) {
-          source.add(`],Array(${deltaStr}),[`);
+          const currentSeparator: string = `],Array(${deltaStr}),[`;
+
+          source.add(currentSeparator);
+          charOffset += currentSeparator.length;
         } else {
-          source.add(`].concat(Array(${deltaStr}),[`);
+          const currentSeparator: string = `].concat(Array(${deltaStr}),[`;
           concatInserted = true;
+
+          source.add(currentSeparator);
+          charOffset += currentSeparator.length;
         }
       } else {
-        source.add(separator + enoughCommas.slice(0, delta + 1));
+        const currentSeparator: string = separator + enoughCommas.slice(0, delta + 1);
+
+        source.add(currentSeparator);
+        charOffset += currentSeparator.length;
       }
       lastId = id as number;
+
+      if (emitRenderInfo) {
+        asset.renderInfo.set(id, {
+          charOffset,
+          charLength
+        });
+      }
+
       source.add(moduleCode);
+      charOffset += charLength;
 
       separator = '';
     }

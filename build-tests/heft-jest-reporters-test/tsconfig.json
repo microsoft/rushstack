@@ -17,8 +17,8 @@
 
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "ES2015",
-    "lib": ["ES2015"]
+    "target": "es2020",
+    "lib": ["es2020"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "lib"]

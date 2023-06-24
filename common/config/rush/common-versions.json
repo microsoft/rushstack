@@ -29,7 +29,7 @@
     // Preferring it avoids errors for indirect dependencies that request it as a peer dependency.
     // It's also the newest supported compiler, used by most build tests and used as the bundled compiler
     // engine for API Extractor.
-    "typescript": "~4.8.4",
+    "typescript": "~5.0.4",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~8.7.0"
@@ -69,10 +69,14 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
-      // "~4.7.4" is the (inferred, not alternative) range used by most projects in this repo
+      // "~5.0.4" is the (inferred, not alternative) range used by most projects in this repo
 
       // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
-      "~2.9.2"
+      "~2.9.2",
+      // For testing Heft with TS V3
+      "~3.9.10",
+      // For testing Heft with TS V4
+      "~4.9.5"
     ],
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
@@ -91,6 +95,18 @@
     "style-loader": ["~2.0.0"],
     "terser-webpack-plugin": ["~3.0.8"],
     "terser": ["~4.8.0"],
-    "webpack": ["~4.44.2"]
+    "webpack": ["~4.44.2"],
+    "@types/node": [
+      // These versions are used by testing projects
+      "ts2.9",
+      "ts3.9",
+      "ts4.9"
+    ],
+    "@types/jest": [
+      // These versions are used by testing projects
+      "ts2.9",
+      "ts3.9",
+      "ts4.9"
+    ]
   }
 }

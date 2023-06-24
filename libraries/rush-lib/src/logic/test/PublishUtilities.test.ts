@@ -55,7 +55,7 @@ function generateVersionPolicySnapshot(allChanges: IChangeRequests): string {
   return lines.join('\n');
 }
 
-describe(PublishUtilities.findChangeRequests.name, () => {
+describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   let packagesRushConfiguration: RushConfiguration;
   let repoRushConfiguration: RushConfiguration;
 
@@ -81,9 +81,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/repo/rush.json`);
   });
 
-  it('returns no changes in an empty change folder', () => {
+  it('returns no changes in an empty change folder', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/noChange`)
@@ -93,9 +93,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(allChanges.versionPolicyChanges.size).toEqual(0);
   });
 
-  it('returns 1 change when changing a leaf package', () => {
+  it('returns 1 change when changing a leaf package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/leafChange`)
@@ -108,9 +108,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(allChanges.packageChanges.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
-  it('returns 6 changes when patching a root package', () => {
+  it('returns 6 changes when patching a root package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/rootPatchChange`)
@@ -141,9 +141,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('returns 8 changes when hotfixing a root package', () => {
+  it('returns 8 changes when hotfixing a root package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/rootHotfixChange`)
@@ -172,9 +172,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('returns 9 changes when major bumping a root package', () => {
+  it('returns 9 changes when major bumping a root package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/rootMajorChange`)
@@ -205,9 +205,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('updates policy project dependencies when updating a lockstep version policy with no nextBump', () => {
+  it('updates policy project dependencies when updating a lockstep version policy with no nextBump', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/lockstepWithoutNextBump`)
@@ -238,9 +238,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('returns 2 changes when bumping cyclic dependencies', () => {
+  it('returns 2 changes when bumping cyclic dependencies', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/cyclicDeps`)
@@ -269,36 +269,36 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('returns error when mixing hotfix and non-hotfix changes', () => {
+  it('returns error when mixing hotfix and non-hotfix changes', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    expect(
-      PublishUtilities.findChangeRequests.bind(
-        PublishUtilities,
-        allPackages,
-        packagesRushConfiguration,
-        new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
-      )
-    ).toThrow('Cannot apply hotfix alongside patch change on same package');
+    await expect(
+      async () =>
+        await PublishUtilities.findChangeRequestsAsync(
+          allPackages,
+          packagesRushConfiguration,
+          new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
+        )
+    ).rejects.toThrow('Cannot apply hotfix alongside patch change on same package');
   });
 
-  it('returns error when adding hotfix with config disabled', () => {
+  it('returns error when adding hotfix with config disabled', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
     (packagesRushConfiguration as unknown as Record<string, boolean>).hotfixChangeEnabled = false;
 
-    expect(
-      PublishUtilities.findChangeRequests.bind(
-        PublishUtilities,
-        allPackages,
-        packagesRushConfiguration,
-        new ChangeFiles(`${__dirname}/rootHotfixChange`)
-      )
-    ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
+    await expect(
+      async () =>
+        await PublishUtilities.findChangeRequestsAsync(
+          allPackages,
+          packagesRushConfiguration,
+          new ChangeFiles(`${__dirname}/rootHotfixChange`)
+        )
+    ).rejects.toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
 
-  it('can resolve multiple changes requests on the same package', () => {
+  it('can resolve multiple changes requests on the same package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/multipleChanges`)
@@ -329,9 +329,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('can resolve multiple reverse-ordered changes requests on the same package', () => {
+  it('can resolve multiple reverse-ordered changes requests on the same package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/orderedChanges`)
@@ -362,9 +362,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('can resolve multiple hotfix changes', () => {
+  it('can resolve multiple hotfix changes', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
@@ -393,9 +393,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('can update an explicit dependency', () => {
+  it('can update an explicit dependency', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/explicitVersionChange`)
@@ -424,9 +424,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('can exclude lock step projects', () => {
+  it('can exclude lock step projects', async () => {
     const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       repoRushConfiguration,
       new ChangeFiles(`${__dirname}/repo/changes`),
@@ -464,9 +464,9 @@ describe(PublishUtilities.sortChangeRequests.name, () => {
     rushConfiguration = RushConfiguration.loadFromConfigurationFile(`${__dirname}/packages/rush.json`);
   });
 
-  it('can return a sorted array of the change requests to be published in the correct order', () => {
+  it('can return a sorted array of the change requests to be published in the correct order', async () => {
     const allPackages: Map<string, RushConfigurationProject> = rushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       rushConfiguration,
       new ChangeFiles(`${__dirname}/multipleChanges`)
@@ -539,7 +539,7 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
   });
 });
 
-describe(PublishUtilities.findChangeRequests.name, () => {
+describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   let packagesRushConfiguration: RushConfiguration;
   let repoRushConfiguration: RushConfiguration;
 
@@ -552,9 +552,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('returns no changes in an empty change folder', () => {
+  it('returns no changes in an empty change folder', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/noChange`)
@@ -564,9 +564,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(allChanges.versionPolicyChanges.size).toEqual(0);
   });
 
-  it('returns 1 change when changing a leaf package', () => {
+  it('returns 1 change when changing a leaf package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/leafChange`)
@@ -579,9 +579,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(allChanges.packageChanges.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
-  it('returns 6 changes when patching a root package', () => {
+  it('returns 6 changes when patching a root package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/rootPatchChange`)
@@ -612,9 +612,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('returns 8 changes when hotfixing a root package', () => {
+  it('returns 8 changes when hotfixing a root package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/rootHotfixChange`)
@@ -643,9 +643,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('returns 9 changes when major bumping a root package', () => {
+  it('returns 9 changes when major bumping a root package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/rootMajorChange`)
@@ -676,9 +676,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('returns 2 changes when bumping cyclic dependencies', () => {
+  it('returns 2 changes when bumping cyclic dependencies', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/cyclicDeps`)
@@ -707,36 +707,36 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('returns error when mixing hotfix and non-hotfix changes', () => {
+  it('returns error when mixing hotfix and non-hotfix changes', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    expect(
-      PublishUtilities.findChangeRequests.bind(
-        PublishUtilities,
-        allPackages,
-        packagesRushConfiguration,
-        new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
-      )
-    ).toThrow('Cannot apply hotfix alongside patch change on same package');
+    await expect(
+      async () =>
+        await PublishUtilities.findChangeRequestsAsync(
+          allPackages,
+          packagesRushConfiguration,
+          new ChangeFiles(`${__dirname}/hotfixWithPatchChanges`)
+        )
+    ).rejects.toThrow('Cannot apply hotfix alongside patch change on same package');
   });
 
-  it('returns error when adding hotfix with config disabled', () => {
+  it('returns error when adding hotfix with config disabled', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
     (packagesRushConfiguration as unknown as Record<string, boolean>).hotfixChangeEnabled = false;
 
-    expect(
-      PublishUtilities.findChangeRequests.bind(
-        PublishUtilities,
-        allPackages,
-        packagesRushConfiguration,
-        new ChangeFiles(`${__dirname}/rootHotfixChange`)
-      )
-    ).toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
+    await expect(
+      async () =>
+        await PublishUtilities.findChangeRequestsAsync(
+          allPackages,
+          packagesRushConfiguration,
+          new ChangeFiles(`${__dirname}/rootHotfixChange`)
+        )
+    ).rejects.toThrow('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
 
-  it('can resolve multiple changes requests on the same package', () => {
+  it('can resolve multiple changes requests on the same package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/multipleChanges`)
@@ -767,9 +767,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('can resolve multiple reverse-ordered changes requests on the same package', () => {
+  it('can resolve multiple reverse-ordered changes requests on the same package', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/orderedChanges`)
@@ -800,9 +800,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     );
   });
 
-  it('can resolve multiple hotfix changes', () => {
+  it('can resolve multiple hotfix changes', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/multipleHotfixChanges`)
@@ -831,9 +831,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(generateVersionPolicySnapshot(allChanges)).toMatchInlineSnapshot(`""`);
   });
 
-  it('can update an explicit dependency', () => {
+  it('can update an explicit dependency', async () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(`${__dirname}/explicitVersionChange`)
@@ -849,9 +849,9 @@ describe(PublishUtilities.findChangeRequests.name, () => {
     expect(allChanges.packageChanges.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
-  it('can exclude lock step projects', () => {
+  it('can exclude lock step projects', async () => {
     const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
-    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       repoRushConfiguration,
       new ChangeFiles(`${__dirname}/repo/changes`),

@@ -115,7 +115,7 @@ describe(parseGitHashObject.name, () => {
 
 describe(getRepoStateAsync.name, () => {
   it('can parse committed files', async () => {
-    const results: Map<string, string> = await getRepoStateAsync(__dirname);
+    const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
     checkSnapshot(results);
   });
 
@@ -125,7 +125,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath);
@@ -140,7 +140,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath2, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
@@ -154,12 +154,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.deleteFile(testFilePath);
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
       checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
-        cwd: getRepoRoot(__dirname)
+        cwd: getRepoRoot(SOURCE_PATH)
       });
     }
   });
@@ -170,12 +170,12 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(testFilePath, 'abc');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
       checkSnapshot(results);
     } finally {
       execSync(`git checkout --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
-        cwd: getRepoRoot(__dirname)
+        cwd: getRepoRoot(SOURCE_PATH)
       });
     }
   });
@@ -190,7 +190,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath3, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(__dirname);
+      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH);
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
@@ -205,7 +205,7 @@ describe(getRepoStateAsync.name, () => {
     FileSystem.writeFile(tempFilePath1, 'a');
 
     try {
-      const results: Map<string, string> = await getRepoStateAsync(__dirname, [
+      const results: Map<string, string> = await getRepoStateAsync(SOURCE_PATH, [
         `${TEST_PREFIX}testProject/log.log`
       ]);
       checkSnapshot(results);

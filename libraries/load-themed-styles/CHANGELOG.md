@@ -1,6 +1,121 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 20 Apr 2023 15:16:55 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 2.0.58
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 2.0.57
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 2.0.56
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 2.0.55
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 2.0.54
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 2.0.53
+Fri, 09 Jun 2023 18:05:34 GMT
+
+_Version update only_
+
+## 2.0.52
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 2.0.51
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 2.0.50
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 2.0.49
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 2.0.48
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 2.0.47
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 2.0.46
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 2.0.45
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 2.0.44
+Fri, 02 Jun 2023 00:24:45 GMT
+
+_Version update only_
+
+## 2.0.43
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 2.0.42
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 2.0.41
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 2.0.40
+Thu, 11 May 2023 00:17:21 GMT
+
+_Version update only_
+
+## 2.0.39
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 2.0.38
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 2.0.37
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 2.0.36
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 2.0.35
 Thu, 20 Apr 2023 15:16:55 GMT
