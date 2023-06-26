@@ -1,4 +1,5 @@
-import * as path from 'path';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import { DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
 import { PnpmShrinkwrapFile, parsePnpmDependencyKey } from '../PnpmShrinkwrapFile';
@@ -119,7 +120,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       it('can detect not modified', async () => {
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
-          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v5/not-modified.yaml')
+          `${__dirname}/yamlFiles/pnpm-lock-v5/not-modified.yaml`
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
       });
@@ -127,7 +128,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       it('can detect modified', async () => {
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
-          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v5/modified.yaml')
+          `${__dirname}/yamlFiles/pnpm-lock-v5/modified.yaml`
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
       });
@@ -137,7 +138,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       it('can detect not modified', async () => {
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
-          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v6/not-modified.yaml')
+          `${__dirname}/yamlFiles/pnpm-lock-v6/not-modified.yaml`
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
       });
@@ -145,7 +146,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       it('can detect modified', async () => {
         const project = getMockRushProject();
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
-          path.resolve(__dirname, 'yamlFiles/pnpm-lock-v6/modified.yaml')
+          `${__dirname}/yamlFiles/pnpm-lock-v6/modified.yaml`
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
       });
@@ -162,7 +163,7 @@ function getPnpmShrinkwrapFileFromFile(filepath: string): PnpmShrinkwrapFile {
 }
 
 function getMockRushProject(): RushConfigurationProject {
-  const rushFilename: string = path.resolve(__dirname, 'repo', 'rush.json');
+  const rushFilename: string = `${__dirname}/repo/rush.json`;
   const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
   const project = rushConfiguration.projectsByName.get('foo');
   if (!project) {
