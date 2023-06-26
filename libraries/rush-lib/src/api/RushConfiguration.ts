@@ -539,7 +539,7 @@ export class RushConfiguration {
   /**
    * @beta
    */
-  public readonly customTipsConfiguration: RushCustomTipsConfiguration;
+  public readonly rushCustomTipsConfiguration: RushCustomTipsConfiguration;
 
   /**
    *
@@ -817,7 +817,7 @@ export class RushConfiguration {
     this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
 
     this.customTipsConfigurationFilePath = path.join(this.rushJsonFolder, RushConstants.customTipsFilename);
-    this.customTipsConfiguration = new RushCustomTipsConfiguration(this.customTipsConfigurationFilePath);
+    this.rushCustomTipsConfiguration = new RushCustomTipsConfiguration(this.customTipsConfigurationFilePath);
 
     this._variants = new Set<string>();
 
