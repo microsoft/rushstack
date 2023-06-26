@@ -729,16 +729,18 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (
-            relativeSourcePath !== '' &&
-            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
-          ) {
+          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
             callback();
             return;
           }
 
           const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
           if (sourcePathNode.kind === 'file') {
+            if (relativeSourcePath !== '' && isFileExcluded(relativeSourcePath)) {
+              callback();
+              return;
+            }
+
             const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
             if (!options.createArchiveOnly) {
               // Manually call fs.copyFile to avoid unnecessary stat calls.
