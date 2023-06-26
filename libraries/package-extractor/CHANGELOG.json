@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.3.2",
+      "tag": "@rushstack/package-extractor_v0.3.2",
+      "date": "Mon, 26 Jun 2023 23:45:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix patternsToInclude and patternsToExclude filters when provided patterns target subdirectories of folders that do not match the provided patterns"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.1",
       "tag": "@rushstack/package-extractor_v0.3.1",
       "date": "Mon, 19 Jun 2023 22:40:21 GMT",
