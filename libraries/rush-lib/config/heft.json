@@ -29,6 +29,11 @@
                   "sourcePath": "src/cli/test",
                   "destinationFolders": ["lib-commonjs/cli/test"],
                   "includeGlobs": ["**/*.js"]
+                },
+                {
+                  "sourcePath": "src/logic/pnpm/test",
+                  "destinationFolders": ["lib-commonjs/logic/pnpm/test"],
+                  "includeGlobs": ["**/*.yaml"]
                 }
               ]
             }
