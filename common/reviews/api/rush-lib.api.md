@@ -864,8 +864,6 @@ export class RushConfiguration {
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
-    // @beta (undocumented)
-    readonly customTipsConfiguration: RushCustomTipsConfiguration;
     // (undocumented)
     readonly customTipsConfigurationFilePath: string;
     readonly ensureConsistentVersions: boolean;
@@ -920,6 +918,8 @@ export class RushConfiguration {
     readonly repositoryUrls: string[];
     // @internal
     readonly rushConfigurationJson: IRushConfigurationJson;
+    // @beta (undocumented)
+    readonly rushCustomTipsConfiguration: RushCustomTipsConfiguration;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     // @deprecated
@@ -1043,7 +1043,7 @@ export class RushConstants {
 }
 
 // @beta
-export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
+export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_EXPOSED_TO_CUSTOM';
 
 // @beta (undocumented)
 export class RushCustomTipsConfiguration {
