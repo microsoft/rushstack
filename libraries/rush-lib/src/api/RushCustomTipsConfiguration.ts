@@ -11,7 +11,7 @@ export interface IRushCustomTipsJson {
 }
 /**
  * @beta
-*/
+ */
 export interface IRushCustomTipItemJson {
   id: RushCustomTipId;
   tip: string;
@@ -30,9 +30,9 @@ export enum RushCustomTipSeverity {
 
 /**
  * @beta
- * TODO: consider making this work with the plugin (e.g., the plugins are able to define their own customizable tips)
+ * TODO: consider making this work with the plugin (i.e., the plugins are able to define their own customizable tips)
  */
-export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ERROR_ID';
+export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_EXPOSED_TO_CUSTOM';
 
 /**
  * @beta
