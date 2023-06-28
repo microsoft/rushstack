@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-http-build-cache-plugin",
-  "version": "5.98.0",
+  "version": "5.100.1",
   "description": "Rush plugin for generic HTTP cloud build cache",
   "repository": {
     "type": "git",
@@ -13,10 +13,10 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft test --clean --watch",
+    "start": "heft test-watch",
     "test": "heft test",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",

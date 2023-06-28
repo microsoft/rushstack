@@ -1,0 +1,214 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Legacy Heft Configuration",
+  "description": "Defines configuration used by the legacy version of Heft.",
+  "type": "object",
+
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    }
+  },
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "eventActions": {
+      "type": "array",
+      "description": "An array of actions (such as deleting files or folders) that should occur during a Heft run.",
+
+      "items": {
+        "type": "object",
+        "required": ["actionKind", "heftEvent", "actionId"],
+        "allOf": [
+          {
+            "properties": {
+              "actionKind": {
+                "type": "string",
+                "description": "The kind of built-in operation that should be performed.",
+                "enum": ["deleteGlobs", "copyFiles", "runScript"]
+              },
+
+              "heftEvent": {
+                "type": "string",
+                "description": "The Heft stage when this action should be performed.  Note that heft.json event actions are scheduled after any plugin tasks have processed the event.  For example, a \"compile\" event action will be performed after the TypeScript compiler has been invoked.",
+                "enum": ["clean", "pre-compile", "compile", "bundle", "post-build", "test"]
+              },
+
+              "actionId": {
+                "type": "string",
+                "description": "A user-defined tag whose purpose is to allow configs to replace/delete handlers that were added by other configs."
+              }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "required": ["globsToDelete"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["deleteGlobs"]
+                  },
+
+                  "heftEvent": {
+                    "type": "string",
+                    "enum": ["clean", "pre-compile", "compile", "bundle", "post-build"]
+                  },
+
+                  "globsToDelete": {
+                    "type": "array",
+                    "description": "Glob patterns to be deleted. The paths are resolved relative to the project folder.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  }
+                }
+              },
+              {
+                "required": ["copyOperations"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["copyFiles"]
+                  },
+
+                  "heftEvent": {
+                    "type": "string",
+                    "enum": ["pre-compile", "compile", "bundle", "post-build"]
+                  },
+
+                  "copyOperations": {
+                    "type": "array",
+                    "description": "An array of copy operations to run perform during the specified Heft event.",
+                    "items": {
+                      "type": "object",
+                      "required": ["sourceFolder", "destinationFolders"],
+                      "properties": {
+                        "sourceFolder": {
+                          "type": "string",
+                          "description": "The base folder that files will be copied from, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. NOTE: Assigning \"sourceFolder\" does not by itself select any files to be copied.",
+                          "pattern": "[^\\\\]"
+                        },
+
+                        "destinationFolders": {
+                          "type": "array",
+                          "description": "One or more folders that files will be copied into, relative to the project root. If you specify more than one destination folder, Heft will read the input files only once, using streams to efficiently write multiple outputs.",
+                          "items": {
+                            "type": "string",
+                            "pattern": "[^\\\\]"
+                          }
+                        },
+
+                        "fileExtensions": {
+                          "type": "array",
+                          "description": "If specified, this option recursively scans all folders under \"sourceFolder\" and includes any files that match the specified extensions.  (If \"fileExtensions\" and \"includeGlobs\" are both specified, their selections are added together.)",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+                          }
+                        },
+
+                        "excludeGlobs": {
+                          "type": "array",
+                          "description": "A list of glob patterns that exclude files/folders from being copied.  The paths are resolved relative to \"sourceFolder\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
+                          "items": {
+                            "type": "string",
+                            "pattern": "[^\\\\]"
+                          }
+                        },
+
+                        "includeGlobs": {
+                          "type": "array",
+                          "description": "A list of glob patterns that select files to be copied.  The paths are resolved relative to \"sourceFolder\".",
+                          "items": {
+                            "type": "string",
+                            "pattern": "[^\\\\]"
+                          }
+                        },
+
+                        "flatten": {
+                          "type": "boolean",
+                          "description": "Normally, when files are selected under a child folder, a corresponding folder will be created in the destination folder.  Specify flatten=true to discard the source path and copy all matching files to the same folder.  If two files have the same name an error will be reported. The default value is false."
+                        },
+
+                        "hardlink": {
+                          "type": "boolean",
+                          "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster. (But note that it may cause unexpected behavior if a tool modifies the link.)  The default value is false."
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "required": ["scriptPath"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["runScript"]
+                  },
+
+                  "heftEvent": {
+                    "type": "string",
+                    "enum": ["pre-compile", "compile", "bundle", "post-build", "test"]
+                  },
+
+                  "scriptPath": {
+                    "type": "string",
+                    "description": "Path to the script that will be run, relative to the project root.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  },
+
+                  "scriptOptions": {
+                    "type": "object",
+                    "description": "Optional parameters that will be passed to the script at runtime.",
+                    "patternProperties": {
+                      "^.*$": { "$ref": "#/definitions/anything" }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    "heftPlugins": {
+      "type": "array",
+      "description": "Defines heft plugins that are used by a project.",
+
+      "items": {
+        "type": "object",
+        "required": ["plugin"],
+        "properties": {
+          "plugin": {
+            "description": "Path to the plugin package, relative to the project root.",
+            "type": "string",
+            "pattern": "[^\\\\]"
+          },
+
+          "options": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

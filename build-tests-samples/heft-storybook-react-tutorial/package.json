@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
-    "storybook": "heft start --storybook",
+    "start": "heft build-watch",
+    "storybook": "heft build-watch --storybook",
     "build-storybook": "heft build --storybook",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
     "react-dom": "~16.13.1",
@@ -20,7 +20,9 @@
     "@babel/core": "~7.20.0",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-storybook-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@storybook/react": "~6.4.18",

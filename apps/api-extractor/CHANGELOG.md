@@ -1,6 +1,33 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 22 May 2023 06:34:32 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 7.36.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+- Use the `IRigConfig` interface in the `IExtractorConfigLoadForFolderOptions` object insteacd of the `RigConfig` class.
+
+## 7.35.4
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 7.35.3
+Tue, 13 Jun 2023 01:49:01 GMT
+
+_Version update only_
+
+## 7.35.2
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 7.35.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 7.35.0
 Mon, 22 May 2023 06:34:32 GMT

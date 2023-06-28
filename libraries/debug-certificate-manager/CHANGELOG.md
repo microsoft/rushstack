@@ -1,6 +1,81 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 24 May 2023 00:19:12 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 1.2.43
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 1.2.42
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 1.2.41
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 1.2.40
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 1.2.39
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 1.2.38
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 1.2.37
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 1.2.36
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 1.2.35
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 1.2.34
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 1.2.33
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 1.2.32
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 1.2.31
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 1.2.30
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 1.2.29
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 1.2.28
 Wed, 24 May 2023 00:19:12 GMT

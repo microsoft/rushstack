@@ -1,6 +1,89 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+
+## 0.8.2
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.8.1
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.8.0
+Wed, 14 Jun 2023 00:19:41 GMT
+
+### Minor changes
+
+- Move loading of webpack config file into the `onLoadConfiguration` hook to allow other plugins to define fallback behavior, rather than only overriding the config file.
+
+## 0.7.10
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.7.9
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Patches
+
+- Bump webpack to v5.82.1
+
+## 0.7.8
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.7.7
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.7.6
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.7.5
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.7.4
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.7.3
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Patches
+
+- Improve the error message when the "--serve" is incorrectly specified
+
+## 0.7.2
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.7.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.7.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.6.12
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 0.6.11
 Mon, 22 May 2023 06:34:33 GMT

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-serve-plugin",
-  "version": "5.98.0",
+  "version": "5.100.1",
   "description": "A Rush plugin that hooks into a rush action and serves output folders from all projects in the repository.",
   "license": "MIT",
   "repository": {
@@ -12,8 +12,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "heft test --clean",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*",

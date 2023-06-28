@@ -27,6 +27,7 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import type { SpawnSyncReturns } from 'child_process';
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
+import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -403,8 +404,7 @@ export class RushPnpmCommandLineParser {
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
           this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
-        const { isEqual } = await import('lodash');
-        if (!isEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
+        if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
           const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\

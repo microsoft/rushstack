@@ -77,7 +77,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all]
+"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
+                [--all]
+                
 
 Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -111,6 +113,8 @@ Optional arguments:
                         specifier (\\"^\\").
   --dev                 If specified, the package will be added to the 
                         \\"devDependencies\\" section of the package.json
+  --peer                If specified, the package will be added to the 
+                        \\"peerDependencies\\" section of the package.json
   -m, --make-consistent
                         If specified, other packages with this dependency 
                         will have their package.json files updated to use the 
@@ -1298,9 +1302,9 @@ Optional arguments:
   --override-bump BUMPTYPE
                         Overrides the bump type in the version-policy.json 
                         for the specified version policy. Valid BUMPTYPE 
-                        values include: prerelease, patch, preminor, minor, 
-                        major. This setting only works for lock-step version 
-                        policy in bump action.
+                        values include: prerelease, patch, minor, major. This 
+                        setting only works for lock-step version policy in 
+                        bump action.
   --override-prerelease-id ID
                         Overrides the prerelease identifier in the version 
                         value of version-policy.json for the specified 

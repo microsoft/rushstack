@@ -2,6 +2,78 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.100.1",
+      "tag": "@microsoft/rush_v5.100.1",
+      "date": "Wed, 14 Jun 2023 19:42:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush would attempt to open a project's log file for writing twice."
+          },
+          {
+            "comment": "Fix an issue where arguments weren't passed to git hook scripts."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.100.0",
+      "tag": "@microsoft/rush_v5.100.0",
+      "date": "Tue, 13 Jun 2023 01:49:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BREAKING API CHANGE) Remove unused members of the `BumpType` API. See https://github.com/microsoft/rushstack/issues/1335 for details."
+          },
+          {
+            "comment": "Add `--peer` flag to `rush add` command to add peerDependencies"
+          },
+          {
+            "comment": "Add support for PNPM 8."
+          },
+          {
+            "comment": "Remove the dependency on `lodash`."
+          },
+          {
+            "comment": "Add functionality for the Amazon S3 Build Cache Plugin to read credentials from common AWS_* environment variables."
+          },
+          {
+            "comment": "Write cache logs to their own file(s)."
+          },
+          {
+            "comment": "Fix an issue where cache logging data was always written to stdout."
+          },
+          {
+            "comment": "Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder."
+          },
+          {
+            "comment": "Bump webpack to v5.82.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.99.0",
+      "tag": "@microsoft/rush_v5.99.0",
+      "date": "Fri, 02 Jun 2023 22:08:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use a separate temrinal for logging cache subsystem"
+          },
+          {
+            "comment": "Expose beforeLog hook"
+          },
+          {
+            "comment": "Convert to multi-phase Heft"
+          },
+          {
+            "comment": "Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.98.0",
       "tag": "@microsoft/rush_v5.98.0",
       "date": "Sun, 21 May 2023 00:18:35 GMT",

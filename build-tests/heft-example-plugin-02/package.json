@@ -7,8 +7,8 @@
   "typings": "./lib/index.d.ts",
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
-    "_phase:build": "heft build --clean"
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
     "heft-example-plugin-01": "workspace:*"
@@ -21,6 +21,8 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "14.18.36",
     "eslint": "~8.7.0",
     "heft-example-plugin-01": "workspace:*",

@@ -10,6 +10,7 @@
 export { CommandLineAction, ICommandLineActionOptions } from './providers/CommandLineAction';
 export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
 export { ScopedCommandLineAction } from './providers/ScopedCommandLineAction';
+export { AliasCommandLineAction, IAliasCommandLineActionOptions } from './providers/AliasCommandLineAction';
 
 export {
   IBaseCommandLineDefinition,

@@ -78,6 +78,7 @@ common/autoinstallers/*/.npmrc
 **/.rush/temp/
 
 # Heft temporary files
+.cache
 .heft
 
 # Common toolchain intermediate files

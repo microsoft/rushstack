@@ -7,22 +7,12 @@ import * as fetch from 'node-fetch';
 
 import { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
 import { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
+import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
 const HOST_HEADER_NAME: 'host' = 'host';
 const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
-
-/**
- * Credentials for authorizing and signing requests to an Amazon S3 endpoint.
- *
- * @public
- */
-export interface IAmazonS3Credentials {
-  accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken: string | undefined;
-}
 
 interface IIsoDateString {
   date: string;
@@ -116,20 +106,7 @@ export class AmazonS3Client {
   public static tryDeserializeCredentials(
     credentialString: string | undefined
   ): IAmazonS3Credentials | undefined {
-    if (!credentialString) {
-      return undefined;
-    }
-
-    const fields: string[] = credentialString.split(':');
-    if (fields.length < 2 || fields.length > 3) {
-      throw new Error('Amazon S3 credential is in an unexpected format.');
-    }
-
-    return {
-      accessKeyId: fields[0],
-      secretAccessKey: fields[1],
-      sessionToken: fields[2]
-    };
+    return fromRushEnv(credentialString);
   }
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {

@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AliasCommandLineAction prints the action parameter map 1`] = `
+Object {
+  "--flag": "true",
+}
+`;
+
+exports[`AliasCommandLineAction prints the scoped action parameter map 1`] = `
+Object {
+  "--scope": "\\"foo\\"",
+  "--scoped-foo": undefined,
+  "--verbose": "false",
+}
+`;
+
+exports[`AliasCommandLineAction prints the scoped action parameter map 2`] = `
+Object {
+  "--scope": "\\"foo\\"",
+  "--scoped-foo": "\\"bar\\"",
+  "--verbose": "false",
+}
+`;
+
+exports[`AliasCommandLineAction prints the scoped action parameter map with provided default scoping arguments 1`] = `
+Object {
+  "--scope": "\\"foo\\"",
+  "--scoped-foo": undefined,
+  "--verbose": "false",
+}
+`;
+
+exports[`AliasCommandLineAction prints the scoped action parameter map with provided default scoping arguments 2`] = `
+Object {
+  "--scope": "\\"foo\\"",
+  "--scoped-foo": "\\"bar\\"",
+  "--verbose": "false",
+}
+`;
+
+exports[`AliasCommandLineAction prints the unscoped action parameter map 1`] = `
+Object {
+  "--scope": undefined,
+  "--verbose": "true",
+}
+`;
+
+exports[`AliasCommandLineAction prints the unscoped action parameter map with provided default arguments 1`] = `
+Object {
+  "--scope": undefined,
+  "--verbose": "true",
+}
+`;

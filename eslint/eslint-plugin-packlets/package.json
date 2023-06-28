@@ -19,8 +19,8 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
@@ -30,8 +30,8 @@
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.50.6",
-    "@rushstack/heft-node-rig": "1.13.0",
+    "@rushstack/heft": "0.54.0",
+    "@rushstack/heft-node-rig": "2.2.6",
     "@types/eslint": "8.2.0",
     "@types/estree": "0.0.50",
     "@types/heft-jest": "1.0.1",

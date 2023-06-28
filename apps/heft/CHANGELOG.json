@@ -2,6 +2,223 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.56.0",
+      "tag": "@rushstack/heft_v0.56.0",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use the `IRigConfig` interface in the `HeftConfiguration` object insteacd of the `RigConfig` class."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.55.2",
+      "tag": "@rushstack/heft_v0.55.2",
+      "date": "Thu, 15 Jun 2023 00:21:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.55.1",
+      "tag": "@rushstack/heft_v0.55.1",
+      "date": "Wed, 14 Jun 2023 00:19:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add MockScopedLogger to help plugin authors with unit testing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.55.0",
+      "tag": "@rushstack/heft_v0.55.0",
+      "date": "Tue, 13 Jun 2023 15:17:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove the deprecated `cacheFolderPath` property from the session object."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.54.0",
+      "tag": "@rushstack/heft_v0.54.0",
+      "date": "Tue, 13 Jun 2023 01:49:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add plugin support for parameter short-names."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.15.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.53.1",
+      "tag": "@rushstack/heft_v0.53.1",
+      "date": "Fri, 09 Jun 2023 18:05:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revise CHANGELOG.md to more clearly identify the breaking changes"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.53.0",
+      "tag": "@rushstack/heft_v0.53.0",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update UPGRADING.md with new JSON schema URLs"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Remove \"taskEvents\" heft.json configuration option, and replace it with directly referencing the included plugins. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.52.2",
+      "tag": "@rushstack/heft_v0.52.2",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Provide a useful error message when encountering legacy Heft configurations"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.52.1",
+      "tag": "@rushstack/heft_v0.52.1",
+      "date": "Thu, 08 Jun 2023 00:20:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove the concept of the cache folder, since it mostly just causes bugs."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.52.0",
+      "tag": "@rushstack/heft_v0.52.0",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new API IHeftTaskSession.parsedCommandLine for accessing the invoked command name"
+          },
+          {
+            "comment": "(BREAKING CHANGE) The built-in task NodeServicePlugin now supports the \"--serve\" mode with semantics similar to heft-webpack5-plugin. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add action aliases support. Action aliases can be used to create custom \"heft <alias>\" commands which call existing Heft commands with optional default arguments."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.51.0",
+      "tag": "@rushstack/heft_v0.51.0",
+      "date": "Fri, 02 Jun 2023 02:01:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Overhaul to support splitting single-project builds into more phases than \"build\" and \"test\", to align with Rush phased commands. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.50.7",
+      "tag": "@rushstack/heft_v0.50.7",
+      "date": "Mon, 29 May 2023 15:21:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.12.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.35.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.50.6",
       "tag": "@rushstack/heft_v0.50.6",
       "date": "Mon, 22 May 2023 06:34:33 GMT",

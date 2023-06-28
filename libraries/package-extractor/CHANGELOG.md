@@ -1,6 +1,97 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Jun 2023 23:45:21 GMT and should not be manually modified.
+
+## 0.3.2
+Mon, 26 Jun 2023 23:45:21 GMT
+
+### Patches
+
+- Fix patternsToInclude and patternsToExclude filters when provided patterns target subdirectories of folders that do not match the provided patterns
+
+## 0.3.1
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.3.0
+Sat, 17 Jun 2023 00:21:54 GMT
+
+### Minor changes
+
+- Allow for include and exclude filters to be provided for projects. This allows for an additional layer of filtering when extracting a package.
+
+## 0.2.18
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.2.17
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.2.16
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.2.15
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Patches
+
+- Bump webpack to v5.82.1
+
+## 0.2.14
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.2.13
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.2.12
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.2.11
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.2.10
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.2.9
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.2.8
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.2.7
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.2.6
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 0.2.5
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
 
 ## 0.2.4
 Mon, 22 May 2023 06:34:33 GMT

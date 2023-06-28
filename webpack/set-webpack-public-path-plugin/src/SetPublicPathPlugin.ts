@@ -3,7 +3,7 @@
 
 import { EOL } from 'os';
 import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
-import { Text } from '@rushstack/node-core-library';
+import { Text, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import type * as Webpack from 'webpack';
 import type * as Tapable from 'tapable';
@@ -153,7 +153,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   public apply(compiler: Webpack.Compiler): void {
     // Casting here because VersionDetection refers to webpack 5 typings
     if (VersionDetection.isWebpack3OrEarlier(compiler as unknown as Webpack5.Compiler)) {
-      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
+      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4`);
     }
 
     // Casting here because VersionDetection refers to webpack 5 typings
@@ -189,12 +189,12 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
           // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
           const Webpack5Error: typeof Webpack5.WebpackError = (compiler as unknown as Webpack5.Compiler)
             .webpack.WebpackError;
-          // Don't bother importing node-core-library for this
-          const thisPackageJson: { name: string } = require('../package.json');
-          compilation.warnings.push(
+          const thisPackageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+          compilation.errors.push(
             new Webpack5Error(
-              `Webpack 5 supports its own automatic public path detection, ` +
-                `so ${thisPackageJson.name} won't do anything in this compilation.`
+              'Webpack 5 supports its own automatic public path detection, ' +
+                `so ${thisPackageJson.name} is unnecessary. Remove the ${SetPublicPathPlugin.name} plugin ` +
+                'from the Webpack configuration.'
             )
           );
         }

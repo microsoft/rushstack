@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "RunScript Heft Task Event Options",
+  "description": "Defines configuration used by the \"runScript\" Heft task event.",
+  "type": "object",
+
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    }
+  },
+
+  "additionalProperties": false,
+  "required": ["scriptPath"],
+
+  "properties": {
+    "scriptPath": {
+      "title": "Script Path",
+      "type": "string",
+      "description": "Path to the script that will be run, relative to the project root.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "scriptOptions": {
+      "title": "Script Options",
+      "type": "object",
+      "description": "Optional parameters that will be passed to the script at runtime.",
+      "patternProperties": {
+        "^.*$": { "$ref": "#/definitions/anything" }
+      }
+    }
+  }
+}

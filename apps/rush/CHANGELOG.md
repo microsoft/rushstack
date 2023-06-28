@@ -1,6 +1,39 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 21 May 2023 00:18:35 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jun 2023 19:42:12 GMT and should not be manually modified.
+
+## 5.100.1
+Wed, 14 Jun 2023 19:42:12 GMT
+
+### Updates
+
+- Fix an issue where Rush would attempt to open a project's log file for writing twice.
+- Fix an issue where arguments weren't passed to git hook scripts.
+
+## 5.100.0
+Tue, 13 Jun 2023 01:49:21 GMT
+
+### Updates
+
+- (BREAKING API CHANGE) Remove unused members of the `BumpType` API. See https://github.com/microsoft/rushstack/issues/1335 for details.
+- Add `--peer` flag to `rush add` command to add peerDependencies
+- Add support for PNPM 8.
+- Remove the dependency on `lodash`.
+- Add functionality for the Amazon S3 Build Cache Plugin to read credentials from common AWS_* environment variables.
+- Write cache logs to their own file(s).
+- Fix an issue where cache logging data was always written to stdout.
+- Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder.
+- Bump webpack to v5.82.1
+
+## 5.99.0
+Fri, 02 Jun 2023 22:08:28 GMT
+
+### Updates
+
+- Use a separate temrinal for logging cache subsystem
+- Expose beforeLog hook
+- Convert to multi-phase Heft
+- Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance.
 
 ## 5.98.0
 Sun, 21 May 2023 00:18:35 GMT

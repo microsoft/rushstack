@@ -37,6 +37,8 @@ export interface IExtractorProjectConfiguration {
     additionalDependenciesToInclude?: string[];
     additionalProjectsToInclude?: string[];
     dependenciesToExclude?: string[];
+    patternsToExclude?: string[];
+    patternsToInclude?: string[];
     projectFolder: string;
     projectName: string;
 }

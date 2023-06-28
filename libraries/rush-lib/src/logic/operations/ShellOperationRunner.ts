@@ -20,6 +20,7 @@ import {
   DiscardStdoutTransform
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+
 import { Utilities } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
@@ -71,6 +72,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
   public readonly hooks: OperationRunnerHooks;
   public readonly periodicCallback: PeriodicCallback;
+  public readonly logFilenameIdentifier: string;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _phase: IPhase;
@@ -79,7 +81,6 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _commandToRun: string;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
-  private readonly _logFilenameIdentifier: string;
   private readonly _selectedPhases: Iterable<IPhase>;
 
   public constructor(options: IOperationRunnerOptions) {
@@ -95,7 +96,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
-    this._logFilenameIdentifier = phase.logFilenameIdentifier;
+    this.logFilenameIdentifier = phase.logFilenameIdentifier;
     this._selectedPhases = options.selectedPhases;
 
     this.hooks = new OperationRunnerHooks();
@@ -113,20 +114,21 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    // TERMINAL PIPELINE:
-    //
-    //                             +--> quietModeTransform? --> collatedWriter
-    //                             |
-    // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-    //                                                        |
-    //                                                        +--> stdioSummarizer
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal,
-      this._logFilenameIdentifier
+      this.logFilenameIdentifier
     );
 
     try {
+      //#region OPERATION LOGGING
+      // TERMINAL PIPELINE:
+      //
+      //                             +--> quietModeTransform? --> collatedWriter
+      //                             |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+      //                                                        |
+      //                                                        +--> stdioSummarizer
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: projectLogWritable,
         removeColors: true,
@@ -161,6 +163,7 @@ export class ShellOperationRunner implements IOperationRunner {
         debugEnabled: context.debugMode
       });
       const terminal: Terminal = new Terminal(terminalProvider);
+      //#endregion
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;

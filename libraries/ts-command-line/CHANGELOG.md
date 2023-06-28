@@ -1,6 +1,25 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 22 May 2023 06:34:33 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+
+## 4.15.1
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 4.15.0
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Minor changes
+
+- Add support for handling ambiguous parameters when conflicting parameters are provided but they provide a non-conflicting alternative (e.g. parameters with the same short-name but different long-names, scoped parameters with the same long-name but different scopes). When using an ambiguous parameter on the CLI, an error message describing the ambiguous parameter usage will appear.
+
+## 4.14.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add AliasCommandLineAction, a CommandLineAction that can be used to redirect commands with optional default arguments to existing commands.
 
 ## 4.13.3
 Mon, 22 May 2023 06:34:33 GMT

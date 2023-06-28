@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-extractor",
-  "version": "0.2.4",
+  "version": "0.3.2",
   "description": "A library for bundling selected files and dependencies into a deployable package.",
   "main": "lib/index.js",
   "typings": "dist/package-extractor.d.ts",
@@ -11,9 +11,9 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "test": "heft test --no-build",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "test": "heft test --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "license": "MIT",
   "dependencies": {
@@ -22,6 +22,7 @@
     "@rushstack/terminal": "workspace:*",
     "ignore": "~5.1.6",
     "jszip": "~3.8.0",
+    "minimatch": "~3.0.3",
     "npm-packlist": "~2.1.2"
   },
   "devDependencies": {
@@ -32,9 +33,10 @@
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
+    "@types/minimatch": "3.0.5",
     "@types/node": "14.18.36",
     "@types/npm-packlist": "~1.1.1",
     "eslint": "~8.7.0",
-    "webpack": "~5.80.0"
+    "webpack": "~5.82.1"
   }
 }

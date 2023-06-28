@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-sass-plugin",
-  "version": "0.9.2",
+  "version": "0.11.13",
   "description": "Heft plugin for SASS",
   "repository": {
     "type": "git",
@@ -8,23 +8,21 @@
     "directory": "heft-plugins/heft-sass-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
-  "main": "lib/index.js",
-  "types": "dist/heft-sass-plugin.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.50.6"
+    "@rushstack/heft": "^0.56.0"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/typings-generator": "workspace:*",
-    "sass-embedded": "~1.49.7",
+    "sass-embedded": "~1.62.0",
     "postcss": "~8.4.6",
     "postcss-modules": "~1.5.0"
   },
