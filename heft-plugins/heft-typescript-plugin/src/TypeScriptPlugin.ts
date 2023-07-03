@@ -207,7 +207,7 @@ export async function loadPartialTsconfigFileAsync(
       if (!_partialTsconfigFileLoader) {
         const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
         _partialTsconfigFileLoader = new ConfigurationFile<IPartialTsconfig>({
-          projectRelativeFilePath: 'tsconfig.json',
+          projectRelativeFilePath: typeScriptConfigurationJson?.project || 'tsconfig.json',
           jsonSchemaPath: schemaPath,
           propertyInheritance: {
             compilerOptions: {
