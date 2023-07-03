@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Fix evaluation of the \"project\" configuration option.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}
