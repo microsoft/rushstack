@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-typescript-plugin",
-      "comment": "fix \"project\" not work",
+      "comment": "Fix evaluation of the \"project\" configuration option.",
       "type": "patch"
     }
   ],
