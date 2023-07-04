@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.2.11",
+      "tag": "@rushstack/heft-node-rig_v2.2.11",
+      "date": "Tue, 04 Jul 2023 00:18:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.1.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.10",
       "tag": "@rushstack/heft-node-rig_v2.2.10",
       "date": "Mon, 19 Jun 2023 22:40:21 GMT",

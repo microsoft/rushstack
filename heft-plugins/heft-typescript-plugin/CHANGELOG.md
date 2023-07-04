@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Jul 2023 00:18:47 GMT and should not be manually modified.
+
+## 0.1.12
+Tue, 04 Jul 2023 00:18:47 GMT
+
+### Patches
+
+- Fix evaluation of the "project" configuration option.
 
 ## 0.1.11
 Mon, 19 Jun 2023 22:40:21 GMT

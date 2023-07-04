@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-typescript-plugin",
   "entries": [
     {
+      "version": "0.1.12",
+      "tag": "@rushstack/heft-typescript-plugin_v0.1.12",
+      "date": "Tue, 04 Jul 2023 00:18:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix evaluation of the \"project\" configuration option."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.11",
       "tag": "@rushstack/heft-typescript-plugin_v0.1.11",
       "date": "Mon, 19 Jun 2023 22:40:21 GMT",
