@@ -129,6 +129,18 @@ describe(Import.name, () => {
         ).toEqual(nodeJsPath.join(packageRoot, 'lib', 'Constants.js'));
       });
 
+      it('resolves the real path inside a package with allowSelfReference turned on', () => {
+        const heftPackageRoot: string = nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft');
+        const heftPackageJsonRealPath: string = require.resolve('@rushstack/heft/package.json');
+        expect(
+          Import.resolveModule({
+            modulePath: '@rushstack/heft/package.json',
+            baseFolderPath: heftPackageRoot,
+            allowSelfReference: true
+          })
+        ).toEqual(heftPackageJsonRealPath);
+      });
+
       it('throws on an attempt to reference this package without allowSelfReference turned on', () => {
         expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolveModule({
@@ -232,6 +244,20 @@ describe(Import.name, () => {
             allowSelfReference: true
           })
         ).toEqual(packageRoot);
+      });
+
+      it('resolves the real path of a package with allowSelfReference turned on', () => {
+        const heftPackageRoot: string = nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft');
+        const resolvedHeftPackageRoot: string = nodeJsPath.dirname(
+          require.resolve('@rushstack/heft/package.json')
+        );
+        expect(
+          Import.resolvePackage({
+            packageName: '@rushstack/heft',
+            baseFolderPath: heftPackageRoot,
+            allowSelfReference: true
+          })
+        ).toEqual(resolvedHeftPackageRoot);
       });
 
       it('fails to resolve a path inside this package with allowSelfReference turned on', () => {

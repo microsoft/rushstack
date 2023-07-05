@@ -276,7 +276,7 @@ export class Import {
     }
 
     if (allowSelfReference === true) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
       if (
         ownPackage &&
         (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
@@ -332,7 +332,7 @@ export class Import {
     }
 
     if (allowSelfReference === true) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
       if (
         ownPackage &&
         (modulePath === ownPackage.packageName || modulePath.startsWith(`${ownPackage.packageName}/`))
@@ -418,7 +418,7 @@ export class Import {
     const normalizedRootPath: string = (getRealPath || FileSystem.getRealPath)(baseFolderPath);
 
     if (allowSelfReference) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
       if (ownPackage && ownPackage.packageName === packageName) {
         return ownPackage.packageRootPath;
       }
@@ -471,7 +471,7 @@ export class Import {
     );
 
     if (allowSelfReference) {
-      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(baseFolderPath);
+      const ownPackage: IPackageDescriptor | undefined = Import._getPackageName(normalizedRootPath);
       if (ownPackage && ownPackage.packageName === packageName) {
         return ownPackage.packageRootPath;
       }
