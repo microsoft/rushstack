@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Revise README.md and UPGRADING.md documentation",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
