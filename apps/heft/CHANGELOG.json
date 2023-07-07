@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.56.2",
+      "tag": "@rushstack/heft_v0.56.2",
+      "date": "Fri, 07 Jul 2023 00:19:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revise README.md and UPGRADING.md documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.56.1",
       "tag": "@rushstack/heft_v0.56.1",
       "date": "Thu, 06 Jul 2023 00:16:19 GMT",
