@@ -7,14 +7,23 @@ import { InternalError } from '@rushstack/node-core-library';
  * A disjoint set data structure
  */
 export class DisjointSet<T extends object> {
-  private _forest: WeakSet<T>;
-  private _parentMap: WeakMap<T, T>;
-  private _sizeMap: WeakMap<T, number>;
+  private _forest: Set<T>;
+  private _parentMap: Map<T, T>;
+  private _sizeMap: Map<T, number>;
+  private _setByElement: Map<T, Set<T>> | undefined;
 
   public constructor() {
-    this._forest = new WeakSet<T>();
-    this._parentMap = new WeakMap<T, T>();
-    this._sizeMap = new WeakMap<T, number>();
+    this._forest = new Set<T>();
+    this._parentMap = new Map<T, T>();
+    this._sizeMap = new Map<T, number>();
+    this._setByElement = new Map<T, Set<T>>();
+  }
+
+  public destroy(): void {
+    this._forest.clear();
+    this._parentMap.clear();
+    this._sizeMap.clear();
+    this._setByElement?.clear();
   }
 
   /**
@@ -28,6 +37,7 @@ export class DisjointSet<T extends object> {
     this._forest.add(x);
     this._parentMap.set(x, x);
     this._sizeMap.set(x, 1);
+    this._setByElement = undefined;
   }
 
   /**
@@ -49,6 +59,24 @@ export class DisjointSet<T extends object> {
     }
     this._parentMap.set(y, x);
     this._sizeMap.set(x, this._getSize(x) + this._getSize(y));
+    this._setByElement = undefined;
+  }
+
+  public getAllSets(): Iterable<Set<T>> {
+    if (this._setByElement === undefined) {
+      this._setByElement = new Map<T, Set<T>>();
+
+      for (const element of this._forest) {
+        const root: T = this._find(element);
+        let set: Set<T> | undefined = this._setByElement.get(root);
+        if (set === undefined) {
+          set = new Set<T>();
+          this._setByElement.set(root, set);
+        }
+        set.add(element);
+      }
+    }
+    return this._setByElement.values();
   }
 
   /**
