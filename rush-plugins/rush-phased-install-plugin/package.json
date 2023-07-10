@@ -1,0 +1,25 @@
+{
+  "name": "@rushstack/rush-phased-install-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plugin to perform CI install as a phased command.",
+  "scripts": {
+    "build": "heft build --clean",
+    "clean": "heft clean",
+    "start": "heft build-watch --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "author": "dmichon-msft",
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
+    "@rushstack/worker-pool": "workspace:*",
+    "@types/node": "14.18.36",
+    "eslint": "~8.7.0"
+  },
+  "sideEffects": false
+}
