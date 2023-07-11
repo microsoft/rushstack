@@ -102,8 +102,6 @@ export class CobuildConfiguration {
     get cobuildLockProvider(): ICobuildLockProvider;
     readonly cobuildRunnerId: string;
     // (undocumented)
-    get contextId(): string | undefined;
-    // (undocumented)
     createLockProviderAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
     destroyLockProviderAsync(): Promise<void>;
@@ -283,8 +281,14 @@ export interface ICobuildCompletedState {
 // @beta (undocumented)
 export interface ICobuildContext {
     cacheId: string;
+    clusterId: string;
+    completedStateKey: string;
     contextId: string;
-    version: number;
+    lockExpireTimeInSeconds: number;
+    lockKey: string;
+    packageName: string;
+    phaseName: string;
+    runnerId: string;
 }
 
 // @beta (undocumented)
@@ -297,18 +301,12 @@ export interface ICobuildJson {
 
 // @beta (undocumented)
 export interface ICobuildLockProvider {
-    // (undocumented)
-    acquireLockAsync(context: ICobuildContext): Promise<boolean>;
-    // (undocumented)
+    acquireLockAsync(context: Readonly<ICobuildContext>): Promise<boolean>;
     connectAsync(): Promise<void>;
-    // (undocumented)
     disconnectAsync(): Promise<void>;
-    // (undocumented)
-    getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
-    // (undocumented)
-    renewLockAsync(context: ICobuildContext): Promise<void>;
-    // (undocumented)
-    setCompletedStateAsync(context: ICobuildContext, state: ICobuildCompletedState): Promise<void>;
+    getCompletedStateAsync(context: Readonly<ICobuildContext>): Promise<ICobuildCompletedState | undefined>;
+    renewLockAsync(context: Readonly<ICobuildContext>): Promise<void>;
+    setCompletedStateAsync(context: Readonly<ICobuildContext>, state: ICobuildCompletedState): Promise<void>;
 }
 
 // @public
@@ -1061,7 +1059,6 @@ export class RushConstants {
     static readonly bypassPolicyFlagLongName: '--bypass-policy';
     static readonly changeFilesFolderName: string;
     static readonly cobuildFilename: string;
-    static readonly cobuildLockVersion: number;
     static readonly commandLineFilename: string;
     static readonly commonFolderName: string;
     static readonly commonVersionsFilename: string;

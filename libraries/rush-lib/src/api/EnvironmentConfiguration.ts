@@ -156,7 +156,10 @@ export const EnvironmentVariableNames = {
   RUSH_COBUILD_ENABLED: 'RUSH_COBUILD_ENABLED',
 
   /**
-   * Setting this environment variable opt into running with cobuilds.
+   * Setting this environment variable opt into running with cobuilds. The context id should be the same across
+   * multiple VMs, but changed when it is a new round of cobuilds.
+   *
+   * e.g. `Build.BuildNumber` in Azure DevOps Pipeline.
    *
    * @remarks
    * If there is no cobuild configured, then this environment variable is ignored.

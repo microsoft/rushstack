@@ -73,6 +73,7 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly hooks: OperationRunnerHooks;
   public readonly periodicCallback: PeriodicCallback;
   public readonly logFilenameIdentifier: string;
+  public static readonly periodicCallbackIntervalInSeconds: number = 10;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _phase: IPhase;
@@ -101,7 +102,7 @@ export class ShellOperationRunner implements IOperationRunner {
 
     this.hooks = new OperationRunnerHooks();
     this.periodicCallback = new PeriodicCallback({
-      interval: 10 * 1000
+      interval: ShellOperationRunner.periodicCallbackIntervalInSeconds * 1000
     });
   }
 

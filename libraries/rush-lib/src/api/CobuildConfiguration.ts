@@ -133,10 +133,6 @@ export class CobuildConfiguration {
     });
   }
 
-  public get contextId(): string | undefined {
-    return this.cobuildContextId;
-  }
-
   public async createLockProviderAsync(terminal: ITerminal): Promise<void> {
     if (this.cobuildEnabled) {
       terminal.writeLine(`Running cobuild (runner ${this.cobuildContextId}/${this.cobuildRunnerId})`);

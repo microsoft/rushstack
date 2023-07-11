@@ -40,6 +40,7 @@
         "cwd": "${workspaceFolder}/sandbox/repo",
         "env": {
           "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "RUSH_COBUILD_RUNNER_ID": "runner1",
           "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED": "1",
           "REDIS_PASS": "redis123"
         }
@@ -63,6 +64,7 @@
         "cwd": "${workspaceFolder}/sandbox/repo",
         "env": {
           "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "RUSH_COBUILD_RUNNER_ID": "runner2",
           "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED": "1",
           "REDIS_PASS": "redis123"
         }
