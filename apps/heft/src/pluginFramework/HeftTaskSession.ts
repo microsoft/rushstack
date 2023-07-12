@@ -106,7 +106,7 @@ export interface IHeftTaskSession {
 
   /**
    * The scoped logger for the task. Messages logged with this logger will be prefixed with
-   * the phase and task name, in the format "[<phaseName>:<taskName>]". It is highly recommended
+   * the phase and task name, in the format `[<phaseName>:<taskName>]`. It is highly recommended
    * that writing to the console be performed via the logger, as it will ensure that logging messages
    * are labeled with the source of the message.
    *
