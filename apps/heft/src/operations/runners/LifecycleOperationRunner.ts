@@ -18,7 +18,7 @@ import type {
   IHeftLifecycleSession
 } from '../../pluginFramework/HeftLifecycleSession';
 
-export type LifecycleOperationRunnerType = 'start' | 'finish';
+export type LifecycleOperationRunnerType = 'clean' | 'start' | 'finish';
 
 export interface ILifecycleOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -26,9 +26,10 @@ export interface ILifecycleOperationRunnerOptions {
 }
 
 export class LifecycleOperationRunner implements IOperationRunner {
-  private readonly _options: ILifecycleOperationRunnerOptions;
-
   public readonly silent: boolean = true;
+
+  private readonly _options: ILifecycleOperationRunnerOptions;
+  private _isClean: boolean = false;
 
   public get name(): string {
     return `Lifecycle ${JSON.stringify(this._options.type)}`;
@@ -42,68 +43,75 @@ export class LifecycleOperationRunner implements IOperationRunner {
     const { internalHeftSession, type } = this._options;
     const { clean, watch } = internalHeftSession.parameterManager.defaultParameters;
 
-    if (watch) {
-      // Avoid running the lifecycle operation when in watch mode
-      return OperationStatus.NoOp;
-    }
-
+    // Load and apply the lifecycle plugins
     const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
-    const lifecycleLogger: ScopedLogger = internalHeftSession.loggingManager.requestScopedLogger(
-      `lifecycle:${this._options.type}`
-    );
+    const lifecycleLogger: ScopedLogger = lifecycle.getLifecycleLoggerByType(undefined);
+    await lifecycle.applyPluginsAsync(lifecycleLogger.terminal);
+
+    const lifecycleTypeLogger: ScopedLogger = lifecycle.getLifecycleLoggerByType(type);
 
     switch (type) {
-      case 'start': {
-        // We can only apply the plugins once, so only do it during the start operation
-        lifecycleLogger.terminal.writeVerboseLine('Applying lifecycle plugins');
-        await lifecycle.applyPluginsAsync();
-
-        // Run the clean hook
-        if (clean) {
-          const startTime: number = performance.now();
-          const cleanLogger: ScopedLogger =
-            internalHeftSession.loggingManager.requestScopedLogger(`lifecycle:clean`);
-          cleanLogger.terminal.writeVerboseLine('Starting clean');
-
-          // Grab the additional clean operations from the phase
-          const deleteOperations: IDeleteOperation[] = [];
-
-          // Delete all temp folders for tasks by default
-          for (const pluginDefinition of lifecycle.pluginDefinitions) {
-            const lifecycleSession: IHeftLifecycleSession =
-              await lifecycle.getSessionForPluginDefinitionAsync(pluginDefinition);
-            deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
-          }
-
-          // Create the options and provide a utility method to obtain paths to delete
-          const cleanHookOptions: IHeftLifecycleCleanHookOptions = {
-            addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
-              deleteOperations.push(...deleteOperationsToAdd)
-          };
-
-          // Run the plugin clean hook
-          if (lifecycle.hooks.clean.isUsed()) {
-            try {
-              await lifecycle.hooks.clean.promise(cleanHookOptions);
-            } catch (e: unknown) {
-              // Log out using the clean logger, and return an error status
-              if (!(e instanceof AlreadyReportedError)) {
-                cleanLogger.emitError(e as Error);
-              }
-              return OperationStatus.Failure;
-            }
-          }
-
-          // Delete the files if any were specified
-          if (deleteOperations.length) {
-            await deleteFilesAsync(deleteOperations, cleanLogger.terminal);
-          }
-
-          cleanLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);
+      case 'clean': {
+        if (this._isClean || !clean) {
+          return OperationStatus.NoOp;
         }
 
+        const startTime: number = performance.now();
+        lifecycleTypeLogger.terminal.writeVerboseLine('Starting clean');
+
+        // Grab the additional clean operations from the phase
+        const deleteOperations: IDeleteOperation[] = [];
+
+        // Delete all temp folders for tasks by default
+        for (const pluginDefinition of lifecycle.pluginDefinitions) {
+          const lifecycleSession: IHeftLifecycleSession = await lifecycle.getSessionForPluginDefinitionAsync(
+            pluginDefinition
+          );
+          deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
+        }
+
+        // Create the options and provide a utility method to obtain paths to delete
+        const cleanHookOptions: IHeftLifecycleCleanHookOptions = {
+          addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
+            deleteOperations.push(...deleteOperationsToAdd)
+        };
+
+        // Run the plugin clean hook
+        if (lifecycle.hooks.clean.isUsed()) {
+          try {
+            await lifecycle.hooks.clean.promise(cleanHookOptions);
+          } catch (e: unknown) {
+            // Log out using the clean logger, and return an error status
+            if (!(e instanceof AlreadyReportedError)) {
+              lifecycleTypeLogger.emitError(e as Error);
+            }
+            return OperationStatus.Failure;
+          }
+        }
+
+        // Delete the files if any were specified
+        if (deleteOperations.length) {
+          const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
+          await deleteFilesAsync(rootFolderPath, deleteOperations, lifecycleTypeLogger.terminal);
+        }
+
+        // Ensure we only run the clean operation once
+        this._isClean = true;
+
+        lifecycleTypeLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);
+        break;
+      }
+      case 'start': {
         // Run the start hook
         if (lifecycle.hooks.toolStart.isUsed()) {
+          if (watch) {
+            // Avoid running the toolStart hooks if we're in watch mode
+            lifecycleTypeLogger.terminal.writeVerboseLine(
+              `Lifecycle plugins aren't currently supported in watch mode.`
+            );
+            return OperationStatus.NoOp;
+          }
+
           const lifecycleToolStartHookOptions: IHeftLifecycleToolStartHookOptions = {};
           await lifecycle.hooks.toolStart.promise(lifecycleToolStartHookOptions);
         }
@@ -111,6 +119,14 @@ export class LifecycleOperationRunner implements IOperationRunner {
       }
       case 'finish': {
         if (lifecycle.hooks.toolFinish.isUsed()) {
+          if (watch) {
+            // Avoid running the toolFinish hooks if we're in watch mode
+            lifecycleTypeLogger.terminal.writeWarningLine(
+              `Lifecycle plugins aren't currently supported in watch mode.`
+            );
+            return OperationStatus.NoOp;
+          }
+
           const lifeycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
           await lifecycle.hooks.toolFinish.promise(lifeycleToolFinishHookOptions);
         }

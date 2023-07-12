@@ -67,11 +67,13 @@ interface ICopyDescriptor {
 }
 
 export async function copyFilesAsync(
+  rootFolderPath: string,
   copyOperations: Iterable<ICopyOperation>,
   terminal: ITerminal,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
   const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
+    rootFolderPath,
     copyOperations,
     watchFileSystemAdapter
   );
@@ -80,6 +82,7 @@ export async function copyFilesAsync(
 }
 
 async function _getCopyDescriptorsAsync(
+  rootFolderPath: string,
   copyConfigurations: Iterable<ICopyOperation>,
   fs: WatchFileSystemAdapter | undefined
 ): Promise<Map<string, ICopyDescriptor>> {
@@ -92,6 +95,7 @@ async function _getCopyDescriptorsAsync(
     async (copyConfiguration: ICopyOperation) => {
       // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
       // and the filename in "includeGlobs"
+      copyConfiguration.sourcePath = path.resolve(rootFolderPath, copyConfiguration.sourcePath);
       const sourceFolder: string | undefined = copyConfiguration.sourcePath;
       const sourceFilePaths: Set<string> | undefined = await getFilePathsAsync(copyConfiguration, fs);
 

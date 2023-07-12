@@ -21,6 +21,8 @@ import {
   type IHeftLifecycleToolFinishHookOptions,
   type IHeftLifecycleSession
 } from './HeftLifecycleSession';
+import type { ScopedLogger } from './logging/ScopedLogger';
+import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
 
 export interface IHeftLifecycleContext {
   lifecycleSession?: HeftLifecycleSession;
@@ -37,6 +39,7 @@ export class HeftLifecycle extends HeftPluginHost {
     HeftLifecyclePluginDefinition,
     IHeftLifecyclePlugin<object | void>
   > = new Map();
+  private readonly _lifecycleLoggersByType: Map<string | undefined, ScopedLogger> = new Map();
 
   private _isInitialized: boolean = false;
 
@@ -176,6 +179,17 @@ export class HeftLifecycle extends HeftPluginHost {
         this._lifecycleContextByDefinition.set(pluginDefinition, lifecycleContext);
       }
     }
+  }
+
+  public getLifecycleLoggerByType(type: LifecycleOperationRunnerType | undefined): ScopedLogger {
+    let logger: ScopedLogger | undefined = this._lifecycleLoggersByType.get(type);
+    if (!logger) {
+      logger = this._internalHeftSession.loggingManager.requestScopedLogger(
+        `lifecycle${type === undefined ? '' : `:${type}`}`
+      );
+      this._lifecycleLoggersByType.set(type, logger);
+    }
+    return logger;
   }
 
   public async getSessionForPluginDefinitionAsync(

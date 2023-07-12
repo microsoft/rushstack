@@ -25,11 +25,15 @@ interface IDeleteFilesPluginOptions {
   deleteOperations: IDeleteOperation[];
 }
 
-async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperation>): Promise<Set<string>> {
+async function _getPathsToDeleteAsync(
+  rootFolderPath: string,
+  deleteOperations: Iterable<IDeleteOperation>
+): Promise<Set<string>> {
   const pathsToDelete: Set<string> = new Set();
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
+      deleteOperation.sourcePath = path.resolve(rootFolderPath, deleteOperation.sourcePath);
       if (
         !deleteOperation.fileExtensions?.length &&
         !deleteOperation.includeGlobs?.length &&
@@ -53,10 +57,11 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
 }
 
 export async function deleteFilesAsync(
+  rootFolderPath: string,
   deleteOperations: Iterable<IDeleteOperation>,
   terminal: ITerminal
 ): Promise<void> {
-  const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(deleteOperations);
+  const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(rootFolderPath, deleteOperations);
   await _deleteFilesInnerAsync(pathsToDelete, terminal);
 }
 

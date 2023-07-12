@@ -209,14 +209,17 @@ export class HeftActionRunner {
       description: 'Use the specified locale for this run, if applicable.'
     });
 
-    let cleanFlag: CommandLineFlagParameter | undefined;
-    if (!this._action.watch) {
-      // Only enable the clean flags in non-watch mode
-      cleanFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: Constants.cleanParameterLongName,
-        description: 'If specified, clean the outputs before running each phase.'
-      });
+    let cleanFlagDescription: string =
+      'If specified, clean the outputs at the beginning of the lifecycle and before running each phase.';
+    if (this._action.watch) {
+      cleanFlagDescription =
+        `${cleanFlagDescription} Cleaning will only be performed once for the lifecycle and each phase, ` +
+        `and further incremental runs will not be cleaned for the duration of execution.`;
     }
+    const cleanFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
+      parameterLongName: Constants.cleanParameterLongName,
+      description: cleanFlagDescription
+    });
 
     const parameterManager: HeftParameterManager = new HeftParameterManager({
       getIsDebug: () => this._internalHeftSession.debug,
@@ -394,6 +397,11 @@ export class HeftActionRunner {
 
     const operations: Map<string, Operation> = new Map();
     const internalHeftSession: InternalHeftSession = this._internalHeftSession;
+    const cleanLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
+      internalHeftSession,
+      'clean',
+      operations
+    );
     const startLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
       internalHeftSession,
       'start',
@@ -429,6 +437,9 @@ export class HeftActionRunner {
       // Set the 'start' lifecycle operation as a dependency of all phases to ensure the 'start' lifecycle
       // operation runs first
       phaseOperation.addDependency(startLifecycleOperation);
+      // Set the lifecycle clean operation as a dependency of the 'start' lifecycle operation to ensure the
+      // clean operation runs first
+      startLifecycleOperation.addDependency(cleanLifecycleOperation);
       // Set the phase operation as a dependency of the 'end' lifecycle operation to ensure the phase
       // operation runs first
       finishLifecycleOperation.addDependency(phaseOperation);
