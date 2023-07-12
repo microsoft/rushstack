@@ -74,8 +74,6 @@ async function parseTarball(
     }
   }
 
-  await pool.finishAsync();
-
   return parsedTarball;
 }
 
@@ -130,7 +128,7 @@ fs.rmSync(destination, { recursive: true });
 fs.mkdirSync(destination, { recursive: true });
 parseTarball(workerPool, tarballPath, integrity)
   .then((tarball: IParsedTarball) => {
-    return extractTarballAsync(workerPool, tarball, integrity, destination.replace(/\//g, '\\'));
+    return extractTarballAsync(workerPool, tarball, integrity, destination);
   })
   .finally(async () => {
     await workerPool.finishAsync();
