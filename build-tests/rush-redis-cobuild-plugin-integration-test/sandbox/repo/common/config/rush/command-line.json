@@ -12,12 +12,13 @@
    */
   "commands": [
     {
-      "commandKind": "bulk",
+      "commandKind": "phased",
       "summary": "Concurrent version of rush build",
       "name": "cobuild",
       "safeForSimultaneousRushProcesses": true,
       "enableParallelism": true,
-      "incremental": true
+      "incremental": true,
+      "phases": ["_phase:pre-build", "_phase:build"]
     }
 
     // {
@@ -177,7 +178,34 @@
     // }
   ],
 
-  "phases": [],
+  "phases": [
+    {
+      /**
+       * The name of the phase. Note that this value must start with the \"_phase:\" prefix.
+       */
+      "name": "_phase:build",
+      /**
+       * The dependencies of this phase.
+       */
+      "dependencies": {
+        "upstream": ["_phase:build"],
+        "self": ["_phase:pre-build"]
+      }
+    },
+    {
+      /**
+       * The name of the phase. Note that this value must start with the \"_phase:\" prefix.
+       */
+      "name": "_phase:pre-build",
+      /**
+       * The dependencies of this phase.
+       */
+      "dependencies": {
+        "upstream": ["_phase:build"]
+      },
+      "missingScriptBehavior": "silent"
+    }
+  ],
 
   /**
    * Custom "parameters" introduce new parameters for specified Rush command-line commands.
