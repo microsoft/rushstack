@@ -92,7 +92,7 @@
     },
     {
       "name": "@rushstack/eslint-config",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/eslint-patch",
@@ -116,7 +116,7 @@
     },
     {
       "name": "@rushstack/heft",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-api-extractor-plugin",
@@ -156,11 +156,11 @@
     },
     {
       "name": "@rushstack/heft-typescript-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-webpack4-plugin",
@@ -168,7 +168,7 @@
     },
     {
       "name": "@rushstack/heft-webpack5-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/localization-utilities",
@@ -232,7 +232,7 @@
     },
     {
       "name": "@rushstack/ts-command-line",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/typings-generator",
@@ -420,7 +420,7 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "eslint-plugin-promise",
@@ -512,7 +512,7 @@
     },
     {
       "name": "html-webpack-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "http-proxy",
@@ -756,7 +756,7 @@
     },
     {
       "name": "typescript",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "url-loader",
@@ -768,11 +768,11 @@
     },
     {
       "name": "webpack",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "webpack-bundle-analyzer",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "webpack-cli",

@@ -62,6 +62,19 @@
 			"type": "node",
 			"request": "attach",
 			"port": 9229
+		},
+		{
+			"name": "Run Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"outFiles": [
+				"${workspaceFolder}/vscode-extensions/rush-vscode-assistant/lib/**/*.js"
+			],
+			"preLaunchTask": "npm: watch"
 		}
 	]
 }

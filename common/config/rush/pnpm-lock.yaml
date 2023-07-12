@@ -2817,6 +2817,57 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
 
+  ../../vscode-extensions/rush-vscode-assistant:
+    specifiers:
+      '@reduxjs/toolkit': ~1.8.6
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-typescript-plugin': workspace:*
+      '@rushstack/heft-web-rig': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
+      '@rushstack/ts-command-line': workspace:*
+      '@types/react': 16.14.23
+      '@types/react-dom': 16.9.14
+      '@types/react-redux': ~7.1.22
+      '@types/vscode': ^1.63.0
+      '@types/webpack-env': 1.18.0
+      eslint: ~8.7.0
+      html-webpack-plugin: ~5.5.0
+      react: ~16.13.1
+      react-dom: ~16.13.1
+      react-hook-form: ~7.24.1
+      react-redux: ~8.0.4
+      redux: ~4.2.0
+      tslib: ~2.3.1
+      typescript: ~5.0.4
+      webpack: ~5.82.1
+      webpack-bundle-analyzer: ~4.5.0
+    dependencies:
+      '@reduxjs/toolkit': 1.8.6_qfynotfwlyrsyq662adyrweaoe
+      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      react-hook-form: 7.24.2_react@16.13.1
+      react-redux: 8.0.5_mq2cyprinb6qi7hdzoedcdddgq
+      redux: 4.2.1
+      tslib: 2.3.1
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
+      '@rushstack/ts-command-line': link:../../libraries/ts-command-line
+      '@types/react': 16.14.23
+      '@types/react-dom': 16.9.14
+      '@types/react-redux': 7.1.25
+      '@types/vscode': 1.80.0
+      '@types/webpack-env': 1.18.0
+      eslint: 8.7.0
+      html-webpack-plugin: 5.5.0_webpack@5.82.1
+      typescript: 5.0.4
+      webpack: 5.82.1
+      webpack-bundle-analyzer: 4.5.0
+
   ../../webpack/hashed-folder-copy-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -8910,7 +8961,6 @@ packages:
     dependencies:
       '@types/react': 16.14.23
       hoist-non-react-statics: 3.3.2
-    dev: false
 
   /@types/html-minifier-terser/5.1.2:
     resolution: {integrity: sha512-h4lTMgMJctJybDp8CQrxTUiiYmedihHWkjnF/8Pxseu2S6Nlfcy8kwboQ8yejh456rP2yWoEVm1sS/FVsfM48w==}
@@ -9116,6 +9166,15 @@ packages:
     dependencies:
       '@types/react': 16.14.23
 
+  /@types/react-redux/7.1.25:
+    resolution: {integrity: sha512-bAGh4e+w5D8dajd6InASVIyCo4pZLJ66oLb80F9OBLO1gKESbZcRCJpTT6uLXX+HAB57zw1WTdwJdAsewuTweg==}
+    dependencies:
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/react': 16.14.23
+      hoist-non-react-statics: 3.3.2
+      redux: 4.2.1
+    dev: true
+
   /@types/react-syntax-highlighter/11.0.5:
     resolution: {integrity: sha512-VIOi9i2Oj5XsmWWoB72p3KlZoEbdRAcechJa8Ztebw7bDl2YmR+odxIqhtJGp1q2EozHs02US+gzxJ9nuf56qg==}
     dependencies:
@@ -9238,6 +9297,10 @@ packages:
   /@types/use-sync-external-store/0.0.3:
     resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
     dev: false
+
+  /@types/vscode/1.80.0:
+    resolution: {integrity: sha512-qK/CmOdS2o7ry3k6YqU4zD3R2AYlJfbwBoSbKpBoP+GpXNE+0NEgJOli4n0bm0diK5kfBnchgCEj4igQz/44Hg==}
+    dev: true
 
   /@types/watchpack/2.4.0:
     resolution: {integrity: sha512-PSAD+o9hezvfUFFzrYB/PO6Je7kwiZ2BSnB3/EZ9le+jTDKB6x5NJ96WWzQz1h/AyGJ/de3/1KpuBTkUFZm77A==}
@@ -19097,6 +19160,15 @@ packages:
       shallowequal: 1.1.0
     dev: true
 
+  /react-hook-form/7.24.2_react@16.13.1:
+    resolution: {integrity: sha512-Ora2l2A4ts8xLxP9QOKEAObTMNZNdR7gt3UpWb9alFJx/AFAQcYAi/joLNo6PoC0AE/Vyq4pnCYb9jUufWoVNw==}
+    engines: {node: '>=12.22.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17
+    dependencies:
+      react: 16.13.1
+    dev: false
+
   /react-inspector/5.1.1_react@16.13.1:
     resolution: {integrity: sha512-GURDaYzoLbW8pMGXwYPDBIv6nqei4kK7LPRZ9q9HCZF54wqXz/dnylBp/kfE9XmekBhHvLDdcYeyIwSrvtOiWg==}
     peerDependencies:
@@ -19418,7 +19490,6 @@ packages:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
     dependencies:
       '@babel/runtime': 7.21.0
-    dev: false
 
   /refractor/3.6.0:
     resolution: {integrity: sha512-MY9W41IOWxxk31o+YvFCNyNzdkc9M20NoZK5vq6jkv4I/uh2zkWcfudj0Q1fovjUQJrNewS9NMzeTtqPf+n5EA==}

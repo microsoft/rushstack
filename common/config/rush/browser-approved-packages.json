@@ -32,7 +32,7 @@
     },
     {
       "name": "@reduxjs/toolkit",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/rush-themed-ui",
@@ -56,19 +56,23 @@
     },
     {
       "name": "react",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "react-dom",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "react-hook-form",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "react-redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "rxjs",
@@ -76,7 +80,7 @@
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "update-notifier",

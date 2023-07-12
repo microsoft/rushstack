@@ -139,7 +139,8 @@
      */
     "reviewCategories": [
       "libraries", // library projects that ship
-      "tests" // non-shipping test projects
+      "tests", // non-shipping test projects
+      "vscode-extensions" // vscode extensions
     ],
 
     /**
@@ -1101,6 +1102,13 @@
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+
+    // "vscode-extensions" folder (alphabetical order)
+    {
+      "packageName": "rush-vscode-assistant",
+      "projectFolder": "vscode-extensions/rush-vscode-assistant",
+      "reviewCategory": "vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)
