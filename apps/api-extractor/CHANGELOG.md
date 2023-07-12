@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 06 Jul 2023 00:16:19 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jul 2023 15:20:39 GMT and should not be manually modified.
+
+## 7.36.2
+Wed, 12 Jul 2023 15:20:39 GMT
+
+### Patches
+
+- Add api-extractor support for .d.mts and .d.cts files
 
 ## 7.36.1
 Thu, 06 Jul 2023 00:16:19 GMT
