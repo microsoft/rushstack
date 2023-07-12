@@ -38,7 +38,7 @@ cd sandbox/repo
 node ../../lib/runRush.js update
 ```
 
-## Case 1: Normal build, Cobuild is disabled because of missing RUSH_COBUILD_CONTEXT_ID 
+#### Case 1: Normal build, Cobuild is disabled because of missing RUSH_COBUILD_CONTEXT_ID 
 
 1. Write to build cache
 
@@ -54,7 +54,7 @@ node ../../lib/runRush.js --debug cobuild
 
 Expected behavior: Cobuild feature is disabled. Build cache is saved/restored as normal.
 
-# Case 2: Cobuild enabled by specifying RUSH_COBUILD_CONTEXT_ID and Redis authentication
+#### Case 2: Cobuild enabled by specifying RUSH_COBUILD_CONTEXT_ID and Redis authentication
 
 1. Clear redis server
 
@@ -83,7 +83,7 @@ Get completed_state(cobuild:completed:foo:cfc620db4e74a6f0db41b1a86d0b5402966b97
 Successfully acquired lock(cobuild:lock:foo:4c36160884a7a502f9894e8f0adae05c45c8cc4b)_package(b)_phase(_phase:build) to runner(runner1) and it expires in 30s
 ```
 
-## Case 4: Cobuild enabled, run two cobuild commands in parallel
+#### Case 3: Cobuild enabled, run two cobuild commands in parallel
 
 > Note: This test requires Visual Studio Code to be installed.
 
@@ -109,7 +109,7 @@ rm -rf common/temp/build-cache
 
 Expected behavior: Cobuild feature is enabled, cobuild related logs out in both terminals.
 
-## Case 5: Cobuild enabled, run two cobuild commands in parallel, one of them failed
+#### Case 4: Cobuild enabled, run two cobuild commands in parallel, one of them failed
 
 > Note: This test requires Visual Studio Code to be installed.
 
