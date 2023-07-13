@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 12 Jul 2023 15:20:39 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Jul 2023 00:22:37 GMT and should not be manually modified.
+
+## 0.57.0
+Thu, 13 Jul 2023 00:22:37 GMT
+
+### Minor changes
+
+- Support `--clean` in watch mode. Cleaning in watch mode is now performed only during the first-pass of lifecycle or phase operations. Once the clean has been completed, `--clean` will be ignored until the command is restarted
 
 ## 0.56.3
 Wed, 12 Jul 2023 15:20:39 GMT

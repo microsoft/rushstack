@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.57.0",
+      "tag": "@rushstack/heft_v0.57.0",
+      "date": "Thu, 13 Jul 2023 00:22:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support `--clean` in watch mode. Cleaning in watch mode is now performed only during the first-pass of lifecycle or phase operations. Once the clean has been completed, `--clean` will be ignored until the command is restarted"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.56.3",
       "tag": "@rushstack/heft_v0.56.3",
       "date": "Wed, 12 Jul 2023 15:20:39 GMT",
