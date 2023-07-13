@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ShellOperationRunnerPlugin defaultCommand "echo custom defaultCommand" should be set to commandToRun 1`] = `
+Array [
+  Object {
+    "commandToRun": "echo custom defaultCommand ",
+    "name": "a",
+  },
+  Object {
+    "commandToRun": "echo custom defaultCommand ",
+    "name": "b",
+  },
+]
+`;
+
+exports[`ShellOperationRunnerPlugin defaultCommand priority should be lower than script name 1`] = `
+Array [
+  Object {
+    "commandToRun": "echo custom defaultCommand ",
+    "name": "a",
+  },
+  Object {
+    "commandToRun": "fake_echo_task_but_works_with_mock ",
+    "name": "b",
+  },
+]
+`;
+
 exports[`ShellOperationRunnerPlugin shellCommand "echo custom shellCommand" should be set to commandToRun 1`] = `
 Array [
   Object {

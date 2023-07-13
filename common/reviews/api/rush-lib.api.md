@@ -461,6 +461,7 @@ export interface IPackageManagerOptionsJsonBase {
 export interface IPhase {
     allowWarningsOnSuccess: boolean;
     associatedParameters: Set<CommandLineParameter>;
+    defaultCommand?: string;
     dependencies: {
         self: Set<IPhase>;
         upstream: Set<IPhase>;

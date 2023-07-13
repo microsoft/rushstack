@@ -294,4 +294,30 @@ describe(CommandLineConfiguration.name, () => {
       expect(phase.shellCommand).toEqual('echo');
     });
   });
+
+  describe('defaultCommand in bulk command', () => {
+    it('get "custom-shell-command-echo" command', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'custom-shell-command-echo',
+            summary: 'custom define bulk defaultCommand echo',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            defaultCommand: 'echo'
+          }
+        ]
+      });
+
+      const command: IPhasedCommandConfig | undefined = commandLineConfiguration.commands.get(
+        'custom-shell-command-echo'
+      ) as IPhasedCommandConfig;
+      expect(command).toBeDefined();
+      expect(command?.phases).toBeDefined();
+      const phase = [...command?.phases][0];
+      expect(phase.name).toEqual('custom-shell-command-echo');
+      expect(phase.defaultCommand).toEqual('echo');
+    });
+  });
 });

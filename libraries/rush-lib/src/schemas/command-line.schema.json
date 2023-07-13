@@ -2,13 +2,13 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Rush command-line.json config file",
   "description": "For use with the Rush tool, this file defines custom command line commands. See http://rushjs.io for details.",
-
   "definitions": {
     "anything": {
       "type": ["array", "boolean", "integer", "number", "object", "string"],
-      "items": { "$ref": "#/definitions/anything" }
+      "items": {
+        "$ref": "#/definitions/anything"
+      }
     },
-
     "baseCommand": {
       "type": "object",
       "additionalProperties": true,
@@ -47,7 +47,9 @@
       "description": "A custom command that is run separately for each project in the repository",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseCommand" },
+        {
+          "$ref": "#/definitions/baseCommand"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -59,6 +61,11 @@
             "shellCommand": {
               "title": "Shell Command",
               "description": "(Optional) If the \"shellCommand\" field is set for a bulk command, Rush will invoke it for each selected project; otherwise, Rush will invoke the package.json \"scripts\" entry matching Rush command name.\n\nThe string is the path to a script that will be invoked using the OS shell. The working directory will be the folder that contains rush.json.  If custom parameters are associated with this command, their values will be appended to the end of this string.",
+              "type": "string"
+            },
+            "defaultCommand": {
+              "title": "Default Command",
+              "description": "(Optional) If the \"defaultCommand\" field is set for a bulk command, when Rush can't find the package.json \"script\" entry matching Rush command/phase name, it will fall back to this command.\n\nThe string is the path to a script that will be invoked using the OS shell. The working directory will be the folder that contains rush.json.  If custom parameters are associated with this command, their values will be appended to the end of this string.",
               "type": "string"
             },
             "enableParallelism": {
@@ -102,20 +109,48 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "commandKind": { "$ref": "#/definitions/anything" },
-            "name": { "$ref": "#/definitions/anything" },
-            "summary": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
-            "shellCommand": { "$ref": "#/definitions/anything" },
-
-            "enableParallelism": { "$ref": "#/definitions/anything" },
-            "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
-            "ignoreMissingScript": { "$ref": "#/definitions/anything" },
-            "incremental": { "$ref": "#/definitions/anything" },
-            "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
-            "watchForChanges": { "$ref": "#/definitions/anything" },
-            "disableBuildCache": { "$ref": "#/definitions/anything" }
+            "commandKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "name": {
+              "$ref": "#/definitions/anything"
+            },
+            "summary": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "safeForSimultaneousRushProcesses": {
+              "$ref": "#/definitions/anything"
+            },
+            "shellCommand": {
+              "$ref": "#/definitions/anything"
+            },
+            "defaultCommand": {
+              "$ref": "#/definitions/anything"
+            },
+            "enableParallelism": {
+              "$ref": "#/definitions/anything"
+            },
+            "ignoreDependencyOrder": {
+              "$ref": "#/definitions/anything"
+            },
+            "ignoreMissingScript": {
+              "$ref": "#/definitions/anything"
+            },
+            "incremental": {
+              "$ref": "#/definitions/anything"
+            },
+            "allowWarningsInSuccessfulBuild": {
+              "$ref": "#/definitions/anything"
+            },
+            "watchForChanges": {
+              "$ref": "#/definitions/anything"
+            },
+            "disableBuildCache": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -125,7 +160,9 @@
       "description": "A custom command that is run once for the entire repository",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseCommand" },
+        {
+          "$ref": "#/definitions/baseCommand"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -150,14 +187,27 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "commandKind": { "$ref": "#/definitions/anything" },
-            "name": { "$ref": "#/definitions/anything" },
-            "summary": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
-
-            "shellCommand": { "$ref": "#/definitions/anything" },
-            "autoinstallerName": { "$ref": "#/definitions/anything" }
+            "commandKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "name": {
+              "$ref": "#/definitions/anything"
+            },
+            "summary": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "safeForSimultaneousRushProcesses": {
+              "$ref": "#/definitions/anything"
+            },
+            "shellCommand": {
+              "$ref": "#/definitions/anything"
+            },
+            "autoinstallerName": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -167,7 +217,9 @@
       "description": "A command that contains multiple phases, that are run separately for each project",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseCommand" },
+        {
+          "$ref": "#/definitions/baseCommand"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -241,22 +293,40 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "commandKind": { "$ref": "#/definitions/anything" },
-            "name": { "$ref": "#/definitions/anything" },
-            "summary": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
-
-            "enableParallelism": { "$ref": "#/definitions/anything" },
-            "incremental": { "$ref": "#/definitions/anything" },
-            "phases": { "$ref": "#/definitions/anything" },
-            "watchOptions": { "$ref": "#/definitions/anything" },
-            "installOptions": { "$ref": "#/definitions/anything" }
+            "commandKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "name": {
+              "$ref": "#/definitions/anything"
+            },
+            "summary": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "safeForSimultaneousRushProcesses": {
+              "$ref": "#/definitions/anything"
+            },
+            "enableParallelism": {
+              "$ref": "#/definitions/anything"
+            },
+            "incremental": {
+              "$ref": "#/definitions/anything"
+            },
+            "phases": {
+              "$ref": "#/definitions/anything"
+            },
+            "watchOptions": {
+              "$ref": "#/definitions/anything"
+            },
+            "installOptions": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
     },
-
     "phase": {
       "title": "Phase",
       "description": "A phase, used in the phased command feature.",
@@ -269,7 +339,6 @@
           "description": "The name of the phase. Note that this value must start with the \"_phase:\" prefix.",
           "type": "string"
         },
-
         "dependencies": {
           "title": "Dependencies",
           "description": "The dependencies of this phase.",
@@ -296,19 +365,16 @@
             }
           }
         },
-
         "ignoreMissingScript": {
           "title": "Ignore Missing Script",
           "description": "Normally Rush requires that each project's package.json has a \"scripts\" entry matching the phase name. To disable this check, set \"ignoreMissingScript\" to true.",
           "type": "boolean"
         },
-
         "allowWarningsOnSuccess": {
           "title": "Allow Warnings on Success",
           "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.",
           "type": "boolean"
         },
-
         "missingScriptBehavior": {
           "title": "Missing Script Behavior",
           "description": "What should happen if a project's package.json does not have a \"scripts\" entry matching the phase name, or it is an empty string. Supersedes \"ignoreMissingScript\". Defaults to \"error\".",
@@ -317,7 +383,6 @@
         }
       }
     },
-
     "baseParameter": {
       "type": "object",
       "additionalProperties": true,
@@ -374,7 +439,9 @@
       "description": "A custom command-line parameter whose presence acts as an on/off switch",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -388,13 +455,27 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -404,7 +485,9 @@
       "description": "A custom command-line parameter whose value is interpreted as a string",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -424,15 +507,30 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            },
+            "argumentName": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -442,7 +540,9 @@
       "description": "A custom command-line parameter whose argument must be chosen from a list of allowable alternatives",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -485,16 +585,33 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "alternatives": { "$ref": "#/definitions/anything" },
-            "defaultValue": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            },
+            "alternatives": {
+              "$ref": "#/definitions/anything"
+            },
+            "defaultValue": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -504,7 +621,9 @@
       "description": "A custom command-line parameter whose value is interpreted as a integer",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -524,15 +643,30 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            },
+            "argumentName": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -542,7 +676,9 @@
       "description": "A custom command-line parameter whose value is interpreted as a list of string",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -562,15 +698,30 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            },
+            "argumentName": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -580,7 +731,9 @@
       "description": "A custom command-line parameter whose value is interpreted as a list of integer",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -600,15 +753,30 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "argumentName": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            },
+            "argumentName": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
@@ -618,7 +786,9 @@
       "description": "A custom command-line parameter whose argument must be chosen from a list of allowable alternatives, value is interpreted as a list of choice",
       "type": "object",
       "allOf": [
-        { "$ref": "#/definitions/baseParameter" },
+        {
+          "$ref": "#/definitions/baseParameter"
+        },
         {
           "type": "object",
           "additionalProperties": true,
@@ -661,31 +831,45 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "parameterKind": { "$ref": "#/definitions/anything" },
-            "longName": { "$ref": "#/definitions/anything" },
-            "shortName": { "$ref": "#/definitions/anything" },
-            "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" },
-            "associatedPhases": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" },
-
-            "alternatives": { "$ref": "#/definitions/anything" },
-            "defaultValue": { "$ref": "#/definitions/anything" }
+            "parameterKind": {
+              "$ref": "#/definitions/anything"
+            },
+            "longName": {
+              "$ref": "#/definitions/anything"
+            },
+            "shortName": {
+              "$ref": "#/definitions/anything"
+            },
+            "description": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedCommands": {
+              "$ref": "#/definitions/anything"
+            },
+            "associatedPhases": {
+              "$ref": "#/definitions/anything"
+            },
+            "required": {
+              "$ref": "#/definitions/anything"
+            },
+            "alternatives": {
+              "$ref": "#/definitions/anything"
+            },
+            "defaultValue": {
+              "$ref": "#/definitions/anything"
+            }
           }
         }
       ]
     }
   },
-
   "type": "object",
   "additionalProperties": false,
-
   "properties": {
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
     },
-
     "commands": {
       "title": "Custom Commands",
       "description": "A list of custom commands that affect all projects in the repository.  These commands are invoked from the Rush command line.",
@@ -693,13 +877,18 @@
       "items": {
         "type": "object",
         "oneOf": [
-          { "$ref": "#/definitions/bulkCommand" },
-          { "$ref": "#/definitions/globalCommand" },
-          { "$ref": "#/definitions/phasedCommand" }
+          {
+            "$ref": "#/definitions/bulkCommand"
+          },
+          {
+            "$ref": "#/definitions/globalCommand"
+          },
+          {
+            "$ref": "#/definitions/phasedCommand"
+          }
         ]
       }
     },
-
     "phases": {
       "title": "Phases",
       "description": "A list of phases that are associated with phased commands.",
@@ -708,7 +897,6 @@
         "$ref": "#/definitions/phase"
       }
     },
-
     "parameters": {
       "title": "Custom Parameters",
       "description": "A list of custom command-line parameters that can be associated with custom commands and Rush's built-in commands.",
@@ -716,13 +904,27 @@
       "items": {
         "type": "object",
         "oneOf": [
-          { "$ref": "#/definitions/flagParameter" },
-          { "$ref": "#/definitions/choiceParameter" },
-          { "$ref": "#/definitions/stringParameter" },
-          { "$ref": "#/definitions/integerParameter" },
-          { "$ref": "#/definitions/stringListParameter" },
-          { "$ref": "#/definitions/integerListParameter" },
-          { "$ref": "#/definitions/choiceListParameter" }
+          {
+            "$ref": "#/definitions/flagParameter"
+          },
+          {
+            "$ref": "#/definitions/choiceParameter"
+          },
+          {
+            "$ref": "#/definitions/stringParameter"
+          },
+          {
+            "$ref": "#/definitions/integerParameter"
+          },
+          {
+            "$ref": "#/definitions/stringListParameter"
+          },
+          {
+            "$ref": "#/definitions/integerListParameter"
+          },
+          {
+            "$ref": "#/definitions/choiceListParameter"
+          }
         ]
       }
     }

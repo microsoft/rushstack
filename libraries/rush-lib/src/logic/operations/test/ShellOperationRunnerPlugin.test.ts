@@ -109,4 +109,91 @@ describe(ShellOperationRunnerPlugin.name, () => {
     // All projects
     expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
   });
+
+  it('defaultCommand "echo custom defaultCommand" should be set to commandToRun', async () => {
+    const rushJsonFile: string = path.resolve(
+      __dirname,
+      `../../test/customDefaultCommandinBulkRepo/rush.json`
+    );
+    const commandLineJsonFile: string = path.resolve(
+      __dirname,
+      `../../test/customDefaultCommandinBulkRepo/common/config/rush/command-line.json`
+    );
+
+    const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+    const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
+
+    const commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
+
+    const echoCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
+      'echo'
+    )! as IPhasedCommandConfig;
+
+    const fakeCreateOperationsContext: Pick<
+      ICreateOperationsContext,
+      'phaseOriginal' | 'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+    > = {
+      phaseOriginal: echoCommand.phases,
+      phaseSelection: echoCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set(rushConfiguration.projects)
+    };
+
+    const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+
+    // Generates the default operation graph
+    new PhasedOperationPlugin().apply(hooks);
+    // Applies the Shell Operation Runner to selected operations
+    new ShellOperationRunnerPlugin().apply(hooks);
+
+    const operations: Set<Operation> = await hooks.createOperations.promise(
+      new Set(),
+      fakeCreateOperationsContext as ICreateOperationsContext
+    );
+    // All projects
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+  });
+
+  it('defaultCommand priority should be lower than script name', async () => {
+    const rushJsonFile: string = path.resolve(
+      __dirname,
+      `../../test/customDefaultCommandinBulkOverrideScriptsRepo/rush.json`
+    );
+    const commandLineJsonFile: string = path.resolve(
+      __dirname,
+      `../../test/customDefaultCommandinBulkOverrideScriptsRepo/common/config/rush/command-line.json`
+    );
+
+    const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+    const commandLineJson: ICommandLineJson = JsonFile.load(commandLineJsonFile);
+
+    const commandLineConfiguration = new CommandLineConfiguration(commandLineJson);
+    const echoCommand: IPhasedCommandConfig = commandLineConfiguration.commands.get(
+      'echo'
+    )! as IPhasedCommandConfig;
+
+    const fakeCreateOperationsContext: Pick<
+      ICreateOperationsContext,
+      'phaseOriginal' | 'phaseSelection' | 'projectSelection' | 'projectsInUnknownState'
+    > = {
+      phaseOriginal: echoCommand.phases,
+      phaseSelection: echoCommand.phases,
+      projectSelection: new Set(rushConfiguration.projects),
+      projectsInUnknownState: new Set(rushConfiguration.projects)
+    };
+
+    const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+
+    // Generates the default operation graph
+    new PhasedOperationPlugin().apply(hooks);
+    // Applies the Shell Operation Runner to selected operations
+    new ShellOperationRunnerPlugin().apply(hooks);
+
+    const operations: Set<Operation> = await hooks.createOperations.promise(
+      new Set(),
+      fakeCreateOperationsContext as ICreateOperationsContext
+    );
+    // All projects
+    expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
+  });
 });

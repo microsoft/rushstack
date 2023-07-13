@@ -65,7 +65,8 @@ function createShellOperations(
         project,
         phase.name,
         customParameterValues,
-        phase.shellCommand
+        phase.shellCommand,
+        phase.defaultCommand
       );
 
       if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
@@ -106,11 +107,12 @@ function getScriptToRun(
   rushProject: RushConfigurationProject,
   commandToRun: string,
   customParameterValues: ReadonlyArray<string>,
-  shellCommand: string | undefined
+  shellCommand: string | undefined,
+  defaultCommand: string | undefined
 ): string | undefined {
   const { scripts } = rushProject.packageJson;
 
-  const rawCommand: string | undefined | null = shellCommand ?? scripts?.[commandToRun];
+  const rawCommand: string | undefined | null = shellCommand ?? scripts?.[commandToRun] ?? defaultCommand;
 
   if (rawCommand === undefined || rawCommand === null) {
     return undefined;
