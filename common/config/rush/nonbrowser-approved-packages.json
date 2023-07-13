@@ -140,7 +140,7 @@
     },
     {
       "name": "@rushstack/heft-node-rig",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-sass-plugin",

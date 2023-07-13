@@ -2822,10 +2822,12 @@ importers:
       '@reduxjs/toolkit': ~1.8.6
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
       '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-web-rig': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/ts-command-line': workspace:*
+      '@types/node': 14.18.36
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
       '@types/react-redux': ~7.1.22
@@ -2855,8 +2857,10 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
+      '@types/node': 14.18.36
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
       '@types/react-redux': 7.1.25

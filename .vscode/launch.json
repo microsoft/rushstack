@@ -69,7 +69,7 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-assistant"
 			],
 			"outFiles": [
 				"${workspaceFolder}/vscode-extensions/rush-vscode-assistant/lib/**/*.js"
