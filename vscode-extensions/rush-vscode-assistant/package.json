@@ -30,6 +30,10 @@
       {
         "command": "extension.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "rushstack.selectWorkspace",
+        "title": "Select workspace"
       }
     ]
   },
@@ -42,7 +46,9 @@
     "react-hook-form": "~7.24.1",
     "react-redux": "~8.0.4",
     "redux": "~4.2.0",
-    "tslib": "~2.3.1"
+    "tslib": "~2.3.1",
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

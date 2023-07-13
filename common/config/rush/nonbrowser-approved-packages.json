@@ -184,7 +184,7 @@
     },
     {
       "name": "@rushstack/node-core-library",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/package-deps-hash",
@@ -212,7 +212,7 @@
     },
     {
       "name": "@rushstack/rush-sdk",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/set-webpack-public-path-plugin",
