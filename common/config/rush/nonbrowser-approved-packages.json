@@ -52,7 +52,7 @@
     },
     {
       "name": "@microsoft/rush-lib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@microsoft/teams-js",

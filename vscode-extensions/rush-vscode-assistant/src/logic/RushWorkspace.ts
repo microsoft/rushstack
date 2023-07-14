@@ -5,7 +5,7 @@ import type { CommandLineAction } from '@rushstack/ts-command-line/lib/providers
 import type * as RushLib from '@rushstack/rush-sdk';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-declare let ___DEV___: boolean;
+// declare let ___DEV___: boolean;
 declare const global: NodeJS.Global &
   typeof globalThis & {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -73,14 +73,14 @@ export class RushWorkspace {
   ): Promise<RushWorkspace | undefined> {
     terminal.writeDebugLine(`initialize from workspaceFolderPaths: ${JSON.stringify(workspaceFolderPaths)}`);
 
-    // if (___DEV___) {
-    //   try {
-    //     terminal.writeLine('[DEV MODE] try to load @microsoft/rush-lib instead of @rushstack/rush-sdk');
-    //     global.___rush___rushLibModule = (await import('@microsoft/rush-lib')) as unknown as typeof RushLib;
-    //   } catch (e) {
-    //     terminal.writeErrorLine(`Failed to load dev rush lib @microsoft/rush-lib`);
-    //   }
-    // }
+    if (true) {
+      try {
+        terminal.writeLine('[DEV MODE] try to load @microsoft/rush-lib instead of @rushstack/rush-sdk');
+        global.___rush___rushLibModule = (await import('@microsoft/rush-lib')) as unknown as typeof RushLib;
+      } catch (e) {
+        terminal.writeErrorLine(`Failed to load dev rush lib @microsoft/rush-lib`);
+      }
+    }
 
     terminal.writeDebugLine(`current workspaceFolderPaths: ${workspaceFolderPaths.join(',')}`);
 
@@ -88,7 +88,8 @@ export class RushWorkspace {
       let rushLib: typeof RushLib | undefined;
       try {
         global.___rush___workingDirectory = folderPath;
-        rushLib = await import('@rushstack/rush-sdk');
+        // rushLib = await import('@rushstack/rush-sdk');
+        rushLib = (await import('@rushstack/rush-sdk')) as unknown as typeof RushLib;
         if (!rushLib) {
           continue;
         }
@@ -107,15 +108,19 @@ export class RushWorkspace {
   }
 
   public static async selectWorkspace(): Promise<RushWorkspace | undefined> {
-    const Uris: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
-      canSelectFolders: true,
-      canSelectFiles: false,
-      canSelectMany: false,
-      openLabel: 'Select workspace folder'
-    });
-    if (Uris && Uris[0]) {
-      return await RushWorkspace.initializeFromWorkspaceFolderPathsAsync([Uris[0].fsPath]);
+    // const Uris: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+    //   canSelectFolders: true,
+    //   canSelectFiles: false,
+    //   canSelectMany: false,
+    //   openLabel: 'Select workspace folder'
+    // });
+    if (vscode.workspace.workspaceFolders !== undefined) {
+      const wf = vscode.workspace.workspaceFolders[0].uri.path;
+      return await RushWorkspace.initializeFromWorkspaceFolderPathsAsync([wf]);
     }
+    // if (Uris && Uris[0]) {
+    //   return await RushWorkspace.initializeFromWorkspaceFolderPathsAsync([Uris[0].fsPath]);
+    // }
     return undefined;
   }
 

@@ -66,6 +66,7 @@
     "html-webpack-plugin": "~5.5.0",
     "typescript": "~5.0.4",
     "webpack": "~5.82.1",
-    "webpack-bundle-analyzer": "~4.5.0"
+    "webpack-bundle-analyzer": "~4.5.0",
+    "@microsoft/rush-lib": "workspace:*"
   }
 }

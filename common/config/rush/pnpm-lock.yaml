@@ -2819,6 +2819,7 @@ importers:
 
   ../../vscode-extensions/rush-vscode-assistant:
     specifiers:
+      '@microsoft/rush-lib': workspace:*
       '@reduxjs/toolkit': ~1.8.6
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
@@ -2859,6 +2860,7 @@ importers:
       redux: 4.2.1
       tslib: 2.3.1
     devDependencies:
+      '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
