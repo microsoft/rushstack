@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.1.18",
+      "tag": "@rushstack/heft-lint-plugin_v0.1.18",
+      "date": "Fri, 14 Jul 2023 15:20:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Treat a malformed cache file the same as no cache file (i.e. recheck everything) instead of throwing an error.."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.17",
       "tag": "@rushstack/heft-lint-plugin_v0.1.17",
       "date": "Thu, 13 Jul 2023 00:22:37 GMT",
