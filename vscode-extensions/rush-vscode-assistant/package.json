@@ -24,7 +24,8 @@
     "build": "heft build --clean",
     "build:watch": "heft build --watch",
     "start": "heft start",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
   },
   "contributes": {
     "commands": [
