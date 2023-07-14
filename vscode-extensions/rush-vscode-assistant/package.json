@@ -23,7 +23,8 @@
     "_phase:test": "",
     "build": "heft build --clean",
     "build:watch": "heft build --watch",
-    "start": "heft start"
+    "start": "heft start",
+    "package": "vsce package --no-dependencies"
   },
   "contributes": {
     "commands": [

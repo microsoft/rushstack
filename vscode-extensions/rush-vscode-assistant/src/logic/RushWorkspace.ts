@@ -46,7 +46,7 @@ export class RushWorkspace {
     if (!rushConfiguration) {
       throw new Error('RushConfiguration not found');
     }
-    terminal.writeDebugLine(`rushConfiguration loaded from: ${startingFolder}`);
+    terminal.writeWarningLine(`rushConfiguration loaded from: ${startingFolder}`);
     this._rushConfiguration = rushConfiguration;
 
     if (RushCommandLineParser) {
@@ -71,7 +71,9 @@ export class RushWorkspace {
   public static async initializeFromWorkspaceFolderPathsAsync(
     workspaceFolderPaths: string[]
   ): Promise<RushWorkspace | undefined> {
-    terminal.writeDebugLine(`initialize from workspaceFolderPaths: ${JSON.stringify(workspaceFolderPaths)}`);
+    terminal.writeWarningLine(
+      `initialize from workspaceFolderPaths: ${JSON.stringify(workspaceFolderPaths)}`
+    );
 
     if (true) {
       try {
@@ -82,7 +84,7 @@ export class RushWorkspace {
       }
     }
 
-    terminal.writeDebugLine(`current workspaceFolderPaths: ${workspaceFolderPaths.join(',')}`);
+    terminal.writeWarningLine(`current workspaceFolderPaths: ${workspaceFolderPaths.join(',')}`);
 
     for (const folderPath of workspaceFolderPaths) {
       let rushLib: typeof RushLib | undefined;
@@ -90,6 +92,7 @@ export class RushWorkspace {
         global.___rush___workingDirectory = folderPath;
         // rushLib = await import('@rushstack/rush-sdk');
         rushLib = (await import('@rushstack/rush-sdk')) as unknown as typeof RushLib;
+        terminal.writeWarningLine('rush lib: ', String(rushLib));
         if (!rushLib) {
           continue;
         }
@@ -99,7 +102,7 @@ export class RushWorkspace {
       try {
         return new RushWorkspace({ rushLib, startingFolder: folderPath });
       } catch (e) {
-        terminal.writeDebugLine(`Failed to initialize workspace from ${folderPath}: ${e}`);
+        terminal.writeWarningLine(`Failed to initialize workspace from ${folderPath}: ${e}`);
         continue;
       }
     }
