@@ -94,9 +94,18 @@ export abstract class LinterBase<TLintResult> {
 
     let linterCacheData: ILinterCacheData | undefined;
     try {
-      linterCacheData = await JsonFile.loadAsync(linterCacheFilePath);
+      const cacheFileContent: string = await FileSystem.readFileAsync(linterCacheFilePath);
+      if (cacheFileContent) {
+        // Using JSON.parse instead of JsonFile because it is faster for plain JSON
+        // This is safe because it is a machine-generated file that will not be edited by a human.
+        // Also so that we can check for empty file first.
+        linterCacheData = JSON.parse(cacheFileContent);
+      }
     } catch (e) {
       if (FileSystem.isNotExistError(e as Error)) {
+        linterCacheData = undefined;
+      } else if (e instanceof SyntaxError) {
+        this._terminal.writeVerboseLine(`Error parsing ${linterCacheFilePath}: ${e}; ignoring cached data.`);
         linterCacheData = undefined;
       } else {
         throw e;
