@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Fix the \"excludeFiles\" configuraiton option.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
