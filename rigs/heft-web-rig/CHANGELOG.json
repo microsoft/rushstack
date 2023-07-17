@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.18.18",
+      "tag": "@rushstack/heft-web-rig_v0.18.18",
+      "date": "Mon, 17 Jul 2023 15:20:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.11.21`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.17",
       "tag": "@rushstack/heft-web-rig_v0.18.17",
       "date": "Fri, 14 Jul 2023 15:20:45 GMT",
