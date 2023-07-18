@@ -39,6 +39,7 @@ async function parseTarball(
   const parsedTarball: IParsedTarball = await new Promise(
     (resolve: (result: IParsedTarball) => void, reject: (err: Error) => void) => {
       localWorker.once('message', ({ requestId, status, error, value }) => {
+        pool.checkinWorker(localWorker);
         if (status === 'error') {
           return reject(error);
         }
@@ -60,8 +61,6 @@ async function parseTarball(
   );
   // eslint-disable-next-line no-console
   console.timeEnd('parse');
-
-  pool.checkinWorker(localWorker);
 
   // eslint-disable-next-line no-console
   console.log(`Buffer length: ${parsedTarball.buffer.byteLength}`);
@@ -91,6 +90,7 @@ async function extractTarballAsync(
   console.time('extract');
   await new Promise((resolve: (result: boolean) => void, reject: (err: Error) => void) => {
     localWorker.once('message', ({ requestId, status, error, value }) => {
+      pool.checkinWorker(localWorker);
       if (status === 'error') {
         return reject(error);
       }
@@ -113,8 +113,6 @@ async function extractTarballAsync(
   });
   // eslint-disable-next-line no-console
   console.timeEnd('extract');
-
-  pool.checkinWorker(localWorker);
 }
 
 const workerPool: WorkerPool = new WorkerPool({

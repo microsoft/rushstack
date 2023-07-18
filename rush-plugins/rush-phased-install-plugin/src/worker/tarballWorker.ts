@@ -1,5 +1,6 @@
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { parentPort } from 'node:worker_threads';
 
 import { gunzipSync, type IDecompressResult } from '../gunzipSync';
@@ -146,6 +147,11 @@ function parseTarball(buffer: Buffer): IParseResult {
         // If the prefix was not trimmed entirely (or absent), need to join with the remaining filename
         fileName = `${prefix}/${fileName}`;
       }
+    }
+
+    if (fileName.includes('./')) {
+      // Bizarre edge case
+      fileName = path.posix.join('/', fileName).slice(1);
     }
 
     // Values '\0' and '0' are normal files.
