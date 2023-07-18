@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack4-module-minifier-plugin",
+      "comment": "Fix calculation of rendered module positions to properly reflect character codes, not raw bytes.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-module-minifier-plugin"
+}
