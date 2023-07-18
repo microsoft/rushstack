@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Updated semver dependency",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

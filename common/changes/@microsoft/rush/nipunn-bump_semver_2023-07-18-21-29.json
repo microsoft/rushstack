@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Updated semver dependency",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

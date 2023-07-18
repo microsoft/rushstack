@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "comment": "Updated semver dependency",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-api-extractor-plugin"
+}
