@@ -248,7 +248,7 @@
     },
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
@@ -316,7 +316,7 @@
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/experimental-utils",
@@ -324,7 +324,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -464,7 +464,7 @@
     },
     {
       "name": "glob",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "glob-escape",

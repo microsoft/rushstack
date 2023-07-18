@@ -1,0 +1,32 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
+      "tasksByName": {
+        "typescript": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        }
+      }
+    }
+  }
+  // "eventActions": [
+  //   {
+  //     "actionKind": "deleteGlobs",
+  //     "actionId": "clean-folders",
+  //     "heftEvent": "clean",
+  //     "globsToDelete": ["dist", "lib"]
+  //   }
+  // ],
+
+  // "heftPlugins": [{ "plugin": "@rushstack/heft-webpack5-plugin" }]
+}

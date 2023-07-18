@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@fluentui/react",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@lifaon/path",
@@ -39,6 +39,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@vscode/test-electron",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
@@ -49,6 +53,10 @@
     {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "mocha",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "office-ui-fabric-core",
@@ -75,6 +83,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "rush-vscode-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "rxjs",
       "allowedCategories": [ "libraries" ]
     },
@@ -85,6 +97,10 @@
     {
       "name": "update-notifier",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "vsce",
+      "allowedCategories": [ "vscode-extensions" ]
     }
   ]
 }

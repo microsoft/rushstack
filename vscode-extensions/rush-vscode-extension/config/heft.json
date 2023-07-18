@@ -1,0 +1,80 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  // "eventActions": [
+  //   {
+  //     "actionKind": "copyFiles",
+  //     "heftEvent": "pre-compile",
+  //     "actionId": "copy-webview",
+  //     "copyOperations": [
+  //       {
+  //         "sourceFolder": "node_modules/rush-vscode-command-webview/dist",
+  //         "destinationFolders": ["webview/rush-command-webview"],
+  //         "includeGlobs": ["*.{html,js}"]
+  //       }
+  //     ]
+  //   }
+  // ],
+  // "heftPlugins": [
+  //   {
+  //     "plugin": "@rushstack/heft-webpack5-plugin"
+  //   }
+  // ]
+
+  // "aliasesByName": {
+  //   "start": {
+  //     "actionName": "build-watch",
+  //     "defaultParameters": ["--serve"]
+  //   }
+  // },
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
+      "tasksByName": {
+        "typescript": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-typescript-plugin"
+          }
+        },
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        },
+        "post-compile-copy": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginName": "copy-files-plugin",
+            "pluginPackage": "@rushstack/heft",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "node_modules/rush-vscode-command-webview/dist",
+                  "destinationFolders": ["webview/rush-command-webview"],
+                  "includeGlobs": ["*.{html,js}"]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+    // "pre-compile": {
+    //   "tasksByName": {
+
+    //     "copy-webview": {
+
+    //       "copyOperations": [
+    //         {
+    //           "sourceFolder": "node_modules/rush-vscode-command-webview/dist",
+    //           "destinationFolders": ["webview/rush-command-webview"],
+    //           "includeGlobs": ["*.{html,js}"]
+    //         }
+    //       ]
+    //     }
+    //   }
+    // }
+  }
+}
