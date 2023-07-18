@@ -8,7 +8,7 @@
     "directory": "apps/rush-sdk"
   },
   "homepage": "https://rushjs.io",
-  "main": "lib-shim/index.js",
+  "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft build --clean",

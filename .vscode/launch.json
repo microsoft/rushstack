@@ -74,7 +74,7 @@
 			"outFiles": [
 				"${workspaceFolder}/vscode-extensions/rush-vscode-assistant/lib/**/*.js"
 			],
-			"preLaunchTask": "npm: watch"
+			"preLaunchTask": "npm: _phase:build"
 		}
 	]
 }
