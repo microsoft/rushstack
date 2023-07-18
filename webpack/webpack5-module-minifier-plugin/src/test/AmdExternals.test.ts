@@ -18,7 +18,7 @@ async function amdExternalsTest(minifier: IModuleMinifier): Promise<void> {
     {
       '/package.json': '{}',
       '/entry.js': `// A comment\nconsole.log("Do stuff");import(/* webpackChunkName: 'async' */ './async.js').then(mod => mod.foo());`,
-      '/async.js': `// @license MIT\nimport bar from 'bar';\nimport baz from 'baz';\nexport function foo() { bar.a(); baz.b(); }`
+      '/async.js': `// @license MIT\nimport bar from 'bar';\nimport baz from 'baz';\nexport function foo() { bar.a(); baz.b(); }console.log("Test character lengths: \ufeff\uffef")`
     },
     '/src'
   );
