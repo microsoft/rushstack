@@ -67,7 +67,7 @@ export function rehydrateAsset(
     lastStart = CHUNK_MODULE_REGEX.lastIndex;
 
     if (moduleSource) {
-      const charLength: number = moduleSource.source.size();
+      const charLength: number = moduleSource.source.source().length;
 
       if (emitRenderInfo) {
         asset.renderInfo.set(moduleSource.id, {
