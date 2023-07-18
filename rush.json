@@ -1073,6 +1073,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-phased-install-plugin",
+      "projectFolder": "rush-plugins/rush-phased-install-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
