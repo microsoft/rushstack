@@ -3,7 +3,7 @@ import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
 import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel';
 
-import type { CommandLineAction } from 'rush-vscode-command-webview';
+import { CommandLineAction } from 'rush-vscode-command-webview';
 
 interface IRushCommandParams {
   label: string;
@@ -12,11 +12,11 @@ interface IRushCommandParams {
 }
 
 class RushCommand extends vscode.TreeItem {
-  public readonly commandLineAction: CommandLineAction;
+  // public readonly commandLineAction: CommandLineAction;
   public constructor({ label, collapsibleState, commandLineAction }: IRushCommandParams) {
     super(label, collapsibleState);
     this.contextValue = 'rushCommand';
-    this.commandLineAction = commandLineAction;
+    // this.commandLineAction = commandLineAction;
     this.command = {
       title: 'Run Rush Command',
       command: 'rushstack.rushCommands.runRushCommand',
@@ -70,7 +70,7 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
 
   public async openParameterViewPanelAsync(element: RushCommand): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    return RushCommandWebViewPanel.getInstance(this._context).reveal(element.commandLineAction);
+    return RushCommandWebViewPanel.getInstance(this._context).reveal('');
   }
 
   public async runRushCommandAsync(element?: RushCommand): Promise<void> {
@@ -111,26 +111,34 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   }
 
   public getChildren(element?: vscode.TreeItem): Thenable<RushCommand[]> {
+    console.log('children: ', this._commandLineActions);
     if (!this._commandLineActions) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showInformationMessage('No RushProjects in empty workspace');
       return Promise.resolve([]);
     }
 
-    // top-level
-    if (!element) {
-      return Promise.resolve(
-        this._commandLineActions.map(
-          (commandLineAction) =>
-            new RushCommand({
-              label: commandLineAction.actionName,
-              collapsibleState: vscode.TreeItemCollapsibleState.None,
-              commandLineAction
-            })
-        )
-      );
-    }
+    return Promise.resolve([
+      {
+        label: 'Test label',
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      }
+    ]);
 
-    return Promise.resolve([]);
+    // top-level
+    // if (!element) {
+    //   return Promise.resolve(
+    //     this._commandLineActions.map(
+    //       (commandLineAction) =>
+    //         new RushCommand({
+    //           label: commandLineAction.actionName,
+    //           collapsibleState: vscode.TreeItemCollapsibleState.None,
+    //           commandLineAction
+    //         })
+    //     )
+    //   );
+    // }
+
+    // return Promise.resolve([]);
   }
 }

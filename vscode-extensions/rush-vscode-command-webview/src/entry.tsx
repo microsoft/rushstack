@@ -53,4 +53,6 @@ if ($root) {
     </ThemeProvider>,
     $root
   );
+} else {
+  console.error("error can't find root!");
 }

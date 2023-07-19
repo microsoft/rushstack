@@ -14,7 +14,7 @@
   "main": "./dist/extension.js",
   "scripts": {
     "build": "heft build --clean",
-    "build:watch": "heft build --watch",
+    "build:watch": "heft build-watch",
     "copy-webview": "node scripts/copy-webview.js",
     "vscode:prepublish": "heft build --clean --production",
     "package": "vsce package --no-dependencies",

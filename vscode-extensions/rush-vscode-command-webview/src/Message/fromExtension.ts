@@ -12,6 +12,7 @@ export const fromExtensionListener: (event: MessageEvent<IFromExtensionMessage>)
   event: MessageEvent<IFromExtensionMessage>
 ) => {
   const message: IFromExtensionMessage = event.data;
+  console.log('message: ', message);
   switch (message.command) {
     case 'initialize': {
       store.dispatch(

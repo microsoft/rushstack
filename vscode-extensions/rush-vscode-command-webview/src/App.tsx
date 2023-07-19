@@ -22,14 +22,18 @@ const verticalGapStackTokens: IStackTokens = {
 
 export const App = (): JSX.Element => {
   useEffect(() => {
+    console.log('initializing app in effect');
     window.addEventListener('message', fromExtensionListener);
     return () => {
       window.removeEventListener('message', fromExtensionListener);
     };
   }, []);
 
+  console.log('initializing app');
+
   return (
     <Stack styles={stackStyles} tokens={verticalGapStackTokens}>
+      <h4>test item</h4>
       <Stack.Item style={{ zIndex: 1 }}>
         <Toolbar />
       </Stack.Item>

@@ -56,7 +56,7 @@ class RushProjectScript extends vscode.TreeItem {
     this.scriptValue = scriptValue;
 
     // this.tooltip = '';
-    // this.description = '';
+    this.description = 'test descriptiosn';
   }
 }
 

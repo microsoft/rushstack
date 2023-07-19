@@ -73,8 +73,8 @@
 			],
 			"outFiles": [
 				"${workspaceFolder}/vscode-extensions/rush-vscode-assistant/lib/**/*.js"
-			],
-			"preLaunchTask": "npm: _phase:build"
+			]
+			// "preLaunchTask": "npm: _phase:build"
 		},
 		{
 			"name": "Launch Rush Extension",
@@ -86,8 +86,8 @@
 			],
 			"outFiles": [
 				"${workspaceFolder}/vscode-extensions/rush-vscode-extension/dist/**/*.js"
-			],
-			"preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
+			]
+			// "preLaunchTask": "npm: build:watch - vscode-extensions/rush-vscode-extension"
 		}
 	]
 }

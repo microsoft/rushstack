@@ -14,7 +14,7 @@
     "_phase:build": "heft build --clean",
     "_phase:test": "",
     "build": "heft build --clean",
-    "build:watch": "heft build --watch",
+    "build:watch": "heft build-watch",
     "start": "heft start"
   },
   "dependencies": {

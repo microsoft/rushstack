@@ -30,8 +30,8 @@ export class RushCommandWebViewPanel {
     return RushCommandWebViewPanel._instance;
   }
 
-  public reveal(commandLineAction: CommandLineAction): void {
-    const parameters: ICommandLineParameter[] = commandLineAction.parameters
+  public reveal(commandLineAction: string): void {
+    const parameters: ICommandLineParameter[] = [] //commandLineAction.parameters
       .slice()
       .map((parameter: CommandLineParameter) => {
         const o: ICommandLineParameter = {
@@ -44,7 +44,7 @@ export class RushCommandWebViewPanel {
       });
     const state: IRootState = {
       parameter: {
-        commandName: commandLineAction.actionName,
+        commandName: commandLineAction,
         parameters,
         argsKV: {},
         searchText: ''
@@ -112,6 +112,7 @@ export class RushCommandWebViewPanel {
   }
 
   private _getWebviewContent(state: IRootState): string {
+    console.log('loading rush command webview html and bundle');
     let html: string = FileSystem.readFile(
       path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
     );
