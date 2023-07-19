@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Update the copy-files-plugin and delete-files-plugin to specify the plugin option \"sourcePath\" as a required property",
-      "type": "patch"
+      "comment": "BREAKING CHANGE: Update the heft.json \"cleanFiles\" property and the delete-files-plugin to delete the contents of folders specified by \"sourcePath\" instead of deleting the folders themselves. To delete the folders, use the \"includeGlobs\" property to specify the folder to delete.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft"
