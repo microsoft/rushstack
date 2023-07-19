@@ -5,7 +5,11 @@ import * as path from 'path';
 import { AlreadyExistsBehavior, FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
-import { getFilePathsAsync, type IFileSelectionSpecifier } from './FileGlobSpecifier';
+import {
+  normalizeFileSelectionSpecifier,
+  getFilePathsAsync,
+  type IFileSelectionSpecifier
+} from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
@@ -67,11 +71,13 @@ interface ICopyDescriptor {
 }
 
 export async function copyFilesAsync(
+  rootPath: string,
   copyOperations: Iterable<ICopyOperation>,
   terminal: ITerminal,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
   const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
+    rootPath,
     copyOperations,
     watchFileSystemAdapter
   );
@@ -80,6 +86,7 @@ export async function copyFilesAsync(
 }
 
 async function _getCopyDescriptorsAsync(
+  rootPath: string,
   copyConfigurations: Iterable<ICopyOperation>,
   fs: WatchFileSystemAdapter | undefined
 ): Promise<Map<string, ICopyDescriptor>> {
@@ -90,9 +97,12 @@ async function _getCopyDescriptorsAsync(
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
+      normalizeFileSelectionSpecifier(rootPath, copyConfiguration);
+
       // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
-      // and the filename in "includeGlobs"
-      const sourceFolder: string | undefined = copyConfiguration.sourcePath;
+      // and the filename in "includeGlobs". Also, we know that the sourcePath will be set because of the above
+      // call to normalizeFileSelectionSpecifier
+      const sourceFolder: string = copyConfiguration.sourcePath!;
       const sourceFilePaths: Set<string> | undefined = await getFilePathsAsync(copyConfiguration, fs);
 
       // Dedupe and throw if a double-write is detected
@@ -103,7 +113,7 @@ async function _getCopyDescriptorsAsync(
             destinationFolderPath,
             copyConfiguration.flatten
               ? path.basename(sourceFilePath)
-              : path.relative(sourceFolder!, sourceFilePath)
+              : path.relative(sourceFolder, sourceFilePath)
           );
 
           // Throw if a duplicate copy target with a different source or options is specified

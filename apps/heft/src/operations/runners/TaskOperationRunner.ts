@@ -18,11 +18,7 @@ import type {
 } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import {
-  type IGlobOptions,
-  normalizeFileSelectionSpecifier,
-  watchGlobAsync
-} from '../../plugins/FileGlobSpecifier';
+import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
 import { type IWatchedFileState, WatchFileSystemAdapter } from '../../utilities/WatchFileSystemAdapter';
 
 export interface ITaskOperationRunnerOptions {
@@ -99,12 +95,6 @@ export class TaskOperationRunner implements IOperationRunner {
         copyOperations: new Set(),
         deleteOperations: new Set()
       });
-
-      for (const copyOperation of fileOperations.copyOperations) {
-        // Consolidate fileExtensions, includeGlobs, excludeGlobs
-        normalizeFileSelectionSpecifier(copyOperation);
-      }
-
       this._fileOperations = fileOperations;
     }
 
@@ -178,16 +168,20 @@ export class TaskOperationRunner implements IOperationRunner {
 
     if (this._fileOperations) {
       const { copyOperations, deleteOperations } = this._fileOperations;
+      const rootPath: string = this._options.internalHeftSession.heftConfiguration.buildFolderPath;
 
       await Promise.all([
         copyOperations.size > 0
           ? copyFilesAsync(
+              rootPath,
               copyOperations,
               logger.terminal,
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),
-        deleteOperations.size > 0 ? deleteFilesAsync(deleteOperations, logger.terminal) : Promise.resolve()
+        deleteOperations.size > 0
+          ? deleteFilesAsync(rootPath, deleteOperations, logger.terminal)
+          : Promise.resolve()
       ]);
     }
 

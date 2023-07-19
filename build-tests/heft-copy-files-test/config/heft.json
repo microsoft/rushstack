@@ -46,13 +46,11 @@
               "copyOperations": [
                 {
                   "sourcePath": "src",
-                  "destinationFolders": ["out-all"],
-                  "includeGlobs": ["**/*"]
+                  "destinationFolders": ["out-all"]
                 },
                 {
                   "sourcePath": "src",
                   "destinationFolders": ["out-all-linked"],
-                  "includeGlobs": ["**/*"],
                   "hardlink": true
                 },
                 {
@@ -64,8 +62,7 @@
                 {
                   "sourcePath": "src",
                   "destinationFolders": ["out-all-except-for-images"],
-                  "excludeGlobs": ["**/*.png", "**/*.jpg"],
-                  "includeGlobs": ["**/*"]
+                  "excludeGlobs": ["**/*.png", "**/*.jpg"]
                 },
                 {
                   "sourcePath": "src",

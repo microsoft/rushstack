@@ -19,7 +19,7 @@ export interface IFileSelectionSpecifier {
    * fileExtensions, excludeGlobs, or includeGlobs are specified, the sourcePath is assumed
    * to be a folder. If it is not a folder, an error will be thrown.
    */
-  sourcePath: string;
+  sourcePath?: string;
 
   /**
    * File extensions that should be included from the source folder. Only supported when the sourcePath
@@ -161,7 +161,13 @@ export async function getFilePathsAsync(
   return new Set(rawFiles);
 }
 
-export function normalizeFileSelectionSpecifier(fileGlobSpecifier: IFileSelectionSpecifier): void {
+export function normalizeFileSelectionSpecifier(
+  rootPath: string,
+  fileGlobSpecifier: IFileSelectionSpecifier
+): void {
+  fileGlobSpecifier.sourcePath = fileGlobSpecifier.sourcePath
+    ? path.resolve(rootPath, fileGlobSpecifier.sourcePath)
+    : rootPath;
   fileGlobSpecifier.includeGlobs = getIncludedGlobPatterns(fileGlobSpecifier);
 }
 

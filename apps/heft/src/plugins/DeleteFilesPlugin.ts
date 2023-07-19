@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
@@ -25,20 +24,25 @@ interface IDeleteFilesPluginOptions {
   deleteOperations: IDeleteOperation[];
 }
 
-async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperation>): Promise<Set<string>> {
+async function _getPathsToDeleteAsync(
+  rootPath: string,
+  deleteOperations: Iterable<IDeleteOperation>
+): Promise<Set<string>> {
   const pathsToDelete: Set<string> = new Set();
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
+      normalizeFileSelectionSpecifier(rootPath, deleteOperation);
+
       if (
         !deleteOperation.fileExtensions?.length &&
         !deleteOperation.includeGlobs?.length &&
         !deleteOperation.excludeGlobs?.length
       ) {
-        // If no globs or file extensions are provided add the path to the set of paths to delete
-        pathsToDelete.add(deleteOperation.sourcePath);
+        // If no globs or file extensions are provided add the path to the set of paths to delete. We know
+        // that sourcePath is defined because of the above call to normalizeFileSelectionSpecifier.
+        pathsToDelete.add(deleteOperation.sourcePath!);
       } else {
-        normalizeFileSelectionSpecifier(deleteOperation);
         // Glob the files under the source path and add them to the set of files to delete
         const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
         for (const sourceFilePath of sourceFilePaths) {
@@ -53,10 +57,11 @@ async function _getPathsToDeleteAsync(deleteOperations: Iterable<IDeleteOperatio
 }
 
 export async function deleteFilesAsync(
+  rootPath: string,
   deleteOperations: Iterable<IDeleteOperation>,
   terminal: ITerminal
 ): Promise<void> {
-  const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(deleteOperations);
+  const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(rootPath, deleteOperations);
   await _deleteFilesInnerAsync(pathsToDelete, terminal);
 }
 
@@ -97,20 +102,6 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, terminal: ITer
   }
 }
 
-function* _resolveDeleteOperationPaths(
-  heftConfiguration: HeftConfiguration,
-  deleteOperations: Iterable<IDeleteOperation>
-): IterableIterator<IDeleteOperation> {
-  const { buildFolderPath } = heftConfiguration;
-  for (const deleteOperation of deleteOperations) {
-    const { sourcePath } = deleteOperation;
-    yield {
-      ...deleteOperation,
-      sourcePath: sourcePath ? path.resolve(buildFolderPath, sourcePath) : buildFolderPath
-    };
-  }
-}
-
 const PLUGIN_NAME: 'delete-files-plugin' = 'delete-files-plugin';
 
 export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
@@ -122,10 +113,7 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     taskSession.hooks.registerFileOperations.tap(
       PLUGIN_NAME,
       (fileOperations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
-        for (const deleteOperation of _resolveDeleteOperationPaths(
-          heftConfiguration,
-          pluginOptions.deleteOperations
-        )) {
+        for (const deleteOperation of pluginOptions.deleteOperations) {
           fileOperations.deleteOperations.add(deleteOperation);
         }
         return fileOperations;

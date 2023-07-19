@@ -100,7 +100,7 @@ export interface IFileSelectionSpecifier {
     excludeGlobs?: string[];
     fileExtensions?: string[];
     includeGlobs?: string[];
-    sourcePath: string;
+    sourcePath?: string;
 }
 
 // @public

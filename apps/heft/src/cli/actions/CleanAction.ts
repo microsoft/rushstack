@@ -106,7 +106,8 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
     }
 
     // Delete the files
-    await deleteFilesAsync(deleteOperations, this._terminal);
+    const rootPath: string = this._internalHeftSession.heftConfiguration.buildFolderPath;
+    await deleteFilesAsync(rootPath, deleteOperations, this._terminal);
 
     return deleteOperations.length === 0 ? OperationStatus.NoOp : OperationStatus.Success;
   }
