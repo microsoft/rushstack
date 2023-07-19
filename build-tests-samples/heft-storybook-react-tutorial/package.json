@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "heft build --clean",
+    "build": "heft build --clean --storybook",
     "start": "heft build-watch",
     "storybook": "heft build-watch --storybook",
     "build-storybook": "heft build --storybook",
