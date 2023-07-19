@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as fs from 'fs';
 import * as path from 'path';
-import glob, { FileSystemAdapter } from 'fast-glob';
+import glob, { type FileSystemAdapter, type Entry } from 'fast-glob';
 
 import { Async } from '@rushstack/node-core-library';
 
@@ -71,6 +72,12 @@ export interface IGlobOptions {
   dot?: boolean;
 }
 
+export interface IGetFileSelectionSpecifierPathsOptions {
+  fileGlobSpecifier: IFileSelectionSpecifier;
+  includeFolders?: boolean;
+  fileSystemAdapter?: FileSystemAdapter;
+}
+
 /**
  * Glob a set of files and return a list of paths that match the provided patterns.
  *
@@ -129,36 +136,46 @@ export async function watchGlobAsync(
   return results;
 }
 
-export async function getFilePathsAsync(
-  fileGlobSpecifier: IFileSelectionSpecifier,
-  fs?: FileSystemAdapter
-): Promise<Set<string>> {
-  const rawFiles: string[] = await glob(fileGlobSpecifier.includeGlobs!, {
-    fs,
+export async function getFileSelectionSpecifierPathsAsync(
+  options: IGetFileSelectionSpecifierPathsOptions
+): Promise<Map<string, fs.Dirent>> {
+  const { fileGlobSpecifier, includeFolders, fileSystemAdapter } = options;
+  const rawEntries: Entry[] = await glob(fileGlobSpecifier.includeGlobs!, {
+    fs: fileSystemAdapter,
     cwd: fileGlobSpecifier.sourcePath,
     ignore: fileGlobSpecifier.excludeGlobs,
     dot: true,
-    absolute: true
+    absolute: true,
+    onlyFiles: !includeFolders,
+    stats: true
   });
 
-  if (fs && isWatchFileSystemAdapter(fs)) {
-    const changedFiles: Set<string> = new Set();
+  let results: Map<string, fs.Dirent>;
+  if (fileSystemAdapter && isWatchFileSystemAdapter(fileSystemAdapter)) {
+    results = new Map();
     await Async.forEachAsync(
-      rawFiles,
-      async (file: string) => {
-        const state: IWatchedFileState = await fs.getStateAndTrackAsync(path.normalize(file));
+      rawEntries,
+      async (entry: Entry) => {
+        const { path: filePath, dirent } = entry;
+        if (entry.dirent.isDirectory()) {
+          return;
+        }
+        const state: IWatchedFileState = await fileSystemAdapter.getStateAndTrackAsync(
+          path.normalize(filePath)
+        );
         if (state.changed) {
-          changedFiles.add(file);
+          results.set(filePath, dirent);
         }
       },
       {
         concurrency: 20
       }
     );
-    return changedFiles;
+  } else {
+    results = new Map(rawEntries.map((entry) => [entry.path, entry.dirent]));
   }
 
-  return new Set(rawFiles);
+  return results;
 }
 
 export function normalizeFileSelectionSpecifier(

@@ -5,11 +5,11 @@
   "phasesByName": {
     "build": {
       "cleanFiles": [
-        { "sourcePath": "dist" },
-        { "sourcePath": "lib" },
-        { "sourcePath": "lib-commonjs" },
-        { "sourcePath": "temp" }
+        {
+          "includeGlobs": ["dist", "lib", "lib-commonjs", "temp"]
+        }
       ],
+
       "tasksByName": {
         "typescript": {
           "taskPlugin": {

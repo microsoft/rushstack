@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as fs from 'fs';
 import * as path from 'path';
 import { AlreadyExistsBehavior, FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
 import {
   normalizeFileSelectionSpecifier,
-  getFilePathsAsync,
+  getFileSelectionSpecifierPathsAsync,
   type IFileSelectionSpecifier
 } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -93,7 +94,7 @@ function _normalizeCopyOperation(rootPath: string, copyOperation: ICopyOperation
 async function _getCopyDescriptorsAsync(
   rootPath: string,
   copyConfigurations: Iterable<ICopyOperation>,
-  fs: WatchFileSystemAdapter | undefined
+  fileSystemAdapter: WatchFileSystemAdapter | undefined
 ): Promise<Map<string, ICopyDescriptor>> {
   // Create a map to deduplicate and prevent double-writes
   // resolvedDestinationFilePath -> descriptor
@@ -108,11 +109,15 @@ async function _getCopyDescriptorsAsync(
       // and the filename in "includeGlobs". Also, we know that the sourcePath will be set because of the above
       // call to _normalizeCopyOperation
       const sourceFolder: string = copyConfiguration.sourcePath!;
-      const sourceFilePaths: Set<string> | undefined = await getFilePathsAsync(copyConfiguration, fs);
+      const sourceFiles: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
+        fileGlobSpecifier: copyConfiguration,
+        fileSystemAdapter
+      });
 
       // Dedupe and throw if a double-write is detected
       for (const destinationFolderPath of copyConfiguration.destinationFolders) {
-        for (const sourceFilePath of sourceFilePaths!) {
+        // We only need to care about the keys of the map since we know all the keys are paths to files
+        for (const sourceFilePath of sourceFiles.keys()) {
           // Only include the relative path from the sourceFolder if flatten is false
           const resolvedDestinationPath: string = path.resolve(
             destinationFolderPath,

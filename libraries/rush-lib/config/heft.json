@@ -9,6 +9,8 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-esnext"] }],
+
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],
