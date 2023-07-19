@@ -130,6 +130,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           for (const set of disjointSet.getAllSets()) {
             if (cobuildConfiguration?.cobuildEnabled && cobuildConfiguration.cobuildContextId) {
+              // Generates cluster id, cluster id comes from the project folder and phase name of all operations in the same cluster.
               const hash: crypto.Hash = crypto.createHash('sha1');
               for (const operation of set) {
                 const { associatedPhase: phase, associatedProject: project } = operation;
@@ -141,6 +142,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 }
               }
               const cobuildClusterId: string = hash.digest('hex');
+
+              // Assign same cluster id to all operations in the same cluster.
               for (const operation of set) {
                 const { runner } = operation;
                 if (runner instanceof ShellOperationRunner) {
