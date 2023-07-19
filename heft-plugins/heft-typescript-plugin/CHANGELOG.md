@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Thu, 13 Jul 2023 00:22:37 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jul 2023 00:20:31 GMT and should not be manually modified.
+
+## 0.1.18
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
 
 ## 0.1.17
 Thu, 13 Jul 2023 00:22:37 GMT

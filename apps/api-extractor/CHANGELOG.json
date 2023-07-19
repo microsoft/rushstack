@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.36.3",
+      "tag": "@microsoft/api-extractor_v7.36.3",
+      "date": "Wed, 19 Jul 2023 00:20:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated semver dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.27.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.36.2",
       "tag": "@microsoft/api-extractor_v7.36.2",
       "date": "Wed, 12 Jul 2023 15:20:39 GMT",

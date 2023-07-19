@@ -1,6 +1,13 @@
 # Change Log - @rushstack/trace-import
 
-This log was last generated on Fri, 14 Jul 2023 15:20:46 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jul 2023 00:20:31 GMT and should not be manually modified.
+
+## 0.2.23
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
 
 ## 0.2.22
 Fri, 14 Jul 2023 15:20:46 GMT
