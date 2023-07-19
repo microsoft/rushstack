@@ -85,6 +85,11 @@ export async function copyFilesAsync(
   await _copyFilesInnerAsync(copyDescriptorByDestination, terminal);
 }
 
+function _normalizeCopyOperation(rootPath: string, copyOperation: ICopyOperation): void {
+  normalizeFileSelectionSpecifier(rootPath, copyOperation);
+  copyOperation.destinationFolders = copyOperation.destinationFolders.map((x) => path.resolve(rootPath, x));
+}
+
 async function _getCopyDescriptorsAsync(
   rootPath: string,
   copyConfigurations: Iterable<ICopyOperation>,
@@ -97,11 +102,11 @@ async function _getCopyDescriptorsAsync(
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
-      normalizeFileSelectionSpecifier(rootPath, copyConfiguration);
+      _normalizeCopyOperation(rootPath, copyConfiguration);
 
       // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
       // and the filename in "includeGlobs". Also, we know that the sourcePath will be set because of the above
-      // call to normalizeFileSelectionSpecifier
+      // call to _normalizeCopyOperation
       const sourceFolder: string = copyConfiguration.sourcePath!;
       const sourceFilePaths: Set<string> | undefined = await getFilePathsAsync(copyConfiguration, fs);
 
@@ -194,25 +199,6 @@ async function _copyFilesInnerAsync(
   );
 }
 
-function* _resolveCopyOperationPaths(
-  heftConfiguration: HeftConfiguration,
-  copyOperations: Iterable<ICopyOperation>
-): IterableIterator<ICopyOperation> {
-  const { buildFolderPath } = heftConfiguration;
-
-  function resolvePath(inputPath: string | undefined): string {
-    return inputPath ? path.resolve(buildFolderPath, inputPath) : buildFolderPath;
-  }
-
-  for (const copyOperation of copyOperations) {
-    yield {
-      ...copyOperation,
-      sourcePath: resolvePath(copyOperation.sourcePath),
-      destinationFolders: copyOperation.destinationFolders.map(resolvePath)
-    };
-  }
-}
-
 const PLUGIN_NAME: 'copy-files-plugin' = 'copy-files-plugin';
 
 export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPluginOptions> {
@@ -224,7 +210,7 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
     taskSession.hooks.registerFileOperations.tap(
       PLUGIN_NAME,
       (operations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
-        for (const operation of _resolveCopyOperationPaths(heftConfiguration, pluginOptions.copyOperations)) {
+        for (const operation of pluginOptions.copyOperations) {
           operations.copyOperations.add(operation);
         }
         return operations;

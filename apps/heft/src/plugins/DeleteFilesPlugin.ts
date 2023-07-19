@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
@@ -34,20 +35,10 @@ async function _getPathsToDeleteAsync(
     async (deleteOperation: IDeleteOperation) => {
       normalizeFileSelectionSpecifier(rootPath, deleteOperation);
 
-      if (
-        !deleteOperation.fileExtensions?.length &&
-        !deleteOperation.includeGlobs?.length &&
-        !deleteOperation.excludeGlobs?.length
-      ) {
-        // If no globs or file extensions are provided add the path to the set of paths to delete. We know
-        // that sourcePath is defined because of the above call to normalizeFileSelectionSpecifier.
-        pathsToDelete.add(deleteOperation.sourcePath!);
-      } else {
-        // Glob the files under the source path and add them to the set of files to delete
-        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
-        for (const sourceFilePath of sourceFilePaths) {
-          pathsToDelete.add(sourceFilePath);
-        }
+      // Glob the files under the source path and add them to the set of files to delete
+      const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
+      for (const sourceFilePath of sourceFilePaths) {
+        pathsToDelete.add(sourceFilePath);
       }
     },
     { concurrency: Constants.maxParallelism }
