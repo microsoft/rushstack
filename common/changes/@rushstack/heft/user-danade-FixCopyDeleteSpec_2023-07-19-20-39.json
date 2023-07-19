@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Update the copy-files-plugin and delete-files-plugin to specify the plugin option \"sourcePath\" as a required property",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
