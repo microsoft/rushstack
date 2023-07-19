@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Wed, 19 Jul 2023 00:20:31 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jul 2023 18:46:59 GMT and should not be manually modified.
+
+## 0.3.22
+Wed, 19 Jul 2023 18:46:59 GMT
+
+### Patches
+
+- Run Storybook in a forked Node process, providing various advantages including isolation of the process and encapsulation of all console logging
 
 ## 0.3.21
 Wed, 19 Jul 2023 00:20:31 GMT

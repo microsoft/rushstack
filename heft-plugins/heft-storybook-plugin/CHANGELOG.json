@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.3.22",
+      "tag": "@rushstack/heft-storybook-plugin_v0.3.22",
+      "date": "Wed, 19 Jul 2023 18:46:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Run Storybook in a forked Node process, providing various advantages including isolation of the process and encapsulation of all console logging"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.21",
       "tag": "@rushstack/heft-storybook-plugin_v0.3.21",
       "date": "Wed, 19 Jul 2023 00:20:31 GMT",
