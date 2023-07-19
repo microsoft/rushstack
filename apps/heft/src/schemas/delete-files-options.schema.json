@@ -17,13 +17,10 @@
         "additionalProperties": false,
         "anyOf": [
           {
-            "required": ["sourcePath"]
+            "required": ["sourcePath", "includeGlobs"]
           },
           {
-            "required": ["includeGlobs"]
-          },
-          {
-            "required": ["fileExtensions"]
+            "required": ["sourcePath", "fileExtensions"]
           }
         ],
 
