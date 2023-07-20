@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import type * as fs from 'fs';
 import { FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
 import {
-  getFilePathsAsync,
+  getFileSelectionSpecifierPathsAsync,
   normalizeFileSelectionSpecifier,
   type IFileSelectionSpecifier
 } from './FileGlobSpecifier';
@@ -25,35 +25,45 @@ interface IDeleteFilesPluginOptions {
   deleteOperations: IDeleteOperation[];
 }
 
+interface IGetPathsToDeleteResult {
+  filesToDelete: Set<string>;
+  foldersToDelete: Set<string>;
+}
+
 async function _getPathsToDeleteAsync(
   rootFolderPath: string,
   deleteOperations: Iterable<IDeleteOperation>
-): Promise<Set<string>> {
-  const pathsToDelete: Set<string> = new Set();
+): Promise<IGetPathsToDeleteResult> {
+  const result: IGetPathsToDeleteResult = {
+    filesToDelete: new Set<string>(),
+    foldersToDelete: new Set<string>()
+  };
+
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
-      deleteOperation.sourcePath = path.resolve(rootFolderPath, deleteOperation.sourcePath);
-      if (
-        !deleteOperation.fileExtensions?.length &&
-        !deleteOperation.includeGlobs?.length &&
-        !deleteOperation.excludeGlobs?.length
-      ) {
-        // If no globs or file extensions are provided add the path to the set of paths to delete
-        pathsToDelete.add(deleteOperation.sourcePath);
-      } else {
-        normalizeFileSelectionSpecifier(deleteOperation);
-        // Glob the files under the source path and add them to the set of files to delete
-        const sourceFilePaths: Set<string> = await getFilePathsAsync(deleteOperation);
-        for (const sourceFilePath of sourceFilePaths) {
-          pathsToDelete.add(sourceFilePath);
+      normalizeFileSelectionSpecifier(rootFolderPath, deleteOperation);
+
+      // Glob the files under the source path and add them to the set of files to delete
+      const sourcePaths: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
+        fileGlobSpecifier: deleteOperation,
+        includeFolders: true
+      });
+      for (const [sourcePath, dirent] of sourcePaths) {
+        // If the sourcePath is a folder, add it to the foldersToDelete set. Otherwise, add it to
+        // the filesToDelete set. Symlinks and junctions are treated as files, and thus will fall
+        // into the filesToDelete set.
+        if (dirent.isDirectory()) {
+          result.foldersToDelete.add(sourcePath);
+        } else {
+          result.filesToDelete.add(sourcePath);
         }
       }
     },
     { concurrency: Constants.maxParallelism }
   );
 
-  return pathsToDelete;
+  return result;
 }
 
 export async function deleteFilesAsync(
@@ -61,15 +71,24 @@ export async function deleteFilesAsync(
   deleteOperations: Iterable<IDeleteOperation>,
   terminal: ITerminal
 ): Promise<void> {
-  const pathsToDelete: Set<string> = await _getPathsToDeleteAsync(rootFolderPath, deleteOperations);
+  const pathsToDelete: IGetPathsToDeleteResult = await _getPathsToDeleteAsync(
+    rootFolderPath,
+    deleteOperations
+  );
   await _deleteFilesInnerAsync(pathsToDelete, terminal);
 }
 
-async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, terminal: ITerminal): Promise<void> {
+async function _deleteFilesInnerAsync(
+  pathsToDelete: IGetPathsToDeleteResult,
+  terminal: ITerminal
+): Promise<void> {
   let deletedFiles: number = 0;
   let deletedFolders: number = 0;
+
+  const { filesToDelete, foldersToDelete } = pathsToDelete;
+
   await Async.forEachAsync(
-    pathsToDelete,
+    filesToDelete,
     async (pathToDelete: string) => {
       try {
         await FileSystem.deleteFileAsync(pathToDelete, { throwIfNotExists: true });
@@ -78,16 +97,38 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, terminal: ITer
       } catch (error) {
         // If it doesn't exist, we can ignore the error.
         if (!FileSystem.isNotExistError(error)) {
-          // When we encounter an error relating to deleting a directory as if it was a file,
-          // attempt to delete the folder. Windows throws the unlink not permitted error, while
-          // linux throws the EISDIR error.
-          if (FileSystem.isUnlinkNotPermittedError(error) || FileSystem.isDirectoryError(error)) {
-            await FileSystem.deleteFolderAsync(pathToDelete);
-            terminal.writeVerboseLine(`Deleted folder "${pathToDelete}".`);
-            deletedFolders++;
-          } else {
-            throw error;
-          }
+          throw error;
+        }
+      }
+    },
+    { concurrency: Constants.maxParallelism }
+  );
+
+  // Reverse the list of matching folders. Assuming that the list of folders came from
+  // the globber, the folders will be specified in tree-walk order, so by reversing the
+  // list we delete the deepest folders first and avoid not-exist errors for subfolders
+  // of an already-deleted parent folder.
+  const reversedFoldersToDelete: string[] = Array.from(foldersToDelete).reverse();
+
+  // Clear out any folders that were encountered during the file deletion process. This
+  // will recursively delete the folder and it's contents. There are two scenarios that
+  // this handles:
+  // - Deletions of empty folder structures (ex. when the delete glob is '**/*')
+  // - Deletions of folders that still contain files (ex. when the delete glob is 'lib')
+  // In the latter scenario, the count of deleted files will not be tracked. However,
+  // this is a fair trade-off for the performance benefit of not having to glob the
+  // folder structure again.
+  await Async.forEachAsync(
+    reversedFoldersToDelete,
+    async (folderToDelete: string) => {
+      try {
+        await FileSystem.deleteFolderAsync(folderToDelete);
+        terminal.writeVerboseLine(`Deleted folder "${folderToDelete}".`);
+        deletedFolders++;
+      } catch (error) {
+        // If it doesn't exist, we can ignore the error.
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
         }
       }
     },
@@ -102,20 +143,6 @@ async function _deleteFilesInnerAsync(pathsToDelete: Set<string>, terminal: ITer
   }
 }
 
-function* _resolveDeleteOperationPaths(
-  heftConfiguration: HeftConfiguration,
-  deleteOperations: Iterable<IDeleteOperation>
-): IterableIterator<IDeleteOperation> {
-  const { buildFolderPath } = heftConfiguration;
-  for (const deleteOperation of deleteOperations) {
-    const { sourcePath } = deleteOperation;
-    yield {
-      ...deleteOperation,
-      sourcePath: sourcePath ? path.resolve(buildFolderPath, sourcePath) : buildFolderPath
-    };
-  }
-}
-
 const PLUGIN_NAME: 'delete-files-plugin' = 'delete-files-plugin';
 
 export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPluginOptions> {
@@ -127,10 +154,7 @@ export default class DeleteFilesPlugin implements IHeftTaskPlugin<IDeleteFilesPl
     taskSession.hooks.registerFileOperations.tap(
       PLUGIN_NAME,
       (fileOperations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
-        for (const deleteOperation of _resolveDeleteOperationPaths(
-          heftConfiguration,
-          pluginOptions.deleteOperations
-        )) {
+        for (const deleteOperation of pluginOptions.deleteOperations) {
           fileOperations.deleteOperations.add(deleteOperation);
         }
         return fileOperations;

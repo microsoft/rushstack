@@ -9,6 +9,8 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-esnext"] }],
+
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],
@@ -28,12 +30,12 @@
                 {
                   "sourcePath": "src/cli/test",
                   "destinationFolders": ["lib-commonjs/cli/test"],
-                  "includeGlobs": ["**/*.js"]
+                  "fileExtensions": [".js"]
                 },
                 {
                   "sourcePath": "src/logic/pnpm/test",
                   "destinationFolders": ["lib-commonjs/logic/pnpm/test"],
-                  "includeGlobs": ["**/*.yaml"]
+                  "fileExtensions": [".yaml"]
                 }
               ]
             }
