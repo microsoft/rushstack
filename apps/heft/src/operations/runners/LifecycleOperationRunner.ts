@@ -90,8 +90,10 @@ export class LifecycleOperationRunner implements IOperationRunner {
         }
 
         // Delete the files if any were specified
-        const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
-        await deleteFilesAsync(rootFolderPath, deleteOperations, lifecycleTypeLogger.terminal);
+        if (deleteOperations.length > 0) {
+          const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
+          await deleteFilesAsync(rootFolderPath, deleteOperations, lifecycleTypeLogger.terminal);
+        }
 
         // Ensure we only run the clean operation once
         this._isClean = true;
