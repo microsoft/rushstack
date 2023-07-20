@@ -167,20 +167,20 @@ export class TaskOperationRunner implements IOperationRunner {
         OperationStatus.Success;
 
     if (this._fileOperations) {
+      const rootFolderPath: string = this._options.internalHeftSession.heftConfiguration.buildFolderPath;
       const { copyOperations, deleteOperations } = this._fileOperations;
-      const rootPath: string = this._options.internalHeftSession.heftConfiguration.buildFolderPath;
 
       await Promise.all([
         copyOperations.size > 0
           ? copyFilesAsync(
-              rootPath,
+              rootFolderPath,
               copyOperations,
               logger.terminal,
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),
         deleteOperations.size > 0
-          ? deleteFilesAsync(rootPath, deleteOperations, logger.terminal)
+          ? deleteFilesAsync(rootFolderPath, deleteOperations, logger.terminal)
           : Promise.resolve()
       ]);
     }

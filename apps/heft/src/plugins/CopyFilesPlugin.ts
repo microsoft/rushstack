@@ -72,13 +72,13 @@ interface ICopyDescriptor {
 }
 
 export async function copyFilesAsync(
-  rootPath: string,
+  rootFolderPath: string,
   copyOperations: Iterable<ICopyOperation>,
   terminal: ITerminal,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
   const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
-    rootPath,
+    rootFolderPath,
     copyOperations,
     watchFileSystemAdapter
   );
@@ -92,7 +92,7 @@ function _normalizeCopyOperation(rootPath: string, copyOperation: ICopyOperation
 }
 
 async function _getCopyDescriptorsAsync(
-  rootPath: string,
+  rootFolderPath: string,
   copyConfigurations: Iterable<ICopyOperation>,
   fileSystemAdapter: WatchFileSystemAdapter | undefined
 ): Promise<Map<string, ICopyDescriptor>> {
@@ -103,7 +103,7 @@ async function _getCopyDescriptorsAsync(
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
-      _normalizeCopyOperation(rootPath, copyConfiguration);
+      _normalizeCopyOperation(rootFolderPath, copyConfiguration);
 
       // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
       // and the filename in "includeGlobs". Also, we know that the sourcePath will be set because of the above

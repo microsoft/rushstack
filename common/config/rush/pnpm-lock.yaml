@@ -56,11 +56,11 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 14.18.36
       '@types/resolve': 1.20.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       colors: ~1.2.1
       lodash: ~4.17.15
       resolve: ~1.22.1
-      semver: ~7.3.0
+      semver: ~7.5.4
       source-map: ~0.6.1
       typescript: ~5.0.4
     dependencies:
@@ -73,7 +73,7 @@ importers:
       colors: 1.2.5
       lodash: 4.17.21
       resolve: 1.22.1
-      semver: 7.3.8
+      semver: 7.5.4
       source-map: 0.6.1
       typescript: 5.0.4
     devDependencies:
@@ -84,7 +84,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 14.18.36
       '@types/resolve': 1.20.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
 
   ../../apps/heft:
     specifiers:
@@ -248,14 +248,14 @@ importers:
       '@rushstack/rush-http-build-cache-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       colors: ~1.2.1
-      semver: ~7.3.0
+      semver: ~7.5.4
     dependencies:
       '@microsoft/rush-lib': link:../../libraries/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       colors: 1.2.5
-      semver: 7.3.8
+      semver: 7.5.4
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../heft
@@ -265,7 +265,7 @@ importers:
       '@rushstack/rush-http-build-cache-plugin': link:../../rush-plugins/rush-http-build-cache-plugin
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
 
   ../../apps/trace-import:
     specifiers:
@@ -277,17 +277,17 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/resolve': 1.20.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       colors: ~1.2.1
       resolve: ~1.22.1
-      semver: ~7.3.0
+      semver: ~7.5.4
       typescript: ~5.0.4
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
       colors: 1.2.5
       resolve: 1.22.1
-      semver: 7.3.8
+      semver: 7.5.4
       typescript: 5.0.4
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -296,7 +296,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/resolve': 1.20.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
 
   ../../build-tests-samples/heft-node-basic-tutorial:
     specifiers:
@@ -740,15 +740,15 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       api-extractor-test-01: workspace:*
       fs-extra: ~7.0.1
-      semver: ~7.3.0
+      semver: ~7.5.4
       typescript: ~5.0.4
     dependencies:
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       api-extractor-test-01: link:../api-extractor-test-01
-      semver: 7.3.8
+      semver: 7.5.4
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@types/node': 14.18.36
@@ -1266,8 +1266,8 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
-      '@types/jest': 29.5.2
-      '@types/node': 20.3.1
+      '@types/jest': 29.5.3
+      '@types/node': 20.4.2
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -1683,13 +1683,13 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
-      semver: ~7.3.0
+      '@types/semver': 7.5.0
+      semver: ~7.5.4
       typescript: ~5.0.4
     dependencies:
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      semver: 7.3.8
+      semver: 7.5.4
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -1697,7 +1697,7 @@ importers:
       '@rushstack/heft-node-rig': 2.2.6_4dchqclsvvgybys5sefjzqvuhm
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       typescript: 5.0.4
 
   ../../heft-plugins/heft-dev-cert-plugin:
@@ -1780,14 +1780,14 @@ importers:
       '@types/eslint': 8.2.0
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       eslint: ~8.7.0
-      semver: ~7.3.0
+      semver: ~7.5.4
       tslint: ~5.20.1
       typescript: ~5.0.4
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      semver: 7.3.8
+      semver: 7.5.4
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -1796,7 +1796,7 @@ importers:
       '@types/eslint': 8.2.0
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       eslint: 8.7.0
       tslint: 5.20.1_typescript@5.0.4
       typescript: 5.0.4
@@ -1878,23 +1878,23 @@ importers:
       '@rushstack/heft-node-rig': 2.2.6
       '@rushstack/node-core-library': workspace:*
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       '@types/tapable': 1.0.6
-      semver: ~7.3.0
+      semver: ~7.5.4
       tapable: 1.1.3
       typescript: ~5.0.4
     dependencies:
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@types/tapable': 1.0.6
-      semver: 7.3.8
+      semver: 7.5.4
       tapable: 1.1.3
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': 2.2.6_4dchqclsvvgybys5sefjzqvuhm
       '@types/node': 14.18.36
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       typescript: 5.0.4
 
   ../../heft-plugins/heft-webpack4-plugin:
@@ -2096,13 +2096,13 @@ importers:
       '@types/jju': 1.4.1
       '@types/node': 14.18.36
       '@types/resolve': 1.20.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       colors: ~1.2.1
       fs-extra: ~7.0.1
       import-lazy: ~4.0.0
       jju: ~1.4.0
       resolve: ~1.22.1
-      semver: ~7.3.0
+      semver: ~7.5.4
       z-schema: ~5.0.2
     dependencies:
       colors: 1.2.5
@@ -2110,7 +2110,7 @@ importers:
       import-lazy: 4.0.0
       jju: 1.4.0
       resolve: 1.22.1
-      semver: 7.3.8
+      semver: 7.5.4
       z-schema: 5.0.5
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -2121,7 +2121,7 @@ importers:
       '@types/jju': 1.4.1
       '@types/node': 14.18.36
       '@types/resolve': 1.20.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
 
   ../../libraries/package-deps-hash:
     specifiers:
@@ -2233,7 +2233,7 @@ importers:
       '@types/node-fetch': 2.6.2
       '@types/npm-package-arg': 6.1.0
       '@types/read-package-tree': 5.1.0
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
@@ -2256,7 +2256,7 @@ importers:
       npm-package-arg: ~6.1.0
       read-package-tree: ~5.1.5
       rxjs: ~6.6.7
-      semver: ~7.3.0
+      semver: ~7.5.4
       ssri: ~8.0.0
       strict-uri-encode: ~2.0.0
       tapable: 2.2.1
@@ -2293,7 +2293,7 @@ importers:
       npm-package-arg: 6.1.1
       read-package-tree: 5.1.6
       rxjs: 6.6.7
-      semver: 7.3.8
+      semver: 7.5.4
       ssri: 8.0.1
       strict-uri-encode: 2.0.0
       tapable: 2.2.1
@@ -2314,7 +2314,7 @@ importers:
       '@types/node': 14.18.36
       '@types/npm-package-arg': 6.1.0
       '@types/read-package-tree': 5.1.0
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 6.1.1
@@ -2332,7 +2332,7 @@ importers:
       '@rushstack/terminal': workspace:*
       '@rushstack/ts-command-line': workspace:*
       '@types/node-fetch': 2.6.2
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       '@types/webpack-env': 1.18.0
       tapable: 2.2.1
     dependencies:
@@ -2347,7 +2347,7 @@ importers:
       '@rushstack/stream-collator': link:../stream-collator
       '@rushstack/terminal': link:../terminal
       '@rushstack/ts-command-line': link:../ts-command-line
-      '@types/semver': 7.3.5
+      '@types/semver': 7.5.0
       '@types/webpack-env': 1.18.0
 
   ../../libraries/rush-themed-ui:
@@ -3177,7 +3177,7 @@ packages:
     engines: {node: '>= 14.15.0'}
     dependencies:
       jsonschema: 1.4.1
-      semver: 7.5.1
+      semver: 7.5.4
     dev: true
     bundledDependencies:
       - jsonschema
@@ -3201,7 +3201,7 @@ packages:
     engines: {node: '>= 14.15.0'}
     dependencies:
       '@aws-cdk/cloud-assembly-schema': 2.7.0
-      semver: 7.5.1
+      semver: 7.5.4
     dev: true
     bundledDependencies:
       - semver
@@ -5894,7 +5894,7 @@ packages:
     engines: {node: '>= 10.3.0'}
     dependencies:
       chalk: 4.1.2
-      semver: 7.5.1
+      semver: 7.5.4
     dev: true
 
   /@leichtgewicht/ip-codec/2.0.4:
@@ -6038,7 +6038,7 @@ packages:
     resolution: {integrity: sha512-8KG5RD0GVP4ydEzRn/I4BNDuxDtqVbOdm8675T49OIG/NGhaK0pjPX7ZcDlvKYbA+ulvVK3ztfcF4uBdOxuJbQ==}
     dependencies:
       '@gar/promisify': 1.1.3
-      semver: 7.5.1
+      semver: 7.5.4
     dev: true
 
   /@npmcli/move-file/1.1.2:
@@ -6115,7 +6115,7 @@ packages:
       '@pnpm/crypto.base32-hash': 2.0.0
       '@pnpm/types': 9.1.0
       encode-registry: 3.0.0
-      semver: 7.5.1
+      semver: 7.5.4
     dev: false
 
   /@pnpm/error/1.4.0:
@@ -8943,8 +8943,8 @@ packages:
       expect: 29.5.0
       pretty-format: 29.5.0
 
-  /@types/jest/29.5.2:
-    resolution: {integrity: sha512-mSoZVJF5YzGVCk+FsDxzDuH7s+SCkzrgKZzf0Z0T2WudhBUPoF6ktoTPC4R0ZoCPCV5xUvuU6ias5NvxcBcMMg==}
+  /@types/jest/29.5.3:
+    resolution: {integrity: sha512-1Nq7YrO/vJE/FYnqYyw0FS8LdrjExSgIiHyKg7xPpn+yi8Q4huZryKnkJatN1ZRH89Kw2v33/8ZMB7DuZeSLlA==}
     dependencies:
       expect: 29.5.0
       pretty-format: 29.5.0
@@ -9041,8 +9041,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.3.1:
-    resolution: {integrity: sha512-EhcH/wvidPy1WeML3TtYFGR83UzjxeWRen9V402T8aUGYsCHOmfoisV3ZSg03gAFIbLq8TnWOJ0f4cALtnSEUg==}
+  /@types/node/20.4.2:
+    resolution: {integrity: sha512-Dd0BYtWgnWJKwO1jkmTrzofjK2QXXcai0dmtzvIBhcA+RsG5h8R3xlyta0kGOZRNfL9GuRtb1knmPEhQrePCEw==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:
@@ -9124,9 +9124,6 @@ packages:
 
   /@types/scheduler/0.16.3:
     resolution: {integrity: sha512-5cJ8CB4yAx7BH1oMvdU0Jh9lrEXyPkar6F9G/ERswkCuvP4KQZfZkSjcMbAICCpQTN4OuZn8tz0HiKv9TGZgrQ==}
-
-  /@types/semver/7.3.5:
-    resolution: {integrity: sha512-iotVxtCCsPLRAvxMFFgxL8HD2l4mAZ2Oin7/VJ2ooWO0VOK4EGOGmZWZn1uCq7RofR3I/1IOSjCHlFT71eVK0Q==}
 
   /@types/semver/7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
@@ -9294,7 +9291,7 @@ packages:
       grapheme-splitter: 1.0.4
       ignore: 5.2.4
       natural-compare-lite: 1.4.0
-      semver: 7.3.8
+      semver: 7.5.4
       tsutils: 3.21.0_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
@@ -9322,7 +9319,7 @@ packages:
       grapheme-splitter: 1.0.4
       ignore: 5.2.4
       natural-compare-lite: 1.4.0
-      semver: 7.3.8
+      semver: 7.5.4
       tsutils: 3.21.0_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
@@ -9465,7 +9462,7 @@ packages:
       debug: 4.3.4
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.3.8
+      semver: 7.5.4
       tsutils: 3.21.0_typescript@5.0.4
       typescript: 5.0.4
     transitivePeerDependencies:
@@ -9485,7 +9482,7 @@ packages:
       '@typescript-eslint/typescript-estree': 5.59.7_typescript@5.0.4
       eslint: 7.30.0
       eslint-scope: 5.1.1
-      semver: 7.5.1
+      semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -9505,7 +9502,7 @@ packages:
       '@typescript-eslint/typescript-estree': 5.59.7_typescript@5.0.4
       eslint: 8.7.0
       eslint-scope: 5.1.1
-      semver: 7.5.1
+      semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -10387,7 +10384,7 @@ packages:
       jsonschema: 1.4.1
       minimatch: 3.1.2
       punycode: 2.3.0
-      semver: 7.3.8
+      semver: 7.5.4
       yaml: 1.10.2
     dev: true
     bundledDependencies:
@@ -10424,7 +10421,7 @@ packages:
       minimatch: 3.0.8
       promptly: 3.2.0
       proxy-agent: 5.0.0
-      semver: 7.5.1
+      semver: 7.5.4
       source-map-support: 0.5.21
       strip-ansi: 6.0.1
       table: 6.8.1
@@ -11636,7 +11633,7 @@ packages:
       json-schema-typed: 7.0.3
       onetime: 5.1.2
       pkg-up: 3.1.0
-      semver: 7.5.1
+      semver: 7.5.4
     dev: true
 
   /configstore/5.0.1:
@@ -11912,7 +11909,7 @@ packages:
       postcss-modules-values: 4.0.0_postcss@8.4.21
       postcss-value-parser: 4.2.0
       schema-utils: 3.1.1
-      semver: 7.3.8
+      semver: 7.5.4
       webpack: 4.44.2
     dev: true
 
@@ -11929,7 +11926,7 @@ packages:
       postcss-modules-scope: 3.0.0_postcss@8.4.21
       postcss-modules-values: 4.0.0_postcss@8.4.21
       postcss-value-parser: 4.2.0
-      semver: 7.3.8
+      semver: 7.5.4
       webpack: 5.82.1
 
   /css-minimizer-webpack-plugin/3.4.1_webpack@5.82.1:
@@ -12303,7 +12300,7 @@ packages:
       resolve: 1.22.1
       sass: 1.49.11
       scss-parser: 1.0.6
-      semver: 7.5.1
+      semver: 7.5.4
       yargs: 16.2.0
     transitivePeerDependencies:
       - supports-color
@@ -12325,7 +12322,7 @@ packages:
       '@pnpm/crypto.base32-hash': 1.0.1
       '@pnpm/types': 8.9.0
       encode-registry: 3.0.0
-      semver: 7.3.8
+      semver: 7.5.4
     dev: false
 
   /deps-regex/0.1.4:
@@ -13311,7 +13308,7 @@ packages:
       optionator: 0.9.1
       progress: 2.0.3
       regexpp: 3.2.0
-      semver: 7.3.8
+      semver: 7.5.4
       strip-ansi: 6.0.1
       strip-json-comments: 3.1.1
       table: 6.8.1
@@ -13742,7 +13739,7 @@ packages:
       readable-stream: 3.6.2
       rfdc: 1.3.0
       secure-json-parse: 2.7.0
-      semver: 7.3.8
+      semver: 7.5.4
       tiny-lru: 7.0.6
     transitivePeerDependencies:
       - supports-color
@@ -14020,7 +14017,7 @@ packages:
       memfs: 3.4.3
       minimatch: 3.1.2
       schema-utils: 2.7.0
-      semver: 7.5.1
+      semver: 7.5.4
       tapable: 1.1.3
       typescript: 5.0.4
       webpack: 4.44.2
@@ -14052,7 +14049,7 @@ packages:
       memfs: 3.4.3
       minimatch: 3.1.2
       schema-utils: 2.7.0
-      semver: 7.5.1
+      semver: 7.5.4
       tapable: 1.1.3
       typescript: 5.0.4
       webpack: 4.44.2
@@ -16075,7 +16072,7 @@ packages:
       jest-util: 29.5.0
       natural-compare: 1.4.0
       pretty-format: 29.5.0
-      semver: 7.3.8
+      semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
 
@@ -16379,7 +16376,7 @@ packages:
       jws: 3.2.2
       lodash: 4.17.21
       ms: 2.1.3
-      semver: 7.5.1
+      semver: 7.5.4
     dev: false
 
   /jsx-ast-utils/3.3.3:
@@ -17342,7 +17339,7 @@ packages:
       nopt: 5.0.0
       npmlog: 4.1.2
       rimraf: 3.0.2
-      semver: 7.5.1
+      semver: 7.5.4
       tar: 6.1.13
       which: 2.0.2
     transitivePeerDependencies:
@@ -17404,7 +17401,7 @@ packages:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.11.0
-      semver: 7.5.1
+      semver: 7.5.4
       validate-npm-package-license: 3.0.4
     dev: false
 
@@ -17457,7 +17454,7 @@ packages:
       pkg-dir: 5.0.0
       preferred-pm: 3.0.3
       rc-config-loader: 4.1.2
-      semver: 7.3.8
+      semver: 7.5.4
       semver-diff: 3.1.1
       strip-ansi: 6.0.1
       text-table: 0.2.0
@@ -17879,7 +17876,7 @@ packages:
       got: 11.8.6
       registry-auth-token: 4.2.2
       registry-url: 5.1.0
-      semver: 7.5.1
+      semver: 7.5.4
 
   /pako/1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
@@ -18212,7 +18209,7 @@ packages:
       loader-utils: 2.0.4
       postcss: 8.4.21
       schema-utils: 3.1.1
-      semver: 7.3.8
+      semver: 7.5.4
       webpack: 4.44.2
     dev: true
 
@@ -18228,7 +18225,7 @@ packages:
       loader-utils: 2.0.4
       postcss: 7.0.39
       schema-utils: 3.1.2
-      semver: 7.5.1
+      semver: 7.5.4
       webpack: 4.44.2
     dev: true
 
@@ -18242,7 +18239,7 @@ packages:
       cosmiconfig: 7.1.0
       klona: 2.0.6
       postcss: 8.4.21
-      semver: 7.3.8
+      semver: 7.5.4
       webpack: 5.82.1
     dev: false
 
@@ -19928,7 +19925,7 @@ packages:
       neo-async: 2.6.2
       sass: 1.3.2
       schema-utils: 3.1.1
-      semver: 7.3.8
+      semver: 7.5.4
       webpack: 4.44.2
     dev: true
 
@@ -20093,9 +20090,10 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
-  /semver/7.5.1:
-    resolution: {integrity: sha512-Wvss5ivl8TMRZXXESstBA4uR5iXgEN/VC5/sOcuXdVLzcdkz4HWetIoRfG5gb5X+ij/G9rw9YoGn3QoQ8OCSpw==}
+  /semver/7.5.4:
+    resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
@@ -21793,7 +21791,7 @@ packages:
       is-yarn-global: 0.3.0
       latest-version: 5.1.0
       pupa: 2.1.1
-      semver: 7.3.8
+      semver: 7.5.4
       semver-diff: 3.1.1
       xdg-basedir: 4.0.0
 

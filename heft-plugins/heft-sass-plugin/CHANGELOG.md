@@ -1,6 +1,38 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Fri, 07 Jul 2023 00:19:33 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Jul 2023 00:20:32 GMT and should not be manually modified.
+
+## 0.11.22
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.11.21
+Mon, 17 Jul 2023 15:20:25 GMT
+
+### Patches
+
+- Fix the "excludeFiles" configuration option.
+
+## 0.11.20
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.11.19
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.11.18
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.11.17
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
 
 ## 0.11.16
 Fri, 07 Jul 2023 00:19:33 GMT
