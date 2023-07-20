@@ -483,6 +483,7 @@ fi
             : '';
 
           const hookFileContent: string = `#!/bin/bash
+set -e
 SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
 
