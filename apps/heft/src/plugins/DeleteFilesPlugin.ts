@@ -31,7 +31,7 @@ interface IGetPathsToDeleteResult {
 }
 
 async function _getPathsToDeleteAsync(
-  rootPath: string,
+  rootFolderPath: string,
   deleteOperations: Iterable<IDeleteOperation>
 ): Promise<IGetPathsToDeleteResult> {
   const result: IGetPathsToDeleteResult = {
@@ -42,7 +42,7 @@ async function _getPathsToDeleteAsync(
   await Async.forEachAsync(
     deleteOperations,
     async (deleteOperation: IDeleteOperation) => {
-      normalizeFileSelectionSpecifier(rootPath, deleteOperation);
+      normalizeFileSelectionSpecifier(rootFolderPath, deleteOperation);
 
       // Glob the files under the source path and add them to the set of files to delete
       const sourcePaths: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
@@ -64,11 +64,14 @@ async function _getPathsToDeleteAsync(
 }
 
 export async function deleteFilesAsync(
-  rootPath: string,
+  rootFolderPath: string,
   deleteOperations: Iterable<IDeleteOperation>,
   terminal: ITerminal
 ): Promise<void> {
-  const pathsToDelete: IGetPathsToDeleteResult = await _getPathsToDeleteAsync(rootPath, deleteOperations);
+  const pathsToDelete: IGetPathsToDeleteResult = await _getPathsToDeleteAsync(
+    rootFolderPath,
+    deleteOperations
+  );
   await _deleteFilesInnerAsync(pathsToDelete, terminal);
 }
 
@@ -98,7 +101,8 @@ async function _deleteFilesInnerAsync(
     { concurrency: Constants.maxParallelism }
   );
 
-  // Clear out any folders that were encountered during the file deletion process.
+  // Clear out any folders that were encountered during the file deletion process. These
+  // folders should already be empty.
   await Async.forEachAsync(
     foldersToDelete,
     async (folderToDelete: string) => {
