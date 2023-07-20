@@ -104,8 +104,8 @@ async function _deleteFilesInnerAsync(
     { concurrency: Constants.maxParallelism }
   );
 
-  // Clear out any folders that were encountered during the file deletion process. These
-  // folders should already be empty.
+  // Clear out any folders that were encountered during the file deletion process. Some may
+  // already be empty due to the deletion of the files they contained.
   await Async.forEachAsync(
     foldersToDelete,
     async (folderToDelete: string) => {
