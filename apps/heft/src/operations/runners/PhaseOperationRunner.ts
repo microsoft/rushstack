@@ -57,7 +57,7 @@ export class PhaseOperationRunner implements IOperationRunner {
     }
 
     // Delete the files if any were specified
-    if (deleteOperations.length > 0) {
+    if (deleteOperations.length) {
       const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
       await deleteFilesAsync(rootFolderPath, deleteOperations, cleanLogger.terminal);
     }
