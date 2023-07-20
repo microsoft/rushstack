@@ -2,6 +2,21 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.52",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.52",
+      "date": "Thu, 20 Jul 2023 20:47:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.51",
       "tag": "@rushstack/debug-certificate-manager_v1.2.51",
       "date": "Wed, 19 Jul 2023 00:20:31 GMT",

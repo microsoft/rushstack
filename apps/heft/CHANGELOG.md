@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 19 Jul 2023 00:20:31 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Jul 2023 20:47:28 GMT and should not be manually modified.
+
+## 0.58.0
+Thu, 20 Jul 2023 20:47:28 GMT
+
+### Minor changes
+
+- BREAKING CHANGE: Update the heft.json "cleanFiles" property and the delete-files-plugin to delete the contents of folders specified by "sourcePath" instead of deleting the folders themselves. To delete the folders, use the "includeGlobs" property to specify the folder to delete.
 
 ## 0.57.1
 Wed, 19 Jul 2023 00:20:31 GMT

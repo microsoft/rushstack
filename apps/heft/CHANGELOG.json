@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.58.0",
+      "tag": "@rushstack/heft_v0.58.0",
+      "date": "Thu, 20 Jul 2023 20:47:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "BREAKING CHANGE: Update the heft.json \"cleanFiles\" property and the delete-files-plugin to delete the contents of folders specified by \"sourcePath\" instead of deleting the folders themselves. To delete the folders, use the \"includeGlobs\" property to specify the folder to delete."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.57.1",
       "tag": "@rushstack/heft_v0.57.1",
       "date": "Wed, 19 Jul 2023 00:20:31 GMT",

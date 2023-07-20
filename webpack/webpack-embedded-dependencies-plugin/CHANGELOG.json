@@ -2,6 +2,24 @@
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
   "entries": [
     {
+      "version": "0.1.34",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.34",
+      "date": "Thu, 20 Jul 2023 20:47:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.33",
       "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.33",
       "date": "Wed, 19 Jul 2023 00:20:32 GMT",
