@@ -68,42 +68,43 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
     this.refresh();
   }
 
-  public async openParameterViewPanelAsync(element: RushCommand): Promise<void> {
+  public async openParameterViewPanelAsync(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    return RushCommandWebViewPanel.getInstance(this._context).reveal('');
+    // return RushCommandWebViewPanel.getInstance(this._context).reveal('');
   }
 
   public async runRushCommandAsync(element?: RushCommand): Promise<void> {
-    let rushCommand: RushCommand | undefined = element;
-    if (!rushCommand) {
-      const actionNames: string[] = this._commandLineActions?.map((action) => action.actionName) || [];
-      if (!actionNames.length) {
-        terminal.writeErrorLine('No Rush commands available');
-        return;
-      }
-      const commandSelect: string | undefined = await vscode.window.showQuickPick(actionNames, {
-        placeHolder: 'Select a Rush command to run',
-        onDidSelectItem: (item) => {
-          const foundAction: CommandLineAction | undefined = this._commandLineActions?.find(
-            (action) => action.actionName === item
-          );
-          if (foundAction) {
-            rushCommand = new RushCommand({
-              label: foundAction.actionName,
-              collapsibleState: vscode.TreeItemCollapsibleState.None,
-              commandLineAction: foundAction
-            });
-          }
-        }
-      });
-      terminal.writeDebugLine(`Selected command: ${commandSelect}`);
-    }
+    const rushCommand: RushCommand | undefined = element;
+    await this.openParameterViewPanelAsync();
+    // if (!rushCommand) {
+    //   const actionNames: string[] = this._commandLineActions?.map((action) => action.actionName) || [];
+    //   if (!actionNames.length) {
+    //     terminal.writeErrorLine('No Rush commands available');
+    //     return;
+    //   }
+    //   const commandSelect: string | undefined = await vscode.window.showQuickPick(actionNames, {
+    //     placeHolder: 'Select a Rush command to run',
+    //     onDidSelectItem: (item) => {
+    //       const foundAction: CommandLineAction | undefined = this._commandLineActions?.find(
+    //         (action) => action.actionName === item
+    //       );
+    //       if (foundAction) {
+    //         rushCommand = new RushCommand({
+    //           label: foundAction.actionName,
+    //           collapsibleState: vscode.TreeItemCollapsibleState.None,
+    //           commandLineAction: foundAction
+    //         });
+    //       }
+    //     }
+    //   });
+    //   terminal.writeDebugLine(`Selected command: ${commandSelect}`);
+    // }
 
-    if (!rushCommand) {
-      return;
-    }
-    terminal.writeDebugLine(`Running command: ${rushCommand.label}`);
-    await this.openParameterViewPanelAsync(rushCommand);
+    // if (!rushCommand) {
+    //   return;
+    // }
+    // terminal.writeDebugLine(`Running command: ${rushCommand.label}`);
+    // await this.openParameterViewPanelAsync(rushCommand);
   }
 
   public getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -112,6 +113,7 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
 
   public getChildren(element?: vscode.TreeItem): Thenable<RushCommand[]> {
     console.log('children: ', this._commandLineActions);
+    console.log('element: ', element);
     if (!this._commandLineActions) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       vscode.window.showInformationMessage('No RushProjects in empty workspace');
@@ -121,6 +123,14 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
     return Promise.resolve([
       {
         label: 'Test label',
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      },
+      {
+        label: 'Test label2',
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      },
+      {
+        label: 'Test label3',
         collapsibleState: vscode.TreeItemCollapsibleState.None
       }
     ]);

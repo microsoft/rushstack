@@ -6,6 +6,7 @@ import { RushWorkspace } from './logic/RushWorkspace';
 import { RushCommandsProvider } from './providers/RushCommandsProvider';
 import { RushProjectsProvider } from './providers/RushProjectsProvider';
 import { RushTaskProvider } from './providers/TaskProvider';
+import { RushCommandWebViewPanel } from './logic/RushCommandWebViewPanel';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -54,6 +55,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         await RushWorkspace.initializeFromWorkspaceFolderPathsAsync(workspaceFolderPaths);
       })
     );
+
+    RushCommandWebViewPanel.initialize(context);
   }
 }
 

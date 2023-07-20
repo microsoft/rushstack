@@ -159,6 +159,11 @@
         {
           "id": "rushCommands",
           "name": "Rush Commands"
+        },
+        {
+          "id": "rushProjectDetails",
+          "type": "webview",
+          "name": "Rush Project Details"
         }
       ]
     },
@@ -181,7 +186,8 @@
   },
   "activationEvents": [
     "onView:rushProjects",
-    "onView:rushCommands"
+    "onView:rushCommands",
+    "onView:rushProjectDetails"
   ],
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
