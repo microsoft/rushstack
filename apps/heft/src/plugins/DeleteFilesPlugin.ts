@@ -104,10 +104,22 @@ async function _deleteFilesInnerAsync(
     { concurrency: Constants.maxParallelism }
   );
 
-  // Clear out any folders that were encountered during the file deletion process. Some may
-  // already be empty due to the deletion of the files they contained.
+  // Reverse the list of matching folders. Assuming that the list of folders came from
+  // the globber, the folders will be specified in tree-walk order, so by reversing the
+  // list we delete the deepest folders first and avoid not-exist errors for subfolders
+  // of an already-deleted parent folder.
+  const reversedFoldersToDelete: string[] = Array.from(foldersToDelete).reverse();
+
+  // Clear out any folders that were encountered during the file deletion process. This
+  // will recursively delete the folder and it's contents. There are two scenarios that
+  // this handles:
+  // - Deletions of empty folder structures (ex. when the delete glob is '**/*')
+  // - Deletions of folders that still contain files (ex. when the delete glob is 'lib')
+  // In the latter scenario, the count of deleted files will not be tracked. However,
+  // this is a fair trade-off for the performance benefit of not having to glob the
+  // folder structure again.
   await Async.forEachAsync(
-    foldersToDelete,
+    reversedFoldersToDelete,
     async (folderToDelete: string) => {
       try {
         await FileSystem.deleteFolderAsync(folderToDelete);

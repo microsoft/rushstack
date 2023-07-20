@@ -212,8 +212,6 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
       PLUGIN_NAME,
       (operations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
         for (const operation of pluginOptions.copyOperations) {
-          // Do this here so that we only have to do it once
-          normalizeCopyOperation(heftConfiguration.buildFolderPath, operation);
           operations.copyOperations.add(operation);
         }
         return operations;

@@ -182,9 +182,8 @@ export function normalizeFileSelectionSpecifier(
   rootPath: string,
   fileGlobSpecifier: IFileSelectionSpecifier
 ): void {
-  fileGlobSpecifier.sourcePath = fileGlobSpecifier.sourcePath
-    ? path.resolve(rootPath, fileGlobSpecifier.sourcePath)
-    : rootPath;
+  const { sourcePath } = fileGlobSpecifier;
+  fileGlobSpecifier.sourcePath = sourcePath ? path.resolve(rootPath, sourcePath) : rootPath;
   fileGlobSpecifier.includeGlobs = getIncludedGlobPatterns(fileGlobSpecifier);
 }
 
