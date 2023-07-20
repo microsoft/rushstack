@@ -144,10 +144,10 @@ export async function getFileSelectionSpecifierPathsAsync(
     fs: fileSystemAdapter,
     cwd: fileGlobSpecifier.sourcePath,
     ignore: fileGlobSpecifier.excludeGlobs,
+    onlyFiles: !includeFolders,
     dot: true,
     absolute: true,
-    onlyFiles: !includeFolders,
-    stats: true
+    objectMode: true
   });
 
   let results: Map<string, fs.Dirent>;

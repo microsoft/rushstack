@@ -71,14 +71,19 @@ interface ICopyDescriptor {
   hardlink: boolean;
 }
 
+export function normalizeCopyOperation(rootFolderPath: string, copyOperation: ICopyOperation): void {
+  normalizeFileSelectionSpecifier(rootFolderPath, copyOperation);
+  copyOperation.destinationFolders = copyOperation.destinationFolders.map((x) =>
+    path.resolve(rootFolderPath, x)
+  );
+}
+
 export async function copyFilesAsync(
-  rootFolderPath: string,
   copyOperations: Iterable<ICopyOperation>,
   terminal: ITerminal,
   watchFileSystemAdapter?: WatchFileSystemAdapter
 ): Promise<void> {
   const copyDescriptorByDestination: Map<string, ICopyDescriptor> = await _getCopyDescriptorsAsync(
-    rootFolderPath,
     copyOperations,
     watchFileSystemAdapter
   );
@@ -86,13 +91,7 @@ export async function copyFilesAsync(
   await _copyFilesInnerAsync(copyDescriptorByDestination, terminal);
 }
 
-function _normalizeCopyOperation(rootPath: string, copyOperation: ICopyOperation): void {
-  normalizeFileSelectionSpecifier(rootPath, copyOperation);
-  copyOperation.destinationFolders = copyOperation.destinationFolders.map((x) => path.resolve(rootPath, x));
-}
-
 async function _getCopyDescriptorsAsync(
-  rootFolderPath: string,
   copyConfigurations: Iterable<ICopyOperation>,
   fileSystemAdapter: WatchFileSystemAdapter | undefined
 ): Promise<Map<string, ICopyDescriptor>> {
@@ -103,11 +102,8 @@ async function _getCopyDescriptorsAsync(
   await Async.forEachAsync(
     copyConfigurations,
     async (copyConfiguration: ICopyOperation) => {
-      _normalizeCopyOperation(rootFolderPath, copyConfiguration);
-
       // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
-      // and the filename in "includeGlobs". Also, we know that the sourcePath will be set because of the above
-      // call to _normalizeCopyOperation
+      // and the filename in "includeGlobs".
       const sourceFolder: string = copyConfiguration.sourcePath!;
       const sourceFiles: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
         fileGlobSpecifier: copyConfiguration,
@@ -216,6 +212,8 @@ export default class CopyFilesPlugin implements IHeftTaskPlugin<ICopyFilesPlugin
       PLUGIN_NAME,
       (operations: IHeftTaskFileOperations): IHeftTaskFileOperations => {
         for (const operation of pluginOptions.copyOperations) {
+          // Do this here so that we only have to do it once
+          normalizeCopyOperation(heftConfiguration.buildFolderPath, operation);
           operations.copyOperations.add(operation);
         }
         return operations;

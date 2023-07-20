@@ -50,6 +50,9 @@ async function _getPathsToDeleteAsync(
         includeFolders: true
       });
       for (const [sourcePath, dirent] of sourcePaths) {
+        // If the sourcePath is a folder, add it to the foldersToDelete set. Otherwise, add it to
+        // the filesToDelete set. Symlinks and junctions are treated as files, and thus will fall
+        // into the filesToDelete set.
         if (dirent.isDirectory()) {
           result.foldersToDelete.add(sourcePath);
         } else {
