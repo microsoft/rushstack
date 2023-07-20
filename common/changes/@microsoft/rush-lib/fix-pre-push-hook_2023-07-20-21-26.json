@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-lib",
+      "comment": "Fix issue where git pre-push didn't stop push even script exit with error",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-lib"
+}
