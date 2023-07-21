@@ -40,8 +40,8 @@ export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_E
 export class RushCustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _tipMap: Map<RushCustomTipId, IRushCustomTipItemJson>;
-  private _jsonFileName: string;
+  private readonly _tipMap: Map<RushCustomTipId, IRushCustomTipItemJson>;
+  private readonly _jsonFileName: string;
 
   public readonly configuration: Readonly<IRushCustomTipsJson>;
 
@@ -57,9 +57,11 @@ export class RushCustomTipsConfiguration {
         RushCustomTipsConfiguration._jsonSchema
       );
 
-      if (!this.configuration?.customTips) return;
-      for (const tipItem of this.configuration.customTips) {
-        this._tipMap.set(tipItem.id, tipItem);
+      const customTips: IRushCustomTipItemJson[] | undefined = this.configuration?.customTips;
+      if (customTips) {
+        for (const tipItem of customTips) {
+          this._tipMap.set(tipItem.id, tipItem);
+        }
       }
     }
   }
@@ -75,8 +77,8 @@ export class RushCustomTipsConfiguration {
       return;
     }
 
-    const prefix: string | undefined = customTipItem?.prefix ?? this.configuration.prefix;
-    const tipString: string = `${prefix !== undefined ? prefix : ''}${customTipItem?.tip}`;
+    const prefix: string | undefined = customTipItem.prefix ?? this.configuration.prefix;
+    const tipString: string = `${prefix ?? ''}${customTipItem.tip}`;
     switch (customTipItem.severity) {
       case RushCustomTipSeverity.log:
         terminal.writeLine(tipString);
