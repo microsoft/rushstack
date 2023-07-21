@@ -157,10 +157,6 @@
           "name": "Projects"
         },
         {
-          "id": "rushCommands",
-          "name": "Rush Commands"
-        },
-        {
           "id": "rushProjectDetails",
           "type": "webview",
           "name": "Rush Project Details"

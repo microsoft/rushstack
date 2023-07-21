@@ -43,20 +43,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
     vscode.tasks.registerTaskProvider('rushstack', RushTaskProvider.getInstance());
 
-    const rushCommandsProvider: RushCommandsProvider = new RushCommandsProvider(context);
-    // Rush Commands TreeView
-    vscode.window.createTreeView('rushCommands', {
-      treeDataProvider: rushCommandsProvider
-    });
-    context.subscriptions.push(
-      vscode.commands.registerCommand('rushstack.refresh', async () => {
-        const workspaceFolderPaths: string[] =
-          vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath) || [];
-        await RushWorkspace.initializeFromWorkspaceFolderPathsAsync(workspaceFolderPaths);
-      })
-    );
+    // const rushCommandsProvider: RushCommandsProvider = new RushCommandsProvider(context);
+    // // Rush Commands TreeView
+    // vscode.window.createTreeView('rushCommands', {
+    //   treeDataProvider: rushCommandsProvider
+    // });
+    // context.subscriptions.push(
+    //   vscode.commands.registerCommand('rushstack.refresh', async () => {
+    //     const workspaceFolderPaths: string[] =
+    //       vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath) || [];
+    //     await RushWorkspace.initializeFromWorkspaceFolderPathsAsync(workspaceFolderPaths);
+    //   })
+    // );
 
-    RushCommandWebViewPanel.initialize(context);
+    RushCommandWebViewPanel.getInstance(context).reveal();
   }
 }
 

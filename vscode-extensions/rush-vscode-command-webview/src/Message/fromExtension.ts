@@ -1,11 +1,11 @@
 import { store } from '../store';
-import { initializeParameters, IParameterState } from '../store/slices/parameter';
+import { IProjectState, initializeProjectInfo } from '../store/slices/project';
 
 export type IFromExtensionMessage = IFromExtensionMessageInitialize;
 
 interface IFromExtensionMessageInitialize {
   command: 'initialize';
-  state: IParameterState;
+  state: IProjectState;
 }
 
 export const fromExtensionListener: (event: MessageEvent<IFromExtensionMessage>) => void = (
@@ -16,7 +16,7 @@ export const fromExtensionListener: (event: MessageEvent<IFromExtensionMessage>)
   switch (message.command) {
     case 'initialize': {
       store.dispatch(
-        initializeParameters({
+        initializeProjectInfo({
           ...message.state
         })
       );

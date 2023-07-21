@@ -16,11 +16,13 @@ import type {
 
 export class RushCommandWebViewPanel {
   private static _instance: RushCommandWebViewPanel | undefined;
-  private _panel: vscode.WebviewPanel | undefined;
+  private _panel: vscode.WebviewView | undefined;
   private _webViewProvider: vscode.WebviewViewProvider | undefined;
+  private _context: vscode.ExtensionContext;
   private _extensionPath: string;
   private constructor(context: vscode.ExtensionContext) {
     this._extensionPath = context.extensionPath;
+    this._context = context;
   }
 
   public static getInstance(context: vscode.ExtensionContext): RushCommandWebViewPanel {
@@ -34,108 +36,130 @@ export class RushCommandWebViewPanel {
   public static initialize(context: vscode.ExtensionContext): void {
     RushCommandWebViewPanel._instance = new RushCommandWebViewPanel(context);
     const instance = RushCommandWebViewPanel._instance;
-
-    const provider = {
-      resolveWebviewView: function (
-        thisWebview: vscode.WebviewView,
-        thisWebviewContext: vscode.WebviewViewResolveContext,
-        thisToken: any
-      ) {
-        thisWebview.webview.options = { enableScripts: true };
-        const webViewContent: any = instance._getWebviewContent(thisWebview);
-        thisWebview.webview.html = webViewContent;
-      }
-    };
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider('rushProjectDetails', provider));
   }
 
-  // public reveal(commandLineAction: string): void {
-  //   const parameters: ICommandLineParameter[] = [] //commandLineAction.parameters
-  //     .slice()
-  //     .map((parameter: CommandLineParameter) => {
-  //       const o: ICommandLineParameter = {
-  //         ...parameter,
-  //         // kind is a getter in CommandLineParameter
-  //         kind: parameter.kind,
-  //         shortName: undefined
-  //       };
-  //       return o;
-  //     });
-  //   const state: IRootState = {
-  //     parameter: {
-  //       commandName: commandLineAction,
-  //       parameters,
-  //       argsKV: {},
-  //       searchText: ''
-  //     },
-  //     ui: {
-  //       isToolbarSticky: false,
-  //       currentParameterName: parameters[0]?.longName || '',
-  //       userSelectedParameterName: ''
-  //     }
-  //   };
-  //   if (!this._panel) {
-  //     this._panel = vscode.window.createWebviewPanel(
-  //       'rushCommandWebViewPanel',
-  //       'Run Rush Command',
-  //       vscode.ViewColumn.Active,
-  //       {
-  //         enableScripts: true,
-  //         retainContextWhenHidden: true
-  //       }
-  //     );
-  //     this._panel.onDidDispose(() => {
-  //       this._panel = undefined;
-  //     });
-  //     this._setWebviewContent(state);
-  //     this._panel.webview.onDidReceiveMessage((message: IToExtensionMessage) => {
-  //       switch (message.command) {
-  //         case 'commandInfo': {
-  //           // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  //           RushTaskProvider.getInstance().executeTask({
-  //             type: 'rush-command-line',
-  //             displayName: `rush ${message.commandName}`,
-  //             cwd: RushWorkspace.getCurrentInstance().workspaceRootPath,
-  //             command: message.commandName,
-  //             args: message.args
-  //           });
-  //           break;
-  //         }
-  //         default: {
-  //           const _command: never = message.command;
-  //           console.error(`Unknown command: ${_command}`);
-  //           break;
-  //         }
-  //       }
-  //     });
-  //   } else {
-  //     const message: IFromExtensionMessage = {
-  //       command: 'initialize',
-  //       state: {
-  //         ...state.parameter,
-  //         parameters: state.parameter.parameters
-  //       }
-  //     };
-  //     console.log('message', message);
-  //     this._panel.reveal();
-  //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  //     this._panel.webview.postMessage(message);
-  //   }
-  // }
+  public reveal(): void {
+    const state: IRootState = {
+      parameter: {
+        commandName: '',
+        parameters: [],
+        argsKV: {},
+        searchText: ''
+      },
+      ui: {
+        isToolbarSticky: false,
+        currentParameterName: '',
+        userSelectedParameterName: ''
+      },
+      project: {
+        projectName: 'test project name'
+      }
+    };
 
-  // private _setWebviewContent(state: IRootState): void {
-  //   if (!this._panel) {
-  //     return;
-  //   }
-  //   this._panel.webview.html = this._getWebviewContent(state);
-  // }
+    const resolveWebviewView = (
+      thisWebview: vscode.WebviewView,
+      thisWebviewContext: vscode.WebviewViewResolveContext,
+      thisToken: any
+    ) => {
+      this._panel = thisWebview;
 
-  private _getWebviewContent(thisWebview: vscode.WebviewView, state: any = {}): string {
+      const message: IFromExtensionMessage = {
+        command: 'initialize',
+        state: state.project
+      };
+      console.log('message', message);
+      thisWebview.webview.options = { enableScripts: true };
+      thisWebview.webview.html = this._getWebviewContent();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      thisWebview.webview.postMessage(message);
+    };
+
+    const provider: vscode.WebviewViewProvider = {
+      resolveWebviewView
+    };
+    this._context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider('rushProjectDetails', provider)
+    );
+
+    //   const state: IRootState = {
+    //     parameter: {
+    //       commandName: '',
+    //       parameters: [],
+    //       argsKV: {},
+    //       searchText: ''
+    //     },
+    //     ui: {
+    //       isToolbarSticky: false,
+    //       currentParameterName: '',
+    //       userSelectedParameterName: ''
+    //     },
+    //     project: {
+    //       projectName: 'test project name'
+    //     }
+    //   };
+
+    // if (!this._panel) {
+    //   this._panel = vscode.window.createWebviewPanel(
+    //     'rushCommandWebViewPanel',
+    //     'Run Rush Command',
+    //     vscode.ViewColumn.Active,
+    //     {
+    //       enableScripts: true,
+    //       retainContextWhenHidden: true
+    //     }
+    //   );
+    //   this._panel.onDidDispose(() => {
+    //     this._panel = undefined;
+    //   });
+    //   this._setWebviewContent(state);
+    //   this._panel.webview.onDidReceiveMessage((message: IToExtensionMessage) => {
+    //     switch (message.command) {
+    //       case 'commandInfo': {
+    //         // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    //         RushTaskProvider.getInstance().executeTask({
+    //           type: 'rush-command-line',
+    //           displayName: `rush ${message.commandName}`,
+    //           cwd: RushWorkspace.getCurrentInstance().workspaceRootPath,
+    //           command: message.commandName,
+    //           args: message.args
+    //         });
+    //         break;
+    //       }
+    //       default: {
+    //         const _command: never = message.command;
+    //         console.error(`Unknown command: ${_command}`);
+    //         break;
+    //       }
+    //     }
+    //   });
+    // } else {
+    //   const message: IFromExtensionMessage = {
+    //     command: 'initialize',
+    //     state: {
+    //       ...state.parameter,
+    //       parameters: state.parameter.parameters
+    //     }
+    //   };
+    //   console.log('message', message);
+    //   this._panel.reveal();
+    //   // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    //   this._panel.webview.postMessage(message);
+    // }
+  }
+
+  private _setWebviewContent(state: IRootState): void {
+    if (!this._panel) {
+      return;
+    }
+    this._panel.webview.html = this._getWebviewContent(state);
+  }
+
+  private _getWebviewContent(state: any = {}): string {
     console.log('loading rush command webview html and bundle');
     let html: string = FileSystem.readFile(
       path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
     );
-    const scriptSrc: vscode.Uri = thisWebview.webview.asWebviewUri(
+    const scriptSrc: vscode.Uri = this._panel!.webview.asWebviewUri(
       vscode.Uri.file(path.join(this._extensionPath, 'webview/rush-command-webview/bundle.js'))
     );
 

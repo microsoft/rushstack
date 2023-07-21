@@ -2,17 +2,20 @@ import { configureStore } from '@reduxjs/toolkit';
 import type { EnhancedStore } from '@reduxjs/toolkit';
 import parameterReducer, { IParameterState } from './slices/parameter';
 import uiReducer, { IUIState } from './slices/ui';
+import projectReducer, { IProjectState } from './slices/project';
 
 export interface IRootState {
   parameter: IParameterState;
   ui: IUIState;
+  project: IProjectState;
 }
 
 export const store: EnhancedStore<IRootState> = configureStore({
   preloadedState: window.__DATA__,
   reducer: {
     parameter: parameterReducer,
-    ui: uiReducer
+    ui: uiReducer,
+    project: projectReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
