@@ -42,7 +42,25 @@ export interface IGetChangedProjectsOptions {
    * and exclude matched files from change detection.
    */
   enableFiltering: boolean;
+
+  /**
+   * If provided, this filtering function will restrict the set of changed files, and only projects
+   * containing files that pass the filter will be included.
+   *
+   * The filtering function accepts a project as an argument, and should return a promise for a function that
+   * accepts a path as a string and returns a boolean. This "factory pattern" allows the caller to
+   * perform additional asynchronous logic (loading configuration files, etc.) when encountering a
+   * project for the first time.
+   */
+  filterByProject?: ProjectFilterFactory;
 }
+
+/**
+ * @beta
+ */
+export type ProjectFilterFactory = (
+  project: RushConfigurationProject
+) => Promise<(relativePath: string) => boolean>;
 
 interface IGitState {
   gitPath: string;
@@ -178,17 +196,29 @@ export class ProjectChangeAnalyzer {
     return projectState;
   }
 
+  /**
+   * Given a specific project and a list of changed files for that project, apply project-specific
+   * "ignore globs" settings, as well as an optional filtering function, returning a new list of
+   * changed files that have passed through the filter.
+   */
   public async _filterProjectDataAsync<T>(
     project: RushConfigurationProject,
     unfilteredProjectData: Map<string, T>,
     rootDir: string,
-    terminal: ITerminal
+    terminal: ITerminal,
+    filterByProject?: ProjectFilterFactory
   ): Promise<Map<string, T>> {
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
-    if (!ignoreMatcher) {
+    let ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    if (!ignoreMatcher && !filterByProject) {
       return unfilteredProjectData;
     }
+    if (!ignoreMatcher) {
+      ignoreMatcher = ignore();
+    }
 
+    const filterFn: (relativePath: string) => boolean = filterByProject
+      ? await filterByProject(project)
+      : () => true;
     const projectKey: string = path.relative(rootDir, project.projectFolder);
     const projectKeyLength: number = projectKey.length + 1;
 
@@ -198,7 +228,7 @@ export class ProjectChangeAnalyzer {
     const filteredProjectData: Map<string, T> = new Map<string, T>();
     for (const [filePath, value] of unfilteredProjectData) {
       const relativePath: string = filePath.slice(projectKeyLength);
-      if (!ignoreMatcher.ignores(relativePath)) {
+      if (!ignoreMatcher.ignores(relativePath) && filterFn(relativePath)) {
         // Add the file path to the filtered data if it is not ignored
         filteredProjectData.set(filePath, value);
       }
@@ -217,6 +247,7 @@ export class ProjectChangeAnalyzer {
     const { _rushConfiguration: rushConfiguration } = this;
 
     const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
+    const filterByProject: ProjectFilterFactory | undefined = options.filterByProject;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -292,20 +323,16 @@ export class ProjectChangeAnalyzer {
           continue;
         }
 
-        if (enableFiltering) {
-          let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-          if (!projectChanges) {
-            projectChanges = new Map();
-            changesByProject.set(project, projectChanges);
-          }
-          projectChanges.set(file, diffStatus);
-        } else {
-          changedProjects.add(project);
+        let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
+        if (!projectChanges) {
+          projectChanges = new Map();
+          changesByProject.set(project, projectChanges);
         }
+        projectChanges.set(file, diffStatus);
       }
     }
 
-    if (enableFiltering) {
+    if (enableFiltering || filterByProject) {
       // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
       await Async.forEachAsync(
         changesByProject,
@@ -314,7 +341,8 @@ export class ProjectChangeAnalyzer {
             project,
             projectChanges,
             repoRoot,
-            terminal
+            terminal,
+            filterByProject
           );
 
           if (filteredChanges.size > 0) {

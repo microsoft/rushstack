@@ -326,6 +326,7 @@ export interface IGenerateCacheEntryIdOptions {
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
     enableFiltering: boolean;
+    filterByProject?: ProjectFilterFactory;
     includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
@@ -797,14 +798,16 @@ export class ProjectChangeAnalyzer {
     //
     // @internal (undocumented)
     _ensureInitializedAsync(terminal: ITerminal): Promise<IRawRepoState | undefined>;
-    // (undocumented)
-    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
+    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal, filterByProject?: ProjectFilterFactory): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal
     _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
 }
+
+// @beta (undocumented)
+export type ProjectFilterFactory = (project: RushConfigurationProject) => Promise<(relativePath: string) => boolean>;
 
 // @public
 export class RepoStateFile {

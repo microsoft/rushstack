@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add optional infraGlobs option to ProjectChangeAnalyzer",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
