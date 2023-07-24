@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix issue where git pre-push didn't stop push even script exit with error",
+      "comment": "Fix an issue where the git pre-push hook would allow push to go through if the script exited with error.",
       "type": "patch"
     }
   ],
