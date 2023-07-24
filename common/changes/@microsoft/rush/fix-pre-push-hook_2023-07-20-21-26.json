@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the git pre-push hook would allow push to go through if the script exited with error.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
