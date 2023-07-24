@@ -926,7 +926,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         // This is a github repo reference
         return version;
       } else {
-        return `/${name}@${version}`;
+        return version.indexOf('/') === 0 ? version : `/${name}@${version}`;
       }
     } else {
       // Version can sometimes be in the form of a path that's already in the /name/version format.
