@@ -293,6 +293,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               // a log files only project build cache
               projectBuildCache = await this._tryGetLogOnlyProjectBuildCacheAsync({
                 buildCacheConfiguration,
+                cobuildConfiguration,
                 runner,
                 rushProject,
                 phase,
@@ -654,12 +655,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     commandName,
     commandToRun,
     buildCacheConfiguration,
+    cobuildConfiguration,
     phase,
     trackedProjectFiles,
     projectChangeAnalyzer,
     operationMetadataManager
   }: {
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    cobuildConfiguration: CobuildConfiguration;
     runner: IOperationRunner;
     rushProject: RushConfigurationProject;
     phase: IPhase;
@@ -685,6 +688,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         // Force the cache to be a log files only cache
         logFilesOnly: '1'
       };
+      if (cobuildConfiguration.cobuildContextId) {
+        additionalContext.cobuildContextId = cobuildConfiguration.cobuildContextId;
+      }
       if (projectConfiguration) {
         const operationSettings: IOperationSettings | undefined =
           projectConfiguration.operationSettingsByOperationName.get(commandName);
