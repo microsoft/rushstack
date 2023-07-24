@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import { LogLevel, setLogLevel, terminal } from './logic/logger';
 import { RushWorkspace } from './logic/RushWorkspace';
-import { RushCommandsProvider } from './providers/RushCommandsProvider';
 import { RushProjectsProvider } from './providers/RushProjectsProvider';
 import { RushTaskProvider } from './providers/TaskProvider';
 import { RushCommandWebViewPanel } from './logic/RushCommandWebViewPanel';
@@ -56,7 +55,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     //   })
     // );
 
-    RushCommandWebViewPanel.getInstance(context).reveal();
+    RushCommandWebViewPanel.initialize(context).reveal();
   }
 }
 

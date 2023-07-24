@@ -1,10 +1,10 @@
 import { store } from '../store';
-import { IProjectState, initializeProjectInfo } from '../store/slices/project';
+import { IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
 
 export type IFromExtensionMessage = IFromExtensionMessageInitialize;
 
 interface IFromExtensionMessageInitialize {
-  command: 'initialize';
+  command: string;
   state: IProjectState;
 }
 
@@ -22,8 +22,16 @@ export const fromExtensionListener: (event: MessageEvent<IFromExtensionMessage>)
       );
       break;
     }
+    case 'updateProject': {
+      store.dispatch(
+        onChangeProject({
+          ...message.state
+        })
+      );
+      break;
+    }
     default: {
-      const _command: never = message.command;
+      const _command: string = message.command;
       throw new Error(`Unknown command: ${_command}`);
     }
   }

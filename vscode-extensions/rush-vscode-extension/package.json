@@ -59,6 +59,12 @@
         "icon": "$(folder)"
       },
       {
+        "command": "rushstack.rushProjects.revealProjectDetail",
+        "category": "RushStack",
+        "title": "See Project Details",
+        "icon": "$(search)"
+      },
+      {
         "command": "rushstack.rushProjects.runProjectScript",
         "category": "RushStack",
         "title": "Run",
@@ -90,6 +96,11 @@
       "view/item/context": [
         {
           "command": "rushstack.rushProjects.revealInExplorer",
+          "when": "view == rushProjects && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "rushstack.rushProjects.revealProjectDetail",
           "when": "view == rushProjects && viewItem == project",
           "group": "inline"
         },

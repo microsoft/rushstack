@@ -6,6 +6,7 @@ import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
 
 import type { RushConfiguration, RushConfigurationProject } from '@rushstack/rush-sdk';
+import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel';
 
 interface IRushProjectParams {
   label: string;
@@ -78,8 +79,9 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
     });
     this._rushConfiguration = rushWorkspace.rushConfiguration;
 
-    const commandNames: readonly ['revealInExplorer', 'runProjectScript'] = [
+    const commandNames: readonly ['revealInExplorer', 'revealProjectDetail', 'runProjectScript'] = [
       'revealInExplorer',
+      'revealProjectDetail',
       'runProjectScript'
     ] as const;
 
@@ -108,6 +110,17 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
       terminal.writeDebugLine(`Revealing ${projectFolder} in explorer`);
       return await vscode.commands.executeCommand('revealInExplorer', vscode.Uri.file(projectFolder));
     }
+  }
+
+  public async revealProjectDetailAsync(element: RushProject): Promise<void> {
+    const { rushConfigurationProject } = element;
+    console.log('Explorer clicked: ', rushConfigurationProject.packageName);
+    RushCommandWebViewPanel.getInstance().postMessage({
+      command: 'updateProject',
+      state: {
+        projectName: rushConfigurationProject.packageName
+      }
+    });
   }
 
   public async runProjectScriptAsync(element: RushProjectScript): Promise<void> {

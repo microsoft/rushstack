@@ -25,17 +25,25 @@ export class RushCommandWebViewPanel {
     this._context = context;
   }
 
-  public static getInstance(context: vscode.ExtensionContext): RushCommandWebViewPanel {
+  public static getInstance(): RushCommandWebViewPanel {
     if (!RushCommandWebViewPanel._instance) {
-      RushCommandWebViewPanel._instance = new RushCommandWebViewPanel(context);
+      throw new Error('Instance has not been initialized!');
     }
 
     return RushCommandWebViewPanel._instance;
   }
 
-  public static initialize(context: vscode.ExtensionContext): void {
+  public static initialize(context: vscode.ExtensionContext): RushCommandWebViewPanel {
+    if (RushCommandWebViewPanel._instance) {
+      throw new Error('Only one instance of rush command web view panel should be created!');
+    }
     RushCommandWebViewPanel._instance = new RushCommandWebViewPanel(context);
-    const instance = RushCommandWebViewPanel._instance;
+    return RushCommandWebViewPanel._instance;
+  }
+
+  public postMessage(message: IFromExtensionMessage): void {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this._panel?.webview.postMessage(message);
   }
 
   public reveal(): void {

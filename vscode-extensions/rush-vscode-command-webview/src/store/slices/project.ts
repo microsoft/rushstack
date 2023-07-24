@@ -17,7 +17,8 @@ export const projectSlide: Slice<IProjectState, SliceCaseReducers<IProjectState>
       Object.assign(state, action.payload);
     },
     onChangeProject: (state, action: PayloadAction<string>) => {
-      state.projectName = action.payload;
+      console.log('action payload: ', action.payload);
+      Object.assign(state, action.payload);
     }
   }
 });
