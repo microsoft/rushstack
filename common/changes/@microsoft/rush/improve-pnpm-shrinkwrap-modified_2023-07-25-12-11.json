@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "improve accuracy of detecting pnpm shrinkwrap is modified",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
