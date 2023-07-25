@@ -166,6 +166,14 @@ describe(PnpmShrinkwrapFile.name, () => {
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
       });
+
+      it('can handle the inconsistent version of a package declared in dependencies and devDependencies', async () => {
+        const project = getMockRushProject2();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/inconsistent-dep-devDep.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
     });
   });
 });
@@ -184,6 +192,16 @@ function getMockRushProject(): RushConfigurationProject {
   const project = rushConfiguration.projectsByName.get('foo');
   if (!project) {
     throw new Error(`Can not get project "foo"`);
+  }
+  return project;
+}
+
+function getMockRushProject2(): RushConfigurationProject {
+  const rushFilename: string = `${__dirname}/repo/rush2.json`;
+  const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+  const project = rushConfiguration.projectsByName.get('bar');
+  if (!project) {
+    throw new Error(`Can not get project "bar"`);
   }
   return project;
 }

@@ -778,6 +778,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       for (const { dependencyType, name, version } of allDependencies) {
         let isOptional: boolean = false;
         let specifierFromLockfile: IPnpmVersionSpecifier | undefined;
+        let isDevDepFallThrough: boolean = false;
         switch (dependencyType) {
           case DependencyType.Optional: {
             specifierFromLockfile = importer.optionalDependencies?.[name];
@@ -798,6 +799,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               importerDevDependencies.delete(name);
               break;
             }
+            // If fall through, there is a chance the package declares an inconsistent version, ignore it.
+            isDevDepFallThrough = true;
           }
 
           // eslint-disable-next-line no-fallthrough
@@ -819,7 +822,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
             );
           } else {
             const resolvedVersion: string = this.overrides.get(name) ?? version;
-            if (specifierFromLockfile.specifier !== resolvedVersion && !isOptional) {
+            if (specifierFromLockfile.specifier !== resolvedVersion && !isDevDepFallThrough && !isOptional) {
               return true;
             }
           }
