@@ -122,6 +122,8 @@ export interface IPnpmShrinkwrapYaml {
   registry: string;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: Record<string, string>;
+  /** The list of override version number for dependencies */
+  overrides?: { [dependency: string]: string };
 }
 
 /**
@@ -239,6 +241,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly importers: ReadonlyMap<string, IPnpmShrinkwrapImporterYaml>;
   public readonly specifiers: ReadonlyMap<string, string>;
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
+  public readonly overrides: ReadonlyMap<string, string>;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
@@ -266,6 +269,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.importers = new Map(Object.entries(shrinkwrapJson.importers || {}));
     this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
+    this.overrides = new Map(Object.entries(shrinkwrapJson.overrides || {}));
 
     // Importers only exist in workspaces
     this.isWorkspaceCompatible = this.importers.size > 0;
@@ -755,7 +759,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       for (const [importerPackageName, importerVersionSpecifier] of Object.entries(specifiers)) {
         const foundDependency: PackageJsonDependency | undefined =
           dependencyVersions.get(importerPackageName);
-        if (!foundDependency || foundDependency.version !== importerVersionSpecifier) {
+        if (!foundDependency) {
+          return true;
+        }
+        const resolvedVersion: string = this.overrides.get(importerPackageName) ?? foundDependency.version;
+        if (resolvedVersion !== importerVersionSpecifier) {
           return true;
         }
       }
@@ -810,7 +818,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
                 `"${specifierFromLockfile}" instead of an object.`
             );
           } else {
-            if (specifierFromLockfile.specifier !== version && !isOptional) {
+            const resolvedVersion: string = this.overrides.get(name) ?? version;
+            if (specifierFromLockfile.specifier !== resolvedVersion && !isOptional) {
               return true;
             }
           }

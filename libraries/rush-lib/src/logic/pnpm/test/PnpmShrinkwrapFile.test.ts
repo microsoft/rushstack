@@ -132,6 +132,14 @@ describe(PnpmShrinkwrapFile.name, () => {
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
       });
+
+      it('can detect overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/overrides-not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
     });
 
     describe('pnpm lockfile major version 6', () => {
@@ -149,6 +157,14 @@ describe(PnpmShrinkwrapFile.name, () => {
           `${__dirname}/yamlFiles/pnpm-lock-v6/modified.yaml`
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+      });
+
+      it('can detect overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/overrides-not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
       });
     });
   });
