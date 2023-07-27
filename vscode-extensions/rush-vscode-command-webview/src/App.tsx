@@ -5,6 +5,9 @@ import { fromExtensionListener } from './Message/fromExtension';
 import { ParameterView } from './ParameterView';
 import { Toolbar } from './Toolbar';
 import { useAppSelector } from './store/hooks';
+import { ProjectView } from './ProjectView';
+import { SelectTabData, SelectTabEvent, Tab, TabList, TabValue } from '@fluentui/react-components';
+import { VersionsView } from './VersionsView';
 
 initializeIcons();
 
@@ -21,8 +24,17 @@ const verticalGapStackTokens: IStackTokens = {
   padding: 10
 };
 
+enum Views {
+  PROJECT_VIEW,
+  VERSIONS_VIEW
+}
+
 export const App = (): JSX.Element => {
-  const selectedProject: string = useAppSelector((state) => state.project.projectName);
+  const [selectedValue, setSelectedValue] = React.useState<TabValue>(Views.PROJECT_VIEW);
+
+  const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
+    setSelectedValue(data.value);
+  };
 
   useEffect(() => {
     console.log('initializing app in effect');
@@ -35,14 +47,21 @@ export const App = (): JSX.Element => {
   console.log('initializing app');
 
   return (
-    <Stack styles={stackStyles} tokens={verticalGapStackTokens}>
-      <Stack.Item style={{ zIndex: 1 }}>
-        <Toolbar />
-      </Stack.Item>
-      <Stack.Item grow style={{ overflow: 'auto', marginTop: 0 }}>
-        {/* <ParameterView /> */}
-        <h4>Selected project {selectedProject}</h4>
-      </Stack.Item>
-    </Stack>
+    // <Stack styles={stackStyles} tokens={verticalGapStackTokens}>
+    //   <Stack.Item style={{ zIndex: 1 }}>
+    //     <Toolbar />
+    //   </Stack.Item>
+    //   <Stack.Item grow style={{ overflow: 'auto', marginTop: 0 }}>
+    //     <ProjectView />
+    //   </Stack.Item>
+    // </Stack>
+    <div>
+      <TabList selectedValue={selectedValue} onTabSelect={onTabSelect}>
+        <Tab value={Views.PROJECT_VIEW}>Project Details</Tab>
+        <Tab value={Views.VERSIONS_VIEW}>Versions</Tab>
+      </TabList>
+      {selectedValue === Views.PROJECT_VIEW && <ProjectView />}
+      {selectedValue === Views.VERSIONS_VIEW && <VersionsView />}
+    </div>
   );
 };

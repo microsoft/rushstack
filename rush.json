@@ -1106,11 +1106,6 @@
 
     // "vscode-extensions" folder (alphabetical order)
     {
-      "packageName": "rush-vscode-assistant",
-      "projectFolder": "vscode-extensions/rush-vscode-assistant",
-      "reviewCategory": "vscode-extensions"
-    },
-    {
       "packageName": "rushstack",
       "projectFolder": "vscode-extensions/rush-vscode-extension",
       "reviewCategory": "vscode-extensions"

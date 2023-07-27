@@ -60,7 +60,8 @@ export class RushCommandWebViewPanel {
         userSelectedParameterName: ''
       },
       project: {
-        projectName: 'test project name'
+        projectName: 'test project name',
+        projectVersion: '0'
       }
     };
 

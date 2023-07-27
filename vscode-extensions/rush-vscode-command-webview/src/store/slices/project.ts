@@ -2,10 +2,14 @@ import { PayloadAction, Slice, SliceCaseReducers, createSlice } from '@reduxjs/t
 
 export interface IProjectState {
   projectName: string;
+  projectVersion: string;
+  dependencies?: { [key in string]: string };
+  devDependencies?: { [key in string]: string };
 }
 
 const initialState: IProjectState = {
-  projectName: ''
+  projectName: '',
+  projectVersion: ''
 };
 
 export const projectSlide: Slice<IProjectState, SliceCaseReducers<IProjectState>, string> = createSlice({

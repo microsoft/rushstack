@@ -118,7 +118,10 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
     RushCommandWebViewPanel.getInstance().postMessage({
       command: 'updateProject',
       state: {
-        projectName: rushConfigurationProject.packageName
+        projectName: rushConfigurationProject.packageName,
+        projectVersion: rushConfigurationProject.packageJson.version,
+        dependencies: rushConfigurationProject.packageJson.dependencies,
+        devDependencies: rushConfigurationProject.packageJson.devDependencies
       }
     });
   }

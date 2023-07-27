@@ -1,9 +1,0 @@
-{
-  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
-  "compilerOptions": {
-    "outDir": "lib",
-    "lib": ["es2020"],
-    "target": "es2020",
-    "types": ["node", "webpack-env"]
-  }
-}

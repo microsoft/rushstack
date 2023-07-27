@@ -7,6 +7,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "@fluentui/react-components",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@lifaon/path",
       "allowedCategories": [ "libraries" ]
     },
@@ -89,6 +93,10 @@
     {
       "name": "rxjs",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "scheduler",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "tslib",

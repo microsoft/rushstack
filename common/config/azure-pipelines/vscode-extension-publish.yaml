@@ -1,0 +1,38 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: NodeVersion
+    value: 14
+  - name: FORCE_COLOR
+    value: 1
+  - name: SourceBranch
+    value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '10.x'
+    displayName: 'Install Node.js'
+
+  - bash: |
+      /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+      echo ">>> Started xvfb"
+    displayName: Start xvfb
+    condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+
+  - bash: |
+      echo ">>> Compile vscode-extension"
+      node common/scripts/install-run-rush.js install
+      echo ">>> Build package"
+      node common/scripts/install-run-rush.js build -t rushstack
+      echo ">>> Compiled vscode-extension"
+      cd vscode-extensions/rush-vscode-extension
+      echo ">>> Build vscode package"
+      node common/scripts/install-run-rushx.js package
+      echo ">>> Publish"
+      node common/scripts/install-run-rushx.js deploy
+    displayName: Publish
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq(variables['Agent.OS'], 'Linux'))
+    env:
+      VSCE_PAT: $(VSCE_PAT)
