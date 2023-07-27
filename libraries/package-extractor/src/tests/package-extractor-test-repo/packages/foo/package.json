@@ -1,0 +1,8 @@
+{
+  "name": "foo",
+  "version": "0.0.0",
+  "dependencies": {
+    "bar": "workspace: 1.0.0",
+    "baz": "1.0.0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.100.0",
+  "pnpmVersion": "7.26.1",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 10,
+  "projects": [
+    {
+      "packageName": "foo",
+      "projectFolder": "packages/foo"
+    },
+    {
+      "packageName": "bar",
+      "projectFolder": "packages/bar"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+!node_modules
+output
+!packages/**/dist
+!packages/**/dist
