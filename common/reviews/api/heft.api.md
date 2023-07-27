@@ -137,7 +137,6 @@ export interface IHeftLifecycleCleanHookOptions {
 // @public
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
-    // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;

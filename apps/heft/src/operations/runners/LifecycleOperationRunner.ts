@@ -14,7 +14,6 @@ import type { IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
 import type {
   IHeftLifecycleCleanHookOptions,
   IHeftLifecycleToolStartHookOptions,
-  IHeftLifecycleToolFinishHookOptions,
   IHeftLifecycleSession
 } from '../../pluginFramework/HeftLifecycleSession';
 
@@ -30,6 +29,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
   private readonly _options: ILifecycleOperationRunnerOptions;
   private _isClean: boolean = false;
+  private _isStarted: boolean = false;
 
   public get name(): string {
     return `Lifecycle ${JSON.stringify(this._options.type)}`;
@@ -41,7 +41,7 @@ export class LifecycleOperationRunner implements IOperationRunner {
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
     const { internalHeftSession, type } = this._options;
-    const { clean, watch } = internalHeftSession.parameterManager.defaultParameters;
+    const { clean } = internalHeftSession.parameterManager.defaultParameters;
 
     // Load and apply the lifecycle plugins
     const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
@@ -102,35 +102,23 @@ export class LifecycleOperationRunner implements IOperationRunner {
         break;
       }
       case 'start': {
+        if (this._isStarted) {
+          // Only run the toolStart hook once
+          return OperationStatus.NoOp;
+        }
+
+        this._isStarted = true;
+
         // Run the start hook
         if (lifecycle.hooks.toolStart.isUsed()) {
-          if (watch) {
-            // Avoid running the toolStart hooks if we're in watch mode
-            lifecycleTypeLogger.terminal.writeVerboseLine(
-              `Lifecycle plugins aren't currently supported in watch mode.`
-            );
-            return OperationStatus.NoOp;
-          }
-
           const lifecycleToolStartHookOptions: IHeftLifecycleToolStartHookOptions = {};
           await lifecycle.hooks.toolStart.promise(lifecycleToolStartHookOptions);
         }
         break;
       }
       case 'finish': {
-        if (lifecycle.hooks.toolFinish.isUsed()) {
-          if (watch) {
-            // Avoid running the toolFinish hooks if we're in watch mode
-            lifecycleTypeLogger.terminal.writeWarningLine(
-              `Lifecycle plugins aren't currently supported in watch mode.`
-            );
-            return OperationStatus.NoOp;
-          }
-
-          const lifeycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
-          await lifecycle.hooks.toolFinish.promise(lifeycleToolFinishHookOptions);
-        }
-        break;
+        // Tool finish is deferred to the HeftActionRunner to allow for metrics collection to finish.
+        return OperationStatus.NoOp;
       }
       default: {
         // Should never happen, but just in case

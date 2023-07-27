@@ -282,10 +282,15 @@ export class HeftActionRunner {
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(operations);
 
-    if (this._action.watch) {
-      await this._executeWatchAsync(executionManager, cliCancellationToken);
-    } else {
-      await this._executeOnceAsync(executionManager, cliCancellationToken);
+    try {
+      if (this._action.watch) {
+        await this._executeWatchAsync(executionManager, cliCancellationToken);
+      } else {
+        await this._executeOnceAsync(executionManager, cliCancellationToken);
+      }
+    } finally {
+      // Invoke this here both to ensure it always runs and that it does so after recordMetrics
+      await this._internalHeftSession.lifecycle.hooks.toolFinish.promise();
     }
   }
 

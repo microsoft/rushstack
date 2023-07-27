@@ -100,7 +100,12 @@ export interface IHeftLifecycleHooks {
    */
   toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
 
-  // TODO: Wire up and document this hook.
+  /**
+   * The `recordMetrics` hook is called at the end of every Heft execution pass. It is called after all
+   * phases have completed execution (or been canceled). To use it, call
+   * `recordMetrics.tapPromise(<pluginName>, <callback>)`.
+   * @public
+   */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
 }
 
