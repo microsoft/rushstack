@@ -12,7 +12,7 @@ describe(PackageExtractor.name, () => {
   // because this files will be compiled to js, and the path will change if using __dirname
   // using path inside src folder
   const testRepoRoot = path.join(path.resolve(__dirname, '../../'), 'src/tests/package-extractor-test-repo');
-  const testRepoTargetFolder = path.join(testRepoRoot, 'output');
+  const testRepoBaseTargetFolder = path.join(testRepoRoot, 'output');
   const projects = loadRushProjectFromConfigurationFile(path.resolve(testRepoRoot, 'rush.json'));
   const terminal = new Terminal(new StringBufferTerminalProvider());
   const packageExtractor = new PackageExtractor();
@@ -21,19 +21,21 @@ describe(PackageExtractor.name, () => {
     projectName: p.packageName
   }));
   beforeAll(() => {
-    FileSystem.ensureEmptyFolder(testRepoTargetFolder);
+    FileSystem.ensureEmptyFolder(testRepoBaseTargetFolder);
   });
-  afterEach(() => {
+  afterAll(() => {
     // clean up target folder after each test run
-    FileSystem.ensureEmptyFolder(testRepoTargetFolder);
+    // FileSystem.ensureEmptyFolder(testRepoBaseTargetFolder);
   });
 
   it('should extract project correctly', async () => {
+    const targetFolder = path.join(testRepoBaseTargetFolder, 'correctly');
+
     await expect(
       packageExtractor.extractAsync({
         mainProjectName: 'foo',
         sourceRootFolder: testRepoRoot,
-        targetRootFolder: testRepoTargetFolder,
+        targetRootFolder: targetFolder,
         overwriteExisting: true,
         projectConfigurations,
         terminal,
@@ -41,17 +43,19 @@ describe(PackageExtractor.name, () => {
         includeNpmIgnoreFiles: true
       })
     ).resolves.not.toThrow();
-    expect(FileSystem.exists(path.resolve(testRepoTargetFolder, 'packages/foo/dist/index.js'))).toBe(true);
-    expect(FileSystem.exists(path.resolve(testRepoTargetFolder, 'packages/foo/src/index.ts'))).toBe(true);
-    expect(FileSystem.exists(path.resolve(testRepoTargetFolder, 'packages/foo/node_modules/'))).toBe(true);
+    expect(FileSystem.exists(path.resolve(targetFolder, 'packages/foo/dist/index.js'))).toBe(true);
+    expect(FileSystem.exists(path.resolve(targetFolder, 'packages/foo/src/index.ts'))).toBe(true);
+    expect(FileSystem.exists(path.resolve(targetFolder, 'packages/foo/node_modules/'))).toBe(true);
   });
 
   it('should throw error if main project was not correct', async () => {
+    const targetFolder = path.join(testRepoBaseTargetFolder, 'error');
+
     await expect(
       packageExtractor.extractAsync({
         mainProjectName: 'project-that-not-exist',
         sourceRootFolder: 'dist',
-        targetRootFolder: testRepoTargetFolder,
+        targetRootFolder: targetFolder,
         overwriteExisting: true,
         terminal,
         projectConfigurations: []
@@ -60,6 +64,8 @@ describe(PackageExtractor.name, () => {
   });
 
   it('should throw error if contains symlink outsides targetRootFolder', async () => {
+    const targetFolder = path.join(testRepoBaseTargetFolder, 'symlink');
+
     // create a symbolic link for testing, link to this unit test file
     const newLinkPath = path.resolve(testRepoRoot, 'packages/foo/src/link.ts');
 
@@ -75,7 +81,7 @@ describe(PackageExtractor.name, () => {
         .extractAsync({
           mainProjectName: 'foo',
           sourceRootFolder: testRepoRoot,
-          targetRootFolder: testRepoTargetFolder,
+          targetRootFolder: targetFolder,
           overwriteExisting: true,
           projectConfigurations,
           terminal,
@@ -90,6 +96,8 @@ describe(PackageExtractor.name, () => {
   });
 
   it('should exclude file inside local project correctly', async () => {
+    const targetFolder = path.join(testRepoBaseTargetFolder, 'excludeLocalProjectFiles');
+
     const _projectConfigurations: IExtractorProjectConfiguration[] = [];
     projectConfigurations.forEach((p) =>
       _projectConfigurations.push({
@@ -101,7 +109,7 @@ describe(PackageExtractor.name, () => {
       packageExtractor.extractAsync({
         mainProjectName: 'foo',
         sourceRootFolder: testRepoRoot,
-        targetRootFolder: testRepoTargetFolder,
+        targetRootFolder: targetFolder,
         overwriteExisting: true,
         projectConfigurations: _projectConfigurations,
         terminal,
@@ -109,10 +117,12 @@ describe(PackageExtractor.name, () => {
         includeNpmIgnoreFiles: true
       })
     ).resolves.not.toThrow();
-    expect(FileSystem.exists(path.resolve(testRepoTargetFolder, 'packages/foo/src/index.ts'))).toBe(false);
+    expect(FileSystem.exists(path.resolve(targetFolder, 'packages/foo/src/index.ts'))).toBe(false);
   });
 
   it('should exclude file inside third party dependencies', async () => {
+    const targetFolder = path.join(testRepoBaseTargetFolder, 'excludeThirdPartyDependenciesFiles');
+
     const dependenciesConfigurations: IExtractorDependencyConfiguration[] = [
       {
         dependencyName: 'baz',
@@ -124,7 +134,7 @@ describe(PackageExtractor.name, () => {
       packageExtractor.extractAsync({
         mainProjectName: 'foo',
         sourceRootFolder: testRepoRoot,
-        targetRootFolder: testRepoTargetFolder,
+        targetRootFolder: targetFolder,
         overwriteExisting: true,
         projectConfigurations,
         terminal,
@@ -136,7 +146,7 @@ describe(PackageExtractor.name, () => {
     expect(
       FileSystem.exists(
         path.resolve(
-          testRepoTargetFolder,
+          targetFolder,
           'packages/foo/node_modules/.pnpm/baz/folder-that-should-be-exclude/file-should-be-exclude.ts'
         )
       )
