@@ -93,7 +93,9 @@ export interface IHeftLifecycleHooks {
 
   /**
    * The `toolFinish` hook is called at the end of Heft execution. It is called after all phases have
-   * completed execution. To use it, call
+   * completed execution. Plugins that tap this hook are resposible for handling the scenario in which
+   * `toolStart` threw an error, since this hook is used to clean up any resources allocated earlier
+   * in the lifecycle and therefore runs even in error conditions. To use it, call
    * `toolFinish.tapPromise(<pluginName>, <callback>)`.
    *
    * @public
@@ -102,8 +104,10 @@ export interface IHeftLifecycleHooks {
 
   /**
    * The `recordMetrics` hook is called at the end of every Heft execution pass. It is called after all
-   * phases have completed execution (or been canceled). To use it, call
-   * `recordMetrics.tapPromise(<pluginName>, <callback>)`.
+   * phases have completed execution (or been canceled). In a watch run, it will be called several times
+   * in between `toolStart` and (if the session is gracefully interrupted via Ctrl+C), `toolFinish`.
+   * In a non-watch run, it will be invoked exactly once between `toolStart` and `toolFinish`.
+   *  To use it, call `recordMetrics.tapPromise(<pluginName>, <callback>)`.
    * @public
    */
   recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;

@@ -298,8 +298,10 @@ export class HeftActionRunner {
       }
     } finally {
       // Invoke this here both to ensure it always runs and that it does so after recordMetrics
-      const lifecycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
-      await this._internalHeftSession.lifecycle.hooks.toolFinish.promise(lifecycleToolFinishHookOptions);
+      // This is treated as a finalizer for any assets created in lifecycle plugins.
+      // It is the responsibility of the lifecycle plugin to ensure that finish gracefully handles
+      // aborted runs.
+      await _finishLifecycleAsync(this._internalHeftSession);
     }
   }
 
@@ -579,4 +581,9 @@ async function _startLifecycleAsync(this: void, internalHeftSession: InternalHef
       throw new AlreadyReportedError();
     }
   }
+}
+
+async function _finishLifecycleAsync(internalHeftSession: InternalHeftSession): Promise<void> {
+  const lifecycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
+  await internalHeftSession.lifecycle.hooks.toolFinish.promise(lifecycleToolFinishHookOptions);
 }
