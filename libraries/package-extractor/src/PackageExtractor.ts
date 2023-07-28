@@ -124,6 +124,11 @@ export interface IExtractorProjectConfiguration {
   dependenciesToExclude?: string[];
 }
 
+/**
+ * The extractor configuration for individual dependencies.
+ *
+ * @public
+ */
 export interface IExtractorDependencyConfiguration {
   /**
    * The name of dependency

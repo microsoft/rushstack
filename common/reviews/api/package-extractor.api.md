@@ -7,7 +7,7 @@
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 
-// @public (undocumented)
+// @public
 export interface IExtractorDependencyConfiguration {
     dependencyName: string;
     dependencyVersion: string;
