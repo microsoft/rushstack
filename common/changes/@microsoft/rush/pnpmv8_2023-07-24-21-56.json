@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where PnpmShrinkwrapFile._getPackageId returns incorrect value",
+      "comment": "Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`.",
       "type": "none"
     }
   ],
