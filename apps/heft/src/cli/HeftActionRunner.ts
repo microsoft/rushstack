@@ -31,12 +31,18 @@ import {
 import { Operation } from '../operations/Operation';
 import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
 import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
-import { LifecycleOperationRunner } from '../operations/runners/LifecycleOperationRunner';
 import type { HeftPhase } from '../pluginFramework/HeftPhase';
 import type { IHeftAction, IHeftActionOptions } from '../cli/actions/IHeftAction';
+import type {
+  IHeftLifecycleCleanHookOptions,
+  IHeftLifecycleSession,
+  IHeftLifecycleToolFinishHookOptions,
+  IHeftLifecycleToolStartHookOptions
+} from '../pluginFramework/HeftLifecycleSession';
+import type { HeftLifecycle } from '../pluginFramework/HeftLifecycle';
 import type { HeftTask } from '../pluginFramework/HeftTask';
-import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
 import { CancellationToken, CancellationTokenSource } from '../pluginFramework/CancellationToken';
+import { deleteFilesAsync, type IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import { Constants } from '../utilities/Constants';
 import { OperationStatus } from '../operations/OperationStatus';
 
@@ -254,10 +260,6 @@ export class HeftActionRunner {
     // executed, and the session should be populated with the executing parameters.
     this._internalHeftSession.parameterManager = this.parameterManager;
 
-    initializeHeft(this._heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
-
-    const operations: ReadonlySet<Operation> = this._generateOperations();
-
     // Set up the ability to terminate the build via Ctrl+C and have it exit gracefully if pressed once,
     // less gracefully if pressed a second time.
     const cliCancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
@@ -280,12 +282,26 @@ export class HeftActionRunner {
       cliCancellationTokenSource.cancel();
     });
 
+    initializeHeft(this._heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
+
+    const operations: ReadonlySet<Operation> = this._generateOperations();
+
     const executionManager: OperationExecutionManager = new OperationExecutionManager(operations);
 
-    if (this._action.watch) {
-      await this._executeWatchAsync(executionManager, cliCancellationToken);
-    } else {
-      await this._executeOnceAsync(executionManager, cliCancellationToken);
+    try {
+      await _startLifecycleAsync(this._internalHeftSession);
+
+      if (this._action.watch) {
+        await this._executeWatchAsync(executionManager, cliCancellationToken);
+      } else {
+        await this._executeOnceAsync(executionManager, cliCancellationToken);
+      }
+    } finally {
+      // Invoke this here both to ensure it always runs and that it does so after recordMetrics
+      // This is treated as a finalizer for any assets created in lifecycle plugins.
+      // It is the responsibility of the lifecycle plugin to ensure that finish gracefully handles
+      // aborted runs.
+      await _finishLifecycleAsync(this._internalHeftSession);
     }
   }
 
@@ -397,21 +413,6 @@ export class HeftActionRunner {
 
     const operations: Map<string, Operation> = new Map();
     const internalHeftSession: InternalHeftSession = this._internalHeftSession;
-    const cleanLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
-      internalHeftSession,
-      'clean',
-      operations
-    );
-    const startLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
-      internalHeftSession,
-      'start',
-      operations
-    );
-    const finishLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
-      internalHeftSession,
-      'finish',
-      operations
-    );
 
     let hasWarnedAboutSkippedPhases: boolean = false;
     for (const phase of selectedPhases) {
@@ -434,24 +435,12 @@ export class HeftActionRunner {
 
       // Create operation for the phase start node
       const phaseOperation: Operation = _getOrCreatePhaseOperation(internalHeftSession, phase, operations);
-      // Set the 'start' lifecycle operation as a dependency of all phases to ensure the 'start' lifecycle
-      // operation runs first
-      phaseOperation.addDependency(startLifecycleOperation);
-      // Set the lifecycle clean operation as a dependency of the 'start' lifecycle operation to ensure the
-      // clean operation runs first
-      startLifecycleOperation.addDependency(cleanLifecycleOperation);
-      // Set the phase operation as a dependency of the 'end' lifecycle operation to ensure the phase
-      // operation runs first
-      finishLifecycleOperation.addDependency(phaseOperation);
 
       // Create operations for each task
       for (const task of phase.tasks) {
         const taskOperation: Operation = _getOrCreateTaskOperation(internalHeftSession, task, operations);
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.addDependency(phaseOperation);
-        // Set the task operation as a dependency of the 'stop' lifecycle operation to ensure the task operation
-        // runs first
-        finishLifecycleOperation.addDependency(taskOperation);
 
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
@@ -482,25 +471,8 @@ export class HeftActionRunner {
   }
 }
 
-function _getOrCreateLifecycleOperation(
-  internalHeftSession: InternalHeftSession,
-  type: LifecycleOperationRunnerType,
-  operations: Map<string, Operation>
-): Operation {
-  const key: string = `lifecycle.${type}`;
-
-  let operation: Operation | undefined = operations.get(key);
-  if (!operation) {
-    operation = new Operation({
-      groupName: 'lifecycle',
-      runner: new LifecycleOperationRunner({ type, internalHeftSession })
-    });
-    operations.set(key, operation);
-  }
-  return operation;
-}
-
 function _getOrCreatePhaseOperation(
+  this: void,
   internalHeftSession: InternalHeftSession,
   phase: HeftPhase,
   operations: Map<string, Operation>
@@ -520,6 +492,7 @@ function _getOrCreatePhaseOperation(
 }
 
 function _getOrCreateTaskOperation(
+  this: void,
   internalHeftSession: InternalHeftSession,
   task: HeftTask,
   operations: Map<string, Operation>
@@ -538,4 +511,79 @@ function _getOrCreateTaskOperation(
     operations.set(key, operation);
   }
   return operation;
+}
+
+async function _startLifecycleAsync(this: void, internalHeftSession: InternalHeftSession): Promise<void> {
+  const { clean } = internalHeftSession.parameterManager.defaultParameters;
+
+  // Load and apply the lifecycle plugins
+  const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
+  const { lifecycleLogger } = lifecycle;
+  await lifecycle.applyPluginsAsync(lifecycleLogger.terminal);
+
+  if (lifecycleLogger.hasErrors) {
+    throw new AlreadyReportedError();
+  }
+
+  if (clean) {
+    const startTime: number = performance.now();
+    lifecycleLogger.terminal.writeVerboseLine('Starting clean');
+
+    // Grab the additional clean operations from the phase
+    const deleteOperations: IDeleteOperation[] = [];
+
+    // Delete all temp folders for tasks by default
+    for (const pluginDefinition of lifecycle.pluginDefinitions) {
+      const lifecycleSession: IHeftLifecycleSession = await lifecycle.getSessionForPluginDefinitionAsync(
+        pluginDefinition
+      );
+      deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
+    }
+
+    // Create the options and provide a utility method to obtain paths to delete
+    const cleanHookOptions: IHeftLifecycleCleanHookOptions = {
+      addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
+        deleteOperations.push(...deleteOperationsToAdd)
+    };
+
+    // Run the plugin clean hook
+    if (lifecycle.hooks.clean.isUsed()) {
+      try {
+        await lifecycle.hooks.clean.promise(cleanHookOptions);
+      } catch (e: unknown) {
+        // Log out using the clean logger, and return an error status
+        if (!(e instanceof AlreadyReportedError)) {
+          lifecycleLogger.emitError(e as Error);
+        }
+        throw new AlreadyReportedError();
+      }
+    }
+
+    // Delete the files if any were specified
+    if (deleteOperations.length) {
+      const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
+      await deleteFilesAsync(rootFolderPath, deleteOperations, lifecycleLogger.terminal);
+    }
+
+    lifecycleLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);
+
+    if (lifecycleLogger.hasErrors) {
+      throw new AlreadyReportedError();
+    }
+  }
+
+  // Run the start hook
+  if (lifecycle.hooks.toolStart.isUsed()) {
+    const lifecycleToolStartHookOptions: IHeftLifecycleToolStartHookOptions = {};
+    await lifecycle.hooks.toolStart.promise(lifecycleToolStartHookOptions);
+
+    if (lifecycleLogger.hasErrors) {
+      throw new AlreadyReportedError();
+    }
+  }
+}
+
+async function _finishLifecycleAsync(internalHeftSession: InternalHeftSession): Promise<void> {
+  const lifecycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
+  await internalHeftSession.lifecycle.hooks.toolFinish.promise(lifecycleToolFinishHookOptions);
 }
