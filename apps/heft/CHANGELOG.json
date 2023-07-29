@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.58.1",
+      "tag": "@rushstack/heft_v0.58.1",
+      "date": "Sat, 29 Jul 2023 00:22:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the `toolFinish` lifecycle hook so that it is invoked after the `recordMetrics` hook, rather than before. Ensure that the `toolFinish` lifecycle hook is invoked if the user performs a graceful shutdown of Heft (e.g. via Ctrl+C)."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.58.0",
       "tag": "@rushstack/heft_v0.58.0",
       "date": "Thu, 20 Jul 2023 20:47:28 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 20 Jul 2023 20:47:28 GMT and should not be manually modified.
+This log was last generated on Sat, 29 Jul 2023 00:22:50 GMT and should not be manually modified.
+
+## 0.58.1
+Sat, 29 Jul 2023 00:22:50 GMT
+
+### Patches
+
+- Fix the `toolFinish` lifecycle hook so that it is invoked after the `recordMetrics` hook, rather than before. Ensure that the `toolFinish` lifecycle hook is invoked if the user performs a graceful shutdown of Heft (e.g. via Ctrl+C).
 
 ## 0.58.0
 Thu, 20 Jul 2023 20:47:28 GMT

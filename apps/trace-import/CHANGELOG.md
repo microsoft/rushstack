@@ -1,6 +1,11 @@
 # Change Log - @rushstack/trace-import
 
-This log was last generated on Thu, 20 Jul 2023 20:47:29 GMT and should not be manually modified.
+This log was last generated on Sat, 29 Jul 2023 00:22:51 GMT and should not be manually modified.
+
+## 0.2.25
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
 
 ## 0.2.24
 Thu, 20 Jul 2023 20:47:29 GMT
