@@ -18,6 +18,18 @@ import { ExpressionJson, ISelectorJson, IFilterJson, IOperatorJson } from './Sel
 import { SelectorExpressionParser } from './SelectorExpressionParser';
 
 /**
+ * When preparing to select projects in a Rush monorepo, some selector scopes
+ * require additional configuration in order to control their behavior. This
+ * options interface allows the caller to provide these properties.
+ */
+export interface IProjectSelectionOptions {
+  /**
+   * Options required for configuring the git selector scope.
+   */
+  gitSelectorParserOptions: IGitSelectorParserOptions;
+}
+
+/**
  * A central interface for selecting a subset of Rush projects from a given monorepo,
  * using standardized selector expressions. Note that the types of selectors available
  * in a monorepo may be influenced in the future by plugins, so project selection
@@ -26,12 +38,17 @@ import { SelectorExpressionParser } from './SelectorExpressionParser';
 export class RushProjectSelector {
   private _rushConfig: RushConfiguration;
   private _scopes: Map<string, ISelectorParser<RushConfigurationProject>> = new Map();
+  private _options: IProjectSelectionOptions;
 
-  public constructor(rushConfig: RushConfiguration) {
+  public constructor(rushConfig: RushConfiguration, options: IProjectSelectionOptions) {
     this._rushConfig = rushConfig;
+    this._options = options;
 
     this._scopes.set('name', new NamedProjectSelectorParser(this._rushConfig));
-    //this._scopes.set('git', new GitChangedProjectSelectorParser(this._rushConfig, gitOptions));
+    this._scopes.set(
+      'git',
+      new GitChangedProjectSelectorParser(this._rushConfig, this._options.gitSelectorParserOptions)
+    );
     this._scopes.set('tag', new TagProjectSelectorParser(this._rushConfig));
     this._scopes.set('version-policy', new VersionPolicyProjectSelectorParser(this._rushConfig));
   }

@@ -44,7 +44,7 @@ export type SelectorToken = {
 /* eslint-enable @typescript-eslint/consistent-type-definitions */
 
 export class ParseError extends Error {
-  constructor(message: string, expr: string) {
+  public constructor(message: string, expr: string) {
     super(`${message} (parsing expression '${expr}').`);
   }
 }
@@ -377,7 +377,7 @@ export class SelectorExpressionParser {
     return tokens;
   }
 
-  private _tokenToString(token: Token) {
+  private _tokenToString(token: Token): string {
     return (
       (token as UnaryOperatorToken).op ||
       (token as FilterToken).filter ||

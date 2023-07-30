@@ -31,6 +31,7 @@ import { RushProjectSelector } from '../../api/RushProjectSelector';
  */
 export class SelectionParameterSet {
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _gitOptions: IGitSelectorParserOptions;
 
   private readonly _fromProject: CommandLineStringListParameter;
   private readonly _impactedByProject: CommandLineStringListParameter;
@@ -42,8 +43,8 @@ export class SelectionParameterSet {
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
 
-  private readonly _selectString: CommandLineStringListParameter;
-  private readonly _selectJsonFile: CommandLineStringListParameter;
+  private readonly _selectByString: CommandLineStringListParameter;
+  private readonly _selectByJsonFile: CommandLineStringListParameter;
 
   private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
@@ -53,6 +54,7 @@ export class SelectionParameterSet {
     gitOptions: IGitSelectorParserOptions
   ) {
     this._rushConfiguration = rushConfiguration;
+    this._gitOptions = gitOptions;
 
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
       string,
@@ -187,14 +189,14 @@ export class SelectionParameterSet {
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
 
-    this._selectString = action.defineStringListParameter({
+    this._selectByString = action.defineStringListParameter({
       parameterLongName: '--select',
       argumentName: 'EXPRESSION',
       description:
         'Select projects using a string selector expression. ' +
         'This is going to require some pretty good documentation.'
     });
-    this._selectJsonFile = action.defineStringListParameter({
+    this._selectByJsonFile = action.defineStringListParameter({
       parameterLongName: '--select-json-file',
       argumentName: 'EXPRESSION',
       description:
@@ -229,8 +231,8 @@ export class SelectionParameterSet {
     // Check if any of the selection parameters have a value specified on the command line
     const isSelectionSpecified: boolean =
       selectors.some((param: CommandLineStringListParameter) => param.values.length > 0) ||
-      this._selectString.values.length > 0 ||
-      this._selectJsonFile.values.length > 0;
+      this._selectByString.values.length > 0 ||
+      this._selectByJsonFile.values.length > 0;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
@@ -257,9 +259,11 @@ export class SelectionParameterSet {
     );
 
     // New Selector Expression Parsing Stuff
-    const projectSelector: RushProjectSelector = new RushProjectSelector(this._rushConfiguration);
+    const projectSelector: RushProjectSelector = new RushProjectSelector(this._rushConfiguration, {
+      gitSelectorParserOptions: this._gitOptions
+    });
     let selectedByExpression: RushConfigurationProject[] = [];
-    for (const value of this._selectString.values) {
+    for (const value of this._selectByString.values) {
       selectedByExpression = selectedByExpression.concat(await projectSelector.selectExpressionString(value));
     }
     // End New Selector Expression Parsing Stuff
