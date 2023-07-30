@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "Make `jest-environment-jsdom` and `jest-environment-node` peerDependencies.",
+      "comment": "Make `jest-environment-jsdom` and `jest-environment-node` optional peerDependencies.",
       "type": "minor"
     }
   ],
