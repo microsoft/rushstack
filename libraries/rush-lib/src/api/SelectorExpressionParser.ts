@@ -43,6 +43,12 @@ export type SelectorToken = {
 
 /* eslint-enable @typescript-eslint/consistent-type-definitions */
 
+export class ParseError extends Error {
+  constructor(message: string, expr: string) {
+    super(`${message} (parsing expression '${expr}').`);
+  }
+}
+
 /**
  * The SelectorExpressionParser is a small, stand-alone parser designed to take a string-based selector expression
  * and turn it into a JSON-based selector expression. This selector expression is repo-agnostic, and should
@@ -59,10 +65,12 @@ export type SelectorToken = {
 export class SelectorExpressionParser {
   private _tokens: Token[];
   private _pLevel: number;
+  private _originalExpr: string;
 
-  public constructor(tokens: Token[]) {
+  public constructor(tokens: Token[], originalExpr: string) {
     this._tokens = tokens;
     this._pLevel = 0;
+    this._originalExpr = originalExpr;
   }
 
   private _eof(): boolean {
@@ -70,7 +78,12 @@ export class SelectorExpressionParser {
   }
 
   private _peek(): Token {
-    if (this._eof()) throw new Error('eof');
+    if (this._eof()) {
+      throw new ParseError(
+        'Unexpected end of selector expression - this may be a bug in the expression parser',
+        this._originalExpr
+      );
+    }
     return this._tokens[0]!;
   }
 
@@ -130,6 +143,13 @@ export class SelectorExpressionParser {
   }
 
   private _parseLeftSideExpression(): ExpressionJson {
+    if (this._eof()) {
+      throw new ParseError(
+        `Expected partial expression (unary operator, filter, or selector) but encountered end of expression`,
+        this._originalExpr
+      );
+    }
+
     const token: Token = this._peek();
 
     if (token.type === '(') {
@@ -143,7 +163,12 @@ export class SelectorExpressionParser {
     } else if (token.type === 'selector') {
       return this._parseSelector();
     } else {
-      throw new Error(`Expected token good, but saw ${JSON.stringify(token)}`);
+      throw new ParseError(
+        `Expected partial expression (unary operator, filter, or selector) but encountered '${this._tokenToString(
+          token
+        )}' instead`,
+        this._originalExpr
+      );
     }
   }
 
@@ -165,7 +190,7 @@ export class SelectorExpressionParser {
           this._consume(')');
           break;
         }
-        throw new Error('unexpected )');
+        throw new ParseError(`Encountered unmatched ')' in selector expression`, this._originalExpr);
       }
 
       if (token.type === 'binary') {
@@ -182,7 +207,10 @@ export class SelectorExpressionParser {
     this._combineInlineBinaryOperators(components, 'or');
 
     if (components.length !== 1) {
-      throw new Error('should be exactly 1');
+      throw new ParseError(
+        `Selector expression failed to resolve to a single node - this may be a bug in the expression parser.`,
+        this._originalExpr
+      );
     }
 
     return components[0] as ExpressionJson;
@@ -206,7 +234,14 @@ export class SelectorExpressionParser {
   }
 
   public parse(): ExpressionJson {
-    return this._parseExpression();
+    const result: ExpressionJson = this._parseExpression();
+    if (this._pLevel !== 0) {
+      throw new ParseError(
+        `Expected ')' somewhere in expression but encountered end of expression`,
+        this._originalExpr
+      );
+    }
+    return result;
   }
 
   /**
@@ -230,22 +265,51 @@ export class SelectorExpressionParser {
 
     let state: 'flat' | 'selector' = 'flat';
 
-    for (const c of expr) {
+    for (let index: number = 0; index < expr.length; index++) {
+      const c: string = expr[index];
+
       switch (state) {
         case 'flat':
           if (c === '[') {
-            if (token !== '') {
-              throw new Error('found [ in middle of some other expr');
+            if (token) {
+              if (operators[token]) {
+                tokens.push({
+                  type: operators[token],
+                  op: token
+                });
+              } else if (keywords.includes(token)) {
+                tokens.push({
+                  type: 'filter',
+                  filter: token
+                });
+              } else {
+                tokens.push({
+                  type: 'selector',
+                  selector: token
+                });
+              }
+              token = '';
             }
             state = 'selector';
           } else if (c === ']') {
-            throw new Error('found ] in middle of some other expr');
+            throw new ParseError(`Encountered unmatched ']' in selector expression`, expr);
           } else if (c === '(' || c === ')') {
             if (token) {
               if (operators[token]) {
-                tokens.push({ type: operators[token], op: token });
+                tokens.push({
+                  type: operators[token],
+                  op: token
+                });
+              } else if (keywords.includes(token)) {
+                tokens.push({
+                  type: 'filter',
+                  filter: token
+                });
               } else {
-                tokens.push({ type: 'selector', selector: token });
+                tokens.push({
+                  type: 'selector',
+                  selector: token
+                });
               }
               token = '';
             }
@@ -253,11 +317,20 @@ export class SelectorExpressionParser {
           } else if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
             if (token) {
               if (operators[token]) {
-                tokens.push({ type: operators[token], op: token });
+                tokens.push({
+                  type: operators[token],
+                  op: token
+                });
               } else if (keywords.includes(token)) {
-                tokens.push({ type: 'filter', filter: token });
+                tokens.push({
+                  type: 'filter',
+                  filter: token
+                });
               } else {
-                tokens.push({ type: 'selector', selector: token });
+                tokens.push({
+                  type: 'selector',
+                  selector: token
+                });
               }
               token = '';
             }
@@ -267,9 +340,12 @@ export class SelectorExpressionParser {
           break;
         case 'selector':
           if (c === '[') {
-            throw new Error('found [ in selector');
+            throw new ParseError(`Encountered '[' in bracketed selector expression`, expr);
           } else if (c === ']') {
-            tokens.push({ type: 'selector', selector: token });
+            tokens.push({
+              type: 'selector',
+              selector: token
+            });
             token = '';
             state = 'flat';
           } else {
@@ -279,14 +355,39 @@ export class SelectorExpressionParser {
       }
     }
     if (token) {
-      tokens.push({ type: 'selector', selector: token });
+      if (operators[token]) {
+        tokens.push({
+          type: operators[token],
+          op: token
+        });
+      } else if (keywords.includes(token)) {
+        tokens.push({
+          type: 'filter',
+          filter: token
+        });
+      } else {
+        tokens.push({
+          type: 'selector',
+          selector: token
+        });
+      }
+      token = '';
     }
 
     return tokens;
   }
 
+  private _tokenToString(token: Token) {
+    return (
+      (token as UnaryOperatorToken).op ||
+      (token as FilterToken).filter ||
+      (token as SelectorToken).selector ||
+      (token as LeftParenToken).type
+    );
+  }
+
   public static parse(expr: string, allowedFilters: string[]): ExpressionJson {
     const tokens: Token[] = SelectorExpressionParser.tokenize(expr, allowedFilters);
-    return new SelectorExpressionParser(tokens).parse();
+    return new SelectorExpressionParser(tokens, expr).parse();
   }
 }

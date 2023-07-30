@@ -128,8 +128,9 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [--timeline] [-t PROJECT] [-T PROJECT]
                   [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
-                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
-                  [--ignore-hooks] [-s] [-m]
+                  [--from-version-policy VERSION_POLICY_NAME]
+                  [--select EXPRESSION] [--select-json-file EXPRESSION] [-v]
+                  [-c] [--ignore-hooks] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -237,6 +238,13 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --select EXPRESSION   Select projects using a string selector expression. 
+                        This is going to require some pretty good 
+                        documentation.
+  --select-json-file EXPRESSION
+                        Select projects using a JSON selector expression read 
+                        from the specified file. This is going to require 
+                        some pretty good documentation too.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -c, --changed-projects-only
@@ -392,7 +400,9 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
                            [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
                            [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [--from-version-policy VERSION_POLICY_NAME] [-v]
+                           [--from-version-policy VERSION_POLICY_NAME]
+                           [--select EXPRESSION]
+                           [--select-json-file EXPRESSION] [-v]
                            [--ignore-hooks]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
@@ -493,6 +503,13 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --select EXPRESSION   Select projects using a string selector expression. 
+                        This is going to require some pretty good 
+                        documentation.
+  --select-json-file EXPRESSION
+                        Select projects using a JSON selector expression read 
+                        from the specified file. This is going to require 
+                        some pretty good documentation too.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
@@ -573,7 +590,9 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
                     [--variant VARIANT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME] [--check-only]
+                    [--from-version-policy VERSION_POLICY_NAME]
+                    [--select EXPRESSION] [--select-json-file EXPRESSION]
+                    [--check-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -694,6 +713,13 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --select EXPRESSION   Select projects using a string selector expression. 
+                        This is going to require some pretty good 
+                        documentation.
+  --select-json-file EXPRESSION
+                        Select projects using a JSON selector expression read 
+                        from the specified file. This is going to require 
+                        some pretty good documentation too.
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
 "
@@ -721,6 +747,7 @@ exports[`CommandLineHelp prints the help for each action: list 1`] = `
                  [-i PROJECT] [-I PROJECT]
                  [--to-version-policy VERSION_POLICY_NAME]
                  [--from-version-policy VERSION_POLICY_NAME]
+                 [--select EXPRESSION] [--select-json-file EXPRESSION]
                  
 
 List package names, and optionally version (--version) and path (--path) or 
@@ -818,6 +845,13 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --select EXPRESSION   Select projects using a string selector expression. 
+                        This is going to require some pretty good 
+                        documentation.
+  --select-json-file EXPRESSION
+                        Select projects using a JSON selector expression read 
+                        from the specified file. This is going to require 
+                        some pretty good documentation too.
 "
 `;
 
@@ -938,7 +972,8 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [--timeline] [-t PROJECT] [-T PROJECT]
                     [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME] [-v]
+                    [--from-version-policy VERSION_POLICY_NAME]
+                    [--select EXPRESSION] [--select-json-file EXPRESSION] [-v]
                     [--ignore-hooks] [-s] [-m]
                     
 
@@ -1044,6 +1079,13 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --select EXPRESSION   Select projects using a string selector expression. 
+                        This is going to require some pretty good 
+                        documentation.
+  --select-json-file EXPRESSION
+                        Select projects using a JSON selector expression read 
+                        from the specified file. This is going to require 
+                        some pretty good documentation too.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
