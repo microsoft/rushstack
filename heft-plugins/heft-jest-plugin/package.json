@@ -16,7 +16,17 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.58.1"
+    "@rushstack/heft": "^0.58.1",
+    "jest-environment-jsdom": "^29.5.0",
+    "jest-environment-node": "^29.5.0"
+  },
+  "peerDependenciesMeta": {
+    "jest-environment-jsdom": {
+      "optional": true
+    },
+    "jest-environment-node": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@jest/core": "~29.5.0",
