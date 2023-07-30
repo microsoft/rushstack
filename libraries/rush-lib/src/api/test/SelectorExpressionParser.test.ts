@@ -3,22 +3,24 @@
 
 import { SelectorExpressionParser } from '../SelectorExpressionParser';
 
+const KEYWORDS = ['to', 'from'];
+
 describe(SelectorExpressionParser.name, () => {
   describe('parse', () => {
     it('parses one project name', () => {
-      expect(SelectorExpressionParser.parse('@acme/dynamite')).toEqual({
+      expect(SelectorExpressionParser.parse('@acme/dynamite', KEYWORDS)).toEqual({
         selector: '@acme/dynamite'
       });
     });
 
     it('parses a generic selector', () => {
-      expect(SelectorExpressionParser.parse('animal:zebra')).toEqual({
+      expect(SelectorExpressionParser.parse('animal:zebra', KEYWORDS)).toEqual({
         selector: 'animal:zebra'
       });
     });
 
     it('parses an expression with parentheses and operators', () => {
-      expect(SelectorExpressionParser.parse('(A or B or C) and tag:XYZ')).toEqual({
+      expect(SelectorExpressionParser.parse('(A or B or C) and tag:XYZ', KEYWORDS)).toEqual({
         op: 'and',
         args: [
           {
@@ -41,7 +43,7 @@ describe(SelectorExpressionParser.name, () => {
     });
 
     it('applies operator precedence correctly', () => {
-      expect(SelectorExpressionParser.parse('A and not B or not C and D')).toEqual({
+      expect(SelectorExpressionParser.parse('A and not B or not C and D', KEYWORDS)).toEqual({
         op: 'or',
         args: [
           {
@@ -81,7 +83,7 @@ describe(SelectorExpressionParser.name, () => {
     });
 
     it('treats selector parameter keywords as unary operators', () => {
-      expect(SelectorExpressionParser.parse('to (A or B) and not from git:origin/main')).toEqual({
+      expect(SelectorExpressionParser.parse('to (A or B) and not from git:origin/main', KEYWORDS)).toEqual({
         op: 'and',
         args: [
           {

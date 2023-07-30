@@ -22,10 +22,10 @@ export class TagProjectSelectorParser implements ISelectorParser<RushConfigurati
     const selection: ReadonlySet<RushConfigurationProject> | undefined =
       this._rushConfiguration.projectsByTag.get(unscopedSelector);
     if (!selection) {
-      terminal.writeErrorLine(
+      throw new Error(
         `The tag "${unscopedSelector}" passed to "${parameterName}" is not specified for any projects in rush.json.`
       );
-      throw new AlreadyReportedError();
+      //throw new AlreadyReportedError();
     }
     return selection;
   }

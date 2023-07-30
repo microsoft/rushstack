@@ -21,6 +21,8 @@ import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSe
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 
+import { RushProjectSelector } from '../../api/RushProjectSelector';
+
 /**
  * This class is provides the set of command line parameters used to select projects
  * based on dependencies.
@@ -39,6 +41,9 @@ export class SelectionParameterSet {
 
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
+
+  private readonly _selectString: CommandLineStringListParameter;
+  private readonly _selectJsonFile: CommandLineStringListParameter;
 
   private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
@@ -181,6 +186,21 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
+
+    this._selectString = action.defineStringListParameter({
+      parameterLongName: '--select',
+      argumentName: 'EXPRESSION',
+      description:
+        'Select projects using a string selector expression. ' +
+        'This is going to require some pretty good documentation.'
+    });
+    this._selectJsonFile = action.defineStringListParameter({
+      parameterLongName: '--select-json-file',
+      argumentName: 'EXPRESSION',
+      description:
+        'Select projects using a JSON selector expression read from the specified file. ' +
+        'This is going to require some pretty good documentation too.'
+    });
   }
 
   /**
@@ -207,9 +227,10 @@ export class SelectionParameterSet {
     ];
 
     // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = selectors.some(
-      (param: CommandLineStringListParameter) => param.values.length > 0
-    );
+    const isSelectionSpecified: boolean =
+      selectors.some((param: CommandLineStringListParameter) => param.values.length > 0) ||
+      this._selectString.values.length > 0 ||
+      this._selectJsonFile.values.length > 0;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
@@ -235,7 +256,18 @@ export class SelectionParameterSet {
       })
     );
 
+    // New Selector Expression Parsing Stuff
+    const projectSelector: RushProjectSelector = new RushProjectSelector(this._rushConfiguration);
+    let selectedByExpression: RushConfigurationProject[] = [];
+    for (const value of this._selectString.values) {
+      selectedByExpression = selectedByExpression.concat(await projectSelector.selectExpressionString(value));
+    }
+    // End New Selector Expression Parsing Stuff
+
     const selection: Set<RushConfigurationProject> = Selection.union(
+      // Selected by selector expressions
+      new Set(selectedByExpression),
+
       // Safe command line options
       Selection.expandAllDependencies(
         Selection.union(

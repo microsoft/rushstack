@@ -1,19 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ExpressionJson, ISelectorJson, IFilterJson, IOperatorJson } from './SelectorExpressionJson';
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-export type Expression = Selector | Operator;
 
-export type Selector = {
-  selector: string;
-};
-
-export type Operator = {
-  op: string;
-  args: Expression[];
-};
-
-export type Token = LeftParenToken | RightParenToken | UnaryToken | BinaryToken | SelectorToken;
+export type Token =
+  | LeftParenToken
+  | RightParenToken
+  | UnaryOperatorToken
+  | BinaryOperatorToken
+  | FilterToken
+  | SelectorToken;
 
 export type LeftParenToken = {
   type: '(';
@@ -23,26 +21,35 @@ export type RightParenToken = {
   type: ')';
 };
 
-export type UnaryToken = {
+export type UnaryOperatorToken = {
   type: 'unary';
   op: string;
 };
 
-export type BinaryToken = {
+export type BinaryOperatorToken = {
   type: 'binary';
   op: string;
+};
+
+export type FilterToken = {
+  type: 'filter';
+  filter: string;
 };
 
 export type SelectorToken = {
   type: 'selector';
   selector: string;
 };
+
 /* eslint-enable @typescript-eslint/consistent-type-definitions */
 
 /**
  * The SelectorExpressionParser is a small, stand-alone parser designed to take a string-based selector expression
  * and turn it into a JSON-based selector expression. This selector expression is repo-agnostic, and should
  * be something that a Rush project selector would eventually interpret to produce a list of projects.
+ *
+ * (Note: the parser is not truly "repo-agnostic" because it asks you to pass in a list of the supported filter
+ * keywords, which in the future could depend on Rush plugins installed in the repo. So an expression.)
  *
  * The parser intentionally does not dive into the internal implementation of selector parameters or implementations.
  * For example, "git:origin/main" is not validated as a valid selector, or resolved into a GitChangedProjectSelector.
@@ -51,12 +58,10 @@ export type SelectorToken = {
  */
 export class SelectorExpressionParser {
   private _tokens: Token[];
-  private _keywords: string[];
   private _pLevel: number;
 
-  public constructor(tokens: Token[], keywords: string[]) {
+  public constructor(tokens: Token[]) {
     this._tokens = tokens;
-    this._keywords = keywords;
     this._pLevel = 0;
   }
 
@@ -72,8 +77,9 @@ export class SelectorExpressionParser {
   private _consume(type: '('): LeftParenToken;
   private _consume(type: ')'): RightParenToken;
   private _consume(type: 'selector'): SelectorToken;
-  private _consume(type: 'unary'): UnaryToken;
-  private _consume(type: 'binary'): BinaryToken;
+  private _consume(type: 'unary'): UnaryOperatorToken;
+  private _consume(type: 'binary'): BinaryOperatorToken;
+  private _consume(type: 'filter'): FilterToken;
   private _consume(type: string): Token {
     if (this._eof()) throw new Error('eof');
     if (type && this._tokens[0].type !== type) {
@@ -82,24 +88,48 @@ export class SelectorExpressionParser {
     return this._tokens.shift()!;
   }
 
-  private _parseSelector(): Expression {
+  private _parseSelector(): ISelectorJson {
     const token: SelectorToken = this._consume('selector');
+
+    const scopeIndex: number = token.selector.indexOf(':');
+    let scope: string;
+    let value: string;
+
+    if (scopeIndex >= 0) {
+      scope = token.selector.slice(0, scopeIndex);
+      value = token.selector.slice(scopeIndex + 1);
+    } else {
+      scope = 'name';
+      value = token.selector;
+    }
+
     return {
-      selector: token.selector
+      scope: scope,
+      value: value
     };
   }
 
-  private _parseUnaryOperator(): Expression {
-    const op: UnaryToken = this._consume('unary');
-    const arg: Expression = this._parseLeftSideExpression();
+  private _parseUnaryOperator(): IOperatorJson {
+    const token: UnaryOperatorToken = this._consume('unary');
+    const arg: ExpressionJson = this._parseLeftSideExpression();
 
     return {
-      op: op.op,
+      op: token.op,
       args: [arg]
     };
   }
 
-  private _parseLeftSideExpression(): Expression {
+  private _parseFilter(): IFilterJson {
+    const token: FilterToken = this._consume('filter');
+    const arg: ExpressionJson = this._parseLeftSideExpression();
+
+    return {
+      filter: token.filter,
+      arg: arg
+    };
+  }
+
+  private _parseLeftSideExpression(): ExpressionJson {
     const token: Token = this._peek();
 
     if (token.type === '(') {
@@ -108,6 +138,8 @@ export class SelectorExpressionParser {
       return this._parseExpression();
     } else if (token.type === 'unary') {
       return this._parseUnaryOperator();
+    } else if (token.type === 'filter') {
+      return this._parseFilter();
     } else if (token.type === 'selector') {
       return this._parseSelector();
     } else {
@@ -115,11 +147,12 @@ export class SelectorExpressionParser {
     }
   }
 
-  private _parseExpression(): Expression {
-    const components: Array<Expression | Token> = [];
+  private _parseExpression(): ExpressionJson {
+    const components: Array<ExpressionJson | Token> = [];
 
-    // All unary operators (including "not") are handled while parsing left-side
-    // expression blocks.
+    // Unary operators and filters can be handled while parsing left-side
+    // expression blocks. We'll wait until there are no more to process
+    // before combining binary operators.
 
     components.push(this._parseLeftSideExpression());
 
@@ -152,24 +185,27 @@ export class SelectorExpressionParser {
       throw new Error('should be exactly 1');
     }
 
-    return components[0] as Expression;
+    return components[0] as ExpressionJson;
   }
 
-  private _combineInlineBinaryOperators(components: Array<Expression | Token>, op: string): void {
+  private _combineInlineBinaryOperators(components: Array<ExpressionJson | Token>, op: string): void {
     for (let i: number = 0; i < components.length; i++) {
       // Here we are looking for not-yet-consumed binary tokens, and turning them
       // into consumed binary expressions.
-      if ((components[i] as BinaryToken).type === 'binary' && (components[i] as BinaryToken).op === op) {
+      if (
+        (components[i] as BinaryOperatorToken).type === 'binary' &&
+        (components[i] as BinaryOperatorToken).op === op
+      ) {
         components.splice(i - 1, 3, {
           op: op,
-          args: [components[i - 1] as Expression, components[i + 1] as Expression]
+          args: [components[i - 1] as ExpressionJson, components[i + 1] as ExpressionJson]
         });
         i = 0;
       }
     }
   }
 
-  public parse(): Expression {
+  public parse(): ExpressionJson {
     return this._parseExpression();
   }
 
@@ -191,10 +227,6 @@ export class SelectorExpressionParser {
       or: 'binary',
       not: 'unary'
     };
-
-    for (const keyword of keywords) {
-      operators[keyword] = 'unary';
-    }
 
     let state: 'flat' | 'selector' = 'flat';
 
@@ -222,6 +254,8 @@ export class SelectorExpressionParser {
             if (token) {
               if (operators[token]) {
                 tokens.push({ type: operators[token], op: token });
+              } else if (keywords.includes(token)) {
+                tokens.push({ type: 'filter', filter: token });
               } else {
                 tokens.push({ type: 'selector', selector: token });
               }
@@ -235,7 +269,6 @@ export class SelectorExpressionParser {
           if (c === '[') {
             throw new Error('found [ in selector');
           } else if (c === ']') {
-            console.log('a' + token);
             tokens.push({ type: 'selector', selector: token });
             token = '';
             state = 'flat';
@@ -252,11 +285,8 @@ export class SelectorExpressionParser {
     return tokens;
   }
 
-  public static parse(expr: string): Expression {
-    // This list of keywords is, essentially, the list of Rush selector parameters.
-    // Maybe plugins can inject more?
-    const keywords: string[] = ['to', 'from', 'impacted-by'];
-    const tokens: Token[] = SelectorExpressionParser.tokenize(expr, keywords);
-    return new SelectorExpressionParser(tokens, keywords).parse();
+  public static parse(expr: string, allowedFilters: string[]): ExpressionJson {
+    const tokens: Token[] = SelectorExpressionParser.tokenize(expr, allowedFilters);
+    return new SelectorExpressionParser(tokens).parse();
   }
 }
