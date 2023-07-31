@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import path from 'path';
 
 import { FileSystem, Terminal, StringBufferTerminalProvider } from '@rushstack/node-core-library';
@@ -11,7 +14,7 @@ import {
 describe(PackageExtractor.name, () => {
   // because this files will be compiled to js, and the path will change if using __dirname
   // using path inside src folder
-  const testRepoRoot = path.join(path.resolve(__dirname, '../../'), 'src/tests/package-extractor-test-repo');
+  const testRepoRoot = path.resolve(__dirname, '../../src/tests/package-extractor-test-repo');
   const testRepoBaseTargetFolder = path.join(testRepoRoot, 'output');
   const projects = loadRushProjectFromConfigurationFile(path.resolve(testRepoRoot, 'rush.json'));
   const terminal = new Terminal(new StringBufferTerminalProvider());

@@ -77,8 +77,10 @@ interface IExtractorState {
   packageJsonByPath: Map<string, IPackageJson>;
   projectConfigurationsByPath: Map<string, IExtractorProjectConfiguration>;
   projectConfigurationsByName: Map<string, IExtractorProjectConfiguration>;
-  /* As there might be different versions of same dependency, we need take version field into consideration */
-  /* The key format `${name}@${version}` */
+  /**
+   * As there might be different versions of same dependency, we need take version field into consideration
+   * The key format is `${name}@${version}`
+   */
   dependencyConfigurationsByNameAndVersion: Map<`${string}@${string}`, IExtractorDependencyConfiguration>;
   symlinkAnalyzer: SymlinkAnalyzer;
   archiver?: ArchiveManager;
@@ -692,15 +694,15 @@ export class PackageExtractor {
     // Base filter function
     const isFileExcluded = (
       filePath: string,
-      options: { patternsToInclude?: string[]; patternsToExclude?: string[] }
+      { patternsToInclude, patternsToExclude}: Pick<IExtractorDependencyConfiguration, 'patternsToInclude' | 'patternsToExclude'>
     ): boolean => {
       let includeFilters: IMinimatch[] | undefined;
       let excludeFilters: IMinimatch[] | undefined;
-      if (options.patternsToInclude?.length) {
-        includeFilters = options.patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
+      if (patternsToInclude?.length) {
+        includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
       }
-      if (options.patternsToExclude?.length) {
-        excludeFilters = options.patternsToExclude?.map((p) => new Minimatch(p, { dot: true }));
+      if (patternsToExclude?.length) {
+        excludeFilters = patternsToExclude?.map((p) => new Minimatch(p, { dot: true }));
       }
       // If there are no filters, then we can't exclude anything.
       if (!includeFilters && !excludeFilters) {
@@ -716,9 +718,7 @@ export class PackageExtractor {
     };
     // Function to filter files inside local project
     const isFileExcludedForProject = (filePath: string): boolean =>
-      isFileExcluded(filePath, {
-        ...sourceProjectConfiguration
-      });
+      isFileExcluded(filePath, sourceProjectConfiguration);
     // Function to filter files inside third party dependencies
     const isFileExcludedForDependency = (filePath: string): boolean => {
       if (!packagesJson) {
@@ -730,9 +730,7 @@ export class PackageExtractor {
         return false;
       }
 
-      return isFileExcluded(filePath, {
-        ...dependenciesConfiguration
-      });
+      return isFileExcluded(filePath, dependenciesConfiguration);
     };
     if (sourceProjectConfiguration) {
       if (!includeNpmIgnoreFiles) {
