@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-node-rig",
-  "version": "2.2.20",
+  "version": "2.2.21",
   "description": "A rig package for Node.js projects that build using Heft",
   "license": "MIT",
   "scripts": {
