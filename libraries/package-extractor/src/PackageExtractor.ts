@@ -694,7 +694,10 @@ export class PackageExtractor {
     // Base filter function
     const isFileExcluded = (
       filePath: string,
-      { patternsToInclude, patternsToExclude}: Pick<IExtractorDependencyConfiguration, 'patternsToInclude' | 'patternsToExclude'>
+      {
+        patternsToInclude,
+        patternsToExclude
+      }: Pick<IExtractorDependencyConfiguration, 'patternsToInclude' | 'patternsToExclude'>
     ): boolean => {
       let includeFilters: IMinimatch[] | undefined;
       let excludeFilters: IMinimatch[] | undefined;
@@ -718,7 +721,10 @@ export class PackageExtractor {
     };
     // Function to filter files inside local project
     const isFileExcludedForProject = (filePath: string): boolean =>
-      isFileExcluded(filePath, sourceProjectConfiguration);
+      isFileExcluded(filePath, {
+        patternsToExclude: sourceProjectConfiguration?.patternsToExclude,
+        patternsToInclude: sourceProjectConfiguration?.patternsToInclude
+      });
     // Function to filter files inside third party dependencies
     const isFileExcludedForDependency = (filePath: string): boolean => {
       if (!packagesJson) {

@@ -24,11 +24,12 @@ describe(PackageExtractor.name, () => {
     projectName: p.packageName
   }));
   beforeAll(() => {
+    // clean up target folder before all tests run
     FileSystem.ensureEmptyFolder(testRepoBaseTargetFolder);
   });
   afterAll(() => {
-    // clean up target folder after each test run
-    // FileSystem.ensureEmptyFolder(testRepoBaseTargetFolder);
+    // clean up target folder after all tests run
+    FileSystem.ensureEmptyFolder(testRepoBaseTargetFolder);
   });
 
   it('should extract project correctly', async () => {
@@ -57,7 +58,7 @@ describe(PackageExtractor.name, () => {
     await expect(
       packageExtractor.extractAsync({
         mainProjectName: 'project-that-not-exist',
-        sourceRootFolder: 'dist',
+        sourceRootFolder: testRepoRoot,
         targetRootFolder: targetFolder,
         overwriteExisting: true,
         terminal,
