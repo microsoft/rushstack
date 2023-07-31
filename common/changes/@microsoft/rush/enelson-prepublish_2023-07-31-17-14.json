@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Enable the \"http\" option for build-cache providers",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
