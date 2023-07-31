@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.8.0",
+      "date": "Mon, 31 Jul 2023 15:19:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make `jest-environment-jsdom` and `jest-environment-node` optional peerDependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.18",
       "tag": "@rushstack/heft-jest-plugin_v0.7.18",
       "date": "Sat, 29 Jul 2023 00:22:51 GMT",

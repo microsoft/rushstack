@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Sat, 29 Jul 2023 00:22:51 GMT and should not be manually modified.
+This log was last generated on Mon, 31 Jul 2023 15:19:05 GMT and should not be manually modified.
+
+## 0.8.0
+Mon, 31 Jul 2023 15:19:05 GMT
+
+### Minor changes
+
+- Make `jest-environment-jsdom` and `jest-environment-node` optional peerDependencies.
 
 ## 0.7.18
 Sat, 29 Jul 2023 00:22:51 GMT

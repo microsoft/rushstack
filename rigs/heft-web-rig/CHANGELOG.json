@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.18.22",
+      "tag": "@rushstack/heft-web-rig_v0.18.22",
+      "date": "Mon, 31 Jul 2023 15:19:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.11.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.8.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.21",
       "tag": "@rushstack/heft-web-rig_v0.18.21",
       "date": "Sat, 29 Jul 2023 00:22:51 GMT",

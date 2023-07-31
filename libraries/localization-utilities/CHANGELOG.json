@@ -2,6 +2,21 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.8.80",
+      "tag": "@rushstack/localization-utilities_v0.8.80",
+      "date": "Mon, 31 Jul 2023 15:19:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.21`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.79",
       "tag": "@rushstack/localization-utilities_v0.8.79",
       "date": "Sat, 29 Jul 2023 00:22:51 GMT",
