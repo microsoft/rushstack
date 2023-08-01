@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { parentPort } from 'node:worker_threads';
 
-import { gunzipSync, type IDecompressResult } from '../gunzipSync';
+import { gunzipSync, type IDecompressResult } from './gunzipSync';
 
 import type { IParseResult, ITarballExtractMessage, ITarballParseMessage } from '../types';
 
@@ -48,6 +48,7 @@ const SPACE: number = ' '.charCodeAt(0);
 const SLASH: number = '/'.charCodeAt(0);
 const BACKSLASH: number = '\\'.charCodeAt(0);
 const FILE_TYPE_PAX_HEADER: number = 'x'.charCodeAt(0);
+const FILE_TYPE_PAX_GLOBAL_HEADER: number = 'g'.charCodeAt(0);
 
 const USTAR_MAGIC: Buffer = Buffer.from('ustar', 'latin1');
 
@@ -170,7 +171,10 @@ function parseTarball(buffer: Buffer): IParseResult {
         // Skip
         break;
       case FILE_TYPE_PAX_HEADER:
-        parsePaxHeader(blockStart + 512, fileSize);
+        parsePaxHeader(blockStart + 512, fileSize, false);
+        break;
+      case FILE_TYPE_PAX_GLOBAL_HEADER:
+        parsePaxHeader(blockStart + 512, fileSize, true);
         break;
       default:
         throw new Error(`Unsupported file type ${fileType} for file ${fileName}.`);
@@ -211,9 +215,10 @@ function parseTarball(buffer: Buffer): IParseResult {
    *
    * @param offset - Offset into the buffer where the PAX header starts
    * @param length - Length of the PAX header, in bytes
+   * @param global - Whether this is a global PAX header
    * @returns The path field, if present
    */
-  function parsePaxHeader(offset: number, length: number): void {
+  function parsePaxHeader(offset: number, length: number, global: boolean): void {
     const end: number = offset + length;
     let i: number = offset;
     while (i < end) {
@@ -243,11 +248,17 @@ function parseTarball(buffer: Buffer): IParseResult {
       if (keyword === 'path') {
         // Still need to trim the first path segment.
         const slashIndex: number = record.indexOf('/', equalSign + 1);
+        if (global) {
+          throw new Error(`Unexpected global PAX path: ${record}`);
+        }
         paxHeaderPath = record.slice(slashIndex >= 0 ? slashIndex + 1 : equalSign + 1);
       } else if (keyword === 'size') {
         const size: number = parseInt(record.slice(equalSign + 1), 10);
         if (isNaN(size) || size < 0) {
           throw new Error(`Invalid size in PAX record: ${record}`);
+        }
+        if (global) {
+          throw new Error(`Unexpected global PAX file size: ${record}`);
         }
         paxHeaderFileSize = size;
       } else {
