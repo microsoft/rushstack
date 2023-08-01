@@ -292,8 +292,8 @@ export class Import {
         preserveSymlinks: false,
         realpathSync: getRealPath
       });
-    } catch (e) {
-      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
+    } catch (e: unknown) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}": ${e}`);
     }
   }
 
@@ -383,8 +383,8 @@ export class Import {
         }
       );
       return await resolvePromise;
-    } catch (e) {
-      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}".`);
+    } catch (e: unknown) {
+      throw new Error(`Cannot find module "${modulePath}" from "${options.baseFolderPath}": ${e}`);
     }
   }
 
@@ -444,8 +444,8 @@ export class Import {
 
       const packagePath: string = path.dirname(resolvedPath);
       return packagePath;
-    } catch {
-      throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}".`);
+    } catch (e: unknown) {
+      throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}": ${e}.`);
     }
   }
 
@@ -536,8 +536,8 @@ export class Import {
 
       const packagePath: string = path.dirname(resolvedPath);
       return packagePath;
-    } catch {
-      throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}".`);
+    } catch (e: unknown) {
+      throw new Error(`Cannot find package "${packageName}" from "${baseFolderPath}": ${e}`);
     }
   }
 

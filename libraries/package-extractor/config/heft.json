@@ -16,6 +16,10 @@
           }
         }
       }
+    },
+
+    "test": {
+      "cleanFiles": [{ "sourcePath": "test-output" }]
     }
   }
 }
