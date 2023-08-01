@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Expose a `_metricsCollector` property on the sessions to allow plugins to instrument performance.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

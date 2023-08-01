@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 
-import type { MetricsCollector } from '../metrics/MetricsCollector';
+import type { IMetricsCollector, MetricsCollector } from '../metrics/MetricsCollector';
 import type { IScopedLogger } from './logging/ScopedLogger';
 import type { HeftTask } from './HeftTask';
 import type { IHeftPhaseSessionOptions } from './HeftPhaseSession';
@@ -113,6 +113,13 @@ export interface IHeftTaskSession {
    * @public
    */
   readonly logger: IScopedLogger;
+
+  /**
+   * The performance metrics collector. A plugin is required to pipe data anywhere.
+   *
+   * @internal
+   */
+  readonly _metricsCollector: IMetricsCollector;
 
   /**
    * Set a a callback which will be called if and after the specified plugin has been applied.
@@ -235,7 +242,7 @@ export class HeftTaskSession implements IHeftTaskSession {
   /**
    * @internal
    */
-  public readonly metricsCollector: MetricsCollector;
+  public readonly _metricsCollector: MetricsCollector;
 
   public get parameters(): IHeftParameters {
     // Delay loading the parameters for the task until they're actually needed
@@ -269,7 +276,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     this._parsedCommandLine = options.internalHeftSession.parsedCommandLine;
 
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
-    this.metricsCollector = metricsCollector;
+    this._metricsCollector = metricsCollector;
     this.taskName = task.taskName;
     this.hooks = {
       run: new AsyncParallelHook(['runHookOptions']),

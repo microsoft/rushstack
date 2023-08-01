@@ -35,7 +35,8 @@ describe(WebpackConfigurationLoader.tryLoadWebpackConfigurationAsync.name, () =>
       parsedCommandLine: undefined!,
       requestAccessToPluginByName: undefined!,
       taskName: 'webpack',
-      tempFolderPath: `${__dirname}/temp`
+      tempFolderPath: `${__dirname}/temp`,
+      _metricsCollector: undefined!
     };
 
     const heftConfiguration: Partial<HeftConfiguration> = {

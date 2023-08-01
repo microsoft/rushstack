@@ -58,7 +58,7 @@ export {
   type IHeftRecordMetricsHookOptions,
   type IMetricsData,
   type IPerformanceData as _IPerformanceData,
-  MetricsCollector as _MetricsCollector
+  type IMetricsCollector as _IMetricsCollector
 } from './metrics/MetricsCollector';
 
 export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';

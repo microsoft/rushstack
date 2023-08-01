@@ -80,21 +80,17 @@ export interface IPerformanceData {
 }
 
 /**
- * @internal
  * A simple performance metrics collector. A plugin is required to pipe data anywhere.
+ *
+ * @internal
  */
-export class MetricsCollector {
-  public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
-    new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
-
-  private _startTimeMs: number | undefined;
+export interface IMetricsCollector {
+  readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
 
   /**
    * Start metrics log timer.
    */
-  public setStartTime(): void {
-    this._startTimeMs = performance.now();
-  }
+  setStartTime(): void;
 
   /**
    * Record metrics to the installed plugin(s).
@@ -102,6 +98,32 @@ export class MetricsCollector {
    * @param command - Describe the user command, e.g. `start` or `build`
    * @param parameterMap - Optional map of parameters to their values
    * @param performanceData - Optional performance data
+   */
+  recordAsync(
+    command: string,
+    performanceData?: Partial<IPerformanceData>,
+    parameters?: Record<string, string>
+  ): Promise<void>;
+}
+
+/**
+ * {@inheritDoc IMetricsCollector}
+ */
+export class MetricsCollector implements IMetricsCollector {
+  public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
+    new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
+
+  private _startTimeMs: number | undefined;
+
+  /**
+   * {@inheritdoc IMetricsCollector.setStartTime}
+   */
+  public setStartTime(): void {
+    this._startTimeMs = performance.now();
+  }
+
+  /**
+   * {@inheritdoc IMetricsCollector.recordAsync}
    */
   public async recordAsync(
     command: string,

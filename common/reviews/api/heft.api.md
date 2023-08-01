@@ -150,6 +150,8 @@ export interface IHeftLifecyclePlugin<TOptions = void> extends IHeftPlugin<IHeft
 export interface IHeftLifecycleSession {
     readonly hooks: IHeftLifecycleHooks;
     readonly logger: IScopedLogger;
+    // @internal
+    readonly _metricsCollector: _IMetricsCollector;
     readonly parameters: IHeftParameters;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly tempFolderPath: string;
@@ -227,6 +229,8 @@ export interface IHeftTaskRunIncrementalHookOptions extends IHeftTaskRunHookOpti
 export interface IHeftTaskSession {
     readonly hooks: IHeftTaskHooks;
     readonly logger: IScopedLogger;
+    // @internal
+    readonly _metricsCollector: _IMetricsCollector;
     readonly parameters: IHeftParameters;
     readonly parsedCommandLine: IHeftParsedCommandLine;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
@@ -237,6 +241,14 @@ export interface IHeftTaskSession {
 // @public
 export interface IIncrementalCopyOperation extends ICopyOperation {
     onlyIfChanged?: boolean;
+}
+
+// @internal
+export interface _IMetricsCollector {
+    recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
+    // (undocumented)
+    readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+    setStartTime(): void;
 }
 
 // @public (undocumented)
@@ -296,14 +308,6 @@ export interface IScopedLogger {
 // @public
 export interface IWatchedFileState {
     changed: boolean;
-}
-
-// @internal
-export class _MetricsCollector {
-    recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
-    // (undocumented)
-    readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
-    setStartTime(): void;
 }
 
 // @public

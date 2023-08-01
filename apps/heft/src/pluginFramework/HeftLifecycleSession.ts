@@ -4,7 +4,11 @@
 import * as path from 'path';
 import type { AsyncParallelHook } from 'tapable';
 
-import type { IHeftRecordMetricsHookOptions, MetricsCollector } from '../metrics/MetricsCollector';
+import type {
+  IHeftRecordMetricsHookOptions,
+  IMetricsCollector,
+  MetricsCollector
+} from '../metrics/MetricsCollector';
 import type { ScopedLogger, IScopedLogger } from './logging/ScopedLogger';
 import type { IInternalHeftSessionOptions } from './InternalHeftSession';
 import type { IHeftParameters } from './HeftParameterManager';
@@ -53,6 +57,13 @@ export interface IHeftLifecycleSession {
    * @public
    */
   readonly logger: IScopedLogger;
+
+  /**
+   * The performance metrics collector. A plugin is required to pipe data anywhere.
+   *
+   * @internal
+   */
+  readonly _metricsCollector: IMetricsCollector;
 
   /**
    * Set a a callback which will be called if and after the specified plugin has been applied.
@@ -162,12 +173,12 @@ export class HeftLifecycleSession implements IHeftLifecycleSession {
   /**
    * @internal
    */
-  public readonly metricsCollector: MetricsCollector;
+  public readonly _metricsCollector: MetricsCollector;
 
   public constructor(options: IHeftLifecycleSessionOptions) {
     this._options = options;
     this.logger = options.logger;
-    this.metricsCollector = options.metricsCollector;
+    this._metricsCollector = options.metricsCollector;
     this.hooks = options.lifecycleHooks;
     this.parameters = options.lifecycleParameters;
     this.debug = options.debug;
