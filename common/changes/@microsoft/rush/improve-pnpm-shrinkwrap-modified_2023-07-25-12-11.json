@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "improve accuracy of detecting pnpm shrinkwrap is modified",
+      "comment": "Reduce false positive detections of the pnpm shrinkwrap file being out of date in the presence of the `globalOverrides` setting in `pnpm-config.json`, or when a dependency is listed in both `dependencies` and `devDependencies` in the same package.",
       "type": "none"
     }
   ],
