@@ -2817,67 +2817,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
 
-  ../../vscode-extensions/rush-vscode-assistant:
-    specifiers:
-      '@microsoft/rush-lib': workspace:*
-      '@reduxjs/toolkit': ~1.8.6
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
-      '@rushstack/heft-typescript-plugin': workspace:*
-      '@rushstack/heft-web-rig': workspace:*
-      '@rushstack/heft-webpack5-plugin': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-sdk': workspace:*
-      '@rushstack/ts-command-line': workspace:*
-      '@types/node': 14.18.36
-      '@types/react': 16.14.23
-      '@types/react-dom': 16.9.14
-      '@types/react-redux': ~7.1.22
-      '@types/vscode': ^1.63.0
-      '@types/webpack-env': 1.18.0
-      eslint: ~8.7.0
-      html-webpack-plugin: ~5.5.0
-      react: ~16.13.1
-      react-dom: ~16.13.1
-      react-hook-form: ~7.24.1
-      react-redux: ~8.0.4
-      redux: ~4.2.0
-      tslib: ~2.3.1
-      typescript: ~5.0.4
-      webpack: ~5.82.1
-      webpack-bundle-analyzer: ~4.5.0
-    dependencies:
-      '@reduxjs/toolkit': 1.8.6_qfynotfwlyrsyq662adyrweaoe
-      '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
-      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@rushstack/rush-sdk': link:../../libraries/rush-sdk
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      react-hook-form: 7.24.2_react@16.13.1
-      react-redux: 8.0.5_mq2cyprinb6qi7hdzoedcdddgq
-      redux: 4.2.1
-      tslib: 2.3.1
-    devDependencies:
-      '@microsoft/rush-lib': link:../../libraries/rush-lib
-      '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
-      '@rushstack/ts-command-line': link:../../libraries/ts-command-line
-      '@types/node': 14.18.36
-      '@types/react': 16.14.23
-      '@types/react-dom': 16.9.14
-      '@types/react-redux': 7.1.25
-      '@types/vscode': 1.80.0
-      '@types/webpack-env': 1.18.0
-      eslint: 8.7.0
-      html-webpack-plugin: 5.5.0_webpack@5.82.1
-      typescript: 5.0.4
-      webpack: 5.82.1
-      webpack-bundle-analyzer: 4.5.0
-
   ../../vscode-extensions/rush-vscode-command-webview:
     specifiers:
       '@fluentui/react': ^8.96.1
@@ -19008,7 +18947,7 @@ packages:
     resolution: {integrity: sha512-iwXuFrMAcFVi/ZoZiqq8BzAdsLw9kxDfTC0HMyjXfSL/6CSDAGD5UmR7azrAgWV1zKYq7dUUMj4owusBWKLsiQ==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.5.1
+      semver: 7.5.4
     dev: false
 
   /node-addon-api/3.2.1:

@@ -64,19 +64,6 @@
 			"port": 9229
 		},
 		{
-			"name": "Run Extension",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}/vscode-extensions/rush-vscode-assistant"
-			],
-			"outFiles": [
-				"${workspaceFolder}/vscode-extensions/rush-vscode-assistant/lib/**/*.js"
-			]
-			// "preLaunchTask": "npm: _phase:build"
-		},
-		{
 			"name": "Launch Rush Extension",
 			"type": "extensionHost",
 			"request": "launch",
