@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add vscode extension",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
