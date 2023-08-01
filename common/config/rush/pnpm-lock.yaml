@@ -1267,7 +1267,7 @@ importers:
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/jest': 29.5.3
-      '@types/node': 20.4.2
+      '@types/node': 20.4.5
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -1448,6 +1448,30 @@ importers:
       webpack-bundle-analyzer: 4.5.0
       webpack-cli: 3.3.12_webpack@4.44.2
       webpack-dev-server: 4.9.3_spfcq5ngldu5cvjikbre424ry4
+
+  ../../build-tests/package-extractor-test-01:
+    specifiers:
+      package-extractor-test-02: workspace:*
+      package-extractor-test-03: workspace:*
+    dependencies:
+      package-extractor-test-02: link:../package-extractor-test-02
+    devDependencies:
+      package-extractor-test-03: link:../package-extractor-test-03
+
+  ../../build-tests/package-extractor-test-02:
+    specifiers:
+      package-extractor-test-03: workspace:*
+    dependencies:
+      package-extractor-test-03: link:../package-extractor-test-03
+
+  ../../build-tests/package-extractor-test-03:
+    specifiers: {}
+
+  ../../build-tests/package-extractor-test-04:
+    specifiers:
+      '@rushstack/node-core-library': workspace:*
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
 
   ../../build-tests/rush-amazon-s3-build-cache-plugin-integration-test:
     specifiers:
@@ -9041,8 +9065,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.4.2:
-    resolution: {integrity: sha512-Dd0BYtWgnWJKwO1jkmTrzofjK2QXXcai0dmtzvIBhcA+RsG5h8R3xlyta0kGOZRNfL9GuRtb1knmPEhQrePCEw==}
+  /@types/node/20.4.5:
+    resolution: {integrity: sha512-rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:
