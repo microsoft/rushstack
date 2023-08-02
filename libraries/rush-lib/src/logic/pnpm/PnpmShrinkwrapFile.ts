@@ -821,7 +821,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
                 `"${specifierFromLockfile}" instead of an object.`
             );
           } else {
-            // TODO: Add an error message when someone tries to override a version of something in one of their
+            // TODO: Emit an error message when someone tries to override a version of something in one of their
             // local repo packages.
             const resolvedVersion: string = this.overrides.get(name) ?? version;
             if (specifierFromLockfile.specifier !== resolvedVersion && !isDevDepFallThrough && !isOptional) {
