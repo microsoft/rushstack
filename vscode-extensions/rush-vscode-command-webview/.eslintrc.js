@@ -2,7 +2,6 @@
 require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
-  ignorePatterns: ['out', 'dist', '**/*.d.ts'],
   extends: ['@rushstack/eslint-config/profile/web-app', '@rushstack/eslint-config/mixins/friendly-locals'],
   parserOptions: { tsconfigRootDir: __dirname }
 };
