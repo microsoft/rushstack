@@ -9,8 +9,7 @@
     "directory": "vscode-extensions/rush-vscode-extension"
   },
   "license": "MIT",
-  "author": "Cheng Liu<chengcyber@outlook.com>",
-  "publisher": "Microsoft",
+  "publisher": "RushStack",
   "main": "./dist/extension.js",
   "scripts": {
     "build": "heft build --clean",
