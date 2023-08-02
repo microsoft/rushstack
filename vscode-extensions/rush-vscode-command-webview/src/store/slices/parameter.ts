@@ -1,9 +1,8 @@
 import { SliceCaseReducers, createSlice, Slice, PayloadAction } from '@reduxjs/toolkit';
+import type { CommandLineParameterKind } from '@rushstack/ts-command-line';
+import type { FieldValues } from 'react-hook-form';
 
 import { useAppSelector } from '../hooks';
-
-import type { FieldValues } from 'react-hook-form';
-import type { CommandLineParameterKind } from '@rushstack/ts-command-line/lib/parameters/BaseClasses';
 
 export interface ICommandLineParameter {
   readonly kind: CommandLineParameterKind;

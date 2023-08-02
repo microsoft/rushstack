@@ -219,8 +219,7 @@ export const ParameterForm = (): JSX.Element => {
               break;
             }
             default: {
-              const _kind: never = parameter.kind;
-              console.error(`Unhandled parameter kind: ${_kind}`);
+              console.error(`Unhandled parameter kind: ${parameter.kind}`);
               return null;
             }
           }
