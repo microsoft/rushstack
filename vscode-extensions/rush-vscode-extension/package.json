@@ -14,7 +14,6 @@
   "scripts": {
     "build": "heft build --clean",
     "build:watch": "heft build-watch",
-    "copy-webview": "node scripts/copy-webview.js",
     "vscode:prepublish": "heft build --clean --production",
     "deploy": "vsce publish --no-dependencies",
     "package": "vsce package --no-dependencies",

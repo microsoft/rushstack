@@ -19,8 +19,7 @@
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }
         },
-        "post-compile-copy": {
-          "taskDependencies": ["typescript"],
+        "copy-webview": {
           "taskPlugin": {
             "pluginName": "copy-files-plugin",
             "pluginPackage": "@rushstack/heft",
