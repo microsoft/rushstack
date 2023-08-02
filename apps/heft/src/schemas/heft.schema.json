@@ -54,6 +54,12 @@
     "delete-operation": {
       "type": "object",
       "additionalProperties": false,
+      "anyOf": [
+        { "required": ["sourcePath"] },
+        { "required": ["fileExtensions"] },
+        { "required": ["includeGlobs"] },
+        { "required": ["excludeGlobs"] }
+      ],
       "properties": {
         "sourcePath": {
           "title": "Source Path",

@@ -611,7 +611,7 @@ export class TypeScriptBuilder {
         this._printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
       }
 
-      if (warningCount > 0 && !hasError) {
+      if (isSolutionMode && warningCount > 0 && !hasError) {
         this._typescriptLogger.emitError(
           new Error(
             `TypeScript encountered ${warningCount} warning${warningCount === 1 ? '' : 's'} ` +

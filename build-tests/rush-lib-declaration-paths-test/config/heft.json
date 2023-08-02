@@ -5,7 +5,8 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "sourcePath": "src" }],
+      "cleanFiles": [{ "includeGlobs": ["src"] }],
+
       "tasksByName": {
         "create-src": {
           "taskPlugin": {

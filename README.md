@@ -157,6 +157,10 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
+| [/build-tests/package-extractor-test-01](./build-tests/package-extractor-test-01/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-02](./build-tests/package-extractor-test-02/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-03](./build-tests/package-extractor-test-03/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-04](./build-tests/package-extractor-test-04/) | This project is used by tests in the @rushstack/package-extractor package. |
 | [/build-tests/rush-amazon-s3-build-cache-plugin-integration-test](./build-tests/rush-amazon-s3-build-cache-plugin-integration-test/) | Tests connecting to an amazon S3 endpoint |
 | [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |

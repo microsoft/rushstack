@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 14 Jun 2023 19:42:12 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Jul 2023 18:54:49 GMT and should not be manually modified.
+
+## 5.100.2
+Mon, 24 Jul 2023 18:54:49 GMT
+
+### Patches
+
+- Fix an issue where the git pre-push hook would allow push to go through if the script exited with error.
+
+### Updates
+
+- Updated semver dependency
 
 ## 5.100.1
 Wed, 14 Jun 2023 19:42:12 GMT

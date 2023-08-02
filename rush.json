@@ -534,6 +534,30 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "package-extractor-test-01",
+      "projectFolder": "build-tests/package-extractor-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-02",
+      "projectFolder": "build-tests/package-extractor-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-03",
+      "projectFolder": "build-tests/package-extractor-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-04",
+      "projectFolder": "build-tests/package-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {

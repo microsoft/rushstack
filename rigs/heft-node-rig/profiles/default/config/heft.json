@@ -19,7 +19,8 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
+
       "tasksByName": {
         "typescript": {
           "taskPlugin": {

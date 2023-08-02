@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.100.1",
+  "version": "5.100.2",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -51,7 +51,7 @@
     "npm-package-arg": "~6.1.0",
     "read-package-tree": "~5.1.5",
     "rxjs": "~6.6.7",
-    "semver": "~7.3.0",
+    "semver": "~7.5.4",
     "ssri": "~8.0.0",
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
@@ -74,7 +74,7 @@
     "@types/node": "14.18.36",
     "@types/npm-package-arg": "6.1.0",
     "@types/read-package-tree": "5.1.0",
-    "@types/semver": "7.3.5",
+    "@types/semver": "7.5.0",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.1",

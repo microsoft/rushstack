@@ -639,6 +639,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "package-extractor-test-02",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "package-extractor-test-03",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "postcss",
       "allowedCategories": [ "libraries", "tests" ]
     },

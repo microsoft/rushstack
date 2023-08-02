@@ -13,6 +13,8 @@ export interface IDeployScenarioProjectJson {
   additionalProjectsToInclude?: string[];
   additionalDependenciesToInclude?: string[];
   dependenciesToExclude?: string[];
+  patternsToInclude?: string[];
+  patternsToExclude?: string[];
 }
 
 // The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema

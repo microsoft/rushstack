@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "",
+      "comment": "Enable the \"http\" option for build-cache providers",
       "type": "none"
     }
   ],

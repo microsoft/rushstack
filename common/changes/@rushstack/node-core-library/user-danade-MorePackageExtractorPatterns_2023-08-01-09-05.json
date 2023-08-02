@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Update error messages when modules or packages cannot be found using the \"Import.resolve*\" methods.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

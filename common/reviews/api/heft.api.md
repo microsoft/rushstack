@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';
@@ -100,7 +102,7 @@ export interface IFileSelectionSpecifier {
     excludeGlobs?: string[];
     fileExtensions?: string[];
     includeGlobs?: string[];
-    sourcePath: string;
+    sourcePath?: string;
 }
 
 // @public
@@ -135,7 +137,6 @@ export interface IHeftLifecycleCleanHookOptions {
 // @public
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
-    // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
