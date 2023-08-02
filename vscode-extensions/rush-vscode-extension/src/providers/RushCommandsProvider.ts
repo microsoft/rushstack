@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
-import { RushCommandWebViewPanel } from '../logic/RushCommandWebViewPanel';
 
 import { CommandLineAction } from 'rush-vscode-command-webview';
 
@@ -74,7 +73,7 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   }
 
   public async runRushCommandAsync(element?: RushCommand): Promise<void> {
-    const rushCommand: RushCommand | undefined = element;
+    // const rushCommand: RushCommand | undefined = element;
     await this.openParameterViewPanelAsync();
     // if (!rushCommand) {
     //   const actionNames: string[] = this._commandLineActions?.map((action) => action.actionName) || [];

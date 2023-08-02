@@ -2,17 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { RushTaskProvider } from '../providers/TaskProvider';
-import { RushWorkspace } from './RushWorkspace';
-
-import type {
-  CommandLineAction,
-  CommandLineParameter,
-  IFromExtensionMessage,
-  IRootState,
-  ICommandLineParameter,
-  IToExtensionMessage
-} from 'rush-vscode-command-webview';
+import type { IFromExtensionMessage, IRootState } from 'rush-vscode-command-webview';
 
 export class RushCommandWebViewPanel {
   private static _instance: RushCommandWebViewPanel | undefined;
@@ -68,8 +58,8 @@ export class RushCommandWebViewPanel {
     const resolveWebviewView = (
       thisWebview: vscode.WebviewView,
       thisWebviewContext: vscode.WebviewViewResolveContext,
-      thisToken: any
-    ) => {
+      thisToken: vscode.CancellationToken
+    ): void => {
       this._panel = thisWebview;
 
       const message: IFromExtensionMessage = {
@@ -163,7 +153,7 @@ export class RushCommandWebViewPanel {
     this._panel.webview.html = this._getWebviewContent(state);
   }
 
-  private _getWebviewContent(state: any = {}): string {
+  private _getWebviewContent(state: unknown = {}): string {
     console.log('loading rush command webview html and bundle');
     let html: string = FileSystem.readFile(
       path.join(this._extensionPath, 'webview/rush-command-webview/index.html')
