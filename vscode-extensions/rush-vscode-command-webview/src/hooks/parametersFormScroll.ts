@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { MutableRefObject, UIEventHandler, useCallback, useEffect, useRef } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import {

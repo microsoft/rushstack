@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { ComboBox, IComboBoxOption, IComboBoxProps } from '@fluentui/react';
 import * as React from 'react';
 import { Controller, useFormState } from 'react-hook-form';
