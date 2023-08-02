@@ -603,6 +603,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "mocha",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "node-fetch",
       "allowedCategories": [ "libraries" ]
     },
@@ -761,6 +765,10 @@
     {
       "name": "url-loader",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "vsce",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "watchpack",

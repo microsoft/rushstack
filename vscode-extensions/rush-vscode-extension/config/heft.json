@@ -1,42 +1,18 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
 
-  // "eventActions": [
-  //   {
-  //     "actionKind": "copyFiles",
-  //     "heftEvent": "pre-compile",
-  //     "actionId": "copy-webview",
-  //     "copyOperations": [
-  //       {
-  //         "sourceFolder": "node_modules/rush-vscode-command-webview/dist",
-  //         "destinationFolders": ["webview/rush-command-webview"],
-  //         "includeGlobs": ["*.{html,js}"]
-  //       }
-  //     ]
-  //   }
-  // ],
-  // "heftPlugins": [
-  //   {
-  //     "plugin": "@rushstack/heft-webpack5-plugin"
-  //   }
-  // ]
-
-  // "aliasesByName": {
-  //   "start": {
-  //     "actionName": "build-watch",
-  //     "defaultParameters": ["--serve"]
-  //   }
-  // },
+  "aliasesByName": {
+    "start": {
+      "actionName": "build-watch",
+      "defaultParameters": ["--serve"]
+    }
+  },
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "lib-commonjs" }],
+      "cleanFiles": [{ "includeGlobs": ["webview"] }],
       "tasksByName": {
-        "typescript": {
-          "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-typescript-plugin"
-          }
-        },
         "webpack": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
@@ -61,20 +37,5 @@
         }
       }
     }
-    // "pre-compile": {
-    //   "tasksByName": {
-
-    //     "copy-webview": {
-
-    //       "copyOperations": [
-    //         {
-    //           "sourceFolder": "node_modules/rush-vscode-command-webview/dist",
-    //           "destinationFolders": ["webview/rush-command-webview"],
-    //           "includeGlobs": ["*.{html,js}"]
-    //         }
-    //       ]
-    //     }
-    //   }
-    // }
   }
 }

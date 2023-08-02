@@ -59,10 +59,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "mocha",
-      "allowedCategories": [ "vscode-extensions" ]
-    },
-    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },
@@ -105,10 +101,6 @@
     {
       "name": "update-notifier",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "vsce",
-      "allowedCategories": [ "vscode-extensions" ]
     }
   ]
 }
