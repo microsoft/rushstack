@@ -132,6 +132,14 @@ describe(PnpmShrinkwrapFile.name, () => {
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
       });
+
+      it('can detect overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/overrides-not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
     });
 
     describe('pnpm lockfile major version 6', () => {
@@ -149,6 +157,22 @@ describe(PnpmShrinkwrapFile.name, () => {
           `${__dirname}/yamlFiles/pnpm-lock-v6/modified.yaml`
         );
         await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+      });
+
+      it('can detect overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/overrides-not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+
+      it('can handle the inconsistent version of a package declared in dependencies and devDependencies', async () => {
+        const project = getMockRushProject2();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/inconsistent-dep-devDep.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
       });
     });
   });
@@ -168,6 +192,16 @@ function getMockRushProject(): RushConfigurationProject {
   const project = rushConfiguration.projectsByName.get('foo');
   if (!project) {
     throw new Error(`Can not get project "foo"`);
+  }
+  return project;
+}
+
+function getMockRushProject2(): RushConfigurationProject {
+  const rushFilename: string = `${__dirname}/repo/rush2.json`;
+  const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+  const project = rushConfiguration.projectsByName.get('bar');
+  if (!project) {
+    throw new Error(`Can not get project "bar"`);
   }
   return project;
 }
