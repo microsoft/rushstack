@@ -171,7 +171,7 @@ describe(PackageExtractor.name, () => {
   });
 
   it('should exclude specified dependencies', async () => {
-    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-06');
+    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-05');
 
     await expect(
       packageExtractor.extractAsync({
@@ -250,5 +250,59 @@ describe(PackageExtractor.name, () => {
     // Validate project 2 files
     expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'package.json'))).toBe(true);
     expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))).toBe(false);
+  });
+  it('should exclude specified files on third party dependencies', async () => {
+    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-07');
+
+    await expect(
+      packageExtractor.extractAsync({
+        mainProjectName: project1PackageName,
+        sourceRootFolder: repoRoot,
+        targetRootFolder: targetFolder,
+        overwriteExisting: true,
+        projectConfigurations: [
+          {
+            projectName: project1PackageName,
+            projectFolder: project1Path
+          },
+          {
+            projectName: project2PackageName,
+            projectFolder: project2Path
+          },
+          {
+            projectName: project3PackageName,
+            projectFolder: project3Path
+          }
+        ],
+        dependenciesConfigurations: [
+          {
+            dependencyName: '@types/node',
+            dependencyVersion: '14.18.36',
+            patternsToExclude: ['fs/**']
+          }
+        ],
+        terminal,
+        createArchiveOnly: false,
+        includeNpmIgnoreFiles: true,
+        linkCreation: 'default',
+        includeDevDependencies: true
+      })
+    ).resolves.not.toThrow();
+    // Validate project 1 files
+    expect(
+      FileSystem.exists(
+        path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
+      )
+    ).toBe(false);
+    expect(
+      FileSystem.exists(path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/path.d.ts'))
+    ).toBe(true);
+
+    // Validate project 3 files
+    expect(
+      FileSystem.exists(
+        path.join(targetFolder, project3RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
+      )
+    ).toBe(true);
   });
 });

@@ -5,5 +5,8 @@
   "private": true,
   "scripts": {
     "_phase:build": ""
+  },
+  "devDependencies": {
+    "@types/node": "ts3.9"
   }
 }

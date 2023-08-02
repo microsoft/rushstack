@@ -1451,11 +1451,13 @@ importers:
 
   ../../build-tests/package-extractor-test-01:
     specifiers:
+      '@types/node': 14.18.36
       package-extractor-test-02: workspace:*
       package-extractor-test-03: workspace:*
     dependencies:
       package-extractor-test-02: link:../package-extractor-test-02
     devDependencies:
+      '@types/node': 14.18.36
       package-extractor-test-03: link:../package-extractor-test-03
 
   ../../build-tests/package-extractor-test-02:
@@ -1465,7 +1467,10 @@ importers:
       package-extractor-test-03: link:../package-extractor-test-03
 
   ../../build-tests/package-extractor-test-03:
-    specifiers: {}
+    specifiers:
+      '@types/node': ts3.9
+    devDependencies:
+      '@types/node': 17.0.41
 
   ../../build-tests/package-extractor-test-04:
     specifiers:
