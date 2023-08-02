@@ -200,7 +200,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "rush-vscode-command-webview": "workspace:*"
+    "@rushstack/rush-vscode-command-webview": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",

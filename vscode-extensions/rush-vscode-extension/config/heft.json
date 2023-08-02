@@ -27,7 +27,7 @@
             "options": {
               "copyOperations": [
                 {
-                  "sourcePath": "node_modules/rush-vscode-command-webview/dist",
+                  "sourcePath": "node_modules/@rushstack/rush-vscode-command-webview/dist",
                   "destinationFolders": ["webview/rush-command-webview"],
                   "includeGlobs": ["*.{html,js}"]
                 }

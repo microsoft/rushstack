@@ -43,6 +43,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-vscode-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "@vscode/test-electron",
       "allowedCategories": [ "vscode-extensions" ]
     },
@@ -81,10 +85,6 @@
     {
       "name": "redux",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "rush-vscode-command-webview",
-      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "rxjs",

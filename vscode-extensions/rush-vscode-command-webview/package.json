@@ -1,5 +1,5 @@
 {
-  "name": "rush-vscode-command-webview",
+  "name": "@rushstack/rush-vscode-command-webview",
   "version": "0.0.0",
   "description": "Webview to run rush command in VSCode Extension",
   "repository": {

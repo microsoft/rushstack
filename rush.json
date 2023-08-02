@@ -1111,7 +1111,7 @@
       "reviewCategory": "vscode-extensions"
     },
     {
-      "packageName": "rush-vscode-command-webview",
+      "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
       "reviewCategory": "vscode-extensions"
     },
