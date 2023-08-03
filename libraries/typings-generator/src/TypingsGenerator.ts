@@ -8,10 +8,9 @@ import {
   ConsoleTerminalProvider,
   Path,
   NewlineKind,
-  LegacyAdapters,
   Async
 } from '@rushstack/node-core-library';
-import glob from 'glob';
+import glob from 'fast-glob';
 import * as path from 'path';
 import { EOL } from 'os';
 import * as chokidar from 'chokidar';
@@ -134,11 +133,10 @@ export class TypingsGenerator {
     let checkFilePaths: boolean = true;
     if (!relativeFilePaths?.length) {
       checkFilePaths = false; // Don't check file paths if we generate them
-      relativeFilePaths = await LegacyAdapters.convertCallbackToPromise(glob, this.inputFileGlob, {
+      relativeFilePaths = await glob(this.inputFileGlob, {
         cwd: this.sourceFolderPath,
-        ignore: this.ignoredFileGlobs,
-        nosort: true,
-        nodir: true
+        ignore: this.ignoredFileGlobs as string[],
+        onlyFiles: true
       });
     }
 

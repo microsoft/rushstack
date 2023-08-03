@@ -2250,7 +2250,6 @@ importers:
       '@rushstack/webpack-deep-imports-plugin': workspace:*
       '@rushstack/webpack-preserve-dynamic-require-plugin': workspace:*
       '@types/cli-table': 0.3.0
-      '@types/glob': 7.1.1
       '@types/inquirer': 7.3.1
       '@types/js-yaml': 3.12.1
       '@types/node': 14.18.36
@@ -2267,9 +2266,9 @@ importers:
       cli-table: ~0.3.1
       colors: ~1.2.1
       dependency-path: ~9.2.8
+      fast-glob: ~3.2.4
       figures: 3.0.0
       git-repo-info: ~2.1.0
-      glob: ~7.0.5
       glob-escape: ~0.0.2
       https-proxy-agent: ~5.0.0
       ignore: ~5.1.6
@@ -2304,9 +2303,9 @@ importers:
       cli-table: 0.3.11
       colors: 1.2.5
       dependency-path: 9.2.8
+      fast-glob: 3.2.12
       figures: 3.0.0
       git-repo-info: 2.1.1
-      glob: 7.0.6
       glob-escape: 0.0.2
       https-proxy-agent: 5.0.1
       ignore: 5.1.9
@@ -2332,7 +2331,6 @@ importers:
       '@rushstack/webpack-deep-imports-plugin': link:../../webpack/webpack-deep-imports-plugin
       '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/cli-table': 0.3.0
-      '@types/glob': 7.1.1
       '@types/inquirer': 7.3.1
       '@types/js-yaml': 3.12.1
       '@types/node': 14.18.36
@@ -2513,19 +2511,17 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@types/glob': 7.1.1
       '@types/node': 14.18.36
       chokidar: ~3.4.0
-      glob: ~7.0.5
+      fast-glob: ~3.2.4
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
       chokidar: 3.4.3
-      glob: 7.0.6
+      fast-glob: 3.2.12
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
-      '@types/glob': 7.1.1
       '@types/node': 14.18.36
 
   ../../libraries/worker-pool:
@@ -2920,23 +2916,21 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@rushstack/webpack-plugin-utilities': workspace:*
       '@types/enhanced-resolve': 3.0.7
-      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/webpack': 4.41.32
-      glob: ~7.0.5
+      fast-glob: ~3.2.4
       webpack: ~4.44.2
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/webpack-plugin-utilities': link:../webpack-plugin-utilities
-      glob: 7.0.6
+      fast-glob: 3.2.12
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/enhanced-resolve': 3.0.7
-      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
       '@types/webpack': 4.41.32
@@ -15909,6 +15903,7 @@ packages:
       minimatch: 3.0.8
       once: 1.4.0
       path-is-absolute: 1.0.1
+    dev: true
 
   /glob/7.2.0:
     resolution: {integrity: sha512-lmLf6gtyrPq8tTjSmrO94wBeQbFR3HbLHbuyD69wuyQkImp2hWqMGB47OX65FBkPffO641IP9jWa1z4ivqG26Q==}

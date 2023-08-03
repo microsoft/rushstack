@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Switch from glob to fast-glob.",
+      "type": "patch",
+      "packageName": "@rushstack/typings-generator"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
