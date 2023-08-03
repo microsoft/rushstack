@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import { terminal } from './logger';
 
-import type { CommandLineAction } from 'rush-vscode-command-webview';
+import type { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
 import type * as RushLib from '@rushstack/rush-sdk';
 import type * as RushCommandLine from '@rushstack/ts-command-line';
 

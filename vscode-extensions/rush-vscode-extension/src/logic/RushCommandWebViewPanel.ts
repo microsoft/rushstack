@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import type { IFromExtensionMessage, IRootState } from 'rush-vscode-command-webview';
+import type { IFromExtensionMessage, IRootState } from '@rushstack/rush-vscode-command-webview';
 
 export class RushCommandWebViewPanel {
   private static _instance: RushCommandWebViewPanel | undefined;
