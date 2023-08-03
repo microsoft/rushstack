@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve version resolution logic in common/scripts/install-run.js (#4256)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
