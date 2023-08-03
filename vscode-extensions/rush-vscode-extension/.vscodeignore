@@ -1,20 +1,17 @@
-.vscode/**
-.vscode-test/**
-.rush/**
-temp/**
-scripts/**
-src/**
-config/**
-.gitignore
-.eslintrc.js
-webpack.config.js
-webpack.dev.config.js
-node_modules/**
-*.log
-package.json.backup
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/.eslintrc.json
-**/*.map
-**/*.ts
+# Ignore all files by default, to avoid accidentally publishing unintended files.
+*
+
+# Use negative patterns to bring back the specific things we want to publish.
+!/bin/**
+!/lib/**
+!/lib-*/**
+!/dist/**
+!ThirdPartyNotice.txt
+!resources/**
+!webview/**
+
+# Ignore certain patterns that should not get published.
+/dist/*.stats.*
+/lib/**/test/
+/lib-*/**/test/
+*.test.js

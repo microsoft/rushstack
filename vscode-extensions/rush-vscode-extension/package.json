@@ -21,7 +21,7 @@
     "pretest": "npm run build",
     "test": "node ./lib/test/runTest.js",
     "_phase:build": "heft build --clean",
-    "_phase:test": ""
+    "_phase:test": "node ./lib/test/runTest.js"
   },
   "contributes": {
     "commands": [

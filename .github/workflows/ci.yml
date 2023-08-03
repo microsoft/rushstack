@@ -17,23 +17,33 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
+
       - name: Git config user
         run: |
           git config --local user.name "Rushbot"
           git config --local user.email "rushbot@users.noreply.github.com"
+
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.NodeVersion }}
+
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
+
       - name: Rush Install
         run: node common/scripts/install-run-rush.js install
+
+      - if: runner.os == 'Linux'
+        name: Start xvfb
+        run: /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
       - name: Rush retest (install-run-rush)
         run: node common/scripts/install-run-rush.js retest --verbose --production
         env:
           # Prevent time-based browserslist update warning
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
+
       - name: Rush test (rush-lib)
         run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
         env:
