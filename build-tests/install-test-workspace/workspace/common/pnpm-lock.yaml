@@ -3931,6 +3931,7 @@ packages:
       cli-table: 0.3.11
       colors: 1.2.5
       dependency-path: 9.2.8
+      fast-glob: 3.2.11
       figures: 3.0.0
       git-repo-info: 2.1.1
       glob: 7.0.6

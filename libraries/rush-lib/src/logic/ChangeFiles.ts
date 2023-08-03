@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, FileSystem, JsonFile, JsonSchema, LegacyAdapters } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
@@ -103,9 +103,8 @@ export class ChangeFiles {
    */
   public async getFilesAsync(): Promise<string[]> {
     if (!this._files) {
-      const { default: glob } = await import('glob');
-      this._files =
-        (await LegacyAdapters.convertCallbackToPromise(glob, `${this._changesPath}/**/*.json`)) || [];
+      const { default: glob } = await import('fast-glob');
+      this._files = (await glob(`${this._changesPath}/**/*.json`)) || [];
     }
 
     return this._files;

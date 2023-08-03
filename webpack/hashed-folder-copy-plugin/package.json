@@ -26,14 +26,13 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/webpack-plugin-utilities": "workspace:*",
-    "glob": "~7.0.5"
+    "fast-glob": "~3.2.4"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/enhanced-resolve": "3.0.7",
-    "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
     "@types/webpack": "4.41.32",
