@@ -2,7 +2,7 @@ parameters:
   - name: BuildParameters
     type: string
     default: ''
-  - name: RunSecondRushBuild
+  - name: PerformValidation
     type: boolean
     default: true
 
@@ -32,7 +32,7 @@ steps:
       # See https://github.com/microsoft/rushstack/issues/2981
       BROWSERSLIST_IGNORE_OLD_DATA: 1
 
-  - ${{ if eq(parameters.RunSecondRushBuild, true) }}:
+  - ${{ if eq(parameters.PerformValidation, true) }}:
       - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline ${{ parameters.BuildParameters }}'
         displayName: 'Rush test (rush-lib)'
         env:
@@ -40,5 +40,5 @@ steps:
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
 
-  - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
-    displayName: 'Ensure repo README is up-to-date'
+      - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
+        displayName: 'Ensure repo README is up-to-date'
