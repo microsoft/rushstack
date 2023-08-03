@@ -9,11 +9,20 @@
  * @packageDocumentation
  */
 
-export { ITypingsGeneratorBaseOptions, ITypingsGeneratorOptions, TypingsGenerator } from './TypingsGenerator';
+export {
+  type IReadFile,
+  type ITypingsGeneratorBaseOptions,
+  type ITypingsGeneratorOptionsWithoutReadFile,
+  type ITypingsGeneratorOptions,
+  type ITypingsGeneratorOptionsWithCustomReadFile,
+  TypingsGenerator
+} from './TypingsGenerator';
 
 export {
-  IStringValueTyping,
-  IStringValueTypings,
-  IStringValuesTypingsGeneratorOptions,
+  type IStringValueTyping,
+  type IStringValueTypings,
+  type IStringValuesTypingsGeneratorBaseOptions,
+  type IStringValuesTypingsGeneratorOptions,
+  type IStringValuesTypingsGeneratorOptionsWithCustomReadFile,
   StringValuesTypingsGenerator
 } from './StringValuesTypingsGenerator';
