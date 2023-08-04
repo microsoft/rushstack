@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Include an API for getting files that are included in a npm package.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}

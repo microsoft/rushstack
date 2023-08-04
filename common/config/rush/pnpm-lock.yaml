@@ -1267,7 +1267,7 @@ importers:
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/jest': 29.5.3
-      '@types/node': 20.4.6
+      '@types/node': 20.4.7
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -2872,6 +2872,7 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/heft-webpack5-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
+      '@rushstack/package-extractor': workspace:*
       '@rushstack/rush-sdk': workspace:*
       '@rushstack/rush-vscode-command-webview': workspace:*
       '@rushstack/ts-command-line': workspace:*
@@ -2896,6 +2897,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/package-extractor': link:../../libraries/package-extractor
       '@rushstack/webpack-preserve-dynamic-require-plugin': link:../../webpack/preserve-dynamic-require-plugin
       '@types/glob': 7.1.1
       '@types/mocha': 9.1.1
@@ -10365,8 +10367,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.4.6:
-    resolution: {integrity: sha512-q0RkvNgMweWWIvSMDiXhflGUKMdIxBo2M2tYM/0kEGDueQByFzK4KZAgu5YHGFNxziTlppNpTIBcqHQAxlfHdA==}
+  /@types/node/20.4.7:
+    resolution: {integrity: sha512-bUBrPjEry2QUTsnuEjzjbS7voGWCc30W0qzgMf90GPeDGFRakvrz47ju+oqDAKCXLUCe39u57/ORMl/O/04/9g==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:

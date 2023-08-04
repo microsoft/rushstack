@@ -192,7 +192,7 @@
     },
     {
       "name": "@rushstack/package-extractor",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/rig-package",

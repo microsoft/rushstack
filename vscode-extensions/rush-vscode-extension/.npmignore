@@ -14,4 +14,7 @@
 /dist/*.stats.*
 /lib/**/test/
 /lib-*/**/test/
+lib/scripts/
+lib-*/scripts/
 *.test.js
+*.map
