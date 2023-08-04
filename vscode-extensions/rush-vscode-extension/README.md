@@ -1,6 +1,6 @@
 # Rush Stack monorepo tools
 
-<a href="https://rushstack.io/"><img src="https://rushstack.io/images/rushstack.svg" width="300px" /></a>
+<a href="https://rushstack.io/"><img src="https://rushstack.io/images/vscode-extension/readme-logo.png" width="300px" /></a>
 
 This VS Code extension provides various enhancements when working with a TypeScript monorepo
 that uses the [Rush Stack](https://rushstack.io/) family of tools.
