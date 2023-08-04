@@ -1,8 +1,6 @@
 {
   "name": "rushstack",
-  "displayName": "RushStack",
   "version": "0.0.0",
-  "description": "Integrates RushStack into VS Code",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
@@ -10,6 +8,67 @@
   },
   "license": "MIT",
   "publisher": "RushStack",
+  "preview": true,
+  "displayName": "Rush Stack monorepo tools",
+  "description": "Enhanced experience for monorepos that use the Rush Stack toolchain",
+  "categories": [
+    "Formatters",
+    "Other",
+    "Extension Packs",
+    "Visualization"
+  ],
+  "keywords": [
+    "api-extractor",
+    "build",
+    "heft",
+    "js",
+    "lockfile",
+    "monorepo",
+    "orchestrator",
+    "rig",
+    "rush",
+    "ts",
+    "tsdoc",
+    "typescript",
+    "web"
+  ],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "icon": "resources/rushstack-icon.png",
+  "badges": [
+    {
+      "url": "https://img.shields.io/badge/Rush-db714a",
+      "href": "https://rushjs.io/",
+      "description": "Rush build orchestrator"
+    },
+    {
+      "url": "https://img.shields.io/badge/Heft-db714a",
+      "href": "https://heft.rushstack.io/",
+      "description": "Heft toolchain"
+    },
+    {
+      "url": "https://img.shields.io/badge/Lockfile%20Explorer-db714a",
+      "href": "https://lfx.rushstack.io/",
+      "description": "Lockfile Explorer dependency visualizer"
+    },
+    {
+      "url": "https://img.shields.io/badge/API%20Extractor-db714a",
+      "href": "https://api-extractor.com/",
+      "description": "API Extractor review and documentation engine"
+    },
+    {
+      "url": "https://img.shields.io/badge/TSDoc-db714a",
+      "href": "https://tsdoc.org",
+      "description": "TSDoc standard for API doc comments"
+    },
+    {
+      "url": "https://img.shields.io/badge/Get%20Help-0078d4?label=%F0%9F%97%A8%EF%B8%8F",
+      "href": "https://rushstack.io/pages/help/support/",
+      "description": "Rush Stack community support"
+    }
+  ],
   "main": "./dist/extension.js",
   "scripts": {
     "build": "heft build --clean",
@@ -71,7 +130,7 @@
       }
     ],
     "configuration": {
-      "title": "RushStack",
+      "title": "Rush Stack monorepo tools",
       "properties": {
         "rushstack.logLevel": {
           "type": "string",
@@ -80,7 +139,7 @@
             "info",
             "debug"
           ],
-          "description": "The log level to use for RushStack"
+          "description": "The log level to use for the VS Code extension"
         }
       }
     },
@@ -177,15 +236,15 @@
       "activitybar": [
         {
           "id": "rushstack",
-          "title": "RushStack",
-          "icon": "resources/rushstack.svg"
+          "title": "Rush Stack",
+          "icon": "resources/rushstack-icon.svg"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "rushProjects",
-        "contents": "In order to use RushStack, you can open a folder containing a rush.json.\n[Open Folder](command:vscode.openFolder)\nTo learn more about how to use RushStack in VS Code [read our docs](https://rushstack.io).",
+        "contents": "Open a monorepo folder containing a rush.json config file.\n[Open Folder](command:vscode.openFolder)\nFor more information about the Rush Stack tools, consult the [website documentation](https://rushstack.io).",
         "when": "workbenchState == empty"
       }
     ]
@@ -220,6 +279,5 @@
   },
   "engines": {
     "vscode": "^1.63.0"
-  },
-  "icon": "resources/rushstack.png"
+  }
 }
