@@ -11,6 +11,7 @@
   "preview": true,
   "displayName": "Rush Stack monorepo tools",
   "description": "Enhanced experience for monorepos that use the Rush Stack toolchain",
+  "homepage": "https://rushstack.io",
   "categories": [
     "Formatters",
     "Other",
