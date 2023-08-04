@@ -16,7 +16,7 @@
       "default": "./lib-shim/index.js"
     },
     "./proxy": {
-      "types": "./lib-shim/rushSdkProxy.d.ts",
+      "types": "./dist/proxy.d.ts",
       "default": "./lib-shim/rushSdkProxy.js"
     }
   },

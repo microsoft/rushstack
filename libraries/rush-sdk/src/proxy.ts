@@ -21,7 +21,7 @@ declare const global: NodeJS.Global &
   };
 
 /**
- * Used by {@link ISdkCallbackEvent}
+ * Type of {@link ISdkCallbackEvent.logMessage}
  * @public
  */
 export interface IProgressBarCallbackLogMessage {
@@ -37,6 +37,10 @@ export interface IProgressBarCallbackLogMessage {
   messageType: 'info' | 'debug';
 }
 
+/**
+ * Type of {@link ISdkCallbackEvent.state}
+ * @public
+ */
 export type SdkCallbackState =
   /**
    * The task has started and is still running.
@@ -82,10 +86,15 @@ export interface ISdkCallbackEvent {
   progressBarPercent: number | undefined;
 }
 
+/**
+ * Type of {@link ILoadSdkAsyncOptions.onNotifyEvent}
+ * @public
+ */
 export type SdkNotifyEventCallback = (sdkEvent: ISdkCallbackEvent) => void;
 
 /**
- * Options for {@link rushSdkProxy.loadSdkAsync}
+ * Options for {@link rushSdkProxy.loadAsync}
+ * @public
  */
 export interface ILoadSdkAsyncOptions {
   /**
@@ -106,6 +115,11 @@ export interface ILoadSdkAsyncOptions {
   onNotifyEvent?: SdkNotifyEventCallback;
 }
 
+/**
+ * Exposes operations that control how the `@microsoft/rush-lib` engine is
+ * located and loaded.
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace rushSdkProxy {
   function _checkForCancel(
@@ -131,6 +145,11 @@ export namespace rushSdkProxy {
     return false;
   }
 
+  /**
+   * Manually load the Rush engine from a specified starting folder.
+   * This API supports an optional cancellation token and callback for status updates
+   * during the operation.
+   */
   export async function loadAsync(options?: ILoadSdkAsyncOptions): Promise<void> {
     // SCENARIO 5: The rush-lib engine is loaded manually using rushSdkProxy.loadAsync().
 
