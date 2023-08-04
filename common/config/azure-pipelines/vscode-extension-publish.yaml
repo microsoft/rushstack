@@ -25,4 +25,4 @@ steps:
     workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
     displayName: 'Publish vscode extension'
     env:
-      VSCE_PAT: $(System.AccessToken)
+      VSCE_PAT: $(vscePat)
