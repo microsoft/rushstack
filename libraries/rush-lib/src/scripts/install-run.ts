@@ -168,12 +168,22 @@ function _resolvePackageVersion(
       const npmPath: string = getNpmPath();
 
       // This returns something that looks like:
+      // ```
       // [
       //   "3.0.0",
       //   "3.0.1",
       //   ...
       //   "3.0.20"
       // ]
+      // ```
+      //
+      // if multiple versions match the selector, or
+      //
+      // ```
+      // "3.0.0
+      // ```
+      //
+      // if only a single version matches.
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
         npmPath,
         ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
@@ -192,8 +202,13 @@ function _resolvePackageVersion(
       const versions: string[] = Array.isArray(parsedVersionOutput)
         ? parsedVersionOutput
         : [parsedVersionOutput];
-      versions.sort(_compareVersionStrings);
-      const latestVersion: string | undefined = versions[versions.length - 1];
+      let latestVersion: string | undefined = versions[0];
+      for (let i: number = 1; i < versions.length; i++) {
+        const version: string = versions[i];
+        if (_compareVersionStrings(version, latestVersion) > 0) {
+          latestVersion = version;
+        }
+      }
 
       if (!latestVersion) {
         throw new Error('No versions found for the specified version range.');
