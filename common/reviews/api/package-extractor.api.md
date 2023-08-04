@@ -59,6 +59,8 @@ export interface IProjectInfoJson {
 // @public
 export class PackageExtractor {
     extractAsync(options: IExtractorOptions): Promise<void>;
+    // @beta
+    static getPackageIncludedFilesAsync(packageRootPath: string): Promise<string[]>;
 }
 
 // (No @packageDocumentation comment for this package)

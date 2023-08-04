@@ -212,6 +212,26 @@ export interface IExtractorOptions {
  */
 export class PackageExtractor {
   /**
+   * Get a list of files that would be included in a package created from the provided package root path.
+   *
+   * @beta
+   */
+  public static async getPackageIncludedFilesAsync(packageRootPath: string): Promise<string[]> {
+    // Use npm-packlist to filter the files.  Using the Walker class (instead of the default API) ensures
+    // that "bundledDependencies" are not included.
+    const walkerPromise: Promise<string[]> = new Promise<string[]>(
+      (resolve: (result: string[]) => void, reject: (error: Error) => void) => {
+        const walker: npmPacklist.Walker = new npmPacklist.Walker({
+          path: packageRootPath
+        });
+        walker.on('done', resolve).on('error', reject).start();
+      }
+    );
+    const npmPackFiles: string[] = await walkerPromise;
+    return npmPackFiles;
+  }
+
+  /**
    * Extract a package using the provided options
    */
   public async extractAsync(options: IExtractorOptions): Promise<void> {
@@ -651,17 +671,7 @@ export class PackageExtractor {
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
 
     if (useNpmIgnoreFilter) {
-      // Use npm-packlist to filter the files.  Using the Walker class (instead of the default API) ensures
-      // that "bundledDependencies" are not included.
-      const walkerPromise: Promise<string[]> = new Promise<string[]>(
-        (resolve: (result: string[]) => void, reject: (error: Error) => void) => {
-          const walker: npmPacklist.Walker = new npmPacklist.Walker({
-            path: sourceFolderPath
-          });
-          walker.on('done', resolve).on('error', reject).start();
-        }
-      );
-      const npmPackFiles: string[] = await walkerPromise;
+      const npmPackFiles: string[] = await PackageExtractor.getPackageIncludedFilesAsync(sourceFolderPath);
 
       const alreadyCopiedSourcePaths: Set<string> = new Set();
 

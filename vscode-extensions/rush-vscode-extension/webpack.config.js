@@ -39,7 +39,10 @@ function createExtensionConfig({ production, webpack }) {
       new webpack.DefinePlugin({
         ___DEV___: JSON.stringify(!production)
       })
-    ]
+    ],
+    optimization: {
+      minimize: false // Ensure licenses are included in the bundle
+    }
   };
   return extensionConfig;
 }
