@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.11.26",
+      "tag": "@rushstack/heft-sass-plugin_v0.11.26",
+      "date": "Fri, 04 Aug 2023 00:22:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.37`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.25",
       "tag": "@rushstack/heft-sass-plugin_v0.11.25",
       "date": "Mon, 31 Jul 2023 15:19:06 GMT",

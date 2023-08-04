@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.8.81",
+      "tag": "@rushstack/localization-utilities_v0.8.81",
+      "date": "Fri, 04 Aug 2023 00:22:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.10.37`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.80",
       "tag": "@rushstack/localization-utilities_v0.8.80",
       "date": "Mon, 31 Jul 2023 15:19:06 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "0.2.43",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.2.43",
+      "date": "Fri, 04 Aug 2023 00:22:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Switch from glob to fast-glob."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.42",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.2.42",
       "date": "Mon, 31 Jul 2023 15:19:05 GMT",
