@@ -10,6 +10,16 @@
   "homepage": "https://rushjs.io",
   "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/rush-lib.d.ts",
+      "default": "./lib-shim/index.js"
+    },
+    "./proxy": {
+      "types": "./lib-shim/rushSdkProxy.d.ts",
+      "default": "./lib-shim/rushSdkProxy.js"
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
