@@ -7,12 +7,6 @@
 import { ITerminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
-export interface IReadFile<TFileContents = string> {
-    // (undocumented)
-    (filePath: string, relativePath: string): Promise<TFileContents> | TFileContents;
-}
-
-// @public (undocumented)
 export interface IStringValuesTypingsGeneratorBaseOptions {
     exportAsDefault?: boolean;
     exportAsDefaultInterfaceName?: string;
@@ -57,13 +51,13 @@ export interface ITypingsGeneratorBaseOptions {
 // @public (undocumented)
 export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined, TFileContents extends string = string> extends ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult, TFileContents> {
     // (undocumented)
-    readFile?: IReadFile<TFileContents>;
+    readFile?: ReadFile<TFileContents>;
 }
 
 // @public
 export interface ITypingsGeneratorOptionsWithCustomReadFile<TTypingsResult = string | undefined, TFileContents = string> extends ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult, TFileContents> {
     // (undocumented)
-    readFile: IReadFile<TFileContents>;
+    readFile: ReadFile<TFileContents>;
 }
 
 // @public (undocumented)
@@ -77,6 +71,9 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string
     // (undocumented)
     parseAndGenerateTypings: (fileContents: TFileContents, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
 }
+
+// @public (undocumented)
+export type ReadFile<TFileContents = string> = (filePath: string, relativePath: string) => Promise<TFileContents> | TFileContents;
 
 // @public
 export class StringValuesTypingsGenerator<TFileContents = string> extends TypingsGenerator<TFileContents> {

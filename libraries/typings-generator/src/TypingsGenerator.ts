@@ -51,9 +51,10 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<
 /**
  * @public
  */
-export interface IReadFile<TFileContents = string> {
-  (filePath: string, relativePath: string): Promise<TFileContents> | TFileContents;
-}
+export type ReadFile<TFileContents = string> = (
+  filePath: string,
+  relativePath: string
+) => Promise<TFileContents> | TFileContents;
 
 /**
  * @public
@@ -62,7 +63,7 @@ export interface ITypingsGeneratorOptions<
   TTypingsResult = string | undefined,
   TFileContents extends string = string
 > extends ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult, TFileContents> {
-  readFile?: IReadFile<TFileContents>;
+  readFile?: ReadFile<TFileContents>;
 }
 
 /**
@@ -74,7 +75,7 @@ export interface ITypingsGeneratorOptionsWithCustomReadFile<
   TTypingsResult = string | undefined,
   TFileContents = string
 > extends ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult, TFileContents> {
-  readFile: IReadFile<TFileContents>;
+  readFile: ReadFile<TFileContents>;
 }
 
 /**

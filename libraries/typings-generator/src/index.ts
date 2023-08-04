@@ -10,7 +10,7 @@
  */
 
 export {
-  type IReadFile,
+  type ReadFile,
   type ITypingsGeneratorBaseOptions,
   type ITypingsGeneratorOptionsWithoutReadFile,
   type ITypingsGeneratorOptions,
