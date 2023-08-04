@@ -264,9 +264,10 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/package-extractor": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/glob": "7.1.1",
     "@types/mocha": "^9.0.0",
