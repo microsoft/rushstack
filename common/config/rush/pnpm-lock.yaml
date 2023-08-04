@@ -2353,6 +2353,7 @@ importers:
       '@rushstack/stream-collator': workspace:*
       '@rushstack/terminal': workspace:*
       '@rushstack/ts-command-line': workspace:*
+      '@types/node': 14.18.36
       '@types/node-fetch': 2.6.2
       '@types/semver': 7.5.0
       '@types/webpack-env': 1.18.0
@@ -2369,6 +2370,7 @@ importers:
       '@rushstack/stream-collator': link:../stream-collator
       '@rushstack/terminal': link:../terminal
       '@rushstack/ts-command-line': link:../ts-command-line
+      '@types/node': 14.18.36
       '@types/semver': 7.5.0
       '@types/webpack-env': 1.18.0
 
