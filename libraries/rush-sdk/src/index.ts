@@ -5,19 +5,22 @@ import * as path from 'path';
 import {
   JsonFile,
   JsonObject,
-  Import,
   IPackageJson,
   PackageJsonLookup,
   Executable,
-  FileSystem,
   Terminal,
   ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
 import type { SpawnSyncReturns } from 'child_process';
-import type { EnvironmentVariableNames } from '@microsoft/rush-lib';
-
-const RUSH_LIB_NAME: '@microsoft/rush-lib' = '@microsoft/rush-lib';
-const RUSH_LIB_PATH_ENV_VAR_NAME: typeof EnvironmentVariableNames.RUSH_LIB_PATH = '_RUSH_LIB_PATH';
+import {
+  RUSH_LIB_NAME,
+  RUSH_LIB_PATH_ENV_VAR_NAME,
+  RushLibModuleType,
+  _require,
+  requireRushLibUnderFolderPath,
+  tryFindRushJsonLocation,
+  sdkContext
+} from './helpers';
 
 const verboseEnabled: boolean = typeof process !== 'undefined' && process.env.RUSH_SDK_DEBUG === '1';
 const terminal: Terminal = new Terminal(
@@ -26,25 +29,12 @@ const terminal: Terminal = new Terminal(
   })
 );
 
-type RushLibModuleType = Record<string, unknown>;
 declare const global: NodeJS.Global &
   typeof globalThis & {
     ___rush___rushLibModule?: RushLibModuleType;
     ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
     ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
   };
-
-function _require<TResult>(moduleName: string): TResult {
-  if (typeof __non_webpack_require__ === 'function') {
-    // If this library has been bundled with Webpack, we need to call the real `require` function
-    // that doesn't get turned into a `__webpack_require__` statement.
-    // `__non_webpack_require__` is a Webpack macro that gets turned into a `require` statement
-    // during bundling.
-    return __non_webpack_require__(moduleName);
-  } else {
-    return require(moduleName);
-  }
-}
 
 // SCENARIO 1:  Rush's PluginManager has initialized "rush-sdk" with Rush's own instance of rush-lib.
 // The Rush host process will assign "global.___rush___rushLibModule" before loading the plugin.
@@ -56,7 +46,7 @@ let errorMessage: string = '';
 
 // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
 // as a package.json dependency.  For example, this is used by the Jest tests for Rush plugins.
-if (rushLibModule === undefined) {
+if (sdkContext.rushLibModule === undefined) {
   const importingPath: string | null | undefined = module?.parent?.filename;
   if (importingPath) {
     const callerPackageFolder: string | undefined =
@@ -96,14 +86,14 @@ if (rushLibModule === undefined) {
 
 // SCENARIO 3: A tool or script has been invoked as a child process by an instance of "rush-lib" and can use the
 // version that invoked it. In this case, use process.env._RUSH_LIB_PATH to find "rush-lib".
-if (rushLibModule === undefined) {
+if (sdkContext.rushLibModule === undefined) {
   const rushLibPath: string | undefined = process.env[RUSH_LIB_PATH_ENV_VAR_NAME];
   if (rushLibPath) {
     terminal.writeVerboseLine(
       `Try to load ${RUSH_LIB_NAME} from process.env.${RUSH_LIB_PATH_ENV_VAR_NAME} from caller package`
     );
     try {
-      rushLibModule = _require(rushLibPath);
+      sdkContext.rushLibModule = _require(rushLibPath);
     } catch (error) {
       // Log this as a warning, since it is unexpected to define an incorrect value of the variable.
       terminal.writeWarningLine(
@@ -151,7 +141,7 @@ if (rushLibModule === undefined) {
 
         terminal.writeLine('The Rush engine has not been installed yet. Invoking install-run-rush.js...');
 
-        const installAndRuhRushProcess: SpawnSyncReturns<string> = Executable.spawnSync(
+        const installAndRunRushProcess: SpawnSyncReturns<string> = Executable.spawnSync(
           'node',
           [installAndRunRushJSPath, '--help'],
           {
@@ -159,8 +149,8 @@ if (rushLibModule === undefined) {
           }
         );
 
-        installAndRunRushStderrContent = installAndRuhRushProcess.stderr;
-        if (installAndRuhRushProcess.status !== 0) {
+        installAndRunRushStderrContent = installAndRunRushProcess.stderr;
+        if (installAndRunRushProcess.status !== 0) {
           throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
         }
 
@@ -221,44 +211,4 @@ export function _rushSdk_loadInternalModule(srcImportPath: string): unknown {
     );
   }
   return exports._RushInternals.loadModule(srcImportPath);
-}
-
-/**
- * Require `@microsoft/rush-lib` under the specified folder path.
- */
-function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {
-  const rushLibModulePath: string = Import.resolveModule({
-    modulePath: RUSH_LIB_NAME,
-    baseFolderPath: folderPath
-  });
-
-  return _require(rushLibModulePath);
-}
-
-/**
- * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
- *
- * @privateRemarks
- * Keep this in sync with `RushConfiguration.tryFindRushJsonLocation`.
- */
-function tryFindRushJsonLocation(startingFolder: string): string | undefined {
-  let currentFolder: string = startingFolder;
-
-  // Look upwards at parent folders until we find a folder containing rush.json
-  for (let i: number = 0; i < 10; ++i) {
-    const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
-
-    if (FileSystem.exists(rushJsonFilename)) {
-      return rushJsonFilename;
-    }
-
-    const parentFolder: string = path.dirname(currentFolder);
-    if (parentFolder === currentFolder) {
-      break;
-    }
-
-    currentFolder = parentFolder;
-  }
-
-  return undefined;
 }
