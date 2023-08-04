@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/rush-vscode-command-webview",
   "version": "0.0.0",
-  "description": "Webview to run rush command in VSCode Extension",
+  "description": "Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
