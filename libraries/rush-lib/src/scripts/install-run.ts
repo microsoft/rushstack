@@ -180,7 +180,7 @@ function _resolvePackageVersion(
       // if multiple versions match the selector, or
       //
       // ```
-      // "3.0.0
+      // "3.0.0"
       // ```
       //
       // if only a single version matches.
