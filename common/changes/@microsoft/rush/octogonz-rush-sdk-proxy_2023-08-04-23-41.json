@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "@rushstack/rush-sdk now exposes a proxy API for customizing how the Rush engine is loaded and monitoring progress",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
