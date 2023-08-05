@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.4.40",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.4.40",
+      "date": "Sat, 05 Aug 2023 00:20:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.8.82`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.39",
       "tag": "@rushstack/webpack5-localization-plugin_v0.4.39",
       "date": "Fri, 04 Aug 2023 00:22:37 GMT",
