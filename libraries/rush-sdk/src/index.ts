@@ -36,13 +36,16 @@ declare const global: NodeJS.Global &
     ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
   };
 
+let errorMessage: string = '';
+
 // SCENARIO 1:  Rush's PluginManager has initialized "rush-sdk" with Rush's own instance of rush-lib.
 // The Rush host process will assign "global.___rush___rushLibModule" before loading the plugin.
-let rushLibModule: RushLibModuleType | undefined =
-  global.___rush___rushLibModule ||
-  global.___rush___rushLibModuleFromEnvironment ||
-  global.___rush___rushLibModuleFromInstallAndRunRush;
-let errorMessage: string = '';
+if (sdkContext.rushLibModule === undefined) {
+  sdkContext.rushLibModule =
+    global.___rush___rushLibModule ||
+    global.___rush___rushLibModuleFromEnvironment ||
+    global.___rush___rushLibModuleFromInstallAndRunRush;
+}
 
 // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
 // as a package.json dependency.  For example, this is used by the Jest tests for Rush plugins.
@@ -66,7 +69,7 @@ if (sdkContext.rushLibModule === undefined) {
         // Try to resolve rush-lib from the caller's folder
         terminal.writeVerboseLine(`Try to load ${RUSH_LIB_NAME} from caller package`);
         try {
-          rushLibModule = requireRushLibUnderFolderPath(callerPackageFolder);
+          sdkContext.rushLibModule = requireRushLibUnderFolderPath(callerPackageFolder);
         } catch (error) {
           // If we fail to resolve it, ignore the error
           terminal.writeVerboseLine(`Failed to load ${RUSH_LIB_NAME} from caller package`);
@@ -74,9 +77,9 @@ if (sdkContext.rushLibModule === undefined) {
 
         // If two different libraries invoke `rush-sdk`, and one of them provides "rush-lib"
         // then the first version to be loaded wins.  We do not support side-by-side instances of "rush-lib".
-        if (rushLibModule !== undefined) {
+        if (sdkContext.rushLibModule !== undefined) {
           // to track which scenario is active and how it got initialized.
-          global.___rush___rushLibModule = rushLibModule;
+          global.___rush___rushLibModule = sdkContext.rushLibModule;
           terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} from caller`);
         }
       }
@@ -101,9 +104,9 @@ if (sdkContext.rushLibModule === undefined) {
       );
     }
 
-    if (rushLibModule !== undefined) {
+    if (sdkContext.rushLibModule !== undefined) {
       // to track which scenario is active and how it got initialized.
-      global.___rush___rushLibModuleFromEnvironment = rushLibModule;
+      global.___rush___rushLibModuleFromEnvironment = sdkContext.rushLibModule;
       terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} from process.env.${RUSH_LIB_PATH_ENV_VAR_NAME}`);
     }
   }
@@ -111,7 +114,7 @@ if (sdkContext.rushLibModule === undefined) {
 
 // SCENARIO 4:  A standalone tool or script depends on "rush-sdk", and is meant to be used inside a monorepo folder.
 // In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
-if (rushLibModule === undefined) {
+if (sdkContext.rushLibModule === undefined) {
   try {
     const rushJsonPath: string | undefined = tryFindRushJsonLocation(process.cwd());
     if (!rushJsonPath) {
@@ -133,7 +136,7 @@ if (rushLibModule === undefined) {
     try {
       // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
       terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`);
-      rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
+      sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
     } catch (e) {
       let installAndRunRushStderrContent: string = '';
       try {
@@ -158,16 +161,16 @@ if (rushLibModule === undefined) {
         terminal.writeVerboseLine(
           `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
         );
-        rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
+        sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
       } catch (e) {
         console.error(`${installAndRunRushStderrContent}`);
         throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
       }
     }
 
-    if (rushLibModule !== undefined) {
+    if (sdkContext.rushLibModule !== undefined) {
       // to track which scenario is active and how it got initialized.
-      global.___rush___rushLibModuleFromInstallAndRunRush = rushLibModule;
+      global.___rush___rushLibModuleFromInstallAndRunRush = sdkContext.rushLibModule;
       terminal.writeVerboseLine(`Loaded ${RUSH_LIB_NAME} installed by install-run-rush`);
     }
   } catch (e) {
@@ -176,7 +179,7 @@ if (rushLibModule === undefined) {
   }
 }
 
-if (rushLibModule === undefined) {
+if (sdkContext.rushLibModule === undefined) {
   // This error indicates that a project is trying to import "@rushstack/rush-sdk", but the Rush engine
   // instance cannot be found.  If you are writing Jest tests for a Rush plugin, add "@microsoft/rush-lib"
   // to the devDependencies for your project.
@@ -187,9 +190,9 @@ ${errorMessage}
 }
 
 // Based on TypeScript's __exportStar()
-for (const property in rushLibModule) {
+for (const property in sdkContext.rushLibModule) {
   if (property !== 'default' && !exports.hasOwnProperty(property)) {
-    const rushLibModuleForClosure: RushLibModuleType = rushLibModule;
+    const rushLibModuleForClosure: RushLibModuleType = sdkContext.rushLibModule;
 
     // Based on TypeScript's __createBinding()
     Object.defineProperty(exports, property, {
