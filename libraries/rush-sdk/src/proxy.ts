@@ -102,7 +102,7 @@ export interface ILoadSdkAsyncOptions {
    * If this folder does not contain a `rush.json` file, then each parent folder
    * will be searched.  If `rush.json` is not found, then the SDK fails to load.
    */
-  startingFolder?: string;
+  rushJsonSearchFolder?: string;
 
   /**
    * A cancellation token that the caller can use to prematurely abort the operation.
@@ -146,7 +146,7 @@ export namespace rushSdkProxy {
   }
 
   /**
-   * Manually load the Rush engine from a specified starting folder.
+   * Manually load the Rush engine based on rush.json found for `rushJsonSearchFolder`.
    * This API supports an optional cancellation token and callback for status updates
    * during the operation.
    */
@@ -163,8 +163,8 @@ export namespace rushSdkProxy {
     const abortSignal: AbortSignal = options.abortSignal ?? { aborted: false };
 
     try {
-      const startingFolder: string = options.startingFolder ?? process.cwd();
-      const rushJsonPath: string | undefined = tryFindRushJsonLocation(startingFolder);
+      const rushJsonSearchFolder: string = options.rushJsonSearchFolder ?? process.cwd();
+      const rushJsonPath: string | undefined = tryFindRushJsonLocation(rushJsonSearchFolder);
       if (!rushJsonPath) {
         throw new Error(
           'Unable to find rush.json in the current folder or its parent folders.\n' +

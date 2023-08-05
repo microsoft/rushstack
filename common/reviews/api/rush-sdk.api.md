@@ -10,7 +10,7 @@
 export interface ILoadSdkAsyncOptions {
     abortSignal?: AbortSignal;
     onNotifyEvent?: SdkNotifyEventCallback;
-    startingFolder?: string;
+    rushJsonSearchFolder?: string;
 }
 
 // @public
