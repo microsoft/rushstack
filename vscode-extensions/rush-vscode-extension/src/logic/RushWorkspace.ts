@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { rushSdkProxy, ISdkCallbackEvent } from '@rushstack/rush-sdk/proxy';
+
 import * as vscode from 'vscode';
 import { terminal } from './logger';
 
@@ -12,8 +14,6 @@ import type * as RushCommandLine from '@rushstack/ts-command-line';
 declare let ___DEV___: boolean;
 declare const global: NodeJS.Global &
   typeof globalThis & {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ___rush___workingDirectory?: string;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     ___rush___rushLibModule?: typeof RushLib;
   };
@@ -91,8 +91,16 @@ export class RushWorkspace {
     for (const folderPath of workspaceFolderPaths) {
       let rushLib: typeof RushLib | undefined;
       try {
-        global.___rush___workingDirectory = folderPath;
+        await rushSdkProxy.loadAsync({
+          rushJsonSearchFolder: folderPath,
+          onNotifyEvent: (event: ISdkCallbackEvent) => {
+            if (event.logMessage) {
+              terminal.writeDebugLine(event.logMessage.message);
+            }
+          }
+        });
         rushLib = await import('@rushstack/rush-sdk');
+
         if (!rushLib) {
           continue;
         }
@@ -106,7 +114,7 @@ export class RushWorkspace {
         continue;
       }
     }
-    terminal.writeWarningLine(`RushWorkspace has not been ininitialized from current workspace folders`);
+    terminal.writeWarningLine(`RushWorkspace has not been initialized from current workspace folders`);
     return undefined;
   }
 

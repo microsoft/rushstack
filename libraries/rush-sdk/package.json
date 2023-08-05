@@ -11,13 +11,14 @@
   "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/rush-lib.d.ts",
-      "default": "./lib-shim/index.js"
-    },
-    "./proxy": {
-      "types": "./dist/proxy.d.ts",
-      "default": "./lib-shim/rushSdkProxy.js"
+    ".": "./lib-shim/index.js",
+    "./proxy": "./lib-shim/proxy.js"
+  },
+  "typesVersions": {
+    "*": {
+      "proxy": [
+        "./dist/proxy.d.ts"
+      ]
     }
   },
   "scripts": {
