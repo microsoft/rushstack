@@ -15,13 +15,13 @@
           "$ref": "#/definitions/parameter"
         },
         {
-          "$ref": "#/definitions/andx"
+          "$ref": "#/definitions/andOperator"
         },
         {
-          "$ref": "#/definitions/orx"
+          "$ref": "#/definitions/orOperator"
         },
         {
-          "$ref": "#/definitions/notx"
+          "$ref": "#/definitions/notOperator"
         }
       ]
     },
@@ -52,7 +52,7 @@
         }
       }
     },
-    "andx": {
+    "andOperator": {
       "type": "object",
       "additionalProperties": false,
       "requiredProperties": ["and"],
@@ -65,7 +65,7 @@
         }
       }
     },
-    "orx": {
+    "orOperator": {
       "type": "object",
       "additionalProperties": false,
       "requiredProperties": ["or"],
@@ -78,7 +78,7 @@
         }
       }
     },
-    "notx": {
+    "notOperator": {
       "type": "object",
       "additionalProperties": false,
       "requiredProperties": ["not"],
