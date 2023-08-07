@@ -10,11 +10,13 @@ export const RUSH_LIB_PATH_ENV_VAR_NAME: typeof EnvironmentVariableNames.RUSH_LI
 
 export type RushLibModuleType = Record<string, unknown>;
 
-export class SdkContext {
-  public rushLibModule: RushLibModuleType | undefined = undefined;
+export interface ISdkContext {
+  rushLibModule: RushLibModuleType | undefined;
 }
 
-export const sdkContext: SdkContext = new SdkContext();
+export const sdkContext: ISdkContext = {
+  rushLibModule: undefined
+};
 
 /**
  * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
