@@ -23,6 +23,7 @@ import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/Versio
 import { JsonFileSelectorParser } from '../../logic/selectors/JsonFileSelectorParser';
 
 import { RushProjectSelector } from '../../api/RushProjectSelector';
+import { SelectorError } from '../../logic/selectors/SelectorError';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -403,14 +404,23 @@ export class SelectionParameterSet {
         throw new AlreadyReportedError();
       }
 
-      const context: string = `parameter ${parameterName}`;
+      const context: string = `parameter '${parameterName}'`;
 
-      for (const project of await handler.evaluateSelectorAsync({
-        unscopedSelector,
-        terminal,
-        context
-      })) {
-        selection.add(project);
+      try {
+        for (const project of await handler.evaluateSelectorAsync({
+          unscopedSelector,
+          terminal,
+          context
+        })) {
+          selection.add(project);
+        }
+      } catch (error) {
+        if (error instanceof SelectorError) {
+          terminal.writeErrorLine(error.message);
+          throw new AlreadyReportedError();
+        } else {
+          throw error;
+        }
       }
     }
 
