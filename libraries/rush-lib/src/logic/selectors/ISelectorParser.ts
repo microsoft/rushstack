@@ -6,7 +6,13 @@ import type { ITerminal } from '@rushstack/node-core-library';
 export interface IEvaluateSelectorOptions {
   unscopedSelector: string;
   terminal: ITerminal;
-  parameterName: string;
+
+  /**
+   * A short, human-readable description of the context where this selector was encountered.
+   * Often used in an error message reading: "<Error> happened in <context>." For example,
+   * "parameter --from" would be a good context for a CLI.
+   */
+  context: string;
 }
 
 export interface ISelectorParser<T> {
