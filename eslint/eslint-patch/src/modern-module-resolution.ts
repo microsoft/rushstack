@@ -68,7 +68,7 @@ for (let currentModule = module; ; ) {
 
       // Make sure we actually resolved the module in our call path
       // and not some other spurious dependency.
-      if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') === currentModule.filename) {
+      if (currentModule.filename.startsWith(eslintCandidateFolder + path.sep)) {
         eslintFolder = eslintCandidateFolder;
         break;
       }
