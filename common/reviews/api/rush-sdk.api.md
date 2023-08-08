@@ -22,7 +22,7 @@ export interface IProgressBarCallbackLogMessage {
 // @public
 export interface ISdkCallbackEvent {
     logMessage: IProgressBarCallbackLogMessage | undefined;
-    progressBarPercent: number | undefined;
+    progressPercent: number | undefined;
 }
 
 // @public

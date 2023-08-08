@@ -93,9 +93,9 @@ if (!RushSdkLoader.alreadyLoaded) {
         }
       }
 
-      if (event.progressBarPercent !== undefined) {
+      if (event.progressPercent !== undefined) {
         // If installation takes a long time, your tool can display a progress bar
-        displayYourProgressBar(event.progressBarPercent);
+        displayYourProgressBar(event.progressPercent);
       }
     }
   });

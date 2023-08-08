@@ -51,12 +51,12 @@ export interface ISdkCallbackEvent {
    * Allows the caller to display a progress bar for long-running operations.
    *
    * @remarks
-   * If a long-running operation is required, then `progressBarPercent` will
+   * If a long-running operation is required, then `progressPercent` will
    * start at 0.0 and count upwards and finish at 100.0 if the operation completes
    * successfully.  If the long-running operation has not yet started, or
    * is not required, then the value will be `undefined`.
    */
-  progressBarPercent: number | undefined;
+  progressPercent: number | undefined;
 }
 
 /**
@@ -100,7 +100,7 @@ export class RushSdkLoader {
   private static _checkForCancel(
     abortSignal: AbortSignal,
     onNotifyEvent: SdkNotifyEventCallback | undefined,
-    progressBarPercent: number | undefined
+    progressPercent: number | undefined
   ): void {
     if (!abortSignal.aborted) {
       return;
@@ -112,7 +112,7 @@ export class RushSdkLoader {
           kind: 'info',
           text: `The operation was canceled`
         },
-        progressBarPercent
+        progressPercent
       });
     }
 
@@ -148,7 +148,7 @@ export class RushSdkLoader {
     }
 
     const onNotifyEvent: SdkNotifyEventCallback | undefined = options.onNotifyEvent;
-    let progressBarPercent: number | undefined = undefined;
+    let progressPercent: number | undefined = undefined;
 
     const abortSignal: AbortSignal = options.abortSignal ?? { aborted: false };
 
@@ -161,7 +161,7 @@ export class RushSdkLoader {
             kind: 'debug',
             text: `Searching for rush.json starting from: ` + rushJsonSearchFolder
           },
-          progressBarPercent
+          progressPercent
         });
       }
 
@@ -190,7 +190,7 @@ export class RushSdkLoader {
               kind: 'info',
               text: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`
             },
-            progressBarPercent
+            progressPercent
           });
         }
         sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
@@ -208,12 +208,12 @@ export class RushSdkLoader {
                 kind: 'info',
                 text: 'The Rush engine has not been installed yet. Invoking install-run-rush.js...'
               },
-              progressBarPercent
+              progressPercent
             });
           }
 
           // Start the installation
-          progressBarPercent = 0;
+          progressPercent = 0;
 
           const installAndRunRushProcess: SpawnSyncReturns<string> = Executable.spawnSync(
             'node',
@@ -228,10 +228,10 @@ export class RushSdkLoader {
             throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
           }
 
-          RushSdkLoader._checkForCancel(abortSignal, onNotifyEvent, progressBarPercent);
+          RushSdkLoader._checkForCancel(abortSignal, onNotifyEvent, progressPercent);
 
           // TODO: Implement incremental progress updates
-          progressBarPercent = 90;
+          progressPercent = 90;
 
           // Retry to load "rush-lib" after install-run-rush run
           if (onNotifyEvent) {
@@ -240,13 +240,13 @@ export class RushSdkLoader {
                 kind: 'debug',
                 text: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
               },
-              progressBarPercent
+              progressPercent
             });
           }
 
           sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
 
-          progressBarPercent = 100;
+          progressPercent = 100;
         } catch (e) {
           console.error(`${installAndRunRushStderrContent}`);
           throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
@@ -262,7 +262,7 @@ export class RushSdkLoader {
               kind: 'debug',
               text: `Loaded ${RUSH_LIB_NAME} installed by install-run-rush`
             },
-            progressBarPercent
+            progressPercent
           });
         }
       }
@@ -273,7 +273,7 @@ export class RushSdkLoader {
             kind: 'info',
             text: 'The operation failed: ' + (e.message ?? 'An unknown error occurred')
           },
-          progressBarPercent
+          progressPercent
         });
       }
       throw e;
