@@ -66,7 +66,7 @@ export interface ISdkCallbackEvent {
 export type SdkNotifyEventCallback = (sdkEvent: ISdkCallbackEvent) => void;
 
 /**
- * Options for {@link rushSdkLoader.loadAsync}
+ * Options for {@link RushSdkLoader.loadAsync}
  * @public
  */
 export interface ILoadSdkAsyncOptions {
@@ -93,12 +93,11 @@ export interface ILoadSdkAsyncOptions {
  * located and loaded.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace rushSdkLoader {
+export class RushSdkLoader {
   /**
    * Throws an "AbortError" exception if abortSignal.aborted is true.
    */
-  function _checkForCancel(
+  private static _checkForCancel(
     abortSignal: AbortSignal,
     onNotifyEvent: SdkNotifyEventCallback | undefined,
     progressBarPercent: number | undefined
@@ -123,15 +122,29 @@ export namespace rushSdkLoader {
   }
 
   /**
-   * Manually load the Rush engine based on rush.json found for `rushJsonSearchFolder`.
-   * This API supports an optional cancellation token and callback for status updates
-   * during the operation.
+   * Returns true if the Rush engine has already been loaded.
    */
-  export async function loadAsync(options?: ILoadSdkAsyncOptions): Promise<void> {
+  public static get alreadyLoaded(): boolean {
+    return sdkContext.rushLibModule !== undefined;
+  }
+
+  /**
+   * Manually load the Rush engine based on rush.json found for `rushJsonSearchFolder`.
+   * Throws an exception if {@link RushSdkLoader.alreadyLoaded} is already `true`.
+   *
+   * @remarks
+   * This API supports an callback that can be used display a progress bar,
+   * log of operations, and allow the operation to be canceled prematurely.
+   */
+  public static async loadAsync(options?: ILoadSdkAsyncOptions): Promise<void> {
     // SCENARIO 5: The rush-lib engine is loaded manually using rushSdkLoader.loadAsync().
 
     if (!options) {
       options = {};
+    }
+
+    if (RushSdkLoader.alreadyLoaded) {
+      throw new Error('RushSdkLoader.loadAsync() failed because the Rush engine has already been loaded');
     }
 
     const onNotifyEvent: SdkNotifyEventCallback | undefined = options.onNotifyEvent;
@@ -215,7 +228,7 @@ export namespace rushSdkLoader {
             throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
           }
 
-          _checkForCancel(abortSignal, onNotifyEvent, progressBarPercent);
+          RushSdkLoader._checkForCancel(abortSignal, onNotifyEvent, progressBarPercent);
 
           // TODO: Implement incremental progress updates
           progressBarPercent = 90;

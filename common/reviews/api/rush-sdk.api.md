@@ -26,8 +26,9 @@ export interface ISdkCallbackEvent {
 }
 
 // @public
-export namespace rushSdkLoader {
-    export function loadAsync(options?: ILoadSdkAsyncOptions): Promise<void>;
+export class RushSdkLoader {
+    static get alreadyLoaded(): boolean;
+    static loadAsync(options?: ILoadSdkAsyncOptions): Promise<void>;
 }
 
 // @public
