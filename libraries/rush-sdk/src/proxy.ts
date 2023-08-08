@@ -38,37 +38,10 @@ export interface IProgressBarCallbackLogMessage {
 }
 
 /**
- * Type of {@link ISdkCallbackEvent.state}
- * @public
- */
-export type SdkCallbackState =
-  /**
-   * The task has started and is still running.
-   */
-  | 'running'
-  /**
-   * The task has completed successfully. No further events will be fired.
-   */
-  | 'succeeded'
-  /**
-   * The task was aborted by the caller. No further events will be fired.
-   */
-  | 'aborted'
-  /**
-   * The task has failed due to an error. No further events will be fired.
-   */
-  | 'failed';
-
-/**
  * Event options for {@link ILoadSdkAsyncOptions.onNotifyEvent}
  * @public
  */
 export interface ISdkCallbackEvent {
-  /**
-   * Indicates the current state of the operation.
-   */
-  state: SdkCallbackState;
-
   /**
    * Allows the caller to display log information about the operation.
    */
@@ -133,7 +106,6 @@ export namespace rushSdkProxy {
 
     if (onNotifyEvent) {
       onNotifyEvent({
-        state: 'aborted',
         logMessage: {
           messageType: 'info',
           message: `The operation was cancelled`
@@ -185,7 +157,6 @@ export namespace rushSdkProxy {
         // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
         if (onNotifyEvent) {
           onNotifyEvent({
-            state: 'running',
             logMessage: {
               messageType: 'info',
               message: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`
@@ -204,7 +175,6 @@ export namespace rushSdkProxy {
 
           if (onNotifyEvent) {
             onNotifyEvent({
-              state: 'running',
               logMessage: {
                 messageType: 'info',
                 message: 'The Rush engine has not been installed yet. Invoking install-run-rush.js...'
@@ -239,7 +209,6 @@ export namespace rushSdkProxy {
           // Retry to load "rush-lib" after install-run-rush run
           if (onNotifyEvent) {
             onNotifyEvent({
-              state: 'running',
               logMessage: {
                 messageType: 'debug',
                 message: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
@@ -262,7 +231,6 @@ export namespace rushSdkProxy {
         global.___rush___rushLibModuleFromInstallAndRunRush = sdkContext.rushLibModule;
         if (onNotifyEvent) {
           onNotifyEvent({
-            state: 'succeeded',
             logMessage: {
               messageType: 'debug',
               message: `Loaded ${RUSH_LIB_NAME} installed by install-run-rush`
@@ -274,7 +242,6 @@ export namespace rushSdkProxy {
     } catch (e) {
       if (onNotifyEvent) {
         onNotifyEvent({
-          state: 'failed',
           logMessage: {
             messageType: 'info',
             message: 'The operation failed: ' + (e.message ?? 'An unknown error occurred')

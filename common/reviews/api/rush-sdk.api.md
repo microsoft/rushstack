@@ -23,32 +23,12 @@ export interface IProgressBarCallbackLogMessage {
 export interface ISdkCallbackEvent {
     logMessage: IProgressBarCallbackLogMessage | undefined;
     progressBarPercent: number | undefined;
-    state: SdkCallbackState;
 }
 
 // @public
 export namespace rushSdkProxy {
     export function loadAsync(options?: ILoadSdkAsyncOptions): Promise<void>;
 }
-
-// @public
-export type SdkCallbackState =
-/**
-* The task has started and is still running.
-*/
-'running'
-/**
-* The task has completed successfully. No further events will be fired.
-*/
-| 'succeeded'
-/**
-* The task was aborted by the caller. No further events will be fired.
-*/
-| 'aborted'
-/**
-* The task has failed due to an error. No further events will be fired.
-*/
-| 'failed';
 
 // @public
 export type SdkNotifyEventCallback = (sdkEvent: ISdkCallbackEvent) => void;
