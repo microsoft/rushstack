@@ -96,7 +96,7 @@ export class RushWorkspace {
             rushJsonSearchFolder: folderPath,
             onNotifyEvent: (event: ISdkCallbackEvent) => {
               if (event.logMessage) {
-                terminal.writeDebugLine(event.logMessage.message);
+                terminal.writeDebugLine(event.logMessage.text);
               }
             }
           });

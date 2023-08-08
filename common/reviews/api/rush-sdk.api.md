@@ -15,8 +15,8 @@ export interface ILoadSdkAsyncOptions {
 
 // @public
 export interface IProgressBarCallbackLogMessage {
-    message: string;
-    messageType: 'info' | 'debug';
+    kind: 'info' | 'debug';
+    text: string;
 }
 
 // @public

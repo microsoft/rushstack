@@ -29,12 +29,12 @@ export interface IProgressBarCallbackLogMessage {
    * A status message to print in the log window, or `undefined` if there are
    * no further messages.  This string may contain newlines.
    */
-  message: string;
+  text: string;
 
   /**
    * The type of message.  More message types may be added in the future.
    */
-  messageType: 'info' | 'debug';
+  kind: 'info' | 'debug';
 }
 
 /**
@@ -109,8 +109,8 @@ export class RushSdkLoader {
     if (onNotifyEvent) {
       onNotifyEvent({
         logMessage: {
-          messageType: 'info',
-          message: `The operation was canceled`
+          kind: 'info',
+          text: `The operation was canceled`
         },
         progressBarPercent
       });
@@ -158,8 +158,8 @@ export class RushSdkLoader {
       if (onNotifyEvent) {
         onNotifyEvent({
           logMessage: {
-            messageType: 'debug',
-            message: `Searching for rush.json starting from: ` + rushJsonSearchFolder
+            kind: 'debug',
+            text: `Searching for rush.json starting from: ` + rushJsonSearchFolder
           },
           progressBarPercent
         });
@@ -187,8 +187,8 @@ export class RushSdkLoader {
         if (onNotifyEvent) {
           onNotifyEvent({
             logMessage: {
-              messageType: 'info',
-              message: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`
+              kind: 'info',
+              text: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`
             },
             progressBarPercent
           });
@@ -205,8 +205,8 @@ export class RushSdkLoader {
           if (onNotifyEvent) {
             onNotifyEvent({
               logMessage: {
-                messageType: 'info',
-                message: 'The Rush engine has not been installed yet. Invoking install-run-rush.js...'
+                kind: 'info',
+                text: 'The Rush engine has not been installed yet. Invoking install-run-rush.js...'
               },
               progressBarPercent
             });
@@ -237,8 +237,8 @@ export class RushSdkLoader {
           if (onNotifyEvent) {
             onNotifyEvent({
               logMessage: {
-                messageType: 'debug',
-                message: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
+                kind: 'debug',
+                text: `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
               },
               progressBarPercent
             });
@@ -259,8 +259,8 @@ export class RushSdkLoader {
         if (onNotifyEvent) {
           onNotifyEvent({
             logMessage: {
-              messageType: 'debug',
-              message: `Loaded ${RUSH_LIB_NAME} installed by install-run-rush`
+              kind: 'debug',
+              text: `Loaded ${RUSH_LIB_NAME} installed by install-run-rush`
             },
             progressBarPercent
           });
@@ -270,8 +270,8 @@ export class RushSdkLoader {
       if (onNotifyEvent) {
         onNotifyEvent({
           logMessage: {
-            messageType: 'info',
-            message: 'The operation failed: ' + (e.message ?? 'An unknown error occurred')
+            kind: 'info',
+            text: 'The operation failed: ' + (e.message ?? 'An unknown error occurred')
           },
           progressBarPercent
         });
