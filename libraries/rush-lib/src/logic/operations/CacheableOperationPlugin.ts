@@ -360,7 +360,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
           //   - For skipping, "isSkipAllowed" is set to true initially, and during
-          //     the process of running dependents, it will be changed by OperationExecutionManager to
+          //     the process of running dependents, it will be changed by this plugin to
           //     false if a dependency wasn't able to be skipped.
           //
           let buildCacheReadAttempted: boolean = false;
