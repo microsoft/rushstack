@@ -21,49 +21,55 @@ describe(RushProjectSelector.name, () => {
   describe(RushProjectSelector.prototype.selectExpression.name, () => {
     it('treats a string as a project name', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
-      const projects: RushConfigurationProject[] = await projectSelector.selectExpression('project2');
-      expect(projects.map((project) => project.packageName)).toEqual(['project2']);
+      const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression(
+        'project2'
+      );
+      expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
     });
 
     it('selects a project using a detailed scope', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
-      const projects: RushConfigurationProject[] = await projectSelector.selectExpression({
+      const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         scope: 'name',
         value: 'project2'
       });
-      expect(projects.map((project) => project.packageName)).toEqual(['project2']);
+      expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
     });
 
     it('selects several projects with an OR operator', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
-      const projects: RushConfigurationProject[] = await projectSelector.selectExpression({
+      const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         or: ['project1', 'project2', 'project3']
       });
-      expect(projects.map((project) => project.packageName)).toEqual(['project1', 'project2', 'project3']);
+      expect([...projects].map((project) => project.packageName)).toEqual([
+        'project1',
+        'project2',
+        'project3'
+      ]);
     });
 
     it('restricts a selection with an AND operator', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
-      const projects: RushConfigurationProject[] = await projectSelector.selectExpression({
+      const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         and: [{ or: ['project1', 'project2', 'project3'] }, 'project2']
       });
-      expect(projects.map((project) => project.packageName)).toEqual(['project2']);
+      expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
     });
 
     it('restricts a selection with a NOT operator', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
-      const projects: RushConfigurationProject[] = await projectSelector.selectExpression({
+      const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         not: 'project3'
       });
-      expect(projects.map((project) => project.packageName)).toEqual(['project1', 'project2']);
+      expect([...projects].map((project) => project.packageName)).toEqual(['project1', 'project2']);
     });
 
     it('applies a parameter to a project', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
-      const projects: RushConfigurationProject[] = await projectSelector.selectExpression({
+      const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         '--to': 'project1'
       });
-      expect(projects.map((project) => project.packageName)).toEqual(['project1']);
+      expect([...projects].map((project) => project.packageName)).toEqual(['project1']);
     });
   });
 });

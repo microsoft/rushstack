@@ -48,9 +48,9 @@ export interface IProjectSelectionOptions {
  * is always done in the context of a particular Rush configuration.
  */
 export class RushProjectSelector {
-  private _rushConfig: RushConfiguration;
-  private _scopes: Map<string, ISelectorParser<RushConfigurationProject>> = new Map();
-  private _options: IProjectSelectionOptions;
+  private readonly _rushConfig: RushConfiguration;
+  private readonly _scopes: Map<string, ISelectorParser<RushConfigurationProject>> = new Map();
+  private readonly _options: IProjectSelectionOptions;
 
   public constructor(rushConfig: RushConfiguration, options: IProjectSelectionOptions) {
     this._rushConfig = rushConfig;
@@ -75,7 +75,7 @@ export class RushProjectSelector {
   public async selectExpression(
     expr: SelectorExpression,
     context: string = 'expression'
-  ): Promise<RushConfigurationProject[]> {
+  ): Promise<ReadonlySet<RushConfigurationProject>> {
     if (isAnd(expr)) {
       return this._evaluateAnd(expr, context);
     } else if (isOr(expr)) {
@@ -98,49 +98,65 @@ export class RushProjectSelector {
   private async _evaluateAnd(
     expr: IExpressionOperatorAnd,
     context: string
-  ): Promise<RushConfigurationProject[]> {
-    const result: Array<RushConfigurationProject>[] = [];
+  ): Promise<Set<RushConfigurationProject>> {
+    const results: ReadonlySet<RushConfigurationProject>[] = [];
     for (const operand of expr.and) {
-      result.push(await this.selectExpression(operand, context));
+      results.push(await this.selectExpression(operand, context));
     }
-    return [...Selection.intersection(new Set(result[0]), ...result.slice(1).map((x) => new Set(x)))];
+
+    return Selection.intersection(results[0], ...results.slice(1));
   }
 
   private async _evaluateOr(
     expr: IExpressionOperatorOr,
     context: string
-  ): Promise<RushConfigurationProject[]> {
-    const result: Array<RushConfigurationProject>[] = [];
+  ): Promise<Set<RushConfigurationProject>> {
+    const results: ReadonlySet<RushConfigurationProject>[] = [];
     for (const operand of expr.or) {
-      result.push(await this.selectExpression(operand, context));
+      results.push(await this.selectExpression(operand, context));
     }
-    return [...Selection.union(new Set(result[0]), ...result.slice(1).map((x) => new Set(x)))];
+
+    return Selection.union(results[0], ...results.slice(1));
   }
 
   private async _evaluateNot(
     expr: IExpressionOperatorNot,
     context: string
-  ): Promise<RushConfigurationProject[]> {
-    const result: RushConfigurationProject[] = await this.selectExpression(expr.not, context);
-    return this._rushConfig.projects.filter((p) => !result.includes(p));
+  ): Promise<Set<RushConfigurationProject>> {
+    const result: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr.not, context);
+    return new Set(this._rushConfig.projects.filter((p) => !result.has(p)));
   }
 
   private async _evaluateParameter(
     expr: ExpressionParameter,
     context: string
-  ): Promise<RushConfigurationProject[]> {
+  ): Promise<ReadonlySet<RushConfigurationProject>> {
     const key: string = Object.keys(expr)[0];
 
+    // Existing parameters "--to-version-policy" and "--from-version-policy" are not supported
+    // in expressions (prefer `{ "--to": "version-policy:xyz" }`).
+    //
+    // Existing parameter "--changed-projects-only" is also not supported.
+
     if (key === '--to') {
-      const arg: RushConfigurationProject[] = await this.selectExpression(expr[key], context);
-      return [...Selection.expandAllDependencies(arg)];
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      return Selection.expandAllDependencies(projects);
     } else if (key === '--from') {
-      const arg: RushConfigurationProject[] = await this.selectExpression(expr[key], context);
-      return [...Selection.expandAllDependencies(Selection.expandAllConsumers(arg))];
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      return Selection.expandAllDependencies(Selection.expandAllConsumers(projects));
+    } else if (key === '--impacted-by') {
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      return Selection.expandAllConsumers(projects);
+    } else if (key === '--to-except') {
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      return Selection.subtraction(Selection.expandAllDependencies(projects), projects);
+    } else if (key === '--impacted-by-except') {
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      return Selection.subtraction(Selection.expandAllConsumers(projects), projects);
     } else if (key === '--only') {
       // "only" is a no-op in a generic selector expression
-      const arg: RushConfigurationProject[] = await this.selectExpression(expr[key], context);
-      return arg;
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      return projects;
     } else {
       throw new SelectorError(`Unknown parameter '${key}' encountered in selector expression in ${context}.`);
     }
@@ -149,23 +165,30 @@ export class RushProjectSelector {
   private async _evaluateDetailedSelector(
     expr: IExpressionDetailedSelector,
     context: string
-  ): Promise<RushConfigurationProject[]> {
+  ): Promise<Set<RushConfigurationProject>> {
     const parser: ISelectorParser<RushConfigurationProject> | undefined = this._scopes.get(expr.scope);
     if (!parser) {
       throw new SelectorError(
         `Unknown selector scope '${expr.scope}' for value '${expr.value}' in ${context}.`
       );
     }
-    return [
-      ...(await parser.evaluateSelectorAsync({
-        unscopedSelector: expr.value,
-        terminal: undefined as unknown as ITerminal,
-        context: context
-      }))
-    ];
+
+    const result: Set<RushConfigurationProject> = new Set();
+    for (const project of await parser.evaluateSelectorAsync({
+      unscopedSelector: expr.value,
+      terminal: undefined as unknown as ITerminal,
+      context: context
+    })) {
+      result.add(project);
+    }
+
+    return result;
   }
 
-  private async _evaluateSimpleSelector(expr: string, context: string): Promise<RushConfigurationProject[]> {
+  private async _evaluateSimpleSelector(
+    expr: string,
+    context: string
+  ): Promise<Set<RushConfigurationProject>> {
     const index: number = expr.indexOf(':');
 
     if (index === -1) {

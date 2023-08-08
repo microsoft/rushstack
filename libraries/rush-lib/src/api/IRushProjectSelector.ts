@@ -11,5 +11,5 @@ import { SelectorExpression } from './SelectorExpressions';
  * expression and parse it.)
  */
 export interface IRushProjectSelector {
-  selectExpression(expr: SelectorExpression, context: string): Promise<RushConfigurationProject[]>;
+  selectExpression(expr: SelectorExpression, context: string): Promise<ReadonlySet<RushConfigurationProject>>;
 }

@@ -46,7 +46,7 @@ export class JsonFileSelectorParser implements ISelectorParser<RushConfiguration
   }
 
   public getCompletions(): Iterable<string> {
-    return this._rushConfiguration.projectsByTag.keys();
+    return [];
   }
 
   public getAbsolutePath(file: string): string {
