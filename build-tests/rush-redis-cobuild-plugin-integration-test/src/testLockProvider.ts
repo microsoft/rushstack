@@ -43,7 +43,18 @@ async function main(): Promise<void> {
   console.log('Completed state: ', completedState);
   await lockProvider.disconnectAsync();
 }
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+
+process.exitCode = 1;
+
+main()
+  .then(() => {
+    process.exitCode = 0;
+  })
+  .catch((err) => {
+    console.error(err);
+  })
+  .finally(() => {
+    if (process.exitCode !== undefined) {
+      process.exit(process.exitCode);
+    }
+  });
