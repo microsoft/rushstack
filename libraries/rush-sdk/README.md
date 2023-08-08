@@ -4,17 +4,109 @@ This is a companion package for the Rush tool. See the [@microsoft/rush](https:/
 
 ⚠ **_THIS PACKAGE IS EXPERIMENTAL_** ⚠
 
-The **@rushstack/rush-sdk** package acts as a lightweight proxy for accessing the APIs of the **@microsoft/rush-lib** engine. It is intended to support three different use cases:
+The **@rushstack/rush-sdk** package acts as a lightweight proxy for accessing the APIs of the **@microsoft/rush-lib** engine. It is intended to support five different use cases:
 
-1. Rush plugins should import from **@rushstack/rush-sdk** instead of **@microsoft/rush-lib**. This gives plugins full access to Rush APIs while avoiding a redundant installation of those packages. At runtime, the APIs will be bound to the correct `rushVersion` from **rush.json**, and guaranteed to be the same **@microsoft/rush-lib** module instance as the plugin host.
+1. **Rush plugins:** Rush plugins should import from **@rushstack/rush-sdk** instead of **@microsoft/rush-lib**. This gives plugins full access to Rush APIs while avoiding a redundant installation of those packages. At runtime, the APIs will be bound to the correct `rushVersion` from **rush.json**, and guaranteed to be the same **@microsoft/rush-lib** module instance as the plugin host.
 
-2. When authoring unit tests for a Rush plugin, developers should add **@microsoft/rush-lib** to their **package.json** `devDependencies`. In this context, **@rushstack/rush-sdk** will resolve to that instance for testing purposes.
+2. **Unit tests:** When authoring unit tests (for a Rush plugin, for example), developers should add **@microsoft/rush-lib** to their **package.json** `devDependencies` and add **@rushstack/rush-sdk** to the regular `dependencies`. In this context, **@rushstack/rush-sdk** will resolve to the locally installed instance for testing purposes.
 
-3. For projects within a monorepo that use **@rushstack/rush-sdk** during their build process, child processes will inherit the installation of Rush that invoked them. This is communicated using the `_RUSH_LIB_PATH` environment variable.
+3. **Rush subprocesses:** For tools within a monorepo that import **@rushstack/rush-sdk** during their build process, child processes will inherit the installation of Rush that invoked them. This is communicated using the `_RUSH_LIB_PATH` environment variable.
 
-4. For scripts and tools that are designed to be used in a Rush monorepo, in the future **@rushstack/rush-sdk** will automatically invoke **install-run-rush.js** and load the local installation. This ensures that tools load a compatible version of the Rush engine for the given branch. Once this is implemented, **@rushstack/rush-sdk** can replace **@microsoft/rush-lib** entirely as the official API interface, with the latter serving as the underlying implementation.
+4. **Monorepo tools:** For scripts and tools that are designed to be used in a Rush monorepo, **@rushstack/rush-sdk** will automatically invoke **install-run-rush.js** and load the local installation. This ensures that tools load a compatible version of the Rush engine for the given branch.
+
+5. **Advanced scenarios:** The secondary `@rushstack/rush-sdk/loader` entry point can be imported by tools that need to explicitly control where **@microsoft/rush-lib** gets loaded from. This API also allows monitoring installation and canceling the operation.  This API is used by the Rush Stack VS Code extension, for example.
 
 The **@rushstack/rush-sdk** API declarations are identical to the corresponding version of **@microsoft/rush-lib**.
+
+## Basic usage
+
+Here's an example of basic usage that works with cases 1-4 above:
+
+```ts
+// CommonJS notation:
+const { RushConfiguration } = require('@rushstack/rush-sdk');
+
+const config = RushConfiguration.loadFromDefaultLocation();
+console.log(config.commonFolder);
+```
+
+```ts
+// TypeScript notation:
+import { RushConfiguration } from '@rushstack/rush-sdk';
+
+const config = RushConfiguration.loadFromDefaultLocation();
+console.log(config.commonFolder);
+```
+
+## Loader API
+
+Here's a basic example of how to manually load **@rushstack/rush-sdk** and monitor installation progress:
+
+```ts
+import { RushSdkLoader, ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
+
+if (!RushSdkLoader.alreadyLoaded) {
+  await RushSdkLoader.loadAsync({
+    // the search for rush.json starts here:
+    rushJsonSearchFolder: "path/to/my-repo/apps/my-app",
+
+    onNotifyEvent: (event: ISdkCallbackEvent) => {
+      if (event.logMessage) {
+        // Your tool can show progress about the loading:
+        if (event.logMessage.kind === 'info') {
+          console.log(event.logMessage.text);
+        }
+      }
+    }
+  });
+}
+
+// Any subsequent attempts to call require() will return the same instance
+// that was loaded above.
+const rushSdk = require('@rushstack/rush-sdk');
+const config = rushSdk.RushConfiguration.loadFromDefaultLocation();
+```
+
+Here's a more elaborate example illustrating other API features:
+
+```ts
+import { RushSdkLoader, ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
+
+// Use an AbortController to cancel the operation after a certain time period
+const abortController = new AbortController();
+setTimeout(() => {
+  abortController.abort();
+}, 1000);
+
+if (!RushSdkLoader.alreadyLoaded) {
+  await RushSdkLoader.loadAsync({
+    // the search for rush.json starts here:
+    rushJsonSearchFolder: "path/to/my-repo/apps/my-app",
+
+    abortSignal: abortController.signal,
+
+    onNotifyEvent: (event: ISdkCallbackEvent) => {
+      if (event.logMessage) {
+        // Your tool can show progress about the loading:
+        if (event.logMessage.kind === 'info') {
+          console.log(event.logMessage.text);
+        }
+      }
+
+      if (event.progressBarPercent !== undefined) {
+        // If installation takes a long time, your tool can display a progress bar
+        displayYourProgressBar(event.progressBarPercent);
+      }
+    }
+  });
+}
+
+// Any subsequent attempts to call require() will return the same instance
+// that was loaded above.
+const rushSdk = require('@rushstack/rush-sdk');
+const config = rushSdk.RushConfiguration.loadFromDefaultLocation();
+```
+
 
 ## Importing internal APIs
 
