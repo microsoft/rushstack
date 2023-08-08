@@ -9,6 +9,7 @@ import {
   InternalError,
   ITerminal,
   JsonObject,
+  Sort,
   Terminal
 } from '@rushstack/node-core-library';
 import { CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
@@ -137,9 +138,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           for (const set of disjointSet.getAllSets()) {
             if (cobuildConfiguration?.cobuildEnabled && cobuildConfiguration.cobuildContextId) {
+              // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
+              const groupedOperations: Operation[] = Array.from(set);
+              Sort.sortBy(groupedOperations, (operation: Operation) => {
+                const { associatedProject, associatedPhase } = operation;
+                return `${associatedProject?.packageName}${RushConstants.hashDelimiter}${associatedPhase?.name}`;
+              });
+
               // Generates cluster id, cluster id comes from the project folder and phase name of all operations in the same cluster.
               const hash: crypto.Hash = crypto.createHash('sha1');
-              for (const operation of set) {
+              for (const operation of groupedOperations) {
                 const { associatedPhase: phase, associatedProject: project } = operation;
                 if (project && phase) {
                   hash.update(project.projectRelativeFolder);
@@ -151,7 +159,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               const cobuildClusterId: string = hash.digest('hex');
 
               // Assign same cluster id to all operations in the same cluster.
-              for (const operation of set) {
+              for (const operation of groupedOperations) {
                 const { runner } = operation;
                 if (runner instanceof ShellOperationRunner) {
                   const buildCacheContext: IOperationBuildCacheContext =
