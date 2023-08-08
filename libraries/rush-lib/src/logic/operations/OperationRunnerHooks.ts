@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesWaterfallHook } from 'tapable';
+import { AsyncSeriesBailHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import type { ITerminal } from '@rushstack/node-core-library';
 import type { IOperationRunnerContext } from './IOperationRunner';
@@ -23,7 +23,6 @@ export interface IOperationRunnerPlugin {
 export interface IOperationRunnerBeforeExecuteContext {
   context: IOperationRunnerContext;
   runner: ShellOperationRunner;
-  earlyReturnStatus: OperationStatus | undefined;
   terminal: ITerminal;
   projectDeps: IProjectDeps | undefined;
   lastProjectDeps: IProjectDeps | undefined;
@@ -55,11 +54,13 @@ export interface IOperationRunnerAfterExecuteContext {
  *
  */
 export class OperationRunnerHooks {
-  public beforeExecute: AsyncSeriesWaterfallHook<IOperationRunnerBeforeExecuteContext> =
-    new AsyncSeriesWaterfallHook<IOperationRunnerBeforeExecuteContext>(
-      ['beforeExecuteContext'],
-      'beforeExecute'
-    );
+  public beforeExecute: AsyncSeriesBailHook<
+    IOperationRunnerBeforeExecuteContext,
+    OperationStatus | undefined
+  > = new AsyncSeriesBailHook<IOperationRunnerBeforeExecuteContext, OperationStatus | undefined>(
+    ['beforeExecuteContext'],
+    'beforeExecute'
+  );
 
   public afterExecute: AsyncSeriesWaterfallHook<IOperationRunnerAfterExecuteContext> =
     new AsyncSeriesWaterfallHook<IOperationRunnerAfterExecuteContext>(

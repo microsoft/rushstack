@@ -231,14 +231,14 @@ export class ShellOperationRunner implements IOperationRunner {
         phase: this._phase,
         commandName: this._commandName,
         commandToRun: this._commandToRun,
-        earlyReturnStatus: undefined,
         finallyCallbacks
       };
 
-      await this.hooks.beforeExecute.promise(beforeExecuteContext);
-
-      if (beforeExecuteContext.earlyReturnStatus) {
-        return beforeExecuteContext.earlyReturnStatus;
+      const earlyReturnStatus: OperationStatus | undefined = await this.hooks.beforeExecute.promise(
+        beforeExecuteContext
+      );
+      if (earlyReturnStatus) {
+        return earlyReturnStatus;
       }
 
       // If the deps file exists, remove it before starting execution.

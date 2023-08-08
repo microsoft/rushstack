@@ -247,13 +247,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             phase,
             commandName,
             commandToRun,
-            earlyReturnStatus,
             finallyCallbacks
           } = beforeExecuteContext;
-          if (earlyReturnStatus) {
-            // If there is existing early return status, we don't need to do anything
-            return earlyReturnStatus;
-          }
 
           if (!projectDeps && buildCacheContext.isSkipAllowed) {
             // To test this code path:
@@ -434,10 +429,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
           }
         })();
-        if (earlyReturnStatus) {
-          beforeExecuteContext.earlyReturnStatus = earlyReturnStatus;
-        }
-        return beforeExecuteContext;
+        return earlyReturnStatus;
       }
     );
 

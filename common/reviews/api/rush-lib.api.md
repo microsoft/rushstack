@@ -841,7 +841,10 @@ export class PhasedCommandHooks {
     readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
-    readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
+    readonly beforeExecuteOperations: AsyncSeriesHook<[
+    Map<Operation, IOperationExecutionResult>,
+    ICreateOperationsContext
+    ]>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
