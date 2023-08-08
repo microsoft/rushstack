@@ -55,10 +55,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "cors",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },

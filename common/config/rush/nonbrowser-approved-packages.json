@@ -403,6 +403,14 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "compression",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "cors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "constructs",
       "allowedCategories": [ "tests" ]
     },
@@ -525,6 +533,10 @@
     {
       "name": "http-proxy",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "http2-express-bridge",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "https-proxy-agent",
