@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "lib-shim",
     "types": [
+      "node",
       "heft-jest",
       "webpack-env" // Use webpack-env here instead of node so we have __non_webpack_require__
     ]

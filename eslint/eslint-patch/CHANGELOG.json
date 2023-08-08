@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.3.3",
+      "tag": "@rushstack/eslint-patch_v1.3.3",
+      "date": "Tue, 08 Aug 2023 07:10:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix patching for running eslint via eslint/use-at-your-own-risk, which VS Code's eslint extension does when enabling flat config support"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.2",
       "tag": "@rushstack/eslint-patch_v1.3.2",
       "date": "Thu, 15 Jun 2023 00:21:01 GMT",
