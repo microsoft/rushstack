@@ -6,7 +6,7 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
-import type { Stopwatch } from '../../utilities/Stopwatch';
+import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -39,7 +39,7 @@ export interface IOperationRunnerContext {
   /**
    * Object used to track elapsed time.
    */
-  stopwatch: Stopwatch;
+  stopwatch: IStopwatchResult;
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when

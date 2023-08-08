@@ -45,6 +45,7 @@ import { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { Stopwatch } from '../../utilities/Stopwatch';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 
@@ -424,7 +425,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               });
             } else {
               // failed to acquire the lock, mark current operation to remote executing
-              context.stopwatch.reset();
+              (context.stopwatch as Stopwatch).reset();
               return OperationStatus.RemoteExecuting;
             }
           }

@@ -510,8 +510,7 @@ export interface IOperationRunnerContext {
     readonly runner: IOperationRunner;
     status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
-    // Warning: (ae-forgotten-export) The symbol "Stopwatch" needs to be exported by the entry point index.d.ts
-    stopwatch: Stopwatch;
+    stopwatch: IStopwatchResult;
 }
 
 // @internal (undocumented)
