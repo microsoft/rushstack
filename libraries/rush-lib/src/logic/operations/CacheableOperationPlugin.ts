@@ -234,7 +234,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     hooks.beforeExecute.tapPromise(
       PLUGIN_NAME,
       async (beforeExecuteContext: IOperationRunnerBeforeExecuteContext) => {
-        const earlyReturnStatus: OperationStatus | undefined = await (async () => {
+        const beforeExecuteCallbackAsync = async ({
+          buildCacheContext,
+          buildCacheConfiguration,
+          cobuildConfiguration,
+          selectedPhases,
+          projectChangeAnalyzer
+        }: {
+          buildCacheContext: IOperationBuildCacheContext;
+          buildCacheConfiguration: BuildCacheConfiguration | undefined;
+          cobuildConfiguration: CobuildConfiguration | undefined;
+          selectedPhases: ReadonlySet<IPhase>;
+          projectChangeAnalyzer: ProjectChangeAnalyzer;
+        }): Promise<OperationStatus | undefined> => {
           const {
             context,
             runner,
@@ -429,7 +441,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               return OperationStatus.RemoteExecuting;
             }
           }
-        })();
+        };
+        const earlyReturnStatus: OperationStatus | undefined = await beforeExecuteCallbackAsync({
+          buildCacheContext,
+          buildCacheConfiguration,
+          cobuildConfiguration,
+          selectedPhases,
+          projectChangeAnalyzer
+        });
         return earlyReturnStatus;
       }
     );
