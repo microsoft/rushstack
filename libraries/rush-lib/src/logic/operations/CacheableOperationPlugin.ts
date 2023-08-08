@@ -286,7 +286,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (cobuildConfiguration?.cobuildEnabled) {
             if (
               cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
-              rushProject.consumingProjects.size === 0 &&
+              runner.consumers.size === 0 &&
               !projectBuildCache
             ) {
               // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
@@ -447,7 +447,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         let setCacheEntryPromise: Promise<boolean> | undefined;
         if (cobuildLock && isCacheWriteAllowed) {
           if (context.error) {
-            // In order to preventing the worst case that all cobuild tasks go through the same failure,
+            // In order to prevent the worst case that all cobuild tasks go through the same failure,
             // allowing a failing build to be cached and retrieved, print the error message to the terminal
             // and clear the error in context.
             const message: string | undefined = context.error?.message;
@@ -512,7 +512,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext;
   }
 
-  private async _tryGetProjectBuildEnabledAsync({
+  private async _tryGetProjectBuildCacheEnabledAsync({
     buildCacheConfiguration,
     rushProject,
     commandName

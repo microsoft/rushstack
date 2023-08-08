@@ -52,13 +52,15 @@ export class DisjointSet<T extends object> {
       return;
     }
 
-    if (this._getSize(x) < this._getSize(y)) {
+    const xSize: number = this._getSize(x);
+    const ySize: number = this._getSize(y);
+    if (xSize < ySize) {
       const t: T = x;
       x = y;
       y = t;
     }
     this._parentMap.set(y, x);
-    this._sizeMap.set(x, this._getSize(x) + this._getSize(y));
+    this._sizeMap.set(x, xSize + ySize);
     this._setByElement = undefined;
   }
 
@@ -88,9 +90,12 @@ export class DisjointSet<T extends object> {
 
   private _find(a: T): T {
     let x: T = a;
-    while (this._getParent(x) !== x) {
-      this._parentMap.set(x, this._getParent(this._getParent(x)));
-      x = this._getParent(x);
+    let parent: T = this.getParent(x);
+    while (parent !== x) {
+      parent = this._getParent(parent);
+      this._parentMap.set(x, parent);
+      x = parent;
+      parent = this._getParent(x);
     }
     return x;
   }

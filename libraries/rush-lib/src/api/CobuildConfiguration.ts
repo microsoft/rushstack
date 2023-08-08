@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
+import path from 'path';
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import schemaJson from '../schemas/cobuild.schema.json';
+import { v4 as uuidv4 } from 'uuid';
+
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
 import { RushConstants } from '../logic/RushConstants';
-import { v4 as uuidv4 } from 'uuid';
-
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
+import schemaJson from '../schemas/cobuild.schema.json';
 
 /**
  * @beta
@@ -98,14 +98,17 @@ export class CobuildConfiguration {
     rushSession: RushSession
   ): Promise<CobuildConfiguration | undefined> {
     const jsonFilePath: string = CobuildConfiguration.getCobuildConfigFilePath(rushConfiguration);
-    if (!FileSystem.exists(jsonFilePath)) {
-      return undefined;
+    try {
+      return await CobuildConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
+    } catch (err) {
+      if (!FileSystem.isNotExistError(err)) {
+        throw err;
+      }
     }
-    return await CobuildConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
   }
 
   public static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string {
-    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.cobuildFilename);
+    return `${rushConfiguration.commonRushConfigFolder}/${RushConstants.cobuildFilename}`;
   }
 
   private static async _loadAsync(
@@ -113,11 +116,20 @@ export class CobuildConfiguration {
     terminal: ITerminal,
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
-  ): Promise<CobuildConfiguration> {
-    const cobuildJson: ICobuildJson = await JsonFile.loadAndValidateAsync(
-      jsonFilePath,
-      CobuildConfiguration._jsonSchema
-    );
+  ): Promise<CobuildConfiguration | undefined> {
+    let cobuildJson: ICobuildJson | undefined;
+    try {
+      cobuildJson = await JsonFile.loadAndValidateAsync(
+        jsonFilePath,
+        CobuildConfiguration._jsonSchema
+      );
+    } catch (e) {
+      if (FileSystem.isNotExistError(e) {
+        return undefined;
+      } else {
+        throw e;
+      }
+    }
 
     const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
       rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);

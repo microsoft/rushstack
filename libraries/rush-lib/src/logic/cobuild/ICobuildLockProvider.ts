@@ -25,8 +25,8 @@ export interface ICobuildContext {
    */
   contextId: string;
   /**
-   * The id of the cluster. The operations in the same cluster shares the same clusterId and
-   * will be executed in the same machine.
+   * The id of the cluster. The operations in the same cluster share the same clusterId and
+   * will be executed on the same machine.
    */
   clusterId: string;
   /**
@@ -36,8 +36,8 @@ export interface ICobuildContext {
    */
   runnerId: string;
   /**
-   * The id of cache. It should be keep same as the normal cacheId from ProjectBuildCache.
-   * Otherwise, there is a discrepancy in the success case then turning on cobuilds will
+   * The id of the cache entry. It should be kept the same as the normal cacheId from ProjectBuildCache.
+   * Otherwise, there is a discrepancy in the success case wherein turning on cobuilds will
    * fail to populate the normal build cache.
    */
   cacheId: string;
