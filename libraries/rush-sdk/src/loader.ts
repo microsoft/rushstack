@@ -66,7 +66,7 @@ export interface ISdkCallbackEvent {
 export type SdkNotifyEventCallback = (sdkEvent: ISdkCallbackEvent) => void;
 
 /**
- * Options for {@link rushSdkProxy.loadAsync}
+ * Options for {@link rushSdkLoader.loadAsync}
  * @public
  */
 export interface ILoadSdkAsyncOptions {
@@ -94,7 +94,7 @@ export interface ILoadSdkAsyncOptions {
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace rushSdkProxy {
+export namespace rushSdkLoader {
   /**
    * Throws an "AbortError" exception if abortSignal.aborted is true.
    */
@@ -128,7 +128,7 @@ export namespace rushSdkProxy {
    * during the operation.
    */
   export async function loadAsync(options?: ILoadSdkAsyncOptions): Promise<void> {
-    // SCENARIO 5: The rush-lib engine is loaded manually using rushSdkProxy.loadAsync().
+    // SCENARIO 5: The rush-lib engine is loaded manually using rushSdkLoader.loadAsync().
 
     if (!options) {
       options = {};

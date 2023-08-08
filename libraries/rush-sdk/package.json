@@ -12,12 +12,12 @@
   "typings": "dist/rush-lib.d.ts",
   "exports": {
     ".": "./lib-shim/index.js",
-    "./proxy": "./lib-shim/proxy.js"
+    "./loader": "./lib-shim/loader.js"
   },
   "typesVersions": {
     "*": {
-      "proxy": [
-        "./dist/proxy.d.ts"
+      "loader": [
+        "./dist/loader.d.ts"
       ]
     }
   },

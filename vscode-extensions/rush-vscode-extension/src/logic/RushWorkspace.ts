@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { rushSdkProxy, ISdkCallbackEvent } from '@rushstack/rush-sdk/proxy';
+import { rushSdkLoader, ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
 
 import * as vscode from 'vscode';
 import { terminal } from './logger';
@@ -91,7 +91,7 @@ export class RushWorkspace {
     for (const folderPath of workspaceFolderPaths) {
       let rushLib: typeof RushLib | undefined;
       try {
-        await rushSdkProxy.loadAsync({
+        await rushSdkLoader.loadAsync({
           rushJsonSearchFolder: folderPath,
           onNotifyEvent: (event: ISdkCallbackEvent) => {
             if (event.logMessage) {
