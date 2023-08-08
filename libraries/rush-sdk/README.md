@@ -45,7 +45,7 @@ Here's a basic example of how to manually load **@rushstack/rush-sdk** and monit
 ```ts
 import { RushSdkLoader, ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
 
-if (!RushSdkLoader.alreadyLoaded) {
+if (!RushSdkLoader.isLoaded) {
   await RushSdkLoader.loadAsync({
     // the search for rush.json starts here:
     rushJsonSearchFolder: "path/to/my-repo/apps/my-app",
@@ -78,7 +78,7 @@ setTimeout(() => {
   abortController.abort();
 }, 1000);
 
-if (!RushSdkLoader.alreadyLoaded) {
+if (!RushSdkLoader.isLoaded) {
   await RushSdkLoader.loadAsync({
     // the search for rush.json starts here:
     rushJsonSearchFolder: "path/to/my-repo/apps/my-app",

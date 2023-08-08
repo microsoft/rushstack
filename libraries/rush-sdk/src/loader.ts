@@ -124,13 +124,13 @@ export class RushSdkLoader {
   /**
    * Returns true if the Rush engine has already been loaded.
    */
-  public static get alreadyLoaded(): boolean {
+  public static get isLoaded(): boolean {
     return sdkContext.rushLibModule !== undefined;
   }
 
   /**
    * Manually load the Rush engine based on rush.json found for `rushJsonSearchFolder`.
-   * Throws an exception if {@link RushSdkLoader.alreadyLoaded} is already `true`.
+   * Throws an exception if {@link RushSdkLoader.isLoaded} is already `true`.
    *
    * @remarks
    * This API supports an callback that can be used display a progress bar,
@@ -143,7 +143,7 @@ export class RushSdkLoader {
       options = {};
     }
 
-    if (RushSdkLoader.alreadyLoaded) {
+    if (RushSdkLoader.isLoaded) {
       throw new Error('RushSdkLoader.loadAsync() failed because the Rush engine has already been loaded');
     }
 

@@ -91,7 +91,7 @@ export class RushWorkspace {
     for (const folderPath of workspaceFolderPaths) {
       let rushLib: typeof RushLib | undefined;
       try {
-        if (!RushSdkLoader.alreadyLoaded) {
+        if (!RushSdkLoader.isLoaded) {
           await RushSdkLoader.loadAsync({
             rushJsonSearchFolder: folderPath,
             onNotifyEvent: (event: ISdkCallbackEvent) => {
