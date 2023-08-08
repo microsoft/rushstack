@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Fix patching for running eslint via eslint/use-at-your-own-risk, which VS Code's eslint extension does when enabling flat config support",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
