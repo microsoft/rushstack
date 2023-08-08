@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "(EXPERIMENTAL) Add a cheap way to get distributed builds called \"cobuild\"",
+      "comment": "(EXPERIMENTAL) Add a cheap way to get distributed builds called \"cobuild\". See [Rush.js Cobuild Feature Note](https://docs.google.com/document/d/1ydh4dVMpqSk_3mi-NgtWhI_g3TTmvkKsFQuddp8-4dI/edit)",
       "type": "none"
     }
   ],
