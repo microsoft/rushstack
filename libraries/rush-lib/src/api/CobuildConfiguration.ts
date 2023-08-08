@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -119,16 +118,16 @@ export class CobuildConfiguration {
   ): Promise<CobuildConfiguration | undefined> {
     let cobuildJson: ICobuildJson | undefined;
     try {
-      cobuildJson = await JsonFile.loadAndValidateAsync(
-        jsonFilePath,
-        CobuildConfiguration._jsonSchema
-      );
+      cobuildJson = await JsonFile.loadAndValidateAsync(jsonFilePath, CobuildConfiguration._jsonSchema);
     } catch (e) {
-      if (FileSystem.isNotExistError(e) {
+      if (FileSystem.isNotExistError(e)) {
         return undefined;
-      } else {
-        throw e;
       }
+      throw e;
+    }
+
+    if (!cobuildJson) {
+      return undefined;
     }
 
     const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =

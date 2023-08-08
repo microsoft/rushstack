@@ -109,7 +109,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             async (operation) => {
               const { associatedProject: project, associatedPhase: phase } = operation;
               if (project && phase && operation.runner instanceof ShellOperationRunner) {
-                const buildCacheEnabled: boolean = await this._tryGetProjectBuildEnabledAsync({
+                const buildCacheEnabled: boolean = await this._tryGetProjectBuildCacheEnabledAsync({
                   buildCacheConfiguration,
                   rushProject: project,
                   commandName: phase.name
@@ -286,7 +286,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (cobuildConfiguration?.cobuildEnabled) {
             if (
               cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
-              runner.consumers.size === 0 &&
+              context.consumers.size === 0 &&
               !projectBuildCache
             ) {
               // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get

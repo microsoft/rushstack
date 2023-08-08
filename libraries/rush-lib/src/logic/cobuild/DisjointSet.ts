@@ -90,7 +90,7 @@ export class DisjointSet<T extends object> {
 
   private _find(a: T): T {
     let x: T = a;
-    let parent: T = this.getParent(x);
+    let parent: T = this._getParent(x);
     while (parent !== x) {
       parent = this._getParent(parent);
       this._parentMap.set(x, parent);
