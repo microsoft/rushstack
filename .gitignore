@@ -78,6 +78,7 @@ common/autoinstallers/*/.npmrc
 **/.rush/temp/
 
 # Heft temporary files
+.cache
 .heft
 
 # Common toolchain intermediate files
@@ -89,5 +90,6 @@ lib-esnext
 lib-commonjs
 lib-shim
 dist
+dist-storybook
 *.scss.ts
 *.sass.ts

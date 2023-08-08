@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.90.0",
+  "rushVersion": "5.100.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -139,7 +139,8 @@
      */
     "reviewCategories": [
       "libraries", // library projects that ship
-      "tests" // non-shipping test projects
+      "tests", // non-shipping test projects
+      "vscode-extensions" // vscode extensions
     ],
 
     /**
@@ -534,6 +535,30 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "package-extractor-test-01",
+      "projectFolder": "build-tests/package-extractor-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-02",
+      "projectFolder": "build-tests/package-extractor-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-03",
+      "projectFolder": "build-tests/package-extractor-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-04",
+      "projectFolder": "build-tests/package-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {
@@ -635,18 +660,6 @@
 
     // heft-* projects
     {
-      "packageName": "heft-action-plugin",
-      "projectFolder": "build-tests/heft-action-plugin",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-action-plugin-test",
-      "projectFolder": "build-tests/heft-action-plugin-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-copy-files-test",
       "projectFolder": "build-tests/heft-copy-files-test",
       "reviewCategory": "tests",
@@ -661,6 +674,12 @@
     {
       "packageName": "heft-example-plugin-02",
       "projectFolder": "build-tests/heft-example-plugin-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-jest-preset-test",
+      "projectFolder": "build-tests/heft-jest-preset-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -721,6 +740,24 @@
     {
       "packageName": "heft-typescript-composite-test",
       "projectFolder": "build-tests/heft-typescript-composite-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v2-test",
+      "projectFolder": "build-tests/heft-typescript-v2-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v3-test",
+      "projectFolder": "build-tests/heft-typescript-v3-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-typescript-v4-test",
+      "projectFolder": "build-tests/heft-typescript-v4-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -817,6 +854,13 @@
 
     // "heft-plugins" folder (alphabetical order)
     {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "projectFolder": "heft-plugins/heft-api-extractor-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+    },
+    {
       "packageName": "@rushstack/heft-dev-cert-plugin",
       "projectFolder": "heft-plugins/heft-dev-cert-plugin",
       "reviewCategory": "libraries",
@@ -826,7 +870,15 @@
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+    },
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "projectFolder": "heft-plugins/heft-lint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
     },
     {
       "packageName": "@rushstack/heft-sass-plugin",
@@ -845,6 +897,13 @@
       "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "projectFolder": "heft-plugins/heft-typescript-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
     },
     {
       "packageName": "@rushstack/heft-webpack4-plugin",
@@ -870,6 +929,12 @@
     {
       "packageName": "@rushstack/debug-certificate-manager",
       "projectFolder": "libraries/debug-certificate-manager",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/package-extractor",
+      "projectFolder": "libraries/package-extractor",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -1049,6 +1114,18 @@
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+
+    // "vscode-extensions" folder (alphabetical order)
+    {
+      "packageName": "rushstack",
+      "projectFolder": "vscode-extensions/rush-vscode-extension",
+      "reviewCategory": "vscode-extensions"
+    },
+    {
+      "packageName": "@rushstack/rush-vscode-command-webview",
+      "projectFolder": "vscode-extensions/rush-vscode-command-webview",
+      "reviewCategory": "vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)

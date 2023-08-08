@@ -7,9 +7,17 @@
 import { ITerminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
-export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings | undefined> {
+export interface IStringValuesTypingsGeneratorBaseOptions {
     exportAsDefault?: boolean;
     exportAsDefaultInterfaceName?: string;
+}
+
+// @public (undocumented)
+export interface IStringValuesTypingsGeneratorOptions<TFileContents extends string = string> extends ITypingsGeneratorOptions<IStringValueTypings | undefined, TFileContents>, IStringValuesTypingsGeneratorBaseOptions {
+}
+
+// @public (undocumented)
+export interface IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents = string> extends ITypingsGeneratorOptionsWithCustomReadFile<IStringValueTypings | undefined, TFileContents>, IStringValuesTypingsGeneratorBaseOptions {
 }
 
 // @public (undocumented)
@@ -41,7 +49,19 @@ export interface ITypingsGeneratorBaseOptions {
 }
 
 // @public (undocumented)
-export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> extends ITypingsGeneratorBaseOptions {
+export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined, TFileContents extends string = string> extends ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult, TFileContents> {
+    // (undocumented)
+    readFile?: ReadFile<TFileContents>;
+}
+
+// @public
+export interface ITypingsGeneratorOptionsWithCustomReadFile<TTypingsResult = string | undefined, TFileContents = string> extends ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult, TFileContents> {
+    // (undocumented)
+    readFile: ReadFile<TFileContents>;
+}
+
+// @public (undocumented)
+export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string | undefined, TFileContents = string> extends ITypingsGeneratorBaseOptions {
     // (undocumented)
     fileExtensions: string[];
     // @deprecated (undocumented)
@@ -49,24 +69,29 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> e
     // (undocumented)
     getAdditionalOutputFiles?: (relativePath: string) => string[];
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
+    parseAndGenerateTypings: (fileContents: TFileContents, filePath: string, relativePath: string) => TTypingsResult | Promise<TTypingsResult>;
+}
+
+// @public (undocumented)
+export type ReadFile<TFileContents = string> = (filePath: string, relativePath: string) => Promise<TFileContents> | TFileContents;
+
+// @public
+export class StringValuesTypingsGenerator<TFileContents = string> extends TypingsGenerator<TFileContents> {
+    constructor(options: TFileContents extends string ? IStringValuesTypingsGeneratorOptions<TFileContents> : never);
+    constructor(options: IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents>);
 }
 
 // @public
-export class StringValuesTypingsGenerator extends TypingsGenerator {
-    constructor(options: IStringValuesTypingsGeneratorOptions);
-}
-
-// @public
-export class TypingsGenerator {
-    constructor(options: ITypingsGeneratorOptions);
+export class TypingsGenerator<TFileContents = string> {
+    constructor(options: TFileContents extends string ? ITypingsGeneratorOptions<string | undefined, TFileContents> : never);
+    constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>);
     generateTypingsAsync(relativeFilePaths?: string[]): Promise<void>;
     // (undocumented)
     getOutputFilePaths(relativePath: string): string[];
     readonly ignoredFileGlobs: readonly string[];
     readonly inputFileGlob: string;
     // (undocumented)
-    protected _options: ITypingsGeneratorOptions;
+    protected _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
     registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;

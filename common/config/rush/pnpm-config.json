@@ -112,6 +112,8 @@
     // "ignoreMissing": ["@eslint/*"],
     // "allowedVersions": { "react": "17" },
     // "allowAny": ["@babel/*"]
+    // TODO: Remove once Heft is 1.0.0
+    "allowAny": ["@rushstack/heft"]
   },
 
   /**
@@ -214,6 +216,12 @@
       }
     },
 
+    "@types/compression": {
+      "peerDependencies": {
+        "@types/express": "*"
+      }
+    },
+
     "@types/webpack": {
       "dependencies": {
         "anymatch": "^3"
@@ -234,6 +242,12 @@
 
     "http-proxy-middleware": {
       "dependencies": {
+        "@types/express": "*"
+      }
+    },
+
+    "http2-express-bridge": {
+      "peerDependencies": {
         "@types/express": "*"
       }
     },

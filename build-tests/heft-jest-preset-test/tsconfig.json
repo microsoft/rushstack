@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "types": ["heft-jest"],
+
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "ES2015",
+    "lib": ["ES2015"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "lib"]
+}

@@ -3,6 +3,7 @@
 
 import { EOL } from 'os';
 import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
+import { Text, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import type * as Webpack from 'webpack';
 import type * as Tapable from 'tapable';
@@ -128,10 +129,6 @@ const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b782
 
 const ASSET_NAME_TOKEN_REGEX: RegExp = new RegExp(ASSET_NAME_TOKEN);
 
-function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 /**
  * This simple plugin sets the __webpack_public_path__ variable to a value specified in the arguments,
  *  optionally appended to the SystemJs baseURL property.
@@ -156,7 +153,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   public apply(compiler: Webpack.Compiler): void {
     // Casting here because VersionDetection refers to webpack 5 typings
     if (VersionDetection.isWebpack3OrEarlier(compiler as unknown as Webpack5.Compiler)) {
-      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
+      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4`);
     }
 
     // Casting here because VersionDetection refers to webpack 5 typings
@@ -192,12 +189,12 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
           // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
           const Webpack5Error: typeof Webpack5.WebpackError = (compiler as unknown as Webpack5.Compiler)
             .webpack.WebpackError;
-          // Don't bother importing node-core-library for this
-          const thisPackageJson: { name: string } = require('../package.json');
-          compilation.warnings.push(
+          const thisPackageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+          compilation.errors.push(
             new Webpack5Error(
-              `Webpack 5 supports its own automatic public path detection, ` +
-                `so ${thisPackageJson.name} won't do anything in this compilation.`
+              'Webpack 5 supports its own automatic public path detection, ' +
+                `so ${thisPackageJson.name} is unnecessary. Remove the ${SetPublicPathPlugin.name} plugin ` +
+                'from the Webpack configuration.'
             )
           );
         }
@@ -220,13 +217,13 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
                       0,
                       assetFilename.length - 4 /* '.map'.length */
                     );
-                    escapedAssetFilename = escapeRegExp(escapedAssetFilename);
+                    escapedAssetFilename = Text.escapeRegExp(escapedAssetFilename);
                     // source in sourcemaps is JSON-encoded
                     escapedAssetFilename = JSON.stringify(escapedAssetFilename);
                     // Trim the quotes from the JSON encoding
                     escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1);
                   } else {
-                    escapedAssetFilename = escapeRegExp(assetFilename);
+                    escapedAssetFilename = Text.escapeRegExp(assetFilename);
                   }
 
                   const asset: IAsset = compilation.assets[assetFilename];
@@ -277,7 +274,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         moduleOptions.regexName = this.options.scriptName.name;
         if (this.options.scriptName.isTokenized) {
           moduleOptions.regexName = moduleOptions.regexName
-            .replace(/\[name\]/g, escapeRegExp(options.chunk.name))
+            .replace(/\[name\]/g, Text.escapeRegExp(options.chunk.name))
             .replace(/\[hash\]/g, options.chunk.renderedHash || '');
         }
       } else if (this.options.scriptName.useAssetName) {

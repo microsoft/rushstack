@@ -77,7 +77,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all]
+"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
+                [--all]
+                
 
 Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -111,6 +113,8 @@ Optional arguments:
                         specifier (\\"^\\").
   --dev                 If specified, the package will be added to the 
                         \\"devDependencies\\" section of the package.json
+  --peer                If specified, the package will be added to the 
+                        \\"peerDependencies\\" section of the package.json
   -m, --make-consistent
                         If specified, other packages with this dependency 
                         will have their package.json files updated to use the 
@@ -335,6 +339,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
 "usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO_NAME] [--overwrite]
                    [-t PATH] [--create-archive ARCHIVE_PATH]
+                   [--create-archive-only]
                    
 
 After building the repo, \\"rush deploy\\" can be used to prepare a deployment by 
@@ -374,6 +379,11 @@ Optional arguments:
                         archive file will be placed according to the 
                         designated path, relative to the target folder. 
                         Supported file extensions: .zip
+  --create-archive-only
+                        If specified, \\"rush deploy\\" will only create an 
+                        archive containing the contents of the target folder. 
+                        The target folder will not be modified other than to 
+                        create the archive file.
 "
 `;
 
@@ -1292,9 +1302,9 @@ Optional arguments:
   --override-bump BUMPTYPE
                         Overrides the bump type in the version-policy.json 
                         for the specified version policy. Valid BUMPTYPE 
-                        values include: prerelease, patch, preminor, minor, 
-                        major. This setting only works for lock-step version 
-                        policy in bump action.
+                        values include: prerelease, patch, minor, major. This 
+                        setting only works for lock-step version policy in 
+                        bump action.
   --override-prerelease-id ID
                         Overrides the prerelease identifier in the version 
                         value of version-policy.json for the specified 

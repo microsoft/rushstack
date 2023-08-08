@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as glob from 'glob';
 import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -527,8 +526,10 @@ export class RushInstallManager extends BaseInstallManager {
             '/'
           );
 
+          const { default: glob } = await import('fast-glob');
+          const tempModulePaths: string[] = await glob(globEscape(normalizedpathToDeleteWithoutStar) + '/*');
           // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-          for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
+          for (const tempModulePath of tempModulePaths) {
             // We could potentially use AsyncRecycler here, but in practice these folders tend
             // to be very small
             Utilities.dangerouslyDeletePath(tempModulePath);
@@ -609,7 +610,7 @@ export class RushInstallManager extends BaseInstallManager {
       });
       console.log('"npm shrinkwrap" completed\n');
 
-      this._fixupNpm5Regression();
+      await this._fixupNpm5RegressionAsync();
     }
   }
 
@@ -638,7 +639,7 @@ export class RushInstallManager extends BaseInstallManager {
    * Our workaround is to rewrite the package.json files for each of the @rush-temp projects
    * in the node_modules folder, after "npm install" completes.
    */
-  private _fixupNpm5Regression(): void {
+  private async _fixupNpm5RegressionAsync(): Promise<void> {
     const pathToDeleteWithoutStar: string = path.join(
       this.rushConfiguration.commonTempFolder,
       'node_modules',
@@ -649,10 +650,12 @@ export class RushInstallManager extends BaseInstallManager {
 
     let anyChanges: boolean = false;
 
-    // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
-    for (const packageJsonPath of glob.sync(
+    const { default: glob } = await import('fast-glob');
+    const packageJsonPaths: string[] = await glob(
       globEscape(normalizedPathToDeleteWithoutStar) + '/*/package.json'
-    )) {
+    );
+    // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
+    for (const packageJsonPath of packageJsonPaths) {
       // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/example/package.json"
       const packageJsonObject: IRushTempPackageJson = JsonFile.load(packageJsonPath);
 

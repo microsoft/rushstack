@@ -20,6 +20,10 @@ describe(LookupByPath.iteratePathSegments.name, () => {
     const result = [...LookupByPath.iteratePathSegments('foo/bar/baz')];
     expect(result).toEqual(['foo', 'bar', 'baz']);
   });
+  it('returns correct last single character segment', () => {
+    const result = [...LookupByPath.iteratePathSegments('foo/a')];
+    expect(result).toEqual(['foo', 'a']);
+  });
 });
 
 describe(LookupByPath.prototype.findChildPath.name, () => {

@@ -3,7 +3,7 @@
 
 import { createClient } from '@redis/client';
 
-import type {
+import {
   ICobuildLockProvider,
   ICobuildContext,
   ICobuildCompletedState,
@@ -29,7 +29,6 @@ export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
   passwordEnvironmentVariable?: string;
 }
 
-const KEY_SEPARATOR: ':' = ':';
 const COMPLETED_STATE_SEPARATOR: ';' = ';';
 
 /**
@@ -38,13 +37,16 @@ const COMPLETED_STATE_SEPARATOR: ';' = ';';
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
   private readonly _options: IRedisCobuildLockProviderOptions;
   private readonly _terminal: ITerminal;
-
-  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
-  private readonly _lockKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<ICobuildContext, string>();
-  private readonly _completedKeyMap: WeakMap<ICobuildContext, string> = new WeakMap<
+  private readonly _lockKeyIdentifierMap: WeakMap<ICobuildContext, string> = new WeakMap<
     ICobuildContext,
     string
   >();
+  private readonly _completedStateKeyIdentifierMap: WeakMap<ICobuildContext, string> = new WeakMap<
+    ICobuildContext,
+    string
+  >();
+
+  private readonly _redisClient: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
 
   public constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession) {
     this._options = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(options);
@@ -103,32 +105,54 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     }
   }
 
+  /**
+   * Acquiring the lock based on the specific context.
+   *
+   * NOTE: this is a reentrant lock implementation
+   */
   public async acquireLockAsync(context: ICobuildContext): Promise<boolean> {
     const { _terminal: terminal } = this;
-    const lockKey: string = this.getLockKey(context);
+    const { lockKey, lockExpireTimeInSeconds, runnerId } = context;
     let result: boolean = false;
+    const lockKeyIdentifier: string = this._getLockKeyIdentifier(context);
     try {
-      const incrResult: number = await this._redisClient.incr(lockKey);
-      result = incrResult === 1;
-      terminal.writeDebugLine(`Acquired lock for ${lockKey}: ${incrResult}, 1 is success`);
+      // According to the doc, the reply of set command is either "OK" or nil. The reply doesn't matter
+      await this._redisClient.set(lockKey, runnerId, {
+        NX: true,
+        // call EXPIRE in an atomic command
+        EX: lockExpireTimeInSeconds
+        // Do not specify GET here since using NX ane GET together requires Redis@7.
+      });
+      // Just read the value by lock key to see wether it equals current runner id
+      const value: string | null = await this._redisClient.get(lockKey);
+      if (value === null) {
+        // This should not happen.
+        throw new Error(`Get redis key failed: ${lockKey}`);
+      }
+      result = value === runnerId;
       if (result) {
-        await this.renewLockAsync(context);
+        terminal.writeDebugLine(
+          `Successfully acquired ${lockKeyIdentifier} to runner(${runnerId}) and it expires in ${lockExpireTimeInSeconds}s`
+        );
+      } else {
+        terminal.writeDebugLine(`Failed to acquire ${lockKeyIdentifier}, locked by runner ${value}`);
       }
     } catch (e) {
-      throw new Error(`Failed to acquire lock for ${lockKey}: ${e.message}`);
+      throw new Error(`Error occurs when acquiring ${lockKeyIdentifier}: ${e.message}`);
     }
     return result;
   }
 
   public async renewLockAsync(context: ICobuildContext): Promise<void> {
     const { _terminal: terminal } = this;
-    const lockKey: string = this.getLockKey(context);
+    const { lockKey, lockExpireTimeInSeconds } = context;
+    const lockKeyIdentifier: string = this._getLockKeyIdentifier(context);
     try {
-      await this._redisClient.expire(lockKey, 30);
+      await this._redisClient.expire(lockKey, lockExpireTimeInSeconds);
     } catch (e) {
-      throw new Error(`Failed to renew lock for ${lockKey}: ${e.message}`);
+      throw new Error(`Failed to renew ${lockKeyIdentifier}: ${e.message}`);
     }
-    terminal.writeDebugLine(`Renewed lock for ${lockKey}`);
+    terminal.writeDebugLine(`Renewed ${lockKeyIdentifier} expires in ${lockExpireTimeInSeconds} seconds`);
   }
 
   public async setCompletedStateAsync(
@@ -136,68 +160,63 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
     state: ICobuildCompletedState
   ): Promise<void> {
     const { _terminal: terminal } = this;
-    const key: string = this.getCompletedStateKey(context);
+    const { completedStateKey: key } = context;
     const value: string = this._serializeCompletedState(state);
+    const completedStateKeyIdentifier: string = this._getCompletedStateKeyIdentifier(context);
     try {
       await this._redisClient.set(key, value);
     } catch (e) {
-      throw new Error(`Failed to set completed state for ${key}: ${e.message}`);
+      throw new Error(`Failed to set ${completedStateKeyIdentifier}: ${e.message}`);
     }
-    terminal.writeDebugLine(`Set completed state for ${key}: ${value}`);
+    terminal.writeDebugLine(`Set ${completedStateKeyIdentifier}: ${value}`);
   }
 
   public async getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined> {
     const { _terminal: terminal } = this;
-    const key: string = this.getCompletedStateKey(context);
+    const { completedStateKey: key } = context;
+    const completedStateKeyIdentifier: string = this._getCompletedStateKeyIdentifier(context);
     let state: ICobuildCompletedState | undefined;
     try {
       const value: string | null = await this._redisClient.get(key);
       if (value) {
         state = this._deserializeCompletedState(value);
       }
-      terminal.writeDebugLine(`Get completed state for ${key}: ${value}`);
+      terminal.writeDebugLine(`Get ${completedStateKeyIdentifier}: ${value}`);
     } catch (e) {
-      throw new Error(`Failed to get completed state for ${key}: ${e.message}`);
+      throw new Error(`Failed to get ${completedStateKeyIdentifier}: ${e.message}`);
     }
     return state;
-  }
-
-  /**
-   * Returns the lock key for the given context
-   * Example: cobuild:v1:<contextId>:<cacheId>:lock
-   */
-  public getLockKey(context: ICobuildContext): string {
-    const { version, contextId, cacheId } = context;
-    let lockKey: string | undefined = this._lockKeyMap.get(context);
-    if (!lockKey) {
-      lockKey = ['cobuild', `v${version}`, contextId, cacheId, 'lock'].join(KEY_SEPARATOR);
-      this._lockKeyMap.set(context, lockKey);
-    }
-    return lockKey;
-  }
-
-  /**
-   * Returns the completed key for the given context
-   * Example: cobuild:v1:<contextId>:<cacheId>:completed
-   */
-  public getCompletedStateKey(context: ICobuildContext): string {
-    const { version, contextId, cacheId } = context;
-    let completedKey: string | undefined = this._completedKeyMap.get(context);
-    if (!completedKey) {
-      completedKey = ['cobuild', `v${version}`, contextId, cacheId, 'completed'].join(KEY_SEPARATOR);
-      this._completedKeyMap.set(context, completedKey);
-    }
-    return completedKey;
   }
 
   private _serializeCompletedState(state: ICobuildCompletedState): string {
     // Example: SUCCESS;1234567890
     // Example: FAILURE;1234567890
-    return `${state.status}${COMPLETED_STATE_SEPARATOR}${state.cacheId}`;
+    const { status, cacheId } = state;
+    return [status, cacheId].join(COMPLETED_STATE_SEPARATOR);
   }
 
   private _deserializeCompletedState(state: string): ICobuildCompletedState | undefined {
     const [status, cacheId] = state.split(COMPLETED_STATE_SEPARATOR);
     return { status: status as ICobuildCompletedState['status'], cacheId };
+  }
+
+  private _getLockKeyIdentifier(context: ICobuildContext): string {
+    let lockKeyIdentifier: string | undefined = this._lockKeyIdentifierMap.get(context);
+    if (lockKeyIdentifier === undefined) {
+      const { lockKey, packageName, phaseName } = context;
+      lockKeyIdentifier = `lock(${lockKey})_package(${packageName})_phase(${phaseName})`;
+      this._lockKeyIdentifierMap.set(context, lockKeyIdentifier);
+    }
+    return lockKeyIdentifier;
+  }
+
+  private _getCompletedStateKeyIdentifier(context: ICobuildContext): string {
+    let completedStateKeyIdentifier: string | undefined = this._completedStateKeyIdentifierMap.get(context);
+    if (completedStateKeyIdentifier === undefined) {
+      const { completedStateKey, packageName, phaseName } = context;
+      completedStateKeyIdentifier = `completed_state(${completedStateKey})_package(${packageName})_phase(${phaseName})`;
+      this._completedStateKeyIdentifierMap.set(context, completedStateKeyIdentifier);
+    }
+    return completedStateKeyIdentifier;
   }
 }

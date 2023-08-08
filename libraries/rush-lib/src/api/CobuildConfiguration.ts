@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import schemaJson from '../schemas/cobuild.schema.json';
+import { v4 as uuidv4 } from 'uuid';
+
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CobuildLockProviderFactory, RushSession } from '../pluginFramework/RushSession';
 import { RushConstants } from '../logic/RushConstants';
-
 import type { ICobuildLockProvider } from '../logic/cobuild/ICobuildLockProvider';
 import type { RushConfiguration } from './RushConfiguration';
+import schemaJson from '../schemas/cobuild.schema.json';
 
 /**
  * @beta
@@ -26,6 +26,7 @@ export interface ICobuildConfigurationOptions {
   cobuildJson: ICobuildJson;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
+  cobuildLockProviderFactory: CobuildLockProviderFactory;
 }
 
 /**
@@ -53,6 +54,12 @@ export class CobuildConfiguration {
    * The cobuild feature won't be enabled until the context id is provided as an non-empty string.
    */
   public readonly cobuildContextId: string | undefined;
+
+  /**
+   * This is a name of the participating cobuild runner. It can be specified by the environment variable
+   * RUSH_COBUILD_RUNNER_ID. If it is not provided, a random id will be generated to identify the runner.
+   */
+  public readonly cobuildRunnerId: string;
   /**
    * If true, Rush will automatically handle the leaf project with build cache "disabled" by writing
    * to the cache in a special "log files only mode". This is useful when you want to use Cobuilds
@@ -60,25 +67,23 @@ export class CobuildConfiguration {
    */
   public readonly cobuildLeafProjectLogOnlyAllowed: boolean;
 
-  public readonly cobuildLockProvider: ICobuildLockProvider;
+  private _cobuildLockProvider: ICobuildLockProvider | undefined;
+  private readonly _cobuildLockProviderFactory: CobuildLockProviderFactory;
+  private readonly _cobuildJson: ICobuildJson;
 
   private constructor(options: ICobuildConfigurationOptions) {
-    const { cobuildJson } = options;
+    const { cobuildJson, cobuildLockProviderFactory } = options;
 
-    this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
+    this.cobuildEnabled = this.cobuildContextId
+      ? EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled
+      : false;
+    this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
-    if (!this.cobuildContextId) {
-      this.cobuildEnabled = false;
-    }
 
-    const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
-      options.rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
-    if (!cobuildLockProviderFactory) {
-      throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
-    }
-    this.cobuildLockProvider = cobuildLockProviderFactory(cobuildJson);
+    this._cobuildLockProviderFactory = cobuildLockProviderFactory;
+    this._cobuildJson = cobuildJson;
   }
 
   /**
@@ -91,14 +96,17 @@ export class CobuildConfiguration {
     rushSession: RushSession
   ): Promise<CobuildConfiguration | undefined> {
     const jsonFilePath: string = CobuildConfiguration.getCobuildConfigFilePath(rushConfiguration);
-    if (!FileSystem.exists(jsonFilePath)) {
-      return undefined;
+    try {
+      return await CobuildConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
+    } catch (err) {
+      if (!FileSystem.isNotExistError(err)) {
+        throw err;
+      }
     }
-    return await CobuildConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
   }
 
   public static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string {
-    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.cobuildFilename);
+    return `${rushConfiguration.commonRushConfigFolder}/${RushConstants.cobuildFilename}`;
   }
 
   private static async _loadAsync(
@@ -106,32 +114,56 @@ export class CobuildConfiguration {
     terminal: ITerminal,
     rushConfiguration: RushConfiguration,
     rushSession: RushSession
-  ): Promise<CobuildConfiguration> {
-    const cobuildJson: ICobuildJson = await JsonFile.loadAndValidateAsync(
-      jsonFilePath,
-      CobuildConfiguration._jsonSchema
-    );
+  ): Promise<CobuildConfiguration | undefined> {
+    let cobuildJson: ICobuildJson | undefined;
+    try {
+      cobuildJson = await JsonFile.loadAndValidateAsync(jsonFilePath, CobuildConfiguration._jsonSchema);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        return undefined;
+      }
+      throw e;
+    }
+
+    if (!cobuildJson) {
+      return undefined;
+    }
+
+    const cobuildLockProviderFactory: CobuildLockProviderFactory | undefined =
+      rushSession.getCobuildLockProviderFactory(cobuildJson.cobuildLockProvider);
+    if (!cobuildLockProviderFactory) {
+      throw new Error(`Unexpected cobuild lock provider: ${cobuildJson.cobuildLockProvider}`);
+    }
 
     return new CobuildConfiguration({
       cobuildJson,
       rushConfiguration,
-      rushSession
+      rushSession,
+      cobuildLockProviderFactory
     });
   }
 
-  public get contextId(): string | undefined {
-    return this.cobuildContextId;
-  }
-
-  public async connectLockProviderAsync(): Promise<void> {
+  public async createLockProviderAsync(terminal: ITerminal): Promise<void> {
     if (this.cobuildEnabled) {
-      await this.cobuildLockProvider.connectAsync();
+      terminal.writeLine(`Running cobuild (runner ${this.cobuildContextId}/${this.cobuildRunnerId})`);
+      const cobuildLockProvider: ICobuildLockProvider = await this._cobuildLockProviderFactory(
+        this._cobuildJson
+      );
+      this._cobuildLockProvider = cobuildLockProvider;
+      await this._cobuildLockProvider.connectAsync();
     }
   }
 
-  public async disconnectLockProviderAsync(): Promise<void> {
+  public async destroyLockProviderAsync(): Promise<void> {
     if (this.cobuildEnabled) {
-      await this.cobuildLockProvider.disconnectAsync();
+      await this._cobuildLockProvider?.disconnectAsync();
     }
+  }
+
+  public get cobuildLockProvider(): ICobuildLockProvider {
+    if (!this._cobuildLockProvider) {
+      throw new Error(`Cobuild lock provider has not been created`);
+    }
+    return this._cobuildLockProvider;
   }
 }

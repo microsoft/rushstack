@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import {
   RedisCobuildLockProvider,
   IRedisCobuildLockProviderOptions
@@ -20,21 +23,38 @@ async function main(): Promise<void> {
   const lockProvider: RedisCobuildLockProvider = new RedisCobuildLockProvider(options, rushSession as any);
   await lockProvider.connectAsync();
   const context: ICobuildContext = {
-    contextId: 'test-context-id',
-    version: 1,
-    cacheId: 'test-cache-id'
+    contextId: 'context_id',
+    cacheId: 'cache_id',
+    lockKey: 'lock_key',
+    lockExpireTimeInSeconds: 30,
+    completedStateKey: 'completed_state_key',
+    clusterId: 'cluster_id',
+    runnerId: 'runner_id',
+    packageName: 'package_name',
+    phaseName: 'phase_name'
   };
   await lockProvider.acquireLockAsync(context);
   await lockProvider.renewLockAsync(context);
   await lockProvider.setCompletedStateAsync(context, {
     status: OperationStatus.Success,
-    cacheId: 'test-cache-id'
+    cacheId: 'cache_id'
   });
   const completedState = await lockProvider.getCompletedStateAsync(context);
   console.log('Completed state: ', completedState);
   await lockProvider.disconnectAsync();
 }
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+
+process.exitCode = 1;
+
+main()
+  .then(() => {
+    process.exitCode = 0;
+  })
+  .catch((err) => {
+    console.error(err);
+  })
+  .finally(() => {
+    if (process.exitCode !== undefined) {
+      process.exit(process.exitCode);
+    }
+  });

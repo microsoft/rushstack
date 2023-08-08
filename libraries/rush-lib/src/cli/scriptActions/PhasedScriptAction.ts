@@ -36,7 +36,7 @@ import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
 import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
-import type { ITelemetryOperationResult } from '../../logic/Telemetry';
+import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
@@ -320,86 +320,90 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.rushConfiguration,
         this.rushSession
       );
-      await cobuildConfiguration?.connectLockProviderAsync();
+      await cobuildConfiguration?.createLockProviderAsync(terminal);
     }
 
-    const projectSelection: Set<RushConfigurationProject> =
-      await this._selectionParameters.getSelectedProjectsAsync(terminal);
+    try {
+      const projectSelection: Set<RushConfigurationProject> =
+        await this._selectionParameters.getSelectedProjectsAsync(terminal);
 
-    if (!projectSelection.size) {
-      terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
-      return;
-    }
-
-    const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
-
-    const customParametersByName: Map<string, CommandLineParameter> = new Map();
-    for (const [configParameter, parserParameter] of this.customParameters) {
-      customParametersByName.set(configParameter.longName, parserParameter);
-    }
-
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const initialCreateOperationsContext: ICreateOperationsContext = {
-      buildCacheConfiguration,
-      cobuildConfiguration,
-      customParameters: customParametersByName,
-      isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      isInitial: true,
-      isWatch,
-      rushConfiguration: this.rushConfiguration,
-      phaseOriginal: new Set(this._originalPhases),
-      phaseSelection: new Set(this._initialPhases),
-      projectChangeAnalyzer,
-      projectSelection,
-      projectsInUnknownState: projectSelection
-    };
-
-    const executionManagerOptions: IOperationExecutionManagerOptions = {
-      quietMode: isQuietMode,
-      debugMode: this.parser.isDebug,
-      parallelism,
-      changedProjectsOnly,
-      beforeExecuteOperation: async (record: IOperationRunnerContext) => {
-        await this.hooks.beforeExecuteOperation.promise(record);
-      },
-      afterExecuteOperation: async (record: IOperationRunnerContext) => {
-        await this.hooks.afterExecuteOperation.promise(record);
-      },
-      beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
-        await this.hooks.beforeExecuteOperations.promise(records);
-      },
-      onOperationStatusChanged: (record: OperationExecutionRecord) => {
-        this.hooks.onOperationStatusChanged.call(record);
-      }
-    };
-
-    const internalOptions: IRunPhasesOptions = {
-      initialCreateOperationsContext,
-      executionManagerOptions,
-      stopwatch,
-      terminal
-    };
-
-    terminal.write('Analyzing repo state... ');
-    const repoStateStopwatch: Stopwatch = new Stopwatch();
-    repoStateStopwatch.start();
-    await projectChangeAnalyzer._ensureInitializedAsync(terminal);
-    repoStateStopwatch.stop();
-    terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
-    terminal.writeLine();
-
-    await this._runInitialPhases(internalOptions);
-
-    if (isWatch) {
-      if (buildCacheConfiguration) {
-        // Cache writes are not supported during watch mode, only reads.
-        buildCacheConfiguration.cacheWriteEnabled = false;
+      if (!projectSelection.size) {
+        terminal.writeLine(
+          colors.yellow(`The command line selection parameters did not match any projects.`)
+        );
+        return;
       }
 
-      await this._runWatchPhases(internalOptions);
-    }
+      const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
-    await cobuildConfiguration?.disconnectLockProviderAsync();
+      const customParametersByName: Map<string, CommandLineParameter> = new Map();
+      for (const [configParameter, parserParameter] of this.customParameters) {
+        customParametersByName.set(configParameter.longName, parserParameter);
+      }
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+      const initialCreateOperationsContext: ICreateOperationsContext = {
+        buildCacheConfiguration,
+        cobuildConfiguration,
+        customParameters: customParametersByName,
+        isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
+        isInitial: true,
+        isWatch,
+        rushConfiguration: this.rushConfiguration,
+        phaseOriginal: new Set(this._originalPhases),
+        phaseSelection: new Set(this._initialPhases),
+        projectChangeAnalyzer,
+        projectSelection,
+        projectsInUnknownState: projectSelection
+      };
+
+      const executionManagerOptions: IOperationExecutionManagerOptions = {
+        quietMode: isQuietMode,
+        debugMode: this.parser.isDebug,
+        parallelism,
+        changedProjectsOnly,
+        beforeExecuteOperation: async (record: IOperationRunnerContext) => {
+          await this.hooks.beforeExecuteOperation.promise(record);
+        },
+        afterExecuteOperation: async (record: IOperationRunnerContext) => {
+          await this.hooks.afterExecuteOperation.promise(record);
+        },
+        beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+          await this.hooks.beforeExecuteOperations.promise(records, initialCreateOperationsContext);
+        },
+        onOperationStatusChanged: (record: OperationExecutionRecord) => {
+          this.hooks.onOperationStatusChanged.call(record);
+        }
+      };
+
+      const internalOptions: IRunPhasesOptions = {
+        initialCreateOperationsContext,
+        executionManagerOptions,
+        stopwatch,
+        terminal
+      };
+
+      terminal.write('Analyzing repo state... ');
+      const repoStateStopwatch: Stopwatch = new Stopwatch();
+      repoStateStopwatch.start();
+      await projectChangeAnalyzer._ensureInitializedAsync(terminal);
+      repoStateStopwatch.stop();
+      terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+      terminal.writeLine();
+
+      await this._runInitialPhases(internalOptions);
+
+      if (isWatch) {
+        if (buildCacheConfiguration) {
+          // Cache writes are not supported during watch mode, only reads.
+          buildCacheConfiguration.cacheWriteEnabled = false;
+        }
+
+        await this._runWatchPhases(internalOptions);
+      }
+    } finally {
+      await cobuildConfiguration?.destroyLockProviderAsync();
+    }
   }
 
   private async _runInitialPhases(options: IRunPhasesOptions): Promise<void> {
@@ -660,13 +664,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }
       }
 
-      this.parser.telemetry.log({
+      const logEntry: ITelemetryData = {
         name: this.actionName,
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData,
         operationResults
-      });
+      };
+
+      this.hooks.beforeLog.call(logEntry);
+
+      this.parser.telemetry.log(logEntry);
 
       this.parser.flushTelemetry();
     }

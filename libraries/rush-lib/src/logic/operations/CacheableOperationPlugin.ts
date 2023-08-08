@@ -1,15 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ColorValue, InternalError, ITerminal, JsonObject } from '@rushstack/node-core-library';
+import * as crypto from 'crypto';
+import {
+  Async,
+  ColorValue,
+  ConsoleTerminalProvider,
+  InternalError,
+  ITerminal,
+  JsonObject,
+  Sort,
+  Terminal
+} from '@rushstack/node-core-library';
+import { CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
+import { DiscardStdoutTransform, PrintUtilities } from '@rushstack/terminal';
+import { SplitterTransform, TerminalWritable } from '@rushstack/terminal';
+
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { ShellOperationRunner } from './ShellOperationRunner';
 import { OperationStatus } from './OperationStatus';
 import { CobuildLock, ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import { PrintUtilities } from '@rushstack/terminal';
 import { RushConstants } from '../RushConstants';
 import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
+import { ProjectLogWritable } from './ProjectLogWritable';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import { DisjointSet } from '../cobuild/DisjointSet';
 
 import type { Operation } from './Operation';
 import type {
@@ -17,17 +34,18 @@ import type {
   IOperationRunnerBeforeExecuteContext
 } from './OperationRunnerHooks';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { Stopwatch } from '../../utilities/Stopwatch';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 
@@ -37,6 +55,11 @@ export interface IOperationBuildCacheContext {
   isSkipAllowed: boolean;
   projectBuildCache: ProjectBuildCache | undefined;
   cobuildLock: CobuildLock | undefined;
+  // The id of the cluster contains the operation, used when acquiring cobuild lock
+  cobuildClusterId: string | undefined;
+  // Controls the log for the cache subsystem
+  buildCacheTerminal: ITerminal | undefined;
+  buildCacheProjectLogWritable: ProjectLogWritable | undefined;
 }
 
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
@@ -46,34 +69,108 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   >();
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tapPromise(
+    hooks.beforeExecuteOperations.tapPromise(
       PLUGIN_NAME,
-      async (operations: Set<Operation>, context: ICreateOperationsContext): Promise<Set<Operation>> => {
-        const { buildCacheConfiguration, isIncrementalBuildAllowed } = context;
+      async (
+        records: Map<Operation, IOperationExecutionResult>,
+        context: ICreateOperationsContext
+      ): Promise<void> => {
+        const { buildCacheConfiguration, isIncrementalBuildAllowed, cobuildConfiguration } = context;
         if (!buildCacheConfiguration) {
-          return operations;
+          return;
         }
 
+        let disjointSet: DisjointSet<Operation> | undefined;
+        if (cobuildConfiguration?.cobuildEnabled) {
+          disjointSet = new DisjointSet<Operation>();
+        }
+
+        const operations: IterableIterator<Operation> = records.keys();
+
         for (const operation of operations) {
-          if (operation.runner) {
+          disjointSet?.add(operation);
+          const { runner } = operation;
+          if (runner) {
             const buildCacheContext: IOperationBuildCacheContext = {
               // ShellOperationRunner supports cache writes by default.
               isCacheWriteAllowed: true,
               isCacheReadAllowed: isIncrementalBuildAllowed,
               isSkipAllowed: isIncrementalBuildAllowed,
               projectBuildCache: undefined,
-              cobuildLock: undefined
+              cobuildLock: undefined,
+              cobuildClusterId: undefined,
+              buildCacheTerminal: undefined,
+              buildCacheProjectLogWritable: undefined
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
-            this._buildCacheContextByOperationRunner.set(operation.runner, buildCacheContext);
+            this._buildCacheContextByOperationRunner.set(runner, buildCacheContext);
 
-            if (operation.runner instanceof ShellOperationRunner) {
-              this._applyShellOperationRunner(operation.runner, context);
+            if (runner instanceof ShellOperationRunner) {
+              this._applyShellOperationRunner(runner, context);
             }
           }
         }
 
-        return operations;
+        if (disjointSet) {
+          // If disjoint set exists, connect build cache disabled project with its consumers
+          await Async.forEachAsync(
+            operations,
+            async (operation) => {
+              const { associatedProject: project, associatedPhase: phase } = operation;
+              if (project && phase && operation.runner instanceof ShellOperationRunner) {
+                const buildCacheEnabled: boolean = await this._tryGetProjectBuildCacheEnabledAsync({
+                  buildCacheConfiguration,
+                  rushProject: project,
+                  commandName: phase.name
+                });
+                if (!buildCacheEnabled) {
+                  for (const consumer of operation.consumers) {
+                    if (consumer.runner instanceof ShellOperationRunner) {
+                      disjointSet?.union(operation, consumer);
+                    }
+                  }
+                }
+              }
+            },
+            {
+              concurrency: 10
+            }
+          );
+
+          for (const set of disjointSet.getAllSets()) {
+            if (cobuildConfiguration?.cobuildEnabled && cobuildConfiguration.cobuildContextId) {
+              // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
+              const groupedOperations: Operation[] = Array.from(set);
+              Sort.sortBy(groupedOperations, (operation: Operation) => {
+                const { associatedProject, associatedPhase } = operation;
+                return `${associatedProject?.packageName}${RushConstants.hashDelimiter}${associatedPhase?.name}`;
+              });
+
+              // Generates cluster id, cluster id comes from the project folder and phase name of all operations in the same cluster.
+              const hash: crypto.Hash = crypto.createHash('sha1');
+              for (const operation of groupedOperations) {
+                const { associatedPhase: phase, associatedProject: project } = operation;
+                if (project && phase) {
+                  hash.update(project.projectRelativeFolder);
+                  hash.update(RushConstants.hashDelimiter);
+                  hash.update(phase.name);
+                  hash.update(RushConstants.hashDelimiter);
+                }
+              }
+              const cobuildClusterId: string = hash.digest('hex');
+
+              // Assign same cluster id to all operations in the same cluster.
+              for (const operation of groupedOperations) {
+                const { runner } = operation;
+                if (runner instanceof ShellOperationRunner) {
+                  const buildCacheContext: IOperationBuildCacheContext =
+                    this._getBuildCacheContextByRunnerOrThrow(runner);
+                  buildCacheContext.cobuildClusterId = cobuildClusterId;
+                }
+              }
+            }
+          }
+        }
       }
     );
 
@@ -137,7 +234,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     hooks.beforeExecute.tapPromise(
       PLUGIN_NAME,
       async (beforeExecuteContext: IOperationRunnerBeforeExecuteContext) => {
-        const earlyReturnStatus: OperationStatus | undefined = await (async () => {
+        const beforeExecuteCallbackAsync = async ({
+          buildCacheContext,
+          buildCacheConfiguration,
+          cobuildConfiguration,
+          selectedPhases,
+          projectChangeAnalyzer
+        }: {
+          buildCacheContext: IOperationBuildCacheContext;
+          buildCacheConfiguration: BuildCacheConfiguration | undefined;
+          cobuildConfiguration: CobuildConfiguration | undefined;
+          selectedPhases: ReadonlySet<IPhase>;
+          projectChangeAnalyzer: ProjectChangeAnalyzer;
+        }): Promise<OperationStatus | undefined> => {
           const {
             context,
             runner,
@@ -151,12 +260,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             phase,
             commandName,
             commandToRun,
-            earlyReturnStatus
+            finallyCallbacks
           } = beforeExecuteContext;
-          if (earlyReturnStatus) {
-            // If there is existing early return status, we don't need to do anything
-            return earlyReturnStatus;
-          }
 
           if (!projectDeps && buildCacheContext.isSkipAllowed) {
             // To test this code path:
@@ -170,6 +275,26 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             });
           }
 
+          const buildCacheTerminal: ITerminal = this._getBuildCacheTerminal({
+            runner,
+            buildCacheConfiguration,
+            rushProject,
+            collatedWriter: context.collatedWriter,
+            logFilenameIdentifier: runner.logFilenameIdentifier,
+            quietMode: context.quietMode,
+            debugMode: context.debugMode
+          });
+          buildCacheContext.buildCacheTerminal = buildCacheTerminal;
+
+          finallyCallbacks.push(() => {
+            /**
+             * A known issue is that on some operating system configurations, attempting to read the file while this
+             * process has it open for writing throws an error, so the lifetime of the buildCacheProjectLogWritable
+             * needs to be wrapped between the beforeExecute and afterExecute hooks.
+             */
+            buildCacheContext.buildCacheProjectLogWritable?.close();
+          });
+
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheConfiguration,
             runner,
@@ -179,7 +304,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             projectChangeAnalyzer,
             commandName,
             commandToRun,
-            terminal,
+            terminal: buildCacheTerminal,
             trackedProjectFiles,
             operationMetadataManager: context._operationMetadataManager
           });
@@ -189,29 +314,30 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (cobuildConfiguration?.cobuildEnabled) {
             if (
               cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
-              rushProject.consumingProjects.size === 0 &&
+              context.consumers.size === 0 &&
               !projectBuildCache
             ) {
               // When the leaf project log only is allowed and the leaf project is build cache "disabled", try to get
               // a log files only project build cache
               projectBuildCache = await this._tryGetLogOnlyProjectBuildCacheAsync({
                 buildCacheConfiguration,
+                cobuildConfiguration,
                 runner,
                 rushProject,
                 phase,
                 projectChangeAnalyzer,
                 commandName,
                 commandToRun,
-                terminal,
+                terminal: buildCacheTerminal,
                 trackedProjectFiles,
                 operationMetadataManager: context._operationMetadataManager
               });
               if (projectBuildCache) {
-                terminal.writeVerboseLine(
+                buildCacheTerminal.writeVerboseLine(
                   `Log files only build cache is enabled for the project "${rushProject.packageName}" because the cobuild leaf project log only is allowed`
                 );
               } else {
-                terminal.writeWarningLine(
+                buildCacheTerminal.writeWarningLine(
                   `Failed to get log files only build cache for the project "${rushProject.packageName}"`
                 );
               }
@@ -220,7 +346,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             cobuildLock = await this._tryGetCobuildLockAsync({
               runner,
               projectBuildCache,
-              cobuildConfiguration
+              cobuildConfiguration,
+              packageName: rushProject.packageName,
+              phaseName: phase.name
             });
           }
 
@@ -240,7 +368,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           //     has changed happens inside the hashing logic.
           //
           //   - For skipping, "isSkipAllowed" is set to true initially, and during
-          //     the process of running dependents, it will be changed by OperationExecutionManager to
+          //     the process of running dependents, it will be changed by this plugin to
           //     false if a dependency wasn't able to be skipped.
           //
           let buildCacheReadAttempted: boolean = false;
@@ -256,7 +384,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               const { status, cacheId } = cobuildCompletedState;
 
               const restoreFromCacheSuccess: boolean | undefined =
-                await cobuildLock.projectBuildCache.tryRestoreFromCacheAsync(terminal, cacheId);
+                await cobuildLock.projectBuildCache.tryRestoreFromCacheAsync(buildCacheTerminal, cacheId);
 
               if (restoreFromCacheSuccess) {
                 // Restore the original state of the operation without cache
@@ -274,7 +402,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           } else if (buildCacheContext.isCacheReadAllowed) {
             buildCacheReadAttempted = !!projectBuildCache;
             const restoreFromCacheSuccess: boolean | undefined =
-              await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
+              await projectBuildCache?.tryRestoreFromCacheAsync(buildCacheTerminal);
 
             if (restoreFromCacheSuccess) {
               // Restore the original state of the operation without cache
@@ -309,30 +437,49 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               });
             } else {
               // failed to acquire the lock, mark current operation to remote executing
-              context.stopwatch.reset();
+              (context.stopwatch as Stopwatch).reset();
               return OperationStatus.RemoteExecuting;
             }
           }
-        })();
-        if (earlyReturnStatus) {
-          beforeExecuteContext.earlyReturnStatus = earlyReturnStatus;
-        }
-        return beforeExecuteContext;
+        };
+        const earlyReturnStatus: OperationStatus | undefined = await beforeExecuteCallbackAsync({
+          buildCacheContext,
+          buildCacheConfiguration,
+          cobuildConfiguration,
+          selectedPhases,
+          projectChangeAnalyzer
+        });
+        return earlyReturnStatus;
       }
     );
 
     runner.hooks.afterExecute.tapPromise(
       PLUGIN_NAME,
       async (afterExecuteContext: IOperationRunnerAfterExecuteContext) => {
-        const { context, terminal, status, taskIsSuccessful } = afterExecuteContext;
+        const { context, status, taskIsSuccessful, logPath, errorLogPath } = afterExecuteContext;
 
-        const { cobuildLock, projectBuildCache, isCacheWriteAllowed } = buildCacheContext;
+        const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal } = buildCacheContext;
+
+        // Save the metadata to disk
+        const { duration: durationInSeconds } = context.stopwatch;
+        await context._operationMetadataManager?.saveAsync({
+          durationInSeconds,
+          cobuildContextId: cobuildLock?.cobuildConfiguration.cobuildContextId,
+          cobuildRunnerId: cobuildLock?.cobuildConfiguration.cobuildRunnerId,
+          logPath,
+          errorLogPath
+        });
+
+        if (!buildCacheTerminal) {
+          // This should not happen
+          throw new InternalError(`Build Cache Terminal is not created`);
+        }
 
         let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
         let setCacheEntryPromise: Promise<boolean> | undefined;
         if (cobuildLock && isCacheWriteAllowed) {
           if (context.error) {
-            // In order to preventing the worst case that all cobuild tasks go through the same failure,
+            // In order to prevent the worst case that all cobuild tasks go through the same failure,
             // allowing a failing build to be cached and retrieved, print the error message to the terminal
             // and clear the error in context.
             const message: string | undefined = context.error?.message;
@@ -357,7 +504,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 });
               };
               setCacheEntryPromise = cobuildLock.projectBuildCache.trySetCacheEntryAsync(
-                terminal,
+                buildCacheTerminal,
                 finalCacheId
               );
             }
@@ -367,7 +514,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         // If the command is successful, we can calculate project hash, and no dependencies were skipped,
         // write a new cache entry.
         if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && projectBuildCache) {
-          setCacheEntryPromise = projectBuildCache.trySetCacheEntryAsync(terminal);
+          setCacheEntryPromise = projectBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
         }
         const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise;
         await setCompletedStatePromiseFunction?.();
@@ -395,6 +542,34 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       throw new InternalError(`Build cache context for runner ${runner.name} should be defined`);
     }
     return buildCacheContext;
+  }
+
+  private async _tryGetProjectBuildCacheEnabledAsync({
+    buildCacheConfiguration,
+    rushProject,
+    commandName
+  }: {
+    buildCacheConfiguration: BuildCacheConfiguration;
+    rushProject: RushConfigurationProject;
+    commandName: string;
+  }): Promise<boolean> {
+    const consoleTerminalProvider: ConsoleTerminalProvider = new ConsoleTerminalProvider();
+    const terminal: ITerminal = new Terminal(consoleTerminalProvider);
+    // This is a silent terminal
+    terminal.unregisterProvider(consoleTerminalProvider);
+
+    if (buildCacheConfiguration && buildCacheConfiguration.buildCacheEnabled) {
+      const projectConfiguration: RushProjectConfiguration | undefined =
+        await RushProjectConfiguration.tryLoadForProjectAsync(rushProject, terminal);
+      if (projectConfiguration && projectConfiguration.disableBuildCacheForProject) {
+        const operationSettings: IOperationSettings | undefined =
+          projectConfiguration.operationSettingsByOperationName.get(commandName);
+        if (operationSettings && !operationSettings.disableBuildCacheForOperation) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private async _tryGetProjectBuildCacheAsync({
@@ -504,6 +679,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     return buildCacheContext.projectBuildCache;
   }
 
+  // Get a ProjectBuildCache only cache/restore log files
   private async _tryGetLogOnlyProjectBuildCacheAsync({
     runner,
     rushProject,
@@ -511,12 +687,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     commandName,
     commandToRun,
     buildCacheConfiguration,
+    cobuildConfiguration,
     phase,
     trackedProjectFiles,
     projectChangeAnalyzer,
     operationMetadataManager
   }: {
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    cobuildConfiguration: CobuildConfiguration;
     runner: IOperationRunner;
     rushProject: RushConfigurationProject;
     phase: IPhase;
@@ -542,6 +720,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         // Force the cache to be a log files only cache
         logFilesOnly: '1'
       };
+      if (cobuildConfiguration.cobuildContextId) {
+        additionalContext.cobuildContextId = cobuildConfiguration.cobuildContextId;
+      }
       if (projectConfiguration) {
         const operationSettings: IOperationSettings | undefined =
           projectConfiguration.operationSettingsByOperationName.get(commandName);
@@ -593,24 +774,157 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   private async _tryGetCobuildLockAsync({
     cobuildConfiguration,
     runner,
-    projectBuildCache
+    projectBuildCache,
+    packageName,
+    phaseName
   }: {
     cobuildConfiguration: CobuildConfiguration | undefined;
     runner: IOperationRunner;
     projectBuildCache: ProjectBuildCache | undefined;
+    packageName: string;
+    phaseName: string;
   }): Promise<CobuildLock | undefined> {
     const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
     if (!buildCacheContext.cobuildLock) {
-      buildCacheContext.cobuildLock = undefined;
-
       if (projectBuildCache && cobuildConfiguration && cobuildConfiguration.cobuildEnabled) {
+        if (!buildCacheContext.cobuildClusterId) {
+          // This should not happen
+          throw new InternalError('Cobuild cluster id is not defined');
+        }
         buildCacheContext.cobuildLock = new CobuildLock({
           cobuildConfiguration,
-          projectBuildCache
+          projectBuildCache,
+          cobuildClusterId: buildCacheContext.cobuildClusterId,
+          lockExpireTimeInSeconds: ShellOperationRunner.periodicCallbackIntervalInSeconds * 3,
+          packageName,
+          phaseName
         });
       }
     }
     return buildCacheContext.cobuildLock;
+  }
+
+  private _getBuildCacheTerminal({
+    runner,
+    buildCacheConfiguration,
+    rushProject,
+    collatedWriter,
+    logFilenameIdentifier,
+    quietMode,
+    debugMode
+  }: {
+    runner: ShellOperationRunner;
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    rushProject: RushConfigurationProject;
+    collatedWriter: CollatedWriter;
+    logFilenameIdentifier: string;
+    quietMode: boolean;
+    debugMode: boolean;
+  }): ITerminal {
+    const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
+    if (!buildCacheContext.buildCacheTerminal) {
+      buildCacheContext.buildCacheTerminal = this._createBuildCacheTerminal({
+        runner,
+        buildCacheConfiguration,
+        rushProject,
+        collatedWriter,
+        logFilenameIdentifier,
+        quietMode,
+        debugMode
+      });
+    } else if (!buildCacheContext.buildCacheProjectLogWritable?.isOpen) {
+      // The ProjectLogWritable is closed, re-create one
+      buildCacheContext.buildCacheTerminal = this._createBuildCacheTerminal({
+        runner,
+        buildCacheConfiguration,
+        rushProject,
+        collatedWriter,
+        logFilenameIdentifier,
+        quietMode,
+        debugMode
+      });
+    }
+
+    return buildCacheContext.buildCacheTerminal;
+  }
+
+  private _createBuildCacheTerminal({
+    runner,
+    buildCacheConfiguration,
+    rushProject,
+    collatedWriter,
+    logFilenameIdentifier,
+    quietMode,
+    debugMode
+  }: {
+    runner: ShellOperationRunner;
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    rushProject: RushConfigurationProject;
+    collatedWriter: CollatedWriter;
+    logFilenameIdentifier: string;
+    quietMode: boolean;
+    debugMode: boolean;
+  }): ITerminal {
+    let cacheConsoleWritable: TerminalWritable;
+    const cacheProjectLogWritable: ProjectLogWritable | undefined = this._tryGetBuildCacheProjectLogWritable({
+      runner,
+      buildCacheConfiguration,
+      rushProject,
+      collatedTerminal: collatedWriter.terminal,
+      logFilenameIdentifier
+    });
+
+    if (quietMode) {
+      cacheConsoleWritable = new DiscardStdoutTransform({
+        destination: collatedWriter
+      });
+    } else {
+      cacheConsoleWritable = collatedWriter;
+    }
+
+    let cacheCollatedTerminal: CollatedTerminal;
+    if (cacheProjectLogWritable) {
+      const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
+        destinations: [cacheConsoleWritable, cacheProjectLogWritable]
+      });
+      cacheCollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
+    } else {
+      cacheCollatedTerminal = new CollatedTerminal(cacheConsoleWritable);
+    }
+
+    const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+      cacheCollatedTerminal,
+      {
+        debugEnabled: debugMode
+      }
+    );
+    return new Terminal(buildCacheTerminalProvider);
+  }
+
+  private _tryGetBuildCacheProjectLogWritable({
+    buildCacheConfiguration,
+    rushProject,
+    runner,
+    collatedTerminal,
+    logFilenameIdentifier
+  }: {
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    rushProject: RushConfigurationProject;
+    runner: ShellOperationRunner;
+    collatedTerminal: CollatedTerminal;
+    logFilenameIdentifier: string;
+  }): ProjectLogWritable | undefined {
+    // Only open the *.cache.log file(s) if the cache is enabled.
+    if (!buildCacheConfiguration?.buildCacheEnabled) {
+      return;
+    }
+    const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
+    buildCacheContext.buildCacheProjectLogWritable = new ProjectLogWritable(
+      rushProject,
+      collatedTerminal,
+      `${logFilenameIdentifier}.cache`
+    );
+    return buildCacheContext.buildCacheProjectLogWritable;
   }
 }
 

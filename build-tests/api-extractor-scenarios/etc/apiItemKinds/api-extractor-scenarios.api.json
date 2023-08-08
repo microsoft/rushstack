@@ -919,7 +919,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare type SomeType = "
+              "text": "export type SomeType = "
             },
             {
               "kind": "Content",

@@ -52,7 +52,7 @@
     },
     {
       "name": "@microsoft/rush-lib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@microsoft/teams-js",
@@ -64,6 +64,18 @@
     },
     {
       "name": "@microsoft/tsdoc-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@nodelib/fs.scandir",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@nodelib/fs.stat",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/dependency-path",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -84,7 +96,7 @@
     },
     {
       "name": "@rushstack/eslint-config",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/eslint-patch",
@@ -108,6 +120,10 @@
     },
     {
       "name": "@rushstack/heft",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/heft-api-extractor-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
@@ -123,8 +139,12 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@rushstack/heft-node-rig",
+      "name": "@rushstack/heft-lint-plugin",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-node-rig",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-sass-plugin",
@@ -139,8 +159,12 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/heft-typescript-plugin",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
       "name": "@rushstack/heft-web-rig",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/heft-webpack4-plugin",
@@ -148,7 +172,7 @@
     },
     {
       "name": "@rushstack/heft-webpack5-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/localization-utilities",
@@ -164,15 +188,15 @@
     },
     {
       "name": "@rushstack/node-core-library",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/package-deps-hash",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/rush-redis-cobuild-plugin",
-      "allowedCategories": [ "tests" ]
+      "name": "@rushstack/package-extractor",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/rig-package",
@@ -191,8 +215,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-redis-cobuild-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/rush-sdk",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/set-webpack-public-path-plugin",
@@ -212,7 +240,7 @@
     },
     {
       "name": "@rushstack/ts-command-line",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/typings-generator",
@@ -228,7 +256,7 @@
     },
     {
       "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/webpack4-localization-plugin",
@@ -296,7 +324,7 @@
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/experimental-utils",
@@ -304,7 +332,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -375,6 +403,14 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "compression",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "cors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "constructs",
       "allowedCategories": [ "tests" ]
     },
@@ -400,7 +436,7 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "eslint-plugin-promise",
@@ -444,7 +480,7 @@
     },
     {
       "name": "glob",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "glob-escape",
@@ -492,11 +528,15 @@
     },
     {
       "name": "html-webpack-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "http-proxy",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "http2-express-bridge",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "https-proxy-agent",
@@ -583,6 +623,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "mocha",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "node-fetch",
       "allowedCategories": [ "libraries" ]
     },
@@ -609,6 +653,14 @@
     {
       "name": "open",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "package-extractor-test-02",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "package-extractor-test-03",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "postcss",
@@ -641,6 +693,10 @@
     {
       "name": "sass",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "sass-embedded",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "sass-loader",
@@ -724,19 +780,31 @@
     },
     {
       "name": "typescript",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "url-loader",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "uuid",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "vsce",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "watchpack",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "webpack",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "webpack-bundle-analyzer",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "webpack-cli",

@@ -2,6 +2,71 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.15.2",
+      "tag": "@rushstack/ts-command-line_v4.15.2",
+      "date": "Tue, 08 Aug 2023 07:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.15.1",
+      "tag": "@rushstack/ts-command-line_v4.15.1",
+      "date": "Thu, 15 Jun 2023 00:21:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.15.0",
+      "tag": "@rushstack/ts-command-line_v4.15.0",
+      "date": "Tue, 13 Jun 2023 01:49:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for handling ambiguous parameters when conflicting parameters are provided but they provide a non-conflicting alternative (e.g. parameters with the same short-name but different long-names, scoped parameters with the same long-name but different scopes). When using an ambiguous parameter on the CLI, an error message describing the ambiguous parameter usage will appear."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.14.0",
+      "tag": "@rushstack/ts-command-line_v4.14.0",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add AliasCommandLineAction, a CommandLineAction that can be used to redirect commands with optional default arguments to existing commands."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.13.3",
+      "tag": "@rushstack/ts-command-line_v4.13.3",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.13.2",
       "tag": "@rushstack/ts-command-line_v4.13.2",
       "date": "Fri, 10 Feb 2023 01:18:50 GMT",

@@ -1,3 +1,17 @@
 {
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json"
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json",
+
+  "roots": ["<rootDir>/lib-shim"],
+
+  "testMatch": ["<rootDir>/lib-shim/**/*.test.js"],
+
+  "collectCoverageFrom": [
+    "lib-shim/**/*.js",
+    "!lib-shim/**/*.d.ts",
+    "!lib-shim/**/*.test.js",
+    "!lib-shim/**/test/**",
+    "!lib-shim/**/__tests__/**",
+    "!lib-shim/**/__fixtures__/**",
+    "!lib-shim/**/__mocks__/**"
+  ]
 }

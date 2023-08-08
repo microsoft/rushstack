@@ -53,11 +53,18 @@ export interface IAssetInfo {
     externalNames: Map<string, string>;
     fileName: string;
     modules: (string | number)[];
+    renderInfo: Map<string | number, IRenderedModulePosition>;
     source: Source;
 }
 
 // @public
 export type IAssetMap = Map<string, IAssetInfo>;
+
+// @public
+export interface IAssetStats {
+    // (undocumented)
+    positionByModuleId: Map<string | number, IRenderedModulePosition>;
+}
 
 // @public
 export interface IDehydratedAssets {
@@ -118,6 +125,12 @@ export interface IModuleMinifierPluginOptions {
     usePortableModules?: boolean;
 }
 
+// @public
+export interface IModuleMinifierPluginStats {
+    // (undocumented)
+    metadataByAssetFileName: Map<string, IAssetStats>;
+}
+
 // @internal
 export interface _INormalModuleFactoryModuleData {
     // (undocumented)
@@ -136,6 +149,12 @@ export interface IPostProcessFragmentContext {
     compilation: webpack.compilation.Compilation;
     loggingName: string;
     module: webpack.compilation.Module | undefined;
+}
+
+// @public
+export interface IRenderedModulePosition {
+    charLength: number;
+    charOffset: number;
 }
 
 // @internal
@@ -162,6 +181,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     // (undocumented)
     apply(compiler: webpack.Compiler): void;
     // (undocumented)
+    static getCompilationStatistics(compilation: webpack.compilation.Compilation): IModuleMinifierPluginStats | undefined;
+    // (undocumented)
     readonly hooks: IModuleMinifierPluginHooks;
     // (undocumented)
     minifier: IModuleMinifier;
@@ -177,7 +198,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
 }
 
 // @public
-export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source;
+export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string, emitRenderInfo?: boolean): Source;
 
 // @public
 export const STAGE_AFTER: 100;

@@ -37,17 +37,17 @@ export class ChangeManager {
    * @param prereleaseToken - prerelease token
    * @param includeCommitDetails - whether commit details need to be included in changes
    */
-  public load(
+  public async loadAsync(
     changesPath: string,
     prereleaseToken: PrereleaseToken = new PrereleaseToken(),
     includeCommitDetails: boolean = false
-  ): void {
+  ): Promise<void> {
     this._allPackages = this._rushConfiguration.projectsByName;
 
     this._prereleaseToken = prereleaseToken;
 
     this._changeFiles = new ChangeFiles(changesPath);
-    this._allChanges = PublishUtilities.findChangeRequests(
+    this._allChanges = await PublishUtilities.findChangeRequestsAsync(
       this._allPackages,
       this._rushConfiguration,
       this._changeFiles,
@@ -117,7 +117,7 @@ export class ChangeManager {
     return updatedPackages;
   }
 
-  public updateChangelog(shouldCommit: boolean): void {
+  public async updateChangelogAsync(shouldCommit: boolean): Promise<void> {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
@@ -130,7 +130,7 @@ export class ChangeManager {
       );
 
       // Remove the change request files only if "-a" was provided.
-      this._changeFiles.deleteAll(shouldCommit, updatedChangelogs);
+      await this._changeFiles.deleteAllAsync(shouldCommit, updatedChangelogs);
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "2.0.35",
+  "version": "2.0.73",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "main": "lib/index.js",
   "module": "lib-es6/index.js",

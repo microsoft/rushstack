@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "3.3.99",
+  "version": "4.0.16",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "dist/set-webpack-public-path-plugin.d.ts",
@@ -12,21 +12,18 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@types/webpack": "^4.39.8",
-    "webpack": "^5.35.1"
+    "@types/webpack": "^4.39.8"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
       "optional": true
-    },
-    "webpack": {
-      "optional": true
     }
   },
   "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/webpack-plugin-utilities": "workspace:*"
   },
   "devDependencies": {

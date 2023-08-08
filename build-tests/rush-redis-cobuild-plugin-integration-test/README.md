@@ -35,34 +35,26 @@ Sandbox repo folder: **build-tests/rush-redis-cobuild-plugin-integration-test/sa
 
 ```sh
 cd sandbox/repo
-rush update
+node ../../lib/runRush.js update
 ```
 
-## Case 1: Disable cobuild by setting `RUSH_COBUILD_ENABLED=0`
+#### Case 1: Normal build, Cobuild is disabled because of missing RUSH_COBUILD_CONTEXT_ID 
+
+1. Write to build cache
 
 ```sh
-rm -rf common/temp/build-cache && RUSH_COBUILD_ENABLED=0 REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
+rm -rf common/temp/build-cache && node ../../lib/runRush.js --debug cobuild
 ```
 
-Expected behavior: Cobuild feature is disabled. Run command successfully.
+2. Read from build cache
 
 ```sh
-RUSH_COBUILD_ENABLED=0 REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
+node ../../lib/runRush.js --debug cobuild
 ```
 
-Expected behavior: Cobuild feature is disabled. Build cache was restored successfully.
+Expected behavior: Cobuild feature is disabled. Build cache is saved/restored as normal.
 
-## Case 2: Cobuild enabled without specifying RUSH_COBUILD_CONTEXT_ID
-
-Run `rush cobuild` command without specifying cobuild context id.
-
-```sh
-rm -rf common/temp/build-cache && REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
-```
-
-Expected behavior: Cobuild feature is disabled. Build cache was restored successfully.
-
-## Case 3: Cobuild enabled, run one cobuild command only
+#### Case 2: Cobuild enabled by specifying RUSH_COBUILD_CONTEXT_ID and Redis authentication
 
 1. Clear redis server
 
@@ -70,38 +62,46 @@ Expected behavior: Cobuild feature is disabled. Build cache was restored success
 (cd ../.. && docker compose down && docker compose up -d)
 ```
 
-2. Run `rush cobuild` command
+2. Run cobuilds
 
 ```sh
-rm -rf common/temp/build-cache && RUSH_COBUILD_CONTEXT_ID=foo REDIS_PASS=redis123 node ../../lib/runRush.js --debug cobuild
+rm -rf common/temp/build-cache && RUSH_COBUILD_CONTEXT_ID=foo REDIS_PASS=redis123 RUSH_COBUILD_RUNNER_ID=runner1 node ../../lib/runRush.js --debug cobuild
 ```
 
 Expected behavior: Cobuild feature is enabled. Run command successfully.
 You can also see cobuild related logs in the terminal.
 
 ```sh
-Get completed state for cobuild:v1:foo:c2df36270ec5faa8ef6497fa7367a476de3e2861:completed: null
-Acquired lock for cobuild:v1:foo:c2df36270ec5faa8ef6497fa7367a476de3e2861:lock: 1, 1 is success
-Set completed state for cobuild:v1:foo:c2df36270ec5faa8ef6497fa7367a476de3e2861:completed: SUCCESS;c2df36270ec5faa8ef6497fa7367a476de3e2861
+Running cobuild (runner foo/runner1)
+Analyzing repo state... DONE (0.11 seconds)
+
+Executing a maximum of 10 simultaneous processes...
+
+==[ b (build) ]====================================================[ 1 of 9 ]==
+Get completed_state(cobuild:completed:foo:2e477baf39a85b28fc40e63b417692fe8afcc023)_package(b)_phase(_phase:build): SUCCESS;2e477baf39a85b28fc40e63b417692fe8afcc023
+Get completed_state(cobuild:completed:foo:cfc620db4e74a6f0db41b1a86d0b5402966b97f3)_package(a)_phase(_phase:build): SUCCESS;cfc620db4e74a6f0db41b1a86d0b5402966b97f3
+Successfully acquired lock(cobuild:lock:foo:4c36160884a7a502f9894e8f0adae05c45c8cc4b)_package(b)_phase(_phase:build) to runner(runner1) and it expires in 30s
 ```
 
-## Case 4: Cobuild enabled, run two cobuild commands in parallel
+#### Case 3: Cobuild enabled, run two cobuild commands in parallel
 
 > Note: This test requires Visual Studio Code to be installed.
 
-1. Clear redis server
+1. Open predefined `.vscode/redis-cobuild.code-workspace` in Visual Studio Code.
+
+2. Clear redis server
 
 ```sh
-(cd ../.. && docker compose down && docker compose up -d)
+# Under rushstack/build-tests/rush-redis-cobuild-plugin-integration-test
+docker compose down && docker compose up -d
 ```
 
-2. Clear build cache
+3. Clear build cache
 
 ```sh
+# Under rushstack/build-tests/rush-redis-cobuild-plugin-integration-test/sandbox/repo
 rm -rf common/temp/build-cache
 ```
-
-3. Open predefined `.vscode/redis-cobuild.code-workspace` in Visual Studio Code.
 
 4. Open command palette (Ctrl+Shift+P or Command+Shift+P) and select `Tasks: Run Task` and select `cobuild`.
 
@@ -109,35 +109,36 @@ rm -rf common/temp/build-cache
 
 Expected behavior: Cobuild feature is enabled, cobuild related logs out in both terminals.
 
-## Case 5: Cobuild enabled, run two cobuild commands in parallel, one of them failed
+#### Case 4: Cobuild enabled, run two cobuild commands in parallel, one of them failed
 
 > Note: This test requires Visual Studio Code to be installed.
 
-1. Making the cobuild command of project "A" fails
+1. Open predefined `.vscode/redis-cobuild.code-workspace` in Visual Studio Code.
+
+2. Making the cobuild command of project "A" fails
 
 **sandbox/repo/projects/a/package.json**
 
 ```diff
   "scripts": {
--   "cobuild": "node ../build.js a",
-+   "cobuild": "sleep 5 && exit 1",
-    "build": "node ../build.js a"
+-   "_phase:build": "node ../build.js a",
++   "_phase:build": "exit 1",
   }
 ```
 
-2. Clear redis server
+3. Clear redis server
 
 ```sh
-(cd ../.. && docker compose down && docker compose up -d)
+# Under rushstack/build-tests/rush-redis-cobuild-plugin-integration-test
+docker compose down && docker compose up -d
 ```
 
-3. Clear build cache
+4. Clear build cache
 
 ```sh
+# Under rushstack/build-tests/rush-redis-cobuild-plugin-integration-test/sandbox/repo
 rm -rf common/temp/build-cache
 ```
-
-4. Open predefined `.vscode/redis-cobuild.code-workspace` in Visual Studio Code.
 
 5. Open command palette (Ctrl+Shift+P or Command+Shift+P) and select `Tasks: Run Task` and select `cobuild`.
 

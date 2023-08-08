@@ -43,7 +43,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
         // Is it an expression like "x.y"?
 
         // Ignore expressions such as "super.y", "this.y", and "that.y"
-        const memberObject: TSESTree.LeftHandSideExpression = node.object;
+        const memberObject: TSESTree.Expression = node.object;
         if (memberObject) {
           if (memberObject.type === 'Super' || memberObject.type === 'ThisExpression') {
             return; // no match

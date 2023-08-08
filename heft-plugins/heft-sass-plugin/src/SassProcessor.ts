@@ -4,7 +4,7 @@
 
 import * as path from 'path';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
-import { CompileResult, Syntax, Exception, compileString } from 'sass';
+import { CompileResult, Syntax, Exception, compileStringAsync } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
 import { FileSystem, Sort } from '@rushstack/node-core-library';
@@ -106,7 +106,13 @@ export class SassProcessor extends StringValuesTypingsGenerator {
 
     const { allFileExtensions, isFileModule } = buildExtensionClassifier(sassConfiguration);
 
-    const { cssOutputFolders, preserveSCSSExtension = false } = sassConfiguration;
+    const {
+      cssOutputFolders,
+      excludeFiles,
+      secondaryGeneratedTsFolders,
+      importIncludePaths,
+      preserveSCSSExtension = false
+    } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
@@ -125,14 +131,26 @@ export class SassProcessor extends StringValuesTypingsGenerator {
         }
       : undefined;
 
+    let globsToIgnore: string[] | undefined;
+    if (excludeFiles) {
+      globsToIgnore = [];
+      for (const excludedFile of excludeFiles) {
+        if (excludedFile.startsWith('./')) {
+          globsToIgnore.push(excludedFile.substring(2));
+        } else {
+          globsToIgnore.push(excludedFile);
+        }
+      }
+    }
+
     super({
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions: allFileExtensions,
-      filesToIgnore: sassConfiguration.excludeFiles,
-      secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
+      globsToIgnore,
+      secondaryGeneratedTsFolders,
 
       getAdditionalOutputFiles: getCssPaths,
 
@@ -149,7 +167,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.importIncludePaths
+          importIncludePaths
         );
 
         let classMap: IClassMap = {};
@@ -212,7 +230,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     let result: CompileResult;
     const nodeModulesUrl: URL = pathToFileURL(`${buildFolder}/node_modules/`);
     try {
-      result = compileString(fileContents, {
+      result = await compileStringAsync(fileContents, {
         importers: [
           {
             findFileUrl: (url: string): URL | null => {

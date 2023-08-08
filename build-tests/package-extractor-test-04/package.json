@@ -1,0 +1,12 @@
+{
+  "name": "package-extractor-test-04",
+  "description": "This project is used by tests in the @rushstack/package-extractor package.",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "_phase:build": ""
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
+  }
+}

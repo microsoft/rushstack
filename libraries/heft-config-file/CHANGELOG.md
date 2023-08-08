@@ -1,6 +1,70 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 10 Feb 2023 01:18:51 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+
+## 0.13.3
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.13.2
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.13.1
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.13.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+-  Use the `IRigConfig` interface insteacd of the `RigConfig` class in the API.
+
+## 0.12.5
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 0.12.4
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 0.12.3
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.12.2
+Mon, 22 May 2023 06:34:32 GMT
+
+_Version update only_
+
+## 0.12.1
+Fri, 12 May 2023 00:23:06 GMT
+
+_Version update only_
+
+## 0.12.0
+Mon, 01 May 2023 15:23:19 GMT
+
+### Minor changes
+
+- BREAKING CHANGE: The custom resolver method now accepts an options parameter. This parameter includes all previously provided information and now includes the partially-resolved configuration file.
+
+## 0.11.11
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.11.10
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
 
 ## 0.11.9
 Fri, 10 Feb 2023 01:18:51 GMT

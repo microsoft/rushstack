@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "DeleteFiles Heft Task Event Options",
+  "description": "Defines configuration used by the \"deleteFiles\" Heft task event.",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["deleteOperations"],
+
+  "properties": {
+    "deleteOperations": {
+      "type": "array",
+      "description": "An array of delete operations to perform during the specified Heft event.",
+
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "anyOf": [
+          { "required": ["sourcePath"] },
+          { "required": ["fileExtensions"] },
+          { "required": ["includeGlobs"] },
+          { "required": ["excludeGlobs"] }
+        ],
+        "properties": {
+          "sourcePath": {
+            "title": "Source Path",
+            "type": "string",
+            "description": "The base folder that files will be deleted from, relative to the project root. Settings such as \"includeGlobs\" and \"excludeGlobs\" will be resolved relative to this folder. If no globs or file extensions are specified, the folder will be deleted.",
+            "pattern": "[^\\\\]"
+          },
+
+          "fileExtensions": {
+            "title": "File Extensions",
+            "type": "array",
+            "description": "If specified, this option recursively scans all folders under \"sourcePath\" and includes any files that match the specified extensions.  (If \"fileExtensions\" and \"includeGlobs\" are both specified, their selections are added together.)",
+            "items": {
+              "type": "string",
+              "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+            }
+          },
+
+          "excludeGlobs": {
+            "title": "Exclude Globs",
+            "type": "array",
+            "description": "A list of glob patterns that exclude files or folders from being deleted.  The paths are resolved relative to \"sourcePath\".  These exclusions eliminate items that were selected by the \"includeGlobs\" or \"fileExtensions\" setting.",
+            "items": {
+              "type": "string",
+              "pattern": "[^\\\\]"
+            }
+          },
+
+          "includeGlobs": {
+            "title": "Include Globs",
+            "type": "array",
+            "description": "A list of glob patterns that select files to be deleted.  The paths are resolved relative to \"sourcePath\".",
+            "items": {
+              "type": "string",
+              "pattern": "[^\\\\]"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,89 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+
+## 7.36.4
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 7.36.3
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 7.36.2
+Wed, 12 Jul 2023 15:20:39 GMT
+
+### Patches
+
+- Add api-extractor support for .d.mts and .d.cts files
+
+## 7.36.1
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 7.36.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+- Use the `IRigConfig` interface in the `IExtractorConfigLoadForFolderOptions` object insteacd of the `RigConfig` class.
+
+## 7.35.4
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 7.35.3
+Tue, 13 Jun 2023 01:49:01 GMT
+
+_Version update only_
+
+## 7.35.2
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 7.35.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 7.35.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the TypeScript dependency to ~5.0.4
+
+## 7.34.9
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 7.34.8
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 7.34.7
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 7.34.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 7.34.5
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 7.34.4
 Fri, 10 Feb 2023 01:18:50 GMT

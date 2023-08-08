@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as glob from 'glob';
+import glob from 'fast-glob';
 import crypto from 'crypto';
 import type * as webpack from 'webpack';
 import { FileSystem, Import } from '@rushstack/node-core-library';
@@ -246,8 +246,8 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
           packageName = globsBase;
           pathInsidePackage = '';
         } else {
-          packageName = globsBase.substr(0, slashAfterPackageNameIndex);
-          pathInsidePackage = globsBase.substr(slashAfterPackageNameIndex + 1);
+          packageName = globsBase.slice(0, slashAfterPackageNameIndex);
+          pathInsidePackage = globsBase.slice(slashAfterPackageNameIndex + 1);
         }
 
         let packagePath: string;
@@ -267,21 +267,19 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
         resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
       }
 
-      for (const globPattern of globPatterns) {
-        const globResults: string[] = glob.sync(globPattern, { cwd: resolvedGlobsBase, nodir: true });
-        for (const globResult of globResults) {
-          const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
-
-          if (assetsToAdd.has(globResult)) {
-            const errorMessage: string = `Two files resolve to the same output path "${globResult}"`;
-            compilation.errors.push(new Error(errorMessage));
-            return this._renderError(errorMessage);
-          }
-
-          const assetContents: Buffer = FileSystem.readFileToBuffer(globResultFullPath);
-          assetsToAdd.set(globResult, { size: () => assetContents.byteLength, source: () => assetContents });
-          module.buildInfo.fileDependencies.add(globResultFullPath);
+      const globResults: string[] = glob.sync(globPatterns, { cwd: resolvedGlobsBase, onlyFiles: true });
+      for (const globResult of globResults) {
+        if (assetsToAdd.has(globResult)) {
+          const errorMessage: string = `Two files resolve to the same output path "${globResult}"`;
+          compilation.errors.push(new Error(errorMessage));
+          return this._renderError(errorMessage);
         }
+
+        const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
+
+        const assetContents: Buffer = FileSystem.readFileToBuffer(globResultFullPath);
+        assetsToAdd.set(globResult, { size: () => assetContents.byteLength, source: () => assetContents });
+        module.buildInfo.fileDependencies.add(globResultFullPath);
       }
     }
 
@@ -303,7 +301,7 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
     let pathPrefix: string = requireFolderOptions.outputFolder.replace(hashTokenRegex, (match, length) => {
       const hashLength: number | undefined = length ? Number.parseInt(length, 10) : undefined;
       if (hashLength) {
-        return hashDigest.substr(0, hashLength);
+        return hashDigest.slice(0, hashLength);
       } else {
         return hashDigest;
       }

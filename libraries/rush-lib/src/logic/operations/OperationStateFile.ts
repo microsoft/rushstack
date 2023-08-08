@@ -16,6 +16,8 @@ export interface IOperationStateFileOptions {
  */
 export interface IOperationStateJson {
   nonCachedDurationMs: number;
+  cobuildContextId: string | undefined;
+  cobuildRunnerId: string | undefined;
 }
 
 /**
@@ -53,7 +55,7 @@ export class OperationStateFile {
   }
 
   public async writeAsync(json: IOperationStateJson): Promise<void> {
-    await JsonFile.saveAsync(json, this.filepath, { ensureFolderExists: true });
+    await JsonFile.saveAsync(json, this.filepath, { ensureFolderExists: true, ignoreUndefinedValues: true });
     this._state = json;
   }
 

@@ -3,13 +3,13 @@
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-// Begin Asset Hash=1ae78808fac7117a5df587de32cb0a5dee132b58e7e47a7b63a98988b705dd2d
+// Begin Asset Hash=9cea223c5b52c3d2d453434504be210b33d1d8257f6a701509abfe7888323dcb
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[931],{
 
 /***/ 417:
 
-// Begin Module Hash=28dcea527403bc33391ab136fc2a6cb6b86954eee7151ce9026985cfd93e297a
+// Begin Module Hash=094ab5223af3c15d458c0cef66f228ac5ef757e87c865e83b0c812f6e36777ae
 
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -24,7 +24,7 @@ __webpack_require__.r(__webpack_exports__);
 // @license MIT
 
 
-function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IMPORTED_MODULE_1___default().b(); }
+function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IMPORTED_MODULE_1___default().b(); }console.log(\\"Test character lengths: ﻿￯\\")
 
 /***/ })
 
@@ -35,7 +35,7 @@ function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IM
 // End Asset",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "// Begin Asset Hash=b7fc2462de348315cb2fd1daa625acef56088c98afb80ddf2b701b74faed5b03
+  "/release/main.js": "// Begin Asset Hash=72f872cd36fc291394f263bf0ff812893481f2651f7475ccf67fcd0d60b3f7be
 define([\\"bar\\",\\"baz\\"], (__WEBPACK_EXTERNAL_MODULE__791__, __WEBPACK_EXTERNAL_MODULE__506__) => { return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -214,7 +214,10 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 				scriptUrl = document.currentScript.src;
 /******/ 			if (!scriptUrl) {
 /******/ 				var scripts = document.getElementsByTagName(\\"script\\");
-/******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
+/******/ 				if(scripts.length) {
+/******/ 					var i = scripts.length - 1;
+/******/ 					while (i > -1 && !scriptUrl) scriptUrl = scripts[i--].src;
+/******/ 				}
 /******/ 			}
 /******/ 		}
 /******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
@@ -269,7 +272,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__506__;
 /******/ 								}
 /******/ 							};
 /******/ 							__webpack_require__.l(url, loadingEnded, \\"chunk-\\" + chunkId, chunkId);
-/******/ 						} else installedChunks[chunkId] = 0;
+/******/ 						}
 /******/ 					}
 /******/ 				}
 /******/ 		};
@@ -333,9 +336,24 @@ console.log(\\"Do stuff\\");__webpack_require__.e(/* import() | async */ 931).th
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Metadata 1`] = `
-Map {
-  417 => Map {
-    931 => 965,
+Object {
+  "byAssetFilename": Map {
+    "main.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async.js" => Object {
+      "positionByModuleId": Map {
+        417 => Object {
+          "charLength": 1006,
+          "charOffset": 240,
+        },
+      },
+    },
+  },
+  "byModule": Map {
+    417 => Map {
+      931 => 1010,
+    },
   },
 }
 `;
@@ -345,20 +363,35 @@ exports[`ModuleMinifierPlugin Handles AMD externals (mock): Warnings 1`] = `Arra
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[931],{417:((e,t,n)=>{n.r(t),n.d(t,{foo:()=>s});var a=n(791),i=n.n(a),r=n(506),o=n.n(r);function s(){i().a(),o().b()}})
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[931],{417:((e,t,n)=>{n.r(t),n.d(t,{foo:()=>s});var a=n(791),i=n.n(a),r=n(506),o=n.n(r);function s(){i().a(),o().b()}console.log(\\"Test character lengths: \\\\ufeff￯\\")})
 }]);",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
-  "/release/main.js": "define([\\"bar\\",\\"baz\\"],((e,t)=>(()=>{var n,a={791:t=>{\\"use strict\\";t.exports=e},506:e=>{\\"use strict\\";e.exports=t}},i={};function r(e){var t=i[e];if(void 0!==t)return t.exports;var n=i[e]={exports:{}};return a[e](n,n.exports,r),n.exports}r.m=a,r.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return r.d(t,{a:t}),t},r.d=(e,t)=>{for(var n in t)r.o(t,n)&&!r.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},r.f={},r.e=e=>Promise.all(Object.keys(r.f).reduce(((t,n)=>(r.f[n](e,t),t)),[])),r.u=e=>\\"async.js\\",r.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),r.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),n={},r.l=(e,t,a,i)=>{if(n[e])n[e].push(t);else{var o,s;if(void 0!==a)for(var c=document.getElementsByTagName(\\"script\\"),d=0;d<c.length;d++){var l=c[d];if(l.getAttribute(\\"src\\")==e){o=l;break}}o||(s=!0,(o=document.createElement(\\"script\\")).charset=\\"utf-8\\",o.timeout=120,r.nc&&o.setAttribute(\\"nonce\\",r.nc),o.src=e),n[e]=[t];var u=(t,a)=>{o.onerror=o.onload=null,clearTimeout(f);var i=n[e];if(delete n[e],o.parentNode&&o.parentNode.removeChild(o),i&&i.forEach((e=>e(a))),t)return t(a)},f=setTimeout(u.bind(null,void 0,{type:\\"timeout\\",target:o}),12e4);o.onerror=u.bind(null,o.onerror),o.onload=u.bind(null,o.onload),s&&document.head.appendChild(o)}},r.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;r.g.importScripts&&(e=r.g.location+\\"\\");var t=r.g.document;if(!e&&t&&(t.currentScript&&(e=t.currentScript.src),!e)){var n=t.getElementsByTagName(\\"script\\");n.length&&(e=n[n.length-1].src)}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),r.p=e})(),(()=>{var e={179:0};r.f.j=(t,n)=>{var a=r.o(e,t)?e[t]:void 0;if(0!==a)if(a)n.push(a[2]);else{var i=new Promise(((n,i)=>a=e[t]=[n,i]));n.push(a[2]=i);var o=r.p+r.u(t),s=new Error;r.l(o,(n=>{if(r.o(e,t)&&(0!==(a=e[t])&&(e[t]=void 0),a)){var i=n&&(\\"load\\"===n.type?\\"missing\\":n.type),o=n&&n.target&&n.target.src;s.message=\\"Loading chunk \\"+t+\\" failed.\\\\n(\\"+i+\\": \\"+o+\\")\\",s.name=\\"ChunkLoadError\\",s.type=i,s.request=o,a[1](s)}}),\\"chunk-\\"+t,t)}};var t=(t,n)=>{var a,i,[o,s,c]=n,d=0;if(o.some((t=>0!==e[t]))){for(a in s)r.o(s,a)&&(r.m[a]=s[a]);if(c)c(r)}for(t&&t(n);d<o.length;d++)i=o[d],r.o(e,i)&&e[i]&&e[i][0](),e[i]=0},n=self.webpackChunk=self.webpackChunk||[];n.forEach(t.bind(null,0)),n.push=t.bind(null,n.push.bind(n))})();return console.log(\\"Do stuff\\"),r.e(931).then(r.bind(r,417)).then((e=>e.foo())),{}})()));",
+  "/release/main.js": "define([\\"bar\\",\\"baz\\"],((e,t)=>(()=>{var n,a={791:t=>{\\"use strict\\";t.exports=e},506:e=>{\\"use strict\\";e.exports=t}},i={};function r(e){var t=i[e];if(void 0!==t)return t.exports;var n=i[e]={exports:{}};return a[e](n,n.exports,r),n.exports}r.m=a,r.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return r.d(t,{a:t}),t},r.d=(e,t)=>{for(var n in t)r.o(t,n)&&!r.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},r.f={},r.e=e=>Promise.all(Object.keys(r.f).reduce(((t,n)=>(r.f[n](e,t),t)),[])),r.u=e=>\\"async.js\\",r.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),r.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),n={},r.l=(e,t,a,i)=>{if(n[e])n[e].push(t);else{var o,s;if(void 0!==a)for(var c=document.getElementsByTagName(\\"script\\"),d=0;d<c.length;d++){var l=c[d];if(l.getAttribute(\\"src\\")==e){o=l;break}}o||(s=!0,(o=document.createElement(\\"script\\")).charset=\\"utf-8\\",o.timeout=120,r.nc&&o.setAttribute(\\"nonce\\",r.nc),o.src=e),n[e]=[t];var u=(t,a)=>{o.onerror=o.onload=null,clearTimeout(f);var i=n[e];if(delete n[e],o.parentNode&&o.parentNode.removeChild(o),i&&i.forEach((e=>e(a))),t)return t(a)},f=setTimeout(u.bind(null,void 0,{type:\\"timeout\\",target:o}),12e4);o.onerror=u.bind(null,o.onerror),o.onload=u.bind(null,o.onload),s&&document.head.appendChild(o)}},r.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;r.g.importScripts&&(e=r.g.location+\\"\\");var t=r.g.document;if(!e&&t&&(t.currentScript&&(e=t.currentScript.src),!e)){var n=t.getElementsByTagName(\\"script\\");if(n.length)for(var a=n.length-1;a>-1&&!e;)e=n[a--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),r.p=e})(),(()=>{var e={179:0};r.f.j=(t,n)=>{var a=r.o(e,t)?e[t]:void 0;if(0!==a)if(a)n.push(a[2]);else{var i=new Promise(((n,i)=>a=e[t]=[n,i]));n.push(a[2]=i);var o=r.p+r.u(t),s=new Error;r.l(o,(n=>{if(r.o(e,t)&&(0!==(a=e[t])&&(e[t]=void 0),a)){var i=n&&(\\"load\\"===n.type?\\"missing\\":n.type),o=n&&n.target&&n.target.src;s.message=\\"Loading chunk \\"+t+\\" failed.\\\\n(\\"+i+\\": \\"+o+\\")\\",s.name=\\"ChunkLoadError\\",s.type=i,s.request=o,a[1](s)}}),\\"chunk-\\"+t,t)}};var t=(t,n)=>{var a,i,[o,s,c]=n,d=0;if(o.some((t=>0!==e[t]))){for(a in s)r.o(s,a)&&(r.m[a]=s[a]);if(c)c(r)}for(t&&t(n);d<o.length;d++)i=o[d],r.o(e,i)&&e[i]&&e[i][0](),e[i]=0},n=self.webpackChunk=self.webpackChunk||[];n.forEach(t.bind(null,0)),n.push=t.bind(null,n.push.bind(n))})();return console.log(\\"Do stuff\\"),r.e(931).then(r.bind(r,417)).then((e=>e.foo())),{}})()));",
 }
 `;
 
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Errors 1`] = `Array []`;
 
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Metadata 1`] = `
-Map {
-  417 => Map {
-    931 => 108,
+Object {
+  "byAssetFilename": Map {
+    "main.js" => Object {
+      "positionByModuleId": Map {},
+    },
+    "async.js" => Object {
+      "positionByModuleId": Map {
+        417 => Object {
+          "charLength": 154,
+          "charOffset": 135,
+        },
+      },
+    },
+  },
+  "byModule": Map {
+    417 => Map {
+      931 => 156,
+    },
   },
 }
 `;

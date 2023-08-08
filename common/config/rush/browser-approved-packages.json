@@ -4,7 +4,11 @@
   "packages": [
     {
       "name": "@fluentui/react",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@fluentui/react-components",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@lifaon/path",
@@ -32,18 +36,22 @@
     },
     {
       "name": "@reduxjs/toolkit",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/rush-themed-ui",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "axios",
-      "allowedCategories": [ "libraries" ]
+      "name": "@rushstack/rush-vscode-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
-      "name": "cors",
+      "name": "@vscode/test-electron",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -56,27 +64,35 @@
     },
     {
       "name": "react",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "react-dom",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "react-hook-form",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "react-redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "redux",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "rxjs",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "scheduler",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
       "name": "tslib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "update-notifier",

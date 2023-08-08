@@ -2,6 +2,6 @@
   "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node", "heft-jest"]
   }
 }

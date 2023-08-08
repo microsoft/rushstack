@@ -1,0 +1,47 @@
+{
+  "name": "@rushstack/rush-vscode-command-webview",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/rush-vscode-command-webview"
+  },
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "scripts": {
+    "_phase:build": "heft build --clean",
+    "_phase:test": "",
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "start": "heft start"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "~9.27.0",
+    "@fluentui/react": "^8.96.1",
+    "@reduxjs/toolkit": "~1.8.6",
+    "react-dom": "~16.13.1",
+    "react-hook-form": "~7.24.1",
+    "react-redux": "~8.0.4",
+    "react": "~16.13.1",
+    "redux": "~4.2.0",
+    "scheduler": "0.19.0",
+    "tslib": "~2.3.1"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-web-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
+    "@types/react-dom": "16.9.14",
+    "@types/react-redux": "~7.1.22",
+    "@types/react": "16.14.23",
+    "@types/vscode": "^1.63.0",
+    "@types/webpack-env": "1.18.0",
+    "eslint": "~8.7.0",
+    "html-webpack-plugin": "~5.5.0",
+    "webpack-bundle-analyzer": "~4.5.0",
+    "webpack": "~5.82.1"
+  }
+}

@@ -5,12 +5,17 @@
 
 
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain)
 
-The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
+
+The home for projects maintained by the Rush Stack community. Our mission is to develop reusable tooling
 for large scale TypeScript monorepos.
 
- [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
+
+<table><tr><td>
+<a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" /> Open in VS Code web view</a>
+</td></tr></table>
 
 ## Documentation Links
 
@@ -18,9 +23,11 @@ for large scale TypeScript monorepos.
 - [API reference](https://api.rushstack.io/) - browse API documentation for NPM packages
 - [Zulip chat room](https://rushstack.zulipchat.com/) - chat with the Rush Stack developers
 - [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
+- [Heft](https://heft.rushstack.io/) - our recommended tool that integrates with Rush
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
-
+- [Lockfile Explorer](https://lfx.rushstack.io/) - investigate and solve version conflicts for PNPM lockfiles
+- [TSDoc](https://tsdoc.org/) - the standard for doc comments in TypeScript code
 
 ## Related Repos
 
@@ -30,8 +37,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
   illustrate various project setups, including how to use Heft with other popular JavaScript frameworks
 - [rush-example](https://github.com/microsoft/rush-example) - a minimal Rush repo that demonstrates the fundamentals
   of Rush without relying on any other Rush Stack tooling
-- [rushstack-legacy](https://github.com/microsoft/rushstack-legacy) - older projects that are still maintained
-  but no longer actively developed
+- [rushstack-websites](https://github.com/microsoft/rushstack-websites) - Docusaurus monorepo for our websites
 
 
 <!-- GENERATED PROJECT SUMMARY START -->
@@ -54,11 +60,14 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/eslint/eslint-plugin](./eslint/eslint-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-plugin) | [changelog](./eslint/eslint-plugin/CHANGELOG.md) | [@rushstack/eslint-plugin](https://www.npmjs.com/package/@rushstack/eslint-plugin) |
 | [/eslint/eslint-plugin-packlets](./eslint/eslint-plugin-packlets/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-plugin-packlets.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-plugin-packlets) | [changelog](./eslint/eslint-plugin-packlets/CHANGELOG.md) | [@rushstack/eslint-plugin-packlets](https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets) |
 | [/eslint/eslint-plugin-security](./eslint/eslint-plugin-security/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Feslint-plugin-security.svg)](https://badge.fury.io/js/%40rushstack%2Feslint-plugin-security) | [changelog](./eslint/eslint-plugin-security/CHANGELOG.md) | [@rushstack/eslint-plugin-security](https://www.npmjs.com/package/@rushstack/eslint-plugin-security) |
+| [/heft-plugins/heft-api-extractor-plugin](./heft-plugins/heft-api-extractor-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-api-extractor-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-api-extractor-plugin) | [changelog](./heft-plugins/heft-api-extractor-plugin/CHANGELOG.md) | [@rushstack/heft-api-extractor-plugin](https://www.npmjs.com/package/@rushstack/heft-api-extractor-plugin) |
 | [/heft-plugins/heft-dev-cert-plugin](./heft-plugins/heft-dev-cert-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-dev-cert-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-dev-cert-plugin) | [changelog](./heft-plugins/heft-dev-cert-plugin/CHANGELOG.md) | [@rushstack/heft-dev-cert-plugin](https://www.npmjs.com/package/@rushstack/heft-dev-cert-plugin) |
 | [/heft-plugins/heft-jest-plugin](./heft-plugins/heft-jest-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-jest-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-jest-plugin) | [changelog](./heft-plugins/heft-jest-plugin/CHANGELOG.md) | [@rushstack/heft-jest-plugin](https://www.npmjs.com/package/@rushstack/heft-jest-plugin) |
+| [/heft-plugins/heft-lint-plugin](./heft-plugins/heft-lint-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-lint-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-lint-plugin) | [changelog](./heft-plugins/heft-lint-plugin/CHANGELOG.md) | [@rushstack/heft-lint-plugin](https://www.npmjs.com/package/@rushstack/heft-lint-plugin) |
 | [/heft-plugins/heft-sass-plugin](./heft-plugins/heft-sass-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-sass-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-sass-plugin) | [changelog](./heft-plugins/heft-sass-plugin/CHANGELOG.md) | [@rushstack/heft-sass-plugin](https://www.npmjs.com/package/@rushstack/heft-sass-plugin) |
 | [/heft-plugins/heft-serverless-stack-plugin](./heft-plugins/heft-serverless-stack-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-serverless-stack-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-serverless-stack-plugin) | [changelog](./heft-plugins/heft-serverless-stack-plugin/CHANGELOG.md) | [@rushstack/heft-serverless-stack-plugin](https://www.npmjs.com/package/@rushstack/heft-serverless-stack-plugin) |
 | [/heft-plugins/heft-storybook-plugin](./heft-plugins/heft-storybook-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-storybook-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-storybook-plugin) | [changelog](./heft-plugins/heft-storybook-plugin/CHANGELOG.md) | [@rushstack/heft-storybook-plugin](https://www.npmjs.com/package/@rushstack/heft-storybook-plugin) |
+| [/heft-plugins/heft-typescript-plugin](./heft-plugins/heft-typescript-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-typescript-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-typescript-plugin) | [changelog](./heft-plugins/heft-typescript-plugin/CHANGELOG.md) | [@rushstack/heft-typescript-plugin](https://www.npmjs.com/package/@rushstack/heft-typescript-plugin) |
 | [/heft-plugins/heft-webpack4-plugin](./heft-plugins/heft-webpack4-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-webpack4-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-webpack4-plugin) | [changelog](./heft-plugins/heft-webpack4-plugin/CHANGELOG.md) | [@rushstack/heft-webpack4-plugin](https://www.npmjs.com/package/@rushstack/heft-webpack4-plugin) |
 | [/heft-plugins/heft-webpack5-plugin](./heft-plugins/heft-webpack5-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-webpack5-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-webpack5-plugin) | [changelog](./heft-plugins/heft-webpack5-plugin/CHANGELOG.md) | [@rushstack/heft-webpack5-plugin](https://www.npmjs.com/package/@rushstack/heft-webpack5-plugin) |
 | [/libraries/api-extractor-model](./libraries/api-extractor-model/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor-model) | [changelog](./libraries/api-extractor-model/CHANGELOG.md) | [@microsoft/api-extractor-model](https://www.npmjs.com/package/@microsoft/api-extractor-model) |
@@ -69,6 +78,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/libraries/module-minifier](./libraries/module-minifier/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fmodule-minifier.svg)](https://badge.fury.io/js/%40rushstack%2Fmodule-minifier) | [changelog](./libraries/module-minifier/CHANGELOG.md) | [@rushstack/module-minifier](https://www.npmjs.com/package/@rushstack/module-minifier) |
 | [/libraries/node-core-library](./libraries/node-core-library/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fnode-core-library.svg)](https://badge.fury.io/js/%40rushstack%2Fnode-core-library) | [changelog](./libraries/node-core-library/CHANGELOG.md) | [@rushstack/node-core-library](https://www.npmjs.com/package/@rushstack/node-core-library) |
 | [/libraries/package-deps-hash](./libraries/package-deps-hash/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40rushstack%2Fpackage-deps-hash) | [changelog](./libraries/package-deps-hash/CHANGELOG.md) | [@rushstack/package-deps-hash](https://www.npmjs.com/package/@rushstack/package-deps-hash) |
+| [/libraries/package-extractor](./libraries/package-extractor/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fpackage-extractor.svg)](https://badge.fury.io/js/%40rushstack%2Fpackage-extractor) | [changelog](./libraries/package-extractor/CHANGELOG.md) | [@rushstack/package-extractor](https://www.npmjs.com/package/@rushstack/package-extractor) |
 | [/libraries/rig-package](./libraries/rig-package/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frig-package.svg)](https://badge.fury.io/js/%40rushstack%2Frig-package) | [changelog](./libraries/rig-package/CHANGELOG.md) | [@rushstack/rig-package](https://www.npmjs.com/package/@rushstack/rig-package) |
 | [/libraries/rush-lib](./libraries/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
 | [/libraries/rush-sdk](./libraries/rush-sdk/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-sdk.svg)](https://badge.fury.io/js/%40rushstack%2Frush-sdk) | | [@rushstack/rush-sdk](https://www.npmjs.com/package/@rushstack/rush-sdk) |
@@ -84,7 +94,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/rush-plugins/rush-azure-storage-build-cache-plugin](./rush-plugins/rush-azure-storage-build-cache-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-azure-storage-build-cache-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Frush-azure-storage-build-cache-plugin) | | [@rushstack/rush-azure-storage-build-cache-plugin](https://www.npmjs.com/package/@rushstack/rush-azure-storage-build-cache-plugin) |
 | [/rush-plugins/rush-http-build-cache-plugin](./rush-plugins/rush-http-build-cache-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-http-build-cache-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Frush-http-build-cache-plugin) | | [@rushstack/rush-http-build-cache-plugin](https://www.npmjs.com/package/@rushstack/rush-http-build-cache-plugin) |
 | [/rush-plugins/rush-redis-cobuild-plugin](./rush-plugins/rush-redis-cobuild-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-redis-cobuild-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Frush-redis-cobuild-plugin) | [changelog](./rush-plugins/rush-redis-cobuild-plugin/CHANGELOG.md) | [@rushstack/rush-redis-cobuild-plugin](https://www.npmjs.com/package/@rushstack/rush-redis-cobuild-plugin) |
-| [/rush-plugins/rush-serve-plugin](./rush-plugins/rush-serve-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-serve-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Frush-serve-plugin) | [changelog](./rush-plugins/rush-serve-plugin/CHANGELOG.md) | [@rushstack/rush-serve-plugin](https://www.npmjs.com/package/@rushstack/rush-serve-plugin) |
+| [/rush-plugins/rush-serve-plugin](./rush-plugins/rush-serve-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-serve-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Frush-serve-plugin) | | [@rushstack/rush-serve-plugin](https://www.npmjs.com/package/@rushstack/rush-serve-plugin) |
 | [/webpack/hashed-folder-copy-plugin](./webpack/hashed-folder-copy-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fhashed-folder-copy-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fhashed-folder-copy-plugin) | [changelog](./webpack/hashed-folder-copy-plugin/CHANGELOG.md) | [@rushstack/hashed-folder-copy-plugin](https://www.npmjs.com/package/@rushstack/hashed-folder-copy-plugin) |
 | [/webpack/loader-load-themed-styles](./webpack/loader-load-themed-styles/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles.svg)](https://badge.fury.io/js/%40microsoft%2Floader-load-themed-styles) | [changelog](./webpack/loader-load-themed-styles/CHANGELOG.md) | [@microsoft/loader-load-themed-styles](https://www.npmjs.com/package/@microsoft/loader-load-themed-styles) |
 | [/webpack/loader-raw-script](./webpack/loader-raw-script/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Floader-raw-script.svg)](https://badge.fury.io/js/%40rushstack%2Floader-raw-script) | [changelog](./webpack/loader-raw-script/CHANGELOG.md) | [@rushstack/loader-raw-script](https://www.npmjs.com/package/@rushstack/loader-raw-script) |
@@ -129,12 +139,11 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/eslint-7-test](./build-tests/eslint-7-test/) | This project contains a build test to validate ESLint 7 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin) |
 | [/build-tests/hashed-folder-copy-plugin-webpack4-test](./build-tests/hashed-folder-copy-plugin-webpack4-test/) | Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 4. |
 | [/build-tests/hashed-folder-copy-plugin-webpack5-test](./build-tests/hashed-folder-copy-plugin-webpack5-test/) | Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 5. NOTE - THIS TEST IS CURRENTLY EXPECTED TO BE BROKEN |
-| [/build-tests/heft-action-plugin](./build-tests/heft-action-plugin/) | This project contains a Heft plugin that adds a custom action |
-| [/build-tests/heft-action-plugin-test](./build-tests/heft-action-plugin-test/) | This project exercises a custom Heft action |
 | [/build-tests/heft-copy-files-test](./build-tests/heft-copy-files-test/) | Building this project tests copying files with Heft |
 | [/build-tests/heft-example-plugin-01](./build-tests/heft-example-plugin-01/) | This is an example heft plugin that exposes hooks for other plugins |
 | [/build-tests/heft-example-plugin-02](./build-tests/heft-example-plugin-02/) | This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01 |
 | [/build-tests/heft-fastify-test](./build-tests/heft-fastify-test/) | This project tests Heft support for the Fastify framework for Node.js services |
+| [/build-tests/heft-jest-preset-test](./build-tests/heft-jest-preset-test/) | This project illustrates configuring a Jest preset in a minimal Heft project |
 | [/build-tests/heft-jest-reporters-test](./build-tests/heft-jest-reporters-test/) | This project illustrates configuring Jest reporters in a minimal Heft project |
 | [/build-tests/heft-minimal-rig-test](./build-tests/heft-minimal-rig-test/) | This is a minimal rig package that is imported by the 'heft-minimal-rig-usage-test' project |
 | [/build-tests/heft-minimal-rig-usage-test](./build-tests/heft-minimal-rig-usage-test/) | A test project for Heft that resolves its compiler from the 'heft-minimal-rig-test' package |
@@ -144,6 +153,9 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-parameter-plugin-test](./build-tests/heft-parameter-plugin-test/) | This project exercises a built-in Heft action with a custom parameter |
 | [/build-tests/heft-sass-test](./build-tests/heft-sass-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
 | [/build-tests/heft-typescript-composite-test](./build-tests/heft-typescript-composite-test/) | Building this project tests behavior of Heft when the tsconfig.json file uses project references. |
+| [/build-tests/heft-typescript-v2-test](./build-tests/heft-typescript-v2-test/) | Building this project tests building with TypeScript v2 |
+| [/build-tests/heft-typescript-v3-test](./build-tests/heft-typescript-v3-test/) | Building this project tests building with TypeScript v3 |
+| [/build-tests/heft-typescript-v4-test](./build-tests/heft-typescript-v4-test/) | Building this project tests building with TypeScript v4 |
 | [/build-tests/heft-web-rig-library-test](./build-tests/heft-web-rig-library-test/) | A test project for Heft that exercises the '@rushstack/heft-web-rig' package |
 | [/build-tests/heft-webpack4-everything-test](./build-tests/heft-webpack4-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 4 |
 | [/build-tests/heft-webpack5-everything-test](./build-tests/heft-webpack5-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 5 |
@@ -151,6 +163,10 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
+| [/build-tests/package-extractor-test-01](./build-tests/package-extractor-test-01/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-02](./build-tests/package-extractor-test-02/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-03](./build-tests/package-extractor-test-03/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-04](./build-tests/package-extractor-test-04/) | This project is used by tests in the @rushstack/package-extractor package. |
 | [/build-tests/rush-amazon-s3-build-cache-plugin-integration-test](./build-tests/rush-amazon-s3-build-cache-plugin-integration-test/) | Tests connecting to an amazon S3 endpoint |
 | [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
@@ -163,6 +179,8 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
+| [/vscode-extensions/rush-vscode-command-webview](./vscode-extensions/rush-vscode-command-webview/) | Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands |
+| [/vscode-extensions/rush-vscode-extension](./vscode-extensions/rush-vscode-extension/) | Enhanced experience for monorepos that use the Rush Stack toolchain |
 | [/webpack/webpack-deep-imports-plugin](./webpack/webpack-deep-imports-plugin/) | This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder. |
 <!-- GENERATED PROJECT SUMMARY END -->
 

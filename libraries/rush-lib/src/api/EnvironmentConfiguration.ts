@@ -156,12 +156,27 @@ export const EnvironmentVariableNames = {
   RUSH_COBUILD_ENABLED: 'RUSH_COBUILD_ENABLED',
 
   /**
-   * Setting this environment variable opt into running with cobuilds.
+   * Setting this environment variable opts into running with cobuilds. The context id should be the same across
+   * multiple VMs, but changed when it is a new round of cobuilds.
+   *
+   * e.g. `Build.BuildNumber` in Azure DevOps Pipeline.
    *
    * @remarks
    * If there is no cobuild configured, then this environment variable is ignored.
    */
   RUSH_COBUILD_CONTEXT_ID: 'RUSH_COBUILD_CONTEXT_ID',
+
+  /**
+   * Explicitly specifies a name for each participating cobuild runner.
+   *
+   * Setting this environment variable opts into running with cobuilds.
+   *
+   * @remarks
+   * This environment variable is optional, if it is not provided, a random id is used.
+   *
+   * If there is no cobuild configured, then this environment variable is ignored.
+   */
+  RUSH_COBUILD_RUNNER_ID: 'RUSH_COBUILD_RUNNER_ID',
 
   /**
    * If this variable is set to "1", When getting distributed builds, Rush will automatically handle the leaf project
@@ -232,6 +247,8 @@ export class EnvironmentConfiguration {
   private static _cobuildEnabled: boolean | undefined;
 
   private static _cobuildContextId: string | undefined;
+
+  private static _cobuildRunnerId: string | undefined;
 
   private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
 
@@ -348,6 +365,15 @@ export class EnvironmentConfiguration {
   public static get cobuildContextId(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._cobuildContextId;
+  }
+
+  /**
+   * Provides a determined cobuild runner id if configured
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID}
+   */
+  public static get cobuildRunnerId(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildRunnerId;
   }
 
   /**
@@ -500,6 +526,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
             EnvironmentConfiguration._cobuildContextId = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID: {
+            EnvironmentConfiguration._cobuildRunnerId = value;
             break;
           }
 

@@ -1,6 +1,185 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+
+## 0.11.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.11.0
+Sat, 05 Aug 2023 00:20:19 GMT
+
+### Minor changes
+
+- Allow customization of how the TypingsGenerator reads files.
+
+## 0.10.37
+Fri, 04 Aug 2023 00:22:37 GMT
+
+### Patches
+
+- Switch from glob to fast-glob.
+
+## 0.10.36
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.10.35
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.10.34
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.10.33
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.10.32
+Fri, 14 Jul 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.10.31
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.10.30
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.10.29
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.10.28
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.10.27
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.10.26
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.10.25
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.10.24
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.10.23
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.10.22
+Tue, 13 Jun 2023 15:17:21 GMT
+
+_Version update only_
+
+## 0.10.21
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 0.10.20
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.10.19
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.10.18
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.10.17
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.10.16
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.10.15
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.10.14
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.10.13
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.10.12
+Fri, 02 Jun 2023 02:01:13 GMT
+
+_Version update only_
+
+## 0.10.11
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.10.10
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.10.9
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.10.8
+Thu, 04 May 2023 00:20:29 GMT
+
+_Version update only_
+
+## 0.10.7
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 0.10.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.10.5
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
 
 ## 0.10.4
 Tue, 04 Apr 2023 22:36:28 GMT

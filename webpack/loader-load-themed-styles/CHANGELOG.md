@@ -1,6 +1,196 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Thu, 20 Apr 2023 15:16:55 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+
+## 2.0.71
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 2.0.70
+Sat, 05 Aug 2023 00:20:19 GMT
+
+_Version update only_
+
+## 2.0.69
+Fri, 04 Aug 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.68
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 2.0.67
+Sat, 29 Jul 2023 00:22:50 GMT
+
+_Version update only_
+
+## 2.0.66
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 2.0.65
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 2.0.64
+Mon, 17 Jul 2023 15:20:25 GMT
+
+_Version update only_
+
+## 2.0.63
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 2.0.62
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.61
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 2.0.60
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 2.0.59
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 2.0.58
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 2.0.57
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 2.0.56
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 2.0.55
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 2.0.54
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 2.0.53
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 2.0.52
+Tue, 13 Jun 2023 01:49:01 GMT
+
+_Version update only_
+
+## 2.0.51
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 2.0.50
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 2.0.49
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 2.0.48
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 2.0.47
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 2.0.46
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 2.0.45
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 2.0.44
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 2.0.43
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 2.0.42
+Fri, 02 Jun 2023 00:24:45 GMT
+
+_Version update only_
+
+## 2.0.41
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 2.0.40
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 2.0.39
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 2.0.38
+Thu, 11 May 2023 00:17:21 GMT
+
+_Version update only_
+
+## 2.0.37
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 2.0.36
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 2.0.35
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 2.0.34
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 2.0.33
 Thu, 20 Apr 2023 15:16:55 GMT

@@ -20,12 +20,15 @@
     "allowUnreachableCode": false,
     "importHelpers": true,
 
-    "types": [],
+    "types": ["heft-jest"],
+    "typeRoots": ["../../../../../node_modules/@types", "../../node_modules/@types"],
 
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es5",
-    "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"]
+    "lib": ["es5", "scripthost", "es2015.collection", "es2015.promise", "es2015.iterable", "dom"],
+
+    "incremental": true
   },
   "include": ["../../../../../src/**/*.ts", "../../../../../src/**/*.tsx"]
 }

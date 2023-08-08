@@ -19,6 +19,11 @@ export interface IInstallManagerOptions {
   checkOnly: boolean;
 
   /**
+   * Whether a "--bypass-policy" flag can be specified.
+   */
+  bypassPolicyAllowed?: boolean;
+
+  /**
    * Whether to skip policy checks.
    */
   bypassPolicy: boolean;

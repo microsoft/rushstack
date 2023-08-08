@@ -2,6 +2,155 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.101.0",
+      "tag": "@microsoft/rush_v5.101.0",
+      "date": "Tue, 08 Aug 2023 07:11:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Enable the \"http\" option for build-cache providers"
+          },
+          {
+            "comment": "Switch from glob to fast-glob."
+          },
+          {
+            "comment": "Reduce false positive detections of the pnpm shrinkwrap file being out of date in the presence of the `globalOverrides` setting in `pnpm-config.json`, or when a dependency is listed in both `dependencies` and `devDependencies` in the same package."
+          },
+          {
+            "comment": "@rushstack/rush-sdk now exposes a secondary API for manually loading the Rush engine and monitoring installation progress"
+          },
+          {
+            "comment": "Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`."
+          },
+          {
+            "comment": "Improve version resolution logic in common/scripts/install-run.js (see https://github.com/microsoft/rushstack/issues/4256)"
+          },
+          {
+            "comment": "Add `patternsToInclude` and `patternsToExclude` support to Rush deploy.json configurations. This will allow developers to include or exclude provided glob patterns within a local project when running `rush deploy`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.100.2",
+      "tag": "@microsoft/rush_v5.100.2",
+      "date": "Mon, 24 Jul 2023 18:54:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the git pre-push hook would allow push to go through if the script exited with error."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Updated semver dependency"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.100.1",
+      "tag": "@microsoft/rush_v5.100.1",
+      "date": "Wed, 14 Jun 2023 19:42:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush would attempt to open a project's log file for writing twice."
+          },
+          {
+            "comment": "Fix an issue where arguments weren't passed to git hook scripts."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.100.0",
+      "tag": "@microsoft/rush_v5.100.0",
+      "date": "Tue, 13 Jun 2023 01:49:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BREAKING API CHANGE) Remove unused members of the `BumpType` API. See https://github.com/microsoft/rushstack/issues/1335 for details."
+          },
+          {
+            "comment": "Add `--peer` flag to `rush add` command to add peerDependencies"
+          },
+          {
+            "comment": "Add support for PNPM 8."
+          },
+          {
+            "comment": "Remove the dependency on `lodash`."
+          },
+          {
+            "comment": "Add functionality for the Amazon S3 Build Cache Plugin to read credentials from common AWS_* environment variables."
+          },
+          {
+            "comment": "Write cache logs to their own file(s)."
+          },
+          {
+            "comment": "Fix an issue where cache logging data was always written to stdout."
+          },
+          {
+            "comment": "Generate scripts in the Git hooks folder referring to the actual hook implementations in-place in the Rush `common/git-hooks/` folder instead of copying the scripts to the Git hooks folder."
+          },
+          {
+            "comment": "Bump webpack to v5.82.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.99.0",
+      "tag": "@microsoft/rush_v5.99.0",
+      "date": "Fri, 02 Jun 2023 22:08:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use a separate temrinal for logging cache subsystem"
+          },
+          {
+            "comment": "Expose beforeLog hook"
+          },
+          {
+            "comment": "Convert to multi-phase Heft"
+          },
+          {
+            "comment": "Use `JSON.parse` instead of `jju` to parse `package.json` files for faster performance."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.98.0",
+      "tag": "@microsoft/rush_v5.98.0",
+      "date": "Sun, 21 May 2023 00:18:35 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"forbidPhantomResolvableNodeModuleFolders\" experiment that forbids node_modules folders in the repo root and in parent folders."
+          },
+          {
+            "comment": "Update the `RushSession.registerCloudBuildCacheProviderFactory` API to allow a cache provider's factory function to return a promise."
+          },
+          {
+            "comment": "Add built-in plugin rush-http-build-cache-plugin"
+          },
+          {
+            "comment": "Fix an issue where the last character in a project's path is ignored when determining which files contribute to the project's cache ID."
+          },
+          {
+            "comment": "Fix a performance bug in `rush version` when using `workspace:` protocol."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Add a property `missingScriptBehavior` to phase definitions that can be used to silence missing scripts to reduce log noise. This replaces the `ignoreMissingScript` property visible to the plugin API, although the `ignoreMissingScript` property is still supported in the `common/config/rush/command-line.json` config file for backwards compatibility."
+          },
+          {
+            "comment": "Flatten watch status into a single line with TTY rewrites."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.97.1",
       "tag": "@microsoft/rush_v5.97.1",
       "date": "Tue, 18 Apr 2023 16:39:03 GMT",

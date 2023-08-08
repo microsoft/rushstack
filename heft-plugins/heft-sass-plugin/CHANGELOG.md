@@ -1,6 +1,204 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+
+## 0.11.28
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.11.27
+Sat, 05 Aug 2023 00:20:19 GMT
+
+_Version update only_
+
+## 0.11.26
+Fri, 04 Aug 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.11.25
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.11.24
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.11.23
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 0.11.22
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.11.21
+Mon, 17 Jul 2023 15:20:25 GMT
+
+### Patches
+
+- Fix the "excludeFiles" configuration option.
+
+## 0.11.20
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.11.19
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.11.18
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.11.17
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.11.16
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.11.15
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.11.14
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.11.13
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.11.12
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.11.11
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.11.10
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.11.9
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 0.11.8
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.11.7
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.11.6
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.11.5
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.11.4
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.11.3
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.11.2
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.11.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.11.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.10.0
+Fri, 02 Jun 2023 00:24:45 GMT
+
+### Minor changes
+
+- Update to sass-embedded ~1.62.0
+
+## 0.9.3
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.9.2
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.9.1
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.9.0
+Thu, 11 May 2023 00:17:21 GMT
+
+### Minor changes
+
+- Switch from sass to sass-embedded for better performance.
+
+## 0.8.9
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.8.8
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.8.7
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.8.6
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
 
 ## 0.8.5
 Tue, 04 Apr 2023 22:36:28 GMT

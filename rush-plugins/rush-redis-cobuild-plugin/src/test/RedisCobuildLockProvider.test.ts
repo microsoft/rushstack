@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
-import { ICobuildCompletedState, ICobuildContext, OperationStatus, RushSession } from '@rushstack/rush-sdk';
-import { IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from '../RedisCobuildLockProvider';
-
 import * as redisAPI from '@redis/client';
 import type { RedisClientType } from '@redis/client';
+
+import { ICobuildCompletedState, ICobuildContext, OperationStatus, RushSession } from '@rushstack/rush-sdk';
+import { IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from '../RedisCobuildLockProvider';
 
 const rushSession: RushSession = new RushSession({
   terminalProvider: new ConsoleTerminalProvider(),
@@ -15,18 +14,42 @@ const rushSession: RushSession = new RushSession({
 });
 
 describe(RedisCobuildLockProvider.name, () => {
-  let storage: Record<string, string | number> = {};
+  let storage: Record<string, string> = {};
   beforeEach(() => {
     jest.spyOn(redisAPI, 'createClient').mockImplementation(() => {
       return {
-        incr: jest.fn().mockImplementation((key: string) => {
-          storage[key] = (Number(storage[key]) || 0) + 1;
-          return storage[key];
-        }),
         expire: jest.fn().mockResolvedValue(undefined),
-        set: jest.fn().mockImplementation((key: string, value: string) => {
-          storage[key] = value;
-        }),
+        set: jest
+          .fn()
+          .mockImplementation((key: string, value: string, options?: { NX?: boolean; GET?: boolean }) => {
+            // https://redis.io/commands/set/
+            const oldValue: string | undefined = storage[key];
+            const { NX, GET } = options || {};
+            let didSet: boolean = false;
+            if (NX) {
+              if (!storage[key]) {
+                storage[key] = value;
+                didSet = true;
+              }
+            } else {
+              storage[key] = value;
+              didSet = true;
+            }
+
+            if (GET) {
+              if (oldValue === undefined) {
+                return null;
+              } else {
+                return oldValue;
+              }
+            } else {
+              if (didSet) {
+                return 'OK';
+              } else {
+                return null;
+              }
+            }
+          }),
         get: jest.fn().mockImplementation((key: string) => {
           return storage[key];
         })
@@ -44,9 +67,15 @@ describe(RedisCobuildLockProvider.name, () => {
   }
 
   const context: ICobuildContext = {
-    contextId: '123',
-    cacheId: 'abc',
-    version: 1
+    contextId: 'context_id',
+    cacheId: 'cache_id',
+    lockKey: 'lock_key',
+    lockExpireTimeInSeconds: 30,
+    completedStateKey: 'completed_state_key',
+    clusterId: 'cluster_id',
+    runnerId: 'runner_id',
+    packageName: 'package_name',
+    phaseName: 'phase_name'
   };
 
   it('expands options with environment variables', () => {
@@ -75,32 +104,28 @@ describe(RedisCobuildLockProvider.name, () => {
     }).toThrowErrorMatchingSnapshot();
   });
 
-  it('getLockKey works', () => {
-    const subject: RedisCobuildLockProvider = prepareSubject();
-    const lockKey: string = subject.getLockKey(context);
-    expect(lockKey).toMatchSnapshot();
-  });
-
-  it('getCompletedStateKey works', () => {
-    const subject: RedisCobuildLockProvider = prepareSubject();
-    const completedStateKey: string = subject.getCompletedStateKey(context);
-    expect(completedStateKey).toMatchSnapshot();
-  });
-
   it('acquires lock success', async () => {
     const subject: RedisCobuildLockProvider = prepareSubject();
     const result: boolean = await subject.acquireLockAsync(context);
     expect(result).toBe(true);
   });
 
-  it('acquires lock fails at the second time', async () => {
+  it('acquires lock is a reentrant lock', async () => {
     const subject: RedisCobuildLockProvider = prepareSubject();
+    const result1: boolean = await subject.acquireLockAsync(context);
+    expect(result1).toBe(true);
+    const result2: boolean = await subject.acquireLockAsync(context);
+    expect(result2).toBe(true);
+  });
+
+  it('acquires lock fails with a different runner', async () => {
+    const subject: RedisCobuildLockProvider = prepareSubject();
+    const result1: boolean = await subject.acquireLockAsync(context);
+    expect(result1).toBe(true);
     const cobuildContext: ICobuildContext = {
       ...context,
-      contextId: 'abc'
+      runnerId: 'other_runner_id'
     };
-    const result1: boolean = await subject.acquireLockAsync(cobuildContext);
-    expect(result1).toBe(true);
     const result2: boolean = await subject.acquireLockAsync(cobuildContext);
     expect(result2).toBe(false);
   });

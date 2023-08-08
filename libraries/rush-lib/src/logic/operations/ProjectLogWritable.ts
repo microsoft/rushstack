@@ -34,10 +34,16 @@ export class ProjectLogWritable extends TerminalWritable {
       projectFolder: string,
       logFilenameIdentifier: string,
       logFolder?: string
-    ): { logPath: string; errorLogPath: string; relativeLogPath: string; relativeErrorLogPath: string } {
+    ): {
+      logPath: string;
+      errorLogPath: string;
+      relativeLogPath: string;
+      relativeErrorLogPath: string;
+    } {
       const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-      const logFilename: string = `${unscopedProjectName}.${logFilenameIdentifier}.log`;
-      const errorLogFilename: string = `${unscopedProjectName}.${logFilenameIdentifier}.error.log`;
+      const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
+      const logFilename: string = `${logFileBaseName}.log`;
+      const errorLogFilename: string = `${logFileBaseName}.error.log`;
 
       const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
       const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
@@ -54,39 +60,39 @@ export class ProjectLogWritable extends TerminalWritable {
     }
 
     const projectFolder: string = this._project.projectFolder;
-    const {
-      logPath: legacyLogPath,
-      errorLogPath: legacyErrorLogPath,
-      relativeLogPath: legacyRelativeLogPath,
-      relativeErrorLogPath: legacyRelativeErrorLogPath
-    } = getLogFilePaths(projectFolder, 'build');
-    // If the phased commands experiment is enabled, put logs under `rush-logs`
-    if (project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
-      // Delete the legacy logs
-      FileSystem.deleteFile(legacyLogPath);
-      FileSystem.deleteFile(legacyErrorLogPath);
+    // Delete the legacy logs
+    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = getLogFilePaths(
+      projectFolder,
+      'build'
+    );
+    FileSystem.deleteFile(legacyLogPath);
+    FileSystem.deleteFile(legacyErrorLogPath);
 
+    // If the phased commands experiment is enabled, put logs under `rush-logs`
+    let logFolder: string | undefined;
+    if (project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
       const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
       FileSystem.ensureFolder(logPathPrefix);
-
-      const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } = getLogFilePaths(
-        projectFolder,
-        logFilenameIdentifier,
-        RushConstants.rushLogsFolderName
-      );
-      this.logPath = logPath;
-      this.errorLogPath = errorLogPath;
-      this.relativeLogPath = relativeLogPath;
-      this.relativeErrorLogPath = relativeErrorLogPath;
-    } else {
-      this.logPath = legacyLogPath;
-      this.errorLogPath = legacyErrorLogPath;
-      this.relativeLogPath = legacyRelativeLogPath;
-      this.relativeErrorLogPath = legacyRelativeErrorLogPath;
+      logFolder = RushConstants.rushLogsFolderName;
     }
 
-    FileSystem.deleteFile(this.logPath);
-    FileSystem.deleteFile(this.errorLogPath);
+    const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } = getLogFilePaths(
+      projectFolder,
+      logFilenameIdentifier,
+      logFolder
+    );
+    this.logPath = logPath;
+    this.errorLogPath = errorLogPath;
+    this.relativeLogPath = relativeLogPath;
+    this.relativeErrorLogPath = relativeErrorLogPath;
+
+    if (legacyLogPath !== this.logPath) {
+      FileSystem.deleteFile(this.logPath);
+    }
+
+    if (legacyErrorLogPath !== this.errorLogPath) {
+      FileSystem.deleteFile(this.errorLogPath);
+    }
 
     this._logWriter = FileWriter.open(this.logPath);
   }

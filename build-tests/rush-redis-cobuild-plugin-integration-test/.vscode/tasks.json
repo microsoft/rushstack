@@ -34,12 +34,13 @@
     {
       "type": "shell",
       "label": "build 1",
-      "command": "node ../../lib/runRush.js --debug cobuild --parallelism 1 --verbose",
+      "command": "node ../../lib/runRush.js --debug cobuild --timeline --parallelism 1 --verbose",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/sandbox/repo",
         "env": {
           "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "RUSH_COBUILD_RUNNER_ID": "runner1",
           "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED": "1",
           "REDIS_PASS": "redis123"
         }
@@ -57,12 +58,13 @@
     {
       "type": "shell",
       "label": "build 2",
-      "command": "node ../../lib/runRush.js --debug cobuild --parallelism 1 --verbose",
+      "command": "node ../../lib/runRush.js --debug cobuild --timeline --parallelism 1 --verbose",
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}/sandbox/repo",
         "env": {
           "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "RUSH_COBUILD_RUNNER_ID": "runner2",
           "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED": "1",
           "REDIS_PASS": "redis123"
         }

@@ -16,7 +16,8 @@ import {
   FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider
+  ITerminalProvider,
+  Path
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -36,7 +37,7 @@ import { RushConstants } from '../RushConstants';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
-import { PolicyValidator } from '../policy/PolicyValidator';
+import * as PolicyValidator from '../policy/PolicyValidator';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
@@ -48,6 +49,8 @@ import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
 const pnpmCacheDirParameter: string = '--config.cacheDir';
 const pnpmStateDirParameter: string = '--config.stateDir';
+
+const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit', 'post-merge', 'pre-push']);
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -256,7 +259,7 @@ export abstract class BaseInstallManager {
     npmrcHash: string | undefined;
   }> {
     // Check the policies
-    PolicyValidator.validatePolicy(this.rushConfiguration, this.options);
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, this.options);
 
     this._installGitHooks();
 
@@ -438,7 +441,8 @@ export abstract class BaseInstallManager {
           console.error(
             color(
               [
-                '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
+                '(Or, to temporarily ignore this problem, invoke Rush with the ' +
+                  `"${RushConstants.bypassPolicyFlagLongName}" option.)`,
                 ' '
               ].join('\n')
             )
@@ -449,11 +453,48 @@ export abstract class BaseInstallManager {
         // Clear the currently installed git hooks and install fresh copies
         FileSystem.ensureEmptyFolder(hookDestination);
 
+        // Find the relative path from Git hooks directory to the directory storing the actual scripts.
+        const hookRelativePath: string = Path.convertToSlashes(path.relative(hookDestination, hookSource));
+
         // Only copy files that look like Git hook names
         const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
         for (const filename of filteredHookFilenames) {
-          // Copy the file.  Important: For Bash scripts, the EOL must not be CRLF.
-          const hookFileContent: string = FileSystem.readFile(path.join(hookSource, filename));
+          const hookFilePath: string = `${hookSource}/${filename}`;
+          // Make sure the actual script in the hookSource directory has correct Linux compatible line endings
+          const originalHookFileContent: string = FileSystem.readFile(hookFilePath);
+          FileSystem.writeFile(hookFilePath, originalHookFileContent, {
+            convertLineEndings: NewlineKind.Lf
+          });
+          // Make sure the actual script in the hookSource directory has required permission bits
+          const originalPosixModeBits: PosixModeBits = FileSystem.getPosixModeBits(hookFilePath);
+          FileSystem.changePosixModeBits(
+            hookFilePath,
+            // eslint-disable-next-line no-bitwise
+            originalPosixModeBits | PosixModeBits.UserRead | PosixModeBits.UserExecute
+          );
+
+          const gitLfsHookHandling: string = gitLfsHooks.has(filename)
+            ? `
+# Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
+if command -v git-lfs &> /dev/null; then
+  git lfs ${filename} "$@"
+fi
+`
+            : '';
+
+          const hookFileContent: string = `#!/bin/bash
+set -e
+SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
+
+if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
+  "$SCRIPT_IMPLEMENTATION_PATH" $@
+else
+  echo "The ${filename} Git hook no longer exists in your version of the repo. Run 'rush install' or 'rush update' to refresh your installed Git hooks." >&2
+fi
+${gitLfsHookHandling}
+`;
+          // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
           FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
             convertLineEndings: NewlineKind.Lf
           });
@@ -747,7 +788,8 @@ export abstract class BaseInstallManager {
         console.error();
         console.error(
           colors.bold(
-            '==> Please run "rush setup" to update your NPM token.  (Or append "--bypass-policy" to proceed anyway.)'
+            '==> Please run "rush setup" to update your NPM token. ' +
+              `(Or append "${RushConstants.bypassPolicyFlagLongName}" to proceed anyway.)`
           )
         );
         throw new AlreadyReportedError();

@@ -20,6 +20,7 @@ import {
   DiscardStdoutTransform
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+
 import { Utilities } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
@@ -71,6 +72,8 @@ export class ShellOperationRunner implements IOperationRunner {
 
   public readonly hooks: OperationRunnerHooks;
   public readonly periodicCallback: PeriodicCallback;
+  public readonly logFilenameIdentifier: string;
+  public static readonly periodicCallbackIntervalInSeconds: number = 10;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _phase: IPhase;
@@ -79,7 +82,6 @@ export class ShellOperationRunner implements IOperationRunner {
   private readonly _commandToRun: string;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
-  private readonly _logFilenameIdentifier: string;
   private readonly _selectedPhases: Iterable<IPhase>;
 
   public constructor(options: IOperationRunnerOptions) {
@@ -95,12 +97,12 @@ export class ShellOperationRunner implements IOperationRunner {
     this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
-    this._logFilenameIdentifier = phase.logFilenameIdentifier;
+    this.logFilenameIdentifier = phase.logFilenameIdentifier;
     this._selectedPhases = options.selectedPhases;
 
     this.hooks = new OperationRunnerHooks();
     this.periodicCallback = new PeriodicCallback({
-      interval: 10 * 1000
+      interval: ShellOperationRunner.periodicCallbackIntervalInSeconds * 1000
     });
   }
 
@@ -113,20 +115,23 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    // TERMINAL PIPELINE:
-    //
-    //                             +--> quietModeTransform? --> collatedWriter
-    //                             |
-    // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-    //                                                        |
-    //                                                        +--> stdioSummarizer
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal,
-      this._logFilenameIdentifier
+      this.logFilenameIdentifier
     );
 
+    const finallyCallbacks: (() => {})[] = [];
+
     try {
+      //#region OPERATION LOGGING
+      // TERMINAL PIPELINE:
+      //
+      //                             +--> quietModeTransform? --> collatedWriter
+      //                             |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+      //                                                        |
+      //                                                        +--> stdioSummarizer
       const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: projectLogWritable,
         removeColors: true,
@@ -161,6 +166,7 @@ export class ShellOperationRunner implements IOperationRunner {
         debugEnabled: context.debugMode
       });
       const terminal: Terminal = new Terminal(terminalProvider);
+      //#endregion
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -225,13 +231,14 @@ export class ShellOperationRunner implements IOperationRunner {
         phase: this._phase,
         commandName: this._commandName,
         commandToRun: this._commandToRun,
-        earlyReturnStatus: undefined
+        finallyCallbacks
       };
 
-      await this.hooks.beforeExecute.promise(beforeExecuteContext);
-
-      if (beforeExecuteContext.earlyReturnStatus) {
-        return beforeExecuteContext.earlyReturnStatus;
+      const earlyReturnStatus: OperationStatus | undefined = await this.hooks.beforeExecute.promise(
+        beforeExecuteContext
+      );
+      if (earlyReturnStatus) {
+        return earlyReturnStatus;
       }
 
       // If the deps file exists, remove it before starting execution.
@@ -307,13 +314,14 @@ export class ShellOperationRunner implements IOperationRunner {
         }
       );
 
-      // Save the metadata to disk
-      const { duration: durationInSeconds } = context.stopwatch;
-      await context._operationMetadataManager?.saveAsync({
-        durationInSeconds,
-        logPath: projectLogWritable.logPath,
-        errorLogPath: projectLogWritable.errorLogPath
-      });
+      // projectLogWritable should be closed before copy the logs to build cache
+      normalizeNewlineTransform.close();
+
+      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+      // have closed projectLogWritable.
+      if (projectLogWritable.isOpen) {
+        throw new InternalError('The output file handle was not closed');
+      }
 
       const taskIsSuccessful: boolean =
         status === OperationStatus.Success ||
@@ -334,7 +342,9 @@ export class ShellOperationRunner implements IOperationRunner {
         terminal,
         exitCode,
         status,
-        taskIsSuccessful
+        taskIsSuccessful,
+        logPath: projectLogWritable.logPath,
+        errorLogPath: projectLogWritable.errorLogPath
       };
 
       await this.hooks.afterExecute.promise(afterExecuteContext);
@@ -350,18 +360,13 @@ export class ShellOperationRunner implements IOperationRunner {
         status = OperationStatus.Failure;
       }
 
-      normalizeNewlineTransform.close();
-
-      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
-      // have closed projectLogWritable.
-      if (projectLogWritable.isOpen) {
-        throw new InternalError('The output file handle was not closed');
-      }
-
       return status;
     } finally {
       projectLogWritable.close();
       this.periodicCallback.stop();
+      for (const callback of finallyCallbacks) {
+        callback();
+      }
     }
   }
 }

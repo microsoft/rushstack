@@ -5,12 +5,10 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import builtinPackageNames from 'builtin-modules';
 
-import { Import, FileSystem } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-
-const glob: typeof import('glob') = Import.lazy('glob', require);
 
 export interface IJsonOutput {
   /**
@@ -107,7 +105,9 @@ export class ScanAction extends BaseConfiglessRushAction {
 
     const requireMatches: Set<string> = new Set<string>();
 
-    for (const filename of glob.sync('{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}')) {
+    const { default: glob } = await import('fast-glob');
+    const scanResults: string[] = await glob('{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}');
+    for (const filename of scanResults) {
       try {
         const contents: string = FileSystem.readFile(filename);
         const lines: string[] = contents.split('\n');

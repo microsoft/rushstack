@@ -26,8 +26,8 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "node lib/start-dev-docs.js",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "bin": {
     "rush": "./bin/rush",
@@ -39,7 +39,7 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "colors": "~1.2.1",
-    "semver": "~7.3.0"
+    "semver": "~7.5.4"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -50,6 +50,6 @@
     "@rushstack/rush-http-build-cache-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "14.18.36",
-    "@types/semver": "7.3.5"
+    "@types/semver": "7.5.0"
   }
 }

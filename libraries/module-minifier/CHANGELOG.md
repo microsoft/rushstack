@@ -1,6 +1,178 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Tue, 04 Apr 2023 22:36:28 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+
+## 0.3.38
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.3.37
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.3.36
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.3.35
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 0.3.34
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.3.33
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.3.32
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.3.31
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.3.30
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.3.29
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.3.28
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.3.27
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.3.26
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.3.25
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.3.24
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.3.23
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.3.22
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 0.3.21
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.3.20
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.3.19
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.3.18
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.3.17
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.3.16
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.3.15
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.3.14
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.3.13
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 0.3.12
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.3.11
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.3.10
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.3.9
+Thu, 04 May 2023 15:17:38 GMT
+
+### Patches
+
+- Switch terser dependency to ^5.9.0.
+
+## 0.3.8
+Thu, 04 May 2023 00:20:29 GMT
+
+_Version update only_
+
+## 0.3.7
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.3.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.3.5
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
 
 ## 0.3.4
 Tue, 04 Apr 2023 22:36:28 GMT

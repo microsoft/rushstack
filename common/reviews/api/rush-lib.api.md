@@ -80,8 +80,6 @@ export enum BumpType {
     // (undocumented)
     'patch' = 2,
     // (undocumented)
-    'preminor' = 3,
-    // (undocumented)
     'prerelease' = 1
 }
 
@@ -93,7 +91,7 @@ export class ChangeManager {
 // Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
 // @beta (undocumented)
-export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
+export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider | Promise<ICloudBuildCacheProvider>;
 
 // @beta
 export class CobuildConfiguration {
@@ -101,20 +99,19 @@ export class CobuildConfiguration {
     readonly cobuildEnabled: boolean;
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
     // (undocumented)
-    readonly cobuildLockProvider: ICobuildLockProvider;
+    get cobuildLockProvider(): ICobuildLockProvider;
+    readonly cobuildRunnerId: string;
     // (undocumented)
-    connectLockProviderAsync(): Promise<void>;
+    createLockProviderAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
-    get contextId(): string | undefined;
-    // (undocumented)
-    disconnectLockProviderAsync(): Promise<void>;
+    destroyLockProviderAsync(): Promise<void>;
     // (undocumented)
     static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<CobuildConfiguration | undefined>;
 }
 
 // @beta (undocumented)
-export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider;
+export type CobuildLockProviderFactory = (cobuildJson: ICobuildJson) => ICobuildLockProvider | Promise<ICobuildLockProvider>;
 
 // @public
 export class CommonVersionsConfiguration {
@@ -173,6 +170,7 @@ export class EnvironmentConfiguration {
     static get cobuildContextId(): string | undefined;
     static get cobuildEnabled(): boolean | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
+    static get cobuildRunnerId(): string | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -207,6 +205,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_BUILD_CACHE_WRITE_ALLOWED: "RUSH_BUILD_CACHE_WRITE_ALLOWED";
     readonly RUSH_COBUILD_ENABLED: "RUSH_COBUILD_ENABLED";
     readonly RUSH_COBUILD_CONTEXT_ID: "RUSH_COBUILD_CONTEXT_ID";
+    readonly RUSH_COBUILD_RUNNER_ID: "RUSH_COBUILD_RUNNER_ID";
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
@@ -282,8 +281,14 @@ export interface ICobuildCompletedState {
 // @beta (undocumented)
 export interface ICobuildContext {
     cacheId: string;
+    clusterId: string;
+    completedStateKey: string;
     contextId: string;
-    version: number;
+    lockExpireTimeInSeconds: number;
+    lockKey: string;
+    packageName: string;
+    phaseName: string;
+    runnerId: string;
 }
 
 // @beta (undocumented)
@@ -296,18 +301,12 @@ export interface ICobuildJson {
 
 // @beta (undocumented)
 export interface ICobuildLockProvider {
-    // (undocumented)
-    acquireLockAsync(context: ICobuildContext): Promise<boolean>;
-    // (undocumented)
+    acquireLockAsync(context: Readonly<ICobuildContext>): Promise<boolean>;
     connectAsync(): Promise<void>;
-    // (undocumented)
     disconnectAsync(): Promise<void>;
-    // (undocumented)
-    getCompletedStateAsync(context: ICobuildContext): Promise<ICobuildCompletedState | undefined>;
-    // (undocumented)
-    renewLockAsync(context: ICobuildContext): Promise<void>;
-    // (undocumented)
-    setCompletedStateAsync(context: ICobuildContext, state: ICobuildCompletedState): Promise<void>;
+    getCompletedStateAsync(context: Readonly<ICobuildContext>): Promise<ICobuildCompletedState | undefined>;
+    renewLockAsync(context: Readonly<ICobuildContext>): Promise<void>;
+    setCompletedStateAsync(context: Readonly<ICobuildContext>, state: ICobuildCompletedState): Promise<void>;
 }
 
 // @public
@@ -369,6 +368,7 @@ export interface IExecutionResult {
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
+    forbidPhantomResolvableNodeModulesFolders?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -451,6 +451,7 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 
 // @alpha
 export interface IOperationExecutionResult {
+    readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
     readonly nonCachedDurationMs: number | undefined;
     readonly status: OperationStatus;
@@ -460,6 +461,10 @@ export interface IOperationExecutionResult {
 
 // @internal (undocumented)
 export interface _IOperationMetadata {
+    // (undocumented)
+    cobuildContextId: string | undefined;
+    // (undocumented)
+    cobuildRunnerId: string | undefined;
     // (undocumented)
     durationInSeconds: number;
     // (undocumented)
@@ -505,8 +510,7 @@ export interface IOperationRunnerContext {
     readonly runner: IOperationRunner;
     status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
-    // Warning: (ae-forgotten-export) The symbol "Stopwatch" needs to be exported by the entry point index.d.ts
-    stopwatch: Stopwatch;
+    stopwatch: IStopwatchResult;
 }
 
 // @internal (undocumented)
@@ -519,6 +523,10 @@ export interface _IOperationStateFileOptions {
 
 // @internal (undocumented)
 export interface _IOperationStateJson {
+    // (undocumented)
+    cobuildContextId: string | undefined;
+    // (undocumented)
+    cobuildRunnerId: string | undefined;
     // (undocumented)
     nonCachedDurationMs: number;
 }
@@ -536,12 +544,15 @@ export interface IPhase {
         self: Set<IPhase>;
         upstream: Set<IPhase>;
     };
-    ignoreMissingScript: boolean;
     isSynthetic: boolean;
     logFilenameIdentifier: string;
+    missingScriptBehavior: IPhaseBehaviorForMissingScript;
     name: string;
     shellCommand?: string;
 }
+
+// @alpha
+export type IPhaseBehaviorForMissingScript = 'silent' | 'log' | 'error';
 
 // @beta
 export interface IPhasedCommand extends IRushCommand {
@@ -721,7 +732,7 @@ export class _OperationMetadataManager {
     constructor(options: _IOperationMetadataManagerOptions);
     get relativeFilepaths(): string[];
     // (undocumented)
-    saveAsync({ durationInSeconds, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
+    saveAsync({ durationInSeconds, cobuildContextId, cobuildRunnerId, logPath, errorLogPath }: _IOperationMetadata): Promise<void>;
     // (undocumented)
     readonly stateFile: _OperationStateFile;
     // (undocumented)
@@ -829,7 +840,11 @@ export class PhasedCommandHooks {
     readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
-    readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
+    readonly beforeExecuteOperations: AsyncSeriesHook<[
+    Map<Operation, IOperationExecutionResult>,
+    ICreateOperationsContext
+    ]>;
+    readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
     readonly waitingForChanges: SyncHook<void>;
@@ -985,6 +1000,8 @@ export class RushConfiguration {
     readonly tempShrinkwrapPreinstallFilename: string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
+    // (undocumented)
+    static tryLoadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration | undefined;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     // @beta (undocumented)
@@ -1041,9 +1058,9 @@ export class RushConstants {
     static readonly buildCacheVersion: number;
     static readonly buildCommandName: string;
     static readonly bulkCommandKind: 'bulk';
+    static readonly bypassPolicyFlagLongName: '--bypass-policy';
     static readonly changeFilesFolderName: string;
     static readonly cobuildFilename: string;
-    static readonly cobuildLockVersion: number;
     static readonly commandLineFilename: string;
     static readonly commonFolderName: string;
     static readonly commonVersionsFilename: string;

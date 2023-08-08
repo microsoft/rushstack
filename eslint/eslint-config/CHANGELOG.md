@@ -1,6 +1,28 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Fri, 10 Feb 2023 01:18:50 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+
+## 3.3.3
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 3.3.2
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 3.3.1
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 3.3.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the @typescript-eslint/* dependencies to ~5.59.2
 
 ## 3.2.0
 Fri, 10 Feb 2023 01:18:50 GMT

@@ -1,5 +1,60 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.53.0
+The `taskEvent` configuration option in heft.json has been removed, and use of any `taskEvent`-based functionality is now accomplished by referencing the plugins directly within the `@rushstack/heft` package.
+
+Plugin name mappings for previously-existing task events are:
+- `copyFiles` -> `copy-files-plugin`
+- `deleteFiles` -> `delete-files-plugin`
+- `runScript` -> `run-script-plugin`
+- `nodeService` -> `node-service-plugin`
+
+Example diff of a heft.json file that uses the `copyFiles` task event:
+```diff
+{
+  "phasesByName": {
+    "build": {
+      "tasksbyName": {
+        "perform-copy": {
+-          "taskEvent": {
+-            "eventKind": "copyFiles",
++          "taskPlugin": {
++            "pluginPackage": "@rushstack/heft",
++            "pluginName": "copy-files-plugin",
+            "options": {
+              ...
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Heft 0.52.0
+
+The `nodeService` built-in plugin now supports the `--serve` parameter, to be consistent with the `@rushstack/heft-webpack5-plugin` dev server.
+
+Old behavior:
+- `nodeService` was always enabled, but would have no effect unless Heft was in watch mode (`heft start`)
+- If `config/node-service.json` was omitted, the plugin would silently be disabled
+
+New behavior:
+- `nodeService` is always loaded by `@rushstack/heft-node-rig` but for a custom `heft.json` you need to load it manually
+- `nodeService` has no effect unless you specify `--serve`, for example: `heft build-watch --serve`
+- If `--serve` is specified and `config/node-service.json` is omitted, then Heft fails with a hard error
+
+### Heft 0.51.0
+
+⭐ This release included significant breaking changes. ⭐
+
+For details, please see our two blog posts:
+
+- [What's New in Heft 0.51](https://rushstack.io/blog/2023/06/15/heft-whats-new/)
+
+- [Heft 0.51 Migration Guide](https://rushstack.io/blog/2023/06/16/heft-migration-guide/)
+
 ### Heft 0.35.0
 
 This release of Heft removed the Sass plugin from the `@rushstack/heft` package

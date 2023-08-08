@@ -307,6 +307,13 @@
           "title": "Allow Warnings on Success",
           "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.",
           "type": "boolean"
+        },
+
+        "missingScriptBehavior": {
+          "title": "Missing Script Behavior",
+          "description": "What should happen if a project's package.json does not have a \"scripts\" entry matching the phase name, or it is an empty string. Supersedes \"ignoreMissingScript\". Defaults to \"error\".",
+          "type": "string",
+          "enum": ["silent", "log", "error"]
         }
       }
     },

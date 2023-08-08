@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/lockfile-explorer",
-  "version": "1.0.10",
+  "version": "1.0.43",
   "description": "Rush Lockfile Explorer: The UI for solving version conflicts quickly in a large monorepo",
   "keywords": [
     "conflict",
@@ -30,11 +30,11 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start --clean",
+    "start": "heft start",
     "serve": "node ./lib/start.js --debug",
     "test": "heft test",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",

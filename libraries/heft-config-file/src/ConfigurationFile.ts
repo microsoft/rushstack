@@ -11,7 +11,7 @@ import {
   FileSystem,
   ITerminal
 } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
+import type { IRigConfig } from '@rushstack/rig-package';
 
 interface IConfigurationJson {
   extends?: string;
@@ -92,16 +92,40 @@ interface IConfigurationFileFieldAnnotation<TField> {
 }
 
 /**
+ * Options provided to the custom resolver specified in {@link ICustomJsonPathMetadata}.
+ *
+ * @beta
+ */
+export interface IJsonPathMetadataResolverOptions<TConfigurationFile> {
+  /**
+   * The name of the property being resolved.
+   */
+  propertyName: string;
+  /**
+   * The value of the path property being resolved.
+   */
+  propertyValue: string;
+  /**
+   * The path to the configuration file the property was obtained from.
+   */
+  configurationFilePath: string;
+  /**
+   * The configuration file the property was obtained from.
+   */
+  configurationFile: Partial<TConfigurationFile>;
+}
+
+/**
  * Used to specify how node(s) in a JSON object should be processed after being loaded.
  *
  * @beta
  */
-export interface ICustomJsonPathMetadata {
+export interface ICustomJsonPathMetadata<TConfigurationFile> {
   /**
    * If `ICustomJsonPathMetadata.pathResolutionMethod` is set to `PathResolutionMethod.custom`,
    * this property be used to resolve the path.
    */
-  customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
+  customResolver?: (resolverOptions: IJsonPathMetadataResolverOptions<TConfigurationFile>) => string;
 
   /**
    * If this property describes a filesystem path, use this property to describe
@@ -174,7 +198,7 @@ export interface IPropertyInheritanceDefaults {
 /**
  * @beta
  */
-export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMetadata;
+export type IJsonPathMetadata<T> = ICustomJsonPathMetadata<T> | INonCustomJsonPathMetadata;
 
 /**
  * Keys in this object are JSONPaths {@link https://jsonpath.com/}, and values are objects
@@ -182,8 +206,8 @@ export type IJsonPathMetadata = ICustomJsonPathMetadata | INonCustomJsonPathMeta
  *
  * @beta
  */
-export interface IJsonPathsMetadata {
-  [jsonPath: string]: IJsonPathMetadata;
+export interface IJsonPathsMetadata<TConfigurationFile> {
+  [jsonPath: string]: IJsonPathMetadata<TConfigurationFile>;
 }
 
 /**
@@ -198,7 +222,7 @@ export interface IConfigurationFileOptionsBase<TConfigurationFile> {
   /**
    * Use this property to specify how JSON nodes are postprocessed.
    */
-  jsonPathMetadata?: IJsonPathsMetadata;
+  jsonPathMetadata?: IJsonPathsMetadata<TConfigurationFile>;
 
   /**
    * Use this property to control how root-level properties are handled between parent and child
@@ -268,7 +292,7 @@ export class ConfigurationFile<TConfigurationFile> {
   /** {@inheritDoc IConfigurationFileOptionsBase.projectRelativeFilePath} */
   public readonly projectRelativeFilePath: string;
 
-  private readonly _jsonPathMetadata: IJsonPathsMetadata;
+  private readonly _jsonPathMetadata: IJsonPathsMetadata<TConfigurationFile>;
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
   private readonly _defaultPropertyInheritance: IPropertyInheritanceDefaults;
   private __schema: JsonSchema | undefined;
@@ -305,7 +329,7 @@ export class ConfigurationFile<TConfigurationFile> {
   public async loadConfigurationFileForProjectAsync(
     terminal: ITerminal,
     projectPath: string,
-    rigConfig?: RigConfig
+    rigConfig?: IRigConfig
   ): Promise<TConfigurationFile> {
     const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
     return await this._loadConfigurationFileInnerWithCacheAsync(
@@ -323,7 +347,7 @@ export class ConfigurationFile<TConfigurationFile> {
   public async tryLoadConfigurationFileForProjectAsync(
     terminal: ITerminal,
     projectPath: string,
-    rigConfig?: RigConfig
+    rigConfig?: IRigConfig
   ): Promise<TConfigurationFile | undefined> {
     try {
       return await this.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
@@ -377,7 +401,7 @@ export class ConfigurationFile<TConfigurationFile> {
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: RigConfig | undefined
+    rigConfig: IRigConfig | undefined
   ): Promise<TConfigurationFile> {
     let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
       resolvedConfigurationFilePath
@@ -416,7 +440,7 @@ export class ConfigurationFile<TConfigurationFile> {
     terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    rigConfig: RigConfig | undefined
+    rigConfig: IRigConfig | undefined
   ): Promise<TConfigurationFile> {
     const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
       resolvedConfigurationFilePath
@@ -466,9 +490,12 @@ export class ConfigurationFile<TConfigurationFile> {
         json: configurationJson,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
           const resolvedPath: string = this._resolvePathProperty(
-            resolvedConfigurationFilePath,
-            fullPayload.path,
-            fullPayload.value,
+            {
+              propertyName: fullPayload.path,
+              propertyValue: fullPayload.value,
+              configurationFilePath: resolvedConfigurationFilePath,
+              configurationFile: configurationJson
+            },
             metadata
           );
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -522,7 +549,7 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _tryLoadConfigurationFileInRigAsync(
     terminal: ITerminal,
-    rigConfig: RigConfig,
+    rigConfig: IRigConfig,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile | undefined> {
     if (rigConfig.rigFound) {
@@ -583,11 +610,10 @@ export class ConfigurationFile<TConfigurationFile> {
   }
 
   private _resolvePathProperty(
-    configurationFilePath: string,
-    propertyName: string,
-    propertyValue: string,
-    metadata: IJsonPathMetadata
+    resolverOptions: IJsonPathMetadataResolverOptions<TConfigurationFile>,
+    metadata: IJsonPathMetadata<TConfigurationFile>
   ): string {
+    const { propertyValue, configurationFilePath } = resolverOptions;
     const resolutionMethod: PathResolutionMethod | undefined = metadata.pathResolutionMethod;
     if (resolutionMethod === undefined) {
       return propertyValue;
@@ -628,7 +654,7 @@ export class ConfigurationFile<TConfigurationFile> {
           );
         }
 
-        return metadata.customResolver(configurationFilePath, propertyName, propertyValue);
+        return metadata.customResolver(resolverOptions);
       }
 
       default: {

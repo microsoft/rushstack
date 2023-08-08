@@ -11,7 +11,7 @@ import { Executable, AlreadyReportedError, Path, ITerminal } from '@rushstack/no
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';
-import { GitEmailPolicy } from './policy/GitEmailPolicy';
+import * as GitEmailPolicy from './policy/GitEmailPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { IChangedGitStatusEntry, IGitStatusEntry, parseGitStatus } from './GitStatusParser';

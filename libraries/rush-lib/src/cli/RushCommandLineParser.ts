@@ -191,7 +191,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   public async execute(args?: string[]): Promise<boolean> {
     // debugParameter will be correctly parsed during super.execute(), so manually parse here.
-    this._terminalProvider.debugEnabled = process.argv.indexOf('--debug') >= 0;
+    this._terminalProvider.verboseEnabled = this._terminalProvider.debugEnabled =
+      process.argv.indexOf('--debug') >= 0;
 
     await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
 

@@ -2,6 +2,831 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.4.34",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.34",
+      "date": "Tue, 08 Aug 2023 07:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.38`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.33",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.33",
+      "date": "Mon, 31 Jul 2023 15:19:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.32",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.32",
+      "date": "Sat, 29 Jul 2023 00:22:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.31",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.31",
+      "date": "Thu, 20 Jul 2023 20:47:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.30",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.30",
+      "date": "Wed, 19 Jul 2023 00:20:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix calculation of rendered module positions to properly reflect character codes, not raw bytes."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.57.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.29",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.29",
+      "date": "Fri, 14 Jul 2023 15:20:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.28",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.28",
+      "date": "Thu, 13 Jul 2023 00:22:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.27",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.27",
+      "date": "Wed, 12 Jul 2023 15:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.26",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.26",
+      "date": "Wed, 12 Jul 2023 00:23:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.25",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.25",
+      "date": "Fri, 07 Jul 2023 00:19:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.24",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.24",
+      "date": "Thu, 06 Jul 2023 00:16:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.23",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.23",
+      "date": "Tue, 04 Jul 2023 00:18:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.22",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.22",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.21",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.21",
+      "date": "Thu, 15 Jun 2023 00:21:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.55.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.20",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.20",
+      "date": "Wed, 14 Jun 2023 00:19:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.55.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.19",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.19",
+      "date": "Tue, 13 Jun 2023 15:17:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.55.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.18",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.18",
+      "date": "Tue, 13 Jun 2023 01:49:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump webpack to v5.82.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.54.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.17",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.17",
+      "date": "Fri, 09 Jun 2023 18:05:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.16",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.16",
+      "date": "Fri, 09 Jun 2023 15:23:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.15",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.15",
+      "date": "Fri, 09 Jun 2023 00:19:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.53.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.14",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.14",
+      "date": "Thu, 08 Jun 2023 15:21:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.13",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.13",
+      "date": "Thu, 08 Jun 2023 00:20:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.12",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.12",
+      "date": "Wed, 07 Jun 2023 22:45:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.52.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.11",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.11",
+      "date": "Tue, 06 Jun 2023 02:52:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.10",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.10",
+      "date": "Mon, 05 Jun 2023 21:45:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.9",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.9",
+      "date": "Fri, 02 Jun 2023 02:01:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Convert to multi-phase Heft"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.51.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.8",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.8",
+      "date": "Mon, 29 May 2023 15:21:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.7",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.7",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.6",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.6",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.5",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.5",
+      "date": "Thu, 04 May 2023 15:17:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.4",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.4",
+      "date": "Thu, 04 May 2023 00:20:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.3",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.3",
+      "date": "Mon, 01 May 2023 15:23:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.2",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.2",
+      "date": "Sat, 29 Apr 2023 00:23:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.1",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.1",
+      "date": "Thu, 27 Apr 2023 17:18:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.50.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.12.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.4.0",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.4.0",
+      "date": "Wed, 26 Apr 2023 00:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Emit metadata about character position of rendered modules."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.6",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.3.6",
       "date": "Thu, 20 Apr 2023 15:16:55 GMT",
