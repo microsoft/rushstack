@@ -1,24 +1,42 @@
 pool:
   vmImage: 'ubuntu-latest'
+
 variables:
-  NodeVersion: 14
-  FORCE_COLOR: 1
+  - name: FORCE_COLOR
+    value: 1
+  - name: SourceBranch
+    value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
+
 steps:
   - checkout: self
     persistCredentials: true
+
+  - template: templates/install-node.yaml
+    parameters:
+      NodeMajorVersion: 14
+
   - template: templates/build.yaml
+
   #  - template: templates/bump-versions.yaml
   #    parameters:
   #      VersionPolicyName: noRush
+  #      BranchName: $(SourceBranch)
+  #
   #  - template: templates/bump-versions.yaml
   #    parameters:
   #      VersionPolicyName: rush
+  #      BranchName: $(SourceBranch)
+
   - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
     displayName: 'Prepublish workaround for rush-lib'
+
   #  - template: templates/publish.yaml
   #    parameters:
   #      VersionPolicyName: noRush
+  #      BranchName: $(SourceBranch)
+
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: rush
+      BranchName: $(SourceBranch)
 #  - template: templates/record-published-versions.yaml
