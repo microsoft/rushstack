@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/package-extractor_v0.4.0",
+      "date": "Fri, 04 Aug 2023 15:22:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include an API for getting files that are included in a npm package."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.13",
       "tag": "@rushstack/package-extractor_v0.3.13",
       "date": "Mon, 31 Jul 2023 15:19:05 GMT",

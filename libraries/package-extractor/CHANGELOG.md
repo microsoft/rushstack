@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Mon, 31 Jul 2023 15:19:05 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Aug 2023 15:22:44 GMT and should not be manually modified.
+
+## 0.4.0
+Fri, 04 Aug 2023 15:22:44 GMT
+
+### Minor changes
+
+- Include an API for getting files that are included in a npm package.
 
 ## 0.3.13
 Mon, 31 Jul 2023 15:19:05 GMT

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+
+  "aliasesByName": {
+    "start": {
+      "actionName": "build-watch",
+      "defaultParameters": ["--serve"]
+    }
+  },
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["webview"] }],
+      "tasksByName": {
+        "webpack": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-webpack5-plugin"
+          }
+        },
+        "copy-webview": {
+          "taskPlugin": {
+            "pluginName": "copy-files-plugin",
+            "pluginPackage": "@rushstack/heft",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "node_modules/@rushstack/rush-vscode-command-webview/dist",
+                  "destinationFolders": ["webview/rush-command-webview"],
+                  "includeGlobs": ["*.{html,js,txt}"]
+                }
+              ]
+            }
+          }
+        },
+        "generate-vscodeignore": {
+          "taskDependencies": ["copy-webview", "typescript", "webpack"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "lib/scripts/generate-vscodeignore.js"
+            }
+          }
+        }
+      }
+    }
+  }
+}

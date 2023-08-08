@@ -1,55 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, LegacyAdapters } from '@rushstack/node-core-library';
 import { getGitHashForFiles } from '@rushstack/package-deps-hash';
 import * as path from 'path';
-import type { IOptions } from 'glob';
 import type { IRawRepoState } from '../ProjectChangeAnalyzer';
 
 async function expandGlobPatternsAsync(
   globPatterns: Iterable<string>,
   packagePath: string
 ): Promise<string[]> {
-  const allMatches: Set<string> = new Set<string>();
+  const { default: glob } = await import('fast-glob');
+  const matches: string[] = await glob(Array.from(globPatterns), {
+    cwd: packagePath,
+    onlyFiles: true,
+    // We want to keep path's type unchanged,
+    // i.e. if the pattern was a  relative path, then matched paths should also be relative paths
+    //      if the pattern was an absolute path, then matched paths should also be absolute paths
+    //
+    // We are doing this because these paths are going to be used to calculate a hash for the build cache and some users
+    // might choose to depend on global files (e.g. `/etc/os-release`) and some might choose to depend on local files
+    // (e.g. `../path/to/workspace/file`)
+    //
+    // In both cases we want that path to the resource would be the same on all machines,
+    // regardless of what is the current working directory.
+    //
+    // That being said, we want to keep `absolute` option here as false:
+    absolute: false
+  });
 
-  const { default: glob } = await import('glob');
-  const globAsync = (pattern: string, options: IOptions = {}): Promise<string[]> => {
-    return LegacyAdapters.convertCallbackToPromise(glob, pattern, options);
-  };
-  await Async.forEachAsync(
-    globPatterns,
-    async (pattern) => {
-      const matches: string[] = await globAsync(pattern, {
-        cwd: packagePath,
-        nodir: true,
-        // We want to keep path's type unchanged,
-        // i.e. if the pattern was a  relative path, then matched paths should also be relative paths
-        //      if the pattern was an absolute path, then matched paths should also be absolute paths
-        //
-        // We are doing this because these paths are going to be used to calculate a hash for the build cache and some users
-        // might choose to depend on global files (e.g. `/etc/os-release`) and some might choose to depend on local files
-        // (e.g. `../path/to/workspace/file`)
-        //
-        // In both cases we want that path to the resource would be the same on all machines,
-        // regardless of what is the current working directory.
-        //
-        // That being said, we want to keep `realpath` and `absolute` options here as false:
-        realpath: false,
-        absolute: false
-      });
-      matches.forEach((match) => allMatches.add(match));
-    },
-    { concurrency: 10 }
-  );
-
-  if (allMatches.size === 0) {
+  if (matches.length === 0) {
     throw new Error(
       `Couldn't find any files matching provided glob patterns: ["${Array.from(globPatterns).join('", "')}"].`
     );
   }
 
-  return Array.from(allMatches);
+  return matches;
 }
 
 interface IKnownHashesResult {
