@@ -202,9 +202,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     );
 
     hooks.afterExecuteOperations.tapPromise(PLUGIN_NAME, async () => {
-      for (const { buildCacheProjectLogWritable } of this._buildCacheContextByOperationRunner.values()) {
-        buildCacheProjectLogWritable?.close();
-      }
       this._buildCacheContextByOperationRunner.clear();
     });
   }
@@ -237,7 +234,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             phase,
             commandName,
             commandToRun,
-            earlyReturnStatus
+            earlyReturnStatus,
+            finallyCallbacks
           } = beforeExecuteContext;
           if (earlyReturnStatus) {
             // If there is existing early return status, we don't need to do anything
@@ -266,6 +264,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             debugMode: context.debugMode
           });
           buildCacheContext.buildCacheTerminal = buildCacheTerminal;
+
+          finallyCallbacks.push(() => {
+            /**
+             * A known issue is that on some operating system configurations, attempting to read the file while this
+             * process has it open for writing throws an error, so the lifetime of the buildCacheProjectLogWritable
+             * needs to be wrapped between the beforeExecute and afterExecute hooks.
+             */
+            buildCacheContext.buildCacheProjectLogWritable?.close();
+          });
 
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheConfiguration,
@@ -791,44 +798,82 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   }): ITerminal {
     const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
     if (!buildCacheContext.buildCacheTerminal) {
-      let cacheConsoleWritable: TerminalWritable;
-      const cacheProjectLogWritable: ProjectLogWritable | undefined =
-        this._tryGetBuildCacheProjectLogWritable({
-          runner,
-          buildCacheConfiguration,
-          rushProject,
-          collatedTerminal: collatedWriter.terminal,
-          logFilenameIdentifier
-        });
-
-      if (quietMode) {
-        cacheConsoleWritable = new DiscardStdoutTransform({
-          destination: collatedWriter
-        });
-      } else {
-        cacheConsoleWritable = collatedWriter;
-      }
-
-      let cacheCollatedTerminal: CollatedTerminal;
-      if (cacheProjectLogWritable) {
-        const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
-          destinations: [cacheConsoleWritable, cacheProjectLogWritable]
-        });
-        cacheCollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
-      } else {
-        cacheCollatedTerminal = new CollatedTerminal(cacheConsoleWritable);
-      }
-
-      const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
-        cacheCollatedTerminal,
-        {
-          debugEnabled: debugMode
-        }
-      );
-      buildCacheContext.buildCacheTerminal = new Terminal(buildCacheTerminalProvider);
+      buildCacheContext.buildCacheTerminal = this._createBuildCacheTerminal({
+        runner,
+        buildCacheConfiguration,
+        rushProject,
+        collatedWriter,
+        logFilenameIdentifier,
+        quietMode,
+        debugMode
+      });
+    } else if (!buildCacheContext.buildCacheProjectLogWritable?.isOpen) {
+      // The ProjectLogWritable is closed, re-create one
+      buildCacheContext.buildCacheTerminal = this._createBuildCacheTerminal({
+        runner,
+        buildCacheConfiguration,
+        rushProject,
+        collatedWriter,
+        logFilenameIdentifier,
+        quietMode,
+        debugMode
+      });
     }
 
     return buildCacheContext.buildCacheTerminal;
+  }
+
+  private _createBuildCacheTerminal({
+    runner,
+    buildCacheConfiguration,
+    rushProject,
+    collatedWriter,
+    logFilenameIdentifier,
+    quietMode,
+    debugMode
+  }: {
+    runner: ShellOperationRunner;
+    buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    rushProject: RushConfigurationProject;
+    collatedWriter: CollatedWriter;
+    logFilenameIdentifier: string;
+    quietMode: boolean;
+    debugMode: boolean;
+  }): ITerminal {
+    let cacheConsoleWritable: TerminalWritable;
+    const cacheProjectLogWritable: ProjectLogWritable | undefined = this._tryGetBuildCacheProjectLogWritable({
+      runner,
+      buildCacheConfiguration,
+      rushProject,
+      collatedTerminal: collatedWriter.terminal,
+      logFilenameIdentifier
+    });
+
+    if (quietMode) {
+      cacheConsoleWritable = new DiscardStdoutTransform({
+        destination: collatedWriter
+      });
+    } else {
+      cacheConsoleWritable = collatedWriter;
+    }
+
+    let cacheCollatedTerminal: CollatedTerminal;
+    if (cacheProjectLogWritable) {
+      const cacheSplitterTransform: SplitterTransform = new SplitterTransform({
+        destinations: [cacheConsoleWritable, cacheProjectLogWritable]
+      });
+      cacheCollatedTerminal = new CollatedTerminal(cacheSplitterTransform);
+    } else {
+      cacheCollatedTerminal = new CollatedTerminal(cacheConsoleWritable);
+    }
+
+    const buildCacheTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+      cacheCollatedTerminal,
+      {
+        debugEnabled: debugMode
+      }
+    );
+    return new Terminal(buildCacheTerminalProvider);
   }
 
   private _tryGetBuildCacheProjectLogWritable({
@@ -849,13 +894,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       return;
     }
     const buildCacheContext: IOperationBuildCacheContext = this._getBuildCacheContextByRunnerOrThrow(runner);
-    if (!buildCacheContext.buildCacheProjectLogWritable) {
-      buildCacheContext.buildCacheProjectLogWritable = new ProjectLogWritable(
-        rushProject,
-        collatedTerminal,
-        `${logFilenameIdentifier}.cache`
-      );
-    }
+    buildCacheContext.buildCacheProjectLogWritable = new ProjectLogWritable(
+      rushProject,
+      collatedTerminal,
+      `${logFilenameIdentifier}.cache`
+    );
     return buildCacheContext.buildCacheProjectLogWritable;
   }
 }

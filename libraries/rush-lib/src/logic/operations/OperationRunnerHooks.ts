@@ -34,6 +34,7 @@ export interface IOperationRunnerBeforeExecuteContext {
   phase: IPhase;
   commandName: string;
   commandToRun: string;
+  finallyCallbacks: (() => void)[];
 }
 
 export interface IOperationRunnerAfterExecuteContext {

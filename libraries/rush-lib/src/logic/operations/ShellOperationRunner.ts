@@ -121,6 +121,8 @@ export class ShellOperationRunner implements IOperationRunner {
       this.logFilenameIdentifier
     );
 
+    const finallyCallbacks: (() => {})[] = [];
+
     try {
       //#region OPERATION LOGGING
       // TERMINAL PIPELINE:
@@ -229,7 +231,8 @@ export class ShellOperationRunner implements IOperationRunner {
         phase: this._phase,
         commandName: this._commandName,
         commandToRun: this._commandToRun,
-        earlyReturnStatus: undefined
+        earlyReturnStatus: undefined,
+        finallyCallbacks
       };
 
       await this.hooks.beforeExecute.promise(beforeExecuteContext);
@@ -361,6 +364,9 @@ export class ShellOperationRunner implements IOperationRunner {
     } finally {
       projectLogWritable.close();
       this.periodicCallback.stop();
+      for (const callback of finallyCallbacks) {
+        callback();
+      }
     }
   }
 }
