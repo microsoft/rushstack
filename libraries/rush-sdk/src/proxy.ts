@@ -141,16 +141,27 @@ export namespace rushSdkProxy {
 
     try {
       const rushJsonSearchFolder: string = options.rushJsonSearchFolder ?? process.cwd();
+
+      if (onNotifyEvent) {
+        onNotifyEvent({
+          logMessage: {
+            messageType: 'debug',
+            message: `Searching for rush.json starting from: ` + rushJsonSearchFolder
+          },
+          progressBarPercent
+        });
+      }
+
       const rushJsonPath: string | undefined = tryFindRushJsonLocation(rushJsonSearchFolder);
       if (!rushJsonPath) {
         throw new Error(
-          'Unable to find rush.json in the current folder or its parent folders.\n' +
-            'This tool is meant to be invoked from a working directory inside a Rush repository.'
+          'Unable to find rush.json in the specified folder or its parent folders:\n' +
+            `${rushJsonSearchFolder}\n`
         );
       }
       const monorepoRoot: string = path.dirname(rushJsonPath);
 
-      const rushJson: JsonObject = JsonFile.load(rushJsonPath);
+      const rushJson: JsonObject = await JsonFile.loadAsync(rushJsonPath);
       const { rushVersion } = rushJson;
 
       const installRunNodeModuleFolder: string = path.join(
