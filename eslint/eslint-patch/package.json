@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-patch",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A patch that improves how ESLint loads plugins when working in a monorepo with a reusable toolchain",
   "main": "lib/usage.js",
   "license": "MIT",
