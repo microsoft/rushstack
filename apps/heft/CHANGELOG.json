@@ -2,6 +2,33 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.58.2",
+      "tag": "@rushstack/heft_v0.58.2",
+      "date": "Tue, 08 Aug 2023 07:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.13.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.58.1",
       "tag": "@rushstack/heft_v0.58.1",
       "date": "Sat, 29 Jul 2023 00:22:50 GMT",
