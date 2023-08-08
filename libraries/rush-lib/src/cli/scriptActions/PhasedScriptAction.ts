@@ -369,7 +369,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           await this.hooks.afterExecuteOperation.promise(record);
         },
         beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
-          await this.hooks.beforeExecuteOperations.promise(records);
+          await this.hooks.beforeExecuteOperations.promise(records, initialCreateOperationsContext);
         },
         onOperationStatusChanged: (record: OperationExecutionRecord) => {
           this.hooks.onOperationStatusChanged.call(record);

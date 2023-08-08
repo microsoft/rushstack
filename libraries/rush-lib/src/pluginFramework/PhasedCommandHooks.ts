@@ -104,8 +104,9 @@ export class PhasedCommandHooks {
    * Hook invoked before operation start
    * Hook is series for stable output.
    */
-  public readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]> =
-    new AsyncSeriesHook(['records']);
+  public readonly beforeExecuteOperations: AsyncSeriesHook<
+    [Map<Operation, IOperationExecutionResult>, ICreateOperationsContext]
+  > = new AsyncSeriesHook(['records', 'context']);
 
   /**
    * Hook invoked when operation status changed

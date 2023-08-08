@@ -24,6 +24,9 @@ import { RushConstants } from '../RushConstants';
 import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import { DisjointSet } from '../cobuild/DisjointSet';
+
 import type { Operation } from './Operation';
 import type {
   IOperationRunnerAfterExecuteContext,
@@ -40,8 +43,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { CobuildConfiguration } from '../../api/CobuildConfiguration';
-import { DisjointSet } from '../cobuild/DisjointSet';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 
@@ -65,18 +67,23 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   >();
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tapPromise(
+    hooks.beforeExecuteOperations.tapPromise(
       PLUGIN_NAME,
-      async (operations: Set<Operation>, context: ICreateOperationsContext): Promise<Set<Operation>> => {
+      async (
+        records: Map<Operation, IOperationExecutionResult>,
+        context: ICreateOperationsContext
+      ): Promise<void> => {
         const { buildCacheConfiguration, isIncrementalBuildAllowed, cobuildConfiguration } = context;
         if (!buildCacheConfiguration) {
-          return operations;
+          return;
         }
 
         let disjointSet: DisjointSet<Operation> | undefined;
         if (cobuildConfiguration?.cobuildEnabled) {
           disjointSet = new DisjointSet<Operation>();
         }
+
+        const operations: IterableIterator<Operation> = records.keys();
 
         for (const operation of operations) {
           disjointSet?.add(operation);
@@ -155,8 +162,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             }
           }
         }
-
-        return operations;
       }
     );
 
