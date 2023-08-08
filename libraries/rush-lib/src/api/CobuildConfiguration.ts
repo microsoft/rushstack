@@ -74,14 +74,13 @@ export class CobuildConfiguration {
   private constructor(options: ICobuildConfigurationOptions) {
     const { cobuildJson, cobuildLockProviderFactory } = options;
 
-    this.cobuildEnabled = EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled;
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
+    this.cobuildEnabled = this.cobuildContextId
+      ? EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled
+      : false;
     this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
-    if (!this.cobuildContextId) {
-      this.cobuildEnabled = false;
-    }
 
     this._cobuildLockProviderFactory = cobuildLockProviderFactory;
     this._cobuildJson = cobuildJson;
