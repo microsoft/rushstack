@@ -95,26 +95,31 @@ export interface ILoadSdkAsyncOptions {
  */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace rushSdkProxy {
+  /**
+   * Throws an "AbortError" exception if abortSignal.aborted is true.
+   */
   function _checkForCancel(
     abortSignal: AbortSignal,
     onNotifyEvent: SdkNotifyEventCallback | undefined,
     progressBarPercent: number | undefined
-  ): boolean {
+  ): void {
     if (!abortSignal.aborted) {
-      return true;
+      return;
     }
 
     if (onNotifyEvent) {
       onNotifyEvent({
         logMessage: {
           messageType: 'info',
-          message: `The operation was cancelled`
+          message: `The operation was canceled`
         },
         progressBarPercent
       });
     }
 
-    return false;
+    const error: Error = new Error('The operation was canceled');
+    error.name = 'AbortError';
+    throw error;
   }
 
   /**
@@ -199,9 +204,7 @@ export namespace rushSdkProxy {
             throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
           }
 
-          if (!_checkForCancel(abortSignal, onNotifyEvent, progressBarPercent)) {
-            return;
-          }
+          _checkForCancel(abortSignal, onNotifyEvent, progressBarPercent);
 
           // TODO: Implement incremental progress updates
           progressBarPercent = 90;
