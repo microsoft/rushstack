@@ -475,6 +475,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           // Delete the legacy package-deps.json
           FileSystem.deleteFile(legacyDepsPath);
 
+          // No-op command
           if (!commandToRun) {
             // Write deps on success.
             if (projectDeps) {
@@ -482,6 +483,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 ensureFolderExists: true
               });
             }
+            return OperationStatus.Success;
           }
         };
 
