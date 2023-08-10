@@ -44,3 +44,9 @@ importers:
       b: workspace:*
     dependencies:
       b: link:../b
+
+  ../../projects/h:
+    specifiers:
+      a: workspace:*
+    dependencies:
+      a: link:../a
