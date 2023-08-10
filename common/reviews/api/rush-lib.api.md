@@ -839,7 +839,9 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 export class PhasedCommandHooks {
     readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
-    readonly beforeExecuteOperation: AsyncSeriesBailHook<[IOperationRunnerContext], OperationStatus | undefined>;
+    readonly beforeExecuteOperation: AsyncSeriesBailHook<[
+    IOperationRunnerContext
+    ], OperationStatus | undefined>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[
     Map<Operation, IOperationExecutionResult>,
     ICreateOperationsContext

@@ -19,6 +19,11 @@ export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {
     passwordEnvironmentVariable?: string;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "IRushRedisCobuildPluginOptions" is marked as @public, but its signature references "IRedisCobuildLockProviderOptions" which is marked as @beta
+//
+// @public (undocumented)
+export type IRushRedisCobuildPluginOptions = IRedisCobuildLockProviderOptions;
+
 // @beta (undocumented)
 export class RedisCobuildLockProvider implements ICobuildLockProvider {
     constructor(options: IRedisCobuildLockProviderOptions, rushSession: RushSession);
@@ -39,7 +44,6 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
 
 // @public (undocumented)
 class RushRedisCobuildPlugin implements IRushPlugin {
-    // Warning: (ae-forgotten-export) The symbol "IRushRedisCobuildPluginOptions" needs to be exported by the entry point index.d.ts
     constructor(options: IRushRedisCobuildPluginOptions);
     // (undocumented)
     apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void;
