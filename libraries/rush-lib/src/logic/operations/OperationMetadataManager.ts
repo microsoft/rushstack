@@ -110,7 +110,7 @@ export class OperationMetadataManager {
   }): Promise<void> {
     await this.stateFile.tryRestoreAsync();
 
-    // Append cached log into current log file
+    // Append cached log into cache log file
     terminal.writeLine(`Restoring cached log file at ${this._logPath}`);
     try {
       const logReadStream: fs.ReadStream = fs.createReadStream(this._logPath, {
@@ -119,6 +119,18 @@ export class OperationMetadataManager {
       for await (const data of logReadStream) {
         terminal.write(data);
       }
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
+
+    // Try to restore cached log as log file
+    try {
+      await FileSystem.copyFileAsync({
+        sourcePath: this._logPath,
+        destinationPath: logPath
+      });
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;

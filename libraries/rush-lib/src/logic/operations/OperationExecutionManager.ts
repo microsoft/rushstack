@@ -4,9 +4,9 @@
 import colors from 'colors/safe';
 import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async } from '@rushstack/node-core-library';
+import { NewlineKind, Async, type IAsyncTaskContext } from '@rushstack/node-core-library';
 
-import { AsyncOperationQueue, IOperationSortFunction } from './AsyncOperationQueue';
+import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
@@ -16,11 +16,19 @@ export interface IOperationExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: number;
-  changedProjectsOnly: boolean;
   destination?: TerminalWritable;
 
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
+
+  beforeExecuteOperation?: (
+    record: OperationExecutionRecord,
+    asyncContext: IAsyncTaskContext
+  ) => Promise<OperationStatus | undefined>;
+  afterExecuteOperation?: (
+    record: OperationExecutionRecord,
+    asyncContext: IAsyncTaskContext
+  ) => Promise<OperationStatus | undefined>;
 }
 
 /**
@@ -35,7 +43,6 @@ const ASCII_HEADER_WIDTH: number = 79;
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class OperationExecutionManager {
-  private readonly _changedProjectsOnly: boolean;
   private readonly _executionRecords: Map<Operation, OperationExecutionRecord>;
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
@@ -62,15 +69,15 @@ export class OperationExecutionManager {
       quietMode,
       debugMode,
       parallelism,
-      changedProjectsOnly,
       onOperationStatusChanged,
-      beforeExecuteOperations
+      beforeExecuteOperations,
+      beforeExecuteOperation,
+      afterExecuteOperation
     } = options;
     this._completedOperations = 0;
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyNonAllowedWarnings = false;
-    this._changedProjectsOnly = changedProjectsOnly;
     this._parallelism = parallelism;
 
     this._beforeExecuteOperations = beforeExecuteOperations;
@@ -96,6 +103,8 @@ export class OperationExecutionManager {
     const executionRecordContext: IOperationExecutionRecordContext = {
       streamCollator: this._streamCollator,
       onOperationStatusChanged,
+      beforeExecute: beforeExecuteOperation,
+      afterExecute: afterExecuteOperation,
       debugMode,
       quietMode
     };
@@ -188,6 +197,8 @@ export class OperationExecutionManager {
       this._terminal.writeStdoutLine('');
     }
 
+    await this._beforeExecuteOperations?.(this._executionRecords);
+
     this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     const maxParallelism: number = Math.min(totalOperations, this._parallelism);
@@ -202,8 +213,6 @@ export class OperationExecutionManager {
       prioritySort
     );
 
-    await this._beforeExecuteOperations?.(this._executionRecords);
-
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
     const onOperationComplete: (record: OperationExecutionRecord) => void = (
@@ -214,8 +223,9 @@ export class OperationExecutionManager {
 
     await Async.forEachAsync(
       executionQueue,
-      async (operation: OperationExecutionRecord) => {
-        await operation.executeAsync(onOperationComplete);
+      async (operation: OperationExecutionRecord, index: number, asyncContext: IAsyncTaskContext) => {
+        await operation.executeAsync(onOperationComplete, asyncContext);
+        executionQueue.assignOperations();
       },
       {
         concurrency: maxParallelism
@@ -239,9 +249,6 @@ export class OperationExecutionManager {
    */
   private _onOperationComplete(record: OperationExecutionRecord): void {
     const { runner, name, status } = record;
-
-    let blockCacheWrite: boolean = !runner.isCacheWriteAllowed;
-    let blockSkip: boolean = !runner.isSkipAllowed;
 
     const silent: boolean = runner.silent;
 
@@ -301,8 +308,6 @@ export class OperationExecutionManager {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
         }
-        // Skipping means cannot guarantee integrity, so prevent cache writes in dependents.
-        blockCacheWrite = true;
         break;
       }
 
@@ -322,8 +327,6 @@ export class OperationExecutionManager {
             colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
           );
         }
-        // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
-        blockSkip ||= !this._changedProjectsOnly;
         break;
       }
 
@@ -334,7 +337,6 @@ export class OperationExecutionManager {
           );
         }
         // Legacy incremental build, if asked, prevent skip in dependents if the operation executed.
-        blockSkip ||= !this._changedProjectsOnly;
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;
         break;
       }
@@ -342,14 +344,6 @@ export class OperationExecutionManager {
 
     // Apply status changes to direct dependents
     for (const item of record.consumers) {
-      if (blockCacheWrite) {
-        item.runner.isCacheWriteAllowed = false;
-      }
-
-      if (blockSkip) {
-        item.runner.isSkipAllowed = false;
-      }
-
       // Remove this operation from the dependencies, to unblock the scheduler
       item.dependencies.delete(record);
     }

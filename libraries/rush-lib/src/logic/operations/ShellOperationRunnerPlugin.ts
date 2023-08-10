@@ -29,13 +29,7 @@ function createShellOperations(
   operations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const {
-    buildCacheConfiguration,
-    isIncrementalBuildAllowed,
-    phaseSelection: selectedPhases,
-    projectChangeAnalyzer,
-    rushConfiguration
-  } = context;
+  const { rushConfiguration } = context;
 
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
@@ -78,15 +72,11 @@ function createShellOperations(
 
       if (commandToRun) {
         operation.runner = new ShellOperationRunner({
-          buildCacheConfiguration,
           commandToRun: commandToRun || '',
           displayName,
-          isIncrementalBuildAllowed,
           phase,
-          projectChangeAnalyzer,
           rushConfiguration,
-          rushProject: project,
-          selectedPhases
+          rushProject: project
         });
       } else {
         // Empty build script indicates a no-op, so use a no-op runner

@@ -5,7 +5,6 @@ import type { StdioSummarizer } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
-import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
@@ -31,15 +30,13 @@ export interface IOperationRunnerContext {
    */
   stdioSummarizer: StdioSummarizer;
   /**
-   * Object used to manage metadata of the operation.
-   *
-   * @internal
-   */
-  _operationMetadataManager?: OperationMetadataManager;
-  /**
    * Object used to track elapsed time.
    */
   stopwatch: IStopwatchResult;
+  /**
+   * Adds a task to be performed as part of finishing the operation (on success or failure).
+   */
+  addCleanupTask(task: () => void): void;
 }
 
 /**
@@ -56,9 +53,10 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
-   * This flag determines if the operation is allowed to be skipped if up to date.
+   * This flag indicates if this operation should be considered by Rush's incremental engines.
+   * If false, it will always be run, bypassing cache or skip detection.
    */
-  isSkipAllowed: boolean;
+  supportsIncremental: boolean;
 
   /**
    * Indicates that this runner's duration has meaning.
@@ -77,12 +75,12 @@ export interface IOperationRunner {
   warningsAreAllowed: boolean;
 
   /**
-   * Indicates if the output of this operation may be written to the cache
-   */
-  isCacheWriteAllowed: boolean;
-
-  /**
    * Method to be executed for the operation.
    */
   executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+
+  /**
+   * Returns a hash of the configuration state of the runner.
+   */
+  getConfigHash(): string;
 }

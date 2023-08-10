@@ -12,6 +12,10 @@ import type { Operation } from './Operation';
  */
 export interface IOperationExecutionResult {
   /**
+   * The operation that was executed.
+   */
+  readonly operation: Operation;
+  /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
    * the operation is executing. Once execution is complete, it is either 'success' or
@@ -34,7 +38,7 @@ export interface IOperationExecutionResult {
   /**
    * The value indicates the duration of the same operation without cache hit.
    */
-  readonly nonCachedDurationMs: number | undefined;
+  nonCachedDurationMs: number | undefined;
 }
 
 /**

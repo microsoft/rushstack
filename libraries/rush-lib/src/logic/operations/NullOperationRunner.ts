@@ -31,10 +31,8 @@ export class NullOperationRunner implements IOperationRunner {
   // This operation does nothing, so timing is meaningless
   public readonly reportTiming: boolean = false;
   public readonly silent: boolean;
-  // The operation may be skipped; it doesn't do anything anyway
-  public isSkipAllowed: boolean = true;
-  // The operation is a no-op, so is cacheable.
-  public isCacheWriteAllowed: boolean = true;
+  // This is a no-op. Don't apply any caching or skip detection.
+  public readonly supportsIncremental: boolean = false;
   // Nothing will get logged, no point allowing warnings
   public readonly warningsAreAllowed: boolean = false;
 
@@ -44,6 +42,10 @@ export class NullOperationRunner implements IOperationRunner {
     this.name = name;
     this.result = result;
     this.silent = silent;
+  }
+
+  public getConfigHash(): string {
+    return 'null';
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {

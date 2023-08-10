@@ -4,7 +4,13 @@
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError, ITerminal, Terminal } from '@rushstack/node-core-library';
+import {
+  AlreadyReportedError,
+  type IAsyncTaskContext,
+  InternalError,
+  type ITerminal,
+  Terminal
+} from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineParameter,
@@ -38,6 +44,9 @@ import { IExecutionResult } from '../../logic/operations/IOperationExecutionResu
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
+import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
+import { BuildCachePlugin } from '../../logic/operations/BuildCachePlugin';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -326,6 +335,30 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       customParametersByName.set(configParameter.longName, parserParameter);
     }
 
+    if (buildCacheConfiguration) {
+      new BuildCachePlugin({
+        allowWarningsInSuccessfulBuild:
+          !!this.rushConfiguration.experimentsConfiguration.configuration
+            .buildCacheWithAllowWarningsInSuccessfulBuild,
+        buildCacheConfiguration,
+        isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
+        terminal
+      }).apply(this.hooks);
+    } else {
+      new LegacySkipPlugin({
+        terminal,
+        changedProjectsOnly,
+        isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
+      }).apply(this.hooks);
+    }
+
+    const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+      await RushProjectConfiguration.tryLoadAndValidateForProjectsAsync(
+        projectSelection,
+        this._initialPhases,
+        terminal
+      );
+
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const initialCreateOperationsContext: ICreateOperationsContext = {
       buildCacheConfiguration,
@@ -336,6 +369,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       rushConfiguration: this.rushConfiguration,
       phaseOriginal: new Set(this._originalPhases),
       phaseSelection: new Set(this._initialPhases),
+      projectConfigurations,
       projectChangeAnalyzer,
       projectSelection,
       projectsInUnknownState: projectSelection
@@ -345,10 +379,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism,
-      changedProjectsOnly,
       beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
         await this.hooks.beforeExecuteOperations.promise(records);
       },
+      beforeExecuteOperation: this.hooks.beforeExecuteOperation.isUsed()
+        ? async (
+            record: OperationExecutionRecord,
+            asyncContext: IAsyncTaskContext
+          ): Promise<OperationStatus | undefined> => {
+            return this.hooks.beforeExecuteOperation.promise(record, asyncContext);
+          }
+        : undefined,
+      afterExecuteOperation: this.hooks.afterExecuteOperation.isUsed()
+        ? async (
+            record: OperationExecutionRecord,
+            asyncContext: IAsyncTaskContext
+          ): Promise<OperationStatus | undefined> => {
+            return this.hooks.afterExecuteOperation.promise(record, asyncContext);
+          }
+        : undefined,
       onOperationStatusChanged: (record: OperationExecutionRecord) => {
         this.hooks.onOperationStatusChanged.call(record);
       }

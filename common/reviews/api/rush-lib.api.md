@@ -7,11 +7,13 @@
 /// <reference types="node" />
 
 import { AsyncParallelHook } from 'tapable';
+import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
+import type { IAsyncTaskContext } from '@rushstack/node-core-library';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
@@ -264,6 +266,7 @@ export interface ICreateOperationsContext {
     readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+    readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
@@ -385,7 +388,8 @@ export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 // @alpha
 export interface IOperationExecutionResult {
     readonly error: Error | undefined;
-    readonly nonCachedDurationMs: number | undefined;
+    nonCachedDurationMs: number | undefined;
+    readonly operation: Operation;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -419,20 +423,19 @@ export interface IOperationOptions {
 // @beta
 export interface IOperationRunner {
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
-    isCacheWriteAllowed: boolean;
-    isSkipAllowed: boolean;
+    getConfigHash(): string;
     readonly name: string;
     reportTiming: boolean;
     silent: boolean;
+    supportsIncremental: boolean;
     warningsAreAllowed: boolean;
 }
 
 // @beta
 export interface IOperationRunnerContext {
+    addCleanupTask(task: () => void): void;
     collatedWriter: CollatedWriter;
     debugMode: boolean;
-    // @internal
-    _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
@@ -756,7 +759,15 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 
 // @alpha
 export class PhasedCommandHooks {
+    readonly afterExecuteOperation: AsyncSeriesBailHook<[
+    IOperationExecutionResult & IOperationRunnerContext,
+    IAsyncTaskContext
+    ], OperationStatus | undefined>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
+    readonly beforeExecuteOperation: AsyncSeriesBailHook<[
+    IOperationExecutionResult & IOperationRunnerContext,
+    IAsyncTaskContext
+    ], OperationStatus | undefined>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
@@ -1038,6 +1049,30 @@ export class RushLifecycleHooks {
     runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
     runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
     runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
+}
+
+// @public
+export class RushProjectConfiguration {
+    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@microsoft/rush-lib" does not have an export "IRushProjectJson"
+    //
+    // (undocumented)
+    readonly disableBuildCacheForProject: boolean;
+    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@microsoft/rush-lib" does not have an export "IRushProjectJson"
+    //
+    // (undocumented)
+    readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
+    // Warning: (ae-forgotten-export) The symbol "IOperationSettings" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
+    // (undocumented)
+    readonly project: RushConfigurationProject;
+    // Warning: (ae-incompatible-release-tags) The symbol "tryLoadAndValidateForProjectsAsync" is marked as @public, but its signature references "IPhase" which is marked as @alpha
+    static tryLoadAndValidateForProjectsAsync(projects: Iterable<RushConfigurationProject>, phases: ReadonlySet<IPhase>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
+    static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
+    static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
+    // Warning: (ae-incompatible-release-tags) The symbol "validatePhaseConfiguration" is marked as @public, but its signature references "IPhase" which is marked as @alpha
+    validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }
 
 // @beta (undocumented)

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Refactor the build cache to schedule cache reads/writes as their own operations. This allows cache reads to occur while dependencies are still executing and cache writes to occur while consumers are executing.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

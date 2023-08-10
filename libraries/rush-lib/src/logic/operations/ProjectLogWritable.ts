@@ -9,9 +9,16 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
 
+export interface IProjectLogFilePaths {
+  logPath: string;
+  errorLogPath: string;
+  relativeLogPath: string;
+  relativeErrorLogPath: string;
+}
+
 export class ProjectLogWritable extends TerminalWritable {
   private readonly _project: RushConfigurationProject;
-  private readonly _terminal: CollatedTerminal;
+  private readonly _terminal: () => CollatedTerminal;
 
   public readonly logPath: string;
   public readonly errorLogPath: string;
@@ -23,46 +30,17 @@ export class ProjectLogWritable extends TerminalWritable {
 
   public constructor(
     project: RushConfigurationProject,
-    terminal: CollatedTerminal,
+    terminal: () => CollatedTerminal,
     logFilenameIdentifier: string
   ) {
     super();
     this._project = project;
     this._terminal = terminal;
 
-    function getLogFilePaths(
-      projectFolder: string,
-      logFilenameIdentifier: string,
-      logFolder?: string
-    ): {
-      logPath: string;
-      errorLogPath: string;
-      relativeLogPath: string;
-      relativeErrorLogPath: string;
-    } {
-      const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-      const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
-      const logFilename: string = `${logFileBaseName}.log`;
-      const errorLogFilename: string = `${logFileBaseName}.error.log`;
-
-      const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
-      const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
-
-      const logPath: string = `${projectFolder}/${relativeLogPath}`;
-      const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
-
-      return {
-        logPath,
-        errorLogPath,
-        relativeLogPath,
-        relativeErrorLogPath
-      };
-    }
-
     const projectFolder: string = this._project.projectFolder;
     // Delete the legacy logs
-    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = getLogFilePaths(
-      projectFolder,
+    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = getLogFilePathsInternal(
+      project,
       'build'
     );
     FileSystem.deleteFile(legacyLogPath);
@@ -76,8 +54,8 @@ export class ProjectLogWritable extends TerminalWritable {
       logFolder = RushConstants.rushLogsFolderName;
     }
 
-    const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } = getLogFilePaths(
-      projectFolder,
+    const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } = getLogFilePathsInternal(
+      project,
       logFilenameIdentifier,
       logFolder
     );
@@ -95,6 +73,17 @@ export class ProjectLogWritable extends TerminalWritable {
     }
 
     this._logWriter = FileWriter.open(this.logPath);
+  }
+
+  public static getLogFilePaths(
+    project: RushConfigurationProject,
+    logFilenameIdentifier: string
+  ): IProjectLogFilePaths {
+    const usePhasedCommands: boolean | undefined =
+      project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands;
+    return usePhasedCommands
+      ? getLogFilePathsInternal(project, logFilenameIdentifier, RushConstants.rushLogsFolderName)
+      : getLogFilePathsInternal(project, 'build');
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -118,7 +107,7 @@ export class ProjectLogWritable extends TerminalWritable {
       try {
         this._logWriter.close();
       } catch (error) {
-        this._terminal.writeStderrLine('Failed to close file handle for ' + this._logWriter.filePath);
+        this._terminal().writeStderrLine('Failed to close file handle for ' + this._logWriter.filePath);
       }
       this._logWriter = undefined;
     }
@@ -127,9 +116,34 @@ export class ProjectLogWritable extends TerminalWritable {
       try {
         this._errorLogWriter.close();
       } catch (error) {
-        this._terminal.writeStderrLine('Failed to close file handle for ' + this._errorLogWriter.filePath);
+        this._terminal().writeStderrLine('Failed to close file handle for ' + this._errorLogWriter.filePath);
       }
       this._errorLogWriter = undefined;
     }
   }
+}
+
+function getLogFilePathsInternal(
+  project: RushConfigurationProject,
+  logFilenameIdentifier: string,
+  logFolder?: string
+): IProjectLogFilePaths {
+  const projectFolder: string = project.projectFolder;
+  const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
+  const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
+  const logFilename: string = `${logFileBaseName}.log`;
+  const errorLogFilename: string = `${logFileBaseName}.error.log`;
+
+  const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
+  const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
+
+  const logPath: string = `${projectFolder}/${relativeLogPath}`;
+  const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
+
+  return {
+    logPath,
+    errorLogPath,
+    relativeLogPath,
+    relativeErrorLogPath
+  };
 }

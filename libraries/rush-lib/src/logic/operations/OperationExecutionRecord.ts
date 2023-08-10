@@ -2,18 +2,26 @@
 // See LICENSE in the project root for license information.
 
 import { StdioSummarizer } from '@rushstack/terminal';
-import { InternalError } from '@rushstack/node-core-library';
+import { InternalError, type IAsyncTaskContext } from '@rushstack/node-core-library';
 import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
 import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { OperationMetadataManager } from './OperationMetadataManager';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  beforeExecute?: (
+    record: OperationExecutionRecord,
+    asyncContext: IAsyncTaskContext
+  ) => Promise<OperationStatus | undefined>;
+  afterExecute?: (
+    record: OperationExecutionRecord,
+    asyncContext: IAsyncTaskContext
+  ) => Promise<OperationStatus | undefined>;
 
   debugMode: boolean;
   quietMode: boolean;
@@ -22,7 +30,12 @@ export interface IOperationExecutionRecordContext {
 /**
  * Internal class representing everything about executing an operation
  */
-export class OperationExecutionRecord implements IOperationRunnerContext {
+export class OperationExecutionRecord implements IOperationRunnerContext, IOperationExecutionResult {
+  /**
+   * The operation which is being executed
+   */
+  public readonly operation: Operation;
+
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
@@ -82,11 +95,14 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public readonly runner: IOperationRunner;
   public readonly weight: number;
-  public readonly _operationMetadataManager: OperationMetadataManager | undefined;
+
+  public nonCachedDurationMs: number | undefined;
 
   private readonly _context: IOperationExecutionRecordContext;
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
+
+  private readonly _cleanupTasks: (() => void)[];
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner } = operation;
@@ -97,15 +113,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       );
     }
 
+    this.operation = operation;
     this.runner = runner;
     this.weight = operation.weight;
-    if (operation.associatedPhase && operation.associatedProject) {
-      this._operationMetadataManager = new OperationMetadataManager({
-        phase: operation.associatedPhase,
-        rushProject: operation.associatedProject
-      });
-    }
     this._context = context;
+    this._cleanupTasks = [
+      () => this._collatedWriter?.close(),
+      () => this.stdioSummarizer.close(),
+      () => this.stopwatch.stop(),
+      () => this._context.onOperationStatusChanged?.(this)
+    ];
   }
 
   public get name(): string {
@@ -128,30 +145,60 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._collatedWriter;
   }
 
-  public get nonCachedDurationMs(): number | undefined {
-    // Lazy calculated because the state file is created/restored later on
-    return this._operationMetadataManager?.stateFile.state?.nonCachedDurationMs;
+  public addCleanupTask(task: () => void): void {
+    this._cleanupTasks.unshift(task);
   }
 
-  public async executeAsync(onResult: (record: OperationExecutionRecord) => void): Promise<void> {
+  public async executeAsync(
+    onResult: (record: OperationExecutionRecord) => void,
+    asyncContext: IAsyncTaskContext
+  ): Promise<void> {
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
-    this._context.onOperationStatusChanged?.(this);
+    const { onOperationStatusChanged, beforeExecute, afterExecute } = this._context;
+    onOperationStatusChanged?.(this);
 
     try {
+      const earlyStatus: OperationStatus | undefined = beforeExecute
+        ? await beforeExecute(this, asyncContext)
+        : undefined;
+      if (earlyStatus !== undefined) {
+        this.status = earlyStatus;
+        onOperationStatusChanged?.(this);
+        onResult(this);
+        return;
+      }
+
       this.status = await this.runner.executeAsync(this);
+      onOperationStatusChanged?.(this);
+
+      if (afterExecute) {
+        const updatedStatus: OperationStatus | undefined = await afterExecute(this, asyncContext);
+        if (updatedStatus !== undefined) {
+          this.status = updatedStatus;
+          onOperationStatusChanged?.(this);
+        }
+      }
+
       // Delegate global state reporting
       onResult(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
+      onOperationStatusChanged?.(this);
       this.error = error;
       // Delegate global state reporting
       onResult(this);
     } finally {
-      this._collatedWriter?.close();
-      this.stdioSummarizer.close();
-      this.stopwatch.stop();
-      this._context.onOperationStatusChanged?.(this);
+      for (const task of this._cleanupTasks.splice(0)) {
+        try {
+          task();
+        } catch (e) {
+          if (this.debugMode) {
+            // eslint-disable-next-line no-console
+            console.error(`Cleanup task in ${this.name} failed: ${e}`);
+          }
+        }
+      }
     }
   }
 }

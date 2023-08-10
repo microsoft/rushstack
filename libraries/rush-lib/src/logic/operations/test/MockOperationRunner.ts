@@ -11,8 +11,7 @@ export class MockOperationRunner implements IOperationRunner {
   public readonly name: string;
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
-  public isSkipAllowed: boolean = false;
-  public isCacheWriteAllowed: boolean = false;
+  public readonly supportsIncremental: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
   public constructor(
@@ -23,6 +22,10 @@ export class MockOperationRunner implements IOperationRunner {
     this.name = name;
     this._action = action;
     this.warningsAreAllowed = warningsAreAllowed;
+  }
+
+  public getConfigHash(): string {
+    return 'mock';
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {

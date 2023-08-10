@@ -10,6 +10,8 @@ export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export { RushConfiguration, ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
 
+export { RushProjectConfiguration } from './api/RushProjectConfiguration';
+
 export {
   IPackageManagerOptionsJsonBase,
   IConfigurationEnvironment,

@@ -11,6 +11,7 @@ import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/rush-project.schema.json';
+import { Async } from '@rushstack/node-core-library';
 
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
@@ -335,6 +336,29 @@ export class RushProjectConfiguration {
     );
 
     return rushProjectJson?.incrementalBuildIgnoredGlobs;
+  }
+
+  /**
+   * Load the rush-project.json data for all selected projects.
+   * Validate compatibility of output folders across all selected phases.
+   */
+  public static async tryLoadAndValidateForProjectsAsync(
+    projects: Iterable<RushConfigurationProject>,
+    phases: ReadonlySet<IPhase>,
+    terminal: ITerminal
+  ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
+    const result: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
+
+    await Async.forEachAsync(projects, async (project: RushConfigurationProject) => {
+      const projectConfig: RushProjectConfiguration | undefined =
+        await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+      if (projectConfig) {
+        projectConfig.validatePhaseConfiguration(phases, terminal);
+        result.set(project, projectConfig);
+      }
+    });
+
+    return result;
   }
 
   private static async _tryLoadJsonForProjectAsync(
