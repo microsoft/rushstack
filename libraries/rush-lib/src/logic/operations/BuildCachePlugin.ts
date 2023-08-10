@@ -1,41 +1,49 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, type ITerminal, type IAsyncTaskContext, Terminal } from '@rushstack/node-core-library';
+import {
+  Async,
+  NewlineKind,
+  Terminal,
+  type IAsyncTaskContext,
+  type ITerminal
+} from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+import {
+  DiscardStdoutTransform,
+  SplitterTransform,
+  StderrLineTransform,
+  TerminalWritable,
+  TextRewriterTransform
+} from '@rushstack/terminal';
 
-import { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { RushProjectConfiguration, type IOperationSettings } from '../../api/RushProjectConfiguration';
 import {
   STAGE_CREATE_CACHE_OPERATIONS,
   type ICreateOperationsContext,
   type IPhasedCommandPlugin,
   type PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import { type IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
-import { RushConstants } from '../RushConstants';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import { ProjectLogWritable } from './ProjectLogWritable';
+import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { RushConstants } from '../RushConstants';
+import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
+import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import { Operation } from './Operation';
 import { OperationMetadataManager } from './OperationMetadataManager';
-import {
-  DiscardStdoutTransform,
-  StderrLineTransform,
-  TerminalWritable,
-  TextRewriterTransform
-} from '@rushstack/terminal';
-import { SplitterTransform } from '@rushstack/terminal';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IPhase } from '../../api/CommandLineConfiguration';
-import { NewlineKind } from '@rushstack/node-core-library';
+import { OperationStatus } from './OperationStatus';
+import { ProjectLogWritable } from './ProjectLogWritable';
 
 const PLUGIN_NAME: 'BuildCachePlugin' = 'BuildCachePlugin';
 
+/**
+ * Options for configuring the build cache plugin.
+ */
 export interface IBuildCachePluginOptions {
   allowWarningsInSuccessfulBuild: boolean;
   buildCacheConfiguration: BuildCacheConfiguration;
@@ -43,25 +51,60 @@ export interface IBuildCachePluginOptions {
   isIncrementalBuildAllowed: boolean;
 }
 
+/**
+ * Metadata for a cacheable operation.
+ */
 interface IBuildCacheRecord {
+  /**
+   * The project that this operation is associated with.
+   */
   project: RushConfigurationProject;
+  /**
+   * The phase that this operation is associated with.
+   */
   phase: IPhase;
 
+  /**
+   * The bound build cache for the operation, if enabled.
+   */
   projectBuildCache: ProjectBuildCache | undefined;
-  allowCacheWrite: boolean;
-
-  operationMetadataManager: OperationMetadataManager;
-  logPath: string;
-  errorLogPath: string;
-
+  /**
+   * Reason why `projectBuildCache` is `undefined`.
+   */
   cacheDisabledReason: string | undefined;
 
+  /**
+   * Whether or not the outputs from this operation can safely be written to the build cache.
+   */
+  allowCacheWrite: boolean;
+
+  /**
+   * Object tracking additional metadata to be included in the cache entry.
+   */
+  operationMetadataManager: OperationMetadataManager;
+  /**
+   * Path to the combined log file for the underlying operation.
+   */
+  logPath: string;
+  /**
+   * Path to the stderr log file for the underlying operation.
+   */
+  errorLogPath: string;
+
+  /**
+   * If `true`, this operation successfully read from the build cache.
+   */
   readFromCache?: boolean;
+  /**
+   * If `truq`, this operation will have its outputs written to the build cache.
+   */
   willWriteCache?: boolean;
 }
 
 /**
  * Runner that reads from the build cache.
+ * Communicates via the `IBuildCacheRecord` instance with the `beforeExecuteOperation` hook.
+ * Will set `record.readFromCache` to `true` if the operation successfully read from the cache.
  */
 class BuildCacheReadOperationRunner implements IOperationRunner {
   public readonly name: string;
@@ -151,6 +194,8 @@ class BuildCacheReadOperationRunner implements IOperationRunner {
 
 /**
  * Runner that writes the output of a prior operation to the build cache.
+ * Communicates via the `IBuildCacheRecord` instance with the `afterExecuteOperation` hook.
+ * Will only execute if `record.willWriteCache` has been set to `true`.
  */
 class BuildCacheWriteOperationRunner implements IOperationRunner {
   public readonly name: string;
@@ -216,6 +261,8 @@ class BuildCacheWriteOperationRunner implements IOperationRunner {
       stderrLineTransform.close();
 
       if (terminalProvider.hasErrors) {
+        // This operation can report an error without blocking other operations that depend on the underlying operation.
+        // It only reflects the status of the cache write.
         return OperationStatus.Failure;
       }
 
@@ -260,6 +307,10 @@ export class BuildCachePlugin implements IPhasedCommandPlugin {
       return;
     }
 
+    /**
+     * Find all cacheable operations in the graph and create an `IBuildCacheRecord` for each.
+     * For all operations that are both theoretically cacheable and have the necessary
+     */
     hooks.createOperations.tapPromise(
       {
         name: PLUGIN_NAME,
@@ -279,6 +330,11 @@ export class BuildCachePlugin implements IPhasedCommandPlugin {
 
           const { name: phaseName } = associatedPhase;
 
+          const projectConfiguration: RushProjectConfiguration | undefined =
+            projectConfigurations.get(associatedProject);
+
+          // This value can *currently* be cached per-project, but in the future the list of files will vary
+          // depending on the selected phase.
           const fileHashes: Map<string, string> | undefined =
             await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
 
@@ -293,10 +349,11 @@ export class BuildCachePlugin implements IPhasedCommandPlugin {
             rushProject: associatedProject
           });
 
-          const trackedProjectFiles: string[] = Array.from(fileHashes.keys());
-
           let projectBuildCache: ProjectBuildCache | undefined;
-          let cacheDisabledReason: string | undefined;
+          const cacheDisabledReason: string | undefined = projectConfiguration
+            ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), associatedPhase.name)
+            : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+              'or one provided by a rig, so it does not support caching.';
 
           const { logPath, errorLogPath } = ProjectLogWritable.getLogFilePaths(
             associatedProject,
@@ -316,99 +373,78 @@ export class BuildCachePlugin implements IPhasedCommandPlugin {
 
           stateMap.set(operation, buildCacheRecord);
 
-          const projectConfiguration: RushProjectConfiguration | undefined =
-            projectConfigurations.get(associatedProject);
+          const operationSettings: IOperationSettings | undefined =
+            projectConfiguration?.operationSettingsByOperationName.get(phaseName);
 
-          if (projectConfiguration) {
-            if (projectConfiguration.disableBuildCacheForProject) {
-              buildCacheRecord.cacheDisabledReason = 'Caching has been disabled for this project.';
-            } else {
-              const operationSettings: IOperationSettings | undefined =
-                projectConfiguration.operationSettingsByOperationName.get(phaseName);
-              if (!operationSettings) {
-                buildCacheRecord.cacheDisabledReason = `This project does not define the caching behavior of the "${phaseName}" command, so caching has been disabled.`;
-              } else if (operationSettings.disableBuildCacheForOperation) {
-                buildCacheRecord.cacheDisabledReason = `Caching has been disabled for this project's "${phaseName}" command.`;
-              } else {
-                const projectOutputFolderNames: ReadonlyArray<string> =
-                  operationSettings.outputFolderNames || [];
+          if (!cacheDisabledReason && operationSettings) {
+            const projectOutputFolderNames: ReadonlyArray<string> = operationSettings.outputFolderNames || [];
 
-                const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
-                  ...(operationMetadataManager?.relativeFilepaths || [])
-                ];
+            const additionalProjectOutputFilePaths: ReadonlyArray<string> = [
+              ...(operationMetadataManager?.relativeFilepaths || [])
+            ];
 
-                const additionalContext: Record<string, string> = {};
-                if (operationSettings.dependsOnEnvVars) {
-                  for (const varName of operationSettings.dependsOnEnvVars) {
-                    additionalContext['$' + varName] = process.env[varName] || '';
-                  }
-                }
-
-                if (operationSettings.dependsOnAdditionalFiles) {
-                  const repoState: IRawRepoState | undefined =
-                    await projectChangeAnalyzer._ensureInitializedAsync(terminal);
-
-                  const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
-                    operationSettings.dependsOnAdditionalFiles,
-                    associatedProject.projectFolder,
-                    repoState
-                  );
-
-                  terminal.writeDebugLine(
-                    `Including additional files to calculate build cache hash for ${
-                      runner.name
-                    }:\n  ${Array.from(additionalFiles.keys()).join('\n  ')} `
-                  );
-
-                  for (const [filePath, fileHash] of additionalFiles) {
-                    additionalContext['file://' + filePath] = fileHash;
-                  }
-                }
-
-                buildCacheRecord.projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
-                  projectConfiguration,
-                  projectOutputFolderNames,
-                  additionalProjectOutputFilePaths,
-                  additionalContext,
-                  buildCacheConfiguration,
-                  terminal,
-                  command: runner.getConfigHash(),
-                  trackedProjectFiles,
-                  projectChangeAnalyzer,
-                  phaseName
-                });
-
-                if (isIncrementalBuildAllowed) {
-                  const readOperation: Operation = new Operation({
-                    project: associatedProject,
-                    phase: associatedPhase,
-                    runner: new BuildCacheReadOperationRunner(
-                      buildCacheRecord,
-                      `${operation.name} (cache read)`
-                    )
-                  });
-                  operation.addDependency(readOperation);
-                  buildCacheOperations.add(readOperation);
-                }
-
-                if (isCacheWriteAllowed) {
-                  const writeOperation: Operation = new Operation({
-                    project: associatedProject,
-                    phase: associatedPhase,
-                    runner: new BuildCacheWriteOperationRunner(
-                      buildCacheRecord,
-                      `${operation.name} (cache write)`
-                    )
-                  });
-                  writeOperation.addDependency(operation);
-                  buildCacheOperations.add(writeOperation);
-                }
+            const additionalContext: Record<string, string> = {};
+            if (operationSettings.dependsOnEnvVars) {
+              for (const varName of operationSettings.dependsOnEnvVars) {
+                additionalContext['$' + varName] = process.env[varName] || '';
               }
             }
-          } else {
-            buildCacheRecord.cacheDisabledReason =
-              `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-              'or one provided by a rig, so it does not support caching.';
+
+            if (operationSettings.dependsOnAdditionalFiles) {
+              const repoState: IRawRepoState | undefined =
+                await projectChangeAnalyzer._ensureInitializedAsync(terminal);
+
+              const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
+                operationSettings.dependsOnAdditionalFiles,
+                associatedProject.projectFolder,
+                repoState
+              );
+
+              terminal.writeDebugLine(
+                `Including additional files to calculate build cache hash for ${runner.name}:\n  ${Array.from(
+                  additionalFiles.keys()
+                ).join('\n  ')} `
+              );
+
+              for (const [filePath, fileHash] of additionalFiles) {
+                additionalContext['file://' + filePath] = fileHash;
+              }
+            }
+
+            buildCacheRecord.projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
+              project: associatedProject,
+              projectOutputFolderNames,
+              additionalProjectOutputFilePaths,
+              additionalContext,
+              buildCacheConfiguration,
+              configHash: runner.getConfigHash(),
+              projectChangeAnalyzer,
+              phaseName,
+              terminal
+            });
+
+            if (isIncrementalBuildAllowed) {
+              const readOperation: Operation = new Operation({
+                project: associatedProject,
+                phase: associatedPhase,
+                runner: new BuildCacheReadOperationRunner(buildCacheRecord, `${operation.name} (cache read)`)
+              });
+              operation.addDependency(readOperation);
+              buildCacheOperations.add(readOperation);
+            }
+
+            if (isCacheWriteAllowed) {
+              const writeOperation: Operation = new Operation({
+                project: associatedProject,
+                phase: associatedPhase,
+                runner: new BuildCacheWriteOperationRunner(
+                  buildCacheRecord,
+                  `${operation.name} (cache write)`
+                )
+              });
+              writeOperation.addDependency(operation);
+              buildCacheOperations.add(writeOperation);
+            }
           }
         });
 

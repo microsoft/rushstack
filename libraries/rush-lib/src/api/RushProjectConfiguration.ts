@@ -189,7 +189,7 @@ const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson
  * Use this class to load the "config/rush-project.json" config file.
  *
  * This file provides project-specific configuration options.
- * @public
+ * @alpha
  */
 export class RushProjectConfiguration {
   private static readonly _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> =
@@ -282,6 +282,53 @@ export class RushProjectConfiguration {
 
     if (hasErrors) {
       throw new AlreadyReportedError();
+    }
+  }
+
+  /**
+   * Examines the list of source files for the project and the target phase and returns a reason
+   * why the project cannot enable the build cache for that phase, or undefined if it is safe to so do.
+   */
+  public getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string): string | undefined {
+    if (this.disableBuildCacheForProject) {
+      return 'Caching has been disabled for this project.';
+    }
+
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(this.project.projectRelativeFolder);
+
+    const operationSettings: IOperationSettings | undefined =
+      this.operationSettingsByOperationName.get(phaseName);
+    if (!operationSettings) {
+      return `This project does not define the caching behavior of the "${phaseName}" command, so caching has been disabled.`;
+    }
+
+    if (operationSettings.disableBuildCacheForOperation) {
+      return `Caching has been disabled for this project's "${phaseName}" command.`;
+    }
+
+    const { outputFolderNames } = operationSettings;
+    if (!outputFolderNames) {
+      return;
+    }
+
+    const normalizedOutputFolders: string[] = outputFolderNames.map(
+      (outputFolderName) => `${normalizedProjectRelativeFolder}/${outputFolderName}/`
+    );
+
+    const inputOutputFiles: string[] = [];
+    for (const file of trackedFileNames) {
+      for (const outputFolder of normalizedOutputFolders) {
+        if (file.startsWith(outputFolder)) {
+          inputOutputFiles.push(file);
+        }
+      }
+    }
+
+    if (inputOutputFiles.length > 0) {
+      return (
+        'The following files are used to calculate project state ' +
+        `and are considered project output: ${inputOutputFiles.join(', ')}`
+      );
     }
   }
 

@@ -3,12 +3,12 @@
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
-import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
 import { ProjectBuildCache } from '../ProjectBuildCache';
+import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 
 interface ITestOptions {
   enabled: boolean;
@@ -36,15 +36,12 @@ describe(ProjectBuildCache.name, () => {
         }
       } as unknown as BuildCacheConfiguration,
       projectOutputFolderNames: ['dist'],
-      projectConfiguration: {
-        project: {
-          packageName: 'acme-wizard',
-          projectRelativeFolder: 'apps/acme-wizard',
-          dependencyProjects: []
-        }
-      } as unknown as RushProjectConfiguration,
-      command: 'build',
-      trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
+      project: {
+        packageName: 'acme-wizard',
+        projectRelativeFolder: 'apps/acme-wizard',
+        dependencyProjects: []
+      } as unknown as RushConfigurationProject,
+      configHash: 'build',
       projectChangeAnalyzer,
       terminal,
       phaseName: 'build'
@@ -59,14 +56,6 @@ describe(ProjectBuildCache.name, () => {
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );
-    });
-
-    it('returns undefined if the tracked file list is undefined', async () => {
-      expect(
-        await prepareSubject({
-          trackedProjectFiles: undefined
-        })
-      ).toBe(undefined);
     });
   });
 });

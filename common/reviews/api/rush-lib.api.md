@@ -1051,12 +1051,13 @@ export class RushLifecycleHooks {
     runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
 }
 
-// @public
+// @alpha
 export class RushProjectConfiguration {
     // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@microsoft/rush-lib" does not have an export "IRushProjectJson"
     //
     // (undocumented)
     readonly disableBuildCacheForProject: boolean;
+    getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string): string | undefined;
     // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@microsoft/rush-lib" does not have an export "IRushProjectJson"
     //
     // (undocumented)
@@ -1067,11 +1068,9 @@ export class RushProjectConfiguration {
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
     // (undocumented)
     readonly project: RushConfigurationProject;
-    // Warning: (ae-incompatible-release-tags) The symbol "tryLoadAndValidateForProjectsAsync" is marked as @public, but its signature references "IPhase" which is marked as @alpha
     static tryLoadAndValidateForProjectsAsync(projects: Iterable<RushConfigurationProject>, phases: ReadonlySet<IPhase>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
     static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
-    // Warning: (ae-incompatible-release-tags) The symbol "validatePhaseConfiguration" is marked as @public, but its signature references "IPhase" which is marked as @alpha
     validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }
 
