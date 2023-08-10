@@ -363,7 +363,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         parallelism,
         changedProjectsOnly,
         beforeExecuteOperation: async (record: IOperationRunnerContext) => {
-          await this.hooks.beforeExecuteOperation.promise(record);
+          return await this.hooks.beforeExecuteOperation.promise(record);
         },
         afterExecuteOperation: async (record: IOperationRunnerContext) => {
           await this.hooks.afterExecuteOperation.promise(record);

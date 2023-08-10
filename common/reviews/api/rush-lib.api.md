@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AsyncParallelHook } from 'tapable';
+import { AsyncSeriesBailHook } from 'tapable';
 import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
@@ -490,6 +491,7 @@ export interface IOperationOptions {
 
 // @beta
 export interface IOperationRunner {
+    commandToRun?: string;
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
     readonly name: string;
     reportTiming: boolean;
@@ -501,13 +503,11 @@ export interface IOperationRunner {
 export interface IOperationRunnerContext {
     readonly changedProjectsOnly: boolean;
     collatedWriter: CollatedWriter;
-    readonly consumers: Set<IOperationRunnerContext>;
     debugMode: boolean;
     error?: Error;
     // @internal
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
-    readonly runner: IOperationRunner;
     status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
@@ -839,7 +839,7 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 export class PhasedCommandHooks {
     readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
-    readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
+    readonly beforeExecuteOperation: AsyncSeriesBailHook<[IOperationRunnerContext], OperationStatus | undefined>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[
     Map<Operation, IOperationExecutionResult>,
     ICreateOperationsContext

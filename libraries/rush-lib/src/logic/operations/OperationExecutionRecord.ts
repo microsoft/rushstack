@@ -10,6 +10,8 @@ import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { OperationMetadataManager } from './OperationMetadataManager';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -87,6 +89,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
 
   public readonly runner: IOperationRunner;
   public readonly weight: number;
+  public readonly associatedPhase: IPhase | undefined;
+  public readonly associatedProject: RushConfigurationProject | undefined;
   public readonly _operationMetadataManager: OperationMetadataManager | undefined;
 
   private readonly _context: IOperationExecutionRecordContext;
@@ -94,16 +98,18 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   private _collatedWriter: CollatedWriter | undefined = undefined;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
-    const { runner } = operation;
+    const { runner, associatedPhase, associatedProject } = operation;
 
     if (!runner) {
       throw new InternalError(
-        `Operation for phase '${operation.associatedPhase?.name}' and project '${operation.associatedProject?.packageName}' has no runner.`
+        `Operation for phase '${associatedPhase?.name}' and project '${associatedProject?.packageName}' has no runner.`
       );
     }
 
     this.runner = runner;
     this.weight = operation.weight;
+    this.associatedPhase = associatedPhase;
+    this.associatedProject = associatedProject;
     if (operation.associatedPhase && operation.associatedProject) {
       this._operationMetadataManager = new OperationMetadataManager({
         phase: operation.associatedPhase,
@@ -147,13 +153,28 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
   }
 
-  public async executeAsync(onResult: (record: OperationExecutionRecord) => Promise<void>): Promise<void> {
+  public async executeAsync({
+    onStart,
+    onResult
+  }: {
+    onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
+    onResult: (record: OperationExecutionRecord) => Promise<void>;
+  }): Promise<void> {
+    if (this.status === OperationStatus.RemoteExecuting) {
+      this.stopwatch.reset();
+    }
     this.status = OperationStatus.Executing;
     this.stopwatch.start();
     this._context.onOperationStatusChanged?.(this);
 
     try {
-      this.status = await this.runner.executeAsync(this);
+      const earlyReturnStatus: OperationStatus | undefined = await onStart(this);
+      // When the operation status returns by the hook, bypass the runner execution.
+      if (earlyReturnStatus) {
+        this.status = earlyReturnStatus;
+      } else {
+        this.status = await this.runner.executeAsync(this);
+      }
       // Delegate global state reporting
       await onResult(this);
     } catch (error) {

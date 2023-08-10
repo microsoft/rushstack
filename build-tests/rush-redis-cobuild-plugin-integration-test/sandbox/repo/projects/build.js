@@ -11,4 +11,4 @@ setTimeout(() => {
   FileSystem.ensureFolder(outputFolder);
   FileSystem.writeFile(outputFile, `Hello world! ${args.join(' ')}`);
   console.log('done');
-}, 1000);
+}, 2000);

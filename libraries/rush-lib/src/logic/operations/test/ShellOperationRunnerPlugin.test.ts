@@ -21,7 +21,7 @@ interface ISerializedOperation {
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
     name: operation.name!,
-    commandToRun: (operation.runner as ShellOperationRunner)['_commandToRun']
+    commandToRun: (operation.runner as ShellOperationRunner).commandToRun
   };
 }
 

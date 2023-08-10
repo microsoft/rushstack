@@ -2,16 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as path from 'path';
-import {
-  JsonFile,
-  Text,
-  FileSystem,
-  NewlineKind,
-  InternalError,
-  Terminal,
-  ColorValue
-} from '@rushstack/node-core-library';
+import { Text, NewlineKind, InternalError, Terminal } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
   TextRewriterTransform,
@@ -28,22 +19,11 @@ import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { PeriodicCallback } from './PeriodicCallback';
-import {
-  IOperationRunnerAfterExecuteContext,
-  IOperationRunnerBeforeExecuteContext,
-  OperationRunnerHooks
-} from './OperationRunnerHooks';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-
-export interface IProjectDeps {
-  files: { [filePath: string]: string };
-  arguments: string;
-}
 
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
@@ -70,40 +50,22 @@ export class ShellOperationRunner implements IOperationRunner {
   public readonly silent: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
-  public readonly hooks: OperationRunnerHooks;
-  public readonly periodicCallback: PeriodicCallback;
-  public readonly logFilenameIdentifier: string;
-  public static readonly periodicCallbackIntervalInSeconds: number = 10;
+  public readonly commandToRun: string;
 
+  private readonly _logFilenameIdentifier: string;
   private readonly _rushProject: RushConfigurationProject;
-  private readonly _phase: IPhase;
   private readonly _rushConfiguration: RushConfiguration;
-  private readonly _commandName: string;
-  private readonly _commandToRun: string;
-  private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
-  private readonly _packageDepsFilename: string;
-  private readonly _selectedPhases: Iterable<IPhase>;
 
   public constructor(options: IOperationRunnerOptions) {
     const { phase } = options;
 
     this.name = options.displayName;
     this._rushProject = options.rushProject;
-    this._phase = phase;
     this._rushConfiguration = options.rushConfiguration;
-    this._commandName = phase.name;
-    this._commandToRun = options.commandToRun;
-    this._projectChangeAnalyzer = options.projectChangeAnalyzer;
-    this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
+    this.commandToRun = options.commandToRun;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
-    this.logFilenameIdentifier = phase.logFilenameIdentifier;
-    this._selectedPhases = options.selectedPhases;
-
-    this.hooks = new OperationRunnerHooks();
-    this.periodicCallback = new PeriodicCallback({
-      interval: ShellOperationRunner.periodicCallbackIntervalInSeconds * 1000
-    });
+    this._logFilenameIdentifier = phase.logFilenameIdentifier;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -118,10 +80,8 @@ export class ShellOperationRunner implements IOperationRunner {
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal,
-      this.logFilenameIdentifier
+      this._logFilenameIdentifier
     );
-
-    const finallyCallbacks: (() => {})[] = [];
 
     try {
       //#region OPERATION LOGGING
@@ -170,102 +130,12 @@ export class ShellOperationRunner implements IOperationRunner {
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
-      let lastProjectDeps: IProjectDeps | undefined = undefined;
-
-      const currentDepsPath: string = path.join(
-        this._rushProject.projectRushTempFolder,
-        this._packageDepsFilename
-      );
-
-      if (FileSystem.exists(currentDepsPath)) {
-        try {
-          lastProjectDeps = JsonFile.load(currentDepsPath);
-        } catch (e) {
-          // Warn and ignore - treat failing to load the file as the project being not built.
-          terminal.writeWarningLine(
-            `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
-              `treating the command "${this._commandToRun}" as not run.`
-          );
-        }
-      }
-
-      let projectDeps: IProjectDeps | undefined;
-      let trackedProjectFiles: string[] | undefined;
-      try {
-        const fileHashes: Map<string, string> | undefined =
-          await this._projectChangeAnalyzer._tryGetProjectDependenciesAsync(this._rushProject, terminal);
-
-        if (fileHashes) {
-          const files: { [filePath: string]: string } = {};
-          trackedProjectFiles = [];
-          for (const [filePath, fileHash] of fileHashes) {
-            files[filePath] = fileHash;
-            trackedProjectFiles.push(filePath);
-          }
-
-          projectDeps = {
-            files,
-            arguments: this._commandToRun
-          };
-        }
-      } catch (error) {
-        // To test this code path:
-        // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
-        terminal.writeLine('Unable to calculate incremental state: ' + (error as Error).toString());
-        terminal.writeLine({
-          text: 'Rush will proceed without incremental execution, caching, and change detection.',
-          foregroundColor: ColorValue.Cyan
-        });
-      }
-
-      const beforeExecuteContext: IOperationRunnerBeforeExecuteContext = {
-        context,
-        runner: this,
-        terminal,
-        projectDeps,
-        lastProjectDeps,
-        trackedProjectFiles,
-        logPath: projectLogWritable.logPath,
-        errorLogPath: projectLogWritable.errorLogPath,
-        rushProject: this._rushProject,
-        phase: this._phase,
-        commandName: this._commandName,
-        commandToRun: this._commandToRun,
-        finallyCallbacks
-      };
-
-      const earlyReturnStatus: OperationStatus | undefined = await this.hooks.beforeExecute.promise(
-        beforeExecuteContext
-      );
-      if (earlyReturnStatus) {
-        return earlyReturnStatus;
-      }
-
-      // If the deps file exists, remove it before starting execution.
-      FileSystem.deleteFile(currentDepsPath);
-
-      // TODO: Remove legacyDepsPath with the next major release of Rush
-      const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
-      // Delete the legacy package-deps.json
-      FileSystem.deleteFile(legacyDepsPath);
-
-      if (!this._commandToRun) {
-        // Write deps on success.
-        if (projectDeps) {
-          JsonFile.save(projectDeps, currentDepsPath, {
-            ensureFolderExists: true
-          });
-        }
-
-        return OperationStatus.Success;
-      }
 
       // Run the operation
-      terminal.writeLine('Invoking: ' + this._commandToRun);
-      this.periodicCallback.start();
+      terminal.writeLine('Invoking: ' + this.commandToRun);
 
       const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-        this._commandToRun,
+        this.commandToRun,
         {
           rushConfiguration: this._rushConfiguration,
           workingDirectory: projectFolder,
@@ -292,14 +162,12 @@ export class ShellOperationRunner implements IOperationRunner {
         });
       }
 
-      let exitCode: number = 1;
       let status: OperationStatus = await new Promise(
         (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
           subProcess.on('close', (code: number) => {
-            exitCode = code;
             try {
               if (code !== 0) {
-                // Do NOT reject here immediately, give a chance for hooks to suppress the error
+                // Do NOT reject here immediately, give a chance for other logic to suppress the error
                 context.error = new OperationError('error', `Returned error code: ${code}`);
                 resolve(OperationStatus.Failure);
               } else if (hasWarningOrError) {
@@ -323,39 +191,6 @@ export class ShellOperationRunner implements IOperationRunner {
         throw new InternalError('The output file handle was not closed');
       }
 
-      const taskIsSuccessful: boolean =
-        status === OperationStatus.Success ||
-        (status === OperationStatus.SuccessWithWarning &&
-          this.warningsAreAllowed &&
-          !!this._rushConfiguration.experimentsConfiguration.configuration
-            .buildCacheWithAllowWarningsInSuccessfulBuild);
-
-      if (taskIsSuccessful && projectDeps) {
-        // Write deps on success.
-        await JsonFile.saveAsync(projectDeps, currentDepsPath, {
-          ensureFolderExists: true
-        });
-      }
-
-      const afterExecuteContext: IOperationRunnerAfterExecuteContext = {
-        context,
-        terminal,
-        exitCode,
-        status,
-        taskIsSuccessful,
-        logPath: projectLogWritable.logPath,
-        errorLogPath: projectLogWritable.errorLogPath
-      };
-
-      await this.hooks.afterExecute.promise(afterExecuteContext);
-
-      if (context.error) {
-        throw context.error;
-      }
-
-      // Sync the status in case it was changed by the hook
-      status = afterExecuteContext.status;
-
       if (terminalProvider.hasErrors) {
         status = OperationStatus.Failure;
       }
@@ -363,10 +198,6 @@ export class ShellOperationRunner implements IOperationRunner {
       return status;
     } finally {
       projectLogWritable.close();
-      this.periodicCallback.stop();
-      for (const callback of finallyCallbacks) {
-        callback();
-      }
     }
   }
 }

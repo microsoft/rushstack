@@ -184,7 +184,7 @@ export class ProjectBuildCache {
     const tarUtility: TarExecutable | undefined = await ProjectBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
-      const logFilePath: string = this._getTarLogFilePath();
+      const logFilePath: string = this._getTarLogFilePath('untar');
       const tarExitCode: number = await tarUtility.tryUntarAsync({
         archivePath: localCacheEntryPath,
         outputFolderPath: projectFolderPath,
@@ -194,7 +194,10 @@ export class ProjectBuildCache {
         restoreSuccess = true;
         terminal.writeLine('Successfully restored output from the build cache.');
       } else {
-        terminal.writeWarningLine('Unable to restore output from the build cache.');
+        terminal.writeWarningLine(
+          'Unable to restore output from the build cache. ' +
+            `See "${logFilePath}" for logs from the tar process.`
+        );
       }
     }
 
@@ -238,7 +241,7 @@ export class ProjectBuildCache {
       const randomSuffix: string = crypto.randomBytes(8).toString('hex');
       const tempLocalCacheEntryPath: string = `${finalLocalCacheEntryPath}-${randomSuffix}.temp`;
 
-      const logFilePath: string = this._getTarLogFilePath();
+      const logFilePath: string = this._getTarLogFilePath('tar');
       const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
         archivePath: tempLocalCacheEntryPath,
         paths: filesToCache.outputFilePaths,
@@ -382,7 +385,7 @@ export class ProjectBuildCache {
     // Add additional output file paths
     await Async.forEachAsync(
       this._additionalProjectOutputFilePaths,
-      async (additionalProjectOutputFilePath) => {
+      async (additionalProjectOutputFilePath: string) => {
         const fullPath: string = `${projectFolderPath}/${additionalProjectOutputFilePath}`;
         const pathExists: boolean = await FileSystem.existsAsync(fullPath);
         if (pathExists) {
@@ -401,8 +404,8 @@ export class ProjectBuildCache {
     };
   }
 
-  private _getTarLogFilePath(): string {
-    return path.join(this._project.projectRushTempFolder, `${this._cacheId}.log`);
+  private _getTarLogFilePath(mode: 'tar' | 'untar'): string {
+    return path.join(this._project.projectRushTempFolder, `${this._cacheId}.${mode}.log`);
   }
 
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
