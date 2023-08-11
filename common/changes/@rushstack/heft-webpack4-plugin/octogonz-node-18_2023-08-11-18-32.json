@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Display a warning if Node.js 17 or newer is used without the \"--openssl-legacy-provider\" workaround",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}
