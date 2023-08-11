@@ -15,7 +15,11 @@ jobs:
             OS: ubuntu-latest
           - NodeVersion: 16
             OS: ubuntu-latest
+          - NodeVersion: 18
+            OS: ubuntu-latest
           - NodeVersion: 16
+            OS: windows-latest
+          - NodeVersion: 18
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersion }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
@@ -50,11 +54,18 @@ jobs:
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
 
+          # Workaround for Node 18 incompatibility with Webpack 4
+          NODE_OPTIONS: --openssl-legacy-provider
+
+      - name: Ensure repo README is up-to-date
+        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+
       - name: Rush test (rush-lib)
         run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
         env:
           # Prevent time-based browserslist update warning
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
-      - name: Ensure repo README is up-to-date
-        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+
+          # Workaround for Node 18 incompatibility with Webpack 4
+          NODE_OPTIONS: --openssl-legacy-provider
