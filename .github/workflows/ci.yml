@@ -37,6 +37,11 @@ jobs:
         with:
           node-version: ${{ matrix.NodeVersion }}
 
+      # Workaround for Node 18 incompatibility with Webpack 4
+      - name: Enable Webpack4 workaround
+        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
+        if: matrix.NodeVersion == 18
+
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
 
@@ -54,9 +59,6 @@ jobs:
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
 
-          # Workaround for Node 18 incompatibility with Webpack 4
-          NODE_OPTIONS: --openssl-legacy-provider
-
       - name: Ensure repo README is up-to-date
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
 
@@ -66,6 +68,3 @@ jobs:
           # Prevent time-based browserslist update warning
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
-
-          # Workaround for Node 18 incompatibility with Webpack 4
-          NODE_OPTIONS: --openssl-legacy-provider
