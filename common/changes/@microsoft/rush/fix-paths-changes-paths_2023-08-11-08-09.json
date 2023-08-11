@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where changefiles would not be correctly discovered when running on Windows.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
