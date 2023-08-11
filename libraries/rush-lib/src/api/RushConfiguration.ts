@@ -60,6 +60,7 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.buildCacheFilename,
   RushConstants.commandLineFilename,
   RushConstants.commonVersionsFilename,
+  RushConstants.customTipsFilename,
   RushConstants.experimentsFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
@@ -816,7 +817,10 @@ export class RushConfiguration {
     );
     this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
 
-    this.customTipsConfigurationFilePath = path.join(this.rushJsonFolder, RushConstants.customTipsFilename);
+    this.customTipsConfigurationFilePath = path.join(
+      this.commonRushConfigFolder,
+      RushConstants.customTipsFilename
+    );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
 
     this._variants = new Set<string>();

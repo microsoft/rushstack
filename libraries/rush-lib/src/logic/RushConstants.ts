@@ -134,7 +134,8 @@ export class RushConstants {
 
   /**
    * The filename ("custom-tips.json") for the file used by Rush to
-   * print user-customized messages
+   * print user-customized messages.
+   * This configuration file should go in the "common/config/rush" folder.
    */
   public static readonly customTipsFilename: string = 'custom-tips.json';
 
