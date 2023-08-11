@@ -188,7 +188,7 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     const versionMatch: RegExpExecArray | null = /^([0-9]+)\./.exec(process.versions.node); // parse the SemVer MAJOR part
     if (versionMatch) {
       const nodejsMajorVersion: number = parseInt(versionMatch[1]);
-      if (nodejsMajorVersion >= 16) {
+      if (nodejsMajorVersion > 16) {
         // Match strings like this:
         //   "--max-old-space-size=4096 --openssl-legacy-provider"
         //   "--openssl-legacy-provider=true"
