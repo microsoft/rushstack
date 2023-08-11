@@ -36,7 +36,7 @@ jobs:
           node-version: ${{ matrix.NodeVersion }}
 
       # Workaround for Node 18 incompatibility with Webpack 4
-      - name: Enable Webpack 4 workaround
+      - name: Set environment for Webpack 4 workaround
         shell: bash
         run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> "$GITHUB_ENV"
         if: matrix.NodeVersion == 18
@@ -67,3 +67,9 @@ jobs:
           # Prevent time-based browserslist update warning
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
+
+      # One of the post run actions apparently uses older Node.js that rejects --openssl-legacy-provider
+      - name: Unset environment for Webpack 4 workaround
+        shell: bash
+        run: echo "NODE_OPTIONS=" >> "$GITHUB_ENV"
+        if: matrix.NodeVersion == 18
