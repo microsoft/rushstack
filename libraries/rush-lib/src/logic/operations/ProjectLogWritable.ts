@@ -103,6 +103,15 @@ export class ProjectLogWritable extends TerminalWritable {
     };
   }
 
+  // Override writeChunk function to throw custom error
+  public writeChunk(chunk: ITerminalChunk): void {
+    if (!this._logWriter) {
+      throw new InternalError(`Log writer was closed for ${this.logPath}`);
+    }
+    // Stderr can always get written to a error log writer
+    super.writeChunk(chunk);
+  }
+
   protected onWriteChunk(chunk: ITerminalChunk): void {
     if (!this._logWriter) {
       throw new InternalError('Output file was closed');
