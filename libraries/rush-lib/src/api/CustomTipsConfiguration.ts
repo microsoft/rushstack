@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
@@ -30,10 +31,8 @@ export enum CustomTipSeverity {
 
 /**
  * @beta
- * @privateRemarks
- * TODO: consider making this work with the plugin (i.e., the plugins are able to define their own customizable tips)
  */
-export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY';
+export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | string;
 
 /**
  * @beta
@@ -45,6 +44,8 @@ export class CustomTipsConfiguration {
   private readonly _jsonFileName: string;
 
   public readonly configuration: Readonly<ICustomTipsJson>;
+
+  public static readonly knownTipIds: ReadonlySet<string> = new Set<string>(['PNPM_MISMATCH_DEPENDENCY']);
 
   public constructor(configFilename: string) {
     this._jsonFileName = configFilename;
@@ -58,6 +59,18 @@ export class CustomTipsConfiguration {
       const customTips: ICustomTipItemJson[] | undefined = this.configuration?.customTips;
       if (customTips) {
         for (const tipItem of customTips) {
+          if (!CustomTipsConfiguration.knownTipIds.has(tipItem.id)) {
+            throw new Error(
+              `The ${path.basename(this._jsonFileName)} configuration` +
+                ` references an unknown ID "${tipItem.id}"`
+            );
+          }
+          if (this._tipMap.has(tipItem.id)) {
+            throw new Error(
+              `The ${path.basename(this._jsonFileName)} configuration` +
+                ` specifies a duplicate definition for "${tipItem.id}"`
+            );
+          }
           this._tipMap.set(tipItem.id, tipItem);
         }
       }

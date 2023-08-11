@@ -126,13 +126,15 @@ export class CredentialCache {
 }
 
 // @beta (undocumented)
-export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY';
+export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | string;
 
 // @beta (undocumented)
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
     // (undocumented)
     readonly configuration: Readonly<ICustomTipsJson>;
+    // (undocumented)
+    static readonly knownTipIds: ReadonlySet<string>;
     // (undocumented)
     log(tipId: CustomTipId, terminal: ITerminal): void;
 }

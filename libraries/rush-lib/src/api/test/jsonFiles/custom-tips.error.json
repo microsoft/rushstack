@@ -1,0 +1,12 @@
+{
+  "customTips": [
+    {
+      "id": "PNPM_MISMATCH_DEPENDENCY",
+      "tip": "definition 1"
+    },
+    {
+      "id": "PNPM_MISMATCH_DEPENDENCY",
+      "tip": "definition 2"
+    }
+  ]
+}

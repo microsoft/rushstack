@@ -7,4 +7,10 @@ describe(CustomTipsConfiguration.name, () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
     expect(rushConfiguration.customTipsConfiguration.configuration.customTips?.length).toBe(1);
   });
+
+  it('reports an error for duplicate tips', () => {
+    expect(() => {
+      new CustomTipsConfiguration(`${__dirname}/jsonFiles/custom-tips.error.json`);
+    }).toThrowError('PNPM_MISMATCH_DEPENDENCY');
+  });
 });
