@@ -101,6 +101,22 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions = {}
   ): void {
+    const versionMatch: RegExpExecArray | null = /^([0-9]+)\./.exec(process.versions.node); // parse the SemVer MAJOR part
+    if (versionMatch) {
+      const nodejsMajorVersion: number = parseInt(versionMatch[1]);
+      if (nodejsMajorVersion >= 16) {
+        if (!/(^|[^a-z\-])--openssl-legacy-provider($|[^a-z\-])/.test(process.env.NODE_OPTIONS ?? '')) {
+          taskSession.logger.emitWarning(
+            new Error(
+              `Node.js version ${nodejsMajorVersion} is incompatible with Webpack 4. To work around this problem, use the environment variable NODE_OPTIONS="--openssl-legacy-provider"`
+            )
+          );
+        }
+      }
+    } else {
+      taskSession.logger.emitWarning(new Error(`Unable to parse Node.js version "${process.versions.node}"`));
+    }
+
     this._isServeMode = taskSession.parameters.getFlagParameter(SERVE_PARAMETER_LONG_NAME).value;
     if (!taskSession.parameters.watch && this._isServeMode) {
       throw new Error(
