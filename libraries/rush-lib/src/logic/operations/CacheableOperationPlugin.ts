@@ -162,8 +162,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
               const groupedRecords: OperationExecutionRecord[] = Array.from(set);
               Sort.sortBy(groupedRecords, (record: OperationExecutionRecord) => {
-                const { associatedProject, associatedPhase } = record;
-                return `${associatedProject?.packageName}${RushConstants.hashDelimiter}${associatedPhase?.name}`;
+                return record.runner.name;
               });
 
               // Generates cluster id, cluster id comes from the project folder and phase name of all operations in the same cluster.
