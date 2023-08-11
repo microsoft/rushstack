@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update the \"rush init\" template's .gitignore to avoid spurious diffs for files such as \"autoinstaller.lock\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
