@@ -1,8 +1,8 @@
 # @rushstack/rush-serve-plugin
 
-UNDER DEVELOPMENT
-
 A Rush plugin that hooks into action execution and runs an express server to serve project outputs. Meant for use with watch-mode commands.
+
+Supports HTTP/2, compression, CORS, and the new Access-Control-Allow-Private-Network header.
 
 ```
 # The user invokes this command

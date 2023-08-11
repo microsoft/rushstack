@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support in rush-serve-plugin for HTTP/2, gzip compression, and CORS preflight requests.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

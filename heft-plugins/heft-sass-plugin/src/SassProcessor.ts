@@ -106,7 +106,13 @@ export class SassProcessor extends StringValuesTypingsGenerator {
 
     const { allFileExtensions, isFileModule } = buildExtensionClassifier(sassConfiguration);
 
-    const { cssOutputFolders, preserveSCSSExtension = false } = sassConfiguration;
+    const {
+      cssOutputFolders,
+      excludeFiles,
+      secondaryGeneratedTsFolders,
+      importIncludePaths,
+      preserveSCSSExtension = false
+    } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
@@ -125,14 +131,26 @@ export class SassProcessor extends StringValuesTypingsGenerator {
         }
       : undefined;
 
+    let globsToIgnore: string[] | undefined;
+    if (excludeFiles) {
+      globsToIgnore = [];
+      for (const excludedFile of excludeFiles) {
+        if (excludedFile.startsWith('./')) {
+          globsToIgnore.push(excludedFile.substring(2));
+        } else {
+          globsToIgnore.push(excludedFile);
+        }
+      }
+    }
+
     super({
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions: allFileExtensions,
-      filesToIgnore: sassConfiguration.excludeFiles,
-      secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
+      globsToIgnore,
+      secondaryGeneratedTsFolders,
 
       getAdditionalOutputFiles: getCssPaths,
 
@@ -149,7 +167,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.importIncludePaths
+          importIncludePaths
         );
 
         let classMap: IClassMap = {};

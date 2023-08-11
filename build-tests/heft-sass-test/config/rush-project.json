@@ -4,7 +4,7 @@
   "operationSettings": [
     {
       "operationName": "build",
-      "outputFolderNames": ["lib", "dist"]
+      "outputFolderNames": ["lib", "dist", "temp/sass-ts"]
     }
   ]
 }

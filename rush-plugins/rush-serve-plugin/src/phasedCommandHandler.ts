@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { once } from 'events';
-import https from 'https';
-import type { AddressInfo } from 'net';
+import { once } from 'node:events';
+import http2 from 'node:http2';
+import type { AddressInfo } from 'node:net';
 
-import express from 'express';
+import express, { type Application } from 'express';
+import http2express from 'http2-express-bridge';
+import cors from 'cors';
+import compression from 'compression';
+
 import { CertificateManager, ICertificate } from '@rushstack/debug-certificate-manager';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type {
@@ -92,7 +96,37 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
         throw new AlreadyReportedError();
       }
 
-      const app: express.Express = express();
+      const app: Application = http2express(express);
+
+      app.use((req: unknown, res: unknown, next: () => void) => {
+        // Hack to allow the compression middleware to be used with http2-express-bridge
+        Object.defineProperty(res, '_header', {
+          get: function () {
+            return this.headersSent;
+          }
+        });
+
+        Object.defineProperty(res, '_implicitHeader', {
+          value: function () {
+            return this.writeHead(this.statusCode);
+          }
+        });
+        next();
+      });
+
+      app.use((req, res, next) => {
+        res.setHeader('Access-Control-Allow-Private-Network', 'true'); // Allow access from other devices on the same network
+        next();
+      });
+
+      app.options(
+        '*',
+        cors({
+          // No options needed
+        })
+      );
+
+      app.use(compression({}));
 
       const selectedProjects: ReadonlySet<RushConfigurationProject> = context.projectSelection;
 
@@ -151,11 +185,12 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
         }
       }
 
-      const server: https.Server = https.createServer(
+      const server: http2.Http2SecureServer = http2.createSecureServer(
         {
           ca: certificate.pemCaCertificate,
           cert: certificate.pemCertificate,
-          key: certificate.pemKey
+          key: certificate.pemKey,
+          allowHTTP1: true
         },
         app
       );

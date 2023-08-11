@@ -1,6 +1,30 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 14 Jun 2023 19:42:12 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:11:02 GMT and should not be manually modified.
+
+## 5.101.0
+Tue, 08 Aug 2023 07:11:02 GMT
+
+### Updates
+
+- Enable the "http" option for build-cache providers
+- Switch from glob to fast-glob.
+- Reduce false positive detections of the pnpm shrinkwrap file being out of date in the presence of the `globalOverrides` setting in `pnpm-config.json`, or when a dependency is listed in both `dependencies` and `devDependencies` in the same package.
+- @rushstack/rush-sdk now exposes a secondary API for manually loading the Rush engine and monitoring installation progress
+- Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`.
+- Improve version resolution logic in common/scripts/install-run.js (see https://github.com/microsoft/rushstack/issues/4256)
+- Add `patternsToInclude` and `patternsToExclude` support to Rush deploy.json configurations. This will allow developers to include or exclude provided glob patterns within a local project when running `rush deploy`.
+
+## 5.100.2
+Mon, 24 Jul 2023 18:54:49 GMT
+
+### Patches
+
+- Fix an issue where the git pre-push hook would allow push to go through if the script exited with error.
+
+### Updates
+
+- Updated semver dependency
 
 ## 5.100.1
 Wed, 14 Jun 2023 19:42:12 GMT

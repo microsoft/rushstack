@@ -5,12 +5,17 @@
 
 
 
-[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain) &nbsp; <a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" />  Open in Visual Studio Code</a>
+[![Zulip chat room](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://rushstack.zulipchat.com/) &nbsp; [![Build Status](https://github.com/microsoft/rushstack/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/rushstack/actions/workflows/ci.yml?query=branch%3Amain)
 
-The home for various projects maintained by the Rush Stack community, whose mission is to develop reusable tooling
+
+The home for projects maintained by the Rush Stack community. Our mission is to develop reusable tooling
 for large scale TypeScript monorepos.
 
- [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
+
+<table><tr><td>
+<a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" /> Open in VS Code web view</a>
+</td></tr></table>
 
 ## Documentation Links
 
@@ -18,9 +23,11 @@ for large scale TypeScript monorepos.
 - [API reference](https://api.rushstack.io/) - browse API documentation for NPM packages
 - [Zulip chat room](https://rushstack.zulipchat.com/) - chat with the Rush Stack developers
 - [Rush](https://rushjs.io/) - a build orchestrator for large scale TypeScript monorepos
+- [Heft](https://heft.rushstack.io/) - our recommended tool that integrates with Rush
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
-
+- [Lockfile Explorer](https://lfx.rushstack.io/) - investigate and solve version conflicts for PNPM lockfiles
+- [TSDoc](https://tsdoc.org/) - the standard for doc comments in TypeScript code
 
 ## Related Repos
 
@@ -30,8 +37,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
   illustrate various project setups, including how to use Heft with other popular JavaScript frameworks
 - [rush-example](https://github.com/microsoft/rush-example) - a minimal Rush repo that demonstrates the fundamentals
   of Rush without relying on any other Rush Stack tooling
-- [rushstack-legacy](https://github.com/microsoft/rushstack-legacy) - older projects that are still maintained
-  but no longer actively developed
+- [rushstack-websites](https://github.com/microsoft/rushstack-websites) - Docusaurus monorepo for our websites
 
 
 <!-- GENERATED PROJECT SUMMARY START -->
@@ -156,6 +162,10 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
+| [/build-tests/package-extractor-test-01](./build-tests/package-extractor-test-01/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-02](./build-tests/package-extractor-test-02/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-03](./build-tests/package-extractor-test-03/) | This project is used by tests in the @rushstack/package-extractor package. |
+| [/build-tests/package-extractor-test-04](./build-tests/package-extractor-test-04/) | This project is used by tests in the @rushstack/package-extractor package. |
 | [/build-tests/rush-amazon-s3-build-cache-plugin-integration-test](./build-tests/rush-amazon-s3-build-cache-plugin-integration-test/) | Tests connecting to an amazon S3 endpoint |
 | [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
@@ -167,6 +177,8 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
+| [/vscode-extensions/rush-vscode-command-webview](./vscode-extensions/rush-vscode-command-webview/) | Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands |
+| [/vscode-extensions/rush-vscode-extension](./vscode-extensions/rush-vscode-extension/) | Enhanced experience for monorepos that use the Rush Stack toolchain |
 | [/webpack/webpack-deep-imports-plugin](./webpack/webpack-deep-imports-plugin/) | This plugin creates a bundle and commonJS files in a 'lib' folder mirroring modules in another 'lib' folder. |
 <!-- GENERATED PROJECT SUMMARY END -->
 

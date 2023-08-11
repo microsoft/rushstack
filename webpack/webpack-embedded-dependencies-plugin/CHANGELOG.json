@@ -2,6 +2,222 @@
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
   "entries": [
     {
+      "version": "0.1.37",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.37",
+      "date": "Tue, 08 Aug 2023 07:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.37`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.36",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.36",
+      "date": "Mon, 31 Jul 2023 15:19:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.36`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.35",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.35",
+      "date": "Sat, 29 Jul 2023 00:22:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.35`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.34",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.34",
+      "date": "Thu, 20 Jul 2023 20:47:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.58.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.33",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.33",
+      "date": "Wed, 19 Jul 2023 00:20:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.33`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.57.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.32",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.32",
+      "date": "Fri, 14 Jul 2023 15:20:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.31",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.31",
+      "date": "Thu, 13 Jul 2023 00:22:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.57.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.30",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.30",
+      "date": "Wed, 12 Jul 2023 15:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.29",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.29",
+      "date": "Wed, 12 Jul 2023 00:23:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.28",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.28",
+      "date": "Fri, 07 Jul 2023 00:19:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.27",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.27",
+      "date": "Thu, 06 Jul 2023 00:16:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.56.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.26",
+      "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.26",
+      "date": "Tue, 04 Jul 2023 00:18:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.2.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `2.2.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.25",
       "tag": "@rushstack/webpack-embedded-dependencies-plugin_v0.1.25",
       "date": "Mon, 19 Jun 2023 22:40:21 GMT",

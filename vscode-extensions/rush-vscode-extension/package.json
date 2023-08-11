@@ -1,0 +1,285 @@
+{
+  "name": "rushstack",
+  "version": "0.0.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "vscode-extensions/rush-vscode-extension"
+  },
+  "license": "MIT",
+  "publisher": "RushStack",
+  "preview": true,
+  "displayName": "Rush Stack monorepo tools",
+  "description": "Enhanced experience for monorepos that use the Rush Stack toolchain",
+  "homepage": "https://rushstack.io",
+  "categories": [
+    "Formatters",
+    "Other",
+    "Extension Packs",
+    "Visualization"
+  ],
+  "keywords": [
+    "api-extractor",
+    "build",
+    "heft",
+    "js",
+    "lockfile",
+    "monorepo",
+    "orchestrator",
+    "rig",
+    "rush",
+    "ts",
+    "tsdoc",
+    "typescript",
+    "web"
+  ],
+  "galleryBanner": {
+    "color": "#f0f0f0",
+    "theme": "light"
+  },
+  "icon": "resources/rushstack-icon.png",
+  "badges": [
+    {
+      "url": "https://img.shields.io/badge/Rush-db714a",
+      "href": "https://rushjs.io/",
+      "description": "Rush build orchestrator"
+    },
+    {
+      "url": "https://img.shields.io/badge/Heft-db714a",
+      "href": "https://heft.rushstack.io/",
+      "description": "Heft toolchain"
+    },
+    {
+      "url": "https://img.shields.io/badge/Lockfile%20Explorer-db714a",
+      "href": "https://lfx.rushstack.io/",
+      "description": "Lockfile Explorer dependency visualizer"
+    },
+    {
+      "url": "https://img.shields.io/badge/API%20Extractor-db714a",
+      "href": "https://api-extractor.com/",
+      "description": "API Extractor review and documentation engine"
+    },
+    {
+      "url": "https://img.shields.io/badge/TSDoc-db714a",
+      "href": "https://tsdoc.org",
+      "description": "TSDoc standard for API doc comments"
+    },
+    {
+      "url": "https://img.shields.io/badge/Get%20Help-0078d4?label=%F0%9F%97%A8%EF%B8%8F",
+      "href": "https://rushstack.io/pages/help/support/",
+      "description": "Rush Stack community support"
+    }
+  ],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
+    "vscode:prepublish": "heft build --clean --production",
+    "deploy": "vsce publish --no-dependencies",
+    "package": "vsce package --no-dependencies",
+    "start": "heft start",
+    "pretest": "npm run build",
+    "test": "node ./lib/test/runTest.js",
+    "_phase:build": "heft build --clean",
+    "_phase:test": ""
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "rushstack.openSettings",
+        "category": "RushStack",
+        "title": "Open Settings"
+      },
+      {
+        "command": "rushstack.selectWorkspace",
+        "category": "RushStack",
+        "title": "Select workspace"
+      },
+      {
+        "command": "rushstack.refresh",
+        "category": "RushStack",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "rushstack.rushCommands.openParameterViewPanel",
+        "category": "RushStack",
+        "title": "Open Parameter View Panel"
+      },
+      {
+        "command": "rushstack.rushCommands.runRushCommand",
+        "category": "RushStack",
+        "title": "Run Rush Command"
+      },
+      {
+        "command": "rushstack.rushProjects.revealInExplorer",
+        "category": "RushStack",
+        "title": "Reveal In Explorer",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "rushstack.rushProjects.revealProjectDetail",
+        "category": "RushStack",
+        "title": "See Project Details",
+        "icon": "$(search)"
+      },
+      {
+        "command": "rushstack.rushProjects.runProjectScript",
+        "category": "RushStack",
+        "title": "Run",
+        "icon": "$(play)"
+      }
+    ],
+    "configuration": {
+      "title": "Rush Stack monorepo tools",
+      "properties": {
+        "rushstack.logLevel": {
+          "type": "string",
+          "default": "info",
+          "enum": [
+            "info",
+            "debug"
+          ],
+          "description": "The log level to use for the VS Code extension"
+        }
+      }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "rushstack.refresh",
+          "when": "view == rushProjects || view == rushCommands",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "rushstack.rushProjects.revealInExplorer",
+          "when": "view == rushProjects && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "rushstack.rushProjects.revealProjectDetail",
+          "when": "view == rushProjects && viewItem == project",
+          "group": "inline"
+        },
+        {
+          "command": "rushstack.rushProjects.runProjectScript",
+          "when": "view == rushProjects && viewItem == projectScript",
+          "group": "inline"
+        }
+      ]
+    },
+    "taskDefinitions": [
+      {
+        "type": "rush",
+        "required": [
+          "cwd",
+          "displayName",
+          "command",
+          "args"
+        ],
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "description": "The working directory for the task"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The display name for the command"
+          },
+          "command": {
+            "type": "string",
+            "description": "The command to run"
+          },
+          "args": {
+            "type": "array",
+            "description": "The arguments to pass to the command"
+          }
+        }
+      },
+      {
+        "type": "rushx",
+        "required": [
+          "cwd",
+          "command"
+        ],
+        "properties": {
+          "cwd": {
+            "type": "string",
+            "description": "The working directory for the command"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The display name for the command"
+          },
+          "command": {
+            "type": "string",
+            "description": "The command to run"
+          }
+        }
+      }
+    ],
+    "views": {
+      "rushstack": [
+        {
+          "id": "rushProjects",
+          "name": "Projects"
+        },
+        {
+          "id": "rushProjectDetails",
+          "type": "webview",
+          "name": "Rush Project Details"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rushstack",
+          "title": "Rush Stack",
+          "icon": "resources/rushstack-icon.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "rushProjects",
+        "contents": "Open a monorepo folder containing a rush.json config file.\n[Open Folder](command:vscode.openFolder)\nFor more information about the Rush Stack tools, consult the [website documentation](https://rushstack.io).",
+        "when": "workbenchState == empty"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onView:rushProjects",
+    "onView:rushCommands",
+    "onView:rushProjectDetails"
+  ],
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
+    "@rushstack/rush-vscode-command-webview": "workspace:*"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/package-extractor": "workspace:*",
+    "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
+    "@types/glob": "7.1.1",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.18.36",
+    "@types/vscode": "^1.63.0",
+    "@types/webpack-env": "1.18.0",
+    "@vscode/test-electron": "^1.6.2",
+    "glob": "~7.0.5",
+    "mocha": "^9.1.3",
+    "vsce": "~2.14.0"
+  },
+  "engines": {
+    "vscode": "^1.63.0"
+  }
+}

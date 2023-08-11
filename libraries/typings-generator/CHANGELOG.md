@@ -1,6 +1,80 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+
+## 0.11.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.11.0
+Sat, 05 Aug 2023 00:20:19 GMT
+
+### Minor changes
+
+- Allow customization of how the TypingsGenerator reads files.
+
+## 0.10.37
+Fri, 04 Aug 2023 00:22:37 GMT
+
+### Patches
+
+- Switch from glob to fast-glob.
+
+## 0.10.36
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.10.35
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.10.34
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.10.33
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.10.32
+Fri, 14 Jul 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.10.31
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.10.30
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.10.29
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.10.28
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.10.27
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.10.26
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 0.10.25
 Mon, 19 Jun 2023 22:40:21 GMT

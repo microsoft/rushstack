@@ -1,6 +1,54 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+
+## 0.58.2
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 0.58.1
+Sat, 29 Jul 2023 00:22:50 GMT
+
+### Patches
+
+- Fix the `toolFinish` lifecycle hook so that it is invoked after the `recordMetrics` hook, rather than before. Ensure that the `toolFinish` lifecycle hook is invoked if the user performs a graceful shutdown of Heft (e.g. via Ctrl+C).
+
+## 0.58.0
+Thu, 20 Jul 2023 20:47:28 GMT
+
+### Minor changes
+
+- BREAKING CHANGE: Update the heft.json "cleanFiles" property and the delete-files-plugin to delete the contents of folders specified by "sourcePath" instead of deleting the folders themselves. To delete the folders, use the "includeGlobs" property to specify the folder to delete.
+
+## 0.57.1
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.57.0
+Thu, 13 Jul 2023 00:22:37 GMT
+
+### Minor changes
+
+- Support `--clean` in watch mode. Cleaning in watch mode is now performed only during the first-pass of lifecycle or phase operations. Once the clean has been completed, `--clean` will be ignored until the command is restarted
+
+## 0.56.3
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 0.56.2
+Fri, 07 Jul 2023 00:19:32 GMT
+
+### Patches
+
+- Revise README.md and UPGRADING.md documentation
+
+## 0.56.1
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
 
 ## 0.56.0
 Mon, 19 Jun 2023 22:40:21 GMT

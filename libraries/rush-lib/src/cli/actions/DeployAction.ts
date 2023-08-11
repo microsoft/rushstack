@@ -164,7 +164,9 @@ export class DeployAction extends BaseRushAction {
         projectFolder: project.projectFolder,
         additionalProjectsToInclude: scenarioProjectJson?.additionalProjectsToInclude,
         additionalDependenciesToInclude: scenarioProjectJson?.additionalDependenciesToInclude,
-        dependenciesToExclude: scenarioProjectJson?.dependenciesToExclude
+        dependenciesToExclude: scenarioProjectJson?.dependenciesToExclude,
+        patternsToInclude: scenarioProjectJson?.patternsToInclude,
+        patternsToExclude: scenarioProjectJson?.patternsToExclude
       });
     }
 

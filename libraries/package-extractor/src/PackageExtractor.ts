@@ -212,6 +212,26 @@ export interface IExtractorOptions {
  */
 export class PackageExtractor {
   /**
+   * Get a list of files that would be included in a package created from the provided package root path.
+   *
+   * @beta
+   */
+  public static async getPackageIncludedFilesAsync(packageRootPath: string): Promise<string[]> {
+    // Use npm-packlist to filter the files.  Using the Walker class (instead of the default API) ensures
+    // that "bundledDependencies" are not included.
+    const walkerPromise: Promise<string[]> = new Promise<string[]>(
+      (resolve: (result: string[]) => void, reject: (error: Error) => void) => {
+        const walker: npmPacklist.Walker = new npmPacklist.Walker({
+          path: packageRootPath
+        });
+        walker.on('done', resolve).on('error', reject).start();
+      }
+    );
+    const npmPackFiles: string[] = await walkerPromise;
+    return npmPackFiles;
+  }
+
+  /**
    * Extract a package using the provided options
    */
   public async extractAsync(options: IExtractorOptions): Promise<void> {
@@ -651,17 +671,7 @@ export class PackageExtractor {
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
 
     if (useNpmIgnoreFilter) {
-      // Use npm-packlist to filter the files.  Using the Walker class (instead of the default API) ensures
-      // that "bundledDependencies" are not included.
-      const walkerPromise: Promise<string[]> = new Promise<string[]>(
-        (resolve: (result: string[]) => void, reject: (error: Error) => void) => {
-          const walker: npmPacklist.Walker = new npmPacklist.Walker({
-            path: sourceFolderPath
-          });
-          walker.on('done', resolve).on('error', reject).start();
-        }
-      );
-      const npmPackFiles: string[] = await walkerPromise;
+      const npmPackFiles: string[] = await PackageExtractor.getPackageIncludedFilesAsync(sourceFolderPath);
 
       const alreadyCopiedSourcePaths: Set<string> = new Set();
 
@@ -729,16 +739,18 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (
-            relativeSourcePath !== '' &&
-            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
-          ) {
+          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
             callback();
             return;
           }
 
           const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
           if (sourcePathNode.kind === 'file') {
+            if (relativeSourcePath !== '' && isFileExcluded(relativeSourcePath)) {
+              callback();
+              return;
+            }
+
             const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
             if (!options.createArchiveOnly) {
               // Manually call fs.copyFile to avoid unnecessary stat calls.

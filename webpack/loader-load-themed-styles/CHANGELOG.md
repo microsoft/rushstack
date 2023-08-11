@@ -1,6 +1,81 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+
+## 2.0.71
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 2.0.70
+Sat, 05 Aug 2023 00:20:19 GMT
+
+_Version update only_
+
+## 2.0.69
+Fri, 04 Aug 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.68
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 2.0.67
+Sat, 29 Jul 2023 00:22:50 GMT
+
+_Version update only_
+
+## 2.0.66
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 2.0.65
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 2.0.64
+Mon, 17 Jul 2023 15:20:25 GMT
+
+_Version update only_
+
+## 2.0.63
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 2.0.62
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.61
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 2.0.60
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 2.0.59
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 2.0.58
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 2.0.57
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 2.0.56
 Mon, 19 Jun 2023 22:40:21 GMT

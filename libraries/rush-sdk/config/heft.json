@@ -9,11 +9,7 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [
-        {
-          "sourcePath": "lib-shim"
-        }
-      ],
+      "cleanFiles": [{ "includeGlobs": ["lib-shim"] }],
 
       "tasksByName": {
         "copy-rush-lib-types": {

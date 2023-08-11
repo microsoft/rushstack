@@ -10,9 +10,9 @@
     "_phase:build": "node build.js"
   },
   "dependencies": {
-    "@types/semver": "7.3.5",
+    "@types/semver": "7.5.0",
     "api-extractor-test-01": "workspace:*",
-    "semver": "~7.3.0"
+    "semver": "~7.5.4"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",

@@ -2,6 +2,53 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.101.0",
+      "tag": "@microsoft/rush_v5.101.0",
+      "date": "Tue, 08 Aug 2023 07:11:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Enable the \"http\" option for build-cache providers"
+          },
+          {
+            "comment": "Switch from glob to fast-glob."
+          },
+          {
+            "comment": "Reduce false positive detections of the pnpm shrinkwrap file being out of date in the presence of the `globalOverrides` setting in `pnpm-config.json`, or when a dependency is listed in both `dependencies` and `devDependencies` in the same package."
+          },
+          {
+            "comment": "@rushstack/rush-sdk now exposes a secondary API for manually loading the Rush engine and monitoring installation progress"
+          },
+          {
+            "comment": "Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`."
+          },
+          {
+            "comment": "Improve version resolution logic in common/scripts/install-run.js (see https://github.com/microsoft/rushstack/issues/4256)"
+          },
+          {
+            "comment": "Add `patternsToInclude` and `patternsToExclude` support to Rush deploy.json configurations. This will allow developers to include or exclude provided glob patterns within a local project when running `rush deploy`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.100.2",
+      "tag": "@microsoft/rush_v5.100.2",
+      "date": "Mon, 24 Jul 2023 18:54:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the git pre-push hook would allow push to go through if the script exited with error."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Updated semver dependency"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.100.1",
       "tag": "@microsoft/rush_v5.100.1",
       "date": "Wed, 14 Jun 2023 19:42:12 GMT",

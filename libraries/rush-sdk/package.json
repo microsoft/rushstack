@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.100.1",
+  "version": "5.101.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -10,6 +10,17 @@
   "homepage": "https://rushjs.io",
   "main": "lib-shim/index.js",
   "typings": "dist/rush-lib.d.ts",
+  "exports": {
+    ".": "./lib-shim/index.js",
+    "./loader": "./lib-shim/loader.js"
+  },
+  "typesVersions": {
+    "*": {
+      "loader": [
+        "./dist/loader.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
@@ -29,7 +40,8 @@
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@types/semver": "7.3.5",
+    "@types/node": "14.18.36",
+    "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.0"
   }
 }

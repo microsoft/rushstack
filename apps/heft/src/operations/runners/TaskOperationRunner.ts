@@ -7,7 +7,7 @@ import { AlreadyReportedError, InternalError } from '@rushstack/node-core-librar
 
 import { OperationStatus } from '../OperationStatus';
 import { HeftTask } from '../../pluginFramework/HeftTask';
-import { copyFilesAsync } from '../../plugins/CopyFilesPlugin';
+import { copyFilesAsync, normalizeCopyOperation } from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type {
@@ -18,11 +18,7 @@ import type {
 } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import {
-  type IGlobOptions,
-  normalizeFileSelectionSpecifier,
-  watchGlobAsync
-} from '../../plugins/FileGlobSpecifier';
+import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
 import { type IWatchedFileState, WatchFileSystemAdapter } from '../../utilities/WatchFileSystemAdapter';
 
 export interface ITaskOperationRunnerOptions {
@@ -85,6 +81,7 @@ export class TaskOperationRunner implements IOperationRunner {
     // if this is an immediate rerun
     logger.resetErrorsAndWarnings();
 
+    const rootFolderPath: string = this._options.internalHeftSession.heftConfiguration.buildFolderPath;
     const isWatchMode: boolean = taskSession.parameters.watch && !!requestRun;
 
     const { terminal } = logger;
@@ -100,9 +97,9 @@ export class TaskOperationRunner implements IOperationRunner {
         deleteOperations: new Set()
       });
 
+      // Do this here so that we only need to do it once for each run
       for (const copyOperation of fileOperations.copyOperations) {
-        // Consolidate fileExtensions, includeGlobs, excludeGlobs
-        normalizeFileSelectionSpecifier(copyOperation);
+        normalizeCopyOperation(rootFolderPath, copyOperation);
       }
 
       this._fileOperations = fileOperations;
@@ -187,7 +184,9 @@ export class TaskOperationRunner implements IOperationRunner {
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),
-        deleteOperations.size > 0 ? deleteFilesAsync(deleteOperations, logger.terminal) : Promise.resolve()
+        deleteOperations.size > 0
+          ? deleteFilesAsync(rootFolderPath, deleteOperations, logger.terminal)
+          : Promise.resolve()
       ]);
     }
 

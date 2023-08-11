@@ -1,6 +1,25 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+
+## 3.59.7
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 3.59.6
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 3.59.5
+Thu, 06 Jul 2023 00:16:19 GMT
+
+### Patches
+
+- Fix Import.resolveModule* and Import.resolvePackage* methods to return real-paths when resolving self-referencing specs
 
 ## 3.59.4
 Thu, 15 Jun 2023 00:21:01 GMT

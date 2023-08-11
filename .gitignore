@@ -85,5 +85,6 @@ lib-esnext
 lib-commonjs
 lib-shim
 dist
+dist-storybook
 *.scss.ts
 *.sass.ts
