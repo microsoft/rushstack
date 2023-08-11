@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where changefiles would not be correctly discovered when running on Windows.",
+      "comment": "Fix a regression from 5.101.0 where publishing features did not detect changes properly when running on  Windows OS (GitHub #4277)",
       "type": "none"
     }
   ],
