@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.101.1",
+      "tag": "@microsoft/rush_v5.101.1",
+      "date": "Fri, 11 Aug 2023 17:57:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression from 5.101.0 where publishing features did not detect changes properly when running on  Windows OS (GitHub #4277)"
+          },
+          {
+            "comment": "Add support in rush-serve-plugin for HTTP/2, gzip compression, and CORS preflight requests."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.101.0",
       "tag": "@microsoft/rush_v5.101.0",
       "date": "Tue, 08 Aug 2023 07:11:02 GMT",

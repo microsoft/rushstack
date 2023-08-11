@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 08 Aug 2023 07:11:02 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Aug 2023 17:57:55 GMT and should not be manually modified.
+
+## 5.101.1
+Fri, 11 Aug 2023 17:57:55 GMT
+
+### Updates
+
+- Fix a regression from 5.101.0 where publishing features did not detect changes properly when running on  Windows OS (GitHub #4277)
+- Add support in rush-serve-plugin for HTTP/2, gzip compression, and CORS preflight requests.
 
 ## 5.101.0
 Tue, 08 Aug 2023 07:11:02 GMT
