@@ -125,6 +125,28 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
+// @beta (undocumented)
+export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY';
+
+// @beta (undocumented)
+export class CustomTipsConfiguration {
+    constructor(configFilename: string);
+    // (undocumented)
+    readonly configuration: Readonly<ICustomTipsJson>;
+    // (undocumented)
+    log(tipId: CustomTipId, terminal: ITerminal): void;
+}
+
+// @beta (undocumented)
+export enum CustomTipSeverity {
+    // (undocumented)
+    error = 2,
+    // (undocumented)
+    log = 0,
+    // (undocumented)
+    warning = 1
+}
+
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -283,6 +305,26 @@ export interface ICredentialCacheEntry {
 export interface ICredentialCacheOptions {
     // (undocumented)
     supportEditing: boolean;
+}
+
+// @beta (undocumented)
+export interface ICustomTipItemJson {
+    // (undocumented)
+    id: CustomTipId;
+    // (undocumented)
+    prefix?: string;
+    // (undocumented)
+    severity?: CustomTipSeverity;
+    // (undocumented)
+    tip: string;
+}
+
+// @beta (undocumented)
+export interface ICustomTipsJson {
+    // (undocumented)
+    customTips?: ICustomTipItemJson[];
+    // (undocumented)
+    prefix?: string;
 }
 
 // @beta (undocumented)
@@ -509,26 +551,6 @@ export interface IPrefixMatch<TItem> {
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
-}
-
-// @beta (undocumented)
-export interface IRushCustomTipItemJson {
-    // (undocumented)
-    id: RushCustomTipId;
-    // (undocumented)
-    prefix?: string;
-    // (undocumented)
-    severity?: RushCustomTipSeverity;
-    // (undocumented)
-    tip: string;
-}
-
-// @beta (undocumented)
-export interface IRushCustomTipsJson {
-    // (undocumented)
-    customTips?: IRushCustomTipItemJson[];
-    // (undocumented)
-    prefix?: string;
 }
 
 // @beta (undocumented)
@@ -864,6 +886,8 @@ export class RushConfiguration {
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
+    // @beta (undocumented)
+    readonly customTipsConfiguration: CustomTipsConfiguration;
     // (undocumented)
     readonly customTipsConfigurationFilePath: string;
     readonly ensureConsistentVersions: boolean;
@@ -918,8 +942,6 @@ export class RushConfiguration {
     readonly repositoryUrls: string[];
     // @internal
     readonly rushConfigurationJson: IRushConfigurationJson;
-    // @beta (undocumented)
-    readonly rushCustomTipsConfiguration: RushCustomTipsConfiguration;
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     // @deprecated
@@ -1040,28 +1062,6 @@ export class RushConstants {
     // (undocumented)
     static readonly versionPoliciesFilename: string;
     static readonly yarnShrinkwrapFilename: string;
-}
-
-// @beta
-export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_EXPOSED_TO_CUSTOM';
-
-// @beta (undocumented)
-export class RushCustomTipsConfiguration {
-    constructor(configFilename: string);
-    // (undocumented)
-    readonly configuration: Readonly<IRushCustomTipsJson>;
-    // (undocumented)
-    log(tipId: RushCustomTipId, terminal: ITerminal): void;
-}
-
-// @beta (undocumented)
-export enum RushCustomTipSeverity {
-    // (undocumented)
-    error = 2,
-    // (undocumented)
-    log = 0,
-    // (undocumented)
-    warning = 1
 }
 
 // @internal
