@@ -36,7 +36,7 @@ jobs:
           node-version: ${{ matrix.NodeVersion }}
 
       # Workaround for Node 18 incompatibility with Webpack 4
-      - name: Enable Webpack4 workaround
+      - name: Enable Webpack 4 workaround
         run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
         if: matrix.NodeVersion == 18
 

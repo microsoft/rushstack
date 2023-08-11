@@ -189,6 +189,12 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     if (versionMatch) {
       const nodejsMajorVersion: number = parseInt(versionMatch[1]);
       if (nodejsMajorVersion >= 16) {
+        // Match strings like this:
+        //   "--max-old-space-size=4096 --openssl-legacy-provider"
+        //   "--openssl-legacy-provider=true"
+        // Do not accidentally match strings like this:
+        //   "--openssl-legacy-provider-unrelated"
+        //   "---openssl-legacy-provider"
         if (!/(^|[^a-z\-])--openssl-legacy-provider($|[^a-z\-])/.test(process.env.NODE_OPTIONS ?? '')) {
           taskSession.logger.emitWarning(
             new Error(
