@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a new config file \"rush-custom-tips.json\" for customizing Rush messages (GitHub #4207)",
+      "comment": "Add a new config file \"custom-tips.json\" for customizing Rush messages (GitHub #4207)",
       "type": "none"
     }
   ],

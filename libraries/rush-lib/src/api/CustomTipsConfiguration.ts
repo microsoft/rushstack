@@ -1,6 +1,6 @@
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import schemaJson from '../schemas/rush-custom-tips.schema.json';
+import schemaJson from '../schemas/custom-tips.schema.json';
 
 /**
  * @beta

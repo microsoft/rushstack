@@ -133,10 +133,10 @@ export class RushConstants {
   public static readonly repoStateFilename: string = 'repo-state.json';
 
   /**
-   * The filename ("rush-custom-tips.json") for a file used by Rush to
+   * The filename ("custom-tips.json") for the file used by Rush to
    * print user-customized messages
    */
-  public static readonly customTipsFilename: string = 'rush-custom-tips.json';
+  public static readonly customTipsFilename: string = 'custom-tips.json';
 
   /**
    * The name of the per-project folder where project-specific Rush files are stored. For example,
