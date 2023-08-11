@@ -472,6 +472,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             );
 
             if (isPackageUnchanged) {
+              // Pretend the cache restored when skip
+              buildCacheContext.cacheRestored = true;
               return OperationStatus.Skipped;
             }
           }
@@ -525,8 +527,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           associatedPhase: phase
         } = record;
 
-        if (!project || !phase || record.status === OperationStatus.NoOp) {
+        if (!project || !phase) {
           return;
+        }
+
+        // No need to run for the following operation status
+        switch (record.status) {
+          case OperationStatus.NoOp:
+          case OperationStatus.RemoteExecuting: {
+            return;
+          }
+          default: {
+            break;
+          }
         }
 
         const buildCacheContext: IOperationBuildCacheContext | undefined =
@@ -571,16 +584,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
           let setCacheEntryPromise: (() => Promise<boolean> | undefined) | undefined;
           if (cobuildLock && isCacheWriteAllowed) {
-            if (record.error) {
-              // In order to prevent the worst case that all cobuild tasks go through the same failure,
-              // allowing a failing build to be cached and retrieved, print the error message to the terminal
-              // and clear the error in context.
-              const message: string | undefined = record.error?.message;
-              if (message) {
-                record.collatedWriter.terminal.writeStderrLine(message);
-              }
-              record.error = undefined;
-            }
             const { cacheId, contextId } = cobuildLock.cobuildContext;
 
             const finalCacheId: string =
@@ -980,7 +983,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         quietMode,
         debugMode
       });
-    } else if (!buildCacheContext.buildCacheProjectLogWritable?.isOpen) {
+    } else if (buildCacheContext.buildCacheProjectLogWritable?.isOpen === false) {
       // The ProjectLogWritable is closed, re-create one
       buildCacheContext.buildCacheTerminal = this._createBuildCacheTerminal({
         record,
