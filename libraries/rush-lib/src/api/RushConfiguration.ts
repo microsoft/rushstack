@@ -41,7 +41,7 @@ import schemaJson from '../schemas/rush.schema.json';
 
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
-import { RushCustomTipsConfiguration } from './RushCustomTipsConfiguration';
+import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -539,7 +539,7 @@ export class RushConfiguration {
   /**
    * @beta
    */
-  public readonly rushCustomTipsConfiguration: RushCustomTipsConfiguration;
+  public readonly customTipsConfiguration: CustomTipsConfiguration;
 
   /**
    *
@@ -817,7 +817,7 @@ export class RushConfiguration {
     this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
 
     this.customTipsConfigurationFilePath = path.join(this.rushJsonFolder, RushConstants.customTipsFilename);
-    this.rushCustomTipsConfiguration = new RushCustomTipsConfiguration(this.customTipsConfigurationFilePath);
+    this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
 
     this._variants = new Set<string>();
 

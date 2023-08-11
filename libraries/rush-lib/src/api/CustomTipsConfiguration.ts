@@ -5,24 +5,24 @@ import schemaJson from '../schemas/rush-custom-tips.schema.json';
 /**
  * @beta
  */
-export interface IRushCustomTipsJson {
+export interface ICustomTipsJson {
   prefix?: string;
-  customTips?: IRushCustomTipItemJson[];
+  customTips?: ICustomTipItemJson[];
 }
 /**
  * @beta
  */
-export interface IRushCustomTipItemJson {
-  id: RushCustomTipId;
+export interface ICustomTipItemJson {
+  id: CustomTipId;
   tip: string;
   prefix?: string;
-  severity?: RushCustomTipSeverity;
+  severity?: CustomTipSeverity;
 }
 
 /**
  * @beta
  */
-export enum RushCustomTipSeverity {
+export enum CustomTipSeverity {
   log = 0,
   warning = 1,
   error = 2
@@ -32,18 +32,18 @@ export enum RushCustomTipSeverity {
  * @beta
  * TODO: consider making this work with the plugin (i.e., the plugins are able to define their own customizable tips)
  */
-export type RushCustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_EXPOSED_TO_CUSTOM';
+export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_EXPOSED_TO_CUSTOM';
 
 /**
  * @beta
  */
-export class RushCustomTipsConfiguration {
+export class CustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private readonly _tipMap: Map<RushCustomTipId, IRushCustomTipItemJson>;
+  private readonly _tipMap: Map<CustomTipId, ICustomTipItemJson>;
   private readonly _jsonFileName: string;
 
-  public readonly configuration: Readonly<IRushCustomTipsJson>;
+  public readonly configuration: Readonly<ICustomTipsJson>;
 
   public constructor(configFilename: string) {
     this._jsonFileName = configFilename;
@@ -52,12 +52,9 @@ export class RushCustomTipsConfiguration {
     if (!FileSystem.exists(this._jsonFileName)) {
       this.configuration = {};
     } else {
-      this.configuration = JsonFile.loadAndValidate(
-        this._jsonFileName,
-        RushCustomTipsConfiguration._jsonSchema
-      );
+      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, CustomTipsConfiguration._jsonSchema);
 
-      const customTips: IRushCustomTipItemJson[] | undefined = this.configuration?.customTips;
+      const customTips: ICustomTipItemJson[] | undefined = this.configuration?.customTips;
       if (customTips) {
         for (const tipItem of customTips) {
           this._tipMap.set(tipItem.id, tipItem);
@@ -70,8 +67,8 @@ export class RushCustomTipsConfiguration {
    *
    * @param tipId - All the `tipId` options are in this doc: TODO: add link to doc
    */
-  public log(tipId: RushCustomTipId, terminal: ITerminal): void {
-    const customTipItem: IRushCustomTipItemJson | undefined = this._tipMap.get(tipId);
+  public log(tipId: CustomTipId, terminal: ITerminal): void {
+    const customTipItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
 
     if (!customTipItem) {
       return;
@@ -80,10 +77,10 @@ export class RushCustomTipsConfiguration {
     const prefix: string | undefined = customTipItem.prefix ?? this.configuration.prefix;
     const tipString: string = `${prefix ?? ''}${customTipItem.tip}`;
     switch (customTipItem.severity) {
-      case RushCustomTipSeverity.log:
+      case CustomTipSeverity.log:
         terminal.writeLine(tipString);
         break;
-      case RushCustomTipSeverity.warning:
+      case CustomTipSeverity.warning:
         terminal.writeWarningLine(tipString);
         break;
       default:
