@@ -33,7 +33,7 @@ export class AnsiEscape {
 
 // @beta
 export class Async {
-    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number, context: IAsyncTaskContext) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
@@ -317,6 +317,13 @@ export interface IAnsiEscapeConvertForTestsOptions {
 // @beta
 export interface IAsyncParallelismOptions {
     concurrency?: number;
+}
+
+// @beta
+export interface IAsyncTaskContext {
+    readonly activeConcurrency: number;
+    deferUntil<T>(waitPromise: Promise<T>): Promise<T>;
+    readonly maxConcurrency: number;
 }
 
 // @beta (undocumented)

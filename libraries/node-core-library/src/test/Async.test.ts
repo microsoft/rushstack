@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, AsyncQueue } from '../Async';
+import { Async, AsyncQueue, IAsyncTaskContext, getSignal } from '../Async';
 
 describe(Async.name, () => {
   describe(Async.mapAsync.name, () => {
@@ -205,6 +205,19 @@ describe(Async.name, () => {
       expect(fn).toHaveBeenCalledTimes(3);
     });
 
+    it('terminates iteration as soon as any operation throws', async () => {
+      const array: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
+
+      const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
+        if (item === 3) throw new Error('Something broke');
+      });
+
+      await expect(() => Async.forEachAsync(array, fn, { concurrency: 1 })).rejects.toThrowError(
+        'Something broke'
+      );
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
+
     it('rejects if a sync iterator throws an error', async () => {
       const expectedError: Error = new Error('iterator error');
       let iteratorIndex: number = 0;
@@ -249,7 +262,7 @@ describe(Async.name, () => {
       ).rejects.toThrow(expectedError);
     });
 
-    it('does not exceed the maxiumum concurrency for an async iterator', async () => {
+    it('only has at most 1 waiting iterator, regardless of concurrency', async () => {
       let waitingIterators: number = 0;
 
       let resolve2!: (value: { done: true; value: undefined }) => void;
@@ -286,9 +299,32 @@ describe(Async.name, () => {
 
       // Wait for all the instant resolutions to be done
       await Async.sleep(1);
-      expect(waitingIterators).toEqual(expectedConcurrency);
+      expect(waitingIterators).toEqual(1);
       resolve2({ done: true, value: undefined });
       await finalPromise;
+    });
+
+    it('Supports operation deferral', async () => {
+      const array: number[] = [1, 2, 3];
+      const expected: number[] = [3, 1, 2];
+      const results: number[] = [];
+
+      const [deferPromise, resolveDefer] = getSignal();
+
+      await Async.forEachAsync(
+        array,
+        async (item: number, index: number, context: IAsyncTaskContext) => {
+          if (item < 3) {
+            await context.deferUntil(deferPromise);
+          } else {
+            resolveDefer();
+          }
+
+          results.push(item);
+        },
+        { concurrency: 1 }
+      );
+      expect(results).toMatchObject(expected);
     });
 
     it('rejects if an async iterator rejects', async () => {

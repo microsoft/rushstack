@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add an additional parameter to the callback in `Async.forEachAsync` that allows for the iterator function to defer execution of the current task and allow other tasks in the queue to execute in the meantime.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

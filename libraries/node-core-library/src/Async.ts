@@ -11,10 +11,40 @@
  */
 export interface IAsyncParallelismOptions {
   /**
-   * Optionally used with the  {@link Async.mapAsync} and {@link Async.forEachAsync}
+   * Optionally used with the {@link Async.mapAsync} and {@link Async.forEachAsync}
    * to limit the maximum number of concurrent promises to the specified number.
    */
   concurrency?: number;
+}
+
+/**
+ * Options for interacting with the scheduler from within the task execution callback.
+ * The typical scenario is for a task that might need to wait for some external work and
+ * wants to free up its CPU slot for other local work.
+ *
+ * @remarks
+ * Used with {@link Async.forEachAsync}.
+ *
+ * @beta
+ */
+export interface IAsyncTaskContext {
+  /**
+   * The current number of executing tasks.
+   * Excludes tasks that are currently suspended via `deferUntil`.
+   */
+  readonly activeConcurrency: number;
+
+  /**
+   * The maximum allowed number of executing tasks.
+   */
+  readonly maxConcurrency: number;
+
+  /**
+   * Suspends execution of the current task and frees up its concurrency slot until `waitPromise` resolves or rejects.
+   * if `waitPromise` resolves, the returned promise will resolve with the result of `waitPromise` as soon as there is
+   * available concurrency to resume execution.
+   */
+  deferUntil<T>(waitPromise: Promise<T>): Promise<T>;
 }
 
 /**
@@ -93,69 +123,108 @@ export class Async {
    */
   public static async forEachAsync<TEntry>(
     iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
-    callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
+    callback: (entry: TEntry, arrayIndex: number, context: IAsyncTaskContext) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
-    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      const concurrency: number =
-        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-      let operationsInProgress: number = 0;
+    const requestedConcurrency: number | undefined = options?.concurrency;
+    const maxConcurrency: number =
+      requestedConcurrency && requestedConcurrency > 0 ? requestedConcurrency : Infinity;
 
-      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-      ).call(iterable);
+    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+      (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+      (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+    ).call(iterable);
 
-      let arrayIndex: number = 0;
-      let iteratorIsComplete: boolean = false;
-      let promiseHasResolvedOrRejected: boolean = false;
+    let arrayIndex: number = 0;
+    let usedCapacity: number = 0;
 
-      async function queueOperationsAsync(): Promise<void> {
-        while (operationsInProgress < concurrency && !iteratorIsComplete && !promiseHasResolvedOrRejected) {
-          // Increment the concurrency while waiting for the iterator.
-          // This function is reentrant, so this ensures that at most `concurrency` executions are waiting
-          operationsInProgress++;
-          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
-          // eslint-disable-next-line require-atomic-updates
-          iteratorIsComplete = !!currentIteratorResult.done;
+    const pending: Set<Promise<void>> = new Set();
 
-          if (!iteratorIsComplete) {
-            Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
-              .then(async () => {
-                operationsInProgress--;
-                await onOperationCompletionAsync();
-              })
-              .catch((error) => {
-                promiseHasResolvedOrRejected = true;
-                reject(error);
-              });
-          } else {
-            // The iterator is complete and there wasn't a value, so untrack the waiting state.
-            operationsInProgress--;
-          }
+    let queueFinished: boolean = false;
+
+    const [cancelPromise, cancel] = getSignal<never>();
+    let [deferralPromise, resolveSchedulerNotifyPromise] = getSignal();
+    /**
+     * Notifies the scheduler that a task has been deferred.
+     * Resets the deferral promise to a new signal.
+     */
+    function notifyDeferral(): void {
+      usedCapacity--;
+      resolveSchedulerNotifyPromise?.();
+      [deferralPromise, resolveSchedulerNotifyPromise] = getSignal();
+    }
+
+    /**
+     * Returns true if there is headroom to execute another task.
+     */
+    function hasCapacity(): boolean {
+      return pending.size === 0 || usedCapacity < maxConcurrency;
+    }
+
+    /**
+     * Resolves when any task completes or a task has been deferred.
+     */
+    function waitForCapacityChange(): Promise<void> {
+      return Promise.race([deferralPromise, cancelPromise, ...pending]);
+    }
+
+    /**
+     * The scheduler context that is passed to the callback.
+     */
+    const context: IAsyncTaskContext = {
+      get maxConcurrency(): number {
+        return maxConcurrency;
+      },
+
+      get activeConcurrency(): number {
+        return usedCapacity;
+      },
+
+      async deferUntil<T>(waitPromise: Promise<T>): Promise<T> {
+        notifyDeferral();
+        const result: T = await Promise.race([cancelPromise, waitPromise]);
+
+        while (!hasCapacity()) {
+          await waitForCapacityChange();
         }
 
-        if (iteratorIsComplete) {
-          await onOperationCompletionAsync();
-        }
+        usedCapacity++;
+        return result;
+      }
+    };
+
+    while (!queueFinished) {
+      const currentIteratorResult: IteratorResult<TEntry> = await Promise.race([
+        iterator.next(),
+        cancelPromise
+      ]);
+      if (currentIteratorResult.done) {
+        queueFinished = true;
+        break;
       }
 
-      async function onOperationCompletionAsync(): Promise<void> {
-        if (!promiseHasResolvedOrRejected) {
-          if (operationsInProgress === 0 && iteratorIsComplete) {
-            promiseHasResolvedOrRejected = true;
-            resolve();
-          } else if (!iteratorIsComplete) {
-            await queueOperationsAsync();
-          }
-        }
+      while (!hasCapacity()) {
+        await waitForCapacityChange();
       }
 
-      queueOperationsAsync().catch((error) => {
-        promiseHasResolvedOrRejected = true;
-        reject(error);
+      const { value } = currentIteratorResult;
+
+      usedCapacity++;
+      const promise: Promise<void> = Promise.resolve(callback(value, arrayIndex++, context)).then(() => {
+        usedCapacity--;
+        pending.delete(promise);
       });
-    });
+
+      promise.catch((err: Error) => {
+        cancel(Promise.reject(new Error(`Aborted due to error: ${err.message}`)));
+      });
+
+      pending.add(promise);
+    }
+
+    if (pending.size > 0) {
+      await Promise.all(Array.from(pending));
+    }
   }
 
   /**
@@ -191,9 +260,9 @@ export class Async {
   }
 }
 
-function getSignal(): [Promise<void>, () => void] {
-  let resolver: () => void;
-  const promise: Promise<void> = new Promise<void>((resolve) => {
+export function getSignal<T = void>(): [Promise<T>, (result: T | Promise<T>) => void] {
+  let resolver: (result: T | Promise<T>) => void;
+  const promise: Promise<T> = new Promise<T>((resolve) => {
     resolver = resolve;
   });
   return [promise, resolver!];
