@@ -30,9 +30,10 @@ export enum CustomTipSeverity {
 
 /**
  * @beta
+ * @privateRemarks
  * TODO: consider making this work with the plugin (i.e., the plugins are able to define their own customizable tips)
  */
-export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | 'ANOTHER_ID_THAT_IS_EXPOSED_TO_CUSTOM';
+export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY';
 
 /**
  * @beta
