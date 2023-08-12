@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update \"rush init\" template to use PNPM 7.33.5",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`.",
+      "comment": "Update Node.js version checks to support the new LTS release",
       "type": "none"
     }
   ],

@@ -104,7 +104,7 @@ export class ChangeFiles {
   public async getFilesAsync(): Promise<string[]> {
     if (!this._files) {
       const { default: glob } = await import('fast-glob');
-      this._files = (await glob(`${this._changesPath}/**/*.json`)) || [];
+      this._files = (await glob('**/*.json', { cwd: this._changesPath, absolute: true })) || [];
     }
 
     return this._files;
