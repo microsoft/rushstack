@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.8.0",
+      "date": "Sat, 12 Aug 2023 00:21:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Display a warning if Node.js 17 or newer is used without the \"--openssl-legacy-provider\" workaround"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.14",
       "tag": "@rushstack/heft-webpack4-plugin_v0.7.14",
       "date": "Tue, 08 Aug 2023 07:10:39 GMT",
