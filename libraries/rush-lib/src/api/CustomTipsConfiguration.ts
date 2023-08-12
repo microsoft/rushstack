@@ -118,7 +118,7 @@ export class CustomTipsConfiguration {
   }
 
   private _formatTipMessage(tipId: CustomTipId): string | undefined {
-    if (tipId.startsWith('TIP_')) {
+    if (!tipId.startsWith('TIP_')) {
       throw new InternalError('Identifiers for custom tips must start with the "TIP_" prefix');
     }
 
