@@ -22,7 +22,7 @@
        * If that message is printed, then this custom tip will be shown.
        * Consult the Rush documentation for the current list of possible identifiers.
        */
-      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
 
        /**
         * (REQUIRED) The message text to be displayed for this tip.

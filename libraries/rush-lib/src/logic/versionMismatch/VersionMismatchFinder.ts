@@ -136,7 +136,7 @@ export class VersionMismatchFinder {
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
           rushConfiguration.customTipsConfiguration.showErrorTip(
             options.terminal,
-            'PNPM_MISMATCH_DEPENDENCY'
+            'TIP_RUSH_INCONSISTENT_VERSIONS'
           );
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.

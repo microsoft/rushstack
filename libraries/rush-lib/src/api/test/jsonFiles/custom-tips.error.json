@@ -3,11 +3,11 @@
 
   "customTips": [
     {
-      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
       "message": "duplicate 1"
     },
     {
-      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
       "message": "duplicate 2"
     }
   ]

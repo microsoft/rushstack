@@ -11,6 +11,6 @@ describe(CustomTipsConfiguration.name, () => {
   it('reports an error for duplicate tips', () => {
     expect(() => {
       new CustomTipsConfiguration(`${__dirname}/jsonFiles/custom-tips.error.json`);
-    }).toThrowError('PNPM_MISMATCH_DEPENDENCY');
+    }).toThrowError('TIP_RUSH_INCONSISTENT_VERSIONS');
   });
 });

@@ -6,7 +6,7 @@
 
   "customTips": [
     {
-      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
       "message": "This is so wrong my friend. Please read this doc for more information: google.com"
     }
   ]

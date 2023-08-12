@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, ITerminal, InternalError, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
 
@@ -20,9 +20,18 @@ export interface ICustomTipItemJson {
 }
 
 /**
+ *
+ * @privateRemarks
+ * Events from the Rush process should with "TIP_RUSH_".
+ * Events from a PNPM subprocess should start with "TIP_PNPM_".
+ *
  * @beta
  */
-export type CustomTipId = 'PNPM_MISMATCH_DEPENDENCY' | string;
+export type CustomTipId =
+  // The rush.json "ensureConsistentVersions" validation.
+  | 'TIP_RUSH_INCONSISTENT_VERSIONS'
+  // In the future, plugins can contribute other strings.
+  | string;
 
 /**
  * @beta
@@ -35,7 +44,9 @@ export class CustomTipsConfiguration {
 
   public readonly configuration: Readonly<ICustomTipsJson>;
 
-  public static readonly supportedTipIds: ReadonlySet<string> = new Set<string>(['PNPM_MISMATCH_DEPENDENCY']);
+  public static readonly supportedTipIds: ReadonlySet<string> = new Set<string>([
+    'TIP_RUSH_INCONSISTENT_VERSIONS'
+  ]);
 
   public constructor(configFilename: string) {
     this._jsonFileName = configFilename;
@@ -68,6 +79,10 @@ export class CustomTipsConfiguration {
   }
 
   private _formatTipMessage(tipId: CustomTipId): string | undefined {
+    if (tipId.startsWith('TIP_')) {
+      throw new InternalError('Identifiers for custom tips must start with the "TIP_" prefix');
+    }
+
     const customTipItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
     if (!customTipItem) {
       return undefined;
