@@ -17,9 +17,7 @@ export interface IExpressionDetailedSelector {
   filters?: Record<string, string>;
 }
 
-export type ExpressionParameter = {
-  [K in `--${string}`]: string;
-};
+export type ExpressionParameter = Record<`--${string}`, string>;
 
 export type ExpressionOperator = IExpressionOperatorAnd | IExpressionOperatorOr | IExpressionOperatorNot;
 

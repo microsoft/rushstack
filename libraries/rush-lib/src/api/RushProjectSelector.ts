@@ -49,21 +49,23 @@ export interface IProjectSelectionOptions {
  */
 export class RushProjectSelector {
   private readonly _rushConfig: RushConfiguration;
-  private readonly _scopes: Map<string, ISelectorParser<RushConfigurationProject>> = new Map();
+  private readonly _scopes: Map<string, ISelectorParser<RushConfigurationProject>>;
   private readonly _options: IProjectSelectionOptions;
 
   public constructor(rushConfig: RushConfiguration, options: IProjectSelectionOptions) {
     this._rushConfig = rushConfig;
     this._options = options;
 
-    this._scopes.set('name', new NamedProjectSelectorParser(this._rushConfig));
-    this._scopes.set(
+    const scopes: Map<string, ISelectorParser<RushConfigurationProject>> = new Map();
+    scopes.set('name', new NamedProjectSelectorParser(this._rushConfig));
+    scopes.set(
       'git',
       new GitChangedProjectSelectorParser(this._rushConfig, this._options.gitSelectorParserOptions)
     );
-    this._scopes.set('tag', new TagProjectSelectorParser(this._rushConfig));
-    this._scopes.set('version-policy', new VersionPolicyProjectSelectorParser(this._rushConfig));
-    this._scopes.set('json', new JsonFileSelectorParser(this._rushConfig, this));
+    scopes.set('tag', new TagProjectSelectorParser(this._rushConfig));
+    scopes.set('version-policy', new VersionPolicyProjectSelectorParser(this._rushConfig));
+    scopes.set('json', new JsonFileSelectorParser(this._rushConfig, this));
+    this._scopes = scopes;
   }
 
   /**
@@ -131,7 +133,8 @@ export class RushProjectSelector {
     expr: ExpressionParameter,
     context: string
   ): Promise<ReadonlySet<RushConfigurationProject>> {
-    const key: string = Object.keys(expr)[0];
+    const key: keyof ExpressionParameter = Object.keys(expr)[0] as keyof ExpressionParameter;
+    const value: SelectorExpression = expr[key];
 
     // Existing parameters "--to-version-policy" and "--from-version-policy" are not supported
     // in expressions (prefer `{ "--to": "version-policy:xyz" }`).
@@ -139,23 +142,23 @@ export class RushProjectSelector {
     // Existing parameter "--changed-projects-only" is also not supported.
 
     if (key === '--to') {
-      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(value, context);
       return Selection.expandAllDependencies(projects);
     } else if (key === '--from') {
-      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(value, context);
       return Selection.expandAllDependencies(Selection.expandAllConsumers(projects));
     } else if (key === '--impacted-by') {
-      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(value, context);
       return Selection.expandAllConsumers(projects);
     } else if (key === '--to-except') {
-      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(value, context);
       return Selection.subtraction(Selection.expandAllDependencies(projects), projects);
     } else if (key === '--impacted-by-except') {
-      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(value, context);
       return Selection.subtraction(Selection.expandAllConsumers(projects), projects);
     } else if (key === '--only') {
       // "only" is a no-op in a generic selector expression
-      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr[key], context);
+      const projects: ReadonlySet<RushConfigurationProject> = await this.selectExpression(value, context);
       return projects;
     } else {
       throw new SelectorError(`Unknown parameter '${key}' encountered in selector expression in ${context}.`);
