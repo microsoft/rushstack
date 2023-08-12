@@ -25,16 +25,16 @@
        */
       "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
 
-       /**
-        * (REQUIRED) The message text to be displayed for this tip.
-        */
-       "message": "For additional troubleshooting information, refer this wiki article:\n\nhttps://intranet.contoso.com/docs/pnpm-mismatch",
+      /**
+       * (REQUIRED) The message text to be displayed for this tip.
+       */
+      "message": "For additional troubleshooting information, refer this wiki article:\n\nhttps://intranet.contoso.com/docs/pnpm-mismatch",
 
-       /**
-        * Overrides the "defaultMessagePrefix" for this tip.
-        * Specify an empty string to omit the "defaultMessagePrefix" entirely.
-        */
-       // "messagePrefix": ""
+      /**
+       * Overrides the "defaultMessagePrefix" for this tip.
+       * Specify an empty string to omit the "defaultMessagePrefix" entirely.
+       */
+      // "messagePrefix": ""
     }
     /*[END "DEMO"]*/
   ]
