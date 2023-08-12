@@ -21,11 +21,13 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
  */
 export abstract class BaseInstallAction extends BaseRushAction {
+  protected readonly _terminal: ITerminal;
   protected readonly _variant: CommandLineStringParameter;
   protected readonly _purgeParameter: CommandLineFlagParameter;
   protected readonly _bypassPolicyParameter: CommandLineFlagParameter;
@@ -42,6 +44,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   public constructor(options: IBaseRushActionOptions) {
     super(options);
+
+    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: options.parser.isDebug }));
 
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
@@ -90,7 +94,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
 
   protected async runAsync(): Promise<void> {
-    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
+    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
       variant: this._variant.value
     });
 

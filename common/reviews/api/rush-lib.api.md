@@ -125,6 +125,19 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
+// @beta
+export type CustomTipId = 'TIP_RUSH_INCONSISTENT_VERSIONS' | string;
+
+// @beta
+export class CustomTipsConfiguration {
+    constructor(configFilename: string);
+    readonly configuration: Readonly<ICustomTipsJson>;
+    showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
+    static readonly supportedTipIds: ReadonlySet<string>;
+}
+
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -283,6 +296,19 @@ export interface ICredentialCacheEntry {
 export interface ICredentialCacheOptions {
     // (undocumented)
     supportEditing: boolean;
+}
+
+// @beta
+export interface ICustomTipItemJson {
+    message: string;
+    messagePrefix?: string;
+    tipId: CustomTipId;
+}
+
+// @beta
+export interface ICustomTipsJson {
+    customTips?: ICustomTipItemJson[];
+    defaultMessagePrefix?: string;
 }
 
 // @beta (undocumented)
@@ -844,6 +870,10 @@ export class RushConfiguration {
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
+    // @beta
+    readonly customTipsConfiguration: CustomTipsConfiguration;
+    // @beta
+    readonly customTipsConfigurationFilePath: string;
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
@@ -977,6 +1007,7 @@ export class RushConstants {
     static readonly commandLineFilename: string;
     static readonly commonFolderName: string;
     static readonly commonVersionsFilename: string;
+    static readonly customTipsFilename: string;
     static readonly defaultMaxInstallAttempts: number;
     static readonly defaultWatchDebounceMs: number;
     static readonly experimentsFilename: string;

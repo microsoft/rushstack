@@ -242,6 +242,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
 
       await doBasicInstallAsync({
+        terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
         isDebug: this.parser.isDebug
