@@ -1,6 +1,7 @@
 /**
- * This configuration file allows repo maintainers to add additional notes to certain messages
- * printed by Rush commands.  More documentation is available on the Rush website: https://rushjs.io
+ * This configuration file allows repo maintainers to configure extra details to be
+ * printed alongside certain Rush messages.  More documentation is available on the
+ * Rush website: https://rushjs.io
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/custom-tips.schema.json",

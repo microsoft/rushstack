@@ -538,12 +538,14 @@ export class RushConfiguration {
   public readonly versionPolicyConfigurationFilePath: string;
 
   /**
+   * Accesses the custom-tips.json configuration.
    * @beta
    */
   public readonly customTipsConfiguration: CustomTipsConfiguration;
 
   /**
-   *
+   * The absolute path to the custom tips configuration file.
+   * @beta
    */
   public readonly customTipsConfigurationFilePath: string;
 

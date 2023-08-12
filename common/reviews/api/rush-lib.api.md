@@ -125,18 +125,16 @@ export class CredentialCache {
     static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
 }
 
-// @beta (undocumented)
+// @beta
 export type CustomTipId = 'TIP_RUSH_INCONSISTENT_VERSIONS' | string;
 
-// @beta (undocumented)
+// @beta
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
-    // (undocumented)
     readonly configuration: Readonly<ICustomTipsJson>;
     showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
     showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
     showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
-    // (undocumented)
     static readonly supportedTipIds: ReadonlySet<string>;
 }
 
@@ -300,21 +298,16 @@ export interface ICredentialCacheOptions {
     supportEditing: boolean;
 }
 
-// @beta (undocumented)
+// @beta
 export interface ICustomTipItemJson {
-    // (undocumented)
     message: string;
-    // (undocumented)
     messagePrefix?: string;
-    // (undocumented)
     tipId: CustomTipId;
 }
 
-// @beta (undocumented)
+// @beta
 export interface ICustomTipsJson {
-    // (undocumented)
     customTips?: ICustomTipItemJson[];
-    // (undocumented)
     defaultMessagePrefix?: string;
 }
 
@@ -877,9 +870,9 @@ export class RushConfiguration {
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
-    // @beta (undocumented)
+    // @beta
     readonly customTipsConfiguration: CustomTipsConfiguration;
-    // (undocumented)
+    // @beta
     readonly customTipsConfigurationFilePath: string;
     readonly ensureConsistentVersions: boolean;
     // @beta
