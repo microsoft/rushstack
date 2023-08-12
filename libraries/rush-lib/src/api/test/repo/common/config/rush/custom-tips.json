@@ -1,14 +1,13 @@
 {
-  // "$schema": todo need a link
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/custom-tips.schema.json",
+
   // The prefix will be prepended to all the custom message.
-  "prefix": "⭐️ [Monorepo Infra team tip]: ",
+  "defaultMessagePrefix": "⭐️ [Monorepo Infra team tip]: ",
 
   "customTips": [
     {
-      "id": "PNPM_MISMATCH_DEPENDENCY",
-      "tip": "This is so wrong my friend. Please read this doc for more information: google.com"
-      // "prefix": "" // override the global prefix.
-      // "severity": "error" // default to error for more visibility
+      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "message": "This is so wrong my friend. Please read this doc for more information: google.com"
     }
   ]
 }

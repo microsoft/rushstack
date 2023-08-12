@@ -133,20 +133,11 @@ export class CustomTipsConfiguration {
     constructor(configFilename: string);
     // (undocumented)
     readonly configuration: Readonly<ICustomTipsJson>;
+    showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
     // (undocumented)
-    static readonly knownTipIds: ReadonlySet<string>;
-    // (undocumented)
-    log(tipId: CustomTipId, terminal: ITerminal): void;
-}
-
-// @beta (undocumented)
-export enum CustomTipSeverity {
-    // (undocumented)
-    error = 2,
-    // (undocumented)
-    log = 0,
-    // (undocumented)
-    warning = 1
+    static readonly supportedTipIds: ReadonlySet<string>;
 }
 
 // @public (undocumented)
@@ -312,13 +303,11 @@ export interface ICredentialCacheOptions {
 // @beta (undocumented)
 export interface ICustomTipItemJson {
     // (undocumented)
-    id: CustomTipId;
+    message: string;
     // (undocumented)
-    prefix?: string;
+    messagePrefix?: string;
     // (undocumented)
-    severity?: CustomTipSeverity;
-    // (undocumented)
-    tip: string;
+    tipId: CustomTipId;
 }
 
 // @beta (undocumented)
@@ -326,7 +315,7 @@ export interface ICustomTipsJson {
     // (undocumented)
     customTips?: ICustomTipItemJson[];
     // (undocumented)
-    prefix?: string;
+    defaultMessagePrefix?: string;
 }
 
 // @beta (undocumented)

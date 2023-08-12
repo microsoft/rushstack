@@ -10,8 +10,8 @@
       "type": "string"
     },
 
-    "prefix": {
-      "description": "The prefix will be prepended to all the custom message. It will be overridden by the `prefix` of each item (if exist).",
+    "defaultMessagePrefix": {
+      "description": "If specified, this prefix will be prepended to any the tip messages when they are displayed.",
       "type": "string"
     },
 
@@ -19,25 +19,21 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "tip"],
+        "required": ["tipId", "message"],
         "additionalProperties": false,
         "properties": {
-          "id": {
+          "tipId": {
             "type": "string",
-            "description": "The custom tip will append to the message with ths id. Full list can be found in this link: TODO"
+            "description": "An identifier indicating a message that may be printed by Rush.  If that message is printed, then this custom tip will be shown.  Consult the Rush documentation for the current list of possible identifiers.",
+            "pattern": "^[A-Z0-9_]+$"
           },
-          "tip": {
+          "message": {
             "type": "string",
-            "description": "The tip to append to the message."
+            "description": "The message text to be displayed for this tip."
           },
-          "prefix": {
+          "messagePrefix": {
             "type": "string",
-            "description": "Override the global prefix."
-          },
-          "severity": {
-            "description": "Default to `error` for more visibility",
-            "type": "string",
-            "enum": ["warning", "error", "info"]
+            "description": "Overrides the \"defaultMessagePrefix\" for this tip. Specify an empty string to omit the \"defaultMessagePrefix\" entirely."
           }
         }
       }

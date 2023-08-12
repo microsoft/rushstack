@@ -93,7 +93,6 @@ export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsCon
 export {
   CustomTipsConfiguration,
   CustomTipId,
-  CustomTipSeverity,
   ICustomTipsJson,
   ICustomTipItemJson
 } from './api/CustomTipsConfiguration';

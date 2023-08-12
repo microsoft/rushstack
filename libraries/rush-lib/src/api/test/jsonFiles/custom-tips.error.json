@@ -1,12 +1,14 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/custom-tips.schema.json",
+
   "customTips": [
     {
-      "id": "PNPM_MISMATCH_DEPENDENCY",
-      "tip": "definition 1"
+      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "message": "duplicate 1"
     },
     {
-      "id": "PNPM_MISMATCH_DEPENDENCY",
-      "tip": "definition 2"
+      "tipId": "PNPM_MISMATCH_DEPENDENCY",
+      "message": "duplicate 2"
     }
   ]
 }
