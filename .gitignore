@@ -76,10 +76,14 @@ common/deploy/
 common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
+*.lock
 
 # Heft temporary files
 .cache
 .heft
+
+# Visual Studio Code
+.vscode
 
 # Common toolchain intermediate files
 temp

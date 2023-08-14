@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush custom-tips.json config file",
+  "description": "The config file for adding tips to specific messages.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "defaultMessagePrefix": {
+      "description": "If specified, this prefix will be prepended to any the tip messages when they are displayed.",
+      "type": "string"
+    },
+
+    "customTips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tipId", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "tipId": {
+            "type": "string",
+            "description": "An identifier indicating a message that may be printed by Rush.  If that message is printed, then this custom tip will be shown.  Consult the Rush documentation for the current list of possible identifiers.",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "message": {
+            "type": "string",
+            "description": "The message text to be displayed for this tip."
+          },
+          "messagePrefix": {
+            "type": "string",
+            "description": "Overrides the \"defaultMessagePrefix\" for this tip. Specify an empty string to omit the \"defaultMessagePrefix\" entirely."
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

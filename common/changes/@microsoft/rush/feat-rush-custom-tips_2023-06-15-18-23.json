@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support in rush-serve-plugin for HTTP/2, gzip compression, and CORS preflight requests.",
+      "comment": "Add a new config file \"custom-tips.json\" for customizing Rush messages (GitHub #4207)",
       "type": "none"
     }
   ],

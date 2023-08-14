@@ -8,17 +8,19 @@ import { InstallManagerFactory } from '../InstallManagerFactory';
 import { SetupChecks } from '../SetupChecks';
 import { PurgeManager } from '../PurgeManager';
 import { VersionMismatchFinder } from '../versionMismatch/VersionMismatchFinder';
+import { ITerminal } from '@rushstack/node-core-library';
 
 export interface IRunInstallOptions {
   rushConfiguration: RushConfiguration;
   rushGlobalFolder: RushGlobalFolder;
   isDebug: boolean;
+  terminal: ITerminal;
 }
 
 export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<void> {
   const { rushConfiguration, rushGlobalFolder, isDebug } = options;
 
-  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration);
+  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, options.terminal);
   SetupChecks.validate(rushConfiguration);
 
   const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
