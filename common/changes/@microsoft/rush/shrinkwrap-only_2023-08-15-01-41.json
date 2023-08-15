@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add experiment \"usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate\" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation.",
+      "comment": "Add experiment \"usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate\" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation. This mitigates issues that may arise when using the `afterAllResolved` hook in `.pnpmfile.cjs`.",
       "type": "none"
     }
   ],
