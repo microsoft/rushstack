@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add experiment \"usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate\" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
