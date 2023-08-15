@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.102.0",
+      "tag": "@microsoft/rush_v5.102.0",
+      "date": "Tue, 15 Aug 2023 20:09:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new config file \"custom-tips.json\" for customizing Rush messages (GitHub #4207)"
+          },
+          {
+            "comment": "Improve \"rush scan\" to recognize module patterns such as \"import get from 'lodash.get'\""
+          },
+          {
+            "comment": "Update Node.js version checks to support the new LTS release"
+          },
+          {
+            "comment": "Update \"rush init\" template to use PNPM 7.33.5"
+          },
+          {
+            "comment": "Update the \"rush init\" template's .gitignore to avoid spurious diffs for files such as \"autoinstaller.lock\""
+          },
+          {
+            "comment": "Fix an issue where a pnpm-lock file would fail to parse if a project used a package alias in a repo using pnpm 8."
+          },
+          {
+            "comment": "Fix HTTP/1 backwards compatibility in rush-serve-plugin."
+          },
+          {
+            "comment": "Add experiment \"usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate\" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation. This mitigates issues that may arise when using the `afterAllResolved` hook in `.pnpmfile.cjs`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.101.1",
       "tag": "@microsoft/rush_v5.101.1",
       "date": "Fri, 11 Aug 2023 17:57:55 GMT",
