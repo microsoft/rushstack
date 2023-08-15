@@ -333,6 +333,7 @@ export interface IExperimentsJson {
     phasedCommands?: boolean;
     printEventHooksOutputToConsole?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
+    usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
