@@ -96,23 +96,22 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
         throw new AlreadyReportedError();
       }
 
-      const app: Application = http2express(express);
+      const app: Application & { http2Request?: object; http2Response?: object } = http2express(express);
 
-      app.use((req: unknown, res: unknown, next: () => void) => {
+      if (app.http2Response) {
         // Hack to allow the compression middleware to be used with http2-express-bridge
-        Object.defineProperty(res, '_header', {
+        Object.defineProperty(Object.getPrototypeOf(app.http2Response), '_header', {
           get: function () {
             return this.headersSent;
           }
         });
 
-        Object.defineProperty(res, '_implicitHeader', {
+        Object.defineProperty(Object.getPrototypeOf(app.http2Response), '_implicitHeader', {
           value: function () {
             return this.writeHead(this.statusCode);
           }
         });
-        next();
-      });
+      }
 
       app.use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Private-Network', 'true'); // Allow access from other devices on the same network
