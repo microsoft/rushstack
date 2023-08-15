@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where a pnpm-lock file would fail to parse if a project used a package alias in a repo using pnpm 8.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
