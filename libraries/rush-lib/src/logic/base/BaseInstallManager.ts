@@ -568,7 +568,7 @@ ${gitLfsHookHandling}
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-      if (experiments.usePnpmFrozenLockfileForRushInstall && !this.options.allowShrinkwrapUpdates) {
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
@@ -577,6 +577,10 @@ ${gitLfsHookHandling}
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
         args.push('--no-prefer-frozen-lockfile');
+      }
+
+      if (options.onlyShrinkwrap) {
+        args.push(`--lockfile-only`);
       }
 
       if (options.collectLogFile) {
