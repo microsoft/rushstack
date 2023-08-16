@@ -247,6 +247,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
 
       await doBasicInstallAsync({
+        terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
         isDebug: this.parser.isDebug
@@ -363,7 +364,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         parallelism,
         changedProjectsOnly,
         beforeExecuteOperation: async (record: IOperationRunnerContext) => {
-          await this.hooks.beforeExecuteOperation.promise(record);
+          return await this.hooks.beforeExecuteOperation.promise(record);
         },
         afterExecuteOperation: async (record: IOperationRunnerContext) => {
           await this.hooks.afterExecuteOperation.promise(record);

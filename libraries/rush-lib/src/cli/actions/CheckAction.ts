@@ -8,8 +8,10 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
+import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
 
 export class CheckAction extends BaseRushAction {
+  private readonly _terminal: ITerminal;
   private readonly _variant: CommandLineStringParameter;
   private readonly _jsonFlag: CommandLineFlagParameter;
   private readonly _verboseFlag: CommandLineFlagParameter;
@@ -27,6 +29,7 @@ export class CheckAction extends BaseRushAction {
       parser
     });
 
+    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
@@ -52,7 +55,7 @@ export class CheckAction extends BaseRushAction {
       );
     }
 
-    VersionMismatchFinder.rushCheck(this.rushConfiguration, {
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
       variant: this._variant.value,
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value

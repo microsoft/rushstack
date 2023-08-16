@@ -16,6 +16,7 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'CobuildConfiguration',
   'CommonVersionsConfiguration',
   'CredentialCache',
+  'CustomTipsConfiguration',
   'DependencyType',
   'EnvironmentConfiguration',
   'EnvironmentVariableNames',

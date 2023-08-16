@@ -55,16 +55,6 @@ export interface IOperationRunnerContext {
   error?: Error;
 
   /**
-   * The set of operations that depend on this operation.
-   */
-  readonly consumers: Set<IOperationRunnerContext>;
-
-  /**
-   * The operation runner that is executing this operation.
-   */
-  readonly runner: IOperationRunner;
-
-  /**
    * Normally the incremental build logic will rebuild changed projects as well as
    * any projects that directly or indirectly depend on a changed project.
    * If true, then the incremental build logic will only rebuild changed projects and
@@ -101,6 +91,11 @@ export interface IOperationRunner {
    * exit code
    */
   warningsAreAllowed: boolean;
+
+  /**
+   * Full shell command string to run by this runner.
+   */
+  commandToRun?: string;
 
   /**
    * Method to be executed for the operation.

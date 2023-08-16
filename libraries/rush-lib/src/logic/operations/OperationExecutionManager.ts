@@ -24,7 +24,7 @@ export interface IOperationExecutionManagerOptions {
   changedProjectsOnly: boolean;
   destination?: TerminalWritable;
 
-  beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
+  beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
   afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
   onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
   beforeExecuteOperations?: (records: Map<Operation, OperationExecutionRecord>) => Promise<void>;
@@ -61,7 +61,9 @@ export class OperationExecutionManager {
 
   private readonly _terminal: CollatedTerminal;
 
-  private readonly _beforeExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
+  private readonly _beforeExecuteOperation?: (
+    operation: OperationExecutionRecord
+  ) => Promise<OperationStatus | undefined>;
   private readonly _afterExecuteOperation?: (operation: OperationExecutionRecord) => Promise<void>;
   private readonly _onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
   private readonly _beforeExecuteOperations?: (
@@ -224,11 +226,17 @@ export class OperationExecutionManager {
 
     // This function is a callback because it may write to the collatedWriter before
     // operation.executeAsync returns (and cleans up the writer)
-    const onOperationComplete: (record: OperationExecutionRecord) => Promise<void> = async (
+    const onOperationCompleteAsync: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
-      this._onOperationComplete(record);
       await this._afterExecuteOperation?.(record);
+      this._onOperationComplete(record);
+    };
+
+    const onOperationStartAsync: (
+      record: OperationExecutionRecord
+    ) => Promise<OperationStatus | undefined> = async (record: OperationExecutionRecord) => {
+      return await this._beforeExecuteOperation?.(record);
     };
 
     await Async.forEachAsync(
@@ -252,8 +260,10 @@ export class OperationExecutionManager {
           // Fail to assign a operation, start over again
           return;
         } else {
-          await this._beforeExecuteOperation?.(record);
-          await record.executeAsync(onOperationComplete);
+          await record.executeAsync({
+            onStart: onOperationStartAsync,
+            onResult: onOperationCompleteAsync
+          });
         }
       },
       {

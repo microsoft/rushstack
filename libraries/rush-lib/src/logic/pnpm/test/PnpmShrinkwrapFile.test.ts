@@ -80,7 +80,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       );
     });
 
-    it('Supports aliased package specifiers', () => {
+    it('Supports aliased package specifiers (v5)', () => {
       const parsedSpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
         SCOPED_DEPENDENCY_NAME,
         `/${DEPENDENCY_NAME}/${VERSION}`
@@ -88,7 +88,18 @@ describe(PnpmShrinkwrapFile.name, () => {
       expect(parsedSpecifier).toBeDefined();
       expect(parsedSpecifier!.specifierType).toBe(DependencySpecifierType.Alias);
       expect(parsedSpecifier!.packageName).toBe(SCOPED_DEPENDENCY_NAME);
-      expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:dependency_name@1.4.0"`);
+      expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:${DEPENDENCY_NAME}@${VERSION}"`);
+    });
+
+    it('Supports aliased package specifiers (v6)', () => {
+      const parsedSpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+        SCOPED_DEPENDENCY_NAME,
+        `/${DEPENDENCY_NAME}@${VERSION}`
+      );
+      expect(parsedSpecifier).toBeDefined();
+      expect(parsedSpecifier!.specifierType).toBe(DependencySpecifierType.Alias);
+      expect(parsedSpecifier!.packageName).toBe(SCOPED_DEPENDENCY_NAME);
+      expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:${DEPENDENCY_NAME}@${VERSION}"`);
     });
 
     it('Supports URL package specifiers', () => {

@@ -159,6 +159,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/cobuild.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
+      'common/config/rush/custom-tips.json',
       'common/config/rush/experiments.json',
       'common/config/rush/pnpm-config.json',
       'common/config/rush/rush-plugins.json',

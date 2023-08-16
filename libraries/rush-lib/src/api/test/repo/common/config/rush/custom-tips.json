@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/custom-tips.schema.json",
+
+  // The prefix will be prepended to all the custom message.
+  "defaultMessagePrefix": "⭐️ [Monorepo Infra team tip]: ",
+
+  "customTips": [
+    {
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
+      "message": "This is so wrong my friend. Please read this doc for more information: google.com"
+    }
+  ]
+}

@@ -8,11 +8,19 @@ on:
   workflow_dispatch:
 jobs:
   build:
-    name: Node.js v${{ matrix.NodeVersion }}
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        NodeVersion: [14, 16]
+        include:
+          - NodeVersion: 14
+            OS: ubuntu-latest
+          - NodeVersion: 18
+            OS: ubuntu-latest
+          - NodeVersion: 16
+            OS: windows-latest
+          - NodeVersion: 18
+            OS: windows-latest
+    name: Node.js v${{ matrix.NodeVersion }} (${{ matrix.OS }})
+    runs-on: ${{ matrix.OS }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,6 +34,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.NodeVersion }}
+
+      # Workaround for Node 18 incompatibility with Webpack 4
+      - name: Enable Webpack 4 workaround
+        shell: bash
+        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> "$GITHUB_ENV"
+        if: matrix.NodeVersion == 18
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
@@ -44,11 +58,18 @@ jobs:
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
 
+      - name: Ensure repo README is up-to-date
+        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+
       - name: Rush test (rush-lib)
         run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
         env:
           # Prevent time-based browserslist update warning
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
-      - name: Ensure repo README is up-to-date
-        run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
+
+      # One of the post run actions apparently uses older Node.js that rejects --openssl-legacy-provider
+      - name: Revert Webpack 4 workaround
+        shell: bash
+        run: echo "NODE_OPTIONS=" >> "$GITHUB_ENV"
+        if: matrix.NodeVersion == 18

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
+import { AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
@@ -17,6 +17,7 @@ import type {
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
+import type { OperationStatus } from '../logic/operations/OperationStatus';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -125,9 +126,13 @@ export class PhasedCommandHooks {
   /**
    * Hook invoked before executing a operation.
    */
-  public readonly beforeExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]> = new AsyncSeriesHook<
-    [IOperationRunnerContext]
-  >(['runnerContext'], 'beforeExecuteOperation');
+  public readonly beforeExecuteOperation: AsyncSeriesBailHook<
+    [IOperationRunnerContext],
+    OperationStatus | undefined
+  > = new AsyncSeriesBailHook<[IOperationRunnerContext], OperationStatus | undefined>(
+    ['runnerContext'],
+    'beforeExecuteOperation'
+  );
 
   /**
    * Hook invoked after executing a operation.

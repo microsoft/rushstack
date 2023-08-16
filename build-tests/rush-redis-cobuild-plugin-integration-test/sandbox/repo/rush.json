@@ -32,6 +32,10 @@
     {
       "packageName": "g",
       "projectFolder": "projects/g"
+    },
+    {
+      "packageName": "h",
+      "projectFolder": "projects/h"
     }
   ]
 }

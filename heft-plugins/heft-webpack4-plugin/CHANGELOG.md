@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+This log was last generated on Sat, 12 Aug 2023 00:21:48 GMT and should not be manually modified.
+
+## 0.8.0
+Sat, 12 Aug 2023 00:21:48 GMT
+
+### Minor changes
+
+- Display a warning if Node.js 17 or newer is used without the "--openssl-legacy-provider" workaround
 
 ## 0.7.14
 Tue, 08 Aug 2023 07:10:39 GMT
