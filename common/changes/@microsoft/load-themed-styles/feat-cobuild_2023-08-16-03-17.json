@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Use self.setTimeout() instead of setTimeout() to work around a Jest regression",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles"
+}
