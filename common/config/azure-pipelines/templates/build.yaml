@@ -25,7 +25,7 @@ steps:
   #   displayName: Start xvfb
   #   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-  - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }} --to rush --from rush-lib'
+  - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }} --to rush --from rush-lib --to repo-toolbox'
     displayName: 'Rush retest (install-run-rush) --to rush'
     env:
       # Prevent time-based browserslist update warning

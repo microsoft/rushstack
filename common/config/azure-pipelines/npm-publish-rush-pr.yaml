@@ -39,4 +39,5 @@ steps:
     parameters:
       VersionPolicyName: rush
       BranchName: $(SourceBranch)
-#  - template: templates/record-published-versions.yaml
+
+  - template: templates/record-published-versions.yaml
