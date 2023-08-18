@@ -258,8 +258,18 @@
     /**
      * The list of shell commands to run after the Rush build command finishes
      */
-    "postRushBuild": []
-  },
+     "postRushBuild": [],
+
+    /**
+     * The list of shell commands to run before rushx starts
+     */
+     "preRushx": [],
+
+    /**
+     * The list of shell commands to run after rushx finishes
+     */
+     "postRushx": []
+},
 
   /**
    * Installation variants allow you to maintain a parallel set of configuration files that can be

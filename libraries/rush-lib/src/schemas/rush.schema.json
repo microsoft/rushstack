@@ -344,6 +344,20 @@
           "items": {
             "type": "string"
           }
+        },
+        "preRushx": {
+          "description": "The list of scripts to run before rushx starts.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postRushx": {
+          "description": "The list of scripts to run after rushx finishes.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false
