@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { IMinimatch, Minimatch } from 'minimatch';
+import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { Ignore } from 'ignore';
@@ -81,7 +82,7 @@ interface IExtractorState {
    * As there might be different versions of same dependency, we need take version field into consideration
    * The key format is `${name}@${version}`
    */
-  dependencyConfigurationsByNameAndVersion: Map<`${string}@${string}`, IExtractorDependencyConfiguration>;
+  dependencyConfigurationsByName: Map<string, IExtractorDependencyConfiguration[]>;
   symlinkAnalyzer: SymlinkAnalyzer;
   archiver?: ArchiveManager;
 }
@@ -137,7 +138,7 @@ export interface IExtractorDependencyConfiguration {
    */
   dependencyName: string;
   /**
-   * The version of dependency
+   * The semver version range of dependency
    */
   dependencyVersion: string;
   /**
@@ -241,7 +242,7 @@ export interface IExtractorOptions {
   /**
    * Configurations for individual dependencies.
    */
-  dependenciesConfigurations?: IExtractorDependencyConfiguration[];
+  dependencyConfigurations?: IExtractorDependencyConfiguration[];
 }
 
 /**
@@ -283,7 +284,7 @@ export class PackageExtractor {
       overwriteExisting,
       createArchiveFilePath,
       createArchiveOnly,
-      dependenciesConfigurations = []
+      dependencyConfigurations = []
     } = options;
 
     if (createArchiveOnly) {
@@ -337,12 +338,16 @@ export class PackageExtractor {
       packageJsonByPath: new Map(),
       projectConfigurationsByName: new Map(projectConfigurations.map((p) => [p.projectName, p])),
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
-      dependencyConfigurationsByNameAndVersion: new Map(
-        dependenciesConfigurations.map((p) => [`${p.dependencyName}@${p.dependencyVersion}`, p])
-      ),
+      dependencyConfigurationsByName: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer({ requiredSourceParentPath: sourceRootFolder }),
       archiver
     };
+    // set state dependencyConfigurationsByName
+    dependencyConfigurations.forEach((d) => {
+      const origin: IExtractorDependencyConfiguration[] =
+        state.dependencyConfigurationsByName.get(d.dependencyName) ?? [];
+      state.dependencyConfigurationsByName.set(d.dependencyName, [...origin, d]);
+    });
 
     await this._performExtractionAsync(options, state);
     if (archiver && archiveFilePath) {
@@ -673,20 +678,16 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { includeNpmIgnoreFiles, targetRootFolder, terminal } = options;
-    const {
-      projectConfigurationsByPath,
-      packageJsonByPath,
-      dependencyConfigurationsByNameAndVersion,
-      archiver
-    } = state;
+    const { includeNpmIgnoreFiles, targetRootFolder } = options;
+    const { projectConfigurationsByPath, packageJsonByPath, dependencyConfigurationsByName, archiver } =
+      state;
     let useNpmIgnoreFilter: boolean = false;
 
     const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
     const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
       projectConfigurationsByPath.get(sourceFolderRealPath);
 
-    const packagesJson: IPackageJson | undefined = packageJsonByPath.get(sourceFolderPath);
+    const packagesJson: IPackageJson | undefined = packageJsonByPath.get(sourceFolderRealPath);
     // As this function will be used to copy folder for both project inside monorepo and third party dependencies insides node_modules
     // Third part dependencies won't have project configurations
     const isLocalProject: boolean = !!sourceProjectConfiguration;
@@ -730,19 +731,19 @@ export class PackageExtractor {
       if (!packagesJson) {
         return false;
       }
-      const dependenciesConfiguration: IExtractorDependencyConfiguration | undefined =
-        dependencyConfigurationsByNameAndVersion.get(`${packagesJson.name}@${packagesJson.version}`);
-      if (!dependenciesConfiguration) {
+      const dependenciesConfigurations: IExtractorDependencyConfiguration[] | undefined =
+        dependencyConfigurationsByName.get(packagesJson.name);
+      if (!dependenciesConfigurations) {
         return false;
       }
+      const matchedDependenciesConfigurations: IExtractorDependencyConfiguration[] =
+        dependenciesConfigurations.filter((d) => semver.satisfies(packagesJson.version, d.dependencyVersion));
 
-      return isFileExcluded(filePath, dependenciesConfiguration);
+      return matchedDependenciesConfigurations.some((d) => isFileExcluded(filePath, d));
     };
-    if (sourceProjectConfiguration) {
-      if (!includeNpmIgnoreFiles) {
-        // Only use the npmignore filter if the project configuration explicitly asks for it
-        useNpmIgnoreFilter = true;
-      }
+    if (sourceProjectConfiguration && !includeNpmIgnoreFiles) {
+      // Only use the npmignore filter if the project configuration explicitly asks for it
+      useNpmIgnoreFilter = true;
     }
 
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
@@ -761,8 +762,6 @@ export class PackageExtractor {
           //   'dist//index.js'
           //   'dist/index.js'
           //
-          // We can detect the duplicates by comparing the path.resolve() result.
-          const copySourcePath: string = path.resolve(sourceFolderPath, npmPackFile);
 
           // Filter out files that are excluded by the project configuration or dependency configuration.
           if (
@@ -771,6 +770,9 @@ export class PackageExtractor {
           ) {
             return;
           }
+
+          // We can detect the duplicates by comparing the path.resolve() result.
+          const copySourcePath: string = path.resolve(sourceFolderPath, npmPackFile);
 
           if (alreadyCopiedSourcePaths.has(copySourcePath)) {
             return;
@@ -821,20 +823,19 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
-            callback();
-            return;
-          }
-
-          // Filter out files that are excluded by the project configuration or dependency configuration.
-          if (
-            relativeSourcePath !== '' &&
-            ((isLocalProject && isFileExcludedForProject(relativeSourcePath)) ||
-              (!isLocalProject && isFileExcludedForDependency(relativeSourcePath)))
-          ) {
-            terminal.writeLine(`Extra exclude file ${relativeSourcePath} in ${sourceFolderPath}.`);
-            callback();
-            return;
+          if (relativeSourcePath !== '') {
+            if (ignoreFilter.ignores(relativeSourcePath)) {
+              callback();
+              return;
+            }
+            // Filter out files that are excluded by the project configuration or dependency configuration.
+            if (
+              (isLocalProject && isFileExcludedForProject(relativeSourcePath)) ||
+              (!isLocalProject && isFileExcludedForDependency(relativeSourcePath))
+            ) {
+              callback();
+              return;
+            }
           }
 
           const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);

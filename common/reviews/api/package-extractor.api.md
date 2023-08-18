@@ -26,7 +26,7 @@ export interface IExtractorMetadataJson {
 export interface IExtractorOptions {
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
-    dependenciesConfigurations?: IExtractorDependencyConfiguration[];
+    dependencyConfigurations?: IExtractorDependencyConfiguration[];
     folderToCopy?: string;
     includeDevDependencies?: boolean;
     includeNpmIgnoreFiles?: boolean;
