@@ -296,6 +296,28 @@ export class Utilities {
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
+   *
+   * It's basically the same as executeCommand() except that it returns a Promise.
+   */
+  public static async executeCommandAsync(
+    options: IExecuteCommandOptions,
+    processCommandOutputStream?: (data: any) => void
+  ): Promise<void> {
+    await Utilities._executeCommandInternalAsync(
+      options.command,
+      options.args,
+      options.workingDirectory,
+      // notice this is using the pipe stream not "inherit"
+      options.suppressOutput ? undefined : 'pipe',
+      options.environment,
+      options.keepEnvironment,
+      processCommandOutputStream
+    );
+  }
+
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAndCaptureOutput(
     command: string,
@@ -333,6 +355,45 @@ export class Utilities {
     for (;;) {
       try {
         Utilities.executeCommand(options);
+      } catch (error) {
+        console.log('\nThe command failed:');
+        console.log(` ${options.command} ` + options.args.join(' '));
+        console.log(`ERROR: ${(error as Error).toString()}`);
+
+        if (attemptNumber < maxAttempts) {
+          ++attemptNumber;
+          console.log(`Trying again (attempt #${attemptNumber})...\n`);
+          if (retryCallback) {
+            retryCallback();
+          }
+
+          continue;
+        } else {
+          console.error(`Giving up after ${attemptNumber} attempts\n`);
+          throw error;
+        }
+      }
+
+      break;
+    }
+  }
+
+  // todo: add comments after finished
+  public static async executeCommandWithRetryAsync(
+    options: IExecuteCommandOptions,
+    maxAttempts: number,
+    retryCallback?: () => void,
+    processCommandOutputStream?: (data: any) => void
+  ): Promise<void> {
+    if (maxAttempts < 1) {
+      throw new Error('The maxAttempts parameter cannot be less than 1');
+    }
+
+    let attemptNumber: number = 1;
+
+    for (;;) {
+      try {
+        await Utilities.executeCommandAsync(options, processCommandOutputStream);
       } catch (error) {
         console.log('\nThe command failed:');
         console.log(` ${options.command} ` + options.args.join(' '));
@@ -613,17 +674,77 @@ export class Utilities {
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
+   *
+   * It's the same as _executeCommandInternal except that it returns a promise.
+   */
+  private static _executeCommandInternalAsync(
+    command: string,
+    args: string[],
+    workingDirectory: string,
+    stdio: child_process.SpawnSyncOptions['stdio'],
+    environment?: IEnvironment,
+    keepEnvironment: boolean = false,
+    processCommandOutputStream?: (data: any) => void
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const options: child_process.SpawnSyncOptions = {
+        cwd: workingDirectory,
+        shell: true,
+        stdio: stdio,
+        env: keepEnvironment
+          ? environment
+          : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
+        maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
+      };
+
+      // Only escape the command if it actually contains spaces:
+      const escapedCommand: string =
+        command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
+
+      const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
+
+      const childProcess: child_process.ChildProcess = child_process.spawn(
+        escapedCommand,
+        escapedArgs,
+        options
+      );
+
+      childProcess.stdout?.on('data', (data) => {
+        processCommandOutputStream?.(data);
+      });
+      // childProcess.stderr?.on('data', (data) => {
+      //   console.error(data?.toString());
+      // });
+      childProcess.on('error', reject);
+
+      // can't wait for the "exit" event, but only the "close" event.
+      // Because the the stdio might still not closed.
+      childProcess.on('close', () => {
+        resolve();
+      });
+
+      // todo: figure out how to resolve and reject
+      childProcess.on('exit', (code) => {
+        if (code === 0) {
+          resolve();
+        }
+        reject();
+      });
+
+      // todo, do something similar to Utilities._processResult(result);
+      // todo return result;
+    });
+  }
+
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
    */
   private static _executeCommandInternal(
     command: string,
     args: string[],
     workingDirectory: string,
-    stdio:
-      | 'pipe'
-      | 'ignore'
-      | 'inherit'
-      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | stream.Stream | null | undefined)[]
-      | undefined,
+    stdio: child_process.SpawnSyncOptions['stdio'],
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<string | Buffer> {

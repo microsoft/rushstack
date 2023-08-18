@@ -303,7 +303,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    const doInstall = (options: IInstallManagerOptions): void => {
+    const doInstall = async (options: IInstallManagerOptions): Promise<void> => {
       // Run "npm install" in the common folder
       const installArgs: string[] = ['install'];
       this.pushConfigurationArgs(installArgs, options);
@@ -334,7 +334,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
-      Utilities.executeCommandWithRetry(
+      await Utilities.executeCommandWithRetryAsync(
         {
           command: packageManagerFilename,
           args: installArgs,
@@ -363,17 +363,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.options.allowShrinkwrapUpdates &&
       experiments.usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate
     ) {
-      doInstall({
+      await doInstall({
         ...this.options,
         onlyShrinkwrap: true
       });
 
-      doInstall({
+      await doInstall({
         ...this.options,
         allowShrinkwrapUpdates: false
       });
     } else {
-      doInstall(this.options);
+      await doInstall(this.options);
     }
 
     // If all attempts fail we just terminate. No special handling needed.
