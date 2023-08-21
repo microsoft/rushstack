@@ -284,7 +284,7 @@ export class PackageExtractor {
       overwriteExisting,
       createArchiveFilePath,
       createArchiveOnly,
-      dependencyConfigurations = []
+      dependencyConfigurations
     } = options;
 
     if (createArchiveOnly) {
@@ -343,11 +343,16 @@ export class PackageExtractor {
       archiver
     };
     // set state dependencyConfigurationsByName
-    dependencyConfigurations.forEach((d) => {
-      const origin: IExtractorDependencyConfiguration[] =
-        state.dependencyConfigurationsByName.get(d.dependencyName) ?? [];
-      state.dependencyConfigurationsByName.set(d.dependencyName, [...origin, d]);
-    });
+    for (const dependencyConfiguration of dependencyConfigurations || []) {
+      const { dependencyName } = dependencyConfiguration;
+      let existingDependencyConfigurations: IExtractorDependencyConfiguration[] | undefined =
+        state.dependencyConfigurationsByName.get(dependencyName);
+      if (!existingDependencyConfigurations) {
+        existingDependencyConfigurations = [];
+        state.dependencyConfigurationsByName.set(dependencyName, existingDependencyConfigurations);
+      }
+      existingDependencyConfigurations.push(dependencyConfiguration);
+    }
 
     await this._performExtractionAsync(options, state);
     if (archiver && archiveFilePath) {
@@ -689,7 +694,7 @@ export class PackageExtractor {
 
     const packagesJson: IPackageJson | undefined = packageJsonByPath.get(sourceFolderRealPath);
     // As this function will be used to copy folder for both project inside monorepo and third party dependencies insides node_modules
-    // Third part dependencies won't have project configurations
+    // Third party dependencies won't have project configurations
     const isLocalProject: boolean = !!sourceProjectConfiguration;
 
     // Base filter function
