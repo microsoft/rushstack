@@ -140,7 +140,7 @@ export interface IExtractorDependencyConfiguration {
   /**
    * The semver version range of dependency
    */
-  dependencyVersion: string;
+  dependencyVersionRange: string;
   /**
    * A list of glob patterns to exclude when extracting this dependency. If a path is
    * matched by both "patternsToInclude" and "patternsToExclude", the path will be
@@ -697,55 +697,62 @@ export class PackageExtractor {
     // Third party dependencies won't have project configurations
     const isLocalProject: boolean = !!sourceProjectConfiguration;
 
-    // Base filter function
-    const isFileExcluded = (
-      filePath: string,
-      {
-        patternsToInclude,
-        patternsToExclude
-      }: Pick<IExtractorDependencyConfiguration, 'patternsToInclude' | 'patternsToExclude'>
-    ): boolean => {
-      let includeFilters: IMinimatch[] | undefined;
-      let excludeFilters: IMinimatch[] | undefined;
-      if (patternsToInclude?.length) {
-        includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
-      }
-      if (patternsToExclude?.length) {
-        excludeFilters = patternsToExclude?.map((p) => new Minimatch(p, { dot: true }));
-      }
-      // If there are no filters, then we can't exclude anything.
-      if (!includeFilters && !excludeFilters) {
-        return false;
-      }
+    // Function to filter files inside local project or third party dependencies.
+    const isFileExcluded = (filePath: string): boolean => {
+      // Encapsulate exclude logic into a function, so it can be reused.
+      const excludeFileByPatterns = (
+        filePath: string,
+        option: Pick<IExtractorDependencyConfiguration, 'patternsToInclude' | 'patternsToExclude'>
+      ): boolean => {
+        let includeFilters: IMinimatch[] | undefined;
+        let excludeFilters: IMinimatch[] | undefined;
+        const { patternsToExclude, patternsToInclude } = option;
+        if (patternsToInclude?.length) {
+          includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
+        }
+        if (patternsToExclude?.length) {
+          excludeFilters = patternsToExclude?.map((p) => new Minimatch(p, { dot: true }));
+        }
+        // If there are no filters, then we can't exclude anything.
+        if (!includeFilters && !excludeFilters) {
+          return false;
+        }
 
-      const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
+        const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
 
-      // If the file is not included, then we don't need to check the excludeFilter. If it is included
-      // and there is no exclude filter, then we know that the file is not excluded. If it is included
-      // and there is an exclude filter, then we need to check for a match.
-      return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
+        // If the file is not included, then we don't need to check the excludeFilter. If it is included
+        // and there is no exclude filter, then we know that the file is not excluded. If it is included
+        // and there is an exclude filter, then we need to check for a match.
+        return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
+      };
+
+      if (isLocalProject) {
+        return excludeFileByPatterns(filePath, {
+          patternsToExclude: sourceProjectConfiguration?.patternsToExclude,
+          patternsToInclude: sourceProjectConfiguration?.patternsToInclude
+        });
+      } else {
+        if (!packagesJson) {
+          return false;
+        }
+        const dependenciesConfigurations: IExtractorDependencyConfiguration[] | undefined =
+          dependencyConfigurationsByName.get(packagesJson.name);
+        if (!dependenciesConfigurations) {
+          return false;
+        }
+        const matchedDependenciesConfigurations: IExtractorDependencyConfiguration[] =
+          dependenciesConfigurations.filter((d) =>
+            semver.satisfies(packagesJson.version, d.dependencyVersionRange)
+          );
+        return matchedDependenciesConfigurations.some((d) =>
+          excludeFileByPatterns(filePath, {
+            patternsToExclude: d.patternsToExclude,
+            patternsToInclude: d.patternsToInclude
+          })
+        );
+      }
     };
-    // Function to filter files inside local project
-    const isFileExcludedForProject = (filePath: string): boolean =>
-      isFileExcluded(filePath, {
-        patternsToExclude: sourceProjectConfiguration?.patternsToExclude,
-        patternsToInclude: sourceProjectConfiguration?.patternsToInclude
-      });
-    // Function to filter files inside third party dependencies
-    const isFileExcludedForDependency = (filePath: string): boolean => {
-      if (!packagesJson) {
-        return false;
-      }
-      const dependenciesConfigurations: IExtractorDependencyConfiguration[] | undefined =
-        dependencyConfigurationsByName.get(packagesJson.name);
-      if (!dependenciesConfigurations) {
-        return false;
-      }
-      const matchedDependenciesConfigurations: IExtractorDependencyConfiguration[] =
-        dependenciesConfigurations.filter((d) => semver.satisfies(packagesJson.version, d.dependencyVersion));
 
-      return matchedDependenciesConfigurations.some((d) => isFileExcluded(filePath, d));
-    };
     if (sourceProjectConfiguration && !includeNpmIgnoreFiles) {
       // Only use the npmignore filter if the project configuration explicitly asks for it
       useNpmIgnoreFilter = true;
@@ -769,10 +776,7 @@ export class PackageExtractor {
           //
 
           // Filter out files that are excluded by the project configuration or dependency configuration.
-          if (
-            (isLocalProject && isFileExcludedForProject(npmPackFile)) ||
-            (!isLocalProject && isFileExcludedForDependency(npmPackFile))
-          ) {
+          if (isFileExcluded(npmPackFile)) {
             return;
           }
 
@@ -834,10 +838,7 @@ export class PackageExtractor {
               return;
             }
             // Filter out files that are excluded by the project configuration or dependency configuration.
-            if (
-              (isLocalProject && isFileExcludedForProject(relativeSourcePath)) ||
-              (!isLocalProject && isFileExcludedForDependency(relativeSourcePath))
-            ) {
+            if (isFileExcluded(relativeSourcePath)) {
               callback();
               return;
             }

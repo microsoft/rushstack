@@ -10,7 +10,7 @@ import { ITerminal } from '@rushstack/node-core-library';
 // @public
 export interface IExtractorDependencyConfiguration {
     dependencyName: string;
-    dependencyVersion: string;
+    dependencyVersionRange: string;
     patternsToExclude?: string[];
     patternsToInclude?: string[];
 }

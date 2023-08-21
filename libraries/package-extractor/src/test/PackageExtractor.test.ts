@@ -277,7 +277,7 @@ describe(PackageExtractor.name, () => {
         dependencyConfigurations: [
           {
             dependencyName: '@types/node',
-            dependencyVersion: '^14.18.36',
+            dependencyVersionRange: '^14.18.36',
             patternsToExclude: ['fs/**']
           }
         ],
@@ -331,7 +331,7 @@ describe(PackageExtractor.name, () => {
         dependencyConfigurations: [
           {
             dependencyName: '@types/node',
-            dependencyVersion: '^16.20.0',
+            dependencyVersionRange: '^16.20.0',
             patternsToExclude: ['fs/**']
           }
         ],
