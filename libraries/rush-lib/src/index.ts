@@ -163,3 +163,5 @@ export {
   IOperationMetadataManagerOptions as _IOperationMetadataManagerOptions,
   IOperationMetaData as _IOperationMetadata
 } from './logic/operations/OperationMetadataManager';
+
+export { RushCommandLine } from './cli/RushCommandLine';
