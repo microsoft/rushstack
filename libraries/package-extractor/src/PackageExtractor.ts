@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { IMinimatch, Minimatch } from 'minimatch';
+import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
 import ignore, { Ignore } from 'ignore';
@@ -74,8 +75,10 @@ export interface IExtractorMetadataJson {
 
 interface IExtractorState {
   foldersToCopy: Set<string>;
+  packageJsonByPath: Map<string, IPackageJson>;
   projectConfigurationsByPath: Map<string, IExtractorProjectConfiguration>;
   projectConfigurationsByName: Map<string, IExtractorProjectConfiguration>;
+  dependencyConfigurationsByName: Map<string, IExtractorDependencyConfiguration[]>;
   symlinkAnalyzer: SymlinkAnalyzer;
   archiver?: ArchiveManager;
 }
@@ -118,6 +121,34 @@ export interface IExtractorProjectConfiguration {
    * The names of additional dependencies to exclude when extracting this project.
    */
   dependenciesToExclude?: string[];
+}
+
+/**
+ * The extractor configuration for individual dependencies.
+ *
+ * @public
+ */
+export interface IExtractorDependencyConfiguration {
+  /**
+   * The name of dependency
+   */
+  dependencyName: string;
+  /**
+   * The semver version range of dependency
+   */
+  dependencyVersionRange: string;
+  /**
+   * A list of glob patterns to exclude when extracting this dependency. If a path is
+   * matched by both "patternsToInclude" and "patternsToExclude", the path will be
+   * excluded. If undefined, no paths will be excluded.
+   */
+  patternsToExclude?: string[];
+  /**
+   * A list of glob patterns to include when extracting this dependency. If a path is
+   * matched by both "patternsToInclude" and "patternsToExclude", the path will be
+   * excluded. If undefined, all paths will be included.
+   */
+  patternsToInclude?: string[];
 }
 
 /**
@@ -203,6 +234,11 @@ export interface IExtractorOptions {
    * Configurations for individual projects, keyed by the project path relative to the sourceRootFolder.
    */
   projectConfigurations: IExtractorProjectConfiguration[];
+
+  /**
+   * Configurations for individual dependencies.
+   */
+  dependencyConfigurations?: IExtractorDependencyConfiguration[];
 }
 
 /**
@@ -243,7 +279,8 @@ export class PackageExtractor {
       mainProjectName,
       overwriteExisting,
       createArchiveFilePath,
-      createArchiveOnly
+      createArchiveOnly,
+      dependencyConfigurations
     } = options;
 
     if (createArchiveOnly) {
@@ -294,11 +331,24 @@ export class PackageExtractor {
     // Create a new state for each run
     const state: IExtractorState = {
       foldersToCopy: new Set(),
+      packageJsonByPath: new Map(),
       projectConfigurationsByName: new Map(projectConfigurations.map((p) => [p.projectName, p])),
       projectConfigurationsByPath: new Map(projectConfigurations.map((p) => [p.projectFolder, p])),
+      dependencyConfigurationsByName: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer({ requiredSourceParentPath: sourceRootFolder }),
       archiver
     };
+    // set state dependencyConfigurationsByName
+    for (const dependencyConfiguration of dependencyConfigurations || []) {
+      const { dependencyName } = dependencyConfiguration;
+      let existingDependencyConfigurations: IExtractorDependencyConfiguration[] | undefined =
+        state.dependencyConfigurationsByName.get(dependencyName);
+      if (!existingDependencyConfigurations) {
+        existingDependencyConfigurations = [];
+        state.dependencyConfigurationsByName.set(dependencyName, existingDependencyConfigurations);
+      }
+      existingDependencyConfigurations.push(dependencyConfiguration);
+    }
 
     await this._performExtractionAsync(options, state);
     if (archiver && archiveFilePath) {
@@ -434,6 +484,7 @@ export class PackageExtractor {
         // Transform packageJson using the provided transformer, if requested
         const packageJson: IPackageJson = transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
 
+        state.packageJsonByPath.set(packageJsonRealFolderPath, packageJson);
         // Union of keys from regular dependencies, peerDependencies, optionalDependencies
         // (and possibly devDependencies if includeDevDependencies=true)
         const dependencyNamesToProcess: Set<string> = new Set<string>();
@@ -629,43 +680,76 @@ export class PackageExtractor {
     state: IExtractorState
   ): Promise<void> {
     const { includeNpmIgnoreFiles, targetRootFolder } = options;
-    const { projectConfigurationsByPath, archiver } = state;
+    const { projectConfigurationsByPath, packageJsonByPath, dependencyConfigurationsByName, archiver } =
+      state;
     let useNpmIgnoreFilter: boolean = false;
-    let includeFilters: IMinimatch[] | undefined;
-    let excludeFilters: IMinimatch[] | undefined;
 
     const sourceFolderRealPath: string = await FileSystem.getRealPathAsync(sourceFolderPath);
     const sourceProjectConfiguration: IExtractorProjectConfiguration | undefined =
       projectConfigurationsByPath.get(sourceFolderRealPath);
-    if (sourceProjectConfiguration) {
-      if (!includeNpmIgnoreFiles) {
-        // Only use the npmignore filter if the project configuration explicitly asks for it
-        useNpmIgnoreFilter = true;
-      }
-      if (sourceProjectConfiguration.patternsToInclude?.length) {
-        includeFilters = sourceProjectConfiguration.patternsToInclude.map(
-          (p) => new Minimatch(p, { dot: true })
+
+    const packagesJson: IPackageJson | undefined = packageJsonByPath.get(sourceFolderRealPath);
+    // As this function will be used to copy folder for both project inside monorepo and third party dependencies insides node_modules
+    // Third party dependencies won't have project configurations
+    const isLocalProject: boolean = !!sourceProjectConfiguration;
+
+    // Function to filter files inside local project or third party dependencies.
+    const isFileExcluded = (filePath: string): boolean => {
+      // Encapsulate exclude logic into a function, so it can be reused.
+      const excludeFileByPatterns = (
+        filePath: string,
+        patternsToInclude: string[] | undefined,
+        patternsToExclude: string[] | undefined
+      ): boolean => {
+        let includeFilters: IMinimatch[] | undefined;
+        let excludeFilters: IMinimatch[] | undefined;
+        if (patternsToInclude?.length) {
+          includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
+        }
+        if (patternsToExclude?.length) {
+          excludeFilters = patternsToExclude?.map((p) => new Minimatch(p, { dot: true }));
+        }
+        // If there are no filters, then we can't exclude anything.
+        if (!includeFilters && !excludeFilters) {
+          return false;
+        }
+
+        const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
+
+        // If the file is not included, then we don't need to check the excludeFilter. If it is included
+        // and there is no exclude filter, then we know that the file is not excluded. If it is included
+        // and there is an exclude filter, then we need to check for a match.
+        return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
+      };
+
+      if (isLocalProject) {
+        return excludeFileByPatterns(
+          filePath,
+          sourceProjectConfiguration?.patternsToInclude,
+          sourceProjectConfiguration?.patternsToExclude
+        );
+      } else {
+        if (!packagesJson) {
+          return false;
+        }
+        const dependenciesConfigurations: IExtractorDependencyConfiguration[] | undefined =
+          dependencyConfigurationsByName.get(packagesJson.name);
+        if (!dependenciesConfigurations) {
+          return false;
+        }
+        const matchedDependenciesConfigurations: IExtractorDependencyConfiguration[] =
+          dependenciesConfigurations.filter((d) =>
+            semver.satisfies(packagesJson.version, d.dependencyVersionRange)
+          );
+        return matchedDependenciesConfigurations.some(
+          (d) => excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
         );
       }
-      if (sourceProjectConfiguration.patternsToExclude?.length) {
-        excludeFilters = sourceProjectConfiguration.patternsToExclude.map(
-          (p) => new Minimatch(p, { dot: true })
-        );
-      }
-    }
+    };
 
-    function isFileExcluded(filePath: string): boolean {
-      // If we're not in a project folder, or if there are no filters, then we can't exclude anything.
-      if (!includeFilters && !excludeFilters) {
-        return false;
-      }
-
-      const isIncluded: boolean = !includeFilters || includeFilters.some((m) => m.match(filePath));
-
-      // If the file is not included, then we don't need to check the excludeFilter. If it is included
-      // and there is no exclude filter, then we know that the file is not excluded. If it is included
-      // and there is an exclude filter, then we need to check for a match.
-      return !isIncluded || !!excludeFilters?.some((m) => m.match(filePath));
+    if (sourceProjectConfiguration && !includeNpmIgnoreFiles) {
+      // Only use the npmignore filter if the project configuration explicitly asks for it
+      useNpmIgnoreFilter = true;
     }
 
     const targetFolderPath: string = this._remapPathForExtractorFolder(sourceFolderPath, options);
@@ -678,25 +762,28 @@ export class PackageExtractor {
       await Async.forEachAsync(
         npmPackFiles,
         async (npmPackFile: string) => {
-          // Filter out files that are excluded by the project configuration.
-          if (isFileExcluded(npmPackFile)) {
-            return;
-          }
-
           // In issue https://github.com/microsoft/rushstack/issues/2121 we found that npm-packlist sometimes returns
           // duplicate file paths, for example:
           //
           //   'dist//index.js'
           //   'dist/index.js'
           //
+
+          // Filter out files that are excluded by the project configuration or dependency configuration.
+          if (isFileExcluded(npmPackFile)) {
+            return;
+          }
+
           // We can detect the duplicates by comparing the path.resolve() result.
           const copySourcePath: string = path.resolve(sourceFolderPath, npmPackFile);
+
           if (alreadyCopiedSourcePaths.has(copySourcePath)) {
             return;
           }
           alreadyCopiedSourcePaths.add(copySourcePath);
 
           const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
+
           const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(copySourcePath);
           if (copySourcePathNode.kind !== 'link') {
             if (!options.createArchiveOnly) {
@@ -739,18 +826,17 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
+          if (
+            relativeSourcePath !== '' &&
+            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
+          ) {
             callback();
             return;
           }
 
           const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
-          if (sourcePathNode.kind === 'file') {
-            if (relativeSourcePath !== '' && isFileExcluded(relativeSourcePath)) {
-              callback();
-              return;
-            }
 
+          if (sourcePathNode.kind === 'file') {
             const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
             if (!options.createArchiveOnly) {
               // Manually call fs.copyFile to avoid unnecessary stat calls.
