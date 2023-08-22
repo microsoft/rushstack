@@ -78,10 +78,6 @@ interface IExtractorState {
   packageJsonByPath: Map<string, IPackageJson>;
   projectConfigurationsByPath: Map<string, IExtractorProjectConfiguration>;
   projectConfigurationsByName: Map<string, IExtractorProjectConfiguration>;
-  /**
-   * As there might be different versions of same dependency, we need take version field into consideration
-   * The key format is `${name}@${version}`
-   */
   dependencyConfigurationsByName: Map<string, IExtractorDependencyConfiguration[]>;
   symlinkAnalyzer: SymlinkAnalyzer;
   archiver?: ArchiveManager;
@@ -702,11 +698,11 @@ export class PackageExtractor {
       // Encapsulate exclude logic into a function, so it can be reused.
       const excludeFileByPatterns = (
         filePath: string,
-        option: Pick<IExtractorDependencyConfiguration, 'patternsToInclude' | 'patternsToExclude'>
+        patternsToInclude: string[] | undefined,
+        patternsToExclude: string[] | undefined
       ): boolean => {
         let includeFilters: IMinimatch[] | undefined;
         let excludeFilters: IMinimatch[] | undefined;
-        const { patternsToExclude, patternsToInclude } = option;
         if (patternsToInclude?.length) {
           includeFilters = patternsToInclude?.map((p) => new Minimatch(p, { dot: true }));
         }
@@ -727,10 +723,11 @@ export class PackageExtractor {
       };
 
       if (isLocalProject) {
-        return excludeFileByPatterns(filePath, {
-          patternsToExclude: sourceProjectConfiguration?.patternsToExclude,
-          patternsToInclude: sourceProjectConfiguration?.patternsToInclude
-        });
+        return excludeFileByPatterns(
+          filePath,
+          sourceProjectConfiguration?.patternsToInclude
+          sourceProjectConfiguration?.patternsToExclude
+        );
       } else {
         if (!packagesJson) {
           return false;
@@ -744,11 +741,8 @@ export class PackageExtractor {
           dependenciesConfigurations.filter((d) =>
             semver.satisfies(packagesJson.version, d.dependencyVersionRange)
           );
-        return matchedDependenciesConfigurations.some((d) =>
-          excludeFileByPatterns(filePath, {
-            patternsToExclude: d.patternsToExclude,
-            patternsToInclude: d.patternsToInclude
-          })
+        return matchedDependenciesConfigurations.some(
+          (d) => excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
         );
       }
     };
@@ -832,16 +826,12 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (relativeSourcePath !== '') {
-            if (ignoreFilter.ignores(relativeSourcePath)) {
-              callback();
-              return;
-            }
-            // Filter out files that are excluded by the project configuration or dependency configuration.
-            if (isFileExcluded(relativeSourcePath)) {
-              callback();
-              return;
-            }
+          if (
+            relativeSourcePath !== '' &&
+            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
+          ) {
+            callback();
+            return;
           }
 
           const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
