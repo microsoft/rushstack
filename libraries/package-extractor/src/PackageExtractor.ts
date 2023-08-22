@@ -725,7 +725,7 @@ export class PackageExtractor {
       if (isLocalProject) {
         return excludeFileByPatterns(
           filePath,
-          sourceProjectConfiguration?.patternsToInclude
+          sourceProjectConfiguration?.patternsToInclude,
           sourceProjectConfiguration?.patternsToExclude
         );
       } else {
