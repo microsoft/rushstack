@@ -12,6 +12,8 @@ import { Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
+import { EventHooksManager } from '../logic/EventHooksManager';
+import { Event } from '../api/EventHooks';
 
 /**
  * @internal
@@ -45,129 +47,139 @@ interface IRushXCommandLineArguments {
 }
 
 export class RushXCommandLine {
-  public static launchRushX(launcherVersion: string, isManaged: boolean): void {
-    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged });
+  public static launchRushX(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
+    try {
+      const args: IRushXCommandLineArguments = this._getCommandLineArguments();
+      const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
+        showVerbose: false
+      });
+      const eventHooksManager: EventHooksManager | undefined = rushConfiguration
+        ? new EventHooksManager(rushConfiguration)
+        : undefined;
+
+      const ignoreHooks = process.env.INSIDERUSH === '1';
+      eventHooksManager?.handle(Event.preRushx, false /* isDebug */, ignoreHooks);
+      RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
+      eventHooksManager?.handle(Event.postRushx, false /* isDebug */, ignoreHooks);
+    } catch (error) {
+      console.log(colors.red('Error: ' + (error as Error).message));
+    }
   }
 
   /**
    * @internal
    */
-  public static _launchRushXInternal(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
+  public static _launchRushXInternal(
+    launcherVersion: string,
+    options: ILaunchRushXInternalOptions,
+    rushConfiguration: RushConfiguration | undefined,
+    args: IRushXCommandLineArguments
+  ): void {
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
     process.exitCode = 1;
 
-    const args: IRushXCommandLineArguments = this._getCommandLineArguments();
-
     if (!args.quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
+    // Are we in a Rush repo?
+    NodeJsCompatibility.warnAboutCompatibilityIssues({
+      isRushLib: true,
+      alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
+      rushConfiguration
+    });
 
-    try {
-      // Are we in a Rush repo?
-      const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
-        showVerbose: false
-      });
-      NodeJsCompatibility.warnAboutCompatibilityIssues({
-        isRushLib: true,
-        alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
-        rushConfiguration
-      });
+    // Find the governing package.json for this folder:
+    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-      // Find the governing package.json for this folder:
-      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-      const packageJsonFilePath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
-        process.cwd()
+    const packageJsonFilePath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
+      process.cwd()
+    );
+    if (!packageJsonFilePath) {
+      console.log(colors.red('This command should be used inside a project folder.'));
+      console.log(
+        `Unable to find a package.json file in the current working directory or any of its parents.`
       );
-      if (!packageJsonFilePath) {
-        console.log(colors.red('This command should be used inside a project folder.'));
-        console.log(
-          `Unable to find a package.json file in the current working directory or any of its parents.`
-        );
-        return;
-      }
-
-      if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
-        // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
-        // did not install the project's dependencies, because the project was not registered.
-        console.log(
-          colors.yellow(
-            'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
-          )
-        );
-      }
-
-      const packageJson: IPackageJson = packageJsonLookup.loadPackageJson(packageJsonFilePath);
-
-      const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
-
-      if (args.help) {
-        RushXCommandLine._showUsage(packageJson, projectCommandSet);
-        return;
-      }
-
-      const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
-
-      if (scriptBody === undefined) {
-        console.log(
-          colors.red(
-            `Error: The command "${args.commandName}" is not defined in the` +
-              ` package.json file for this project.`
-          )
-        );
-
-        if (projectCommandSet.commandNames.length > 0) {
-          console.log(
-            '\nAvailable commands for this project are: ' +
-              projectCommandSet.commandNames.map((x) => `"${x}"`).join(', ')
-          );
-        }
-
-        console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
-        return;
-      }
-
-      let commandWithArgs: string = scriptBody;
-      let commandWithArgsForDisplay: string = scriptBody;
-      if (args.commandArgs.length > 0) {
-        // This approach is based on what NPM 7 now does:
-        // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-        const escapedRemainingArgs: string[] = args.commandArgs.map((x) => Utilities.escapeShellParameter(x));
-
-        commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
-
-        // Display it nicely without the extra quotes
-        commandWithArgsForDisplay += ' ' + args.commandArgs.join(' ');
-      }
-
-      if (!args.quiet) {
-        console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
-      }
-
-      const packageFolder: string = path.dirname(packageJsonFilePath);
-
-      const exitCode: number = Utilities.executeLifecycleCommand(commandWithArgs, {
-        rushConfiguration,
-        workingDirectory: packageFolder,
-        // If there is a rush.json then use its .npmrc from the temp folder.
-        // Otherwise look for npmrc in the project folder.
-        initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
-        handleOutput: false,
-        environmentPathOptions: {
-          includeProjectBin: true
-        }
-      });
-
-      if (exitCode > 0) {
-        console.log(colors.red(`The script failed with exit code ${exitCode}`));
-      }
-
-      process.exitCode = exitCode;
-    } catch (error) {
-      console.log(colors.red('Error: ' + (error as Error).message));
+      return;
     }
+
+    if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
+      // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
+      // did not install the project's dependencies, because the project was not registered.
+      console.log(
+        colors.yellow(
+          'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
+        )
+      );
+    }
+
+    const packageJson: IPackageJson = packageJsonLookup.loadPackageJson(packageJsonFilePath);
+
+    const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
+
+    if (args.help) {
+      RushXCommandLine._showUsage(packageJson, projectCommandSet);
+      return;
+    }
+
+    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
+
+    if (scriptBody === undefined) {
+      console.log(
+        colors.red(
+          `Error: The command "${args.commandName}" is not defined in the` +
+            ` package.json file for this project.`
+        )
+      );
+
+      if (projectCommandSet.commandNames.length > 0) {
+        console.log(
+          '\nAvailable commands for this project are: ' +
+            projectCommandSet.commandNames.map((x) => `"${x}"`).join(', ')
+        );
+      }
+
+      console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
+      return;
+    }
+
+    let commandWithArgs: string = scriptBody;
+    let commandWithArgsForDisplay: string = scriptBody;
+    if (args.commandArgs.length > 0) {
+      // This approach is based on what NPM 7 now does:
+      // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
+      const escapedRemainingArgs: string[] = args.commandArgs.map((x) => Utilities.escapeShellParameter(x));
+
+      commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
+
+      // Display it nicely without the extra quotes
+      commandWithArgsForDisplay += ' ' + args.commandArgs.join(' ');
+    }
+
+    if (!args.quiet) {
+      console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
+    }
+
+    const packageFolder: string = path.dirname(packageJsonFilePath);
+
+    const exitCode: number = Utilities.executeLifecycleCommand(commandWithArgs, {
+      rushConfiguration,
+      workingDirectory: packageFolder,
+      // If there is a rush.json then use its .npmrc from the temp folder.
+      // Otherwise look for npmrc in the project folder.
+      initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
+      handleOutput: false,
+      environmentPathOptions: {
+        includeProjectBin: true
+      }
+    });
+
+    if (exitCode > 0) {
+      console.log(colors.red(`The script failed with exit code ${exitCode}`));
+    }
+
+    process.exitCode = exitCode;
   }
 
   private static _getCommandLineArguments(): IRushXCommandLineArguments {
@@ -206,6 +218,7 @@ export class RushXCommandLine {
     if (unknownArgs.length > 0) {
       // Future TODO: Instead of just displaying usage info, we could display a
       // specific error about the unknown flag the user tried to pass to rushx.
+      console.log(colors.red(`Unknown arguments: ${unknownArgs.join(', ')}`));
       help = true;
     }
 

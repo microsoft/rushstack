@@ -266,18 +266,7 @@
     /**
      * The list of shell commands to run after the Rush build command finishes
      */
-    "postRushBuild": [],
-
-    /**
-     * The list of shell commands to run before rushx starts
-     */
-     "preRushx": [],
-
-    /**
-     * The list of shell commands to run after rushx finishes
-     */
-     "postRushx": []
-
+    "postRushBuild": []
   },
 
   /**

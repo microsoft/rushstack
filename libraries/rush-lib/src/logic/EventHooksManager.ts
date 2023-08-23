@@ -53,7 +53,7 @@ export class EventHooksManager {
           console.error(
             '\n' +
               colors.yellow(
-                `Event hook "${script}" failed. Run "rush" with --debug` +
+                `Event hook "${script}" failed: ${error}\nRun "rush" with --debug` +
                   ` to see detailed error information.`
               )
           );

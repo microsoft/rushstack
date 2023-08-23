@@ -200,12 +200,12 @@ export const EnvironmentVariableNames: {
 
 // @beta
 export enum Event {
-    postRushx = 6,
-    preRushx = 5,
     postRushBuild = 4,
     postRushInstall = 2,
+    postRushx = 6,
     preRushBuild = 3,
-    preRushInstall = 1
+    preRushInstall = 1,
+    preRushx = 5
 }
 
 // @beta

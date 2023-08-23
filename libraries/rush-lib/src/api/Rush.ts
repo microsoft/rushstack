@@ -102,7 +102,7 @@ export class Rush {
     options = Rush._normalizeLaunchOptions(options);
 
     Rush._assignRushInvokedFolder();
-    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
+    RushXCommandLine.launchRushX(launcherVersion, options);
   }
 
   /**

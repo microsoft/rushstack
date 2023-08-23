@@ -504,6 +504,9 @@ export class Utilities {
       }
     });
 
+    // Communicate to downstream calls that they are running inside a top-level rush command
+    environment.INSIDERUSH = '1';
+
     return spawnFunction(shellCommand, [commandFlags, command], {
       cwd: options.workingDirectory,
       shell: useShell,
