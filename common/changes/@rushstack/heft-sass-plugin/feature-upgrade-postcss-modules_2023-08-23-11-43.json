@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Upgrade postcss-modules from v1.5.0 to v6.0.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin"
+}
