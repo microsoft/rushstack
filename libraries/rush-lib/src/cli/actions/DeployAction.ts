@@ -187,6 +187,7 @@ export class DeployAction extends BaseRushAction {
       targetRootFolder,
       mainProjectName,
       projectConfigurations,
+      dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
       createArchiveOnly,
       pnpmInstallFolder,
