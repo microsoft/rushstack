@@ -421,7 +421,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 errorLogPath
               });
             }
-            return Boolean(restoreFromCacheSuccess);
+            return !!restoreFromCacheSuccess;
           };
           if (cobuildLock) {
             // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
