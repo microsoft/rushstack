@@ -12,7 +12,6 @@ import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
-import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
@@ -1045,7 +1044,7 @@ export class RushCommandLine {
     // Warning: (ae-forgotten-export) The symbol "IRushCliJsonSpec" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getSpec(workspaceFolder: string): IRushCliJsonSpec[];
+    static getSpec(workspaceFolder: string): IRushCliJsonSpec[];
 }
 
 // @public

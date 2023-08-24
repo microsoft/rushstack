@@ -17,7 +17,7 @@
   "scripts": {
     "build": "heft build --clean",
     "test": "heft test --clean",
-    "testCli": "heft test --test-path-pattern src/cli/test/RushCommandLineParser.test.ts --clean",
+    "testCli": "heft test --test-path-pattern RushCLI --clean",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": "heft run --only test -- --clean"
   },

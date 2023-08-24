@@ -5,38 +5,31 @@ import {
 } from '@rushstack/ts-command-line';
 import { RushCommandLineParser } from './RushCommandLineParser';
 
-export type CliParameterKind = 'flag' | 'string';
-
-// interface RushCliJsonSpec {
-//   kind: CliParameterKind;
-
-//   /**
-//    * The long name of the flag including double dashes, e.g. "--do-something"
-//    */
-//   longName: string;
-
-//   /**
-//    * An optional short name for the flag including the dash, e.g. "-d"
-//    */
-//   shortName?: string;
-
-//   /**
-//    * Documentation for the parameter that will be shown when invoking the tool with "--help"
-//    */
-//   description: string;
-
-//   /**
-//    * If true, then an error occurs if the parameter was not included on the command-line.
-//    */
-//   required?: boolean;
-// }
-
 interface ICommandLineParameter {
-  readonly kind: CommandLineParameterKind;
+  /**
+   * The corresponding string representation of CliParameterKind
+   */
+  readonly kind: string;
+
+  /**
+   * The long name of the flag including double dashes, e.g. "--do-something"
+   */
   readonly longName: string;
-  readonly shortName: string | undefined;
+
+  /**
+   * An optional short name for the flag including the dash, e.g. "-d"
+   */
+  readonly shortName?: string;
+
+  /**
+   * Documentation for the parameter that will be shown when invoking the tool with "--help"
+   */
   readonly description: string;
-  readonly required: boolean;
+
+  /**
+   * If true, then an error occurs if the parameter was not included on the command-line.
+   */
+  readonly required?: boolean;
 }
 
 interface IRushCliJsonSpec {
@@ -50,7 +43,7 @@ interface IRushCliJsonSpec {
  * @beta
  */
 export class RushCommandLine {
-  public getSpec(workspaceFolder: string): IRushCliJsonSpec[] {
+  public static getSpec(workspaceFolder: string): IRushCliJsonSpec[] {
     const commandLineParser: RushCommandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
 
     // Copy the actions
@@ -65,7 +58,7 @@ export class RushCommandLine {
           const o: ICommandLineParameter = {
             ...parameter,
             // kind is a getter in CommandLineParameter
-            kind: parameter.kind,
+            kind: CommandLineParameterKind[parameter.kind],
             shortName: parameter.shortName
           };
           return o;
