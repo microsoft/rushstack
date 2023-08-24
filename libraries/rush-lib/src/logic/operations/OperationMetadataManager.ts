@@ -122,8 +122,9 @@ export class OperationMetadataManager {
 
     // Append cached log into current log file
     terminal.writeLine(`Restoring cached log file at ${this._logPath}`);
+    let logReadStream: fs.ReadStream | undefined;
     try {
-      const logReadStream: fs.ReadStream = fs.createReadStream(this._logPath, {
+      logReadStream = fs.createReadStream(this._logPath, {
         encoding: 'utf-8'
       });
       for await (const data of logReadStream) {
@@ -133,6 +134,9 @@ export class OperationMetadataManager {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
       }
+    } finally {
+      // Clean up the read steam
+      logReadStream?.close();
     }
 
     // Try to restore cached error log as error log file

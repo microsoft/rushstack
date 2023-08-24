@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextRewriterTransform should apply standard rewriters 1`] = `
+Array [
+  Object {
+    "kind": "E",
+    "text": "RED",
+  },
+  Object {
+    "kind": "E",
+    "text": "stderr 1[n]stderr 2[n]",
+  },
+  Object {
+    "kind": "O",
+    "text": "stdout 3[n]stdout 4",
+  },
+  Object {
+    "kind": "O",
+    "text": "[1[n]",
+  },
+]
+`;

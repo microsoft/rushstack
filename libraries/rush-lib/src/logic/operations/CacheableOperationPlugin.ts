@@ -11,11 +11,12 @@ import {
   ITerminal,
   JsonFile,
   JsonObject,
+  NewlineKind,
   Sort,
   Terminal
 } from '@rushstack/node-core-library';
 import { CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { DiscardStdoutTransform, PrintUtilities } from '@rushstack/terminal';
+import { DiscardStdoutTransform, PrintUtilities, TextRewriterTransform } from '@rushstack/terminal';
 import { SplitterTransform, TerminalWritable } from '@rushstack/terminal';
 
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
@@ -412,15 +413,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const restoreFromCacheSuccess: boolean | undefined =
               await projectBuildCache?.tryRestoreFromCacheAsync(buildCacheTerminal, specifiedCacheId);
             if (restoreFromCacheSuccess) {
+              buildCacheContext.cacheRestored = true;
               // Restore the original state of the operation without cache
               await operationMetadataManager?.tryRestoreAsync({
                 terminal: buildCacheTerminal,
                 logPath,
                 errorLogPath
               });
-              buildCacheContext.cacheRestored = true;
             }
-            return Boolean(restoreFromCacheSuccess);
+            return !!restoreFromCacheSuccess;
           };
           if (cobuildLock) {
             // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
@@ -1031,9 +1032,15 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     });
 
     if (quietMode) {
-      cacheConsoleWritable = new DiscardStdoutTransform({
+      const discardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
         destination: collatedWriter
       });
+      const normalizeNewlineTransform: TextRewriterTransform = new TextRewriterTransform({
+        destination: discardTransform,
+        normalizeNewlines: NewlineKind.Lf,
+        ensureNewlineAtEnd: true
+      });
+      cacheConsoleWritable = normalizeNewlineTransform;
     } else {
       cacheConsoleWritable = collatedWriter;
     }
