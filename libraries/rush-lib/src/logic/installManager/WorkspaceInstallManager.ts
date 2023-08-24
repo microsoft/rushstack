@@ -305,7 +305,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     const doInstall = async (options: IInstallManagerOptions): Promise<void> => {
       // Run "npm install" in the common folder
-      const installArgs: string[] = ['install'];
+      // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
+      // Without this argument, certain text that should be colored (such as red) will appear white.
+      const installArgs: string[] = ['install', '--color=always'];
       this.pushConfigurationArgs(installArgs, options);
 
       console.log(
@@ -334,7 +336,26 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
-      await Utilities.executeCommandWithRetryAsync(
+      const onPnpmStdoutChunk = (chunk: string) => {
+        if (
+          chunk.includes('No matching version found for') ||
+          chunk.includes('ERR_PNPM_NO_MATCHING_VERSION')
+        ) {
+          this.rushConfiguration.customTipsConfiguration.showErrorTip(
+            this._terminal,
+            'TIP_PNPM_NO_MATCHING_VERSION'
+          );
+        }
+
+        if (chunk.includes('npm WARN')) {
+          this.rushConfiguration.customTipsConfiguration.showErrorTip(
+            this._terminal,
+            'TIP_PNPM_MISMATCHING_DEPENDENCIES'
+          );
+        }
+      };
+
+      await Utilities.executeCommandAndProcessOutputWithRetryAsync(
         {
           command: packageManagerFilename,
           args: installArgs,
@@ -343,6 +364,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           suppressOutput: false
         },
         this.options.maxInstallAttempts,
+        onPnpmStdoutChunk,
         () => {
           if (this.rushConfiguration.packageManager === 'pnpm') {
             console.log(colors.yellow(`Deleting the "node_modules" folder`));

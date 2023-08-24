@@ -58,9 +58,7 @@ export interface ICustomTipItemJson {
  */
 export type CustomTipId =
   // The rush.json "ensureConsistentVersions" validation.
-  | 'TIP_RUSH_INCONSISTENT_VERSIONS'
-  // In the future, plugins can contribute other strings.
-  | string;
+  'TIP_RUSH_INCONSISTENT_VERSIONS' | 'TIP_PNPM_MISMATCHING_DEPENDENCIES' | 'TIP_PNPM_NO_MATCHING_VERSION';
 
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
@@ -84,7 +82,9 @@ export class CustomTipsConfiguration {
    * of the config file.
    */
   public static readonly supportedTipIds: ReadonlySet<string> = new Set<string>([
-    'TIP_RUSH_INCONSISTENT_VERSIONS'
+    'TIP_RUSH_INCONSISTENT_VERSIONS',
+    'TIP_PNPM_MISMATCHING_DEPENDENCIES',
+    'TIP_PNPM_NO_MATCHING_VERSION'
   ]);
 
   public constructor(configFilename: string) {

@@ -12,10 +12,10 @@ import {
   FileConstants,
   FileSystemStats
 } from '@rushstack/node-core-library';
-import type * as stream from 'stream';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
+import { PassThrough } from 'stream';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 export const UNINITIALIZED: UNINITIALIZED = 'UNINITIALIZED';
@@ -299,22 +299,20 @@ export class Utilities {
    *
    * It's basically the same as executeCommand() except that it returns a Promise.
    */
-  public static async executeCommandAsync(
+  public static async executeCommandAndInspectOutputAsync(
     options: IExecuteCommandOptions,
-    processCommandOutputStream?: (data: any) => void
+    onStdoutStreamChunk?: (chunkString: string) => void
   ): Promise<void> {
-    await Utilities._executeCommandInternalAsync(
+    await Utilities._executeCommandAndInspectOutputInternalAsync(
       options.command,
       options.args,
       options.workingDirectory,
-      // notice this is using the pipe stream not "inherit"
-      options.suppressOutput ? undefined : 'pipe',
+      options.suppressOutput ? undefined : ['inherit', 'pipe', 'inherit'],
       options.environment,
       options.keepEnvironment,
-      processCommandOutputStream
+      onStdoutStreamChunk
     );
   }
-
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
@@ -379,11 +377,11 @@ export class Utilities {
   }
 
   // todo: add comments after finished
-  public static async executeCommandWithRetryAsync(
+  public static async executeCommandAndProcessOutputWithRetryAsync(
     options: IExecuteCommandOptions,
     maxAttempts: number,
-    retryCallback?: () => void,
-    processCommandOutputStream?: (data: any) => void
+    onStdoutStreamChunk?: (chunkString: string) => void,
+    retryCallback?: () => void
   ): Promise<void> {
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
@@ -393,7 +391,7 @@ export class Utilities {
 
     for (;;) {
       try {
-        await Utilities.executeCommandAsync(options, processCommandOutputStream);
+        await Utilities.executeCommandAndInspectOutputAsync(options, onStdoutStreamChunk);
       } catch (error) {
         console.log('\nThe command failed:');
         console.log(` ${options.command} ` + options.args.join(' '));
@@ -677,24 +675,23 @@ export class Utilities {
    *
    * It's the same as _executeCommandInternal except that it returns a promise.
    */
-  private static _executeCommandInternalAsync(
+  private static async _executeCommandAndInspectOutputInternalAsync(
     command: string,
     args: string[],
     workingDirectory: string,
     stdio: child_process.SpawnSyncOptions['stdio'],
     environment?: IEnvironment,
     keepEnvironment: boolean = false,
-    processCommandOutputStream?: (data: any) => void
+    onStdoutStreamChunk?: (chunk: string) => void
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const options: child_process.SpawnSyncOptions = {
+      const options: child_process.SpawnOptions = {
         cwd: workingDirectory,
         shell: true,
         stdio: stdio,
         env: keepEnvironment
           ? environment
-          : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
-        maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
+          : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
       };
 
       // Only escape the command if it actually contains spaces:
@@ -709,29 +706,16 @@ export class Utilities {
         options
       );
 
-      childProcess.stdout?.on('data', (data) => {
-        processCommandOutputStream?.(data);
-      });
-      // childProcess.stderr?.on('data', (data) => {
-      //   console.error(data?.toString());
-      // });
-      childProcess.on('error', reject);
+      const inspectStream = new PassThrough();
 
-      // can't wait for the "exit" event, but only the "close" event.
-      // Because the the stdio might still not closed.
-      childProcess.on('close', () => {
-        resolve();
+      inspectStream.on('data', (chunk) => {
+        const strData = chunk.toString();
+        onStdoutStreamChunk?.(strData);
       });
 
-      // todo: figure out how to resolve and reject
-      childProcess.on('exit', (code) => {
-        if (code === 0) {
-          resolve();
-        }
-        reject();
-      });
+      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
 
-      // todo, do something similar to Utilities._processResult(result);
+      // TODO, do something similar to Utilities._processResult(result);
       // todo return result;
     });
   }
