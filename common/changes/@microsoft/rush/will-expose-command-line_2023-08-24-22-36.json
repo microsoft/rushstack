@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Introduce the RushCommandLineAPI class",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
