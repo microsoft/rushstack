@@ -229,7 +229,17 @@ export class OperationExecutionManager {
     const onOperationCompleteAsync: (record: OperationExecutionRecord) => Promise<void> = async (
       record: OperationExecutionRecord
     ) => {
-      await this._afterExecuteOperation?.(record);
+      try {
+        await this._afterExecuteOperation?.(record);
+      } catch (e) {
+        // Failed operations get reported here
+        const message: string | undefined = record.error?.message;
+        if (message) {
+          this._terminal.writeStderrLine('Unhandled exception: ');
+          this._terminal.writeStderrLine(message);
+        }
+        throw e;
+      }
       this._onOperationComplete(record);
     };
 
