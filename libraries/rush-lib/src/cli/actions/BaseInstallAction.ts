@@ -22,7 +22,6 @@ import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
-import { PassThrough } from 'stream';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.

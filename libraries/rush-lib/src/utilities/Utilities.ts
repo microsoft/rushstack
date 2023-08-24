@@ -706,10 +706,10 @@ export class Utilities {
         options
       );
 
-      const inspectStream = new PassThrough();
+      const inspectStream: PassThrough = new PassThrough();
 
       inspectStream.on('data', (chunk) => {
-        const strData = chunk.toString();
+        const strData: string = chunk.toString();
         onStdoutStreamChunk?.(strData);
       });
 

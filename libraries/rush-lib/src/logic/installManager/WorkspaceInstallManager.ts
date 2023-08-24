@@ -336,7 +336,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
-      const onPnpmStdoutChunk = (chunk: string) => {
+      const onPnpmStdoutChunk = (chunk: string): void => {
         if (
           chunk.includes('No matching version found for') ||
           chunk.includes('ERR_PNPM_NO_MATCHING_VERSION')

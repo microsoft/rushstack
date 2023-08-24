@@ -126,7 +126,7 @@ export class CredentialCache {
 }
 
 // @beta
-export type CustomTipId = 'TIP_RUSH_INCONSISTENT_VERSIONS' | 'TIP_PNPM_MISMATCHING_DEPENDENCIES' | 'TIP_PNPM_NO_MATCHING_VERSION' | string;
+export type CustomTipId = 'TIP_RUSH_INCONSISTENT_VERSIONS' | 'TIP_PNPM_MISMATCHING_DEPENDENCIES' | 'TIP_PNPM_NO_MATCHING_VERSION';
 
 // @beta
 export class CustomTipsConfiguration {
