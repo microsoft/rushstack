@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Fix a minor logic issue for TextRewriterTransform cleanup",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

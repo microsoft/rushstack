@@ -1,4 +1,4 @@
-'ues strict';
+'use strict';
 
 const { FileSystem } = require('@rushstack/node-core-library');
 
