@@ -14,5 +14,9 @@ Array [
     "kind": "O",
     "text": "stdout 3[n]stdout 4",
   },
+  Object {
+    "kind": "O",
+    "text": "[1[n]",
+  },
 ]
 `;
