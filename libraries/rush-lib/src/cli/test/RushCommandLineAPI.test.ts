@@ -1,9 +1,9 @@
-import { RushCommandLine } from '../RushCommandLine';
+import { RushCommandLineAPI } from '../RushCommandLineAPI';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 describe('RushCLI', () => {
   test.only(`Returns a spec`, async () => {
-    const spec = RushCommandLine.getSpec(process.cwd());
+    const spec = RushCommandLineAPI.getSpec(process.cwd());
     // Check that RushCommandLine returns the same action names as RushCommandLineParser
     const commandLineParser = new RushCommandLineParser({ cwd: process.cwd() });
 

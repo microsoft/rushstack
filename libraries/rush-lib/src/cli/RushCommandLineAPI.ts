@@ -42,7 +42,7 @@ interface IRushCliJsonSpec {
  *
  * @beta
  */
-export class RushCommandLine {
+export class RushCommandLineAPI {
   public static getSpec(workspaceFolder: string): IRushCliJsonSpec[] {
     const commandLineParser: RushCommandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
 
