@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support adding custom tips for pnpm-printed logs",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -72,14 +72,14 @@ export enum CustomTipType {
   'pnpm'
 }
 
-export interface TipMetadata {
+export interface ITipMetadata {
   tipId: CustomTipIdEnum;
   severity: CustomTipSeverity;
   type: CustomTipType;
   isMatch?: (str: string) => boolean;
 }
 
-export const SupportedTipsMetadata: TipMetadata[] = [
+export const SupportedCustomTipsMetadata: ITipMetadata[] = [
   {
     tipId: CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS,
     severity: CustomTipSeverity.Error,
@@ -163,7 +163,7 @@ export class CustomTipsConfiguration {
     const message: string | undefined = this._formatTipMessage(tipId);
 
     const severity: CustomTipSeverity =
-      SupportedTipsMetadata.find((tip) => tip.tipId === tipId)?.severity ?? CustomTipSeverity.Info;
+      SupportedCustomTipsMetadata.find((tip) => tip.tipId === tipId)?.severity ?? CustomTipSeverity.Info;
     if (message !== undefined && severity !== undefined) {
       switch (severity) {
         case CustomTipSeverity.Error:

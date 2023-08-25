@@ -22,7 +22,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { CustomTipIdEnum, SupportedTipsMetadata } from '../../api/CustomTipsConfiguration';
+import { CustomTipIdEnum, SupportedCustomTipsMetadata } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -341,7 +341,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // They will be printed all at once *after* the install
       const tipIDsShouldBePrinted: CustomTipIdEnum[] = [];
       const onPnpmStdoutChunk = (chunk: string): void => {
-        SupportedTipsMetadata.forEach((tipItem) => {
+        SupportedCustomTipsMetadata.forEach((tipItem) => {
           if (tipItem.isMatch && tipItem.isMatch(chunk)) {
             tipIDsShouldBePrinted.push(tipItem.tipId);
           }
@@ -372,8 +372,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             }
           }
         );
-      } catch (e) {
-        throw e;
       } finally {
         for (const tipID of tipIDsShouldBePrinted) {
           this.rushConfiguration.customTipsConfiguration.showTip(this._terminal, tipID);
