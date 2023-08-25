@@ -713,10 +713,16 @@ export class Utilities {
         onStdoutStreamChunk?.(strData);
       });
 
-      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
+      childProcess.on('close', (code: number, signal: string) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          // mimic the current sync version "_executeCommandInternal" behavior.
+          reject(new Error(`The command failed with exit code ${code}`));
+        }
+      });
 
-      // TODO, do something similar to Utilities._processResult(result);
-      // todo return result;
+      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
     });
   }
 

@@ -126,16 +126,21 @@ export class CredentialCache {
 }
 
 // @beta
-export type CustomTipId = 'TIP_RUSH_INCONSISTENT_VERSIONS' | 'TIP_PNPM_MISMATCHING_DEPENDENCIES' | 'TIP_PNPM_NO_MATCHING_VERSION';
+export enum CustomTipIdEnum {
+    // (undocumented)
+    'TIP_PNPM_NO_MATCHING_VERSION' = "TIP_PNPM_NO_MATCHING_VERSION",
+    // (undocumented)
+    'TIP_RUSH_INCONSISTENT_VERSIONS' = "TIP_RUSH_INCONSISTENT_VERSIONS"
+}
 
 // @beta
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
     readonly configuration: Readonly<ICustomTipsJson>;
-    showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
-    showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
-    showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
-    static readonly supportedTipIds: ReadonlySet<string>;
+    showErrorTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
+    showInfoTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
+    showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
+    showWarningTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
 }
 
 // @public (undocumented)
@@ -302,7 +307,7 @@ export interface ICredentialCacheOptions {
 export interface ICustomTipItemJson {
     message: string;
     messagePrefix?: string;
-    tipId: CustomTipId;
+    tipId: CustomTipIdEnum;
 }
 
 // @beta

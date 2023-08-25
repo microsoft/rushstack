@@ -92,7 +92,7 @@ export { RushInternals as _RushInternals } from './api/RushInternals';
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 export {
   CustomTipsConfiguration,
-  CustomTipId,
+  CustomTipIdEnum,
   ICustomTipsJson,
   ICustomTipItemJson
 } from './api/CustomTipsConfiguration';

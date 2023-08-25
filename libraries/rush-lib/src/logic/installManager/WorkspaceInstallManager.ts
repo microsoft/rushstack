@@ -22,6 +22,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import { CustomTipIdEnum, SupportedTipsMetadata } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -336,48 +337,48 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
+      // Store the tip IDs that should be printed.
+      // They will be printed all at once *after* the install
+      const tipIDsShouldBePrinted: CustomTipIdEnum[] = [];
       const onPnpmStdoutChunk = (chunk: string): void => {
-        if (
-          chunk.includes('No matching version found for') ||
-          chunk.includes('ERR_PNPM_NO_MATCHING_VERSION')
-        ) {
-          this.rushConfiguration.customTipsConfiguration.showErrorTip(
-            this._terminal,
-            'TIP_PNPM_NO_MATCHING_VERSION'
-          );
-        }
-
-        if (chunk.includes('npm WARN')) {
-          this.rushConfiguration.customTipsConfiguration.showErrorTip(
-            this._terminal,
-            'TIP_PNPM_MISMATCHING_DEPENDENCIES'
-          );
-        }
+        SupportedTipsMetadata.forEach((tipItem) => {
+          if (tipItem.isMatch && tipItem.isMatch(chunk)) {
+            tipIDsShouldBePrinted.push(tipItem.tipId);
+          }
+        });
       };
 
-      await Utilities.executeCommandAndProcessOutputWithRetryAsync(
-        {
-          command: packageManagerFilename,
-          args: installArgs,
-          workingDirectory: this.rushConfiguration.commonTempFolder,
-          environment: packageManagerEnv,
-          suppressOutput: false
-        },
-        this.options.maxInstallAttempts,
-        onPnpmStdoutChunk,
-        () => {
-          if (this.rushConfiguration.packageManager === 'pnpm') {
-            console.log(colors.yellow(`Deleting the "node_modules" folder`));
-            this.installRecycler.moveFolder(commonNodeModulesFolder);
+      try {
+        await Utilities.executeCommandAndProcessOutputWithRetryAsync(
+          {
+            command: packageManagerFilename,
+            args: installArgs,
+            workingDirectory: this.rushConfiguration.commonTempFolder,
+            environment: packageManagerEnv,
+            suppressOutput: false
+          },
+          this.options.maxInstallAttempts,
+          onPnpmStdoutChunk,
+          () => {
+            if (this.rushConfiguration.packageManager === 'pnpm') {
+              console.log(colors.yellow(`Deleting the "node_modules" folder`));
+              this.installRecycler.moveFolder(commonNodeModulesFolder);
 
-            // Leave the pnpm-store as is for the retry. This ensures that packages that have already
-            // been downloaded need not be downloaded again, thereby potentially increasing the chances
-            // of a subsequent successful install.
+              // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+              // been downloaded need not be downloaded again, thereby potentially increasing the chances
+              // of a subsequent successful install.
 
-            Utilities.createFolderWithRetry(commonNodeModulesFolder);
+              Utilities.createFolderWithRetry(commonNodeModulesFolder);
+            }
           }
+        );
+      } catch (e) {
+        throw e;
+      } finally {
+        for (const tipID of tipIDsShouldBePrinted) {
+          this.rushConfiguration.customTipsConfiguration.showTip(this._terminal, tipID);
         }
-      );
+      }
     };
 
     const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
