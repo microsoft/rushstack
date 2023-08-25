@@ -41,7 +41,7 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'ProjectChangeAnalyzer',
   'RepoStateFile',
   'Rush',
-  'RushCommandLineAPI',
+  'RushCommandLine',
   'RushConfiguration',
   'RushConfigurationProject',
   'RushConstants',

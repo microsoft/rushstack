@@ -164,4 +164,4 @@ export {
   IOperationMetaData as _IOperationMetadata
 } from './logic/operations/OperationMetadataManager';
 
-export { RushCommandLineAPI } from './cli/RushCommandLineAPI';
+export { RushCommandLine, ICommandLineParameter, ICommandLineSpec } from './api/RushCommandLine';

@@ -3,9 +3,14 @@ import {
   CommandLineParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 
-interface ICommandLineParameter {
+/**
+ * Information about the available parameters associated with a rush action
+ *
+ * @beta
+ */
+export interface ICommandLineParameter {
   /**
    * The corresponding string representation of CliParameterKind
    */
@@ -32,7 +37,12 @@ interface ICommandLineParameter {
   readonly required?: boolean;
 }
 
-interface IRushCliJsonSpec {
+/**
+ * The full spec of an available rush command line action
+ *
+ * @beta
+ */
+export interface ICommandLineSpec {
   actionName: string;
   parameters: ICommandLineParameter[];
 }
@@ -42,15 +52,15 @@ interface IRushCliJsonSpec {
  *
  * @beta
  */
-export class RushCommandLineAPI {
-  public static getSpec(workspaceFolder: string): IRushCliJsonSpec[] {
+export class RushCommandLine {
+  public static getSpec(workspaceFolder: string): ICommandLineSpec[] {
     const commandLineParser: RushCommandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
 
     // Copy the actions
     const commandLineActions: CommandLineAction[] = commandLineParser.actions.slice();
 
     // extract the set of command line elements from the command line parser
-    const filledCommandLineActions: IRushCliJsonSpec[] = [];
+    const filledCommandLineActions: ICommandLineSpec[] = [];
     for (const commandLineAction of commandLineActions) {
       const parameters: ICommandLineParameter[] = commandLineAction.parameters
         .slice()

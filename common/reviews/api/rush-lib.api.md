@@ -367,6 +367,21 @@ export interface ICobuildLockProvider {
     getCompletedStateAsync(context: Readonly<ICobuildContext>): Promise<ICobuildCompletedState | undefined>;
     renewLockAsync(context: Readonly<ICobuildContext>): Promise<void>;
     setCompletedStateAsync(context: Readonly<ICobuildContext>, state: ICobuildCompletedState): Promise<void>;
+// @beta
+export interface ICommandLineParameter {
+    readonly description: string;
+    readonly kind: string;
+    readonly longName: string;
+    readonly required?: boolean;
+    readonly shortName?: string;
+}
+
+// @beta
+export interface ICommandLineSpec {
+    // (undocumented)
+    actionName: string;
+    // (undocumented)
+    parameters: ICommandLineParameter[];
 }
 
 // @public
@@ -1040,11 +1055,9 @@ export class Rush {
 }
 
 // @beta
-export class RushCommandLineAPI {
-    // Warning: (ae-forgotten-export) The symbol "IRushCliJsonSpec" needs to be exported by the entry point index.d.ts
-    //
+export class RushCommandLine {
     // (undocumented)
-    static getSpec(workspaceFolder: string): IRushCliJsonSpec[];
+    static getSpec(workspaceFolder: string): ICommandLineSpec[];
 }
 
 // @public
