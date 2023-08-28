@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
