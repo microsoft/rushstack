@@ -111,14 +111,14 @@
             "type": "string"
           },
           "patternsToInclude": {
-            "description": "A list of glob patterns to include when extracting specific dependency. If a path is matched by both \"patternsToInclude\" and \"patternsToExclude\", the path will be excluded. If undefined, all paths will be included.",
+            "description": "A list of glob patterns to include when extracting the dependency specified in this object. If a path is matched by both \"patternsToInclude\" and \"patternsToExclude\", the path will be excluded. If undefined, all paths will be included.",
             "type": "array",
             "items": {
               "type": "string"
             }
           },
           "patternsToExclude": {
-            "description": "A list of glob patterns to exclude when extracting specific dependency. If a path is matched by both \"patternsToInclude\" and \"patternsToExclude\", the path will be excluded. If undefined, no paths will be excluded.",
+            "description": "A list of glob patterns to include when extracting the dependency specified in this object. If a path is matched by both \"patternsToInclude\" and \"patternsToExclude\", the path will be excluded. If undefined, no paths will be excluded.",
             "type": "array",
             "items": {
               "type": "string"
