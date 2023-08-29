@@ -755,11 +755,10 @@ ${gitLfsHookHandling}
       if (this.rushConfiguration.packageManager === 'pnpm') {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
-        // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
-        // a new lockfile can be generated. However "pnpm install" by design will try to recover
-        // pnpm-lock.yaml from "common/temp/node_modules/.pnpm-lock.yaml" and thus will not generate
-        // a new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
-        // ensures that a new lockfile will be generated with "rush update --full".
+        // When "rush update --full" is run, Rush deletes "common/temp/pnpm-lock.yaml"
+        // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
+        // "pnpm-lock.yaml" from "common/temp/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
+        // Deleting both files ensures that a new lockfile will always be generated.
         const pnpmPackageManager: PnpmPackageManager = this.rushConfiguration
           .packageManagerWrapper as PnpmPackageManager;
 
