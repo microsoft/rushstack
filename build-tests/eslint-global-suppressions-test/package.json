@@ -1,0 +1,23 @@
+{
+  "name": "eslint-global-suppressions-test",
+  "description": "Sample code to test eslint global suppressions",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/eslint-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "~5.59.2",
+    "@typescript-eslint/parser": "~5.59.2",
+    "@typescript-eslint/types": "~6.5.0",
+    "eslint": "~8.7.0",
+    "typescript": "~5.0.4"
+  },
+  "devDependencies": {}
+}

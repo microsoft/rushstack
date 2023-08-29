@@ -799,6 +799,28 @@ importers:
       eslint: 7.30.0
       typescript: 5.0.4
 
+  ../../build-tests/eslint-global-suppressions-test:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/eslint-plugin': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@typescript-eslint/eslint-plugin': ~5.59.2
+      '@typescript-eslint/parser': ~5.59.2
+      '@typescript-eslint/types': ~6.5.0
+      eslint: ~8.7.0
+      typescript: ~5.0.4
+    dependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/eslint-plugin': link:../../eslint/eslint-plugin
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@typescript-eslint/eslint-plugin': 5.59.7_7yosyjls7ieoemdl24ktrlsrzm
+      '@typescript-eslint/parser': 5.59.7_ucoohk2w7gukx6ccuul7rl7pnq
+      '@typescript-eslint/types': 6.5.0_typescript@5.0.4
+      eslint: 8.7.0
+      typescript: 5.0.4
+
   ../../build-tests/hashed-folder-copy-plugin-webpack4-test:
     specifiers:
       '@rushstack/hashed-folder-copy-plugin': workspace:*
@@ -1266,8 +1288,8 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
-      '@types/jest': 29.5.3
-      '@types/node': 20.4.5
+      '@types/jest': 29.5.4
+      '@types/node': 20.5.7
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -1610,10 +1632,14 @@ importers:
       '@rushstack/heft': 0.54.0
       '@rushstack/heft-node-rig': 2.2.6
       '@types/node': 14.18.36
+      '@typescript-eslint/types': ~6.5.0
+      typescript: ~5.0.4
     devDependencies:
       '@rushstack/heft': 0.54.0_@types+node@14.18.36
       '@rushstack/heft-node-rig': 2.2.6_nfozjgqil6u3mushzg237yh5re
       '@types/node': 14.18.36
+      '@typescript-eslint/types': 6.5.0_typescript@5.0.4
+      typescript: 5.0.4
 
   ../../eslint/eslint-plugin:
     specifiers:
@@ -5380,7 +5406,7 @@ packages:
       ignore: 4.0.6
       import-fresh: 3.3.0
       js-yaml: 3.13.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -6907,7 +6933,7 @@ packages:
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
       debug: 4.3.4
-      minimatch: 3.1.2
+      minimatch: 3.0.8
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6918,7 +6944,7 @@ packages:
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
       debug: 4.3.4
-      minimatch: 3.1.2
+      minimatch: 3.0.8
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6929,7 +6955,7 @@ packages:
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
       debug: 4.3.4
-      minimatch: 3.1.2
+      minimatch: 3.0.8
     transitivePeerDependencies:
       - supports-color
 
@@ -10294,8 +10320,8 @@ packages:
       expect: 29.5.0
       pretty-format: 29.5.0
 
-  /@types/jest/29.5.3:
-    resolution: {integrity: sha512-1Nq7YrO/vJE/FYnqYyw0FS8LdrjExSgIiHyKg7xPpn+yi8Q4huZryKnkJatN1ZRH89Kw2v33/8ZMB7DuZeSLlA==}
+  /@types/jest/29.5.4:
+    resolution: {integrity: sha512-PhglGmhWeD46FYOVLt3X7TiWjzwuVGW9wG/4qocPevXMjCmrIc5b6db9WjeGE4QYVpUAWMDv3v0IiBwObY289A==}
     dependencies:
       expect: 29.5.0
       pretty-format: 29.5.0
@@ -10396,8 +10422,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.4.5:
-    resolution: {integrity: sha512-rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==}
+  /@types/node/20.5.7:
+    resolution: {integrity: sha512-dP7f3LdZIysZnmvP3ANJYTSwg+wLLl8p7RqniVlV7j+oXSXAbt9h0WIBFmJy5inWZoX9wZN6eXx+YXd9Rh3RBA==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:
@@ -10811,6 +10837,14 @@ packages:
   /@typescript-eslint/types/5.59.7_typescript@5.0.4:
     resolution: {integrity: sha512-UnVS2MRRg6p7xOSATscWkKjlf/NDKuqo5TdbWck6rIRZbmKpVNTLALzNvcjIfHBE7736kZOFc/4Z3VcZwuOM/A==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      typescript: '*'
+    dependencies:
+      typescript: 5.0.4
+
+  /@typescript-eslint/types/6.5.0_typescript@5.0.4:
+    resolution: {integrity: sha512-eqLLOEF5/lU8jW3Bw+8auf4lZSbbljHR2saKnYqON12G/WsJrGeeDHWuQePoEf9ro22+JkbPfWQwKEC5WwLQ3w==}
+    engines: {node: ^16.0.0 || >=18.0.0}
     peerDependencies:
       typescript: '*'
     dependencies:
@@ -13773,12 +13807,12 @@ packages:
       cosmiconfig: 7.1.0
       debug: 4.3.4
       deps-regex: 0.1.4
-      ignore: 5.2.4
+      ignore: 5.1.9
       is-core-module: 2.11.0
       js-yaml: 3.14.1
       json5: 2.2.3
       lodash: 4.17.21
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       multimatch: 5.0.0
       please-upgrade-node: 3.2.0
       query-ast: 1.0.5
@@ -15532,7 +15566,7 @@ packages:
       '@babel/code-frame': 7.18.6
       chalk: 2.4.2
       micromatch: 3.1.10
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       semver: 5.7.1
       tapable: 1.1.3
       worker-rpc: 0.1.1
@@ -15555,13 +15589,13 @@ packages:
       '@babel/code-frame': 7.18.6
       '@types/json-schema': 7.0.11
       chalk: 4.1.2
-      chokidar: 3.5.3
+      chokidar: 3.4.3
       cosmiconfig: 6.0.0
       deepmerge: 4.3.1
       fs-extra: 9.1.0
       glob: 7.2.3
       memfs: 3.4.3
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       schema-utils: 2.7.0
       semver: 7.5.4
       tapable: 1.1.3
@@ -15586,14 +15620,14 @@ packages:
       '@babel/code-frame': 7.18.6
       '@types/json-schema': 7.0.11
       chalk: 4.1.2
-      chokidar: 3.5.3
+      chokidar: 3.4.3
       cosmiconfig: 6.0.0
       deepmerge: 4.3.1
       eslint: 8.7.0
       fs-extra: 9.1.0
       glob: 7.2.3
       memfs: 3.4.3
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       schema-utils: 2.7.0
       semver: 7.5.4
       tapable: 1.1.3
@@ -15946,7 +15980,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: true
@@ -16646,7 +16680,7 @@ packages:
   /ignore-walk/3.0.4:
     resolution: {integrity: sha512-PY6Ii8o1jMRA1z4F2hRkH/xN59ox43DavKvD3oDpfurRlOJyAHpifIwpbdv1n4jt4ov0jSpw3kQ4GhJnpBL6WQ==}
     dependencies:
-      minimatch: 3.1.2
+      minimatch: 3.0.8
     dev: false
 
   /ignore/4.0.6:
@@ -18889,7 +18923,7 @@ packages:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
     dev: false
 
   /mute-stream/0.0.8:
@@ -22896,7 +22930,7 @@ packages:
     dependencies:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.3
-      minimatch: 3.1.2
+      minimatch: 3.0.8
 
   /text-table/0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
@@ -23975,7 +24009,7 @@ packages:
       graceful-fs: 4.2.11
       neo-async: 2.6.2
     optionalDependencies:
-      chokidar: 3.5.3
+      chokidar: 3.4.3
       watchpack-chokidar2: 2.0.1
 
   /watchpack/2.4.0:

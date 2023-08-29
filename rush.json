@@ -536,6 +536,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-global-suppressions-test",
+      "projectFolder": "build-tests/eslint-global-suppressions-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "package-extractor-test-01",
       "projectFolder": "build-tests/package-extractor-test-01",
       "reviewCategory": "tests",
