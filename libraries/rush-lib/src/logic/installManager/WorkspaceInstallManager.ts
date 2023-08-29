@@ -373,6 +373,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
         );
       } finally {
+        // This is to avoid the tips not being printed if the install fails.
+        // NOT catching the error because we want to keep the other behaviors (i.e., the error will be caught and handle in upper layers).
         for (const tipID of tipIDsShouldBePrinted) {
           this.rushConfiguration.customTipsConfiguration.showTip(this._terminal, tipID);
         }

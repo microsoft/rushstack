@@ -72,14 +72,43 @@ export enum CustomTipType {
   'pnpm'
 }
 
-export interface ITipMetadata {
+/**
+ * Metadata for a custom tip.
+ *
+ * @remarks
+ * This differs from the  {@link ICustomTipItemJson} interface in that these are not configurable by the user; it's the inherent state of a custom tip.
+ * For example, the custom tip for `ERR_PNPM_NO_MATCHING_VERSION` has a inherent severity of `Error`, and a inherent match function that rush maintainer defines.
+ * @beta
+ *
+ */
+export interface ICustomTipMetadata {
   tipId: CustomTipIdEnum;
+
+  /**
+   * (Required) The severity of the custom tip. It will determine the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
+   *
+   * @remarks
+   *  The severity should be consistent with the original message, unless there are strong reasons not to.
+   */
   severity: CustomTipSeverity;
+
+  /**
+   * (Required) The type of the custom tip. Currently either `rush` or `pnpm`. There might be `git` in the future.
+   *
+   */
   type: CustomTipType;
+
+  /**
+   * The function to determine how to match this tipId.
+   *
+   * @remarks
+   * This function might need to be updated if the depending package is updated.
+   * For example, if `pnpm` change the error logs for "ERR_PNPM_NO_MATCHING_VERSION", we will need to update the match function accordingly.
+   */
   isMatch?: (str: string) => boolean;
 }
 
-export const SupportedCustomTipsMetadata: ITipMetadata[] = [
+export const SupportedCustomTipsMetadata: ICustomTipMetadata[] = [
   {
     tipId: CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS,
     severity: CustomTipSeverity.Error,
