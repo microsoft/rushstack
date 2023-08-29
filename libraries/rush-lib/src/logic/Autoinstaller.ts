@@ -254,7 +254,7 @@ export class Autoinstaller {
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
     if (!this._restrictConsoleOutput) {
-      console.log(message);
+      console.log(message ?? '');
     }
   }
 }
