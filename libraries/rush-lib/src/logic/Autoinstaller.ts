@@ -15,6 +15,7 @@ import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 interface IAutoinstallerOptions {
   autoinstallerName: string;
@@ -181,6 +182,20 @@ export class Autoinstaller {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
       FileSystem.deleteFile(this.shrinkwrapFilePath);
+      if (this._rushConfiguration.packageManager === 'pnpm') {
+        // Workaround for https://github.com/pnpm/pnpm/issues/1890
+        //
+        // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
+        // a new lockfile can be generated. However "pnpm install" by design will try to recover
+        // pnpm-lock.yaml from "common/temp/node_modules/.pnpm-lock.yaml" and thus will not generate
+        // a new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
+        // ensures that a new lockfile will be generated with "rush update --full".
+        const pnpmPackageManager: PnpmPackageManager = this._rushConfiguration
+          .packageManagerWrapper as PnpmPackageManager;
+        FileSystem.deleteFile(
+          path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
+        );
+      }
     }
 
     // Detect a common mistake where PNPM prints "Already up-to-date" without creating a shrinkwrap file
