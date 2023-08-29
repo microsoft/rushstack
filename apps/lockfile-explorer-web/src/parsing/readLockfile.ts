@@ -7,6 +7,11 @@ import { Path } from '@lifaon/path';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 
+export enum PnpmVersion {
+  V6,
+  V5
+}
+
 export interface IPackageJsonType {
   name: string;
   dependencies: {
@@ -16,21 +21,35 @@ export interface IPackageJsonType {
     [key in string]: string;
   };
 }
-
-export interface ILockfilePackageType {
-  lockfileVersion: number;
-  importers?: {
+export interface ILockfileImporterV6Type {
+  dependencies?: {
     [key in string]: {
-      specifiers?: {
-        [key in string]: string;
-      };
-      dependencies?: {
-        [key in string]: string;
-      };
-      devDependencies?: {
-        [key in string]: string;
-      };
+      specifier: string;
+      version: string;
     };
+  };
+  devDependencies?: {
+    [key in string]: {
+      specifier: string;
+      version: string;
+    };
+  };
+}
+export interface ILockfileImporterV5Type {
+  specifiers?: {
+    [key in string]: string;
+  };
+  dependencies?: {
+    [key in string]: string;
+  };
+  devDependencies?: {
+    [key in string]: string;
+  };
+}
+export interface ILockfilePackageType {
+  lockfileVersion: number | string;
+  importers?: {
+    [key in string]: ILockfileImporterV5Type | ILockfileImporterV6Type;
   };
   packages?: {
     [key in string]: {
@@ -49,12 +68,47 @@ export interface ILockfilePackageType {
 }
 
 /**
+ * Transform any newer lockfile formats to the following format:
+ * [packageName]:
+ *     specifier: ...
+ *     version: ...
+ */
+function getImporterValue(
+  importerValue: ILockfileImporterV5Type | ILockfileImporterV6Type,
+  pnpmVersion: PnpmVersion
+): ILockfileImporterV5Type {
+  if (pnpmVersion === PnpmVersion.V6) {
+    const v6ImporterValue = importerValue as ILockfileImporterV6Type;
+    const v5ImporterValue: ILockfileImporterV5Type = {
+      specifiers: {},
+      dependencies: {},
+      devDependencies: {}
+    };
+    for (const [depName, depDetails] of Object.entries(v6ImporterValue.dependencies || {})) {
+      v5ImporterValue.specifiers![depName] = depDetails.specifier;
+      v5ImporterValue.dependencies![depName] = depDetails.version;
+    }
+    for (const [depName, depDetails] of Object.entries(v6ImporterValue.devDependencies || {})) {
+      v5ImporterValue.specifiers![depName] = depDetails.specifier;
+      v5ImporterValue.devDependencies![depName] = depDetails.version;
+    }
+    return v5ImporterValue;
+  } else {
+    return importerValue as ILockfileImporterV5Type;
+  }
+}
+
+/**
  * Parse through the lockfile and create all the corresponding LockfileEntries and LockfileDependencies
  * to construct the lockfile graph.
  *
  * @returns A list of all the LockfileEntries in the lockfile.
  */
 export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileEntry[] {
+  let pnpmVersion: PnpmVersion = PnpmVersion.V5;
+  if (`${lockfile.lockfileVersion}`.startsWith('6')) {
+    pnpmVersion = PnpmVersion.V6;
+  }
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
 
@@ -81,8 +135,9 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         // entryId: normalizedPath,
         rawEntryId: importerKey,
         kind: LockfileEntryFilter.Project,
-        rawYamlData: importerValue,
-        duplicates
+        rawYamlData: getImporterValue(importerValue, pnpmVersion),
+        duplicates,
+        pnpmVersion
       });
       allImporters.push(importer);
       allEntries.push(importer);
@@ -95,18 +150,26 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
     for (const [dependencyKey, dependencyValue] of Object.entries(lockfile.packages)) {
       // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
 
+      let packageDepKey = dependencyKey;
+      if (pnpmVersion === PnpmVersion.V6) {
+        packageDepKey = dependencyKey.replace('@', '/');
+      }
+
       const currEntry = new LockfileEntry({
         // entryId: normalizedPath,
-        rawEntryId: dependencyKey,
+        rawEntryId: packageDepKey,
         kind: LockfileEntryFilter.Package,
-        rawYamlData: dependencyValue
+        rawYamlData: dependencyValue,
+        pnpmVersion
       });
 
       allPackages.push(currEntry);
       allEntries.push(currEntry);
-      allEntriesById[dependencyKey] = currEntry;
+      allEntriesById[packageDepKey] = currEntry;
     }
   }
+
+  console.log('all entries by id: ', allEntriesById);
 
   // Construct the graph
   for (const entry of allEntries) {
@@ -123,7 +186,7 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         matchedEntry.referrers.push(entry);
       } else {
         // Local package
-        console.error('Could not resolve dependency entryId: ', dependency.entryId);
+        console.error('Could not resolve dependency entryId: ', dependency.entryId, dependency);
       }
     }
   }
@@ -134,6 +197,8 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
 export async function readLockfileAsync(): Promise<LockfileEntry[]> {
   const response = await fetch(`${serviceUrl}/api/lockfile`);
   const lockfile: ILockfilePackageType = await response.json();
+
+  console.log('LOCKFILE VERSION: ', lockfile.lockfileVersion);
 
   return generateLockfileGraph(lockfile);
 }

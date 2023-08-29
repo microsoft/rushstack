@@ -3,6 +3,7 @@
 
 import { Path } from '@lifaon/path';
 import { LockfileEntry } from './LockfileEntry';
+import { PnpmVersion } from './readLockfile';
 
 export interface ILockfileNode {
   dependencies?: {
@@ -59,6 +60,8 @@ export class LockfileDependency {
     containingEntry: LockfileEntry,
     node?: ILockfileNode
   ) {
+    console.log('creating dependency: ', name, version);
+
     this.name = name;
     this.version = version;
     this.dependencyType = dependencyType;
@@ -100,7 +103,8 @@ export class LockfileDependency {
   public static parseDependencies(
     dependencies: LockfileDependency[],
     lockfileEntry: LockfileEntry,
-    node: ILockfileNode
+    node: ILockfileNode,
+    pnpmVersion: PnpmVersion
   ): void {
     if (node.dependencies) {
       for (const [pkgName, pkgVersion] of Object.entries(node.dependencies)) {
