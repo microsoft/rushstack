@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where \"undefined\" was sometimes printed instead of a blank line",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
