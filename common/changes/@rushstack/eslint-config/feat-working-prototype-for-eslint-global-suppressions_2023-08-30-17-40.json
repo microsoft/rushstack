@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Added eslint-global-suppressions to @rushstack/eslint-config dependencies, allowing it to be used in all projects that use rushstack's eslint-config",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config"
+}
