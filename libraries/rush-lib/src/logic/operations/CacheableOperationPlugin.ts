@@ -62,6 +62,7 @@ export interface IOperationBuildCacheContext {
 
   periodicCallback: PeriodicCallback;
   cacheRestored: boolean;
+  isCacheReadAttempted: boolean;
 }
 
 export interface ICacheableOperationPluginOptions {
@@ -147,7 +148,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               periodicCallback: new PeriodicCallback({
                 interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
               }),
-              cacheRestored: false
+              cacheRestored: false,
+              isCacheReadAttempted: false
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this._buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -353,6 +355,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             projectBuildCache: ProjectBuildCache | undefined,
             specifiedCacheId?: string
           ): Promise<boolean> => {
+            buildCacheContext.isCacheReadAttempted = true;
             const restoreFromCacheSuccess: boolean | undefined =
               await projectBuildCache?.tryRestoreFromCacheAsync(buildCacheTerminal, specifiedCacheId);
             if (restoreFromCacheSuccess) {
@@ -386,6 +389,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                   return cobuildCompletedState.status;
                 }
                 return status;
+              }
+            } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
+              const restoreFromCacheSuccess: boolean = await restoreCacheAsync(projectBuildCache);
+
+              if (restoreFromCacheSuccess) {
+                return OperationStatus.FromCache;
               }
             }
           } else if (buildCacheContext.isCacheReadAllowed) {
