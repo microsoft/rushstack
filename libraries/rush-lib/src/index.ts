@@ -55,6 +55,12 @@ export { PackageManagerName, PackageManager } from './api/packageManager/Package
 
 export { RushConfigurationProject } from './api/RushConfigurationProject';
 
+export {
+  IRushProjectJson as _IRushProjectJson,
+  IOperationSettings,
+  RushProjectConfiguration
+} from './api/RushProjectConfiguration';
+
 export { RushUserConfiguration } from './api/RushUserConfiguration';
 
 export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
@@ -98,7 +104,11 @@ export {
   ICustomTipItemJson
 } from './api/CustomTipsConfiguration';
 
-export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export {
+  ProjectChangeAnalyzer,
+  IGetChangedProjectsOptions,
+  IRawRepoState as _IRawRepoState
+} from './logic/ProjectChangeAnalyzer';
 
 export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';

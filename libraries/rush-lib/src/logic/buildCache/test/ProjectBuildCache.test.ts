@@ -41,8 +41,7 @@ describe(ProjectBuildCache.name, () => {
         projectRelativeFolder: 'apps/acme-wizard',
         dependencyProjects: []
       } as unknown as RushConfigurationProject,
-      command: 'build',
-      trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
+      configHash: 'build',
       projectChangeAnalyzer,
       terminal,
       phaseName: 'build'
@@ -57,14 +56,6 @@ describe(ProjectBuildCache.name, () => {
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
       );
-    });
-
-    it('returns undefined if the tracked file list is undefined', async () => {
-      expect(
-        await prepareSubject({
-          trackedProjectFiles: undefined
-        })
-      ).toBe(undefined);
     });
   });
 });

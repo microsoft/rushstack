@@ -29,6 +29,11 @@ export interface IOperationExecutionRecordContext {
  */
 export class OperationExecutionRecord implements IOperationRunnerContext {
   /**
+   * The associated operation.
+   */
+  public readonly operation: Operation;
+
+  /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
    * the operation is executing. Once execution is complete, it is either 'success' or
@@ -106,6 +111,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       );
     }
 
+    this.operation = operation;
     this.runner = runner;
     this.weight = operation.weight;
     this.associatedPhase = associatedPhase;
