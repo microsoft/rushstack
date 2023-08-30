@@ -139,6 +139,21 @@ export function isStringLiteral(node: BaseNode): node is StringLiteral {
 }
 
 // Custom compound types
+export interface ClassExpressionWithName extends ClassExpression {
+  id: Identifier;
+}
+
+export function isClassExpressionWithName(node: BaseNode): node is ClassExpressionWithName {
+  return isClassExpression(node) && node.id !== null;
+}
+export interface FunctionExpressionWithName extends FunctionExpression {
+  id: Identifier;
+}
+
+export function isFunctionExpressionWithName(node: BaseNode): node is FunctionExpressionWithName {
+  return isFunctionExpression(node) && node.id !== null;
+}
+
 export type NormalAnonymousExpression =
   | ArrayExpression
   | ArrowFunctionExpression
@@ -146,33 +161,19 @@ export type NormalAnonymousExpression =
   | FunctionExpression
   | ObjectExpression;
 
-export interface NormalClassPropertyDefinition extends PropertyDefinitionNonComputedName {
-  key: PrivateIdentifier | Identifier;
-  value: Expression;
-}
-
-export interface NormalMethodDefinition extends MethodDefinitionNonComputedName {
-  key: PrivateIdentifier | Identifier;
-}
-
-export interface NormalObjectProperty extends PropertyNonComputedName {
-  key: Identifier;
-}
-
-export interface NormalVariableDeclarator extends LetOrConstOrVarDeclaration {
-  id: Identifier;
-  init: Expression;
-}
-
 export function isNormalAnonymousExpression(node: BaseNode): node is NormalAnonymousExpression {
   const ANONYMOUS_EXPRESSION_GUARDS = [
-    isArrayExpression,
     isArrowFunctionExpression,
     isClassExpression,
     isFunctionExpression,
     isObjectExpression
   ];
   return ANONYMOUS_EXPRESSION_GUARDS.some((guard) => guard(node));
+}
+
+export interface NormalClassPropertyDefinition extends PropertyDefinitionNonComputedName {
+  key: PrivateIdentifier | Identifier;
+  value: Expression;
 }
 
 export function isNormalClassPropertyDefinition(node: BaseNode): node is NormalClassPropertyDefinition {
@@ -183,28 +184,27 @@ export function isNormalClassPropertyDefinition(node: BaseNode): node is NormalC
   );
 }
 
+export interface NormalMethodDefinition extends MethodDefinitionNonComputedName {
+  key: PrivateIdentifier | Identifier;
+}
+
 export function isNormalMethodDefinition(node: BaseNode): node is NormalMethodDefinition {
   return isMethodDefinition(node) && (isIdentifier(node.key) || isPrivateIdentifier(node.key));
+}
+
+export interface NormalObjectProperty extends PropertyNonComputedName {
+  key: Identifier;
 }
 
 export function isNormalObjectProperty(node: BaseNode): node is NormalObjectProperty {
   return isProperty(node) && (isIdentifier(node.key) || isPrivateIdentifier(node.key));
 }
 
+export interface NormalVariableDeclarator extends LetOrConstOrVarDeclaration {
+  id: Identifier;
+  init: Expression;
+}
+
 export function isNormalVariableDeclarator(node: BaseNode): node is NormalVariableDeclarator {
   return isVariableDeclarator(node) && isIdentifier(node.id) && node.init !== null;
 }
-
-// export function isClassMember(
-//   node: BaseNode
-// ): node is MethodDefinition | PropertyDefinition  {
-//   return (
-//     (isMethodDefinition(node) ||
-//       isPropertyDefinition(node)  &&
-//     isIdentifierOrPrivateIdentifier(node.key)
-//   );
-// }
-
-// export function isObjectProperty(node: BaseNode): node is Property {
-//   return isProperty(node) && isIdentifierOrPrivateIdentifier(node.key);
-// }

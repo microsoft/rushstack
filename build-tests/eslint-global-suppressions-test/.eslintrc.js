@@ -5,7 +5,7 @@ require('@rushstack/eslint-config/patch/eslint-global-suppressions');
 module.exports = {
   extends: ['plugin:@typescript-eslint/recommended'],
   parserOptions: { tsconfigRootDir: __dirname },
-
+  ignorePatterns: ['lib'],
   overrides: [
     /**
      * Override the parser from @rushstack/eslint-config. Since the config is coming

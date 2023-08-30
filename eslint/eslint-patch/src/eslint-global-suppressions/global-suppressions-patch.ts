@@ -1,6 +1,7 @@
+import { BaseNode } from '@typescript-eslint/types/dist/generated/ast-spec';
+import { spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { BaseNode } from '@typescript-eslint/types/dist/generated/ast-spec';
 import * as guards from './ast-node-type-guards';
 
 // type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
@@ -18,19 +19,25 @@ interface GlobalSuppressionsJson {
   suppressions: Suppression[];
 }
 
-function calculateTargetAndScopeForASTNode(node: BaseNode): { scope: string; target: string } | undefined {
-  if (guards.isFunctionDeclarationWithName(node)) return { scope: node.type, target: node.id.name };
-
+function calculateScopeAndTargetForASTNode(node: BaseNode): { scope: string; target: string } | undefined {
   if (guards.isClassDeclarationWithName(node)) return { scope: node.type, target: node.id.name };
 
+  if (guards.isClassExpressionWithName(node)) return { scope: node.type, target: node.id.name };
+
+  if (guards.isFunctionDeclarationWithName(node)) return { scope: node.type, target: node.id.name };
+
+  if (guards.isFunctionExpressionWithName(node)) return { scope: node.type, target: node.id.name };
+
   if (guards.isNormalVariableDeclarator(node))
-    if (guards.isNormalAnonymousExpression(node.init)) return { scope: node.type, target: node.id.name };
+    if (guards.isNormalAnonymousExpression(node.init)) return { scope: node.init.type, target: node.id.name };
 
   if (guards.isNormalObjectProperty(node))
-    if (guards.isNormalAnonymousExpression(node.value)) return { scope: node.type, target: node.key.name };
+    if (guards.isNormalAnonymousExpression(node.value))
+      return { scope: node.value.type, target: node.key.name };
 
   if (guards.isNormalClassPropertyDefinition(node))
-    if (guards.isNormalAnonymousExpression(node.value)) return { scope: node.type, target: node.key.name };
+    if (guards.isNormalAnonymousExpression(node.value))
+      return { scope: node.value.type, target: node.key.name };
 
   // Also handles constructor
   if (guards.isNormalMethodDefinition(node)) return { scope: node.type, target: node.key.name };
@@ -62,16 +69,18 @@ function calculateTargetAndScopeForASTNode(node: BaseNode): { scope: string; tar
 
   // TODO: Handle param default values?
 
+  // TODO: Handle named ClassExpression and named FunctionExpression
+
   return undefined;
 }
 
-function calculateTargetAndScope(node: (BaseNode & { parent?: BaseNode }) | undefined): {
+function calculateScopeAndTarget(node: any | (BaseNode & { parent?: BaseNode }) | undefined): {
   scope: string;
   target: string;
 } {
   const scopeAndTarget: { target: string; scope: string }[] = [];
   for (let current = node; current; current = current.parent) {
-    const scopeAndTargetForASTNode = calculateTargetAndScopeForASTNode(current);
+    const scopeAndTargetForASTNode = calculateScopeAndTargetForASTNode(current);
     if (scopeAndTargetForASTNode !== undefined) scopeAndTarget.unshift(scopeAndTargetForASTNode);
   }
 
@@ -85,18 +94,25 @@ function calculateTargetAndScope(node: (BaseNode & { parent?: BaseNode }) | unde
   );
 }
 
-function findEslintrcDirectory(filename: string): string {
-  let currentDir = filename;
-  while (currentDir !== '/') {
-    if (fs.existsSync(path.join(currentDir, '.eslintrc.js'))) {
+/**
+ * Retrieves the root path of a repository. Written by https://github.com/chengcyber
+ *
+ * @throws Throws an error if the command to retrieve the root path fails.
+ * @returns The root path of the monorepo.
+ */
+export function getGitRootPath(): string {
+  const result = spawnSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf-8' });
+  if (result.status !== 0) throw new Error(`get root path failed`);
+  return result.stdout.toString().trim();
+}
+
+export const GitRootPath = getGitRootPath();
+
+function findEslintrcDirectory(fileAbsolutePath: string): string {
+  for (let currentDir = fileAbsolutePath; currentDir !== GitRootPath; currentDir = path.dirname(currentDir))
+    if (['.eslintrc.js', '.eslintrc.cjs'].some((eslintrc) => fs.existsSync(path.join(currentDir, eslintrc))))
       return currentDir;
-    }
-    if (fs.existsSync(path.join(currentDir, '.eslintrc.cjs'))) {
-      return currentDir;
-    }
-    currentDir = path.dirname(currentDir);
-  }
-  throw new Error("Cannot locate package root. Are you sure you're running this in the monorepo?");
+  throw new Error('Cannot locate eslintrc');
 }
 
 function validateSuppressionsJson(json: GlobalSuppressionsJson): json is GlobalSuppressionsJson {
@@ -153,7 +169,7 @@ Please check file content, or delete file if suppressions are no longer needed.
   return suppressionsJson;
 }
 
-function serializeSuppression(suppression: {
+function serializeFileScopeTargetRuleId(suppression: {
   file: string;
   scope: string;
   target: string;
@@ -162,16 +178,16 @@ function serializeSuppression(suppression: {
   return `${suppression.file}|${suppression.scope}|${suppression.target}|${suppression.ruleId}`;
 }
 
-function getFormattedSuppressions(eslintrcDirectory: string): Set<string> {
+function getSerializedSuppressionsSet(eslintrcDirectory: string): Set<string> {
   const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
-  const suppressed = new Set(suppressionsJson.suppressions.map(serializeSuppression));
+  const suppressed = new Set(suppressionsJson.suppressions.map(serializeFileScopeTargetRuleId));
   return suppressed;
 }
 
-function shouldBulkSuppress(ruleId: string): boolean {
-  if (process.env.ESLINT_BULK_SUPPRESS_RULE === undefined) return false;
+function shouldWriteSuppression(ruleId: string): boolean {
+  if (process.env.ESLINT_GLOBAL_SUPPRESS_RULE === undefined) return false;
 
-  const rulesToSuppress = process.env.ESLINT_BULK_SUPPRESS_RULE.split(',');
+  const rulesToSuppress = process.env.ESLINT_GLOBAL_SUPPRESS_RULE.split(',');
 
   if (rulesToSuppress.length === 1) {
     // Wildcard to suppress all rules
@@ -221,88 +237,60 @@ function writeSuppression(params: {
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
 }
 
-function removeUnusedSuppressions(
-  eslintrcDirectory: string,
-  fileRelativePath: string,
-  usedSuppressionsSet: Set<string>
-) {
-  if (process.env.ESLINT_REMOVE_UNUSED_SUPPRESSIONS !== 'true') return;
-
-  const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
-  const newSuppressionsJson: GlobalSuppressionsJson = { suppressions: [] };
-  newSuppressionsJson.suppressions = suppressionsJson.suppressions.filter((suppression) => {
-    if (suppression.file !== fileRelativePath) return true;
-
-    const suppressionStr = serializeSuppression(suppression);
-    return usedSuppressionsSet.has(suppressionStr);
-  });
-
-  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-global-suppressions.json');
-  fs.writeFileSync(suppressionsPath, JSON.stringify(newSuppressionsJson, null, 2));
-}
-
 export function onBeforeRunRulesHook({ filename }: { filename: string }) {
   const eslintrcDirectory = findEslintrcDirectory(filename);
   const fileRelativePath = path.relative(eslintrcDirectory, filename);
-  const serializedSuppressionsSet = getFormattedSuppressions(eslintrcDirectory);
-  const usedSuppressionsSet = new Set();
+  const serializedSuppressionsSet = getSerializedSuppressionsSet(eslintrcDirectory);
 
   const globalSuppressionsPatchContext = {
     fileRelativePath,
     eslintrcDirectory,
-    serializedSuppressionsSet,
-    usedSuppressionsSet
+    serializedSuppressionsSet
   };
 
   return globalSuppressionsPatchContext;
 }
 
-export function onAfterRunRulesHook(params: {
-  globalSuppressionsPatchContext: {
-    eslintrcDirectory: string;
-    fileRelativePath: string;
-    serializedSuppressionsSet: Set<string>;
-    usedSuppressionsSet: Set<string>;
-  };
-}): void {
-  const { eslintrcDirectory, fileRelativePath, usedSuppressionsSet } = params.globalSuppressionsPatchContext;
-
-  if (process.env.ESLINT_REMOVE_UNUSED_SUPPRESSIONS === 'true')
-    removeUnusedSuppressions(eslintrcDirectory, fileRelativePath, usedSuppressionsSet);
+function readSerializedSuppressionsSet(fileAbsolutePath: string) {
+  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
+  const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
+  const serializedSuppressionsSet = new Set(
+    suppressionsJson.suppressions.map(serializeFileScopeTargetRuleId)
+  );
+  return serializedSuppressionsSet;
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
 export function onReportHook(params: {
-  globalSuppressionsPatchContext: {
-    eslintrcDirectory: string;
-    fileRelativePath: string;
-    serializedSuppressionsSet: Set<string>;
-    usedSuppressionsSet: Set<string>;
-  };
+  fileAbsolutePath: string;
   currentNode: BaseNode;
   ruleId: string;
 }): boolean {
-  const { globalSuppressionsPatchContext, currentNode, ruleId } = params;
   // Use this ENV variable to turn off eslint-global-suppressions functionality, default behavior is on
-  if (process.env.USE_ESLINT_BULK_SUPPRESSIONS === 'false') return false;
+  if (process.env.USE_ESLINT_GLOBAL_SUPPRESSIONS === 'false') return false;
 
-  const { fileRelativePath, eslintrcDirectory, serializedSuppressionsSet, usedSuppressionsSet } =
-    globalSuppressionsPatchContext;
-  const { scope, target } = calculateTargetAndScope(currentNode);
-  const serializedSuppression = serializeSuppression({ file: fileRelativePath, scope, target, ruleId });
+  const { fileAbsolutePath, currentNode, ruleId } = params;
+  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
+  const fileRelativePath = path.relative(eslintrcDirectory, fileAbsolutePath);
+  const { scope, target } = calculateScopeAndTarget(currentNode);
+  const serializedFileScopeTargetRuleId = serializeFileScopeTargetRuleId({
+    file: fileRelativePath,
+    scope,
+    target,
+    ruleId
+  });
 
-  if (shouldBulkSuppress(ruleId)) {
+  if (
+    shouldWriteSuppression(ruleId) &&
+    !readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeTargetRuleId)
+  )
     writeSuppression({ eslintrcDirectory, ruleId, fileRelativePath, scope, target });
-    serializedSuppressionsSet.add(serializedSuppression);
-    usedSuppressionsSet.add(serializedSuppression);
-  }
 
-  if (serializedSuppressionsSet.has(serializedSuppression)) {
-    usedSuppressionsSet.add(serializedSuppression);
-    return true;
-  }
+  const shouldSuppress: boolean = readSerializedSuppressionsSet(fileAbsolutePath).has(
+    serializedFileScopeTargetRuleId
+  );
 
-  return false;
+  return shouldSuppress;
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
@@ -333,8 +321,13 @@ export function findEslintLibraryLocation() {
         eslintFolder = eslintCandidateFolder;
         break;
       }
-    } catch (ex) {
-      if (!isModuleResolutionError(ex)) throw ex;
+    } catch (ex: unknown) {
+      // Module resolution failures are expected, as we're walking
+      // up our require stack to look for eslint. All other errors
+      // are rethrown.
+      if (!isModuleResolutionError(ex)) {
+        throw ex;
+      }
     }
 
     if (!currentModule.parent)
@@ -352,6 +345,5 @@ module.exports = {
   requireFromPathToLinterJS,
   onBeforeRunRulesHook,
   onReportHook,
-  findEslintLibraryLocation,
-  onAfterRunRulesHook
+  findEslintLibraryLocation
 };

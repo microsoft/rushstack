@@ -1,121 +1,116 @@
-// Top-level scope code samples
-let exampleString = 5 + ''; // scopeId: "."
+/* Top-level scope code samples */
+// scope: '.', target: '.'
+let exampleString: string = 5 + '';
 
 const exampleObject = {
   exampleString: exampleString
 };
 
-// Function scope code samples
-function exampleFunction() {
-  const {} = exampleObject; // scopeId: ".exampleFunction"
+/* Function scope code samples */
+export function exampleFunction() {
+  const {}: Object = exampleObject;
 
-  !!!exampleString; // scopeId: ".exampleFunction"
+  // scope: '.FunctionDeclaration', target: '.exampleFunction'
+  !!!exampleString as Boolean;
 }
 
-// Class scope code samples
-class ExampleClass {
-  exampleClassProperty = exampleString + '4'; // scopeId: ".ExampleClass"
+// scope: '.ArrowFunctionExpression', target: '.x'
+export const x = () => {},
+  // scope: '.ArrowFunctionExpression', target: '.y'
+  y = () => {},
+  // scope: '.ArrowFunctionExpression', target: '.z'
+  z = () => {};
+
+/* Class scope code samples */
+export class ExampleClass {
+  // scope: '.ClassDeclaration', target: '.ExampleClass'
+  exampleClassProperty: String = exampleString + '4';
 
   exampleMethod() {
-    '' + !!exampleString; // scopeId: "".ExampleClass.exampleMethod"
+    // scope: '.ClassDeclaration.MethodDefinition', target: '.exampleClass.exampleMethod'
+    var exampleVar;
+    return exampleVar;
   }
 }
 
-// Variable and anonymous constructs code samples
-const exampleArrowFunction = () => {
+/* Variable and anonymous constructs code samples */
+export const exampleArrowFunction = () => {
   const exampleBoolean = true;
   if (exampleBoolean) {
-  } // scopeId: ".exampleArrowFunction"
+  }
 
-  exampleObject['exampleString']; // scopeId: ".exampleArrowFunction"
+  exampleObject['exampleString'];
 };
 
-const exampleAnonymousClass = class {
-  exampleClassProperty = 'x' + 'y'; // scopeId: ".exampleAnonymousClass"
+export const exampleAnonymousClass = class {
+  exampleClassProperty = 'x' + 'y';
 
-  constructor() {} // scopeId: ".exampleAnonymousClass.constructor"
+  // scope: '.ClassExpression.MethodDefinition', target: '.exampleAnonymousClass.constructor'
+  constructor() {}
 
   set exampleSetGet(val: string) {
-    let preferConst = 0; // scopeId: ".exampleAnonymousClass.exampleSetGet"
-    this.exampleClassProperty = val;
+    // scope: '.ClassExpression.MethodDefinition', target: '.exampleAnonymousClass.exampleSetGet'
+    let exampleVariable: Number = 1;
+    this.exampleClassProperty = val + exampleVariable;
   }
 
   get exampleSetGet() {
-    return this.exampleClassProperty;
-    exampleString = 'foo'; // scopeId: ".exampleAnonymousClass.exampleSetGet"
+    // scope: '.ClassExpression.MethodDefinition', target: '.exampleAnonymousClass.exampleSetGet'
+    return this.exampleClassProperty as String as string;
   }
 };
 
-// Object property and method code samples
-const exampleObject2 = {
-  exampleObjectProperty: () => {
-    {
-      // scopeId: ".exampleObject2.exampleObjectProperty"
-      return;
-    }
-  },
+/* Object property and method code samples */
+export const exampleObject2 = {
+  // scope: '.ObjectExpression.ArrowFunctionExpression', target: '.exampleObject2.exampleObjectProperty
+  exampleObjectProperty: () => {},
 
   exampleObjectMethod() {
-    let exampleUndefined = undefined; // scopeId: ".exampleObject2.exampleObjectMethod"
+    // scope: '.ObjectExpression.MethodDefinition', target: '.exampleObject2.exampleObjectMethod'
+    const exampleUndefined: undefined = undefined;
+    return exampleUndefined;
   }
 };
 
-// Absurd examples
-class AbsurdClass {
+/* Absurd examples */
+export class AbsurdClass {
   absurdClassMethod() {
     return class AbsurdClass2 {
+      absurdClassProperty;
       constructor() {
         const absurdObject = {
-          absurdObjectMethod() {
-            // scopeId: ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject.absurdObjectMethod"
-            const absurdVariable = this ? true : false;
-          }
+          // scope: '.ClassDeclaration.MethodDefinition.ClassExpression.MethodDefinition.VariableDeclarator.Property'
+          // target: '.AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject.absurdObjectMethod'
+          absurdObjectMethod() {}
         };
+        this.absurdClassProperty = absurdObject;
       }
     };
   }
 }
 
-const absurdNumber: number = ((absurdParameter: { absurdObjectMethod: () => number }) =>
-  absurdParameter.absurdObjectMethod())({
-  get absurdObjectMethod(): () => number {
-    const absurdArray = [
-      function (): number {
-        return 7;
-      },
-      () => {
-        // scopeId: "absurdObjectMethod.absurdArray"
-        const absurdNumber: number = absurdArray['length'];
-        return absurdNumber;
-      }
-    ];
-    return absurdArray[1];
-  }
-});
-
-// Type, interface, enum code samples
-type ExampleObjectType = {
-  examplePropertyType: unknown | 'foo'; // scopeId: ".ExampleObjectType"
+/* Type, interface, enum code samples */
+export type ExampleObjectType = {
+  // scope: '.TSTypeAliasDeclaration', target: '.ExampleObjectType'
+  examplePropertyType: String;
 };
 
-interface ExampleInterface {} // scopeId: ".ExampleInterface"
+// scope: '.TSInterfaceDeclaration', target: '.ExampleInterface'
+export interface ExampleInterface {}
 
-enum ExampleEnum {
+export enum ExampleEnum {
   A = 0,
 
   B = 1,
 
-  C = 'exampleStringValue'['length'], // scopeId: ".ExampleEnum"
+  C = 'exampleStringValue'['length'],
 
-  D = 1 // scopeId: ".ExampleEnum"
+  D = 1
 }
 
-// Namespace, declare, module code samples
-module ExampleModule {
-  // scopeId: ".ExampleModule"
-  interface ExampleInterface2 {} // scopeId: ".ExampleModule.ExampleInterface2"
+/* Namespace, declare, module code samples */
+// scope: '.TSModuleDeclaration', target: '.ExampleModule'
+export namespace ExampleModule {
+  // scope: '.TSModuleDeclaration.TSInterfaceDeclaration', target: '.ExampleModule.ExampleInterface2'
+  export interface ExampleInterface2 {}
 }
-
-const x = () => {},
-  y = () => {},
-  z = () => {};
