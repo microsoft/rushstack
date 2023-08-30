@@ -86,16 +86,6 @@ export class AsyncOperationQueue
   public assignOperations(): void {
     const { _queue: queue, _pendingIterators: waitingIterators } = this;
 
-    if (this._isDone) {
-      for (const resolveAsyncIterator of waitingIterators.splice(0)) {
-        resolveAsyncIterator({
-          value: undefined,
-          done: true
-        });
-      }
-      return;
-    }
-
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const operation: OperationExecutionRecord = queue[i];
@@ -135,6 +125,21 @@ export class AsyncOperationQueue
         });
       }
       // Otherwise operation is still waiting
+    }
+
+    // Since items only get removed from the queue when they have a final status, this should be safe.
+    if (queue.length === 0) {
+      this._isDone = true;
+    }
+
+    if (this._isDone) {
+      for (const resolveAsyncIterator of waitingIterators.splice(0)) {
+        resolveAsyncIterator({
+          value: undefined,
+          done: true
+        });
+      }
+      return;
     }
 
     if (waitingIterators.length > 0) {

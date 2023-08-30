@@ -4,7 +4,12 @@
 import { Operation } from '../Operation';
 import { IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
 import { MockOperationRunner } from './MockOperationRunner';
-import { AsyncOperationQueue, IOperationSortFunction, UNASSIGNED_OPERATION } from '../AsyncOperationQueue';
+import {
+  AsyncOperationQueue,
+  IOperationIteratorResult,
+  IOperationSortFunction,
+  UNASSIGNED_OPERATION
+} from '../AsyncOperationQueue';
 import { OperationStatus } from '../OperationStatus';
 import { Async } from '@rushstack/node-core-library';
 
@@ -216,5 +221,14 @@ describe(AsyncOperationQueue.name, () => {
     }
 
     expect(actualOrder).toEqual(expectedOrder);
+  });
+
+  it('handles an empty queue', async () => {
+    const operations: OperationExecutionRecord[] = [];
+
+    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
+    const iterator: AsyncIterator<IOperationIteratorResult> = queue[Symbol.asyncIterator]();
+    const result: IteratorResult<IOperationIteratorResult> = await iterator.next();
+    expect(result.done).toEqual(true);
   });
 });
