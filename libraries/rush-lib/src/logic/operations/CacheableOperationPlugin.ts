@@ -235,10 +235,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         const {
           associatedProject: project,
           associatedPhase: phase,
+          runner,
           _operationMetadataManager: operationMetadataManager
         } = record;
 
-        if (!project || !phase) {
+        if (!project || !phase || !runner?.cacheable) {
           return;
         }
 
