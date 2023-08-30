@@ -2,6 +2,18 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.5.38",
+      "tag": "@rushstack/terminal_v0.5.38",
+      "date": "Thu, 24 Aug 2023 15:20:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a minor logic issue for TextRewriterTransform cleanup"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.37",
       "tag": "@rushstack/terminal_v0.5.37",
       "date": "Tue, 08 Aug 2023 07:10:40 GMT",
