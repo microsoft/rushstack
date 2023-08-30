@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "feat: add resolutionMode in pnpm-config",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
