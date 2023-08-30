@@ -1090,7 +1090,13 @@ function runRules(
         options: getRuleOptions(configuredRules[ruleId]),
         report(...args) {
           // --- BEGIN MONKEY PATCH ---
-          if (globalSuppressionsPatch.onReportHook({ globalSuppressionsPatchContext, currentNode, ruleId }))
+          if (
+            globalSuppressionsPatch.onReportHook({
+              fileAbsolutePath: filename,
+              currentNode,
+              ruleId
+            })
+          )
             return;
           // --- END MONKEY PATCH ---
           /*
@@ -1190,10 +1196,6 @@ function runRules(
       throw err;
     }
   });
-
-  // --- BEGIN MONKEY PATCH ---
-  globalSuppressionsPatch.onAfterRunRulesHook({ globalSuppressionsPatchContext });
-  // --- END MONKEY PATCH ---
 
   return lintingProblems;
 }

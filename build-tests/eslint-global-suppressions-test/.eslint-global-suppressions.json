@@ -1,0 +1,10 @@
+{
+  "suppressions": [
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ClassDeclaration.MethodDefinition.ClassExpression.MethodDefinition.ObjectExpression.FunctionExpression",
+      "target": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject.absurdObjectMethod",
+      "ruleId": "@typescript-eslint/no-empty-function"
+    }
+  ]
+}
