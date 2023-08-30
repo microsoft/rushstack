@@ -3,7 +3,8 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { FileSystem, Path, ITerminal, FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+
+import { FileSystem, ITerminal, FolderItem, InternalError, Async } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -20,8 +21,7 @@ export interface IProjectBuildCacheOptions {
   projectOutputFolderNames: ReadonlyArray<string>;
   additionalProjectOutputFilePaths?: ReadonlyArray<string>;
   additionalContext?: Record<string, string>;
-  command: string;
-  trackedProjectFiles: string[] | undefined;
+  configHash: string;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   terminal: ITerminal;
   phaseName: string;
@@ -76,53 +76,8 @@ export class ProjectBuildCache {
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const { terminal, project, projectOutputFolderNames, trackedProjectFiles } = options;
-    if (!trackedProjectFiles) {
-      return undefined;
-    }
-
-    if (
-      !ProjectBuildCache._validateProject(terminal, project, projectOutputFolderNames, trackedProjectFiles)
-    ) {
-      return undefined;
-    }
-
     const cacheId: string | undefined = await ProjectBuildCache._getCacheId(options);
     return new ProjectBuildCache(cacheId, options);
-  }
-
-  private static _validateProject(
-    terminal: ITerminal,
-    project: RushConfigurationProject,
-    projectOutputFolderNames: ReadonlyArray<string>,
-    trackedProjectFiles: string[]
-  ): boolean {
-    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(project.projectRelativeFolder);
-    const outputFolders: string[] = [];
-    if (projectOutputFolderNames) {
-      for (const outputFolderName of projectOutputFolderNames) {
-        outputFolders.push(`${normalizedProjectRelativeFolder}/${outputFolderName}/`);
-      }
-    }
-
-    const inputOutputFiles: string[] = [];
-    for (const file of trackedProjectFiles) {
-      for (const outputFolder of outputFolders) {
-        if (file.startsWith(outputFolder)) {
-          inputOutputFiles.push(file);
-        }
-      }
-    }
-
-    if (inputOutputFiles.length > 0) {
-      terminal.writeWarningLine(
-        'Unable to use build cache. The following files are used to calculate project state ' +
-          `and are considered project output: ${inputOutputFiles.join(', ')}`
-      );
-      return false;
-    } else {
-      return true;
-    }
   }
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
@@ -417,39 +372,29 @@ export class ProjectBuildCache {
     // - A SHA1 hash is created and the following data is fed into it, in order:
     //   1. The JSON-serialized list of output folder names for this
     //      project (see ProjectBuildCache._projectOutputFolderNames)
-    //   2. The command that will be run in the project
+    //   2. The configHash from the operation's runner
     //   3. Each dependency project hash (from the array constructed in previous steps),
     //      in sorted alphanumerical-sorted order
     // - A hex digest of the hash is returned
     const projectChangeAnalyzer: ProjectChangeAnalyzer = options.projectChangeAnalyzer;
     const projectStates: string[] = [];
-    const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-    let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    const projectsToProcess: Set<RushConfigurationProject> = new Set();
     projectsToProcess.add(options.project);
 
-    while (projectsToProcess.size > 0) {
-      const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-      for (const projectToProcess of projectsToProcess) {
-        projectsThatHaveBeenProcessed.add(projectToProcess);
-
-        const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess,
-          options.terminal
-        );
-        if (!projectState) {
-          // If we hit any projects with unknown state, return unknown cache ID
-          return undefined;
-        } else {
-          projectStates.push(projectState);
-          for (const dependency of projectToProcess.dependencyProjects) {
-            if (!projectsThatHaveBeenProcessed.has(dependency)) {
-              newProjectsToProcess.add(dependency);
-            }
-          }
+    for (const projectToProcess of projectsToProcess) {
+      const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
+        projectToProcess,
+        options.terminal
+      );
+      if (!projectState) {
+        // If we hit any projects with unknown state, return unknown cache ID
+        return undefined;
+      } else {
+        projectStates.push(projectState);
+        for (const dependency of projectToProcess.dependencyProjects) {
+          projectsToProcess.add(dependency);
         }
       }
-
-      projectsToProcess = newProjectsToProcess;
     }
 
     const sortedProjectStates: string[] = projectStates.sort();
@@ -460,13 +405,13 @@ export class ProjectBuildCache {
     const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
     hash.update(serializedOutputFolders);
     hash.update(RushConstants.hashDelimiter);
-    hash.update(options.command);
+    hash.update(options.configHash);
     hash.update(RushConstants.hashDelimiter);
     if (options.additionalContext) {
       for (const key of Object.keys(options.additionalContext).sort()) {
         // Add additional context keys and values.
         //
-        // This choice (to modiy the hash for every key regardless of whether a value is set) implies
+        // This choice (to modify the hash for every key regardless of whether a value is set) implies
         // that just _adding_ an env var to the list of dependsOnEnvVars will modify its hash. This
         // seems appropriate, because this behavior is consistent whether or not the env var happens
         // to have a value.

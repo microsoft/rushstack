@@ -77,6 +77,11 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
+   * Whether or not the operation is cacheable. If false, all cache engines will be disabled for this operation.
+   */
+  cacheable: boolean;
+
+  /**
    * Indicates that this runner's duration has meaning.
    */
   reportTiming: boolean;
@@ -93,12 +98,12 @@ export interface IOperationRunner {
   warningsAreAllowed: boolean;
 
   /**
-   * Full shell command string to run by this runner.
-   */
-  commandToRun?: string;
-
-  /**
    * Method to be executed for the operation.
    */
   executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+
+  /**
+   * Return a hash of the configuration that affects the operation.
+   */
+  getConfigHash(): string;
 }

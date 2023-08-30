@@ -345,6 +345,7 @@ export interface ICreateOperationsContext {
     readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
     readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+    readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
@@ -482,6 +483,7 @@ export interface IOperationExecutionResult {
     readonly cobuildRunnerId: string | undefined;
     readonly error: Error | undefined;
     readonly nonCachedDurationMs: number | undefined;
+    readonly operation: Operation;
     readonly status: OperationStatus;
     readonly stdioSummarizer: StdioSummarizer;
     readonly stopwatch: IStopwatchResult;
@@ -518,8 +520,9 @@ export interface IOperationOptions {
 
 // @beta
 export interface IOperationRunner {
-    commandToRun?: string;
+    cacheable: boolean;
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+    getConfigHash(): string;
     readonly name: string;
     reportTiming: boolean;
     silent: boolean;
@@ -538,6 +541,15 @@ export interface IOperationRunnerContext {
     status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
+}
+
+// @alpha (undocumented)
+export interface IOperationSettings {
+    dependsOnAdditionalFiles?: string[];
+    dependsOnEnvVars?: string[];
+    disableBuildCacheForOperation?: boolean;
+    operationName: string;
+    outputFolderNames?: string[];
 }
 
 // @internal (undocumented)
@@ -612,6 +624,16 @@ export interface IPrefixMatch<TItem> {
     value: TItem;
 }
 
+// @internal (undocumented)
+export interface _IRawRepoState {
+    // (undocumented)
+    projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
+    // (undocumented)
+    rawHashes: Map<string, string>;
+    // (undocumented)
+    rootDir: string;
+}
+
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
@@ -629,6 +651,14 @@ export interface _IRushPluginConfigurationBase {
     packageName: string;
     // (undocumented)
     pluginName: string;
+}
+
+// @internal
+export interface _IRushProjectJson {
+    disableBuildCacheForProject?: boolean;
+    incrementalBuildIgnoredGlobs?: string[];
+    // (undocumented)
+    operationSettings?: IOperationSettings[];
 }
 
 // @beta (undocumented)
@@ -864,10 +894,12 @@ export abstract class PackageManagerOptionsConfigurationBase implements IPackage
 
 // @alpha
 export class PhasedCommandHooks {
-    readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]>;
+    readonly afterExecuteOperation: AsyncSeriesHook<[
+    IOperationRunnerContext & IOperationExecutionResult
+    ]>;
     readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
     readonly beforeExecuteOperation: AsyncSeriesBailHook<[
-    IOperationRunnerContext
+    IOperationRunnerContext & IOperationExecutionResult
     ], OperationStatus | undefined>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[
     Map<Operation, IOperationExecutionResult>,
@@ -908,10 +940,8 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
-    // Warning: (ae-forgotten-export) The symbol "IRawRepoState" needs to be exported by the entry point index.d.ts
-    //
     // @internal (undocumented)
-    _ensureInitializedAsync(terminal: ITerminal): Promise<IRawRepoState | undefined>;
+    _ensureInitializedAsync(terminal: ITerminal): Promise<_IRawRepoState | undefined>;
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
@@ -1159,6 +1189,21 @@ export class RushLifecycleHooks {
     runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
     runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
     runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
+}
+
+// @alpha
+export class RushProjectConfiguration {
+    readonly disableBuildCacheForProject: boolean;
+    getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string): string | undefined;
+    readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
+    // (undocumented)
+    readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
+    // (undocumented)
+    readonly project: RushConfigurationProject;
+    static tryLoadAndValidateForProjectsAsync(projects: Iterable<RushConfigurationProject>, phases: ReadonlySet<IPhase>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
+    static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
+    static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
+    validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }
 
 // @beta (undocumented)

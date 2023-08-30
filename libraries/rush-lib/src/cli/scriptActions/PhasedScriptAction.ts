@@ -40,7 +40,8 @@ import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Tele
 import { parseParallelism } from '../parsing/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
-import type { IOperationRunnerContext } from '../../logic/operations/IOperationRunner';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -147,8 +148,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     new PhasedOperationPlugin().apply(this.hooks);
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(this.hooks);
-    // Applies the build cache related logic to the selected operations
-    new CacheableOperationPlugin().apply(this.hooks);
 
     if (this._enableParallelism) {
       this._parallelismParameter = this.defineStringParameter({
@@ -342,6 +341,30 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         customParametersByName.set(configParameter.longName, parserParameter);
       }
 
+      if (buildCacheConfiguration) {
+        new CacheableOperationPlugin({
+          allowWarningsInSuccessfulBuild:
+            !!this.rushConfiguration.experimentsConfiguration.configuration
+              .buildCacheWithAllowWarningsInSuccessfulBuild,
+          buildCacheConfiguration,
+          cobuildConfiguration,
+          terminal
+        }).apply(this.hooks);
+      } else {
+        new LegacySkipPlugin({
+          terminal,
+          changedProjectsOnly,
+          isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
+        }).apply(this.hooks);
+      }
+
+      const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+        await RushProjectConfiguration.tryLoadAndValidateForProjectsAsync(
+          projectSelection,
+          this._initialPhases,
+          terminal
+        );
+
       const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
       const initialCreateOperationsContext: ICreateOperationsContext = {
         buildCacheConfiguration,
@@ -355,6 +378,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         phaseSelection: new Set(this._initialPhases),
         projectChangeAnalyzer,
         projectSelection,
+        projectConfigurations,
         projectsInUnknownState: projectSelection
       };
 
@@ -363,10 +387,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         debugMode: this.parser.isDebug,
         parallelism,
         changedProjectsOnly,
-        beforeExecuteOperation: async (record: IOperationRunnerContext) => {
+        beforeExecuteOperation: async (record: OperationExecutionRecord) => {
           return await this.hooks.beforeExecuteOperation.promise(record);
         },
-        afterExecuteOperation: async (record: IOperationRunnerContext) => {
+        afterExecuteOperation: async (record: OperationExecutionRecord) => {
           await this.hooks.afterExecuteOperation.promise(record);
         },
         beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {

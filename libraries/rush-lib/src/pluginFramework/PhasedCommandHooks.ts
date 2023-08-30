@@ -15,6 +15,7 @@ import type {
   IOperationExecutionResult
 } from '../logic/operations/IOperationExecutionResult';
 import type { CobuildConfiguration } from '../api/CobuildConfiguration';
+import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
@@ -79,6 +80,10 @@ export interface ICreateOperationsContext {
    */
   readonly projectSelection: ReadonlySet<RushConfigurationProject>;
   /**
+   * All successfully loaded rush-project.json data for selected projects.
+   */
+  readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
+  /**
    * The set of Rush projects that have not been built in the current process since they were last modified.
    * When `isInitial` is true, this will be an exact match of `projectSelection`.
    */
@@ -127,19 +132,16 @@ export class PhasedCommandHooks {
    * Hook invoked before executing a operation.
    */
   public readonly beforeExecuteOperation: AsyncSeriesBailHook<
-    [IOperationRunnerContext],
+    [IOperationRunnerContext & IOperationExecutionResult],
     OperationStatus | undefined
-  > = new AsyncSeriesBailHook<[IOperationRunnerContext], OperationStatus | undefined>(
-    ['runnerContext'],
-    'beforeExecuteOperation'
-  );
+  > = new AsyncSeriesBailHook(['runnerContext'], 'beforeExecuteOperation');
 
   /**
    * Hook invoked after executing a operation.
    */
-  public readonly afterExecuteOperation: AsyncSeriesHook<[IOperationRunnerContext]> = new AsyncSeriesHook<
-    [IOperationRunnerContext]
-  >(['runnerContext'], 'afterExecuteOperation');
+  public readonly afterExecuteOperation: AsyncSeriesHook<
+    [IOperationRunnerContext & IOperationExecutionResult]
+  > = new AsyncSeriesHook(['runnerContext'], 'afterExecuteOperation');
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.
