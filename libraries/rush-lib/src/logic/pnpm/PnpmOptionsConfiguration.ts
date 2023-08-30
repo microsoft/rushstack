@@ -17,6 +17,12 @@ import schemaJson from '../../schemas/pnpm-config.schema.json';
 export type PnpmStoreOptions = 'local' | 'global';
 
 /**
+ * This represents the available resolution-mode options
+ * @public
+ */
+export type PnpmResolutionModeOptions = 'highest' | 'time-based' | 'lowest-direct';
+
+/**
  * @beta
  */
 export interface IPnpmPeerDependencyRules {
@@ -87,6 +93,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.unsupportedPackageJsonSettings}
    */
   unsupportedPackageJsonSettings?: unknown;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.ResolutionMode}
+   */
+  resolutionMode?: PnpmResolutionModeOptions;
 }
 
 /**
@@ -115,6 +125,15 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *  - global: Use PNPM's global store path
    */
   public readonly pnpmStore: PnpmStoreOptions;
+
+  /**
+   * The resolution mode used by PNPM.
+   *
+   * Available options: highest, time-based, lowest-direct
+   *
+   * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
+   */
+  public readonly resolutionMode: PnpmResolutionModeOptions | undefined;
 
   /**
    * The path for PNPM to use as the store directory.
@@ -285,6 +304,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.globalAllowedDeprecatedVersions = json.globalAllowedDeprecatedVersions;
     this.unsupportedPackageJsonSettings = json.unsupportedPackageJsonSettings;
     this._globalPatchedDependencies = json.globalPatchedDependencies;
+    this.resolutionMode = json.resolutionMode;
   }
 
   /** @internal */

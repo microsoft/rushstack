@@ -22,6 +22,7 @@ interface ICommonPackageJson extends IPackageJson {
     neverBuiltDependencies?: typeof PnpmOptionsConfiguration.prototype.globalNeverBuiltDependencies;
     allowedDeprecatedVersions?: typeof PnpmOptionsConfiguration.prototype.globalAllowedDeprecatedVersions;
     patchedDependencies?: typeof PnpmOptionsConfiguration.prototype.globalPatchedDependencies;
+    resolutionMode?: typeof PnpmOptionsConfiguration.prototype.resolutionMode;
   };
 }
 
@@ -69,6 +70,10 @@ export class InstallHelpers {
 
       if (pnpmOptions.unsupportedPackageJsonSettings) {
         merge(commonPackageJson, pnpmOptions.unsupportedPackageJsonSettings);
+      }
+
+      if (pnpmOptions.resolutionMode) {
+        commonPackageJson.pnpm.resolutionMode = pnpmOptions.resolutionMode;
       }
     }
 
