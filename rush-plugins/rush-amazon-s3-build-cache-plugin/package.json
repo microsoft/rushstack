@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-  "version": "5.102.0-pr3949.6",
+  "version": "5.102.0-pr3949.7",
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
