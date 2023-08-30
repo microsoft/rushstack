@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where \"rush update-installer\" sometimes did not fully upgrade the lockfile",
+      "comment": "Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile",
       "type": "none"
     }
   ],
