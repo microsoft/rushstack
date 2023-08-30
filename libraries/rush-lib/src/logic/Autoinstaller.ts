@@ -168,7 +168,7 @@ export class Autoinstaller {
 
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
 
-    if (!FileSystem.exists(autoinstallerPackageJsonPath)) {
+    if (!(await FileSystem.existsAsync(autoinstallerPackageJsonPath))) {
       throw new Error(`The specified autoinstaller path does not exist: ` + autoinstallerPackageJsonPath);
     }
 
@@ -178,10 +178,10 @@ export class Autoinstaller {
 
     let oldFileContents: string = '';
 
-    if (FileSystem.exists(this.shrinkwrapFilePath)) {
+    if (await FileSystem.existsAsync(this.shrinkwrapFilePath)) {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
-      FileSystem.deleteFile(this.shrinkwrapFilePath);
+      await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
       if (this._rushConfiguration.packageManager === 'pnpm') {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
@@ -191,7 +191,7 @@ export class Autoinstaller {
         // Deleting both files ensures that a new lockfile will always be generated.
         const pnpmPackageManager: PnpmPackageManager = this._rushConfiguration
           .packageManagerWrapper as PnpmPackageManager;
-        FileSystem.deleteFile(
+        await FileSystem.deleteFileAsync(
           path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
         );
       }
@@ -232,13 +232,13 @@ export class Autoinstaller {
       this._logIfConsoleOutputIsNotRestricted();
     }
 
-    if (!FileSystem.exists(this.shrinkwrapFilePath)) {
+    if (!(await FileSystem.existsAsync(this.shrinkwrapFilePath))) {
       throw new Error(
         'The package manager did not create the expected shrinkwrap file: ' + this.shrinkwrapFilePath
       );
     }
 
-    const newFileContents: string = FileSystem.readFile(this.shrinkwrapFilePath, {
+    const newFileContents: string = await FileSystem.readFileAsync(this.shrinkwrapFilePath, {
       convertLineEndings: NewlineKind.Lf
     });
     if (oldFileContents !== newFileContents) {
