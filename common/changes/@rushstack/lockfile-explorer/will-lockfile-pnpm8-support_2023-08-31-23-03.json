@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/lockfile-explorer",
+      "comment": "Add support for pnpm8's lockfile v6",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/lockfile-explorer"
+}
