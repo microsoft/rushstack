@@ -1063,10 +1063,6 @@ function runRules(
 
   const lintingProblems = [];
 
-  // --- BEGIN MONKEY PATCH ---
-  const globalSuppressionsPatchContext = globalSuppressionsPatch.onBeforeRunRulesHook({ filename });
-  // --- END MONKEY PATCH ---
-
   Object.keys(configuredRules).forEach((ruleId) => {
     const severity = ConfigOps.getRuleSeverity(configuredRules[ruleId]);
 
@@ -1090,14 +1086,7 @@ function runRules(
         options: getRuleOptions(configuredRules[ruleId]),
         report(...args) {
           // --- BEGIN MONKEY PATCH ---
-          if (
-            globalSuppressionsPatch.onReportHook({
-              fileAbsolutePath: filename,
-              currentNode,
-              ruleId
-            })
-          )
-            return;
+          if (globalSuppressionsPatch.shouldGlobalSuppress({ filename, currentNode, ruleId })) return;
           // --- END MONKEY PATCH ---
           /*
            * Create a report translator lazily.
