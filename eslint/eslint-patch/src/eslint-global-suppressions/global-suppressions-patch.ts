@@ -4,15 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import * as guards from './ast-node-type-guards';
 
-// type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
-// type JsonObject = { [key: string]: JsonValue };
-// type JsonArray = JsonValue[];
-
 interface Suppression {
   file: string;
   scope: string;
   target: string;
-  ruleId: string;
+  rule: string;
 }
 
 interface GlobalSuppressionsJson {
@@ -68,8 +64,6 @@ function calculateScopeAndTargetForASTNode(node: BaseNode): { scope: string; tar
   // TODO: handle array and object destructuring
 
   // TODO: Handle param default values?
-
-  // TODO: Handle named ClassExpression and named FunctionExpression
 
   return undefined;
 }
@@ -127,12 +121,12 @@ function validateSuppressionsJson(json: GlobalSuppressionsJson): json is GlobalS
       if (suppression === null) return false;
       if (!suppression.hasOwnProperty('file')) return false;
       if (typeof suppression.file !== 'string') return false;
-      if (!('scope' in suppression)) return false;
+      if (!suppression.hasOwnProperty('scope')) return false;
       if (typeof suppression.scope !== 'string') return false;
-      if (!('target' in suppression)) return false;
+      if (!suppression.hasOwnProperty('target')) return false;
       if (typeof suppression.target !== 'string') return false;
-      if (!('ruleId' in suppression)) return false;
-      if (typeof suppression.ruleId !== 'string') return false;
+      if (!suppression.hasOwnProperty('rule')) return false;
+      if (typeof suppression.rule !== 'string') return false;
       return true;
     })
   )
@@ -155,7 +149,7 @@ function readSuppressionsJson(eslintrcDirectory: string): GlobalSuppressionsJson
       file: string;
       scope: string;
       target: string;
-      ruleId: string;
+      rule: string;
   }[];
 }
 Please check file content, or delete file if suppressions are no longer needed.
@@ -169,34 +163,23 @@ Please check file content, or delete file if suppressions are no longer needed.
   return suppressionsJson;
 }
 
-function serializeFileScopeTargetRuleId(suppression: {
+function serializeFileScopeTargetRule(suppression: {
   file: string;
   scope: string;
   target: string;
-  ruleId: string;
+  rule: string;
 }): string {
-  return `${suppression.file}|${suppression.scope}|${suppression.target}|${suppression.ruleId}`;
+  return `${suppression.file}|${suppression.scope}|${suppression.target}|${suppression.rule}`;
 }
 
-function getSerializedSuppressionsSet(eslintrcDirectory: string): Set<string> {
-  const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
-  const suppressed = new Set(suppressionsJson.suppressions.map(serializeFileScopeTargetRuleId));
-  return suppressed;
-}
-
-function shouldWriteSuppression(ruleId: string): boolean {
+function shouldWriteSuppression(rule: string): boolean {
   if (process.env.ESLINT_GLOBAL_SUPPRESS_RULE === undefined) return false;
 
   const rulesToSuppress = process.env.ESLINT_GLOBAL_SUPPRESS_RULE.split(',');
 
-  if (rulesToSuppress.length === 1) {
-    // Wildcard to suppress all rules
-    if (rulesToSuppress[0] === '*') return true;
+  if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
 
-    return rulesToSuppress[0] === ruleId;
-  }
-
-  return rulesToSuppress.includes(ruleId);
+  return rulesToSuppress.includes(rule);
 }
 
 function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number): void {
@@ -212,85 +195,65 @@ function compareSuppressions(a: Suppression, b: Suppression): -1 | 0 | 1 {
   if (a.scope > b.scope) return 1;
   if (a.target < b.target) return -1;
   if (a.target > b.target) return 1;
-  if (a.ruleId < b.ruleId) return -1;
-  if (a.ruleId > b.ruleId) return 1;
+  if (a.rule < b.rule) return -1;
+  if (a.rule > b.rule) return 1;
   return 0;
 }
 
 function writeSuppression(params: {
   eslintrcDirectory: string;
-  fileRelativePath: string;
+  file: string;
   scope: string;
   target: string;
-  ruleId: string;
+  rule: string;
 }): void {
-  const { eslintrcDirectory, fileRelativePath, scope, target, ruleId } = params;
+  const { eslintrcDirectory, file, scope, target, rule } = params;
   const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
 
-  insort(
-    suppressionsJson.suppressions,
-    { file: fileRelativePath, scope, target, ruleId },
-    compareSuppressions
-  );
+  insort(suppressionsJson.suppressions, { file, scope, target, rule }, compareSuppressions);
 
   const suppressionsPath = path.join(eslintrcDirectory, '.eslint-global-suppressions.json');
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
 }
 
-export function onBeforeRunRulesHook({ filename }: { filename: string }) {
-  const eslintrcDirectory = findEslintrcDirectory(filename);
-  const fileRelativePath = path.relative(eslintrcDirectory, filename);
-  const serializedSuppressionsSet = getSerializedSuppressionsSet(eslintrcDirectory);
-
-  const globalSuppressionsPatchContext = {
-    fileRelativePath,
-    eslintrcDirectory,
-    serializedSuppressionsSet
-  };
-
-  return globalSuppressionsPatchContext;
-}
-
 function readSerializedSuppressionsSet(fileAbsolutePath: string) {
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
-  const serializedSuppressionsSet = new Set(
-    suppressionsJson.suppressions.map(serializeFileScopeTargetRuleId)
-  );
+  const serializedSuppressionsSet = new Set(suppressionsJson.suppressions.map(serializeFileScopeTargetRule));
   return serializedSuppressionsSet;
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
-export function onReportHook(params: {
-  fileAbsolutePath: string;
+export function shouldGlobalSuppress(params: {
+  filename: string;
   currentNode: BaseNode;
   ruleId: string;
 }): boolean {
   // Use this ENV variable to turn off eslint-global-suppressions functionality, default behavior is on
   if (process.env.USE_ESLINT_GLOBAL_SUPPRESSIONS === 'false') return false;
 
-  const { fileAbsolutePath, currentNode, ruleId } = params;
+  const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const fileRelativePath = path.relative(eslintrcDirectory, fileAbsolutePath);
   const { scope, target } = calculateScopeAndTarget(currentNode);
-  const serializedFileScopeTargetRuleId = serializeFileScopeTargetRuleId({
+  const serializedFileScopeTargetRule = serializeFileScopeTargetRule({
     file: fileRelativePath,
     scope,
     target,
-    ruleId
+    rule
   });
 
   if (
-    shouldWriteSuppression(ruleId) &&
-    !readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeTargetRuleId)
+    shouldWriteSuppression(rule) &&
+    !readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeTargetRule)
   )
-    writeSuppression({ eslintrcDirectory, ruleId, fileRelativePath, scope, target });
+    writeSuppression({ eslintrcDirectory, file: fileRelativePath, scope, target, rule: rule });
 
-  const shouldSuppress: boolean = readSerializedSuppressionsSet(fileAbsolutePath).has(
-    serializedFileScopeTargetRuleId
+  const shouldGlobalSuppress: boolean = readSerializedSuppressionsSet(fileAbsolutePath).has(
+    serializedFileScopeTargetRule
   );
 
-  return shouldSuppress;
+  return shouldGlobalSuppress;
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
@@ -332,7 +295,7 @@ export function findEslintLibraryLocation() {
 
     if (!currentModule.parent)
       throw new Error(
-        'Failed to patch ESLint because the calling module was not recognized. Please contact @kevinyang.ky to report this bug.'
+        "Failed to patch ESLint because the calling module was not recognized. This patch is a prototype and only works with ESLint v8.23.1. If you don't have ESLint v8.23.1 installed, try using npx eslint@8.23.1 followed by the directories you want to lint."
       );
 
     currentModule = currentModule.parent;
@@ -343,7 +306,6 @@ export function findEslintLibraryLocation() {
 
 module.exports = {
   requireFromPathToLinterJS,
-  onBeforeRunRulesHook,
-  onReportHook,
+  shouldGlobalSuppress,
   findEslintLibraryLocation
 };
