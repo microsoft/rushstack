@@ -60,8 +60,6 @@ export class LockfileDependency {
     containingEntry: LockfileEntry,
     node?: ILockfileNode
   ) {
-    console.log('creating dependency: ', name, version);
-
     this.name = name;
     this.version = version;
     this.dependencyType = dependencyType;

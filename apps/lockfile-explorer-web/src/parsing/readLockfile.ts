@@ -169,8 +169,6 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
     }
   }
 
-  console.log('all entries by id: ', allEntriesById);
-
   // Construct the graph
   for (const entry of allEntries) {
     for (const dependency of entry.dependencies) {
@@ -197,8 +195,6 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
 export async function readLockfileAsync(): Promise<LockfileEntry[]> {
   const response = await fetch(`${serviceUrl}/api/lockfile`);
   const lockfile: ILockfilePackageType = await response.json();
-
-  console.log('LOCKFILE VERSION: ', lockfile.lockfileVersion);
 
   return generateLockfileGraph(lockfile);
 }
