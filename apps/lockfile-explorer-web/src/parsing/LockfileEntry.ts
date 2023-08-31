@@ -3,7 +3,6 @@
 
 import { Path } from '@lifaon/path';
 import { ILockfileNode, LockfileDependency } from './LockfileDependency';
-import { PnpmVersion } from './readLockfile';
 
 const ROOT_PACKAGE_PATH: string = 'common/temp/package.json';
 
@@ -15,7 +14,6 @@ export enum LockfileEntryFilter {
 }
 
 interface IProps {
-  pnpmVersion: PnpmVersion;
   rawEntryId: string;
   kind: LockfileEntryFilter;
   rawYamlData: ILockfileNode;
@@ -64,7 +62,7 @@ export class LockfileEntry {
   public entrySuffix: string = '';
 
   public constructor(data: IProps) {
-    const { rawEntryId, kind, rawYamlData, duplicates, pnpmVersion } = data;
+    const { rawEntryId, kind, rawYamlData, duplicates } = data;
     this.rawEntryId = rawEntryId;
     this.kind = kind;
 
@@ -138,6 +136,6 @@ export class LockfileEntry {
         this.entryPackageName;
     }
 
-    LockfileDependency.parseDependencies(this.dependencies, this, rawYamlData, pnpmVersion);
+    LockfileDependency.parseDependencies(this.dependencies, this, rawYamlData);
   }
 }

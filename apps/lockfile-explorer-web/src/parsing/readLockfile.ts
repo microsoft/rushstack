@@ -7,7 +7,7 @@ import { Path } from '@lifaon/path';
 
 const serviceUrl: string = window.appContext.serviceUrl;
 
-export enum PnpmVersion {
+export enum PnpmLockfileVersion {
   V6,
   V5
 }
@@ -75,9 +75,9 @@ export interface ILockfilePackageType {
  */
 function getImporterValue(
   importerValue: ILockfileImporterV5Type | ILockfileImporterV6Type,
-  pnpmVersion: PnpmVersion
+  pnpmLockfileVersion: PnpmLockfileVersion
 ): ILockfileImporterV5Type {
-  if (pnpmVersion === PnpmVersion.V6) {
+  if (pnpmLockfileVersion === PnpmLockfileVersion.V6) {
     const v6ImporterValue = importerValue as ILockfileImporterV6Type;
     const v5ImporterValue: ILockfileImporterV5Type = {
       specifiers: {},
@@ -105,9 +105,9 @@ function getImporterValue(
  * @returns A list of all the LockfileEntries in the lockfile.
  */
 export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileEntry[] {
-  let pnpmVersion: PnpmVersion = PnpmVersion.V5;
+  let pnpmLockfileVersion: PnpmLockfileVersion = PnpmLockfileVersion.V5;
   if (`${lockfile.lockfileVersion}`.startsWith('6')) {
-    pnpmVersion = PnpmVersion.V6;
+    pnpmLockfileVersion = PnpmLockfileVersion.V6;
   }
   const allEntries: LockfileEntry[] = [];
   const allEntriesById: { [key in string]: LockfileEntry } = {};
@@ -135,9 +135,8 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         // entryId: normalizedPath,
         rawEntryId: importerKey,
         kind: LockfileEntryFilter.Project,
-        rawYamlData: getImporterValue(importerValue, pnpmVersion),
-        duplicates,
-        pnpmVersion
+        rawYamlData: getImporterValue(importerValue, pnpmLockfileVersion),
+        duplicates
       });
       allImporters.push(importer);
       allEntries.push(importer);
@@ -151,7 +150,7 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
       // const normalizedPath = new Path(dependencyKey).makeAbsolute('/').toString();
 
       let packageDepKey = dependencyKey;
-      if (pnpmVersion === PnpmVersion.V6) {
+      if (pnpmLockfileVersion === PnpmLockfileVersion.V6) {
         packageDepKey = dependencyKey.replace('@', '/');
       }
 
@@ -159,8 +158,7 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         // entryId: normalizedPath,
         rawEntryId: packageDepKey,
         kind: LockfileEntryFilter.Package,
-        rawYamlData: dependencyValue,
-        pnpmVersion
+        rawYamlData: dependencyValue
       });
 
       allPackages.push(currEntry);
