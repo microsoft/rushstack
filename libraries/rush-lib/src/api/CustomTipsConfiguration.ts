@@ -11,11 +11,6 @@ import { PrintUtilities } from '@rushstack/terminal';
  */
 export interface ICustomTipsJson {
   /**
-   * If specified, this prefix will be prepended to any the tip messages when they are displayed.
-   * The default value is an empty string.
-   */
-  defaultMessagePrefix?: string;
-  /**
    *  Specifies the custom tips to be displayed by Rush.
    */
   customTips?: ICustomTipItemJson[];
@@ -37,12 +32,6 @@ export interface ICustomTipItemJson {
    * (REQUIRED) The message text to be displayed for this tip.
    */
   message: string;
-
-  /**
-   *  Overrides the "defaultMessagePrefix" for this tip.
-   * Specify an empty string to omit the "defaultMessagePrefix" entirely.
-   */
-  messagePrefix?: string;
 }
 
 /**
@@ -178,15 +167,12 @@ export class CustomTipsConfiguration {
       return undefined;
     }
 
-    const prefix: string | undefined =
-      customTipJsonItem.messagePrefix ?? this.configuration.defaultMessagePrefix;
-
-    const wrappedMessage = PrintUtilities.wrapWords(
+    const wrappedMessage: string = PrintUtilities.wrapWords(
       `Custom Tip (${tipId ?? ''}) ${customTipJsonItem.message}`
     );
 
     // Add "|" at the beginning of each line
-    const pipePrependedMessage = wrappedMessage
+    const pipePrependedMessage: string = wrappedMessage
       .split('\n')
       .map((line) => {
         return '| ' + line;
@@ -200,7 +186,7 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    *
-   * The display will show corresponding severity defined in {@link SupportedCustomTipsMetadata}
+   * The display will show corresponding severity.
    */
   public showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
     const message: string | undefined = this._formatTipMessage(tipId);

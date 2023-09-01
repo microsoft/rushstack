@@ -306,14 +306,12 @@ export interface ICredentialCacheOptions {
 // @beta
 export interface ICustomTipItemJson {
     message: string;
-    messagePrefix?: string;
     tipId: CustomTipIdEnum;
 }
 
 // @beta
 export interface ICustomTipsJson {
     customTips?: ICustomTipItemJson[];
-    defaultMessagePrefix?: string;
 }
 
 // @beta (undocumented)
