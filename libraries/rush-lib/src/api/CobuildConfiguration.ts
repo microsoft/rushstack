@@ -76,9 +76,7 @@ export class CobuildConfiguration {
     const { cobuildJson, cobuildLockProviderFactory } = options;
 
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
-    this.cobuildFeatureEnabled = this.cobuildContextId
-      ? EnvironmentConfiguration.cobuildFeatureEnabled ?? cobuildJson.cobuildFeatureEnabled
-      : false;
+    this.cobuildFeatureEnabled = this.cobuildContextId ? cobuildJson.cobuildFeatureEnabled : false;
     this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
       EnvironmentConfiguration.cobuildLeafProjectLogOnlyAllowed ?? false;
