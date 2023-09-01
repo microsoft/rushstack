@@ -339,11 +339,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Store the tip IDs that should be printed.
       // They will be printed all at once *after* the install
-      const tipIDsShouldBePrinted: CustomTipIdEnum[] = [];
+      const tipIDsShouldBePrinted: Set<CustomTipIdEnum> = new Set();
       const onPnpmStdoutChunk = (chunk: string): void => {
         SupportedCustomTipsMetadata.forEach((tipItem) => {
           if (tipItem.isMatch && tipItem.isMatch(chunk)) {
-            tipIDsShouldBePrinted.push(tipItem.tipId);
+            tipIDsShouldBePrinted.add(tipItem.tipId);
+            tipIDsShouldBePrinted.add(tipItem.tipId);
           }
         });
       };
