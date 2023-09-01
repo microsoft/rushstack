@@ -47,8 +47,8 @@ export interface ICustomTipItemJson {
  * @beta
  */
 export enum CustomTipIdEnum {
-  'TIP_RUSH_INCONSISTENT_VERSIONS' = 'TIP_RUSH_INCONSISTENT_VERSIONS',
-  'TIP_PNPM_NO_MATCHING_VERSION' = 'TIP_PNPM_NO_MATCHING_VERSION'
+  TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
+  TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION'
 }
 
 enum CustomTipSeverity {
@@ -57,9 +57,9 @@ enum CustomTipSeverity {
   'Info'
 }
 
-export enum CustomTipType {
-  'rush',
-  'pnpm'
+enum CustomTipType {
+  rush = 'rush',
+  pnpm = 'pnpm'
 }
 
 /**
