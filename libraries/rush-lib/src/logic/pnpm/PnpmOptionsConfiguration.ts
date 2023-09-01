@@ -127,8 +127,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly pnpmStore: PnpmStoreOptions;
 
   /**
-   * The resolution mode used by PNPM.
+   * The method used to set resolution mode used by PNPM.
    *
+   * @remarks
+   * The resolution mode used by PNPM.
    * Available options: highest, time-based, lowest-direct
    *
    * PNPM documentation: https://pnpm.io/npmrc#resolution-mode

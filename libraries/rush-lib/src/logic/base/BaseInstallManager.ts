@@ -597,6 +597,10 @@ ${gitLfsHookHandling}
         args.push('--strict-peer-dependencies');
       }
 
+      if (this.rushConfiguration.pnpmOptions.resolutionMode) {
+        args.push(`--config.resolutionMode=${this.rushConfiguration.pnpmOptions.resolutionMode}`);
+      }
+
       if (
         semver.satisfies(
           this.rushConfiguration.packageManagerToolVersion,
