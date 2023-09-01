@@ -741,8 +741,8 @@ export class PackageExtractor {
           dependenciesConfigurations.filter((d) =>
             semver.satisfies(packagesJson.version, d.dependencyVersionRange)
           );
-        return matchedDependenciesConfigurations.some(
-          (d) => excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
+        return matchedDependenciesConfigurations.some((d) =>
+          excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
         );
       }
     };

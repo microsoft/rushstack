@@ -1,0 +1,4 @@
+{
+  "url": "redis://localhost:6379",
+  "passwordEnvironmentVariable": "REDIS_PASS"
+}

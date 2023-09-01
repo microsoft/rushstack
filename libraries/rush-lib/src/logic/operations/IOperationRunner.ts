@@ -40,6 +40,27 @@ export interface IOperationRunnerContext {
    * Object used to track elapsed time.
    */
   stopwatch: IStopwatchResult;
+  /**
+   * The current execution status of an operation. Operations start in the 'ready' state,
+   * but can be 'blocked' if an upstream operation failed. It is 'executing' when
+   * the operation is executing. Once execution is complete, it is either 'success' or
+   * 'failure'.
+   */
+  status: OperationStatus;
+
+  /**
+   * Error which occurred while executing this operation, this is stored in case we need
+   * it later (for example to re-print errors at end of execution).
+   */
+  error?: Error;
+
+  /**
+   * Normally the incremental build logic will rebuild changed projects as well as
+   * any projects that directly or indirectly depend on a changed project.
+   * If true, then the incremental build logic will only rebuild changed projects and
+   * ignore dependent projects.
+   */
+  readonly changedProjectsOnly: boolean;
 }
 
 /**
@@ -56,9 +77,9 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
-   * This flag determines if the operation is allowed to be skipped if up to date.
+   * Whether or not the operation is cacheable. If false, all cache engines will be disabled for this operation.
    */
-  isSkipAllowed: boolean;
+  cacheable: boolean;
 
   /**
    * Indicates that this runner's duration has meaning.
@@ -77,12 +98,12 @@ export interface IOperationRunner {
   warningsAreAllowed: boolean;
 
   /**
-   * Indicates if the output of this operation may be written to the cache
-   */
-  isCacheWriteAllowed: boolean;
-
-  /**
    * Method to be executed for the operation.
    */
   executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+
+  /**
+   * Return a hash of the configuration that affects the operation.
+   */
+  getConfigHash(): string;
 }
