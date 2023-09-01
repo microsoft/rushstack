@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.104.0",
+      "tag": "@microsoft/rush_v5.104.0",
+      "date": "Fri, 01 Sep 2023 04:54:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.103.0",
       "tag": "@microsoft/rush_v5.103.0",
       "date": "Thu, 31 Aug 2023 23:28:28 GMT",

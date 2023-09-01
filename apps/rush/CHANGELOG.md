@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 31 Aug 2023 23:28:28 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Sep 2023 04:54:16 GMT and should not be manually modified.
+
+## 5.104.0
+Fri, 01 Sep 2023 04:54:16 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)
 
 ## 5.103.0
 Thu, 31 Aug 2023 23:28:28 GMT
