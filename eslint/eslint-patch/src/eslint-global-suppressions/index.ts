@@ -1,6 +1,6 @@
 import path from 'path';
 import { findEslintLibraryLocation } from './global-suppressions-patch';
-import { Linter as LinterPatch } from './linter-patch';
+import { Linter as LinterPatch } from './linter-patch-for-eslint-v8.7.0';
 
 const eslintLibraryLocation = findEslintLibraryLocation();
 const pathToLinterJs = path.join(eslintLibraryLocation, 'lib/linter/linter.js');
@@ -22,9 +22,9 @@ Linter.prototype._verifyWithFlatConfigArrayAndWithoutProcessors =
 Linter.prototype._verifyWithConfigArray = LinterPatch.prototype._verifyWithConfigArray;
 Linter.prototype._verifyWithFlatConfigArray = LinterPatch.prototype._verifyWithFlatConfigArray;
 Linter.prototype._verifyWithProcessor = LinterPatch.prototype._verifyWithProcessor;
-Linter.prototype._distinguishSuppressedMessages = LinterPatch.prototype._distinguishSuppressedMessages;
+// Linter.prototype._distinguishSuppressedMessages = LinterPatch.prototype._distinguishSuppressedMessages; // Enable for ESlint v8.23.1
 Linter.prototype.getSourceCode = LinterPatch.prototype.getSourceCode;
-Linter.prototype.getSuppressedMessages = LinterPatch.prototype.getSuppressedMessages;
+// Linter.prototype.getSuppressedMessages = LinterPatch.prototype.getSuppressedMessages; // Enable for ESlint v8.23.1
 Linter.prototype.defineRule = LinterPatch.prototype.defineRule;
 Linter.prototype.defineRules = LinterPatch.prototype.defineRules;
 Linter.prototype.getRules = LinterPatch.prototype.getRules;
