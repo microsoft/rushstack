@@ -3,16 +3,13 @@
   "description": "Sample code to test eslint global suppressions",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
   "scripts": {
-    "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean",
     "eslint": "eslint .",
-    "eslint-global-suppress-all": "ESLINT_GLOBAL_SUPPRESS_RULES=* eslint ."
+    "eslint-global-suppress-all": "ESLINT_GLOBAL_SUPPRESS_RULES=* eslint .",
+    "eslint-without-global-suppressions": "USE_ESLINT_GLOBAL_SUPPRESSIONS=false eslint ."
   },
-  "dependencies": {
+  "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/eslint-plugin": "workspace:*",
     "@typescript-eslint/eslint-plugin": "~5.59.2",
     "@typescript-eslint/parser": "~5.59.2",
     "eslint": "~8.7.0",
