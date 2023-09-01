@@ -2,6 +2,7 @@ import * as path from 'path';
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
+import { PrintUtilities } from '@rushstack/terminal';
 
 /**
  * This interface represents the raw custom-tips.json file which allows repo maintainers
@@ -179,14 +180,27 @@ export class CustomTipsConfiguration {
 
     const prefix: string | undefined =
       customTipJsonItem.messagePrefix ?? this.configuration.defaultMessagePrefix;
-    return `${prefix ?? ''}${customTipJsonItem.message}`;
+
+    const wrappedMessage = PrintUtilities.wrapWords(
+      `Custom Tip (${tipId ?? ''}) ${customTipJsonItem.message}`
+    );
+
+    // Add "|" at the beginning of each line
+    const pipePrependedMessage = wrappedMessage
+      .split('\n')
+      .map((line) => {
+        return '| ' + line;
+      })
+      .join('\n');
+
+    return pipePrependedMessage;
   }
 
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    *
-   * The display will show different colors depending on the pre-defined severity.
+   * The display will show corresponding severity defined in {@link SupportedCustomTipsMetadata}
    */
   public showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
     const message: string | undefined = this._formatTipMessage(tipId);

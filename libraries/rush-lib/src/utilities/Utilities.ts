@@ -714,6 +714,7 @@ export class Utilities {
       });
 
       childProcess.on('close', (code: number, signal: string) => {
+        // TODO: Is it possible that the childProcess is closed before the receiving the last chunks?
         if (code === 0) {
           resolve();
         } else {
