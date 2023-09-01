@@ -15,6 +15,7 @@ import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 interface IAutoinstallerOptions {
   autoinstallerName: string;
@@ -167,7 +168,7 @@ export class Autoinstaller {
 
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
 
-    if (!FileSystem.exists(autoinstallerPackageJsonPath)) {
+    if (!(await FileSystem.existsAsync(autoinstallerPackageJsonPath))) {
       throw new Error(`The specified autoinstaller path does not exist: ` + autoinstallerPackageJsonPath);
     }
 
@@ -177,10 +178,23 @@ export class Autoinstaller {
 
     let oldFileContents: string = '';
 
-    if (FileSystem.exists(this.shrinkwrapFilePath)) {
+    if (await FileSystem.existsAsync(this.shrinkwrapFilePath)) {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
-      FileSystem.deleteFile(this.shrinkwrapFilePath);
+      await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
+      if (this._rushConfiguration.packageManager === 'pnpm') {
+        // Workaround for https://github.com/pnpm/pnpm/issues/1890
+        //
+        // When "rush update-autoinstaller" is run, Rush deletes "common/autoinstallers/my-task/pnpm-lock.yaml"
+        // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
+        // "pnpm-lock.yaml" from "my-task/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
+        // Deleting both files ensures that a new lockfile will always be generated.
+        const pnpmPackageManager: PnpmPackageManager = this._rushConfiguration
+          .packageManagerWrapper as PnpmPackageManager;
+        await FileSystem.deleteFileAsync(
+          path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
+        );
+      }
     }
 
     // Detect a common mistake where PNPM prints "Already up-to-date" without creating a shrinkwrap file
@@ -218,13 +232,13 @@ export class Autoinstaller {
       this._logIfConsoleOutputIsNotRestricted();
     }
 
-    if (!FileSystem.exists(this.shrinkwrapFilePath)) {
+    if (!(await FileSystem.existsAsync(this.shrinkwrapFilePath))) {
       throw new Error(
         'The package manager did not create the expected shrinkwrap file: ' + this.shrinkwrapFilePath
       );
     }
 
-    const newFileContents: string = FileSystem.readFile(this.shrinkwrapFilePath, {
+    const newFileContents: string = await FileSystem.readFileAsync(this.shrinkwrapFilePath, {
       convertLineEndings: NewlineKind.Lf
     });
     if (oldFileContents !== newFileContents) {
@@ -239,7 +253,7 @@ export class Autoinstaller {
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
     if (!this._restrictConsoleOutput) {
-      console.log(message);
+      console.log(message ?? '');
     }
   }
 }

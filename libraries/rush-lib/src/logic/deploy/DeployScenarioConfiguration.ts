@@ -17,6 +17,13 @@ export interface IDeployScenarioProjectJson {
   patternsToExclude?: string[];
 }
 
+export interface IDeployScenarioDependencyJson {
+  dependencyName: string;
+  dependencyVersionRange: string;
+  patternsToExclude?: string[];
+  patternsToInclude?: string[];
+}
+
 // The parsed JSON file structure, as defined by the "deploy-scenario.schema.json" JSON schema
 export interface IDeployScenarioJson {
   deploymentProjectNames: string[];
@@ -26,6 +33,7 @@ export interface IDeployScenarioJson {
   linkCreation?: 'default' | 'script' | 'none';
   folderToCopy?: string;
   projectSettings?: IDeployScenarioProjectJson[];
+  dependencySettings?: IDeployScenarioDependencyJson[];
 }
 
 export class DeployScenarioConfiguration {
