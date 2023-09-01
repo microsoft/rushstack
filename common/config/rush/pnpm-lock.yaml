@@ -803,21 +803,15 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/eslint-plugin': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': workspace:*
       '@typescript-eslint/eslint-plugin': ~5.59.2
       '@typescript-eslint/parser': ~5.59.2
-      '@typescript-eslint/types': ~6.5.0
       eslint: ~8.7.0
       typescript: ~5.0.4
     dependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/eslint-plugin': link:../../eslint/eslint-plugin
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@typescript-eslint/eslint-plugin': 5.59.7_7yosyjls7ieoemdl24ktrlsrzm
       '@typescript-eslint/parser': 5.59.7_ucoohk2w7gukx6ccuul7rl7pnq
-      '@typescript-eslint/types': 6.5.0_typescript@5.0.4
       eslint: 8.7.0
       typescript: 5.0.4
 
@@ -1289,7 +1283,7 @@ importers:
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/jest': 29.5.4
-      '@types/node': 20.5.7
+      '@types/node': 20.5.8
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -10422,8 +10416,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.5.7:
-    resolution: {integrity: sha512-dP7f3LdZIysZnmvP3ANJYTSwg+wLLl8p7RqniVlV7j+oXSXAbt9h0WIBFmJy5inWZoX9wZN6eXx+YXd9Rh3RBA==}
+  /@types/node/20.5.8:
+    resolution: {integrity: sha512-eajsR9aeljqNhK028VG0Wuw+OaY5LLxYmxeoXynIoE6jannr9/Ucd1LL0hSSoafk5LTYG+FfqsyGt81Q6Zkybw==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:
@@ -10849,6 +10843,7 @@ packages:
       typescript: '*'
     dependencies:
       typescript: 5.0.4
+    dev: true
 
   /@typescript-eslint/typescript-estree/5.59.7_typescript@5.0.4:
     resolution: {integrity: sha512-4A1NtZ1I3wMN2UGDkU9HMBL+TIQfbrh4uS0WDMMpf3xMRursDbqEf1ahh6vAAe3mObt8k3ZATnezwG4pdtWuUQ==}

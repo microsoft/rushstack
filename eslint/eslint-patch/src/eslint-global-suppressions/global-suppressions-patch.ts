@@ -173,9 +173,9 @@ function serializeFileScopeTargetRule(suppression: {
 }
 
 function shouldWriteSuppression(rule: string): boolean {
-  if (process.env.ESLINT_GLOBAL_SUPPRESS_RULE === undefined) return false;
+  if (process.env.ESLINT_GLOBAL_SUPPRESS_RULES === undefined) return false;
 
-  const rulesToSuppress = process.env.ESLINT_GLOBAL_SUPPRESS_RULE.split(',');
+  const rulesToSuppress = process.env.ESLINT_GLOBAL_SUPPRESS_RULES.split(',');
 
   if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
 

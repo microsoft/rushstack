@@ -11,8 +11,6 @@
  * All changes are marked with `// --- BEGIN MONKEY PATCH ---` and `// --- END MONKEY PATCH ---`
  */
 
-/* eslint-disable no-extra-boolean-cast, no-cond-assign, max-lines */
-
 /**
  * @fileoverview Main Linter Class
  * @author Gyandeep Singh
@@ -79,12 +77,12 @@ const globals = requireFromPathToLinterJS('../../conf/globals');
 /** @typedef {import("../shared/types").Processor} Processor */
 /** @typedef {import("../shared/types").Rule} Rule */
 
-// --- BEGIN MONKEY PATCH ---
+/* eslint-disable jsdoc/valid-types -- https://github.com/jsdoc-type-pratt-parser/jsdoc-type-pratt-parser/issues/4#issuecomment-778805577 */
 /**
  * @template T
  * @typedef {{ [P in keyof T]-?: T[P] }} Required
  */
-// --- END MONKEY PATCH ---
+/* eslint-enable jsdoc/valid-types -- https://github.com/jsdoc-type-pratt-parser/jsdoc-type-pratt-parser/issues/4#issuecomment-778805577 */
 
 /**
  * @typedef {Object} DisableDirective
