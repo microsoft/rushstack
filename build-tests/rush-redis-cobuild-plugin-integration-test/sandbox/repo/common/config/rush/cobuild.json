@@ -10,7 +10,7 @@
    * RUSH_COBUILD_CONTEXT_ID should always be specified as an environment variable with an non-empty string,
    * otherwise the cobuild feature will be disabled.
    */
-  "cobuildEnabled": true,
+  "cobuildFeatureEnabled": true,
 
   /**
    * (Required) Choose where cobuild lock will be acquired.

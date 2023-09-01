@@ -97,7 +97,7 @@ export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) =
 // @beta
 export class CobuildConfiguration {
     readonly cobuildContextId: string | undefined;
-    readonly cobuildEnabled: boolean;
+    readonly cobuildFeatureEnabled: boolean;
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
     // (undocumented)
     get cobuildLockProvider(): ICobuildLockProvider;
@@ -182,7 +182,7 @@ export class EnvironmentConfiguration {
     static get buildCacheEnabled(): boolean | undefined;
     static get buildCacheWriteAllowed(): boolean | undefined;
     static get cobuildContextId(): string | undefined;
-    static get cobuildEnabled(): boolean | undefined;
+    static get cobuildFeatureEnabled(): boolean | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
     static get cobuildRunnerId(): string | undefined;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
@@ -308,7 +308,7 @@ export interface ICobuildContext {
 // @beta (undocumented)
 export interface ICobuildJson {
     // (undocumented)
-    cobuildEnabled: boolean;
+    cobuildFeatureEnabled: boolean;
     // (undocumented)
     cobuildLockProvider: string;
 }

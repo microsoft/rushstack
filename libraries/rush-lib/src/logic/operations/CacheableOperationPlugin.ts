@@ -97,7 +97,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
         this._createContext = context;
 
-        const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildEnabled
+        const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
           : undefined;
 
@@ -182,7 +182,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
 
           for (const operationSet of disjointSet.getAllSets()) {
-            if (cobuildConfiguration?.cobuildEnabled && cobuildConfiguration.cobuildContextId) {
+            if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
               // Get a deterministic ordered array of operations, which is important to get a deterministic cluster id.
               const groupedOperations: Operation[] = Array.from(operationSet);
               Sort.sortBy(groupedOperations, (operation: Operation) => {
@@ -292,7 +292,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           // Try to acquire the cobuild lock
           let cobuildLock: CobuildLock | undefined;
-          if (cobuildConfiguration?.cobuildEnabled) {
+          if (cobuildConfiguration?.cobuildFeatureEnabled) {
             if (
               cobuildConfiguration?.cobuildLeafProjectLogOnlyAllowed &&
               record.operation.consumers.size === 0 &&
@@ -740,7 +740,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     phaseName: string;
   }): Promise<CobuildLock | undefined> {
     if (!buildCacheContext.cobuildLock) {
-      if (projectBuildCache && cobuildConfiguration?.cobuildEnabled) {
+      if (projectBuildCache && cobuildConfiguration?.cobuildFeatureEnabled) {
         if (!buildCacheContext.cobuildClusterId) {
           // This should not happen
           throw new InternalError('Cobuild cluster id is not defined');

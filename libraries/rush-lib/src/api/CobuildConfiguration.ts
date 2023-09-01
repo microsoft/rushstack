@@ -15,7 +15,7 @@ import schemaJson from '../schemas/cobuild.schema.json';
  * @beta
  */
 export interface ICobuildJson {
-  cobuildEnabled: boolean;
+  cobuildFeatureEnabled: boolean;
   cobuildLockProvider: string;
 }
 
@@ -46,7 +46,8 @@ export class CobuildConfiguration {
    * actually turn on for that particular build unless the cobuild context id is provided as an
    * non-empty string.
    */
-  public readonly cobuildEnabled: boolean;
+  public readonly cobuildFeatureEnabled: boolean;
+
   /**
    * Cobuild context id
    *
@@ -75,8 +76,8 @@ export class CobuildConfiguration {
     const { cobuildJson, cobuildLockProviderFactory } = options;
 
     this.cobuildContextId = EnvironmentConfiguration.cobuildContextId;
-    this.cobuildEnabled = this.cobuildContextId
-      ? EnvironmentConfiguration.cobuildEnabled ?? cobuildJson.cobuildEnabled
+    this.cobuildFeatureEnabled = this.cobuildContextId
+      ? EnvironmentConfiguration.cobuildFeatureEnabled ?? cobuildJson.cobuildFeatureEnabled
       : false;
     this.cobuildRunnerId = EnvironmentConfiguration.cobuildRunnerId || uuidv4();
     this.cobuildLeafProjectLogOnlyAllowed =
@@ -144,7 +145,7 @@ export class CobuildConfiguration {
   }
 
   public async createLockProviderAsync(terminal: ITerminal): Promise<void> {
-    if (this.cobuildEnabled) {
+    if (this.cobuildFeatureEnabled) {
       terminal.writeLine(`Running cobuild (runner ${this.cobuildContextId}/${this.cobuildRunnerId})`);
       const cobuildLockProvider: ICobuildLockProvider = await this._cobuildLockProviderFactory(
         this._cobuildJson
@@ -155,7 +156,7 @@ export class CobuildConfiguration {
   }
 
   public async destroyLockProviderAsync(): Promise<void> {
-    if (this.cobuildEnabled) {
+    if (this.cobuildFeatureEnabled) {
       await this._cobuildLockProvider?.disconnectAsync();
     }
   }

@@ -145,11 +145,11 @@ export const EnvironmentVariableNames = {
   RUSH_BUILD_CACHE_WRITE_ALLOWED: 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
-   * Setting this environment variable overrides the value of `cobuildEnabled` in the `cobuild.json`
+   * Setting this environment variable overrides the value of `cobuildFeatureEnabled` in the `cobuild.json`
    * configuration file.
    *
    * @remarks
-   * Specify `1` to enable the cobuild or `0` to disable it.
+   * Specify `1` to enable the cobuild feature or `0` to disable it.
    *
    * If there is no cobuild configured, then this environment variable is ignored.
    */
@@ -244,7 +244,7 @@ export class EnvironmentConfiguration {
 
   private static _buildCacheWriteAllowed: boolean | undefined;
 
-  private static _cobuildEnabled: boolean | undefined;
+  private static _cobuildFeatureEnabled: boolean | undefined;
 
   private static _cobuildContextId: string | undefined;
 
@@ -353,9 +353,9 @@ export class EnvironmentConfiguration {
    * If set, enables or disables the cobuild feature.
    * See {@link EnvironmentVariableNames.RUSH_COBUILD_ENABLED}
    */
-  public static get cobuildEnabled(): boolean | undefined {
+  public static get cobuildFeatureEnabled(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._cobuildEnabled;
+    return EnvironmentConfiguration._cobuildFeatureEnabled;
   }
 
   /**
@@ -516,7 +516,7 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_COBUILD_ENABLED: {
-            EnvironmentConfiguration._cobuildEnabled =
+            EnvironmentConfiguration._cobuildFeatureEnabled =
               EnvironmentConfiguration.parseBooleanEnvironmentVariable(
                 EnvironmentVariableNames.RUSH_COBUILD_ENABLED,
                 value
