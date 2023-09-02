@@ -36,10 +36,10 @@ describe(RushProjectSelector.name, () => {
       expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
     });
 
-    it('selects several projects with an OR operator', async () => {
+    it('selects several projects with a union operator', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
       const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
-        or: ['project1', 'project2', 'project3']
+        union: ['project1', 'project2', 'project3']
       });
       expect([...projects].map((project) => project.packageName)).toEqual([
         'project1',
@@ -48,20 +48,20 @@ describe(RushProjectSelector.name, () => {
       ]);
     });
 
-    it('restricts a selection with an AND operator', async () => {
+    it('restricts a selection with an intersect operator', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
       const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
-        and: [{ or: ['project1', 'project2', 'project3'] }, 'project2']
+        intersect: [{ union: ['project1', 'project2', 'project3'] }, 'project2']
       });
       expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
     });
 
-    it('restricts a selection with a NOT operator', async () => {
+    it('restricts a selection with a subtract operator', async () => {
       const projectSelector: RushProjectSelector = createProjectSelector();
       const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
-        not: 'project3'
+        subtract: [{ union: ['project1', 'project2', 'project3'] }, 'project2']
       });
-      expect([...projects].map((project) => project.packageName)).toEqual(['project1', 'project2']);
+      expect([...projects].map((project) => project.packageName)).toEqual(['project1', 'project3']);
     });
 
     it('applies a parameter to a project', async () => {

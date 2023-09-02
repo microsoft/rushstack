@@ -3,7 +3,8 @@
 
 /**
  * A "Selector Expression" is a JSON description of a complex selection of
- * projects, using concepts familiar to users of the Rush CLI.
+ * projects, using concepts familiar to users of the Rush CLI. This type represents
+ * the type-safe version of these JSON objects.
  */
 export type SelectorExpression = ExpressionSelector | ExpressionParameter | ExpressionOperator;
 
@@ -19,18 +20,21 @@ export interface IExpressionDetailedSelector {
 
 export type ExpressionParameter = Record<`--${string}`, string>;
 
-export type ExpressionOperator = IExpressionOperatorAnd | IExpressionOperatorOr | IExpressionOperatorNot;
+export type ExpressionOperator =
+  | IExpressionOperatorUnion
+  | IExpressionOperatorIntersect
+  | IExpressionOperatorSubtract;
 
-export interface IExpressionOperatorAnd {
-  and: SelectorExpression[];
+export interface IExpressionOperatorUnion {
+  union: SelectorExpression[];
 }
 
-export interface IExpressionOperatorOr {
-  or: SelectorExpression[];
+export interface IExpressionOperatorIntersect {
+  intersect: SelectorExpression[];
 }
 
-export interface IExpressionOperatorNot {
-  not: SelectorExpression;
+export interface IExpressionOperatorSubtract {
+  subtract: SelectorExpression[];
 }
 
 // A collection of type guards useful for interacting with selector expressions.
@@ -44,14 +48,14 @@ export function isParameter(expr: SelectorExpression): expr is ExpressionParamet
   return keys.length === 1 && keys[0].startsWith('--');
 }
 
-export function isAnd(expr: SelectorExpression): expr is IExpressionOperatorAnd {
-  return !!(expr && (expr as IExpressionOperatorAnd).and);
+export function isUnion(expr: SelectorExpression): expr is IExpressionOperatorUnion {
+  return !!(expr && (expr as IExpressionOperatorUnion).union);
 }
 
-export function isOr(expr: SelectorExpression): expr is IExpressionOperatorOr {
-  return !!(expr && (expr as IExpressionOperatorOr).or);
+export function isIntersect(expr: SelectorExpression): expr is IExpressionOperatorIntersect {
+  return !!(expr && (expr as IExpressionOperatorIntersect).intersect);
 }
 
-export function isNot(expr: SelectorExpression): expr is IExpressionOperatorNot {
-  return !!(expr && (expr as IExpressionOperatorNot).not);
+export function isSubtract(expr: SelectorExpression): expr is IExpressionOperatorSubtract {
+  return !!(expr && (expr as IExpressionOperatorSubtract).subtract);
 }

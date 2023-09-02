@@ -15,13 +15,13 @@
           "$ref": "#/definitions/parameter"
         },
         {
-          "$ref": "#/definitions/andOperator"
+          "$ref": "#/definitions/unionOperator"
         },
         {
-          "$ref": "#/definitions/orOperator"
+          "$ref": "#/definitions/intersectOperator"
         },
         {
-          "$ref": "#/definitions/notOperator"
+          "$ref": "#/definitions/subtractOperator"
         }
       ]
     },
@@ -52,12 +52,12 @@
         }
       }
     },
-    "andOperator": {
+    "unionOperator": {
       "type": "object",
       "additionalProperties": false,
-      "requiredProperties": ["and"],
+      "requiredProperties": ["union"],
       "properties": {
-        "and": {
+        "union": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/expression"
@@ -65,12 +65,12 @@
         }
       }
     },
-    "orOperator": {
+    "intersectOperator": {
       "type": "object",
       "additionalProperties": false,
-      "requiredProperties": ["or"],
+      "requiredProperties": ["intersect"],
       "properties": {
-        "or": {
+        "intersect": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/expression"
@@ -81,10 +81,13 @@
     "notOperator": {
       "type": "object",
       "additionalProperties": false,
-      "requiredProperties": ["not"],
+      "requiredProperties": ["subtract"],
       "properties": {
-        "not": {
-          "$ref": "#/definitions/expression"
+        "subtract": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/expression"
+          }
         }
       }
     }

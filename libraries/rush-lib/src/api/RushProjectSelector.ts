@@ -19,14 +19,14 @@ import {
   SelectorExpression,
   IExpressionDetailedSelector,
   ExpressionParameter,
-  IExpressionOperatorAnd,
-  IExpressionOperatorOr,
-  IExpressionOperatorNot,
+  IExpressionOperatorUnion,
+  IExpressionOperatorIntersect,
+  IExpressionOperatorSubtract,
   isDetailedSelector,
   isParameter,
-  isAnd,
-  isOr,
-  isNot
+  isUnion,
+  isIntersect,
+  isSubtract
 } from './SelectorExpressions';
 
 /**
@@ -78,12 +78,12 @@ export class RushProjectSelector {
     expr: SelectorExpression,
     context: string = 'expression'
   ): Promise<ReadonlySet<RushConfigurationProject>> {
-    if (isAnd(expr)) {
-      return this._evaluateAnd(expr, context);
-    } else if (isOr(expr)) {
-      return this._evaluateOr(expr, context);
-    } else if (isNot(expr)) {
-      return this._evaluateNot(expr, context);
+    if (isUnion(expr)) {
+      return this._evaluateUnion(expr, context);
+    } else if (isIntersect(expr)) {
+      return this._evaluateIntersect(expr, context);
+    } else if (isSubtract(expr)) {
+      return this._evaluateSubtract(expr, context);
     } else if (isParameter(expr)) {
       return this._evaluateParameter(expr, context);
     } else if (isDetailedSelector(expr)) {
@@ -97,36 +97,40 @@ export class RushProjectSelector {
     }
   }
 
-  private async _evaluateAnd(
-    expr: IExpressionOperatorAnd,
+  private async _evaluateUnion(
+    expr: IExpressionOperatorUnion,
     context: string
   ): Promise<Set<RushConfigurationProject>> {
     const results: ReadonlySet<RushConfigurationProject>[] = [];
-    for (const operand of expr.and) {
-      results.push(await this.selectExpression(operand, context));
-    }
-
-    return Selection.intersection(results[0], ...results.slice(1));
-  }
-
-  private async _evaluateOr(
-    expr: IExpressionOperatorOr,
-    context: string
-  ): Promise<Set<RushConfigurationProject>> {
-    const results: ReadonlySet<RushConfigurationProject>[] = [];
-    for (const operand of expr.or) {
+    for (const operand of expr.union) {
       results.push(await this.selectExpression(operand, context));
     }
 
     return Selection.union(results[0], ...results.slice(1));
   }
 
-  private async _evaluateNot(
-    expr: IExpressionOperatorNot,
+  private async _evaluateIntersect(
+    expr: IExpressionOperatorIntersect,
     context: string
   ): Promise<Set<RushConfigurationProject>> {
-    const result: ReadonlySet<RushConfigurationProject> = await this.selectExpression(expr.not, context);
-    return new Set(this._rushConfig.projects.filter((p) => !result.has(p)));
+    const results: ReadonlySet<RushConfigurationProject>[] = [];
+    for (const operand of expr.intersect) {
+      results.push(await this.selectExpression(operand, context));
+    }
+
+    return Selection.intersection(results[0], ...results.slice(1));
+  }
+
+  private async _evaluateSubtract(
+    expr: IExpressionOperatorSubtract,
+    context: string
+  ): Promise<Set<RushConfigurationProject>> {
+    const results: ReadonlySet<RushConfigurationProject>[] = [];
+    for (const operand of expr.subtract) {
+      results.push(await this.selectExpression(operand, context));
+    }
+
+    return Selection.subtraction(results[0], ...results.slice(1));
   }
 
   private async _evaluateParameter(
