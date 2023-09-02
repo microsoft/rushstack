@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AlreadyReportedError, ITerminal, Path } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Async, type ITerminal, Path } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
@@ -13,7 +13,8 @@ import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/rush-project.schema.json';
 
 /**
- * Describes the file structure for the "<project root>/config/rush-project.json" config file.
+ * Describes the file structure for the `<project root>/config/rush-project.json` config file.
+ * @internal
  */
 export interface IRushProjectJson {
   /**
@@ -40,6 +41,9 @@ export interface IRushProjectJson {
   operationSettings?: IOperationSettings[];
 }
 
+/**
+ * @alpha
+ */
 export interface IOperationSettings {
   /**
    * The name of the operation. This should be a key in the `package.json`'s `scripts` object.
@@ -188,7 +192,7 @@ const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IOldRushProjectJson
  * Use this class to load the "config/rush-project.json" config file.
  *
  * This file provides project-specific configuration options.
- * @public
+ * @alpha
  */
 export class RushProjectConfiguration {
   private static readonly _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> =
@@ -197,12 +201,12 @@ export class RushProjectConfiguration {
   public readonly project: RushConfigurationProject;
 
   /**
-   * {@inheritdoc IRushProjectJson.incrementalBuildIgnoredGlobs}
+   * {@inheritdoc _IRushProjectJson.incrementalBuildIgnoredGlobs}
    */
   public readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
 
   /**
-   * {@inheritdoc IRushProjectJson.disableBuildCacheForProject}
+   * {@inheritdoc _IRushProjectJson.disableBuildCacheForProject}
    */
   public readonly disableBuildCacheForProject: boolean;
 
@@ -285,6 +289,53 @@ export class RushProjectConfiguration {
   }
 
   /**
+   * Examines the list of source files for the project and the target phase and returns a reason
+   * why the project cannot enable the build cache for that phase, or undefined if it is safe to so do.
+   */
+  public getCacheDisabledReason(trackedFileNames: Iterable<string>, phaseName: string): string | undefined {
+    if (this.disableBuildCacheForProject) {
+      return 'Caching has been disabled for this project.';
+    }
+
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(this.project.projectRelativeFolder);
+
+    const operationSettings: IOperationSettings | undefined =
+      this.operationSettingsByOperationName.get(phaseName);
+    if (!operationSettings) {
+      return `This project does not define the caching behavior of the "${phaseName}" command, so caching has been disabled.`;
+    }
+
+    if (operationSettings.disableBuildCacheForOperation) {
+      return `Caching has been disabled for this project's "${phaseName}" command.`;
+    }
+
+    const { outputFolderNames } = operationSettings;
+    if (!outputFolderNames) {
+      return;
+    }
+
+    const normalizedOutputFolders: string[] = outputFolderNames.map(
+      (outputFolderName) => `${normalizedProjectRelativeFolder}/${outputFolderName}/`
+    );
+
+    const inputOutputFiles: string[] = [];
+    for (const file of trackedFileNames) {
+      for (const outputFolder of normalizedOutputFolders) {
+        if (file.startsWith(outputFolder)) {
+          inputOutputFiles.push(file);
+        }
+      }
+    }
+
+    if (inputOutputFiles.length > 0) {
+      return (
+        'The following files are used to calculate project state ' +
+        `and are considered project output: ${inputOutputFiles.join(', ')}`
+      );
+    }
+  }
+
+  /**
    * Loads the rush-project.json data for the specified project.
    */
   public static async tryLoadForProjectAsync(
@@ -335,6 +386,29 @@ export class RushProjectConfiguration {
     );
 
     return rushProjectJson?.incrementalBuildIgnoredGlobs;
+  }
+
+  /**
+   * Load the rush-project.json data for all selected projects.
+   * Validate compatibility of output folders across all selected phases.
+   */
+  public static async tryLoadAndValidateForProjectsAsync(
+    projects: Iterable<RushConfigurationProject>,
+    phases: ReadonlySet<IPhase>,
+    terminal: ITerminal
+  ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
+    const result: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
+
+    await Async.forEachAsync(projects, async (project: RushConfigurationProject) => {
+      const projectConfig: RushProjectConfiguration | undefined =
+        await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+      if (projectConfig) {
+        projectConfig.validatePhaseConfiguration(phases, terminal);
+        result.set(project, projectConfig);
+      }
+    });
+
+    return result;
   }
 
   private static async _tryLoadJsonForProjectAsync(

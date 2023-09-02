@@ -1,6 +1,36 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 11 Aug 2023 17:57:55 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Sep 2023 04:54:16 GMT and should not be manually modified.
+
+## 5.104.0
+Fri, 01 Sep 2023 04:54:16 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)
+
+## 5.103.0
+Thu, 31 Aug 2023 23:28:28 GMT
+
+### Updates
+
+- Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`
+- Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile
+- Fix an issue where "undefined" was sometimes printed instead of a blank line
+
+## 5.102.0
+Tue, 15 Aug 2023 20:09:40 GMT
+
+### Updates
+
+- Add a new config file "custom-tips.json" for customizing Rush messages (GitHub #4207)
+- Improve "rush scan" to recognize module patterns such as "import get from 'lodash.get'"
+- Update Node.js version checks to support the new LTS release
+- Update "rush init" template to use PNPM 7.33.5
+- Update the "rush init" template's .gitignore to avoid spurious diffs for files such as "autoinstaller.lock"
+- Fix an issue where a pnpm-lock file would fail to parse if a project used a package alias in a repo using pnpm 8.
+- Fix HTTP/1 backwards compatibility in rush-serve-plugin.
+- Add experiment "usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation. This mitigates issues that may arise when using the `afterAllResolved` hook in `.pnpmfile.cjs`.
 
 ## 5.101.1
 Fri, 11 Aug 2023 17:57:55 GMT

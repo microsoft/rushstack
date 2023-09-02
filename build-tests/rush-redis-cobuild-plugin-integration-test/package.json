@@ -1,0 +1,25 @@
+{
+  "name": "rush-redis-cobuild-plugin-integration-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tests connecting to an redis server",
+  "license": "MIT",
+  "scripts": {
+    "_phase:build": "heft build --clean",
+    "build": "heft build --clean",
+    "test-lock-provider": "node ./lib/testLockProvider.js"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-redis-cobuild-plugin": "workspace:*",
+    "@types/http-proxy": "~1.17.8",
+    "@types/node": "14.18.36",
+    "eslint": "~8.7.0",
+    "http-proxy": "~1.18.1",
+    "typescript": "~5.0.4"
+  }
+}

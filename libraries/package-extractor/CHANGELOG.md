@@ -1,6 +1,18 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2023 15:20:46 GMT and should not be manually modified.
+
+## 0.5.1
+Thu, 24 Aug 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.5.0
+Wed, 23 Aug 2023 00:20:45 GMT
+
+### Minor changes
+
+- Add option field dependenciesConfigurations in PackageExtractor to filter files for third party dependencies
 
 ## 0.4.1
 Tue, 08 Aug 2023 07:10:40 GMT

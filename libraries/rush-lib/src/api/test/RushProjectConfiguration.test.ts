@@ -23,7 +23,8 @@ async function loadProjectConfigurationAsync(
   const testFolder: string = `${__dirname}/jsonFiles/${testProjectName}`;
   const rushProject: RushConfigurationProject = {
     packageName: testProjectName,
-    projectFolder: testFolder
+    projectFolder: testFolder,
+    projectRelativeFolder: testProjectName
   } as RushConfigurationProject;
   const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
   try {
@@ -106,6 +107,76 @@ describe(RushProjectConfiguration.name, () => {
       }
 
       expect(errorWasThrown).toBe(true);
+    });
+  });
+
+  describe(RushProjectConfiguration.prototype.getCacheDisabledReason.name, () => {
+    it('Indicates if the build cache is completely disabled', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-a'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
+      expect(reason).toMatchSnapshot();
+    });
+
+    it('Indicates if the phase behavior is not defined', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-c'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason([], 'z');
+      expect(reason).toMatchSnapshot();
+    });
+
+    it('Indicates if the phase has disabled the cache', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-c'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a');
+      expect(reason).toMatchSnapshot();
+    });
+
+    it('Indicates if tracked files are outputs of the phase', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-c'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason(
+        ['test-project-c/.cache/b/foo'],
+        '_phase:b'
+      );
+      expect(reason).toMatchSnapshot();
+    });
+
+    it('returns undfined if the config is safe', async () => {
+      const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
+        'test-project-c'
+      );
+
+      if (!config) {
+        throw new Error('Failed to load config');
+      }
+
+      const reason: string | undefined = config.getCacheDisabledReason([''], '_phase:b');
+      expect(reason).toBeUndefined();
     });
   });
 });

@@ -1,8 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the build cache is completely disabled 1`] = `"Caching has been disabled for this project."`;
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the phase behavior is not defined 1`] = `"This project does not define the caching behavior of the \\"z\\" command, so caching has been disabled."`;
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the phase has disabled the cache 1`] = `"Caching has been disabled for this project's \\"_phase:a\\" command."`;
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if tracked files are outputs of the phase 1`] = `"The following files are used to calculate project state and are considered project output: test-project-c/.cache/b/foo"`;
+
 exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 1`] = `
 Map {
   "_phase:a" => Object {
+    "disableBuildCacheForOperation": true,
     "operationName": "_phase:a",
     "outputFolderNames": Array [
       ".cache/a",

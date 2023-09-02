@@ -568,7 +568,7 @@ ${gitLfsHookHandling}
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-      if (experiments.usePnpmFrozenLockfileForRushInstall && !this.options.allowShrinkwrapUpdates) {
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
@@ -577,6 +577,10 @@ ${gitLfsHookHandling}
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
         args.push('--no-prefer-frozen-lockfile');
+      }
+
+      if (options.onlyShrinkwrap) {
+        args.push(`--lockfile-only`);
       }
 
       if (options.collectLogFile) {
@@ -751,12 +755,10 @@ ${gitLfsHookHandling}
       if (this.rushConfiguration.packageManager === 'pnpm') {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
-        // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
-        // a new lockfile can be generated. But because of the above bug "pnpm install" would
-        // respect "common/temp/node_modules/.pnpm-lock.yaml" and thus would not generate a
-        // new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
-        // ensures that a new lockfile will be generated with "rush update --full".
-
+        // When "rush update --full" is run, Rush deletes "common/temp/pnpm-lock.yaml"
+        // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
+        // "pnpm-lock.yaml" from "common/temp/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
+        // Deleting both files ensures that a new lockfile will always be generated.
         const pnpmPackageManager: PnpmPackageManager = this.rushConfiguration
           .packageManagerWrapper as PnpmPackageManager;
 

@@ -1,0 +1,12 @@
+{
+  "name": "h",
+  "version": "1.0.0",
+  "scripts": {
+    "cobuild": "",
+    "build": "",
+    "_phase:build": ""
+  },
+  "dependencies": {
+    "a": "workspace:*"
+  }
+}

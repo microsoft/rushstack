@@ -2,6 +2,69 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.104.0",
+      "tag": "@microsoft/rush_v5.104.0",
+      "date": "Fri, 01 Sep 2023 04:54:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.103.0",
+      "tag": "@microsoft/rush_v5.103.0",
+      "date": "Thu, 31 Aug 2023 23:28:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`"
+          },
+          {
+            "comment": "Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile"
+          },
+          {
+            "comment": "Fix an issue where \"undefined\" was sometimes printed instead of a blank line"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.102.0",
+      "tag": "@microsoft/rush_v5.102.0",
+      "date": "Tue, 15 Aug 2023 20:09:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new config file \"custom-tips.json\" for customizing Rush messages (GitHub #4207)"
+          },
+          {
+            "comment": "Improve \"rush scan\" to recognize module patterns such as \"import get from 'lodash.get'\""
+          },
+          {
+            "comment": "Update Node.js version checks to support the new LTS release"
+          },
+          {
+            "comment": "Update \"rush init\" template to use PNPM 7.33.5"
+          },
+          {
+            "comment": "Update the \"rush init\" template's .gitignore to avoid spurious diffs for files such as \"autoinstaller.lock\""
+          },
+          {
+            "comment": "Fix an issue where a pnpm-lock file would fail to parse if a project used a package alias in a repo using pnpm 8."
+          },
+          {
+            "comment": "Fix HTTP/1 backwards compatibility in rush-serve-plugin."
+          },
+          {
+            "comment": "Add experiment \"usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate\" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation. This mitigates issues that may arise when using the `afterAllResolved` hook in `.pnpmfile.cjs`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.101.1",
       "tag": "@microsoft/rush_v5.101.1",
       "date": "Fri, 11 Aug 2023 17:57:55 GMT",

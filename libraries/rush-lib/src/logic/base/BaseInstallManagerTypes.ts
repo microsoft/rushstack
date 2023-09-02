@@ -40,6 +40,11 @@ export interface IInstallManagerOptions {
   fullUpgrade: boolean;
 
   /**
+   * If set, only update the shrinkwrap file; do not create node_modules.
+   */
+  onlyShrinkwrap?: boolean;
+
+  /**
    * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
    * Normally Rush uses heuristics to determine when "pnpm install" can be skipped,
    * but sometimes the heuristics can be inaccurate due to external influences

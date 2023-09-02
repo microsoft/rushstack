@@ -158,12 +158,14 @@ export function parsePnpmDependencyKey(
   // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"  --> 0="@scope/depame" 1="1.4.0"
   // Example: "/isarray/2.0.1"                                  --> 0="isarray"       1="2.0.1"
   // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7"       --> 0="sinon-chai"    1="2.8.0/chai@3.5.0+sinon@1.17.7"
+  // Example: "/typescript@5.1.6"                               --> 0=typescript      1="5.1.6"
   // Example: 1.2.3_peer-dependency@.4.5.6                      --> no match
   // Example: 1.2.3_@scope+peer-dependency@.4.5.6               --> no match
   // Example: 1.2.3(peer-dependency@.4.5.6)                     --> no match
   // Example: 1.2.3(@scope/peer-dependency@.4.5.6)              --> no match
-  const packageNameMatch: RegExpMatchArray | null =
-    /^[^\/]*(?<!\([^\(]*)\/((?:@[^\/]+\/)?[^\/]+)\/(.*)$/.exec(dependencyKey);
+  const packageNameMatch: RegExpMatchArray | null = /^[^\/(]*\/((?:@[^\/(]+\/)?[^\/(]+)[\/@](.*)$/.exec(
+    dependencyKey
+  );
   if (packageNameMatch) {
     parsedPackageName = packageNameMatch[1];
     parsedInstallPath = packageNameMatch[2];

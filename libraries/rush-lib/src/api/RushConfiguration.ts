@@ -58,6 +58,7 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.buildCacheFilename,
+  RushConstants.cobuildFilename,
   RushConstants.commandLineFilename,
   RushConstants.commonVersionsFilename,
   RushConstants.customTipsFilename,
