@@ -51,13 +51,23 @@ export enum CustomTipIdEnum {
   TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION'
 }
 
+/**
+ * The severity of a custom tip.
+ * It determines the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
+ */
 enum CustomTipSeverity {
-  'Warning',
-  'Error',
-  'Info'
+  Warning = 'Warning',
+  Error = 'Error',
+  Info = 'Info'
 }
 
-enum CustomTipType {
+/**
+ * The type of the custom tip.
+ *
+ * @remarks
+ * There might be types like `git` in the future.
+ */
+export enum CustomTipType {
   rush = 'rush',
   pnpm = 'pnpm'
 }
@@ -71,9 +81,8 @@ enum CustomTipType {
  * @beta
  *
  */
-export interface ICustomTipMetadata {
+export interface ICustomTipInfo {
   tipId: CustomTipIdEnum;
-
   /**
    * (Required) The severity of the custom tip. It will determine the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
    *
@@ -98,21 +107,6 @@ export interface ICustomTipMetadata {
   isMatch?: (str: string) => boolean;
 }
 
-export const SupportedCustomTipsMetadata: ICustomTipMetadata[] = [
-  {
-    tipId: CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS,
-    severity: CustomTipSeverity.Error,
-    type: CustomTipType.rush
-  },
-  {
-    tipId: CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION,
-    severity: CustomTipSeverity.Error,
-    type: CustomTipType.pnpm,
-    isMatch: (str: string) => {
-      return str.includes('No matching version found for') || str.includes('ERR_PNPM_NO_MATCHING_VERSION');
-    }
-  }
-];
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
  * which allows repo maintainers to configure extra details to be printed alongside
@@ -129,6 +123,41 @@ export class CustomTipsConfiguration {
    * The JSON settings loaded from `custom-tips.json`.
    */
   public readonly configuration: Readonly<ICustomTipsJson>;
+
+  /**
+   * A registry mapping custom tip IDs to their corresponding metadata.
+   *
+   * @remarks
+   * This registry is used to look up metadata for custom tips based on their IDs. The metadata includes
+   * information such as the severity level, the type of tip, and an optional matching function.
+   *
+   * Each key in the registry corresponds to a `CustomTipIdEnum` value, and each value is an object
+   * implementing the `ICustomTipInfo` interface.
+   *
+   * @example
+   * ```typescript
+   * const tipInfo = CustomTipRegistry[CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS];
+   * console.log(tipInfo.severity);  // Output: CustomTipSeverity.Error
+   * ```
+   *
+   * @see {@link CustomTipIdEnum} for the list of custom tip IDs.
+   * @see {@link ICustomTipInfo} for the structure of the metadata.
+   */
+  public static CustomTipRegistry: Record<CustomTipIdEnum, ICustomTipInfo> = {
+    [CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS]: {
+      tipId: CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS,
+      severity: CustomTipSeverity.Error,
+      type: CustomTipType.rush
+    },
+    [CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION]: {
+      tipId: CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION,
+      severity: CustomTipSeverity.Error,
+      type: CustomTipType.pnpm,
+      isMatch: (str: string) => {
+        return str.includes('No matching version found for') || str.includes('ERR_PNPM_NO_MATCHING_VERSION');
+      }
+    }
+  };
 
   public constructor(configFilename: string) {
     this._jsonFileName = configFilename;
@@ -161,53 +190,25 @@ export class CustomTipsConfiguration {
     }
   }
 
-  private _formatTipMessage(tipId: CustomTipIdEnum): string | undefined {
-    const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
-    if (!customTipJsonItem) {
-      return undefined;
-    }
-
-    const wrappedMessage: string = PrintUtilities.wrapWords(
-      `Custom Tip (${tipId ?? ''}) ${customTipJsonItem.message}`
-    );
-
-    // Add "|" at the beginning of each line
-    const pipePrependedMessage: string = wrappedMessage
-      .split('\n')
-      .map((line) => {
-        return '| ' + line;
-      })
-      .join('\n');
-
-    return pipePrependedMessage;
-  }
-
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    *
-   * The display will show corresponding severity.
+   * @beta
+   * @remarks
+   * The severity of the tip is defined in ${@link CustomTipsConfiguration.CustomTipRegistry}.
+   * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration.showErrorTip}.
+   *
+   * @beta
    */
   public showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
+    const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
+    if (!customTipJsonItem) return;
 
-    const severity: CustomTipSeverity =
-      SupportedCustomTipsMetadata.find((tip) => tip.tipId === tipId)?.severity ?? CustomTipSeverity.Info;
-    if (message !== undefined && severity !== undefined) {
-      switch (severity) {
-        case CustomTipSeverity.Error:
-          terminal.writeErrorLine(message);
-          break;
-        case CustomTipSeverity.Warning:
-          terminal.writeWarningLine(message);
-          break;
-        case CustomTipSeverity.Info:
-          terminal.writeLine(message);
-          break;
-        default:
-          break;
-      }
-    }
+    const severityOfOriginalMessage: CustomTipSeverity =
+      CustomTipsConfiguration.CustomTipRegistry[tipId].severity;
+
+    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
   }
 
   /**
@@ -215,10 +216,7 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    */
   public showInfoTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
-    if (message !== undefined) {
-      terminal.writeLine(message);
-    }
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
   /**
@@ -226,10 +224,7 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    */
   public showWarningTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
-    if (message !== undefined) {
-      terminal.writeWarningLine(message);
-    }
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
 
   /**
@@ -237,9 +232,58 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    */
   public showErrorTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
-    if (message !== undefined) {
-      terminal.writeErrorLine(message);
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
+  }
+
+  private _formatMessageHeader(tipId: CustomTipIdEnum): string {
+    return '| Custom Tip (' + tipId + ')\n|';
+  }
+
+  private _writeMessageWithPipes(
+    terminal: ITerminal,
+    severity: CustomTipSeverity,
+    tipId: CustomTipIdEnum
+  ): void {
+    const messageHeader: string = this._formatMessageHeader(tipId);
+    const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
+    if (!customTipJsonItem) return;
+
+    const message: string = customTipJsonItem?.message;
+
+    const indentToBeRemovedLatter: 2 = 2;
+    const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(
+      message,
+      undefined,
+      indentToBeRemovedLatter
+    );
+    switch (severity) {
+      case CustomTipSeverity.Error:
+        terminal.writeErrorLine(messageHeader);
+        break;
+      case CustomTipSeverity.Warning:
+        terminal.writeWarningLine(messageHeader);
+        break;
+      default:
+        terminal.writeLine(messageHeader);
+        break;
     }
+
+    wrappedAndIndentedMessage.split('\n').forEach((line) => {
+      line = line.replace(/^ {2}/, '');
+
+      switch (severity) {
+        case CustomTipSeverity.Error:
+          terminal.writeError('| ');
+          break;
+        case CustomTipSeverity.Warning:
+          terminal.writeWarning('| ');
+          break;
+        default:
+          terminal.writeLine('| ');
+          break;
+      }
+      terminal.writeLine(line);
+    });
+    terminal.write('\n');
   }
 }

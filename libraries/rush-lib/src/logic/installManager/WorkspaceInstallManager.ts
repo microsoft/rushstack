@@ -22,7 +22,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { CustomTipIdEnum, SupportedCustomTipsMetadata } from '../../api/CustomTipsConfiguration';
+import { CustomTipIdEnum, CustomTipsConfiguration, ICustomTipInfo } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -341,10 +341,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // They will be printed all at once *after* the install
       const tipIDsShouldBePrinted: Set<CustomTipIdEnum> = new Set();
       const onPnpmStdoutChunk = (chunk: string): void => {
-        SupportedCustomTipsMetadata.forEach((tipItem) => {
-          if (tipItem.isMatch && tipItem.isMatch(chunk)) {
-            tipIDsShouldBePrinted.add(tipItem.tipId);
-            tipIDsShouldBePrinted.add(tipItem.tipId);
+        // Iterate over the supported custom tip metadata and try to match the chunk.
+        // TODO: this might be slow. Optimize it.
+        Object.keys(CustomTipsConfiguration.CustomTipRegistry).forEach((key: string) => {
+          const tipInfo: ICustomTipInfo = CustomTipsConfiguration.CustomTipRegistry[key as CustomTipIdEnum];
+          if (tipInfo.isMatch && tipInfo.isMatch(chunk)) {
+            tipIDsShouldBePrinted.add(tipInfo.tipId);
           }
         });
       };
@@ -374,11 +376,26 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
         );
       } finally {
-        // This is to avoid the tips not being printed if the install fails.
+        // The try-finally is to avoid the tips NOT being printed if the install fails.
         // NOT catching the error because we want to keep the other behaviors (i.e., the error will be caught and handle in upper layers).
-        for (const tipID of tipIDsShouldBePrinted) {
+
+        // The idx for only printing the the "\n" before the tips.
+        let idx: number = 0;
+        tipIDsShouldBePrinted.forEach((tipID) => {
+          if (idx !== 0) {
+            this._terminal.writeLine();
+          }
           this.rushConfiguration.customTipsConfiguration.showTip(this._terminal, tipID);
-        }
+          idx++;
+        });
+        this.rushConfiguration.customTipsConfiguration.showTip(
+          this._terminal,
+          CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS
+        );
+        this.rushConfiguration.customTipsConfiguration.showTip(
+          this._terminal,
+          CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION
+        );
       }
     };
 

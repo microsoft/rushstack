@@ -128,15 +128,16 @@ export class CredentialCache {
 // @beta
 export enum CustomTipIdEnum {
     // (undocumented)
-    'TIP_PNPM_NO_MATCHING_VERSION' = "TIP_PNPM_NO_MATCHING_VERSION",
+    TIP_PNPM_NO_MATCHING_VERSION = "TIP_PNPM_NO_MATCHING_VERSION",
     // (undocumented)
-    'TIP_RUSH_INCONSISTENT_VERSIONS' = "TIP_RUSH_INCONSISTENT_VERSIONS"
+    TIP_RUSH_INCONSISTENT_VERSIONS = "TIP_RUSH_INCONSISTENT_VERSIONS"
 }
 
 // @beta
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
     readonly configuration: Readonly<ICustomTipsJson>;
+    static CustomTipRegistry: Record<CustomTipIdEnum, ICustomTipInfo>;
     showErrorTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
     showInfoTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
     showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
@@ -301,6 +302,17 @@ export interface ICredentialCacheEntry {
 export interface ICredentialCacheOptions {
     // (undocumented)
     supportEditing: boolean;
+}
+
+// @beta
+export interface ICustomTipInfo {
+    isMatch?: (str: string) => boolean;
+    // Warning: (ae-forgotten-export) The symbol "CustomTipSeverity" needs to be exported by the entry point index.d.ts
+    severity: CustomTipSeverity;
+    // (undocumented)
+    tipId: CustomTipIdEnum;
+    // Warning: (ae-forgotten-export) The symbol "CustomTipType" needs to be exported by the entry point index.d.ts
+    type: CustomTipType;
 }
 
 // @beta

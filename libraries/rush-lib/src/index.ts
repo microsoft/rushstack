@@ -94,6 +94,7 @@ export {
   CustomTipsConfiguration,
   CustomTipIdEnum,
   ICustomTipsJson,
+  ICustomTipInfo,
   ICustomTipItemJson
 } from './api/CustomTipsConfiguration';
 
