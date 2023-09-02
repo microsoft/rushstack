@@ -22,7 +22,12 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { CustomTipIdEnum, CustomTipsConfiguration, ICustomTipInfo } from '../../api/CustomTipsConfiguration';
+import {
+  CustomTipIdEnum,
+  CustomTipType,
+  CustomTipsConfiguration,
+  ICustomTipInfo
+} from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -340,11 +345,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Store the tip IDs that should be printed.
       // They will be printed all at once *after* the install
       const tipIDsShouldBePrinted: Set<CustomTipIdEnum> = new Set();
+      const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.CustomTipRegistry)
+        .map((key: string) => {
+          return CustomTipsConfiguration.CustomTipRegistry[key as CustomTipIdEnum];
+        })
+        .filter((tipInfo) => tipInfo.type === CustomTipType.pnpm);
+
       const onPnpmStdoutChunk = (chunk: string): void => {
         // Iterate over the supported custom tip metadata and try to match the chunk.
         // TODO: this might be slow. Optimize it.
-        Object.keys(CustomTipsConfiguration.CustomTipRegistry).forEach((key: string) => {
-          const tipInfo: ICustomTipInfo = CustomTipsConfiguration.CustomTipRegistry[key as CustomTipIdEnum];
+        supportedPnpmTips.forEach((tipInfo: ICustomTipInfo) => {
           if (tipInfo.isMatch && tipInfo.isMatch(chunk)) {
             tipIDsShouldBePrinted.add(tipInfo.tipId);
           }
@@ -388,14 +398,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           this.rushConfiguration.customTipsConfiguration.showTip(this._terminal, tipID);
           idx++;
         });
-        this.rushConfiguration.customTipsConfiguration.showTip(
-          this._terminal,
-          CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS
-        );
-        this.rushConfiguration.customTipsConfiguration.showTip(
-          this._terminal,
-          CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION
-        );
       }
     };
 
