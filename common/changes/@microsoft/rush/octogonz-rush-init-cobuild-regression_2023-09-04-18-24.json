@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where \"rush init\" generated a cobuild.json that reported errors (GitHub #4307)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
