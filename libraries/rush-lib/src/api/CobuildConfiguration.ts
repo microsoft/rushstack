@@ -124,7 +124,7 @@ export class CobuildConfiguration {
       throw e;
     }
 
-    if (!cobuildJson || !cobuildJson.cobuildFeatureEnabled) {
+    if (!cobuildJson?.cobuildFeatureEnabled) {
       return undefined;
     }
 
