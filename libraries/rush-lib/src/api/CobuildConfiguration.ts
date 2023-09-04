@@ -159,7 +159,7 @@ export class CobuildConfiguration {
     }
   }
 
-  public get cobuildLockProvider(): ICobuildLockProvider {
+  public getCobuildLockProvider(): ICobuildLockProvider {
     if (!this._cobuildLockProvider) {
       throw new Error(`Cobuild lock provider has not been created`);
     }
