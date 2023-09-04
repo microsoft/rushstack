@@ -89,19 +89,22 @@ export class CobuildLock {
   }
 
   public async setCompletedStateAsync(state: ICobuildCompletedState): Promise<void> {
-    await this.cobuildConfiguration.cobuildLockProvider.setCompletedStateAsync(this._cobuildContext, state);
+    await this.cobuildConfiguration
+      .getCobuildLockProvider()
+      .setCompletedStateAsync(this._cobuildContext, state);
   }
 
   public async getCompletedStateAsync(): Promise<ICobuildCompletedState | undefined> {
-    const state: ICobuildCompletedState | undefined =
-      await this.cobuildConfiguration.cobuildLockProvider.getCompletedStateAsync(this._cobuildContext);
+    const state: ICobuildCompletedState | undefined = await this.cobuildConfiguration
+      .getCobuildLockProvider()
+      .getCompletedStateAsync(this._cobuildContext);
     return state;
   }
 
   public async tryAcquireLockAsync(): Promise<boolean> {
-    const acquireLockResult: boolean = await this.cobuildConfiguration.cobuildLockProvider.acquireLockAsync(
-      this._cobuildContext
-    );
+    const acquireLockResult: boolean = await this.cobuildConfiguration
+      .getCobuildLockProvider()
+      .acquireLockAsync(this._cobuildContext);
     if (acquireLockResult) {
       // renew the lock in a redundant way in case of losing the lock
       await this.renewLockAsync();
@@ -110,7 +113,7 @@ export class CobuildLock {
   }
 
   public async renewLockAsync(): Promise<void> {
-    await this.cobuildConfiguration.cobuildLockProvider.renewLockAsync(this._cobuildContext);
+    await this.cobuildConfiguration.getCobuildLockProvider().renewLockAsync(this._cobuildContext);
   }
 
   public get cobuildContext(): ICobuildContext {

@@ -99,8 +99,6 @@ export class CobuildConfiguration {
     readonly cobuildContextId: string | undefined;
     readonly cobuildFeatureEnabled: boolean;
     readonly cobuildLeafProjectLogOnlyAllowed: boolean;
-    // (undocumented)
-    get cobuildLockProvider(): ICobuildLockProvider;
     readonly cobuildRunnerId: string;
     // (undocumented)
     createLockProviderAsync(terminal: ITerminal): Promise<void>;
@@ -108,6 +106,8 @@ export class CobuildConfiguration {
     destroyLockProviderAsync(): Promise<void>;
     // (undocumented)
     static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string;
+    // (undocumented)
+    getCobuildLockProvider(): ICobuildLockProvider;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<CobuildConfiguration | undefined>;
 }
 
