@@ -259,7 +259,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
 
     if (!this._runsBeforeInstall) {
-      // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
+      // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
       const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
       if (!lastLinkFlag.isValid()) {
         const useWorkspaces: boolean =
