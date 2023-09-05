@@ -21,7 +21,7 @@ export interface IPackageJsonType {
     [key in string]: string;
   };
 }
-export interface ILockfileImporterV6Type {
+export interface ILockfileImporterV6 {
   dependencies?: {
     [key in string]: {
       specifier: string;
@@ -35,7 +35,7 @@ export interface ILockfileImporterV6Type {
     };
   };
 }
-export interface ILockfileImporterV5Type {
+export interface ILockfileImporterV5 {
   specifiers?: {
     [key in string]: string;
   };
@@ -49,7 +49,7 @@ export interface ILockfileImporterV5Type {
 export interface ILockfilePackageType {
   lockfileVersion: number | string;
   importers?: {
-    [key in string]: ILockfileImporterV5Type | ILockfileImporterV6Type;
+    [key in string]: ILockfileImporterV5 | ILockfileImporterV6;
   };
   packages?: {
     [key in string]: {
@@ -74,12 +74,12 @@ export interface ILockfilePackageType {
  *     version: ...
  */
 function getImporterValue(
-  importerValue: ILockfileImporterV5Type | ILockfileImporterV6Type,
+  importerValue: ILockfileImporterV5 | ILockfileImporterV6,
   pnpmLockfileVersion: PnpmLockfileVersion
-): ILockfileImporterV5Type {
+): ILockfileImporterV5 {
   if (pnpmLockfileVersion === PnpmLockfileVersion.V6) {
-    const v6ImporterValue = importerValue as ILockfileImporterV6Type;
-    const v5ImporterValue: ILockfileImporterV5Type = {
+    const v6ImporterValue = importerValue as ILockfileImporterV6;
+    const v5ImporterValue: ILockfileImporterV5 = {
       specifiers: {},
       dependencies: {},
       devDependencies: {}
@@ -94,7 +94,7 @@ function getImporterValue(
     }
     return v5ImporterValue;
   } else {
-    return importerValue as ILockfileImporterV5Type;
+    return importerValue as ILockfileImporterV5;
   }
 }
 
