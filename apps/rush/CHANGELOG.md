@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 01 Sep 2023 04:54:16 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Sep 2023 18:53:03 GMT and should not be manually modified.
+
+## 5.104.1
+Tue, 05 Sep 2023 18:53:03 GMT
+
+### Updates
+
+- Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)
 
 ## 5.104.0
 Fri, 01 Sep 2023 04:54:16 GMT

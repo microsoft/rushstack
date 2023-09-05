@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.104.1",
+      "tag": "@microsoft/rush_v5.104.1",
+      "date": "Tue, 05 Sep 2023 18:53:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.104.0",
       "tag": "@microsoft/rush_v5.104.0",
       "date": "Fri, 01 Sep 2023 04:54:16 GMT",
