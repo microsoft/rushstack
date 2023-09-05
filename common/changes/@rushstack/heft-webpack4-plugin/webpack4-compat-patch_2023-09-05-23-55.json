@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "comment": "Add a `patchMd4WithMd5Hash` option that monkey-patches Webpack to use md5 instead of md4.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack4-plugin"
+}

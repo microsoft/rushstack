@@ -20,6 +20,11 @@
     "configurationPath": {
       "description": "Specifies a relative path to the Webpack configuration. The default value is \"./webpack.config.js\".",
       "type": "string"
+    },
+
+    "patchMd4WithMd5Hash": {
+      "description": "Specifies whether to patch the md4 hash with the md5 hash. This is useful to support Node version >= 18 without setting the `--openssl-legacy-provider` env variable. The default value is false.",
+      "type": "boolean"
     }
   }
 }

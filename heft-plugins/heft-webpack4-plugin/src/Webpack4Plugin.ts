@@ -28,6 +28,7 @@ import {
   type IWatchFileSystem,
   OverrideNodeWatchFSPlugin
 } from './DeferredWatchFileSystem';
+import { loadWebpackAsync } from './webpackPackageUtilities';
 
 type ExtendedWatching = TWebpack.Watching & {
   resume: () => void;
@@ -57,16 +58,18 @@ type ExtendedMultiCompiler = TWebpack.MultiCompiler & {
   watching: ExtendedMultiWatching;
 };
 
-export interface IWebpackPluginOptions {
-  devConfigurationPath?: string | undefined;
-  configurationPath?: string | undefined;
-}
-
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
-const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
+export const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: 'webpack-dev-server' = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: 'WEBPACK_DEV_SERVER' = 'WEBPACK_DEV_SERVER';
 const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-dev-middleware';
+export const PATCH_MD4_WITH_MD5_HASH_OPTION_NAME: 'patchMd4WithMd5Hash' = 'patchMd4WithMd5Hash';
+
+export interface IWebpackPluginOptions {
+  devConfigurationPath?: string | undefined;
+  configurationPath?: string | undefined;
+  [PATCH_MD4_WITH_MD5_HASH_OPTION_NAME]?: boolean | undefined;
+}
 
 /**
  * @internal
@@ -74,7 +77,6 @@ const WEBPACK_DEV_MIDDLEWARE_PACKAGE_NAME: 'webpack-dev-middleware' = 'webpack-d
 export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOptions> {
   private _accessor: IWebpackPluginAccessor | undefined;
   private _isServeMode: boolean = false;
-  private _webpack: typeof TWebpack | undefined;
   private _webpackCompiler: ExtendedCompiler | ExtendedMultiCompiler | undefined;
   private _webpackConfiguration: IWebpackConfiguration | undefined | false = false;
   private _webpackCompilationDonePromise: Promise<void> | undefined;
@@ -135,7 +137,8 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           heftConfiguration,
           hooks: this.accessor.hooks,
           serveMode: this._isServeMode,
-          loadWebpackAsyncFn: this._loadWebpackAsync.bind(this)
+          loadWebpackAsyncFn: async () =>
+            await loadWebpackAsync(taskSession.logger, options.patchMd4WithMd5Hash)
         },
         options
       );
@@ -160,20 +163,16 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     return this._webpackConfiguration;
   }
 
-  private async _loadWebpackAsync(): Promise<typeof TWebpack> {
-    if (!this._webpack) {
-      // Allow this to fail if webpack is not installed
-      this._webpack = await import(WEBPACK_PACKAGE_NAME);
-    }
-    return this._webpack!;
-  }
-
   private async _getWebpackCompilerAsync(
     taskSession: IHeftTaskSession,
-    webpackConfiguration: IWebpackConfiguration
+    webpackConfiguration: IWebpackConfiguration,
+    options: IWebpackPluginOptions
   ): Promise<ExtendedCompiler | ExtendedMultiCompiler> {
     if (!this._webpackCompiler) {
-      const webpack: typeof TWebpack = await this._loadWebpackAsync();
+      const webpack: typeof TWebpack = await loadWebpackAsync(
+        taskSession.logger,
+        options.patchMd4WithMd5Hash
+      );
       taskSession.logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
       this._webpackCompiler = Array.isArray(webpackConfiguration)
         ? (webpack.default(
@@ -213,7 +212,9 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     heftConfiguration: HeftConfiguration,
     options: IWebpackPluginOptions
   ): Promise<void> {
-    this._warnAboutNodeJsIncompatibility(taskSession);
+    if (!options.patchMd4WithMd5Hash) {
+      this._warnAboutNodeJsIncompatibility(taskSession);
+    }
 
     this._validateEnvironmentVariable(taskSession);
     if (taskSession.parameters.watch || this._isServeMode) {
@@ -232,7 +233,8 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     }
     const compiler: ExtendedCompiler | ExtendedMultiCompiler = await this._getWebpackCompilerAsync(
       taskSession,
-      webpackConfiguration
+      webpackConfiguration,
+      options
     );
     taskSession.logger.terminal.writeLine('Running Webpack compilation');
 
@@ -262,7 +264,9 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     options: IWebpackPluginOptions,
     requestRun: () => void
   ): Promise<void> {
-    this._warnAboutNodeJsIncompatibility(taskSession);
+    if (!options.patchMd4WithMd5Hash) {
+      this._warnAboutNodeJsIncompatibility(taskSession);
+    }
 
     // Save a handle to the original promise, since the this-scoped promise will be replaced whenever
     // the compilation completes.
@@ -288,7 +292,8 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
       // Get the compiler which will be used for both serve and watch mode
       const compiler: ExtendedCompiler | ExtendedMultiCompiler = await this._getWebpackCompilerAsync(
         taskSession,
-        webpackConfiguration
+        webpackConfiguration,
+        options
       );
 
       // Set up the hook to detect when the watcher completes the watcher compilation. We will also log out
