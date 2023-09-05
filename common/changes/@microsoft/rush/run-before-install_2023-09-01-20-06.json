@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add the \"disableBuildCache\" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the \"disableBuildCache\" flag to also disable the legacy skip detection, in the event that the build cache is not configured.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

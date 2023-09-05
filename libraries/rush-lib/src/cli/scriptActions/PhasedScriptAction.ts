@@ -103,6 +103,10 @@ interface IPhasedCommandTelemetry {
  * "build" script for each project.
  */
 export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
+  /**
+   * @internal
+   */
+  public _runsBeforeInstall: boolean | undefined;
   public readonly hooks: PhasedCommandHooks;
 
   private readonly _enableParallelism: boolean;
@@ -137,6 +141,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
     this._alwaysWatch = options.alwaysWatch;
     this._alwaysInstall = options.alwaysInstall;
+    this._runsBeforeInstall = false;
     this._knownPhases = options.phases;
 
     this.hooks = new PhasedCommandHooks();
@@ -253,15 +258,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       });
     }
 
-    // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
-    const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
-    if (!lastLinkFlag.isValid()) {
-      const useWorkspaces: boolean =
-        this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
-      if (useWorkspaces) {
-        throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
-      } else {
-        throw new Error('Link flag invalid.\nDid you run "rush link"?');
+    if (!this._runsBeforeInstall) {
+      // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
+      const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
+      if (!lastLinkFlag.isValid()) {
+        const useWorkspaces: boolean =
+          this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+        if (useWorkspaces) {
+          throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
+        } else {
+          throw new Error('Link flag invalid.\nDid you run "rush link"?');
+        }
       }
     }
 
@@ -350,7 +357,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           cobuildConfiguration,
           terminal
         }).apply(this.hooks);
-      } else {
+      } else if (!this._disableBuildCache) {
+        // Explicitly disabling the build cache also disables legacy skip detection.
         new LegacySkipPlugin({
           terminal,
           changedProjectsOnly,
@@ -358,12 +366,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }).apply(this.hooks);
       }
 
-      const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
-        await RushProjectConfiguration.tryLoadAndValidateForProjectsAsync(
-          projectSelection,
-          this._initialPhases,
-          terminal
-        );
+      const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
+        ._runsBeforeInstall
+        ? new Map()
+        : await RushProjectConfiguration.tryLoadAndValidateForProjectsAsync(
+            projectSelection,
+            this._initialPhases,
+            terminal
+          );
 
       const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
       const initialCreateOperationsContext: ICreateOperationsContext = {
