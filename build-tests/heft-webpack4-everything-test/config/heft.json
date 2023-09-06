@@ -24,7 +24,10 @@
         "webpack": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
-            "pluginPackage": "@rushstack/heft-webpack4-plugin"
+            "pluginPackage": "@rushstack/heft-webpack4-plugin",
+            "options": {
+              "patchMd4WithMd5Hash": true
+            }
           }
         }
       }
