@@ -2,15 +2,25 @@
 // See LICENSE in the project root for license information.
 
 import type * as TWebpack from 'webpack';
-import type { IScopedLogger } from '@rushstack/heft';
 import { FileSystem, Import } from '@rushstack/node-core-library';
 import { PATCH_MD4_WITH_MD5_HASH_OPTION_NAME, WEBPACK_PACKAGE_NAME } from './Webpack4Plugin';
 import path from 'path';
 
 let _loadWebpackAsyncPromise: Promise<typeof TWebpack> | undefined;
 
+/**
+ * @beta
+ */
+export interface IWarningErrorEmitter {
+  emitWarning: (warning: Error) => void;
+  emitError: (error: Error) => void;
+}
+
+/**
+ * @beta
+ */
 export async function loadWebpackAsync(
-  logger: IScopedLogger,
+  logger: IWarningErrorEmitter,
   patchMd4WithMd5Hash: boolean | undefined
 ): Promise<typeof TWebpack> {
   if (!_loadWebpackAsyncPromise) {
@@ -21,7 +31,7 @@ export async function loadWebpackAsync(
 }
 
 async function _loadWebpackAsyncInner(
-  logger: IScopedLogger,
+  logger: IWarningErrorEmitter,
   patchMd4WithMd5Hash: boolean | undefined
 ): Promise<typeof TWebpack> {
   // Allow this to fail if webpack is not installed
@@ -39,7 +49,7 @@ interface IWebpackModule {
   default: unknown;
 }
 
-async function _patchWebpackCreateHashModule(logger: IScopedLogger): Promise<void> {
+async function _patchWebpackCreateHashModule(logger: IWarningErrorEmitter): Promise<void> {
   const createHashFullPath: string = await Import.resolveModuleAsync({
     modulePath: `${WEBPACK_PACKAGE_NAME}/lib/util/createHash`,
     baseFolderPath: __dirname
@@ -71,7 +81,7 @@ async function _patchWebpackCreateHashModule(logger: IScopedLogger): Promise<voi
 
 async function _patchWebpackModuleAsync(
   webpackPackageRelativeModulePath: string,
-  logger: IScopedLogger,
+  logger: IWarningErrorEmitter,
   patchFn: (existingCode: string) => string
 ): Promise<void> {
   // TODO: Consider deduplicating this with the code in heft-jest-plugin/patches/jestWorkerPatch.ts

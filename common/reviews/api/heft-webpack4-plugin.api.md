@@ -12,6 +12,14 @@ import type { HeftConfiguration } from '@rushstack/heft';
 import type { IHeftTaskSession } from '@rushstack/heft';
 import type * as TWebpack from 'webpack';
 
+// @beta (undocumented)
+export interface IWarningErrorEmitter {
+    // (undocumented)
+    emitError: (error: Error) => void;
+    // (undocumented)
+    emitWarning: (warning: Error) => void;
+}
+
 // @public (undocumented)
 export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[];
 
@@ -48,6 +56,9 @@ export interface IWebpackPluginAccessorHooks {
 export interface IWebpackPluginAccessorParameters {
     readonly isServeMode: boolean;
 }
+
+// @beta (undocumented)
+export function loadWebpackAsync(logger: IWarningErrorEmitter, patchMd4WithMd5Hash: boolean | undefined): Promise<typeof TWebpack>;
 
 // @public (undocumented)
 export const PluginName: 'webpack4-plugin';

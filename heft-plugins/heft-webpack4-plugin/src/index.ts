@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 export { PLUGIN_NAME as PluginName, STAGE_LOAD_LOCAL_CONFIG } from './shared';
+export { loadWebpackAsync, type IWarningErrorEmitter } from './webpackPackageUtilities';
 
 export type {
   IWebpackConfigurationWithDevServer,
