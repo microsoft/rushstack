@@ -12,22 +12,20 @@ export interface ILogger {
 }
 
 /**
- * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
+ * This function reads the content for given .npmrc file path, and also trims
  * unusable lines from the .npmrc file.
- *
- * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
- * the .npmrc file to provide different authentication tokens for different registry.
- * However, if the environment variable is undefined, it expands to an empty string, which
- * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
- * we'd prefer to skip that line and continue looking in other places such as the user's
- * home directory.
  *
  * @returns
  * The text of the the .npmrc.
  */
-function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): string {
-  logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
-  logger.info(`  --> "${targetNpmrcPath}"`);
+
+// create a global _combinedNpmrc for cache purpose
+const _combinedNpmrcMap: Map<string, string> = new Map();
+
+function _trimNpmrcFile(sourceNpmrcPath: string): string {
+  if (_combinedNpmrcMap.has(sourceNpmrcPath) && _combinedNpmrcMap.get(sourceNpmrcPath) !== undefined) {
+    return _combinedNpmrcMap.get(sourceNpmrcPath)!;
+  }
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
@@ -70,6 +68,33 @@ function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetN
   }
 
   const combinedNpmrc: string = resultLines.join('\n');
+
+  //save the cache
+  _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
+
+  return combinedNpmrc;
+}
+
+/**
+ * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
+ * unusable lines from the .npmrc file.
+ *
+ * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
+ * the .npmrc file to provide different authentication tokens for different registry.
+ * However, if the environment variable is undefined, it expands to an empty string, which
+ * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
+ * we'd prefer to skip that line and continue looking in other places such as the user's
+ * home directory.
+ *
+ * @returns
+ * The text of the the .npmrc.
+ */
+function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): string {
+  logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
+  logger.info(`  --> "${targetNpmrcPath}"`);
+
+  const combinedNpmrc: string = _trimNpmrcFile(sourceNpmrcPath);
+
   fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
 
   return combinedNpmrc;
@@ -109,4 +134,10 @@ export function syncNpmrc(
   } catch (e) {
     throw new Error(`Error syncing .npmrc file: ${e}`);
   }
+}
+
+export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey: string): boolean {
+  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+  const trimNpmrcFile: string = _trimNpmrcFile(sourceNpmrcPath);
+  return trimNpmrcFile.includes(`${variableKey}=`);
 }

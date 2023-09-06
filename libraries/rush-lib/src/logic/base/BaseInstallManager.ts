@@ -42,6 +42,7 @@ import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
+import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -597,10 +598,27 @@ ${gitLfsHookHandling}
         args.push('--strict-peer-dependencies');
       }
 
+      /*
+        If user set resolution-mode in pnpm-config.json only, use the value in pnpm-config.json
+        If user set resolution-mode in pnpm-config.json and .npmrc, use the value in pnpm-config.json
+        If user set resolution-mode in .npmrc only, do nothing, let pnpm handle it
+        If user does not set resolution-mode in pnpm-config.json and .npmrc, rush will default it to "highest"
+      */
+      const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
+        this.rushConfiguration.commonRushConfigFolder,
+        'resolution-mode'
+      );
       if (this.rushConfiguration.pnpmOptions.resolutionMode) {
+        if (isResolutionModeInNpmrc) {
+          console.log(
+            colors.yellow(
+              `Warning: you have set resolution-mode in both .npmrc and pnpm-config.json! We will use the value in pnpm-config.json.`
+            )
+          );
+        }
         args.push(`--config.resolutionMode=${this.rushConfiguration.pnpmOptions.resolutionMode}`);
-      } else {
-        // if you don't specify the resolution-mode, then Rush will default it to "highest"
+      } else if (!isResolutionModeInNpmrc) {
+        // if you don't specify the resolution-mode in both .npmrc and pnpm-config.json, then rush will default it to "highest"
         args.push('--config.resolutionMode=highest');
       }
 
