@@ -74,10 +74,9 @@ async function _patchWebpackCreateHashModule(logger: IWarningErrorEmitter): Prom
 
   type HashFunction = (algorithm?: string | (new () => import('crypto').Hash)) => import('crypto').Hash;
   const webpackCreateHashModule: HashFunction | { default: HashFunction } = await import(createHashFullPath);
-  const webpackCreateHashFunction: HashFunction = (webpackCreateHashModule as { default: HashFunction })
-    .default
-    ? (webpackCreateHashModule as { default: HashFunction }).default
-    : (webpackCreateHashModule as HashFunction);
+  const webpackCreateHashFunction: HashFunction =
+    (webpackCreateHashModule as { default: HashFunction }).default ??
+    (webpackCreateHashModule as HashFunction);
 
   const patchedWebpackCreateHash: typeof webpackCreateHashModule = (algorithm) =>
     webpackCreateHashFunction(algorithm === 'md4' ? 'md5' : algorithm);
