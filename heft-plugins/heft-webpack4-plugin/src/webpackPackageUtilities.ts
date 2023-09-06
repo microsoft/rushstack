@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'path';
+import type Module from 'module';
 import type * as TWebpack from 'webpack';
 import { FileSystem, Import } from '@rushstack/node-core-library';
+
 import { PATCH_MD4_WITH_MD5_HASH_OPTION_NAME, WEBPACK_PACKAGE_NAME } from './Webpack4Plugin';
-import path from 'path';
 
 let _loadWebpackAsyncPromise: Promise<typeof TWebpack> | undefined;
 
@@ -56,12 +58,18 @@ async function _patchWebpackCreateHashModule(logger: IWarningErrorEmitter): Prom
   });
 
   if (createHashFullPath in require.cache) {
-    logger.emitWarning(
-      new Error(
-        `The ${createHashFullPath} module is already loaded and the ` +
-          `${PATCH_MD4_WITH_MD5_HASH_OPTION_NAME} option was set. Webpack may not be patched correctly.`
-      )
+    let errorMessage: string =
+      `The ${createHashFullPath} module is already loaded and the ` +
+      `${PATCH_MD4_WITH_MD5_HASH_OPTION_NAME} option was set. Webpack may not be patched correctly.`;
+
+    const existingRequireChain: string[] | undefined = tryGetModuleParentChain(
+      require.cache[createHashFullPath]!
     );
+    if (existingRequireChain) {
+      errorMessage += ` The module was loaded from:\n${existingRequireChain.join('\n')}`;
+    }
+
+    logger.emitWarning(new Error(errorMessage));
   }
 
   type HashFunction = (algorithm?: string | (new () => import('crypto').Hash)) => import('crypto').Hash;
@@ -77,6 +85,22 @@ async function _patchWebpackCreateHashModule(logger: IWarningErrorEmitter): Prom
     patchedWebpackCreateHash;
 
   require.cache[createHashFullPath]!.exports = patchedWebpackCreateHash;
+}
+
+function tryGetModuleParentChain(module: NodeModule): string[] | undefined {
+  try {
+    const result: string[] = [];
+    let currentModule: Module | null | undefined = module;
+    while (currentModule) {
+      const parentFilename: string = currentModule.filename || 'UNKNOWN';
+      result.push(parentFilename);
+      currentModule = currentModule.parent;
+    }
+
+    return result;
+  } catch (e) {
+    return undefined;
+  }
 }
 
 async function _patchWebpackModuleAsync(

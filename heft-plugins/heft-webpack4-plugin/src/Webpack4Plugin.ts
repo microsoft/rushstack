@@ -131,6 +131,12 @@ export default class Webpack4Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
     requestRun?: () => void
   ): Promise<IWebpackConfiguration | undefined> {
     if (this._webpackConfiguration === false) {
+      if (options.patchMd4WithMd5Hash) {
+        // Ensure webpack is patched before we try to load the webpack config in case the config
+        // also loads webpack
+        await loadWebpackAsync(taskSession.logger, options.patchMd4WithMd5Hash);
+      }
+
       const webpackConfiguration: IWebpackConfiguration | undefined = await tryLoadWebpackConfigurationAsync(
         {
           taskSession,
