@@ -31,6 +31,7 @@ export {
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';
+export { CobuildConfiguration, ICobuildJson } from './api/CobuildConfiguration';
 export { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from './logic/buildCache/CacheEntryId';
 export {
   FileSystemBuildCacheProvider,
@@ -53,6 +54,12 @@ export { RushConstants } from './logic/RushConstants';
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
 export { RushConfigurationProject } from './api/RushConfigurationProject';
+
+export {
+  IRushProjectJson as _IRushProjectJson,
+  IOperationSettings,
+  RushProjectConfiguration
+} from './api/RushProjectConfiguration';
 
 export { RushUserConfiguration } from './api/RushUserConfiguration';
 
@@ -98,7 +105,11 @@ export {
   ICustomTipItemJson
 } from './api/CustomTipsConfiguration';
 
-export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export {
+  ProjectChangeAnalyzer,
+  IGetChangedProjectsOptions,
+  IRawRepoState as _IRawRepoState
+} from './logic/ProjectChangeAnalyzer';
 
 export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';
@@ -108,7 +119,8 @@ export { OperationStatus } from './logic/operations/OperationStatus';
 export {
   RushSession,
   IRushSessionOptions,
-  CloudBuildCacheProviderFactory
+  CloudBuildCacheProviderFactory,
+  CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
 
 export {
@@ -126,6 +138,11 @@ export { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from '.
 export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+export {
+  ICobuildLockProvider,
+  ICobuildContext,
+  ICobuildCompletedState
+} from './logic/cobuild/ICobuildLockProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 

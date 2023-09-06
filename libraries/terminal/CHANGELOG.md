@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 24 Aug 2023 15:20:46 GMT and should not be manually modified.
+
+## 0.5.38
+Thu, 24 Aug 2023 15:20:46 GMT
+
+### Patches
+
+- Fix a minor logic issue for TextRewriterTransform cleanup
 
 ## 0.5.37
 Tue, 08 Aug 2023 07:10:40 GMT

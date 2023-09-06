@@ -1,0 +1,83 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "cobuild",
+      "dependsOrder": "sequence",
+      "dependsOn": ["update", "_cobuild"],
+      "problemMatcher": []
+    },
+    {
+      "type": "shell",
+      "label": "_cobuild",
+      "dependsOn": ["build 1", "build 2"],
+      "problemMatcher": []
+    },
+    {
+      "type": "shell",
+      "label": "update",
+      "command": "node ../../lib/runRush.js update",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/sandbox/repo"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "build 1",
+      "command": "node ../../lib/runRush.js --debug cobuild --timeline --parallelism 1 --verbose",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/sandbox/repo",
+        "env": {
+          "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "RUSH_COBUILD_RUNNER_ID": "runner1",
+          "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED": "1",
+          "REDIS_PASS": "redis123"
+        }
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "group": "build"
+    },
+    {
+      "type": "shell",
+      "label": "build 2",
+      "command": "node ../../lib/runRush.js --debug cobuild --timeline --parallelism 1 --verbose",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}/sandbox/repo",
+        "env": {
+          "RUSH_COBUILD_CONTEXT_ID": "integration-test",
+          "RUSH_COBUILD_RUNNER_ID": "runner2",
+          "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED": "1",
+          "REDIS_PASS": "redis123"
+        }
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "group": "build"
+    }
+  ]
+}

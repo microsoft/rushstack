@@ -190,6 +190,11 @@ export class RushConstants {
   public static readonly buildCacheVersion: number = 1;
 
   /**
+   * Cobuild configuration file.
+   */
+  public static readonly cobuildFilename: string = 'cobuild.json';
+
+  /**
    * Per-project configuration filename.
    */
   public static readonly rushProjectConfigFilename: string = 'rush-project.json';

@@ -140,7 +140,7 @@ export class TextRewriterTransform extends TerminalTransform {
 
   protected onClose(): void {
     this._closeRewriters(this._stderrStates, TerminalChunkKind.Stderr);
-    this._closeRewriters(this._stderrStates, TerminalChunkKind.Stdout);
+    this._closeRewriters(this._stdoutStates, TerminalChunkKind.Stdout);
 
     this.autocloseDestination();
   }
