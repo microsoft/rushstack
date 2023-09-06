@@ -599,6 +599,9 @@ ${gitLfsHookHandling}
 
       if (this.rushConfiguration.pnpmOptions.resolutionMode) {
         args.push(`--config.resolutionMode=${this.rushConfiguration.pnpmOptions.resolutionMode}`);
+      } else {
+        // if you don't specify the resolution-mode, then Rush will default it to "highest"
+        args.push('--config.resolutionMode=highest');
       }
 
       if (
