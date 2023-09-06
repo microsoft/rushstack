@@ -230,7 +230,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private async _wrapOnExecuteAsync(): Promise<void> {
     if (this.rushConfiguration) {
-      this.telemetry = new Telemetry(this.rushConfiguration, this.rushSession);
+      this.telemetry = new Telemetry('rush', this.rushConfiguration, this.rushSession.hooks.flushTelemetry);
     }
 
     await super.onExecute();

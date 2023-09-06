@@ -14,6 +14,8 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
+import { Telemetry } from '../logic/Telemetry';
+import { Stopwatch } from '../utilities/Stopwatch';
 
 /**
  * @internal
@@ -48,22 +50,41 @@ interface IRushXCommandLineArguments {
 
 export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
+    let telemetry: Telemetry | undefined;
+    let args: IRushXCommandLineArguments | undefined;
     try {
+      const ignoreHooks: boolean = process.env.INSIDERUSH === '1';
+
       const args: IRushXCommandLineArguments = this._getCommandLineArguments();
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
         showVerbose: false
       });
+      if (rushConfiguration && !ignoreHooks && !args.help) {
+        telemetry = new Telemetry('rushx', rushConfiguration);
+      }
+
       const eventHooksManager: EventHooksManager | undefined = rushConfiguration
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
-      const ignoreHooks = process.env.INSIDERUSH === '1';
       eventHooksManager?.handle(Event.preRushx, false /* isDebug */, ignoreHooks);
-      RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
+      RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args, telemetry);
       eventHooksManager?.handle(Event.postRushx, false /* isDebug */, ignoreHooks);
     } catch (error) {
+      if (telemetry) {
+        telemetry.log({
+          name: args?.commandName ?? 'not_provided',
+          durationInSeconds: 0,
+          result: 'Failed',
+          extraData: {
+            reason: error.message
+          }
+        });
+      }
       console.log(colors.red('Error: ' + (error as Error).message));
     }
+
+    telemetry?.flush();
   }
 
   /**
@@ -73,8 +94,10 @@ export class RushXCommandLine {
     launcherVersion: string,
     options: ILaunchRushXInternalOptions,
     rushConfiguration: RushConfiguration | undefined,
-    args: IRushXCommandLineArguments
+    args: IRushXCommandLineArguments,
+    telemetry: Telemetry | undefined
   ): void {
+    const stopwatch: Stopwatch = Stopwatch.start();
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
@@ -97,11 +120,9 @@ export class RushXCommandLine {
       process.cwd()
     );
     if (!packageJsonFilePath) {
-      console.log(colors.red('This command should be used inside a project folder.'));
-      console.log(
-        `Unable to find a package.json file in the current working directory or any of its parents.`
+      throw Error(
+        'Unable to find a package.json file in the current working directory or any of its parents.'
       );
-      return;
     }
 
     if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
@@ -126,22 +147,17 @@ export class RushXCommandLine {
     const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
 
     if (scriptBody === undefined) {
-      console.log(
-        colors.red(
-          `Error: The command "${args.commandName}" is not defined in the` +
-            ` package.json file for this project.`
-        )
-      );
+      let errorMessage: string =
+        `Error: The command "${args.commandName}" is not defined in the` +
+        ` package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
-        console.log(
+        errorMessage +=
           '\nAvailable commands for this project are: ' +
-            projectCommandSet.commandNames.map((x) => `"${x}"`).join(', ')
-        );
+          projectCommandSet.commandNames.map((x) => `"${x}"`).join(', ');
       }
 
-      console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
-      return;
+      throw Error(errorMessage);
     }
 
     let commandWithArgs: string = scriptBody;
@@ -180,6 +196,18 @@ export class RushXCommandLine {
     }
 
     process.exitCode = exitCode;
+
+    if (telemetry) {
+      telemetry.log({
+        name: args?.commandName ?? 'not_provided',
+        durationInSeconds: stopwatch.duration,
+        result: 'Succeeded',
+        extraData: {
+          packageFolder,
+          commandWithArgs
+        }
+      });
+    }
   }
 
   private static _getCommandLineArguments(): IRushXCommandLineArguments {

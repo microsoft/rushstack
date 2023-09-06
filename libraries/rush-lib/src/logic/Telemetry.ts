@@ -7,7 +7,7 @@ import { FileSystem, FileSystemStats, JsonFile } from '@rushstack/node-core-libr
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
-import { RushSession } from '../pluginFramework/RushSession';
+import { AsyncParallelHook } from 'tapable';
 
 /**
  * @beta
@@ -133,12 +133,18 @@ export class Telemetry {
   private _store: ITelemetryData[];
   private _dataFolder: string;
   private _rushConfiguration: RushConfiguration;
-  private _rushSession: RushSession;
+  private _telemetryFlushHook: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]> | undefined;
   private _flushAsyncTasks: Set<Promise<void>> = new Set();
+  private _executableName: string;
 
-  public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
+  public constructor(
+    executableName: string,
+    rushConfiguration: RushConfiguration,
+    telemetryHook: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]> | undefined = undefined
+  ) {
+    this._executableName = executableName;
     this._rushConfiguration = rushConfiguration;
-    this._rushSession = rushSession;
+    this._telemetryFlushHook = telemetryHook;
     this._enabled = this._rushConfiguration.telemetryEnabled;
     this._store = [];
 
@@ -175,12 +181,12 @@ export class Telemetry {
 
     const fullPath: string = this._getFilePath();
     JsonFile.save(this._store, fullPath, { ensureFolderExists: true, ignoreUndefinedValues: true });
-    if (this._rushSession.hooks.flushTelemetry.isUsed()) {
+    if (this._telemetryFlushHook?.isUsed()) {
       /**
        * User defined flushTelemetry should not block anything, so we don't await here,
        * and store the promise into a list so that we can await it later.
        */
-      const asyncTaskPromise: Promise<void> = this._rushSession.hooks.flushTelemetry.promise(this._store);
+      const asyncTaskPromise: Promise<void> = this._telemetryFlushHook.promise(this._store);
       this._flushAsyncTasks.add(asyncTaskPromise);
       asyncTaskPromise.then(
         () => {
@@ -243,7 +249,7 @@ export class Telemetry {
   }
 
   private _getFilePath(): string {
-    let fileName: string = `telemetry_${new Date().toISOString()}`;
+    let fileName: string = `telemetry_${this._executableName}_${new Date().toISOString()}`;
     fileName = fileName.replace(/[\-\:\.]/g, '_') + '.json';
     return path.join(this._dataFolder, fileName);
   }
