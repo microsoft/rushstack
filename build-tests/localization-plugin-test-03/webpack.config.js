@@ -8,6 +8,7 @@ const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin'
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 function resolveMissingString(localeNames, localizedResourcePath) {
   let contextRelativePath = path.relative(__dirname, localizedResourcePath);
@@ -140,7 +141,15 @@ function generateConfiguration(mode, outputFolderName) {
         }
       }),
       new HtmlWebpackPlugin()
-    ]
+    ],
+    optimization: {
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new WorkerPoolMinifier(),
+          useSourceMap: true
+        })
+      ]
+    }
   };
 }
 

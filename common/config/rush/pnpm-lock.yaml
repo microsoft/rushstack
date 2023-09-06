@@ -402,6 +402,7 @@ importers:
       '@rushstack/heft-storybook-plugin': workspace:*
       '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@storybook/react': ~6.4.18
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
@@ -432,6 +433,7 @@ importers:
       '@rushstack/heft-storybook-plugin': link:../../heft-plugins/heft-storybook-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@storybook/react': 6.4.22_k3pzkoeaevtikrhe3xivvmfzgq
       '@types/heft-jest': 1.0.1
       '@types/node': 14.18.36
@@ -1117,6 +1119,7 @@ importers:
       '@rushstack/heft-sass-plugin': workspace:*
       '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
@@ -1145,6 +1148,7 @@ importers:
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.14.23
       '@types/react-dom': 16.9.14
@@ -1428,6 +1432,7 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
       '@rushstack/webpack4-localization-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@types/webpack-env': 1.18.0
       html-webpack-plugin: ~4.5.2
       ts-loader: 6.0.0
@@ -1440,6 +1445,7 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@rushstack/webpack4-localization-plugin': link:../../webpack/webpack4-localization-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/webpack-env': 1.18.0
       html-webpack-plugin: 4.5.2_webpack@4.47.0
       ts-loader: 6.0.0_typescript@5.0.4
@@ -1570,6 +1576,7 @@ importers:
       '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       '@rushstack/set-webpack-public-path-plugin': workspace:*
+      '@rushstack/webpack4-module-minifier-plugin': workspace:*
       '@types/webpack-env': 1.18.0
       eslint: ~8.7.0
       html-webpack-plugin: ~4.5.2
@@ -1582,6 +1589,7 @@ importers:
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
+      '@rushstack/webpack4-module-minifier-plugin': link:../../webpack/webpack4-module-minifier-plugin
       '@types/webpack-env': 1.18.0
       eslint: 8.7.0
       html-webpack-plugin: 4.5.2_webpack@4.47.0
