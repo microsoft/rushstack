@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.5.2",
+      "tag": "@rushstack/package-extractor_v0.5.2",
+      "date": "Wed, 06 Sep 2023 19:00:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where subdirectory inclusion patterns (ex. \"src/subdir/**/*\") would get ignored during extraction"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.1",
       "tag": "@rushstack/package-extractor_v0.5.1",
       "date": "Thu, 24 Aug 2023 15:20:46 GMT",

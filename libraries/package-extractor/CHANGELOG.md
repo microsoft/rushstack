@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Thu, 24 Aug 2023 15:20:46 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Sep 2023 19:00:39 GMT and should not be manually modified.
+
+## 0.5.2
+Wed, 06 Sep 2023 19:00:39 GMT
+
+### Patches
+
+- Fix an issue where subdirectory inclusion patterns (ex. "src/subdir/**/*") would get ignored during extraction
 
 ## 0.5.1
 Thu, 24 Aug 2023 15:20:46 GMT
