@@ -205,10 +205,45 @@ describe(PackageExtractor.name, () => {
     // Validate project 1 files
     expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(true);
     expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(false);
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'subdir'))).toBe(false);
 
     // Validate project 2 files
     expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'package.json'))).toBe(true);
     expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))).toBe(true);
+  });
+
+  it('should include specified dependencies', async () => {
+    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-05');
+
+    await expect(
+      packageExtractor.extractAsync({
+        mainProjectName: project1PackageName,
+        sourceRootFolder: repoRoot,
+        targetRootFolder: targetFolder,
+        overwriteExisting: true,
+        projectConfigurations: [
+          {
+            projectName: project1PackageName,
+            projectFolder: project1Path,
+            patternsToInclude: ['src/subdir/**']
+          }
+        ],
+        terminal,
+        createArchiveOnly: false,
+        includeNpmIgnoreFiles: true,
+        linkCreation: 'default',
+        includeDevDependencies: true
+      })
+    ).resolves.not.toThrow();
+
+    // Validate project 1 files
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(false);
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src'))).toBe(true);
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(false);
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'subdir'))).toBe(true);
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'subdir', 'file.js'))).toBe(
+      true
+    );
   });
 
   it('should exclude specified dependencies on local dependencies', async () => {
@@ -251,6 +286,7 @@ describe(PackageExtractor.name, () => {
     expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'package.json'))).toBe(true);
     expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))).toBe(false);
   });
+
   it('should exclude specified files on third party dependencies with semver version', async () => {
     const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-07');
 
