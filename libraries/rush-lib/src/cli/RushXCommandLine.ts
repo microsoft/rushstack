@@ -36,6 +36,11 @@ interface IRushXCommandLineArguments {
   help: boolean;
 
   /**
+   * Flag indicating whether the user has requested debug mode.
+   */
+  isDebug: boolean;
+
+  /**
    * The command to run (i.e., the target "script" in package.json.)
    */
   commandName: string;
@@ -47,8 +52,8 @@ interface IRushXCommandLineArguments {
 }
 
 class ProcessError extends Error {
-  exitCode: number = 0;
-  constructor(message: string, exitCode: number) {
+  public exitCode: number = 0;
+  public constructor(message: string, exitCode: number) {
     super(message);
     this.exitCode = exitCode;
   }
@@ -65,17 +70,22 @@ export class RushXCommandLine {
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
-      const ignoreHooks = process.env._RUSH_SUPPRESS_HOOKS === '1';
-      eventHooksManager?.handle(Event.preRushx, false /* isDebug */, ignoreHooks);
+      const ignoreHooks: boolean = process.env._RUSH_SUPPRESS_HOOKS === '1';
+      eventHooksManager?.handle(Event.preRushx, args.isDebug, ignoreHooks);
+      // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
+      // promise exception), so we start with the assumption that the exit code is 1
+      // and set it to 0 only on success.
+      process.exitCode = 1;
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
-      eventHooksManager?.handle(Event.postRushx, false /* isDebug */, ignoreHooks);
+      process.exitCode = 0;
+      eventHooksManager?.handle(Event.postRushx, args.isDebug, ignoreHooks);
     } catch (error) {
       if (error instanceof ProcessError) {
         process.exitCode = error.exitCode;
       } else {
         process.exitCode = 1;
       }
-      console.log(colors.red('Error: ' + (error as Error).message));
+      console.error(colors.red('Error: ' + (error as Error).message));
     }
   }
 
@@ -87,12 +97,7 @@ export class RushXCommandLine {
     options: ILaunchRushXInternalOptions,
     rushConfiguration: RushConfiguration | undefined,
     args: IRushXCommandLineArguments
-  ) {
-    // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
-    // promise exception), so we start with the assumption that the exit code is 1
-    // and set it to 0 only on success.
-    process.exitCode = 1;
-
+  ): void {
     if (!args.quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
@@ -138,8 +143,7 @@ export class RushXCommandLine {
 
     if (scriptBody === undefined) {
       let errorMessage: string =
-        `Error: The command "${args.commandName}" is not defined in the` +
-        ` package.json file for this project.`;
+        `The command "${args.commandName}" is not defined in the` + ` package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
         errorMessage +=
@@ -198,6 +202,7 @@ export class RushXCommandLine {
     let help: boolean = false;
     let quiet: boolean = false;
     let commandName: string = '';
+    let isDebug: boolean = false;
     const commandArgs: string[] = [];
 
     for (let index: number = 0; index < args.length; index++) {
@@ -208,6 +213,8 @@ export class RushXCommandLine {
           quiet = true;
         } else if (argValue === '-h' || argValue === '--help') {
           help = true;
+        } else if (argValue === '-d' || argValue === '--debug') {
+          isDebug = true;
         } else if (argValue.startsWith('-')) {
           unknownArgs.push(args[index]);
         } else {
@@ -232,6 +239,7 @@ export class RushXCommandLine {
     return {
       help,
       quiet,
+      isDebug,
       commandName,
       commandArgs
     };
@@ -239,11 +247,12 @@ export class RushXCommandLine {
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx [-q/--quiet] <command> ...\n');
+    console.log('       rushx [-q/--quiet/--debug] <command> ...\n');
 
     console.log('Optional arguments:');
     console.log('  -h, --help            Show this help message and exit.');
-    console.log('  -q, --quiet           Hide rushx startup information.\n');
+    console.log('  -q, --quiet           Hide rushx startup information.');
+    console.log('  -d, --debug           Run in debug mode.\n');
 
     if (projectCommandSet.commandNames.length > 0) {
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
