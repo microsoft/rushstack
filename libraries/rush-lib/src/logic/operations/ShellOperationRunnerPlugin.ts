@@ -29,7 +29,7 @@ function createShellOperations(
   operations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { phaseSelection: selectedPhases, projectChangeAnalyzer, rushConfiguration } = context;
+  const { rushConfiguration } = context;
 
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
@@ -75,10 +75,8 @@ function createShellOperations(
           commandToRun: commandToRun || '',
           displayName,
           phase,
-          projectChangeAnalyzer,
           rushConfiguration,
-          rushProject: project,
-          selectedPhases
+          rushProject: project
         });
         operation.runner = shellOperationRunner;
       } else {

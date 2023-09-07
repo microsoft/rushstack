@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a \"withTerminalAsync\" resource lifetime helper to `IOperationRunnerContext` to manage the creation and cleanup of logging for operation execution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

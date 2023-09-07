@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { StdioSummarizer } from '@rushstack/terminal';
+import type {  ITerminal, ITerminalProvider, StdioSummarizer } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
@@ -61,6 +61,17 @@ export interface IOperationRunnerContext {
    * ignore dependent projects.
    */
   readonly changedProjectsOnly: boolean;
+
+  /**
+   * Invokes the specified callback with a terminal that is associated with this operation.
+   *
+   * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
+   */
+  withTerminalAsync<T>(
+    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    createLogFile: boolean,
+    logFileSuffix?: string
+  ): Promise<T>;
 }
 
 /**
