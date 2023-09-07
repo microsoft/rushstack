@@ -62,6 +62,7 @@ export class RushXCommandLine {
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
       eventHooksManager?.handle(Event.postRushx, false /* isDebug */, ignoreHooks);
     } catch (error) {
+      process.exitCode = 1;
       console.log(colors.red('Error: ' + (error as Error).message));
     }
   }
@@ -74,7 +75,7 @@ export class RushXCommandLine {
     options: ILaunchRushXInternalOptions,
     rushConfiguration: RushConfiguration | undefined,
     args: IRushXCommandLineArguments
-  ): void {
+  ) {
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
@@ -97,11 +98,9 @@ export class RushXCommandLine {
       process.cwd()
     );
     if (!packageJsonFilePath) {
-      console.log(colors.red('This command should be used inside a project folder.'));
-      console.log(
-        `Unable to find a package.json file in the current working directory or any of its parents.`
+      throw Error(
+        'Unable to find a package.json file in the current working directory or any of its parents.'
       );
-      return;
     }
 
     if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
@@ -126,22 +125,17 @@ export class RushXCommandLine {
     const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
 
     if (scriptBody === undefined) {
-      console.log(
-        colors.red(
-          `Error: The command "${args.commandName}" is not defined in the` +
-            ` package.json file for this project.`
-        )
-      );
+      let errorMessage: string =
+        `Error: The command "${args.commandName}" is not defined in the` +
+        ` package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
-        console.log(
+        errorMessage +=
           '\nAvailable commands for this project are: ' +
-            projectCommandSet.commandNames.map((x) => `"${x}"`).join(', ')
-        );
+          projectCommandSet.commandNames.map((x) => `"${x}"`).join(', ');
       }
 
-      console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
-      return;
+      throw Error(errorMessage);
     }
 
     let commandWithArgs: string = scriptBody;
@@ -176,10 +170,8 @@ export class RushXCommandLine {
     });
 
     if (exitCode > 0) {
-      console.log(colors.red(`The script failed with exit code ${exitCode}`));
+      throw Error(`The script failed with exit code ${exitCode}`);
     }
-
-    process.exitCode = exitCode;
   }
 
   private static _getCommandLineArguments(): IRushXCommandLineArguments {
