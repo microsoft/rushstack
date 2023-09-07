@@ -521,6 +521,7 @@ export interface IOperationRunner {
     cacheable: boolean;
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
     getConfigHash(): string;
+    readonly isNoOp?: boolean;
     readonly name: string;
     reportTiming: boolean;
     silent: boolean;
@@ -1198,8 +1199,8 @@ export class RushProjectConfiguration {
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
     // (undocumented)
     readonly project: RushConfigurationProject;
-    static tryLoadAndValidateForProjectsAsync(projects: Iterable<RushConfigurationProject>, phases: ReadonlySet<IPhase>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
+    static tryLoadForProjectsAsync(projects: Iterable<RushConfigurationProject>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
     validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }

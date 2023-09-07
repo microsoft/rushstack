@@ -98,6 +98,12 @@ export interface IOperationRunner {
   warningsAreAllowed: boolean;
 
   /**
+   * If set to true, this operation is considered a no-op and can be considered always skipped for
+   * analysis purposes.
+   */
+  readonly isNoOp?: boolean;
+
+  /**
    * Method to be executed for the operation.
    */
   executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
