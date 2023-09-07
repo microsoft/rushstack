@@ -17,7 +17,11 @@ import schemaJson from '../../schemas/pnpm-config.schema.json';
 export type PnpmStoreOptions = 'local' | 'global';
 
 /**
- * This represents the available resolution-mode options
+ * Possible values for the `resolutionMode` setting in Rush's pnpm-config.json file.
+ * @remarks
+ * These modes correspond to PNPM's `resolution-mode` values, which are documented here:
+ *
+ * {@link https://pnpm.io/npmrc#resolution-mode }
  * @public
  */
 export type PnpmResolutionModeOptions = 'highest' | 'time-based' | 'lowest-direct';
@@ -127,11 +131,13 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly pnpmStore: PnpmStoreOptions;
 
   /**
-   * The method used to set resolution mode used by PNPM.
+   * This setting determines PNPM's `resolution-mode`  option. The default value is `highest`.
    *
    * @remarks
-   * The resolution mode used by PNPM.
-   * Available options: highest, time-based, lowest-direct
+   * Be aware that the PNPM 8 initially defaulted to `lowest` instead of  `highest`, but PNPM
+   * reverted this decision in 8.6.12 because it caused confusion for users.  Rush 5.105.0 and newer
+   * avoids this confusion by consistently defaulting to `highest` when `resolutionMode` is not
+   * explicitly set in pnpm-config.json or .npmrc, regardless of your PNPM version.
    *
    * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
    */

@@ -612,7 +612,7 @@ ${gitLfsHookHandling}
         if (isResolutionModeInNpmrc) {
           console.log(
             colors.yellow(
-              `Warning: you have set resolution-mode in both .npmrc and pnpm-config.json! We will use the value in pnpm-config.json.`
+              `Warning: PNPM's resolution-mode is specified in both .npmrc and pnpm-config.json. The value in pnpm-config.json will take precedence.`
             )
           );
         }
