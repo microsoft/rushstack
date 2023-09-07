@@ -225,7 +225,7 @@ export class RushXCommandLine {
     if (unknownArgs.length > 0) {
       // Future TODO: Instead of just displaying usage info, we could display a
       // specific error about the unknown flag the user tried to pass to rushx.
-      console.log(colors.red(`Unknown arguments: ${unknownArgs.join(', ')}`));
+      console.log(colors.red(`Unknown arguments: ${unknownArgs.map((x) => JSON.stringify(x)).join(', ')}`));
       help = true;
     }
 
