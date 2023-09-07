@@ -46,6 +46,14 @@ interface IRushXCommandLineArguments {
   commandArgs: string[];
 }
 
+class ProcessError extends Error {
+  exitCode: number = 0;
+  constructor(message: string, exitCode: number) {
+    super(message);
+    this.exitCode = exitCode;
+  }
+}
+
 export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
     try {
@@ -62,7 +70,11 @@ export class RushXCommandLine {
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
       eventHooksManager?.handle(Event.postRushx, false /* isDebug */, ignoreHooks);
     } catch (error) {
-      process.exitCode = 1;
+      if (error instanceof ProcessError) {
+        process.exitCode = error.exitCode;
+      } else {
+        process.exitCode = 1;
+      }
       console.log(colors.red('Error: ' + (error as Error).message));
     }
   }
@@ -170,7 +182,10 @@ export class RushXCommandLine {
     });
 
     if (exitCode > 0) {
-      throw Error(`The script failed with exit code ${exitCode}`);
+      throw new ProcessError(
+        `Failed calling ${commandWithArgsForDisplay}.  Exit code: ${exitCode}`,
+        exitCode
+      );
     }
   }
 
