@@ -1,9 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StdioSummarizer } from '@rushstack/terminal';
-import { InternalError } from '@rushstack/node-core-library';
-import type { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
+import {
+  DiscardStdoutTransform,
+  SplitterTransform,
+  StderrLineTransform,
+  StdioSummarizer,
+  TextRewriterTransform,
+  TerminalWritable
+} from '@rushstack/terminal';
+import {
+  ITerminal,
+  ITerminalProvider,
+  InternalError,
+  NewlineKind,
+  Terminal
+} from '@rushstack/node-core-library';
+import { CollatedTerminal, CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
@@ -12,6 +25,8 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
+import { ProjectLogWritable } from './ProjectLogWritable';
 
 export interface IOperationExecutionRecordContext {
   streamCollator: StreamCollator;
@@ -168,6 +183,89 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     }
     this._status = newStatus;
     this._context.onOperationStatusChanged?.(this);
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.withTerminalAsync}
+   */
+  public async withTerminalAsync<T>(
+    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    createLogFile: boolean,
+    logFileSuffix: string = ''
+  ): Promise<T> {
+    const { associatedPhase, associatedProject, stdioSummarizer } = this;
+    const projectLogWritable: ProjectLogWritable | undefined =
+      createLogFile && associatedProject && associatedPhase
+        ? new ProjectLogWritable(
+            associatedProject,
+            this.collatedWriter.terminal,
+            `${associatedPhase.logFilenameIdentifier}${logFileSuffix}`
+          )
+        : undefined;
+
+    try {
+      //#region OPERATION LOGGING
+      // TERMINAL PIPELINE:
+      //
+      //                             +--> quietModeTransform? --> collatedWriter
+      //                             |
+      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+      //                                                        |
+      //                                                        +--> stdioSummarizer
+      const destination: TerminalWritable = projectLogWritable
+        ? new SplitterTransform({
+            destinations: [
+              new TextRewriterTransform({
+                destination: projectLogWritable,
+                removeColors: true,
+                normalizeNewlines: NewlineKind.OsDefault
+              }),
+              stdioSummarizer
+            ]
+          })
+        : stdioSummarizer;
+
+      const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
+        destination,
+        newlineKind: NewlineKind.Lf // for StdioSummarizer
+      });
+
+      const splitterTransform1: SplitterTransform = new SplitterTransform({
+        destinations: [
+          this.quietMode
+            ? new DiscardStdoutTransform({ destination: this.collatedWriter })
+            : this.collatedWriter,
+          stderrLineTransform
+        ]
+      });
+
+      const normalizeNewlineTransform: TextRewriterTransform = new TextRewriterTransform({
+        destination: splitterTransform1,
+        normalizeNewlines: NewlineKind.Lf,
+        ensureNewlineAtEnd: true
+      });
+
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
+        debugEnabled: this.debugMode
+      });
+      const terminal: Terminal = new Terminal(terminalProvider);
+      //#endregion
+
+      const result: T = await callback(terminal, terminalProvider);
+
+      normalizeNewlineTransform.close();
+
+      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+      // have closed projectLogWritable.
+      if (projectLogWritable?.isOpen) {
+        throw new InternalError('The output file handle was not closed');
+      }
+
+      return result;
+    } finally {
+      projectLogWritable?.close();
+    }
   }
 
   public async executeAsync({

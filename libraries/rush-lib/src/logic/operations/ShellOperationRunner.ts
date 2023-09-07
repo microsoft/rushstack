@@ -1,41 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as child_process from 'child_process';
-import { Text, NewlineKind, InternalError, Terminal } from '@rushstack/node-core-library';
-import {
-  TerminalChunkKind,
-  TextRewriterTransform,
-  StderrLineTransform,
-  SplitterTransform,
-  DiscardStdoutTransform
-} from '@rushstack/terminal';
-import { CollatedTerminal } from '@rushstack/stream-collator';
+import type * as child_process from 'node:child_process';
+
+import { Text, ITerminal, ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
 
 import { Utilities } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import { ProjectLogWritable } from './ProjectLogWritable';
-import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
+import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
-  projectChangeAnalyzer: ProjectChangeAnalyzer;
   displayName: string;
   phase: IPhase;
-  /**
-   * The set of phases being executed in the current command, for validation of rush-project.json
-   */
-  selectedPhases: Iterable<IPhase>;
 }
 
 /**
@@ -53,7 +38,6 @@ export class ShellOperationRunner implements IOperationRunner {
 
   private readonly _commandToRun: string;
 
-  private readonly _logFilenameIdentifier: string;
   private readonly _rushProject: RushConfigurationProject;
   private readonly _rushConfiguration: RushConfiguration;
 
@@ -66,7 +50,6 @@ export class ShellOperationRunner implements IOperationRunner {
     this._commandToRun = options.commandToRun;
     this.warningsAreAllowed =
       EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
-    this._logFilenameIdentifier = phase.logFilenameIdentifier;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
@@ -82,128 +65,62 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
-      this._rushProject,
-      context.collatedWriter.terminal,
-      this._logFilenameIdentifier
-    );
+    return await context.withTerminalAsync(
+      async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
+        let hasWarningOrError: boolean = false;
+        const projectFolder: string = this._rushProject.projectFolder;
 
-    try {
-      //#region OPERATION LOGGING
-      // TERMINAL PIPELINE:
-      //
-      //                             +--> quietModeTransform? --> collatedWriter
-      //                             |
-      // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-      //                                                        |
-      //                                                        +--> stdioSummarizer
-      const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
-        destination: projectLogWritable,
-        removeColors: true,
-        normalizeNewlines: NewlineKind.OsDefault
-      });
+        // Run the operation
+        terminal.writeLine('Invoking: ' + this._commandToRun);
 
-      const splitterTransform2: SplitterTransform = new SplitterTransform({
-        destinations: [removeColorsTransform, context.stdioSummarizer]
-      });
-
-      const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
-        destination: splitterTransform2,
-        newlineKind: NewlineKind.Lf // for StdioSummarizer
-      });
-
-      const discardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
-        destination: context.collatedWriter
-      });
-
-      const splitterTransform1: SplitterTransform = new SplitterTransform({
-        destinations: [context.quietMode ? discardTransform : context.collatedWriter, stderrLineTransform]
-      });
-
-      const normalizeNewlineTransform: TextRewriterTransform = new TextRewriterTransform({
-        destination: splitterTransform1,
-        normalizeNewlines: NewlineKind.Lf,
-        ensureNewlineAtEnd: true
-      });
-
-      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
-      const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
-        debugEnabled: context.debugMode
-      });
-      const terminal: Terminal = new Terminal(terminalProvider);
-      //#endregion
-
-      let hasWarningOrError: boolean = false;
-      const projectFolder: string = this._rushProject.projectFolder;
-
-      // Run the operation
-      terminal.writeLine('Invoking: ' + this._commandToRun);
-
-      const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-        this._commandToRun,
-        {
-          rushConfiguration: this._rushConfiguration,
-          workingDirectory: projectFolder,
-          initCwd: this._rushConfiguration.commonTempFolder,
-          handleOutput: true,
-          environmentPathOptions: {
-            includeProjectBin: true
+        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
+          this._commandToRun,
+          {
+            rushConfiguration: this._rushConfiguration,
+            workingDirectory: projectFolder,
+            initCwd: this._rushConfiguration.commonTempFolder,
+            handleOutput: true,
+            environmentPathOptions: {
+              includeProjectBin: true
+            }
           }
-        }
-      );
+        );
 
-      // Hook into events, in order to get live streaming of the log
-      if (subProcess.stdout !== null) {
-        subProcess.stdout.on('data', (data: Buffer) => {
+        // Hook into events, in order to get live streaming of the log
+        subProcess.stdout?.on('data', (data: Buffer) => {
           const text: string = data.toString();
-          collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
+          terminalProvider.write(text, TerminalProviderSeverity.log);
         });
-      }
-      if (subProcess.stderr !== null) {
-        subProcess.stderr.on('data', (data: Buffer) => {
+        subProcess.stderr?.on('data', (data: Buffer) => {
           const text: string = data.toString();
-          collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
+          terminalProvider.write(text, TerminalProviderSeverity.error);
           hasWarningOrError = true;
         });
-      }
 
-      let status: OperationStatus = await new Promise(
-        (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
-          subProcess.on('close', (code: number) => {
-            try {
-              if (code !== 0) {
-                // Do NOT reject here immediately, give a chance for other logic to suppress the error
-                context.error = new OperationError('error', `Returned error code: ${code}`);
-                resolve(OperationStatus.Failure);
-              } else if (hasWarningOrError) {
-                resolve(OperationStatus.SuccessWithWarning);
-              } else {
-                resolve(OperationStatus.Success);
+        const status: OperationStatus = await new Promise(
+          (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
+            subProcess.on('close', (code: number) => {
+              try {
+                if (code !== 0) {
+                  // Do NOT reject here immediately, give a chance for other logic to suppress the error
+                  context.error = new OperationError('error', `Returned error code: ${code}`);
+                  resolve(OperationStatus.Failure);
+                } else if (hasWarningOrError) {
+                  resolve(OperationStatus.SuccessWithWarning);
+                } else {
+                  resolve(OperationStatus.Success);
+                }
+              } catch (error) {
+                reject(error as OperationError);
               }
-            } catch (error) {
-              reject(error as OperationError);
-            }
-          });
-        }
-      );
+            });
+          }
+        );
 
-      // projectLogWritable should be closed before copy the logs to build cache
-      normalizeNewlineTransform.close();
-
-      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
-      // have closed projectLogWritable.
-      if (projectLogWritable.isOpen) {
-        throw new InternalError('The output file handle was not closed');
-      }
-
-      if (terminalProvider.hasErrors) {
-        status = OperationStatus.Failure;
-      }
-
-      return status;
-    } finally {
-      projectLogWritable.close();
-    }
+        return status;
+      },
+      true
+    );
   }
 }
 

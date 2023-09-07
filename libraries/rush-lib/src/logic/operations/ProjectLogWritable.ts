@@ -10,7 +10,6 @@ import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
 
 export class ProjectLogWritable extends TerminalWritable {
-  private readonly _project: RushConfigurationProject;
   private readonly _terminal: CollatedTerminal;
 
   public readonly logPath: string;
@@ -27,7 +26,6 @@ export class ProjectLogWritable extends TerminalWritable {
     logFilenameIdentifier: string
   ) {
     super();
-    this._project = project;
     this._terminal = terminal;
 
     // Delete the legacy logs

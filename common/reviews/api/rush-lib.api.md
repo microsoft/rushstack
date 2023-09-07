@@ -598,6 +598,7 @@ export interface IOperationRunnerContext {
     status: OperationStatus;
     stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
+    withTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, createLogFile: boolean, logFileSuffix?: string): Promise<T>;
 }
 
 // @alpha (undocumented)
