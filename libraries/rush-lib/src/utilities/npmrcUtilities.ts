@@ -23,8 +23,9 @@ export interface ILogger {
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
 function _trimNpmrcFile(sourceNpmrcPath: string): string {
-  if (_combinedNpmrcMap.has(sourceNpmrcPath) && _combinedNpmrcMap.get(sourceNpmrcPath) !== undefined) {
-    return _combinedNpmrcMap.get(sourceNpmrcPath)!;
+  const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
+  if (combinedNpmrcFromCache !== undefined) {
+    return combinedNpmrcFromCache;
   }
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
@@ -139,5 +140,7 @@ export function syncNpmrc(
 export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey: string): boolean {
   const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
   const trimNpmrcFile: string = _trimNpmrcFile(sourceNpmrcPath);
-  return trimNpmrcFile.includes(`${variableKey}=`);
+
+  const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
+  return trimNpmrcFile.match(variableKeyRegExp) !== null;
 }

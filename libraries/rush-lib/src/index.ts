@@ -27,7 +27,8 @@ export {
 export {
   IPnpmOptionsJson as _IPnpmOptionsJson,
   PnpmStoreOptions,
-  PnpmOptionsConfiguration
+  PnpmOptionsConfiguration,
+  PnpmResolutionModeOptions
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';

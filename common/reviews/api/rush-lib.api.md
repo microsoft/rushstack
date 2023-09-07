@@ -520,7 +520,6 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "PnpmResolutionModeOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: No member was found with name "ResolutionMode"
     //
     // (undocumented)
@@ -819,6 +818,9 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }
+
+// @public
+export type PnpmResolutionModeOptions = 'highest' | 'time-based' | 'lowest-direct';
 
 // @public
 export type PnpmStoreOptions = 'local' | 'global';
