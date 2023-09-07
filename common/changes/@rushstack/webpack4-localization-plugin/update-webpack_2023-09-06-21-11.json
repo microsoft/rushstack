@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack4-localization-plugin",
+      "comment": "Update Webpack peerDependency to ~4.47.0.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-localization-plugin"
+}

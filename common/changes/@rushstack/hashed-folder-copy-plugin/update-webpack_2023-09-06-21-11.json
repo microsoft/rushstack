@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Update Webpack peerDependency to ~4.47.0.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}
