@@ -139,6 +139,12 @@ export function syncNpmrc(
 
 export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey: string): boolean {
   const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+
+  //if .npmrc file does not exist, return false directly
+  if (!fs.existsSync(sourceNpmrcPath)) {
+    return false;
+  }
+
   const trimNpmrcFile: string = _trimNpmrcFile(sourceNpmrcPath);
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
