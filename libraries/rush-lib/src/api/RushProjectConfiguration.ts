@@ -251,10 +251,11 @@ export class RushProjectConfiguration {
       if (operationSettings) {
         if (operationSettings.outputFolderNames) {
           for (const outputFolderName of operationSettings.outputFolderNames) {
-            const overlappingOperationNames: string[] | undefined =
+            const otherOverlappingOperationNames: string[] | undefined =
               overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(outputFolderName, operationName);
-            if (overlappingOperationNames) {
-              const overlapsWithOwnOperation: boolean = overlappingOperationNames?.includes(operationName);
+            if (otherOverlappingOperationNames) {
+              const overlapsWithOwnOperation: boolean =
+                otherOverlappingOperationNames?.includes(operationName);
               if (overlapsWithOwnOperation) {
                 terminal.writeErrorLine(
                   `The project "${project.packageName}" has a ` +
@@ -267,10 +268,9 @@ export class RushProjectConfiguration {
                   `The project "${project.packageName}" has a ` +
                     `"${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" configuration that defines ` +
                     'two operations in the same command whose "outputFolderNames" would overlap. ' +
-                    'Operations outputs in the same command must be disjoint so that they can be independently cached.' +
-                    `\n\n` +
+                    'Operations outputs in the same command must be disjoint so that they can be independently cached. ' +
                     `The "${outputFolderName}" path overlaps between these operations: ` +
-                    overlappingOperationNames.map((operationName) => `"${operationName}"`).join(', ')
+                    `"${operationName}", "${otherOverlappingOperationNames.join('", "')}"`
                 );
               }
 

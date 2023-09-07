@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
