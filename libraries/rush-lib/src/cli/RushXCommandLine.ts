@@ -65,7 +65,7 @@ export class RushXCommandLine {
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
-      const ignoreHooks = process.env.INSIDERUSH === '1';
+      const ignoreHooks = process.env._RUSH_SUPPRESS_HOOKS === '1';
       eventHooksManager?.handle(Event.preRushx, false /* isDebug */, ignoreHooks);
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
       eventHooksManager?.handle(Event.postRushx, false /* isDebug */, ignoreHooks);

@@ -504,8 +504,8 @@ export class Utilities {
       }
     });
 
-    // Communicate to downstream calls that they are running inside a top-level rush command
-    environment.INSIDERUSH = '1';
+    // Communicate to downstream calls that they should not try to run hooks
+    environment._RUSH_SUPPRESS_HOOKS = '1';
 
     return spawnFunction(shellCommand, [commandFlags, command], {
       cwd: options.workingDirectory,
