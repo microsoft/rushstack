@@ -520,9 +520,6 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
-    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: No member was found with name "ResolutionMode"
-    //
-    // (undocumented)
     resolutionMode?: PnpmResolutionModeOptions;
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;

@@ -98,7 +98,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   unsupportedPackageJsonSettings?: unknown;
   /**
-   * {@inheritDoc PnpmOptionsConfiguration.ResolutionMode}
+   * {@inheritDoc PnpmOptionsConfiguration.resolutionMode}
    */
   resolutionMode?: PnpmResolutionModeOptions;
 }
