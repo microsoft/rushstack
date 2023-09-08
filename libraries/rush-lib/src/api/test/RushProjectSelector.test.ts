@@ -41,7 +41,7 @@ describe(RushProjectSelector.name, () => {
       const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         union: ['project1', 'project2', 'project3']
       });
-      expect([...projects].map((project) => project.packageName)).toEqual([
+      expect(Array.from(projects, (project) => project.packageName)).toEqual([
         'project1',
         'project2',
         'project3'
