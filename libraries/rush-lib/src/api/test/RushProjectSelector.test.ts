@@ -24,7 +24,7 @@ describe(RushProjectSelector.name, () => {
       const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression(
         'project2'
       );
-      expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
+      expect(Array.from(projects, (project) => project.packageName)).toEqual(['project2']);
     });
 
     it('selects a project using a detailed scope', async () => {
