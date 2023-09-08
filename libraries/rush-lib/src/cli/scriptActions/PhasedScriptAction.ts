@@ -534,7 +534,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         ignoreHooks: true,
         operations,
         stopwatch,
-        executionManagerOptions,
+        executionManagerOptions: {
+          ...executionManagerOptions,
+          beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+            await this.hooks.beforeExecuteOperations.promise(records, createOperationsContext);
+          }
+        },
         terminal
       };
 

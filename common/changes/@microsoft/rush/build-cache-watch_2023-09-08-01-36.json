@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix the instance of \"ICreateOperationsContext\" passed to the \"beforeExecuteOperations\" hook in watch mode rebuilds to match the instance passed to the \"createOperations\" hook.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

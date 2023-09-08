@@ -47,6 +47,7 @@ export interface IOperationBuildCacheContext {
   isCacheWriteAllowed: boolean;
   isCacheReadAllowed: boolean;
 
+  projectChangeAnalyzer: ProjectChangeAnalyzer;
   projectBuildCache: ProjectBuildCache | undefined;
   cacheDisabledReason: string | undefined;
   operationSettings: IOperationSettings | undefined;
@@ -75,8 +76,6 @@ export interface ICacheableOperationPluginOptions {
 export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   private _buildCacheContextByOperation: Map<Operation, IOperationBuildCacheContext> = new Map();
 
-  private _createContext: ICreateOperationsContext | undefined;
-
   private readonly _options: ICacheableOperationPluginOptions;
 
   public constructor(options: ICacheableOperationPluginOptions) {
@@ -95,8 +94,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       ): Promise<void> => {
         const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
           context;
-
-        this._createContext = context;
 
         const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
@@ -141,6 +138,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isCacheWriteAllowed: isInitial,
               isCacheReadAllowed: isIncrementalBuildAllowed,
               projectBuildCache: undefined,
+              projectChangeAnalyzer,
               operationSettings,
               cacheDisabledReason,
               cobuildLock: undefined,
@@ -221,8 +219,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       async (
         runnerContext: IOperationRunnerContext & IOperationExecutionResult
       ): Promise<OperationStatus | undefined> => {
-        const { _createContext: createContext } = this;
-        if (!createContext) {
+        if (this._buildCacheContextByOperation.size === 0) {
           return;
         }
 
@@ -232,8 +229,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         if (!buildCacheContext) {
           return;
         }
-
-        const { projectChangeAnalyzer, phaseSelection: selectedPhases } = createContext;
 
         const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
         const {
@@ -248,20 +243,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
 
         const runBeforeExecute = async ({
-          projectChangeAnalyzer,
           buildCacheConfiguration,
           cobuildConfiguration,
-          selectedPhases,
           project,
           phase,
           operationMetadataManager,
           buildCacheContext,
           record
         }: {
-          projectChangeAnalyzer: ProjectChangeAnalyzer;
           buildCacheConfiguration: BuildCacheConfiguration | undefined;
           cobuildConfiguration: CobuildConfiguration | undefined;
-          selectedPhases: ReadonlySet<IPhase>;
           project: RushConfigurationProject;
           phase: IPhase;
           operationMetadataManager: OperationMetadataManager | undefined;
@@ -286,7 +277,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             buildCacheConfiguration,
             rushProject: project,
             phase,
-            projectChangeAnalyzer,
             configHash,
             terminal: buildCacheTerminal,
             operationMetadataManager
@@ -308,7 +298,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 buildCacheContext,
                 rushProject: project,
                 phase,
-                projectChangeAnalyzer,
                 configHash,
                 terminal: buildCacheTerminal,
                 operationMetadataManager
@@ -424,10 +413,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
         try {
           const earlyReturnStatus: OperationStatus | undefined = await runBeforeExecute({
-            projectChangeAnalyzer,
             buildCacheConfiguration,
             cobuildConfiguration,
-            selectedPhases,
             project,
             phase,
             operationMetadataManager,
@@ -604,7 +591,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheContext,
     rushProject,
     phase,
-    projectChangeAnalyzer,
     configHash,
     terminal,
     operationMetadataManager
@@ -613,7 +599,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
     rushProject: RushConfigurationProject;
     phase: IPhase;
-    projectChangeAnalyzer: ProjectChangeAnalyzer;
     configHash: string;
     terminal: ITerminal;
     operationMetadataManager: OperationMetadataManager | undefined;
@@ -625,7 +610,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         return;
       }
 
-      const { operationSettings } = buildCacheContext;
+      const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
       if (!operationSettings || !buildCacheConfiguration) {
         // Unreachable, since this will have set `cacheDisabledReason`.
         return;
@@ -670,7 +655,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheConfiguration,
     cobuildConfiguration,
     phase,
-    projectChangeAnalyzer,
     operationMetadataManager
   }: {
     buildCacheContext: IOperationBuildCacheContext;
@@ -680,14 +664,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     phase: IPhase;
     configHash: string;
     terminal: ITerminal;
-    projectChangeAnalyzer: ProjectChangeAnalyzer;
     operationMetadataManager: OperationMetadataManager | undefined;
   }): Promise<ProjectBuildCache | undefined> {
     if (!buildCacheConfiguration?.buildCacheEnabled) {
       return;
     }
 
-    const { operationSettings } = buildCacheContext;
+    const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
 
     const projectOutputFolderNames: ReadonlyArray<string> = operationSettings?.outputFolderNames ?? [];
     const additionalProjectOutputFilePaths: ReadonlyArray<string> =
