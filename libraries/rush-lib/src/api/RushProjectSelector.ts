@@ -1,32 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from './RushConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
-import { Selection } from '../logic/Selection';
-import type { ISelectorParser } from '../logic/selectors/ISelectorParser';
 import type { ITerminal } from '@rushstack/node-core-library';
+import { Selection } from '../logic/Selection';
 import {
   GitChangedProjectSelectorParser,
   IGitSelectorParserOptions
 } from '../logic/selectors/GitChangedProjectSelectorParser';
+import type { ISelectorParser } from '../logic/selectors/ISelectorParser';
+import { JsonFileSelectorParser } from '../logic/selectors/JsonFileSelectorParser';
 import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
+import { SelectorError } from '../logic/selectors/SelectorError';
 import { TagProjectSelectorParser } from '../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../logic/selectors/VersionPolicyProjectSelectorParser';
-import { JsonFileSelectorParser } from '../logic/selectors/JsonFileSelectorParser';
-import { SelectorError } from '../logic/selectors/SelectorError';
+import { RushConfiguration } from './RushConfiguration';
+import { RushConfigurationProject } from './RushConfigurationProject';
 import {
-  SelectorExpression,
-  IExpressionDetailedSelector,
   ExpressionParameter,
-  IExpressionOperatorUnion,
+  IExpressionDetailedSelector,
   IExpressionOperatorIntersect,
   IExpressionOperatorSubtract,
+  IExpressionOperatorUnion,
+  SelectorExpression,
   isDetailedSelector,
-  isParameter,
-  isUnion,
   isIntersect,
-  isSubtract
+  isParameter,
+  isSubtract,
+  isUnion
 } from './SelectorExpressions';
 
 /**
