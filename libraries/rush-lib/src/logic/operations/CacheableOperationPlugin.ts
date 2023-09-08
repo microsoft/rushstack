@@ -93,7 +93,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         recordByOperation: Map<Operation, IOperationExecutionResult>,
         context: ICreateOperationsContext
       ): Promise<void> => {
-        const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations } = context;
+        const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
+          context;
 
         this._createContext = context;
 
@@ -135,8 +136,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             disjointSet?.add(operation);
 
             const buildCacheContext: IOperationBuildCacheContext = {
-              // Supports cache writes by default.
-              isCacheWriteAllowed: true,
+              // Supports cache writes by default for initial operations.
+              // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
+              isCacheWriteAllowed: isInitial,
               isCacheReadAllowed: isIncrementalBuildAllowed,
               projectBuildCache: undefined,
               operationSettings,
