@@ -135,7 +135,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *
    * @remarks
    * Be aware that the PNPM 8 initially defaulted to `lowest` instead of  `highest`, but PNPM
-   * reverted this decision in 8.6.12 because it caused confusion for users.  Rush 5.105.0 and newer
+   * reverted this decision in 8.6.12 because it caused confusion for users.  Rush 5.106.0 and newer
    * avoids this confusion by consistently defaulting to `highest` when `resolutionMode` is not
    * explicitly set in pnpm-config.json or .npmrc, regardless of your PNPM version.
    *
