@@ -77,14 +77,9 @@ describe(RushProjectConfiguration.name, () => {
     });
 
     it('throws an error when loading a rush-project.json config that lists an operation twice', async () => {
-      let errorMessage: string | undefined;
-      try {
-        await loadProjectConfigurationAsync('test-project-b');
-      } catch (e) {
-        errorMessage = (e as Error).message;
-      }
-
-      expect(errorMessage).toMatchSnapshot();
+      await expect(
+        async () => await loadProjectConfigurationAsync('test-project-b')
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it('allows outputFolderNames to be inside subfolders', async () => {
@@ -99,14 +94,7 @@ describe(RushProjectConfiguration.name, () => {
       const rushProjectConfiguration: RushProjectConfiguration | undefined =
         await loadProjectConfigurationAsync('test-project-d');
 
-      let errorWasThrown: boolean = false;
-      try {
-        validateConfiguration(rushProjectConfiguration);
-      } catch (e) {
-        errorWasThrown = true;
-      }
-
-      expect(errorWasThrown).toBe(true);
+      expect(() => validateConfiguration(rushProjectConfiguration)).toThrowError();
     });
   });
 
@@ -166,7 +154,7 @@ describe(RushProjectConfiguration.name, () => {
       expect(reason).toMatchSnapshot();
     });
 
-    it('returns undfined if the config is safe', async () => {
+    it('returns undefined if the config is safe', async () => {
       const config: RushProjectConfiguration | undefined = await loadProjectConfigurationAsync(
         'test-project-c'
       );

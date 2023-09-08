@@ -392,21 +392,23 @@ export class RushProjectConfiguration {
    * Load the rush-project.json data for all selected projects.
    * Validate compatibility of output folders across all selected phases.
    */
-  public static async tryLoadAndValidateForProjectsAsync(
+  public static async tryLoadForProjectsAsync(
     projects: Iterable<RushConfigurationProject>,
-    phases: ReadonlySet<IPhase>,
     terminal: ITerminal
   ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
     const result: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
 
-    await Async.forEachAsync(projects, async (project: RushConfigurationProject) => {
-      const projectConfig: RushProjectConfiguration | undefined =
-        await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
-      if (projectConfig) {
-        projectConfig.validatePhaseConfiguration(phases, terminal);
-        result.set(project, projectConfig);
-      }
-    });
+    await Async.forEachAsync(
+      projects,
+      async (project: RushConfigurationProject) => {
+        const projectConfig: RushProjectConfiguration | undefined =
+          await RushProjectConfiguration.tryLoadForProjectAsync(project, terminal);
+        if (projectConfig) {
+          result.set(project, projectConfig);
+        }
+      },
+      { concurrency: 50 }
+    );
 
     return result;
   }

@@ -35,6 +35,7 @@ export class NullOperationRunner implements IOperationRunner {
   public cacheable: boolean = false;
   // Nothing will get logged, no point allowing warnings
   public readonly warningsAreAllowed: boolean = false;
+  public readonly isNoOp: boolean = true;
 
   public readonly result: OperationStatus;
 

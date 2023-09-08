@@ -42,6 +42,7 @@ import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
+import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -153,6 +154,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     new PhasedOperationPlugin().apply(this.hooks);
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(this.hooks);
+    new ValidateOperationsPlugin(terminal).apply(this.hooks);
 
     if (this._enableParallelism) {
       this._parallelismParameter = this.defineStringParameter({
@@ -369,11 +371,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
         ._runsBeforeInstall
         ? new Map()
-        : await RushProjectConfiguration.tryLoadAndValidateForProjectsAsync(
-            projectSelection,
-            this._initialPhases,
-            terminal
-          );
+        : await RushProjectConfiguration.tryLoadForProjectsAsync(projectSelection, terminal);
 
       const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
       const initialCreateOperationsContext: ICreateOperationsContext = {
