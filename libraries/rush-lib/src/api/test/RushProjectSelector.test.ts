@@ -69,7 +69,7 @@ describe(RushProjectSelector.name, () => {
       const projects: ReadonlySet<RushConfigurationProject> = await projectSelector.selectExpression({
         '--to': 'project1'
       });
-      expect([...projects].map((project) => project.packageName)).toEqual(['project1']);
+      expect(Array.from(projects, (project) => project.packageName)).toEqual(['project1']);
     });
   });
 });
