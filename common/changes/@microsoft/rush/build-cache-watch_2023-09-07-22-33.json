@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Disable build cache writes in watch rebuilds.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
