@@ -20,8 +20,8 @@ export type PnpmStoreOptions = 'local' | 'global';
  * Possible values for the `resolutionMode` setting in Rush's pnpm-config.json file.
  * @remarks
  * These modes correspond to PNPM's `resolution-mode` values, which are documented here:
+ * {@link https://pnpm.io/npmrc#resolution-mode}
  *
- * {@link https://pnpm.io/npmrc#resolution-mode }
  * @public
  */
 export type PnpmResolutionModeOptions = 'highest' | 'time-based' | 'lowest-direct';

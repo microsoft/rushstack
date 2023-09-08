@@ -162,7 +162,7 @@
     },
 
     "resolutionMode": {
-      "description": "This option overrides the resolution-mode in PNPM. Use it if you want to change the default resolution behavior when installing dependencies. \n\nPNPM documentation: https://pnpm.io/npmrc#resolution-mode",
+      "description": "This option overrides the resolution-mode in PNPM. Use it if you want to change the default resolution behavior when installing dependencies. Defaults to \"highest\".\n\nPNPM documentation: https://pnpm.io/npmrc#resolution-mode.",
       "type": "string",
       "enum": ["highest", "time-based", "lowest-direct"]
     }

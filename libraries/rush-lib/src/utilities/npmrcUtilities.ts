@@ -38,8 +38,14 @@ function _trimNpmrcFile(sourceNpmrcPath: string): string {
   const commentRegExp: RegExp = /^\s*[#;]/;
 
   // Trim out lines that reference environment variables that aren't defined
-  for (const line of npmrcFileLines) {
+  for (let line of npmrcFileLines) {
     let lineShouldBeTrimmed: boolean = false;
+
+    //remove spaces before or after key and value
+    line = line
+      .split('=')
+      .map((line) => line.trim())
+      .join('=');
 
     // Ignore comment lines
     if (!commentRegExp.test(line)) {
@@ -88,7 +94,7 @@ function _trimNpmrcFile(sourceNpmrcPath: string): string {
  * home directory.
  *
  * @returns
- * The text of the the .npmrc.
+ * The text of the the .npmrc with lines containing undefined variables commented out.
  */
 function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): string {
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
@@ -138,15 +144,15 @@ export function syncNpmrc(
 }
 
 export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey: string): boolean {
-  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+  const sourceNpmrcPath: string = `${sourceNpmrcFolder}/.npmrc`;
 
   //if .npmrc file does not exist, return false directly
   if (!fs.existsSync(sourceNpmrcPath)) {
     return false;
   }
 
-  const trimNpmrcFile: string = _trimNpmrcFile(sourceNpmrcPath);
+  const trimmedNpmrcFile: string = _trimNpmrcFile(sourceNpmrcPath);
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
-  return trimNpmrcFile.match(variableKeyRegExp) !== null;
+  return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
 }
