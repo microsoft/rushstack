@@ -33,7 +33,7 @@ describe(RushProjectSelector.name, () => {
         scope: 'name',
         value: 'project2'
       });
-      expect([...projects].map((project) => project.packageName)).toEqual(['project2']);
+      expect(Array.from(projects, (project) => project.packageName)).toEqual(['project2']);
     });
 
     it('selects several projects with a union operator', async () => {
