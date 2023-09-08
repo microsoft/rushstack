@@ -76,7 +76,8 @@ export class RushXCommandLine {
         : undefined;
 
       const suppressHooks: boolean = process.env._RUSH_SUPPRESS_HOOKS === '1';
-      if (!suppressHooks) {
+      const attemptHooks = !suppressHooks && !args.help;
+      if (attemptHooks) {
         eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
       }
       // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
@@ -86,7 +87,7 @@ export class RushXCommandLine {
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
       process.exitCode = 0;
 
-      if (!suppressHooks) {
+      if (attemptHooks) {
         eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
       }
     } catch (error) {
