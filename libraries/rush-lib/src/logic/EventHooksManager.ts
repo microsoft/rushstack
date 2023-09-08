@@ -27,7 +27,7 @@ export class EventHooksManager {
 
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
-      if (ignoreHooks) {
+      if (ignoreHooks && process.env._RUSH_SUPPRESS_HOOKS !== '1') {
         console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
         return;
       }
