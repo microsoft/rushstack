@@ -6,7 +6,8 @@ import type {
   IHeftTaskPlugin,
   IHeftTaskRunHookOptions,
   IHeftTaskSession,
-  HeftConfiguration
+  HeftConfiguration,
+  IHeftTaskRunIncrementalHookOptions
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
@@ -39,6 +40,11 @@ export interface IApiExtractorTaskConfiguration {
    * `IExtractorInvokeOptions.typescriptCompilerFolder` API option. This option defaults to false.
    */
   useProjectTypescriptVersion?: boolean;
+
+  /**
+   * If set to true, do a full run of api-extractor on every build.
+   */
+  runInWatchMode?: boolean;
 }
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
@@ -47,9 +53,12 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   private _apiExtractorTaskConfigurationFileLoader:
     | ConfigurationFile<IApiExtractorTaskConfiguration>
     | undefined;
+  private _printedWatchWarning: boolean = false;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
-    taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+    const runAsync = async (
+      runOptions: IHeftTaskRunHookOptions & Partial<IHeftTaskRunIncrementalHookOptions>
+    ): Promise<void> => {
       const result: IApiExtractorConfigurationResult | undefined =
         await this._getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
       if (result) {
@@ -61,12 +70,10 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
           result.apiExtractorConfiguration
         );
       }
-    });
+    };
 
-    taskSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, async () => {
-      // Warn since don't need to run API Extractor when in watch mode.
-      taskSession.logger.terminal.writeWarningLine("API Extractor isn't currently supported in watch mode.");
-    });
+    taskSession.hooks.run.tapPromise(PLUGIN_NAME, runAsync);
+    taskSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, runAsync);
   }
 
   private async _getApiExtractorConfigurationFilePathAsync(
@@ -165,18 +172,24 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
   private async _runApiExtractorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    runOptions: IHeftTaskRunHookOptions,
+    runOptions: IHeftTaskRunHookOptions & Partial<IHeftTaskRunIncrementalHookOptions>,
     apiExtractor: typeof TApiExtractor,
     apiExtractorConfiguration: TApiExtractor.ExtractorConfig
   ): Promise<void> {
-    // TODO: Handle watch mode
-    // if (watchMode) {
-    //   taskSession.logger.terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
-    //   return;
-    // }
-
     const apiExtractorTaskConfiguration: IApiExtractorTaskConfiguration | undefined =
       await this._getApiExtractorTaskConfigurationAsync(taskSession, heftConfiguration);
+
+    if (runOptions.requestRun) {
+      if (!apiExtractorTaskConfiguration?.runInWatchMode) {
+        if (!this._printedWatchWarning) {
+          this._printedWatchWarning = true;
+          taskSession.logger.terminal.writeWarningLine(
+            "API Extractor isn't currently supported in -watch mode."
+          );
+        }
+        return;
+      }
+    }
 
     let typescriptPackagePath: string | undefined;
     if (apiExtractorTaskConfiguration?.useProjectTypescriptVersion) {
