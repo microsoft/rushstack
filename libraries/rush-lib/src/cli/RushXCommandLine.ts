@@ -41,6 +41,11 @@ interface IRushXCommandLineArguments {
   isDebug: boolean;
 
   /**
+   * Flag indicating whether the user wants to not call hooks.
+   */
+  ignoreHooks: boolean;
+
+  /**
    * The command to run (i.e., the target "script" in package.json.)
    */
   commandName: string;
@@ -70,15 +75,20 @@ export class RushXCommandLine {
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
-      const ignoreHooks: boolean = process.env._RUSH_SUPPRESS_HOOKS === '1';
-      eventHooksManager?.handle(Event.preRushx, args.isDebug, ignoreHooks);
+      const suppressHooks: boolean = process.env._RUSH_SUPPRESS_HOOKS === '1';
+      if (!suppressHooks) {
+        eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
+      }
       // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
       // promise exception), so we start with the assumption that the exit code is 1
       // and set it to 0 only on success.
       process.exitCode = 1;
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
       process.exitCode = 0;
-      eventHooksManager?.handle(Event.postRushx, args.isDebug, ignoreHooks);
+
+      if (!suppressHooks) {
+        eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
+      }
     } catch (error) {
       if (error instanceof ProcessError) {
         process.exitCode = error.exitCode;
@@ -142,8 +152,7 @@ export class RushXCommandLine {
     const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
 
     if (scriptBody === undefined) {
-      let errorMessage: string =
-        `The command "${args.commandName}" is not defined in the` + ` package.json file for this project.`;
+      let errorMessage: string = `The command "${args.commandName}" is not defined in the package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
         errorMessage +=
@@ -203,6 +212,7 @@ export class RushXCommandLine {
     let quiet: boolean = false;
     let commandName: string = '';
     let isDebug: boolean = false;
+    let ignoreHooks: boolean = false;
     const commandArgs: string[] = [];
 
     for (let index: number = 0; index < args.length; index++) {
@@ -215,6 +225,8 @@ export class RushXCommandLine {
           help = true;
         } else if (argValue === '-d' || argValue === '--debug') {
           isDebug = true;
+        } else if (argValue === '-ih' || argValue === '--ignorehooks') {
+          ignoreHooks = true;
         } else if (argValue.startsWith('-')) {
           unknownArgs.push(args[index]);
         } else {
@@ -240,6 +252,7 @@ export class RushXCommandLine {
       help,
       quiet,
       isDebug,
+      ignoreHooks,
       commandName,
       commandArgs
     };
@@ -247,11 +260,12 @@ export class RushXCommandLine {
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx [-q/--quiet/--debug] <command> ...\n');
+    console.log('       rushx [-q/--quiet/--debug/--ignorehooks] <command> ...\n');
 
     console.log('Optional arguments:');
     console.log('  -h, --help            Show this help message and exit.');
     console.log('  -q, --quiet           Hide rushx startup information.');
+    console.log('  -ih, --ignorehooks    Do not run hooks.');
     console.log('  -d, --debug           Run in debug mode.\n');
 
     if (projectCommandSet.commandNames.length > 0) {
