@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "2.0.74",
+      "tag": "@microsoft/load-themed-styles_v2.0.74",
+      "date": "Fri, 01 Sep 2023 04:53:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use self.setTimeout() instead of setTimeout() to work around a Jest regression"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.73",
       "tag": "@microsoft/load-themed-styles_v2.0.73",
       "date": "Tue, 08 Aug 2023 07:10:39 GMT",

@@ -14,7 +14,13 @@ import schemaJson from '../../schemas/pnpm-config.schema.json';
  * This represents the available PNPM store options
  * @public
  */
-export type PnpmStoreOptions = 'local' | 'global';
+export type PnpmStoreLocation = 'local' | 'global';
+
+/**
+ * @deprecated Use {@link PnpmStoreLocation} instead
+ * @public
+ */
+export type PnpmStoreOptions = PnpmStoreLocation;
 
 /**
  * Possible values for the `resolutionMode` setting in Rush's pnpm-config.json file.
@@ -56,7 +62,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * {@inheritDoc PnpmOptionsConfiguration.pnpmStore}
    */
-  pnpmStore?: PnpmStoreOptions;
+  pnpmStore?: PnpmStoreLocation;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.strictPeerDependencies}
    */
@@ -128,7 +134,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *  - local: Use the standard Rush store path: common/temp/pnpm-store
    *  - global: Use PNPM's global store path
    */
-  public readonly pnpmStore: PnpmStoreOptions;
+  public readonly pnpmStore: PnpmStoreLocation;
 
   /**
    * This setting determines PNPM's `resolution-mode`  option. The default value is `highest`.

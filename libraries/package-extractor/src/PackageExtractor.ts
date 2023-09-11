@@ -741,8 +741,8 @@ export class PackageExtractor {
           dependenciesConfigurations.filter((d) =>
             semver.satisfies(packagesJson.version, d.dependencyVersionRange)
           );
-        return matchedDependenciesConfigurations.some(
-          (d) => excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
+        return matchedDependenciesConfigurations.some((d) =>
+          excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
         );
       }
     };
@@ -826,20 +826,25 @@ export class PackageExtractor {
         queue,
         async ([sourcePath, callback]: [string, () => void]) => {
           const relativeSourcePath: string = path.relative(sourceFolderPath, sourcePath);
-          if (
-            relativeSourcePath !== '' &&
-            (ignoreFilter.ignores(relativeSourcePath) || isFileExcluded(relativeSourcePath))
-          ) {
+          if (relativeSourcePath !== '' && ignoreFilter.ignores(relativeSourcePath)) {
             callback();
             return;
           }
 
           const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
-
           if (sourcePathNode.kind === 'file') {
+            // Only ignore files and not folders to ensure that we traverse the contents of all folders. This is
+            // done so that we can match against subfolder patterns, ex. "src/subfolder/**/*"
+            if (relativeSourcePath !== '' && isFileExcluded(relativeSourcePath)) {
+              callback();
+              return;
+            }
+
             const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
             if (!options.createArchiveOnly) {
               // Manually call fs.copyFile to avoid unnecessary stat calls.
+              const targetParentPath: string = path.dirname(targetPath);
+              await FileSystem.ensureFolderAsync(targetParentPath);
               await fs.promises.copyFile(sourcePath, targetPath, fs.constants.COPYFILE_EXCL);
             }
 
@@ -853,10 +858,6 @@ export class PackageExtractor {
               });
             }
           } else if (sourcePathNode.kind === 'folder') {
-            if (!options.createArchiveOnly) {
-              const targetPath: string = path.join(targetFolderPath, relativeSourcePath);
-              await FileSystem.ensureFolderAsync(targetPath);
-            }
             const children: string[] = await FileSystem.readFolderItemNamesAsync(sourcePath);
             for (const child of children) {
               queue.push(path.join(sourcePath, child));

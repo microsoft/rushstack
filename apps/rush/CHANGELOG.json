@@ -2,6 +2,72 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.105.0",
+      "tag": "@microsoft/rush_v5.105.0",
+      "date": "Fri, 08 Sep 2023 04:09:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache writes in watch rebuilds."
+          },
+          {
+            "comment": "Fix the instance of \"ICreateOperationsContext\" passed to the \"beforeExecuteOperations\" hook in watch mode rebuilds to match the instance passed to the \"createOperations\" hook."
+          },
+          {
+            "comment": "Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases."
+          },
+          {
+            "comment": "Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project."
+          },
+          {
+            "comment": "Add the \"disableBuildCache\" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the \"disableBuildCache\" flag to also disable the legacy skip detection, in the event that the build cache is not configured."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.104.1",
+      "tag": "@microsoft/rush_v5.104.1",
+      "date": "Tue, 05 Sep 2023 18:53:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.104.0",
+      "tag": "@microsoft/rush_v5.104.0",
+      "date": "Fri, 01 Sep 2023 04:54:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.103.0",
+      "tag": "@microsoft/rush_v5.103.0",
+      "date": "Thu, 31 Aug 2023 23:28:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`"
+          },
+          {
+            "comment": "Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile"
+          },
+          {
+            "comment": "Fix an issue where \"undefined\" was sometimes printed instead of a blank line"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.102.0",
       "tag": "@microsoft/rush_v5.102.0",
       "date": "Tue, 15 Aug 2023 20:09:40 GMT",

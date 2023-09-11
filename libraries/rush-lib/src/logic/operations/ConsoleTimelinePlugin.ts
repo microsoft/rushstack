@@ -12,6 +12,7 @@ import {
 } from '../../pluginFramework/PhasedCommandHooks';
 import { IExecutionResult } from './IOperationExecutionResult';
 import { OperationStatus } from './OperationStatus';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 
 const PLUGIN_NAME: 'ConsoleTimelinePlugin' = 'ConsoleTimelinePlugin';
 
@@ -55,7 +56,11 @@ export class ConsoleTimelinePlugin implements IPhasedCommandPlugin {
     hooks.afterExecuteOperations.tap(
       PLUGIN_NAME,
       (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printTimeline(this._terminal, result);
+        _printTimeline({
+          terminal: this._terminal,
+          result,
+          cobuildConfiguration: context.cobuildConfiguration
+        });
       }
     );
   }
@@ -71,7 +76,9 @@ const TIMELINE_WIDTH: number = 109;
  */
 const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
   [OperationStatus.Ready]: '?',
+  [OperationStatus.Queued]: '?',
   [OperationStatus.Executing]: '?',
+  [OperationStatus.RemoteExecuting]: '?',
   [OperationStatus.Success]: '#',
   [OperationStatus.SuccessWithWarning]: '!',
   [OperationStatus.Failure]: '!',
@@ -86,7 +93,9 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
  */
 const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => string> = {
   [OperationStatus.Ready]: colors.yellow,
+  [OperationStatus.Queued]: colors.yellow,
   [OperationStatus.Executing]: colors.yellow,
+  [OperationStatus.RemoteExecuting]: colors.yellow,
   [OperationStatus.Success]: colors.green,
   [OperationStatus.SuccessWithWarning]: colors.yellow,
   [OperationStatus.Failure]: colors.red,
@@ -102,12 +111,23 @@ interface ITimelineRecord {
   durationString: string;
   name: string;
   status: OperationStatus;
+  isExecuteByOtherCobuildRunner: boolean;
 }
+
+/**
+ * @internal
+ */
+export interface IPrintTimelineParameters {
+  terminal: ITerminal;
+  result: IExecutionResult;
+  cobuildConfiguration: CobuildConfiguration | undefined;
+}
+
 /**
  * Print a more detailed timeline and analysis of CPU usage for the build.
  * @internal
  */
-export function _printTimeline(terminal: ITerminal, result: IExecutionResult): void {
+export function _printTimeline({ terminal, result, cobuildConfiguration }: IPrintTimelineParameters): void {
   //
   // Gather the operation records we'll be displaying. Do some inline max()
   // finding to reduce the number of times we need to loop through operations.
@@ -163,7 +183,10 @@ export function _printTimeline(terminal: ITerminal, result: IExecutionResult): v
         endTime,
         durationString,
         name: operation.name!,
-        status: operationResult.status
+        status: operationResult.status,
+        isExecuteByOtherCobuildRunner:
+          !!operationResult.cobuildRunnerId &&
+          operationResult.cobuildRunnerId !== cobuildConfiguration?.cobuildRunnerId
       });
     }
   }
@@ -203,7 +226,19 @@ export function _printTimeline(terminal: ITerminal, result: IExecutionResult): v
   terminal.writeLine('');
   terminal.writeLine('='.repeat(maxWidth));
 
-  for (const { startTime, endTime, durationString, name, status } of data) {
+  let hasCobuildSymbol: boolean = false;
+
+  function getChartSymbol(record: ITimelineRecord): string {
+    const { isExecuteByOtherCobuildRunner, status } = record;
+    if (isExecuteByOtherCobuildRunner) {
+      hasCobuildSymbol = true;
+      return 'C';
+    }
+    return TIMELINE_CHART_SYMBOLS[status];
+  }
+
+  for (const record of data) {
+    const { startTime, endTime, durationString, name, status } = record;
     // Track busy CPUs
     const openCpu: number = getOpenCPU(startTime);
     busyCpus[openCpu] = endTime;
@@ -215,7 +250,7 @@ export function _printTimeline(terminal: ITerminal, result: IExecutionResult): v
 
     const chart: string =
       colors.gray('-'.repeat(startIdx)) +
-      TIMELINE_CHART_COLORIZER[status](TIMELINE_CHART_SYMBOLS[status].repeat(length)) +
+      TIMELINE_CHART_COLORIZER[status](getChartSymbol(record).repeat(length)) +
       colors.gray('-'.repeat(chartWidth - endIdx));
     terminal.writeLine(
       `${colors.cyan(name.padStart(longestNameLength))} ${chart} ${colors.white(
@@ -232,19 +267,27 @@ export function _printTimeline(terminal: ITerminal, result: IExecutionResult): v
 
   const usedCpus: number = busyCpus.length;
 
-  const legend: string[] = ['LEGEND:', '  [#] Success  [!] Failed/warnings  [%] Skipped/cached/no-op'];
+  const legend: string[] = [
+    'LEGEND:',
+    '  [#] Success  [!] Failed/warnings  [%] Skipped/cached/no-op',
+    '',
+    ''
+  ];
+  if (hasCobuildSymbol) {
+    legend[2] = '  [C] Cobuild';
+  }
 
   const summary: string[] = [
     `Total Work: ${workDuration.toFixed(1)}s`,
-    `Wall Clock: ${allDurationSeconds.toFixed(1)}s`
+    `Wall Clock: ${allDurationSeconds.toFixed(1)}s`,
+    `Max Parallelism Used: ${usedCpus}`,
+    `Avg Parallelism Used: ${(workDuration / allDurationSeconds).toFixed(1)}`
   ];
 
   terminal.writeLine(legend[0] + summary[0].padStart(maxWidth - legend[0].length));
   terminal.writeLine(legend[1] + summary[1].padStart(maxWidth - legend[1].length));
-  terminal.writeLine(`Max Parallelism Used: ${usedCpus}`.padStart(maxWidth));
-  terminal.writeLine(
-    `Avg Parallelism Used: ${(workDuration / allDurationSeconds).toFixed(1)}`.padStart(maxWidth)
-  );
+  terminal.writeLine(legend[2] + summary[2].padStart(maxWidth - legend[2].length));
+  terminal.writeLine(legend[3] + summary[3].padStart(maxWidth - legend[3].length));
 
   //
   // Include time-by-phase, if phases are enabled

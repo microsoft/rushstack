@@ -2,6 +2,18 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "0.2.45",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v0.2.45",
+      "date": "Thu, 07 Sep 2023 03:35:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update Webpack peerDependency to ~4.47.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.44",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.2.44",
       "date": "Tue, 08 Aug 2023 07:10:40 GMT",

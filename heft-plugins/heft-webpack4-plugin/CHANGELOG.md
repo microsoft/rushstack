@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Sat, 12 Aug 2023 00:21:48 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2023 03:35:42 GMT and should not be manually modified.
+
+## 0.9.0
+Thu, 07 Sep 2023 03:35:42 GMT
+
+### Minor changes
+
+- Update Webpack peerDependency to ~4.47.0 and removes the warning about Node <v18, as Webpack 4.47.0 fixes the underlying issue.
 
 ## 0.8.0
 Sat, 12 Aug 2023 00:21:48 GMT

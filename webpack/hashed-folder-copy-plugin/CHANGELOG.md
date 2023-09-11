@@ -1,6 +1,13 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Sep 2023 03:35:42 GMT and should not be manually modified.
+
+## 0.2.45
+Thu, 07 Sep 2023 03:35:42 GMT
+
+### Patches
+
+- Update Webpack peerDependency to ~4.47.0.
 
 ## 0.2.44
 Tue, 08 Aug 2023 07:10:40 GMT

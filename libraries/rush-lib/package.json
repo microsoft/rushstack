@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.102.0",
+  "version": "5.105.0",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
@@ -56,7 +56,8 @@
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
     "tar": "~6.1.11",
-    "true-case-path": "~2.2.1"
+    "true-case-path": "~2.2.1",
+    "uuid": "~8.3.2"
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",
@@ -76,6 +77,7 @@
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.1",
+    "@types/uuid": "~8.3.4",
     "@types/webpack-env": "1.18.0",
     "webpack": "~5.82.1"
   },

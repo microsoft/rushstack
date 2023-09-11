@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.9.0",
+      "date": "Thu, 07 Sep 2023 03:35:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update Webpack peerDependency to ~4.47.0 and removes the warning about Node <v18, as Webpack 4.47.0 fixes the underlying issue."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.0",
       "tag": "@rushstack/heft-webpack4-plugin_v0.8.0",
       "date": "Sat, 12 Aug 2023 00:21:48 GMT",

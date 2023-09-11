@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+This log was last generated on Fri, 01 Sep 2023 04:53:58 GMT and should not be manually modified.
+
+## 2.0.74
+Fri, 01 Sep 2023 04:53:58 GMT
+
+### Patches
+
+- Use self.setTimeout() instead of setTimeout() to work around a Jest regression
 
 ## 2.0.73
 Tue, 08 Aug 2023 07:10:39 GMT
