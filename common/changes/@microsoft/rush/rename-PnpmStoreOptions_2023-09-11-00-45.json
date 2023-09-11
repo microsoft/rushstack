@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

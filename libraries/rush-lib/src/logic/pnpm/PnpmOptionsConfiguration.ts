@@ -14,7 +14,13 @@ import schemaJson from '../../schemas/pnpm-config.schema.json';
  * This represents the available PNPM store options
  * @public
  */
-export type PnpmStoreOptions = 'local' | 'global';
+export type PnpmStoreLocation = 'local' | 'global';
+
+/**
+ * @deprecated Use {@link PnpmStoreLocation} instead
+ * @public
+ */
+export type PnpmStoreOptions = PnpmStoreLocation;
 
 /**
  * @beta
@@ -46,7 +52,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * {@inheritDoc PnpmOptionsConfiguration.pnpmStore}
    */
-  pnpmStore?: PnpmStoreOptions;
+  pnpmStore?: PnpmStoreLocation;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.strictPeerDependencies}
    */
@@ -114,7 +120,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *  - local: Use the standard Rush store path: common/temp/pnpm-store
    *  - global: Use PNPM's global store path
    */
-  public readonly pnpmStore: PnpmStoreOptions;
+  public readonly pnpmStore: PnpmStoreLocation;
 
   /**
    * The path for PNPM to use as the store directory.

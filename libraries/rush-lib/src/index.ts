@@ -26,6 +26,7 @@ export {
 } from './logic/yarn/YarnOptionsConfiguration';
 export {
   IPnpmOptionsJson as _IPnpmOptionsJson,
+  PnpmStoreLocation,
   PnpmStoreOptions,
   PnpmOptionsConfiguration
 } from './logic/pnpm/PnpmOptionsConfiguration';
