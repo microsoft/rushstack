@@ -608,7 +608,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPatchedDependencies?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
-    pnpmStore?: PnpmStoreOptions;
+    pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;
@@ -924,7 +924,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
-    readonly pnpmStore: PnpmStoreOptions;
+    readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly strictPeerDependencies: boolean;
@@ -934,7 +934,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 }
 
 // @public
-export type PnpmStoreOptions = 'local' | 'global';
+export type PnpmStoreLocation = 'local' | 'global';
+
+// @public @deprecated (undocumented)
+export type PnpmStoreOptions = PnpmStoreLocation;
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
