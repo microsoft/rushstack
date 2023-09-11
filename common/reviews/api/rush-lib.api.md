@@ -367,6 +367,8 @@ export interface ICobuildLockProvider {
     getCompletedStateAsync(context: Readonly<ICobuildContext>): Promise<ICobuildCompletedState | undefined>;
     renewLockAsync(context: Readonly<ICobuildContext>): Promise<void>;
     setCompletedStateAsync(context: Readonly<ICobuildContext>, state: ICobuildCompletedState): Promise<void>;
+}
+
 // @beta
 export interface ICommandLineParameter {
     readonly description: string;
