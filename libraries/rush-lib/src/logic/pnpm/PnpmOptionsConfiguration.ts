@@ -24,7 +24,7 @@ export type PnpmStoreOptions = 'local' | 'global';
  *
  * @public
  */
-export type PnpmResolutionModeOptions = 'highest' | 'time-based' | 'lowest-direct';
+export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
 
 /**
  * @beta
@@ -100,7 +100,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * {@inheritDoc PnpmOptionsConfiguration.resolutionMode}
    */
-  resolutionMode?: PnpmResolutionModeOptions;
+  resolutionMode?: PnpmResolutionMode;
 }
 
 /**
@@ -141,7 +141,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *
    * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
    */
-  public readonly resolutionMode: PnpmResolutionModeOptions | undefined;
+  public readonly resolutionMode: PnpmResolutionMode | undefined;
 
   /**
    * The path for PNPM to use as the store directory.

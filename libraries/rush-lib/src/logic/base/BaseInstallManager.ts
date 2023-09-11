@@ -43,7 +43,7 @@ import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
-import { PnpmResolutionModeOptions } from '../pnpm/PnpmOptionsConfiguration';
+import { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -610,8 +610,7 @@ ${gitLfsHookHandling}
         'resolution-mode'
       );
 
-      let resolutionMode: PnpmResolutionModeOptions | undefined =
-        this.rushConfiguration.pnpmOptions.resolutionMode;
+      let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;
       if (resolutionMode) {
         if (isResolutionModeInNpmrc) {
           this._terminal.writeWarningLine(
