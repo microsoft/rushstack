@@ -56,11 +56,15 @@ export interface ICommandLineSpec {
  * @beta
  */
 export class RushCommandLine {
+  private static _commandLineParser: RushCommandLineParser;
+
   public static getSpec(workspaceFolder: string): ICommandLineSpec[] {
-    const commandLineParser: RushCommandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
+    if (!RushCommandLine._commandLineParser) {
+      RushCommandLine._commandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
+    }
 
     // Copy the actions
-    const commandLineActions: CommandLineAction[] = commandLineParser.actions.slice();
+    const commandLineActions: readonly CommandLineAction[] = RushCommandLine._commandLineParser.actions;
 
     // extract the set of command line elements from the command line parser
     const filledCommandLineActions: ICommandLineSpec[] = [];
