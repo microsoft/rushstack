@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Allow Heft to communicate via IPC with a host process when running in watch mode. The host controls scheduling of incremental re-runs.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

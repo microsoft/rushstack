@@ -3,6 +3,8 @@
 
 /**
  * Encapsulates information about an error
+ *
+ * @beta
  */
 export class OperationError extends Error {
   protected _type: string;
@@ -14,7 +16,7 @@ export class OperationError extends Error {
     // https://github.com/microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
     //
     // Note: the prototype must also be set on any classes which extend this one
-    (this as any).__proto__ = OperationError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
+    Object.setPrototypeOf(this, OperationError.prototype);
 
     this._type = type;
   }

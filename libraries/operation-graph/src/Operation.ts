@@ -3,21 +3,26 @@
 
 import { InternalError, ITerminal } from '@rushstack/node-core-library';
 
-import { Stopwatch } from '../utilities/Stopwatch';
+import { Stopwatch } from './Stopwatch';
 import type {
   IOperationRunner,
   IOperationRunnerContext,
   IOperationState,
   IOperationStates
 } from './IOperationRunner';
-import { OperationError } from './OperationError';
+import type { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
 
 /**
  * Options for constructing a new Operation.
- * @alpha
+ * @beta
  */
 export interface IOperationOptions {
+  /**
+   * The name of this operation, for logging.
+   */
+  name?: string | undefined;
+
   /**
    * The group that this operation belongs to. Will be used for logging and duration tracking.
    */
@@ -37,16 +42,20 @@ export interface IOperationOptions {
 
 /**
  * Information provided to `executeAsync` by the `OperationExecutionManager`.
+ *
+ * @beta
  */
 export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun' | 'requestRun'> {
   /**
    * Function to invoke before execution of an operation, for logging.
    */
   beforeExecute(operation: Operation, state: IOperationState): void;
+
   /**
    * Function to invoke after execution of an operation, for logging.
    */
   afterExecute(operation: Operation, state: IOperationState): void;
+
   /**
    * Function used to schedule the concurrency-limited execution of an operation.
    */
@@ -71,7 +80,7 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
  *
  * The graph of `Operation` instances will be cloned into a separate execution graph after processing.
  *
- * @alpha
+ * @beta
  */
 export class Operation implements IOperationStates {
   /**
@@ -86,6 +95,10 @@ export class Operation implements IOperationStates {
    * If specified, the name of a grouping to which this Operation belongs, for logging start and end times.
    */
   public readonly groupName: string | undefined;
+  /**
+   * The name of this operation, for logging.
+   */
+  public readonly name: string | undefined;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -104,21 +117,21 @@ export class Operation implements IOperationStates {
    *
    * Example:
    *        (0) A
-   *             \
+   *             \\
    *          (1) B     C (0)         (applications)
-   *               \   /|\
-   *                \ / | \
+   *               \\   /|\\
+   *                \\ / | \\
    *             (2) D  |  X (1)      (utilities)
-   *                    | / \
-   *                    |/   \
+   *                    | / \\
+   *                    |/   \\
    *                (2) Y     Z (2)   (other utilities)
    *
    * All roots (A & C) have a criticalPathLength of 0.
    * B has a score of 1, since A depends on it.
-   * D has a score of 2, since we look at the longest chain (e.g D->B->A is longer than D->C)
+   * D has a score of 2, since we look at the longest chain (e.g D-\>B-\>A is longer than D-\>C)
    * X has a score of 1, since the only package which depends on it is A
    * Z has a score of 2, since only X depends on it, and X has a score of 1
-   * Y has a score of 2, since the chain Y->X->C is longer than Y->C
+   * Y has a score of 2, since the chain Y-\>X-\>C is longer than Y-\>C
    *
    * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()
    */
@@ -162,13 +175,7 @@ export class Operation implements IOperationStates {
     this.groupName = options?.groupName;
     this.runner = options?.runner;
     this.weight = options?.weight || 1;
-  }
-
-  /**
-   * The name of this operation, for logging.
-   */
-  public get name(): string | undefined {
-    return this.runner?.name;
+    this.name = options?.name;
   }
 
   public addDependency(dependency: Operation): void {
@@ -186,7 +193,8 @@ export class Operation implements IOperationStates {
     this.lastState = this.state;
 
     this.state = {
-      status: OperationStatus.Ready,
+      status: this.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready,
+      hasBeenRun: this.lastState?.hasBeenRun ?? false,
       error: undefined,
       stopwatch: new Stopwatch()
     };
@@ -222,10 +230,10 @@ export class Operation implements IOperationStates {
       Array.from(this.dependencies, (dependency: Operation) => dependency._executeAsync(context))
     );
 
-    const { cancellationToken, requestRun, queueWork } = context;
+    const { abortSignal, requestRun, queueWork } = context;
 
-    if (cancellationToken.isCancelled) {
-      state.status = OperationStatus.Cancelled;
+    if (abortSignal.aborted) {
+      state.status = OperationStatus.Aborted;
       return state.status;
     }
 
@@ -240,9 +248,11 @@ export class Operation implements IOperationStates {
       }
     }
 
+    state.status = OperationStatus.Ready;
+
     const innerContext: IOperationRunnerContext = {
-      cancellationToken,
-      isFirstRun: !this.lastState,
+      abortSignal,
+      isFirstRun: !state.hasBeenRun,
       requestRun: requestRun
         ? () => {
             switch (this.state?.status) {
@@ -259,7 +269,7 @@ export class Operation implements IOperationStates {
                 return;
 
               case OperationStatus.Blocked:
-              case OperationStatus.Cancelled:
+              case OperationStatus.Aborted:
               case OperationStatus.Failure:
               case OperationStatus.NoOp:
               case OperationStatus.Success:
@@ -278,19 +288,22 @@ export class Operation implements IOperationStates {
       // Redundant variable to satisfy require-atomic-updates
       const innerState: IOperationState = state;
 
-      if (cancellationToken.isCancelled) {
-        innerState.status = OperationStatus.Cancelled;
+      if (abortSignal.aborted) {
+        innerState.status = OperationStatus.Aborted;
         return innerState.status;
       }
 
       context.beforeExecute(this, innerState);
 
-      innerState.status = OperationStatus.Executing;
       innerState.stopwatch.start();
+      innerState.status = OperationStatus.Executing;
+      // Mark that the operation has been started at least once.
+      innerState.hasBeenRun = true;
 
       while (this._runPending) {
         this._runPending = false;
         try {
+          // We don't support aborting in the middle of a runner's execution.
           innerState.status = runner ? await runner.executeAsync(innerContext) : OperationStatus.NoOp;
         } catch (error) {
           innerState.status = OperationStatus.Failure;
@@ -307,8 +320,8 @@ export class Operation implements IOperationStates {
         // This introduces complexity regarding tracking of timing and start/end logging, however.
 
         if (this._runPending) {
-          if (cancellationToken.isCancelled) {
-            innerState.status = OperationStatus.Cancelled;
+          if (abortSignal.aborted) {
+            innerState.status = OperationStatus.Aborted;
             break;
           } else {
             context.terminal.writeLine(`Immediate rerun requested. Executing.`);
@@ -318,7 +331,7 @@ export class Operation implements IOperationStates {
 
       state.stopwatch.stop();
       context.afterExecute(this, state);
-    }, this.criticalPathLength ?? 0);
+    }, /* priority */ this.criticalPathLength ?? 0);
 
     return state.status;
   }

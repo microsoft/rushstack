@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IOperationState } from './IOperationRunner';
-import { OperationStatus } from './OperationStatus';
 import { InternalError } from '@rushstack/node-core-library';
-import { Stopwatch } from '../utilities/Stopwatch';
-import type { Operation } from './Operation';
 
+import type { IOperationState } from './IOperationRunner';
+import type { Operation } from './Operation';
+import { OperationStatus } from './OperationStatus';
+import { Stopwatch } from './Stopwatch';
+
+/**
+ * Meta-entity that tracks information about a group of related operations.
+ *
+ * @beta
+ */
 export class OperationGroupRecord {
   private readonly _operations: Set<Operation> = new Set();
   private _remainingOperations: Set<Operation> = new Set();
@@ -51,7 +57,7 @@ export class OperationGroupRecord {
       throw new InternalError(`Operation ${operation.name} is not in the group ${this.name}`);
     }
 
-    if (state.status === OperationStatus.Cancelled) {
+    if (state.status === OperationStatus.Aborted) {
       this._hasCancellations = true;
     } else if (state.status === OperationStatus.Failure) {
       this._hasFailures = true;

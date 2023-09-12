@@ -164,11 +164,20 @@ export interface IHeftTaskHooks {
  */
 export interface IHeftTaskRunHookOptions {
   /**
+   * An abort signal that is used to abort the build. This can be used to stop operations early and allow
+   * for a new build to be started.
+   *
+   * @beta
+   */
+  readonly abortSignal: AbortSignal;
+
+  /**
    * A cancellation token that is used to signal that the build is cancelled. This
    * can be used to stop operations early and allow for a new build to
    * be started.
    *
    * @beta
+   * @deprecated Use `abortSignal` instead.
    */
   readonly cancellationToken: CancellationToken;
 }

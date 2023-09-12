@@ -3,15 +3,19 @@
 
 import type { ITerminal } from '@rushstack/node-core-library';
 
-import { OperationStatus } from './OperationStatus';
-import type { Operation, IExecuteOperationContext } from './Operation';
-import { OperationGroupRecord } from './OperationGroupRecord';
-import { CancellationToken } from '../pluginFramework/CancellationToken';
-import { calculateCriticalPathLengths } from './calculateCriticalPath';
 import type { IOperationState } from './IOperationRunner';
+import type { IExecuteOperationContext, Operation } from './Operation';
+import { OperationGroupRecord } from './OperationGroupRecord';
+import { OperationStatus } from './OperationStatus';
+import { calculateCriticalPathLengths } from './calculateCriticalPath';
 
+/**
+ * Options for the current run.
+ *
+ * @beta
+ */
 export interface IOperationExecutionOptions {
-  cancellationToken: CancellationToken;
+  abortSignal: AbortSignal;
   parallelism: number;
   terminal: ITerminal;
 
@@ -23,6 +27,8 @@ export interface IOperationExecutionOptions {
  * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
+ *
+ * @beta
  */
 export class OperationExecutionManager {
   /**
@@ -84,7 +90,7 @@ export class OperationExecutionManager {
   public async executeAsync(executionOptions: IOperationExecutionOptions): Promise<OperationStatus> {
     let hasReportedFailures: boolean = false;
 
-    const { cancellationToken, parallelism, terminal, requestRun } = executionOptions;
+    const { abortSignal, parallelism, terminal, requestRun } = executionOptions;
 
     const startedGroups: Set<OperationGroupRecord> = new Set();
     const finishedGroups: Set<OperationGroupRecord> = new Set();
@@ -103,7 +109,7 @@ export class OperationExecutionManager {
 
     const executionContext: IExecuteOperationContext = {
       terminal,
-      cancellationToken,
+      abortSignal,
 
       requestRun,
 
@@ -166,8 +172,8 @@ export class OperationExecutionManager {
     const finalStatus: OperationStatus =
       this._trackedOperationCount === 0
         ? OperationStatus.NoOp
-        : cancellationToken.isCancelled
-        ? OperationStatus.Cancelled
+        : abortSignal.aborted
+        ? OperationStatus.Aborted
         : hasReportedFailures
         ? OperationStatus.Failure
         : OperationStatus.Success;
