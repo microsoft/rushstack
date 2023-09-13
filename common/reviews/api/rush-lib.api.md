@@ -147,7 +147,7 @@ export class CredentialCache {
 }
 
 // @beta
-export enum CustomTipIdEnum {
+export enum CustomTipId {
     // (undocumented)
     TIP_PNPM_NO_MATCHING_VERSION = "TIP_PNPM_NO_MATCHING_VERSION",
     // (undocumented)
@@ -158,11 +158,11 @@ export enum CustomTipIdEnum {
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
     readonly configuration: Readonly<ICustomTipsJson>;
-    static CustomTipRegistry: Record<CustomTipIdEnum, ICustomTipInfo>;
-    showErrorTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
-    showInfoTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
-    showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
-    showWarningTip(terminal: ITerminal, tipId: CustomTipIdEnum): void;
+    static CustomTipRegistry: Record<CustomTipId, ICustomTipInfo>;
+    showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showTip(terminal: ITerminal, tipId: CustomTipId): void;
+    showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
 }
 
 // @public (undocumented)
@@ -377,7 +377,7 @@ export interface ICustomTipInfo {
     // Warning: (ae-forgotten-export) The symbol "CustomTipSeverity" needs to be exported by the entry point index.d.ts
     severity: CustomTipSeverity;
     // (undocumented)
-    tipId: CustomTipIdEnum;
+    tipId: CustomTipId;
     // Warning: (ae-forgotten-export) The symbol "CustomTipType" needs to be exported by the entry point index.d.ts
     type: CustomTipType;
 }
@@ -385,7 +385,7 @@ export interface ICustomTipInfo {
 // @beta
 export interface ICustomTipItemJson {
     message: string;
-    tipId: CustomTipIdEnum;
+    tipId: CustomTipId;
 }
 
 // @beta

@@ -29,7 +29,7 @@ export interface ICustomTipItemJson {
    * If that message is printed, then this custom tip will be shown.
    * Consult the Rush documentation for the current list of possible identifiers.
    */
-  tipId: CustomTipIdEnum;
+  tipId: CustomTipId;
 
   /**
    * (REQUIRED) The message text to be displayed for this tip.
@@ -49,7 +49,7 @@ export interface ICustomTipItemJson {
  *
  * @beta
  */
-export enum CustomTipIdEnum {
+export enum CustomTipId {
   TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
   TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION'
 }
@@ -58,7 +58,7 @@ export enum CustomTipIdEnum {
  * The severity of a custom tip.
  * It determines the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
  */
-enum CustomTipSeverity {
+export enum CustomTipSeverity {
   Warning = 'Warning',
   Error = 'Error',
   Info = 'Info'
@@ -85,7 +85,7 @@ export enum CustomTipType {
  *
  */
 export interface ICustomTipInfo {
-  tipId: CustomTipIdEnum;
+  tipId: CustomTipId;
   /**
    * (Required) The severity of the custom tip. It will determine the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
    *
@@ -119,7 +119,7 @@ export interface ICustomTipInfo {
 export class CustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private readonly _tipMap: Map<CustomTipIdEnum, ICustomTipItemJson>;
+  private readonly _tipMap: Map<CustomTipId, ICustomTipItemJson>;
   private readonly _jsonFileName: string;
 
   /**
@@ -143,17 +143,17 @@ export class CustomTipsConfiguration {
    * console.log(tipInfo.severity);  // Output: CustomTipSeverity.Error
    * ```
    *
-   * @see {@link CustomTipIdEnum} for the list of custom tip IDs.
+   * @see {@link CustomTipId} for the list of custom tip IDs.
    * @see {@link ICustomTipInfo} for the structure of the metadata.
    */
-  public static CustomTipRegistry: Record<CustomTipIdEnum, ICustomTipInfo> = {
-    [CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS]: {
-      tipId: CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS,
+  public static CustomTipRegistry: Record<CustomTipId, ICustomTipInfo> = {
+    [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
+      tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
       severity: CustomTipSeverity.Error,
       type: CustomTipType.rush
     },
-    [CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION]: {
-      tipId: CustomTipIdEnum.TIP_PNPM_NO_MATCHING_VERSION,
+    [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION]: {
+      tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION,
       severity: CustomTipSeverity.Error,
       type: CustomTipType.pnpm,
       isMatch: (str: string) => {
@@ -174,7 +174,7 @@ export class CustomTipsConfiguration {
       const customTips: ICustomTipItemJson[] | undefined = this.configuration?.customTips;
       if (customTips) {
         for (const tipItem of customTips) {
-          if (!(tipItem.tipId in CustomTipIdEnum)) {
+          if (!(tipItem.tipId in CustomTipId)) {
             throw new Error(
               `The ${path.basename(this._jsonFileName)} configuration` +
                 ` references an unknown ID "${tipItem.tipId}"`
@@ -197,14 +197,13 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    *
-   * @beta
    * @remarks
    * The severity of the tip is defined in ${@link CustomTipsConfiguration.CustomTipRegistry}.
    * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration.showErrorTip}.
    *
    * @beta
    */
-  public showTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
+  public showTip(terminal: ITerminal, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
     if (!customTipJsonItem) return;
 
@@ -218,7 +217,7 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    */
-  public showInfoTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
+  public showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
@@ -226,7 +225,7 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    */
-  public showWarningTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
+  public showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
 
@@ -234,19 +233,15 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    */
-  public showErrorTip(terminal: ITerminal, tipId: CustomTipIdEnum): void {
+  public showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
 
-  private _formatMessageHeader(tipId: CustomTipIdEnum): string {
-    return '| Custom Tip (' + tipId + ')\n|';
+  private _formatMessageHeader(tipId: CustomTipId): string {
+    return `| Custom Tip (${tipId})\n|`;
   }
 
-  private _writeMessageWithPipes(
-    terminal: ITerminal,
-    severity: CustomTipSeverity,
-    tipId: CustomTipIdEnum
-  ): void {
+  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
     const messageHeader: string = this._formatMessageHeader(tipId);
     const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
     if (!customTipJsonItem) return;

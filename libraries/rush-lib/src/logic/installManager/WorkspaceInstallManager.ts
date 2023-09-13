@@ -23,7 +23,7 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import {
-  CustomTipIdEnum,
+  CustomTipId,
   CustomTipType,
   CustomTipsConfiguration,
   ICustomTipInfo
@@ -309,7 +309,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    const doInstall = async (options: IInstallManagerOptions): Promise<void> => {
+    const doActualInstallAsync = async (options: IInstallManagerOptions): Promise<void> => {
       // Run "npm install" in the common folder
       // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
       // Without this argument, certain text that should be colored (such as red) will appear white.
@@ -344,16 +344,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Store the tip IDs that should be printed.
       // They will be printed all at once *after* the install
-      const tipIDsShouldBePrinted: Set<CustomTipIdEnum> = new Set();
+      const tipIDsShouldBePrinted: Set<CustomTipId> = new Set();
       const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.CustomTipRegistry)
         .map((key: string) => {
-          return CustomTipsConfiguration.CustomTipRegistry[key as CustomTipIdEnum];
+          return CustomTipsConfiguration.CustomTipRegistry[key as CustomTipId];
         })
         .filter((tipInfo) => tipInfo.type === CustomTipType.pnpm);
 
       const onPnpmStdoutChunk = (chunk: string): void => {
         // Iterate over the supported custom tip metadata and try to match the chunk.
-        // TODO: this might be slow. Optimize it.
         supportedPnpmTips.forEach((tipInfo: ICustomTipInfo) => {
           if (tipInfo.isMatch && tipInfo.isMatch(chunk)) {
             tipIDsShouldBePrinted.add(tipInfo.tipId);
@@ -374,7 +373,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           onPnpmStdoutChunk,
           () => {
             if (this.rushConfiguration.packageManager === 'pnpm') {
-              console.log(colors.yellow(`Deleting the "node_modules" folder`));
+              this._terminal.writeWarningLine(`Deleting the "node_modules" folder`);
               this.installRecycler.moveFolder(commonNodeModulesFolder);
 
               // Leave the pnpm-store as is for the retry. This ensures that packages that have already
@@ -406,17 +405,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.options.allowShrinkwrapUpdates &&
       experiments.usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate
     ) {
-      await doInstall({
+      await doActualInstallAsync({
         ...this.options,
         onlyShrinkwrap: true
       });
 
-      await doInstall({
+      await doActualInstallAsync({
         ...this.options,
         allowShrinkwrapUpdates: false
       });
     } else {
-      await doInstall(this.options);
+      await doActualInstallAsync(this.options);
     }
 
     // If all attempts fail we just terminate. No special handling needed.
