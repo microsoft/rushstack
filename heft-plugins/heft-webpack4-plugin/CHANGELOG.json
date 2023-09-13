@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.9.1",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.9.1",
+      "date": "Wed, 13 Sep 2023 00:32:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.2.56`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.0",
       "tag": "@rushstack/heft-webpack4-plugin_v0.9.0",
       "date": "Thu, 07 Sep 2023 03:35:42 GMT",

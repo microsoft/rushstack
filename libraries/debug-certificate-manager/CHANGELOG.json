@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.2.56",
+      "tag": "@rushstack/debug-certificate-manager_v1.2.56",
+      "date": "Wed, 13 Sep 2023 00:32:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes issues with CertificateManager when setting the certificate friendly name fails."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.55",
       "tag": "@rushstack/debug-certificate-manager_v1.2.55",
       "date": "Tue, 08 Aug 2023 07:10:39 GMT",
