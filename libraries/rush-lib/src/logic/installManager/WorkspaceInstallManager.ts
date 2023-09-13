@@ -394,7 +394,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           if (idx !== 0) {
             this._terminal.writeLine();
           }
-          this.rushConfiguration.customTipsConfiguration.showTip(this._terminal, tipID);
+          this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
           idx++;
         });
       }

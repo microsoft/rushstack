@@ -203,11 +203,12 @@ export class CustomTipsConfiguration {
    *
    * @remarks
    * The severity of the tip is defined in ${@link CustomTipsConfiguration.CustomTipRegistry}.
-   * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration.showErrorTip}.
+   * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration._showErrorTip}.
    *
    * @beta
    */
-  public showTip(terminal: ITerminal, tipId: CustomTipId): void {
+  /** @internal */
+  public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
     if (!customTipJsonItem) return;
 
@@ -221,7 +222,8 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    */
-  public showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
+  /** @internal */
+  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
@@ -229,7 +231,8 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    */
-  public showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
+  /** @internal */
+  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
 
@@ -237,7 +240,8 @@ export class CustomTipsConfiguration {
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
    */
-  public showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
+  /** @internal */
+  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
 

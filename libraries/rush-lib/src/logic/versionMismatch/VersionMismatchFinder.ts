@@ -135,7 +135,7 @@ export class VersionMismatchFinder {
 
         if (mismatchFinder.numberOfMismatches > 0) {
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
-          rushConfiguration.customTipsConfiguration.showErrorTip(
+          rushConfiguration.customTipsConfiguration._showErrorTip(
             options.terminal,
             CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
           );
