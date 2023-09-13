@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-jest-plugin",
       "comment": "Add a `--log-heap-usage` flag that includes memory usage analysis in each test run.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-jest-plugin"
