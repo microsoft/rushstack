@@ -376,7 +376,12 @@ export class Utilities {
     }
   }
 
-  // todo: add comments after finished
+  /**
+   * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
+   * Using `onStdoutStreamChunk` to process the output of the command.
+   *
+   * Note: This is similar to {@link executeCommandWithRetry} except that it returns a Promise and provides a callback to process the output.
+   */
   public static async executeCommandAndProcessOutputWithRetryAsync(
     options: IExecuteCommandOptions,
     maxAttempts: number,
