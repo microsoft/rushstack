@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+This log was last generated on Wed, 13 Sep 2023 00:32:29 GMT and should not be manually modified.
+
+## 1.2.56
+Wed, 13 Sep 2023 00:32:29 GMT
+
+### Patches
+
+- Fixes issues with CertificateManager when setting the certificate friendly name fails.
 
 ## 1.2.55
 Tue, 08 Aug 2023 07:10:39 GMT
