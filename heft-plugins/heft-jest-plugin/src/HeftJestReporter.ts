@@ -66,12 +66,12 @@ export default class HeftJestReporter implements Reporter {
 
     // calculate memoryUsage to MB reference -> https://jestjs.io/docs/cli#--logheapusage
     const memUsage: string = testResult.memoryUsage
-      ? ` ${Math.floor(testResult.memoryUsage / 1000000)}MB heap size`
+      ? `, ${Math.floor(testResult.memoryUsage / 1000000)}MB heap size`
       : '';
 
     const message: string =
       ` ${this._getTestPath(test.path)} ` +
-      `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed,${memUsage})`;
+      `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed${memUsage})`;
 
     if (numFailingTests > 0) {
       this._terminal.writeLine(Colors.redBackground(Colors.black('FAIL')), message);
