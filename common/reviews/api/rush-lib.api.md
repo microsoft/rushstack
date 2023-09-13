@@ -159,13 +159,13 @@ export class CustomTipsConfiguration {
     constructor(configFilename: string);
     readonly configuration: Readonly<ICustomTipsJson>;
     static customTipRegistry: Record<CustomTipId, ICustomTipInfo>;
-    // @internal (undocumented)
+    // @internal
     _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
-    // @internal (undocumented)
+    // @internal
     _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
-    // @internal (undocumented)
+    // @internal
     _showTip(terminal: ITerminal, tipId: CustomTipId): void;
-    // @internal (undocumented)
+    // @internal
     _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
 }
 
