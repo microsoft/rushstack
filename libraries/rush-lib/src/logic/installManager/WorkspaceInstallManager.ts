@@ -309,7 +309,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    const doActualInstallAsync = async (options: IInstallManagerOptions): Promise<void> => {
+    const doInstallInternalAsync = async (options: IInstallManagerOptions): Promise<void> => {
       // Run "npm install" in the common folder
       // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
       // Without this argument, certain text that should be colored (such as red) will appear white.
@@ -405,17 +405,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.options.allowShrinkwrapUpdates &&
       experiments.usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate
     ) {
-      await doActualInstallAsync({
+      await doInstallInternalAsync({
         ...this.options,
         onlyShrinkwrap: true
       });
 
-      await doActualInstallAsync({
+      await doInstallInternalAsync({
         ...this.options,
         allowShrinkwrapUpdates: false
       });
     } else {
-      await doActualInstallAsync(this.options);
+      await doInstallInternalAsync(this.options);
     }
 
     // If all attempts fail we just terminate. No special handling needed.
