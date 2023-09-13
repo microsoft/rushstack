@@ -17,6 +17,8 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'CommonVersionsConfiguration',
   'CredentialCache',
   'CustomTipId',
+  'CustomTipSeverity',
+  'CustomTipType',
   'CustomTipsConfiguration',
   'DependencyType',
   'EnvironmentConfiguration',

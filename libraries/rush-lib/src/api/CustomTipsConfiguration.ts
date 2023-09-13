@@ -57,6 +57,8 @@ export enum CustomTipId {
 /**
  * The severity of a custom tip.
  * It determines the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
+ *
+ * @beta
  */
 export enum CustomTipSeverity {
   Warning = 'Warning',
@@ -69,6 +71,8 @@ export enum CustomTipSeverity {
  *
  * @remarks
  * There might be types like `git` in the future.
+ *
+ * @beta
  */
 export enum CustomTipType {
   rush = 'rush',

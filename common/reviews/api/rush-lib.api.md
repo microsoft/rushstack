@@ -165,6 +165,24 @@ export class CustomTipsConfiguration {
     showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
 }
 
+// @beta
+export enum CustomTipSeverity {
+    // (undocumented)
+    Error = "Error",
+    // (undocumented)
+    Info = "Info",
+    // (undocumented)
+    Warning = "Warning"
+}
+
+// @beta
+export enum CustomTipType {
+    // (undocumented)
+    pnpm = "pnpm",
+    // (undocumented)
+    rush = "rush"
+}
+
 // @public (undocumented)
 export enum DependencyType {
     // (undocumented)
@@ -374,11 +392,9 @@ export interface ICredentialCacheOptions {
 // @beta
 export interface ICustomTipInfo {
     isMatch?: (str: string) => boolean;
-    // Warning: (ae-forgotten-export) The symbol "CustomTipSeverity" needs to be exported by the entry point index.d.ts
     severity: CustomTipSeverity;
     // (undocumented)
     tipId: CustomTipId;
-    // Warning: (ae-forgotten-export) The symbol "CustomTipType" needs to be exported by the entry point index.d.ts
     type: CustomTipType;
 }
 

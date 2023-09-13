@@ -102,7 +102,9 @@ export {
   CustomTipId,
   ICustomTipsJson,
   ICustomTipInfo,
-  ICustomTipItemJson
+  ICustomTipItemJson,
+  CustomTipSeverity,
+  CustomTipType
 } from './api/CustomTipsConfiguration';
 
 export {
