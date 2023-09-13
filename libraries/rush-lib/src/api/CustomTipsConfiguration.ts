@@ -3,9 +3,9 @@
 
 import * as path from 'path';
 import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
-import { PrintUtilities } from '@rushstack/terminal';
 
 /**
  * This interface represents the raw custom-tips.json file which allows repo maintainers
