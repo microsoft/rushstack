@@ -42,6 +42,8 @@ import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
+import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
+import { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -595,6 +597,34 @@ ${gitLfsHookHandling}
         args.push('--no-strict-peer-dependencies');
       } else {
         args.push('--strict-peer-dependencies');
+      }
+
+      /*
+        If user set resolution-mode in pnpm-config.json only, use the value in pnpm-config.json
+        If user set resolution-mode in pnpm-config.json and .npmrc, use the value in pnpm-config.json
+        If user set resolution-mode in .npmrc only, do nothing, let pnpm handle it
+        If user does not set resolution-mode in pnpm-config.json and .npmrc, rush will default it to "highest"
+      */
+      const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
+        this.rushConfiguration.commonRushConfigFolder,
+        'resolution-mode'
+      );
+
+      let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;
+      if (resolutionMode) {
+        if (isResolutionModeInNpmrc) {
+          this._terminal.writeWarningLine(
+            `Warning: PNPM's resolution-mode is specified in both .npmrc and pnpm-config.json. ` +
+              `The value in pnpm-config.json will take precedence.`
+          );
+        }
+      } else if (!isResolutionModeInNpmrc) {
+        // if resolution-mode isn't specified in either .npmrc or pnpm-config.json,
+        // then rush will default it to "highest"
+        resolutionMode = 'highest';
+      }
+      if (resolutionMode) {
+        args.push(`--config.resolutionMode=${resolutionMode}`);
       }
 
       if (

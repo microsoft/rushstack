@@ -610,6 +610,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
+    resolutionMode?: PnpmResolutionMode;
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
@@ -927,11 +928,15 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
+    readonly resolutionMode: PnpmResolutionMode | undefined;
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
     readonly useWorkspaces: boolean;
 }
+
+// @public
+export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
 
 // @public
 export type PnpmStoreLocation = 'local' | 'global';
