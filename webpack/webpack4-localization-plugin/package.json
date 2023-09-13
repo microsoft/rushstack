@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-localization-plugin",
-  "version": "0.17.45",
+  "version": "0.17.47",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/webpack4-localization-plugin.d.ts",
@@ -15,7 +15,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "^4.0.16",
+    "@rushstack/set-webpack-public-path-plugin": "^4.0.17",
     "@types/webpack": "^4.39.0",
     "webpack": "^4.31.0",
     "@types/node": "*"
@@ -47,6 +47,6 @@
     "@types/minimatch": "3.0.5",
     "@types/node": "14.18.36",
     "@types/webpack": "4.41.32",
-    "webpack": "~4.44.2"
+    "webpack": "~4.47.0"
   }
 }

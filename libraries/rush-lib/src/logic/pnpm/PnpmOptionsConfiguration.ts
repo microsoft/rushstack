@@ -14,7 +14,23 @@ import schemaJson from '../../schemas/pnpm-config.schema.json';
  * This represents the available PNPM store options
  * @public
  */
-export type PnpmStoreOptions = 'local' | 'global';
+export type PnpmStoreLocation = 'local' | 'global';
+
+/**
+ * @deprecated Use {@link PnpmStoreLocation} instead
+ * @public
+ */
+export type PnpmStoreOptions = PnpmStoreLocation;
+
+/**
+ * Possible values for the `resolutionMode` setting in Rush's pnpm-config.json file.
+ * @remarks
+ * These modes correspond to PNPM's `resolution-mode` values, which are documented here:
+ * {@link https://pnpm.io/npmrc#resolution-mode}
+ *
+ * @public
+ */
+export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
 
 /**
  * @beta
@@ -46,7 +62,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * {@inheritDoc PnpmOptionsConfiguration.pnpmStore}
    */
-  pnpmStore?: PnpmStoreOptions;
+  pnpmStore?: PnpmStoreLocation;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.strictPeerDependencies}
    */
@@ -87,6 +103,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.unsupportedPackageJsonSettings}
    */
   unsupportedPackageJsonSettings?: unknown;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.resolutionMode}
+   */
+  resolutionMode?: PnpmResolutionMode;
 }
 
 /**
@@ -114,7 +134,20 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    *  - local: Use the standard Rush store path: common/temp/pnpm-store
    *  - global: Use PNPM's global store path
    */
-  public readonly pnpmStore: PnpmStoreOptions;
+  public readonly pnpmStore: PnpmStoreLocation;
+
+  /**
+   * This setting determines PNPM's `resolution-mode`  option. The default value is `highest`.
+   *
+   * @remarks
+   * Be aware that the PNPM 8 initially defaulted to `lowest` instead of  `highest`, but PNPM
+   * reverted this decision in 8.6.12 because it caused confusion for users.  Rush 5.106.0 and newer
+   * avoids this confusion by consistently defaulting to `highest` when `resolutionMode` is not
+   * explicitly set in pnpm-config.json or .npmrc, regardless of your PNPM version.
+   *
+   * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
+   */
+  public readonly resolutionMode: PnpmResolutionMode | undefined;
 
   /**
    * The path for PNPM to use as the store directory.
@@ -285,6 +318,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.globalAllowedDeprecatedVersions = json.globalAllowedDeprecatedVersions;
     this.unsupportedPackageJsonSettings = json.unsupportedPackageJsonSettings;
     this._globalPatchedDependencies = json.globalPatchedDependencies;
+    this.resolutionMode = json.resolutionMode;
   }
 
   /** @internal */

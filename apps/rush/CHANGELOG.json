@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.105.0",
+      "tag": "@microsoft/rush_v5.105.0",
+      "date": "Fri, 08 Sep 2023 04:09:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache writes in watch rebuilds."
+          },
+          {
+            "comment": "Fix the instance of \"ICreateOperationsContext\" passed to the \"beforeExecuteOperations\" hook in watch mode rebuilds to match the instance passed to the \"createOperations\" hook."
+          },
+          {
+            "comment": "Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases."
+          },
+          {
+            "comment": "Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project."
+          },
+          {
+            "comment": "Add the \"disableBuildCache\" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the \"disableBuildCache\" flag to also disable the legacy skip detection, in the event that the build cache is not configured."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.104.1",
       "tag": "@microsoft/rush_v5.104.1",
       "date": "Tue, 05 Sep 2023 18:53:03 GMT",

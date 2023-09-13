@@ -26,8 +26,10 @@ export {
 } from './logic/yarn/YarnOptionsConfiguration';
 export {
   IPnpmOptionsJson as _IPnpmOptionsJson,
+  PnpmStoreLocation,
   PnpmStoreOptions,
-  PnpmOptionsConfiguration
+  PnpmOptionsConfiguration,
+  PnpmResolutionMode
 } from './logic/pnpm/PnpmOptionsConfiguration';
 
 export { BuildCacheConfiguration } from './api/BuildCacheConfiguration';

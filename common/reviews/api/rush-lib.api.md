@@ -556,6 +556,7 @@ export interface IOperationRunner {
     cacheable: boolean;
     executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
     getConfigHash(): string;
+    readonly isNoOp?: boolean;
     readonly name: string;
     reportTiming: boolean;
     silent: boolean;
@@ -642,8 +643,9 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPatchedDependencies?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
-    pnpmStore?: PnpmStoreOptions;
+    pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
+    resolutionMode?: PnpmResolutionMode;
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
@@ -958,9 +960,10 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
-    readonly pnpmStore: PnpmStoreOptions;
+    readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
+    readonly resolutionMode: PnpmResolutionMode | undefined;
     readonly strictPeerDependencies: boolean;
     readonly unsupportedPackageJsonSettings: unknown | undefined;
     updateGlobalPatchedDependencies(patchedDependencies: Record<string, string> | undefined): void;
@@ -968,7 +971,13 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 }
 
 // @public
-export type PnpmStoreOptions = 'local' | 'global';
+export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
+
+// @public
+export type PnpmStoreLocation = 'local' | 'global';
+
+// @public @deprecated (undocumented)
+export type PnpmStoreOptions = PnpmStoreLocation;
 
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
@@ -1233,8 +1242,8 @@ export class RushProjectConfiguration {
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
     // (undocumented)
     readonly project: RushConfigurationProject;
-    static tryLoadAndValidateForProjectsAsync(projects: Iterable<RushConfigurationProject>, phases: ReadonlySet<IPhase>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
+    static tryLoadForProjectsAsync(projects: Iterable<RushConfigurationProject>, terminal: ITerminal): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>>;
     static tryLoadIgnoreGlobsForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<ReadonlyArray<string> | undefined>;
     validatePhaseConfiguration(phases: Iterable<IPhase>, terminal: ITerminal): void;
 }

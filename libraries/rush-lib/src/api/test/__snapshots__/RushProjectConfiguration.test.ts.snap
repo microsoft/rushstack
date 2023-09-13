@@ -34,7 +34,7 @@ exports[`RushProjectConfiguration operationSettingsByOperationName allows output
 
 exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders: validation: terminal warning 1`] = `""`;
 
-exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal error 1`] = `"The project \\"test-project-d\\" has a \\"config/rush-project.json\\" configuration that defines two operations in the same command whose \\"outputFolderNames\\" would overlap. Operations outputs in the same command must be disjoint so that they can be independently cached.[n][n]The \\"a/b\\" path overlaps between these operations: \\"_phase:a\\"[n]"`;
+exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal error 1`] = `"The project \\"test-project-d\\" has a \\"config/rush-project.json\\" configuration that defines two operations in the same command whose \\"outputFolderNames\\" would overlap. Operations outputs in the same command must be disjoint so that they can be independently cached. The \\"a/b\\" path overlaps between these operations: \\"_phase:b\\", \\"_phase:a\\"[n]"`;
 
 exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal output 1`] = `""`;
 

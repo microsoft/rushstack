@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 05 Sep 2023 18:53:03 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Sep 2023 04:09:06 GMT and should not be manually modified.
+
+## 5.105.0
+Fri, 08 Sep 2023 04:09:06 GMT
+
+### Updates
+
+- Disable build cache writes in watch rebuilds.
+- Fix the instance of "ICreateOperationsContext" passed to the "beforeExecuteOperations" hook in watch mode rebuilds to match the instance passed to the "createOperations" hook.
+- Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases.
+- Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project.
+- Add the "disableBuildCache" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the "disableBuildCache" flag to also disable the legacy skip detection, in the event that the build cache is not configured.
 
 ## 5.104.1
 Tue, 05 Sep 2023 18:53:03 GMT
