@@ -86,8 +86,8 @@ export enum CustomTipType {
  * This differs from the  {@link ICustomTipItemJson} interface in that these are not configurable by the user;
  * it's the inherent state of a custom tip. For example, the custom tip for `ERR_PNPM_NO_MATCHING_VERSION`
  * has a inherent severity of `Error`, and a inherent match function that rush maintainer defines.
- * @beta
  *
+ * @beta
  */
 export interface ICustomTipInfo {
   tipId: CustomTipId;
@@ -101,7 +101,6 @@ export interface ICustomTipInfo {
 
   /**
    * The type of the custom tip.
-   *
    */
   type: CustomTipType;
 
