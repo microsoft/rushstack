@@ -198,7 +198,7 @@ export class ProjectWatcher {
           if (watchers.has(watchedPath)) {
             return;
           }
-          const listener: (event: string, fileName: string) => void = changeListener(watchedPath, recursive);
+          const listener: fs.WatchListener<string> = changeListener(watchedPath, recursive);
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
             {
@@ -214,7 +214,12 @@ export class ProjectWatcher {
           });
         }
 
-        function innerListener(root: string, recursive: boolean, event: string, fileName: string): void {
+        function innerListener(
+          root: string,
+          recursive: boolean,
+          event: string,
+          fileName: string | null
+        ): void {
           try {
             if (terminated) {
               return;
@@ -226,7 +231,7 @@ export class ProjectWatcher {
 
             // Handling for added directories
             if (recursive && !useNativeRecursiveWatch) {
-              const decodedName: string = fileName && fileName.toString();
+              const decodedName: string = fileName ? fileName.toString() : '';
               const normalizedName: string = decodedName && Path.convertToSlashes(decodedName);
               const fullName: string = normalizedName && `${root}/${normalizedName}`;
 
@@ -259,7 +264,7 @@ export class ProjectWatcher {
           }
         }
 
-        function changeListener(root: string, recursive: boolean): (event: string, fileName: string) => void {
+        function changeListener(root: string, recursive: boolean): fs.WatchListener<string> {
           return innerListener.bind(0, root, recursive);
         }
       }

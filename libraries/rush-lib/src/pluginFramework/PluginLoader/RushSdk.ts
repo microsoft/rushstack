@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 type RushLibModuleType = Record<string, unknown>;
-declare const global: NodeJS.Global &
-  typeof globalThis & {
-    ___rush___rushLibModule?: RushLibModuleType;
-  };
+declare const global: typeof globalThis & {
+  ___rush___rushLibModule?: RushLibModuleType;
+};
 
 export class RushSdk {
   private static _initialized: boolean = false;

@@ -29,12 +29,11 @@ const terminal: Terminal = new Terminal(
   })
 );
 
-declare const global: NodeJS.Global &
-  typeof globalThis & {
-    ___rush___rushLibModule?: RushLibModuleType;
-    ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
-    ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
-  };
+declare const global: typeof globalThis & {
+  ___rush___rushLibModule?: RushLibModuleType;
+  ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
+  ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
+};
 
 let errorMessage: string = '';
 

@@ -35,7 +35,7 @@
     "@types/glob": "7.1.1",
     "@types/heft-jest": "1.0.1",
     "@types/minimatch": "3.0.5",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "@types/npm-packlist": "~1.1.1",
     "eslint": "~8.7.0",
     "webpack": "~5.82.1",

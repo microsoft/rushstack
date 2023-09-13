@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update @types/node from 14 to 18",
+      "type": "minor",
+      "packageName": "@rushstack/worker-pool"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

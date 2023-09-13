@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update @types/node from 14 to 18",
+      "type": "minor",
+      "packageName": "@rushstack/hashed-folder-copy-plugin"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

@@ -268,12 +268,13 @@ export const EnvironmentVariableNames: {
 };
 
 // @beta
-export enum Event {
+enum Event_2 {
     postRushBuild = 4,
     postRushInstall = 2,
     preRushBuild = 3,
     preRushInstall = 1
 }
+export { Event_2 as Event }
 
 // @beta
 export class EventHooks {
@@ -281,7 +282,7 @@ export class EventHooks {
     //
     // @internal
     constructor(eventHooksJson: IEventHooksJson);
-    get(event: Event): string[];
+    get(event: Event_2): string[];
 }
 
 // @public

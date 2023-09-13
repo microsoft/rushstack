@@ -56,7 +56,7 @@
     "@rushstack/heft-node-rig": "2.2.6",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.5.0"
   }
