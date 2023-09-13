@@ -83,15 +83,16 @@ export enum CustomTipType {
  * Metadata for a custom tip.
  *
  * @remarks
- * This differs from the  {@link ICustomTipItemJson} interface in that these are not configurable by the user; it's the inherent state of a custom tip.
- * For example, the custom tip for `ERR_PNPM_NO_MATCHING_VERSION` has a inherent severity of `Error`, and a inherent match function that rush maintainer defines.
+ * This differs from the  {@link ICustomTipItemJson} interface in that these are not configurable by the user;
+ * it's the inherent state of a custom tip. For example, the custom tip for `ERR_PNPM_NO_MATCHING_VERSION`
+ * has a inherent severity of `Error`, and a inherent match function that rush maintainer defines.
  * @beta
  *
  */
 export interface ICustomTipInfo {
   tipId: CustomTipId;
   /**
-   * (Required) The severity of the custom tip. It will determine the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
+   * The severity of the custom tip. It will determine the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
    *
    * @remarks
    *  The severity should be consistent with the original message, unless there are strong reasons not to.
@@ -99,7 +100,7 @@ export interface ICustomTipInfo {
   severity: CustomTipSeverity;
 
   /**
-   * (Required) The type of the custom tip. Currently either `rush` or `pnpm`. There might be `git` in the future.
+   * The type of the custom tip.
    *
    */
   type: CustomTipType;
@@ -147,8 +148,8 @@ export class CustomTipsConfiguration {
    * console.log(tipInfo.severity);  // Output: CustomTipSeverity.Error
    * ```
    *
-   * @see {@link CustomTipId} for the list of custom tip IDs.
-   * @see {@link ICustomTipInfo} for the structure of the metadata.
+   * See {@link CustomTipId} for the list of custom tip IDs.
+   * See {@link ICustomTipInfo} for the structure of the metadata.
    */
   public static CustomTipRegistry: Record<CustomTipId, ICustomTipInfo> = {
     [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
@@ -205,9 +206,8 @@ export class CustomTipsConfiguration {
    * The severity of the tip is defined in ${@link CustomTipsConfiguration.CustomTipRegistry}.
    * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration._showErrorTip}.
    *
-   * @beta
+   * @internal
    */
-  /** @internal */
   public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
     if (!customTipJsonItem) return;
@@ -221,8 +221,8 @@ export class CustomTipsConfiguration {
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
+   * @internal
    */
-  /** @internal */
   public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
@@ -230,8 +230,8 @@ export class CustomTipsConfiguration {
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
+   * @internal
    */
-  /** @internal */
   public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
@@ -239,8 +239,8 @@ export class CustomTipsConfiguration {
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
+   * @internal
    */
-  /** @internal */
   public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
