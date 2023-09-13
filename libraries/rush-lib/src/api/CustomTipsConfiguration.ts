@@ -144,14 +144,14 @@ export class CustomTipsConfiguration {
    *
    * @example
    * ```typescript
-   * const tipInfo = CustomTipRegistry[CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS];
+   * const tipInfo = CustomTipsConfiguration.customTipRegistry[CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS];
    * console.log(tipInfo.severity);  // Output: CustomTipSeverity.Error
    * ```
    *
    * See {@link CustomTipId} for the list of custom tip IDs.
    * See {@link ICustomTipInfo} for the structure of the metadata.
    */
-  public static CustomTipRegistry: Record<CustomTipId, ICustomTipInfo> = {
+  public static customTipRegistry: Record<CustomTipId, ICustomTipInfo> = {
     [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
       tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
       severity: CustomTipSeverity.Error,
@@ -203,7 +203,7 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    *
    * @remarks
-   * The severity of the tip is defined in ${@link CustomTipsConfiguration.CustomTipRegistry}.
+   * The severity of the tip is defined in ${@link CustomTipsConfiguration.customTipRegistry}.
    * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration._showErrorTip}.
    *
    * @internal
@@ -213,7 +213,7 @@ export class CustomTipsConfiguration {
     if (!customTipJsonItem) return;
 
     const severityOfOriginalMessage: CustomTipSeverity =
-      CustomTipsConfiguration.CustomTipRegistry[tipId].severity;
+      CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
     this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
   }

@@ -345,9 +345,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Store the tip IDs that should be printed.
       // They will be printed all at once *after* the install
       const tipIDsShouldBePrinted: Set<CustomTipId> = new Set();
-      const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.CustomTipRegistry)
+      const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.customTipRegistry)
         .map((key: string) => {
-          return CustomTipsConfiguration.CustomTipRegistry[key as CustomTipId];
+          return CustomTipsConfiguration.customTipRegistry[key as CustomTipId];
         })
         .filter((tipInfo) => tipInfo.type === CustomTipType.pnpm);
 
