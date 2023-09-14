@@ -176,8 +176,8 @@ export class ApiModelGenerator {
 
     const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-    if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
-      return; // trim out items marked as "@internal" or "@alpha"
+    if (releaseTag === ReleaseTag.Internal) {
+      return; // trim out items marked as "@internal"
     }
 
     switch (astDeclaration.declaration.kind) {
