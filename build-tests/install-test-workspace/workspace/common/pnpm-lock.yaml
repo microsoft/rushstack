@@ -7,13 +7,13 @@ importers:
 
   rush-lib-test:
     specifiers:
-      '@microsoft/rush-lib': file:microsoft-rush-lib-5.104.1.tgz
+      '@microsoft/rush-lib': file:microsoft-rush-lib-5.105.0.tgz
       '@types/node': 14.18.36
       colors: ^1.4.0
       rimraf: ^4.1.2
       typescript: ~5.0.4
     dependencies:
-      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz_@types+node@14.18.36
+      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.105.0.tgz_@types+node@14.18.36
       colors: 1.4.0
     devDependencies:
       '@types/node': 14.18.36
@@ -22,17 +22,17 @@ importers:
 
   rush-sdk-test:
     specifiers:
-      '@microsoft/rush-lib': file:microsoft-rush-lib-5.104.1.tgz
-      '@rushstack/rush-sdk': file:rushstack-rush-sdk-5.104.1.tgz
+      '@microsoft/rush-lib': file:microsoft-rush-lib-5.105.0.tgz
+      '@rushstack/rush-sdk': file:rushstack-rush-sdk-5.105.0.tgz
       '@types/node': 14.18.36
       colors: ^1.4.0
       rimraf: ^4.1.2
       typescript: ~5.0.4
     dependencies:
-      '@rushstack/rush-sdk': file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz_@types+node@14.18.36
+      '@rushstack/rush-sdk': file:../temp/tarballs/rushstack-rush-sdk-5.105.0.tgz_@types+node@14.18.36
       colors: 1.4.0
     devDependencies:
-      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz_@types+node@14.18.36
+      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.105.0.tgz_@types+node@14.18.36
       '@types/node': 14.18.36
       rimraf: 4.4.1
       typescript: 5.0.4
@@ -3913,11 +3913,11 @@ packages:
     optionalDependencies:
       commander: 2.20.3
 
-  file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz}
-    id: file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz
+  file:../temp/tarballs/microsoft-rush-lib-5.105.0.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/microsoft-rush-lib-5.105.0.tgz}
+    id: file:../temp/tarballs/microsoft-rush-lib-5.105.0.tgz
     name: '@microsoft/rush-lib'
-    version: 5.104.1
+    version: 5.105.0
     engines: {node: '>=5.6.0'}
     dependencies:
       '@pnpm/dependency-path': 2.1.2
@@ -3925,7 +3925,7 @@ packages:
       '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.13.3.tgz_@types+node@14.18.36
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.59.7.tgz_@types+node@14.18.36
       '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.0.44.tgz_@types+node@14.18.36
-      '@rushstack/package-extractor': file:../temp/tarballs/rushstack-package-extractor-0.5.1.tgz_@types+node@14.18.36
+      '@rushstack/package-extractor': file:../temp/tarballs/rushstack-package-extractor-0.5.3.tgz_@types+node@14.18.36
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.4.1.tgz
       '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.0.263.tgz_@types+node@14.18.36
       '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.5.38.tgz_@types+node@14.18.36
@@ -4247,11 +4247,11 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  file:../temp/tarballs/rushstack-package-extractor-0.5.1.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-package-extractor-0.5.1.tgz}
-    id: file:../temp/tarballs/rushstack-package-extractor-0.5.1.tgz
+  file:../temp/tarballs/rushstack-package-extractor-0.5.3.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-package-extractor-0.5.3.tgz}
+    id: file:../temp/tarballs/rushstack-package-extractor-0.5.3.tgz
     name: '@rushstack/package-extractor'
-    version: 0.5.1
+    version: 0.5.3
     dependencies:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.59.7.tgz_@types+node@14.18.36
@@ -4272,11 +4272,11 @@ packages:
       resolve: 1.22.1
       strip-json-comments: 3.1.1
 
-  file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz}
-    id: file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz
+  file:../temp/tarballs/rushstack-rush-sdk-5.105.0.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.105.0.tgz}
+    id: file:../temp/tarballs/rushstack-rush-sdk-5.105.0.tgz
     name: '@rushstack/rush-sdk'
-    version: 5.104.1
+    version: 5.105.0
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.59.7.tgz_@types+node@14.18.36
       '@types/node-fetch': 2.6.2

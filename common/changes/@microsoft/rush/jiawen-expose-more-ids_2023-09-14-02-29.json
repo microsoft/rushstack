@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Expose more customizable tip ids. ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
