@@ -149,7 +149,21 @@ export class CredentialCache {
 // @beta
 export enum CustomTipId {
     // (undocumented)
+    TIP_PNPM_INVALID_NODE_VERSION = "TIP_PNPM_INVALID_NODE_VERSION",
+    // (undocumented)
+    TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = "TIP_PNPM_MISMATCHED_RELEASE_CHANNEL",
+    // (undocumented)
     TIP_PNPM_NO_MATCHING_VERSION = "TIP_PNPM_NO_MATCHING_VERSION",
+    // (undocumented)
+    TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE = "TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE",
+    // (undocumented)
+    TIP_PNPM_OUTDATED_LOCKFILE = "TIP_PNPM_OUTDATED_LOCKFILE",
+    // (undocumented)
+    TIP_PNPM_PEER_DEP_ISSUES = "TIP_PNPM_PEER_DEP_ISSUES",
+    // (undocumented)
+    TIP_PNPM_TARBALL_INTEGRITY = "TIP_PNPM_TARBALL_INTEGRITY",
+    // (undocumented)
+    TIP_PNPM_UNEXPECTED_STORE = "TIP_PNPM_UNEXPECTED_STORE",
     // (undocumented)
     TIP_RUSH_INCONSISTENT_VERSIONS = "TIP_RUSH_INCONSISTENT_VERSIONS"
 }
@@ -158,7 +172,7 @@ export enum CustomTipId {
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
     readonly configuration: Readonly<ICustomTipsJson>;
-    static customTipRegistry: Record<CustomTipId, ICustomTipInfo>;
+    static customTipRegistry: Readonly<Record<CustomTipId, ICustomTipInfo>>;
     // @internal
     _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
     // @internal
