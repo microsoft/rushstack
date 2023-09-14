@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-lint-plugin",
+      "comment": "Reduce verbosity by only printing the \"not supported in watch mode\" warning during the initial build.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin"
+}

@@ -152,6 +152,15 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private _changedFiles: Set<string> = new Set();
   private _requestRun!: () => void;
 
+  private _resolveFirstRunQueued!: () => void;
+  private _firstRunQueuedPromise: Promise<void>;
+
+  public constructor() {
+    this._firstRunQueuedPromise = new Promise((resolve) => {
+      this._resolveFirstRunQueued = resolve;
+    });
+  }
+
   public static getJestPlugin(object: object): JestPlugin | undefined {
     return (object as IWithJestPlugin)[jestPluginSymbol];
   }
@@ -441,6 +450,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
             return result;
           });
+          host._resolveFirstRunQueued();
         });
       };
 
@@ -467,6 +477,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       this._jestPromise = runCLI(jestArgv, [buildFolderPath]);
     }
+
+    // Wait for the initial run to be queued.
+    await this._firstRunQueuedPromise;
+    // Explicitly wait an async tick for any file watchers
+    await Promise.resolve();
 
     if (pendingTestRuns.size > 0) {
       this._executing = true;
