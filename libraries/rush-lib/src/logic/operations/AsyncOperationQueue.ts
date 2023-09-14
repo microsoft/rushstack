@@ -74,6 +74,19 @@ export class AsyncOperationQueue
    */
   public complete(record: OperationExecutionRecord): void {
     this._completedOperations.add(record);
+
+    // Apply status changes to direct dependents
+    for (const item of record.consumers) {
+      // Remove this operation from the dependencies, to unblock the scheduler
+      if (
+        item.dependencies.delete(record) &&
+        item.dependencies.size === 0 &&
+        item.status === OperationStatus.Waiting
+      ) {
+        item.status = OperationStatus.Ready;
+      }
+    }
+
     if (this._completedOperations.size === this._totalOperations) {
       this._isDone = true;
     }
@@ -88,39 +101,39 @@ export class AsyncOperationQueue
 
     // By iterating in reverse order we do less array shuffling when removing operations
     for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
-      const operation: OperationExecutionRecord = queue[i];
+      const record: OperationExecutionRecord = queue[i];
 
       if (
-        operation.status === OperationStatus.Blocked ||
-        operation.status === OperationStatus.Skipped ||
-        operation.status === OperationStatus.Success ||
-        operation.status === OperationStatus.SuccessWithWarning ||
-        operation.status === OperationStatus.FromCache ||
-        operation.status === OperationStatus.NoOp ||
-        operation.status === OperationStatus.Failure
+        record.status === OperationStatus.Blocked ||
+        record.status === OperationStatus.Skipped ||
+        record.status === OperationStatus.Success ||
+        record.status === OperationStatus.SuccessWithWarning ||
+        record.status === OperationStatus.FromCache ||
+        record.status === OperationStatus.NoOp ||
+        record.status === OperationStatus.Failure
       ) {
         // It shouldn't be on the queue, remove it
         queue.splice(i, 1);
-      } else if (
-        operation.status === OperationStatus.Queued ||
-        operation.status === OperationStatus.Executing
-      ) {
+      } else if (record.status === OperationStatus.Queued || record.status === OperationStatus.Executing) {
         // This operation is currently executing
         // next one plz :)
+      } else if (record.status === OperationStatus.Waiting) {
+        // This operation is not yet ready to be executed
+        // next one plz :)
         continue;
-      } else if (operation.status === OperationStatus.RemoteExecuting) {
+      } else if (record.status === OperationStatus.RemoteExecuting) {
         // This operation is not ready to execute yet, but it may become ready later
         // next one plz :)
         continue;
-      } else if (operation.status !== OperationStatus.Ready) {
+      } else if (record.status !== OperationStatus.Ready) {
         // Sanity check
-        throw new Error(`Unexpected status "${operation.status}" for queued operation: ${operation.name}`);
-      } else if (operation.dependencies.size === 0) {
+        throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
+      } else {
         // This task is ready to process, hand it to the iterator.
         // Needs to have queue semantics, otherwise tools that iterate it get confused
-        operation.status = OperationStatus.Queued;
+        record.status = OperationStatus.Queued;
         waitingIterators.shift()!({
-          value: operation,
+          value: record,
           done: false
         });
       }

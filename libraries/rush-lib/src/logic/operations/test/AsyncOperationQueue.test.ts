@@ -16,6 +16,7 @@ import { Async } from '@rushstack/node-core-library';
 function addDependency(consumer: OperationExecutionRecord, dependency: OperationExecutionRecord): void {
   consumer.dependencies.add(dependency);
   dependency.consumers.add(consumer);
+  consumer.status = OperationStatus.Waiting;
 }
 
 function nullSort(a: OperationExecutionRecord, b: OperationExecutionRecord): number {
@@ -50,9 +51,6 @@ describe(AsyncOperationQueue.name, () => {
         hasUnassignedOperation = true;
         continue;
       }
-      for (const consumer of operation.consumers) {
-        consumer.dependencies.delete(operation);
-      }
       operation.status = OperationStatus.Success;
       queue.complete(operation);
     }
@@ -81,9 +79,6 @@ describe(AsyncOperationQueue.name, () => {
       if (operation === UNASSIGNED_OPERATION) {
         hasUnassignedOperation = true;
         continue;
-      }
-      for (const consumer of operation.consumers) {
-        consumer.dependencies.delete(operation);
       }
       operation.status = OperationStatus.Success;
       queue.complete(operation);
@@ -151,10 +146,6 @@ describe(AsyncOperationQueue.name, () => {
 
           await Promise.resolve();
 
-          for (const consumer of operation.consumers) {
-            consumer.dependencies.delete(operation);
-          }
-
           --concurrency;
           operation.status = OperationStatus.Success;
           queue.complete(operation);
@@ -212,9 +203,6 @@ describe(AsyncOperationQueue.name, () => {
           remoteExecuted = true;
           continue;
         }
-      }
-      for (const consumer of record.consumers) {
-        consumer.dependencies.delete(record);
       }
       record.status = OperationStatus.Success;
       queue.complete(record);
