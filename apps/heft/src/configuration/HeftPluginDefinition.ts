@@ -212,9 +212,6 @@ export abstract class HeftPluginDefinitionBase {
       seenParameters.add(parameter.longName);
     }
 
-    // Ensure that plugin names are unique. Main reason for this restriction is to ensure that command-line
-    // parameter conflicts can be handled/undocumented synonyms can be provided in all scenarios
-
     // Unfortunately loading the schema is a synchronous process.
     if (options.heftPluginDefinitionJson.optionsSchema) {
       const resolvedSchemaPath: string = path.resolve(
