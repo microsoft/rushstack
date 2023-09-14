@@ -109,6 +109,7 @@ export interface IJestPluginOptions {
   testPathPattern?: string;
   testTimeout?: number;
   updateSnapshots?: boolean;
+  logHeapUsage?: boolean;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -187,6 +188,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const silentParameter: CommandLineFlagParameter = parameters.getFlagParameter('--silent');
     const updateSnapshotsParameter: CommandLineFlagParameter =
       parameters.getFlagParameter('--update-snapshots');
+    const logHeapUsageParameter: CommandLineFlagParameter = parameters.getFlagParameter('--log-heap-usage');
 
     // Strings
     const configParameter: CommandLineStringParameter = parameters.getStringParameter('--config');
@@ -213,6 +215,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
       detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
       disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
+      logHeapUsage: logHeapUsageParameter.value || pluginOptions?.logHeapUsage,
       findRelatedTests: findRelatedTestsParameter.values.length
         ? Array.from(findRelatedTestsParameter.values)
         : pluginOptions?.findRelatedTests,
@@ -574,6 +577,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       runInBand: taskSession.parameters.debug,
       debug: taskSession.parameters.debug,
       detectOpenHandles: options.detectOpenHandles || false,
+      logHeapUsage: options.logHeapUsage || false,
 
       // Use the temp folder. Cache is unreliable, so we want it cleared on every --clean run
       cacheDirectory: taskSession.tempFolderPath,
