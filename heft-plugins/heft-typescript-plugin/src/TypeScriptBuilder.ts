@@ -362,7 +362,6 @@ export class TypeScriptBuilder {
   public async _runWatchAsync(tool: ITypeScriptTool): Promise<void> {
     const {
       ts,
-      system,
       measureSync: measureTsPerformance,
       pendingOperations,
       rawDiagnostics,
