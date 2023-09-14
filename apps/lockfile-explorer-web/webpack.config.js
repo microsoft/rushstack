@@ -10,6 +10,24 @@ module.exports = function createConfig(env, argv) {
     projectRoot: __dirname,
     // Documentation: https://webpack.js.org/configuration/
     configOverride: {
+      entry: {
+        app: { import: './lib/start' },
+        shared: { import: './lib/shared', library: { type: 'umd' } }
+      },
+      output: {
+        filename: '[name].js',
+        path: __dirname + '/dist',
+        globalObject: 'this'
+      },
+      optimization: {
+        splitChunks: {
+          // We don't want to split common code into chunks as we need a seperate
+          // shared.js and app.js file that can act independently from each other
+          chunks() {
+            return false;
+          }
+        }
+      },
       resolve: {
         alias: {
           // Don't rebundle this large library

@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import styles from './App.scss';
-import { readLockfileAsync } from './parsing/readLockfile';
+import { ILockfilePackageType, generateLockfileGraph } from './shared/readLockfile';
 import { LockfileViewer } from './containers/LockfileViewer';
 import { PackageJsonViewer } from './containers/PackageJsonViewer';
 import { useAppDispatch } from './store/hooks';
@@ -13,6 +13,7 @@ import { BookmarksSidebar } from './containers/BookmarksSidebar';
 import { SelectedEntryPreview } from './containers/SelectedEntryPreview';
 import { LogoPanel } from './containers/LogoPanel';
 import { ConnectionModal } from './components/ConnectionModal';
+import { linter } from './shared/linter';
 
 /**
  * This React component renders the application page.
@@ -22,8 +23,16 @@ export const App = (): JSX.Element => {
 
   useEffect(() => {
     async function loadLockfileAsync(): Promise<void> {
-      const lockfile = await readLockfileAsync();
-      dispatch(loadEntries(lockfile));
+      const serviceUrl: string = window.appContext.serviceUrl;
+
+      const response = await fetch(`${serviceUrl}/api/lockfile`);
+      const lockfile: ILockfilePackageType = await response.json();
+
+      const lockfileGraph = generateLockfileGraph(lockfile);
+
+      dispatch(loadEntries(lockfileGraph));
+
+      linter(lockfileGraph, true);
     }
     loadLockfileAsync().catch((e) => {
       console.log(`Failed to read lockfile: ${e}`);

@@ -5,7 +5,7 @@ import React, { useCallback } from 'react';
 import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { LockfileEntry } from '../../parsing/LockfileEntry';
+import { LockfileEntry } from '../../shared/LockfileEntry';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
 import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 

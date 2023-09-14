@@ -26,7 +26,8 @@
   "license": "MIT",
   "bin": {
     "lockfile-explorer": "./bin/lockfile-explorer",
-    "lfx": "./bin/lockfile-explorer"
+    "lfx": "./bin/lockfile-explorer",
+    "lflint": "./bin/lockfile-lint"
   },
   "scripts": {
     "build": "heft build --clean",
