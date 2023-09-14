@@ -46,7 +46,7 @@
     "@rushstack/heft-node-rig": "2.2.6",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "eslint": "~8.7.0",
     "jest-environment-jsdom": "~29.5.0",
     "jest-environment-node": "~29.5.0",

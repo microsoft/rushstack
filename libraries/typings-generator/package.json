@@ -22,13 +22,13 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "chokidar": "~3.4.0",
-    "fast-glob": "~3.2.4"
+    "fast-glob": "~3.3.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "@types/node": "14.18.36"
+    "@types/node": "18.17.15"
   },
   "peerDependencies": {
     "@types/node": "*"

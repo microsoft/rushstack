@@ -13,12 +13,11 @@ import {
   sdkContext
 } from './helpers';
 
-declare const global: NodeJS.Global &
-  typeof globalThis & {
-    ___rush___rushLibModule?: RushLibModuleType;
-    ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
-    ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
-  };
+declare const global: typeof globalThis & {
+  ___rush___rushLibModule?: RushLibModuleType;
+  ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
+  ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
+};
 
 /**
  * Type of {@link ISdkCallbackEvent.logMessage}
@@ -102,7 +101,7 @@ export class RushSdkLoader {
     onNotifyEvent: SdkNotifyEventCallback | undefined,
     progressPercent: number | undefined
   ): void {
-    if (!abortSignal.aborted) {
+    if (!abortSignal?.aborted) {
       return;
     }
 
@@ -150,7 +149,7 @@ export class RushSdkLoader {
     const onNotifyEvent: SdkNotifyEventCallback | undefined = options.onNotifyEvent;
     let progressPercent: number | undefined = undefined;
 
-    const abortSignal: AbortSignal = options.abortSignal ?? { aborted: false };
+    const abortSignal: AbortSignal | undefined = options.abortSignal;
 
     try {
       const rushJsonSearchFolder: string = options.rushJsonSearchFolder ?? process.cwd();
@@ -228,7 +227,9 @@ export class RushSdkLoader {
             throw new Error(`The ${RUSH_LIB_NAME} package failed to install`);
           }
 
-          RushSdkLoader._checkForCancel(abortSignal, onNotifyEvent, progressPercent);
+          if (abortSignal) {
+            RushSdkLoader._checkForCancel(abortSignal, onNotifyEvent, progressPercent);
+          }
 
           // TODO: Implement incremental progress updates
           progressPercent = 90;

@@ -313,7 +313,7 @@ describe(PackageExtractor.name, () => {
         dependencyConfigurations: [
           {
             dependencyName: '@types/node',
-            dependencyVersionRange: '^14.18.36',
+            dependencyVersionRange: '^18',
             patternsToExclude: ['fs/**']
           }
         ],

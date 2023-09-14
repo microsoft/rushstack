@@ -82,12 +82,15 @@ export class SubprocessTerminator {
     SubprocessTerminator._ensureInitialized();
 
     // Closure variable
-    const pid: number = subprocess.pid;
+    const pid: number | undefined = subprocess.pid;
+    if (pid === undefined) {
+      // The process failed to spawn.
+      return;
+    }
 
     subprocess.on('close', (code: number, signal: string): void => {
-      if (SubprocessTerminator._subprocessesByPid.has(pid)) {
+      if (SubprocessTerminator._subprocessesByPid.delete(pid)) {
         SubprocessTerminator._logDebug(`untracking #${pid}`);
-        SubprocessTerminator._subprocessesByPid.delete(pid);
       }
     });
     SubprocessTerminator._subprocessesByPid.set(pid, {
@@ -105,12 +108,15 @@ export class SubprocessTerminator {
     subprocess: child_process.ChildProcess,
     subprocessOptions: ISubprocessOptions
   ): void {
-    const pid: number = subprocess.pid;
+    const pid: number | undefined = subprocess.pid;
+    if (pid === undefined) {
+      // The process failed to spawn.
+      return;
+    }
 
     // Don't attempt to kill the same process twice
-    if (SubprocessTerminator._subprocessesByPid.has(pid)) {
+    if (SubprocessTerminator._subprocessesByPid.delete(pid)) {
       SubprocessTerminator._logDebug(`untracking #${pid} via killProcessTree()`);
-      this._subprocessesByPid.delete(subprocess.pid);
     }
 
     SubprocessTerminator._validateSubprocessOptions(subprocessOptions);
@@ -120,7 +126,7 @@ export class SubprocessTerminator {
       return;
     }
 
-    SubprocessTerminator._logDebug(`terminating #${subprocess.pid}`);
+    SubprocessTerminator._logDebug(`terminating #${pid}`);
 
     if (SubprocessTerminator._isWindows) {
       // On Windows we have a problem that CMD.exe launches child processes, but when CMD.exe is killed
@@ -131,7 +137,7 @@ export class SubprocessTerminator {
         '/T', // "Terminates the specified process and any child processes which were started by it."
         '/F', // Without this, TaskKill will try to use WM_CLOSE which doesn't work with CLI tools
         '/PID',
-        subprocess.pid.toString()
+        pid.toString()
       ]);
 
       if (result.status) {
@@ -147,7 +153,7 @@ export class SubprocessTerminator {
       }
     } else {
       // Passing a negative PID terminates the entire group instead of just the one process
-      process.kill(-subprocess.pid, 'SIGKILL');
+      process.kill(-pid, 'SIGKILL');
     }
   }
 

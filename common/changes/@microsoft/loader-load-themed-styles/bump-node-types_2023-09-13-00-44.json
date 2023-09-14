@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update @types/node from 14 to 18",
+      "type": "minor",
+      "packageName": "@microsoft/loader-load-themed-styles"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
