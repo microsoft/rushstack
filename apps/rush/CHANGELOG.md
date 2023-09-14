@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 08 Sep 2023 04:09:06 GMT and should not be manually modified.
+This log was last generated on Thu, 14 Sep 2023 09:20:11 GMT and should not be manually modified.
+
+## 5.106.0
+Thu, 14 Sep 2023 09:20:11 GMT
+
+### Updates
+
+- (IMPORTANT) Add a new setting `resolutionMode` in pnpm-config.json; be aware that Rush now overrides the default behavior if you are using PNPM 8.0.0 through 8.6.12 (GitHub #4283)
+- Support adding custom tips for pnpm-printed logs
+- (BREAKING CHANGE) Remove the "defaultMessagePrefix" config in custom-tips.json
+- Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`.
 
 ## 5.105.0
 Fri, 08 Sep 2023 04:09:06 GMT

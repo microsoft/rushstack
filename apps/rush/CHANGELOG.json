@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.106.0",
+      "tag": "@microsoft/rush_v5.106.0",
+      "date": "Thu, 14 Sep 2023 09:20:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(IMPORTANT) Add a new setting `resolutionMode` in pnpm-config.json; be aware that Rush now overrides the default behavior if you are using PNPM 8.0.0 through 8.6.12 (GitHub #4283)"
+          },
+          {
+            "comment": "Support adding custom tips for pnpm-printed logs"
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"defaultMessagePrefix\" config in custom-tips.json"
+          },
+          {
+            "comment": "Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.105.0",
       "tag": "@microsoft/rush_v5.105.0",
       "date": "Fri, 08 Sep 2023 04:09:06 GMT",
