@@ -369,14 +369,6 @@ export class TypeScriptBuilder {
       pendingTranspilePromises
     } = tool;
 
-    // Remove this when watchFile and watchDirectory have been overridden
-    if (ts.sys.getCurrentDirectory() !== system.getCurrentDirectory()) {
-      // This happens because ts.sys.watchFile and ts.sys.watchDirectory wrap a memoized working directory.
-      throw new Error(
-        `TypeScript has internally memoized an incorrect working directory in the watcher. Watch mode cannot function properly.`
-      );
-    }
-
     if (!tool.solutionBuilder && !tool.watchProgram) {
       //#region CONFIGURE
       const { duration: configureDurationMs, tsconfig } = measureTsPerformance('Configure', () => {

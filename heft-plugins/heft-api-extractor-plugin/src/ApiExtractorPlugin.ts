@@ -184,7 +184,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
         if (!this._printedWatchWarning) {
           this._printedWatchWarning = true;
           taskSession.logger.terminal.writeWarningLine(
-            "API Extractor isn't currently supported in -watch mode."
+            "API Extractor isn't currently enabled in watch mode."
           );
         }
         return;
