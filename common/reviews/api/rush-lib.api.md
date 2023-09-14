@@ -147,16 +147,44 @@ export class CredentialCache {
 }
 
 // @beta
-export type CustomTipId = 'TIP_RUSH_INCONSISTENT_VERSIONS' | string;
+export enum CustomTipId {
+    // (undocumented)
+    TIP_PNPM_NO_MATCHING_VERSION = "TIP_PNPM_NO_MATCHING_VERSION",
+    // (undocumented)
+    TIP_RUSH_INCONSISTENT_VERSIONS = "TIP_RUSH_INCONSISTENT_VERSIONS"
+}
 
 // @beta
 export class CustomTipsConfiguration {
     constructor(configFilename: string);
     readonly configuration: Readonly<ICustomTipsJson>;
-    showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
-    showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
-    showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
-    static readonly supportedTipIds: ReadonlySet<string>;
+    static customTipRegistry: Record<CustomTipId, ICustomTipInfo>;
+    // @internal
+    _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
+    // @internal
+    _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
+    // @internal
+    _showTip(terminal: ITerminal, tipId: CustomTipId): void;
+    // @internal
+    _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
+}
+
+// @beta
+export enum CustomTipSeverity {
+    // (undocumented)
+    Error = "Error",
+    // (undocumented)
+    Info = "Info",
+    // (undocumented)
+    Warning = "Warning"
+}
+
+// @beta
+export enum CustomTipType {
+    // (undocumented)
+    pnpm = "pnpm",
+    // (undocumented)
+    rush = "rush"
 }
 
 // @public (undocumented)
@@ -366,16 +394,23 @@ export interface ICredentialCacheOptions {
 }
 
 // @beta
+export interface ICustomTipInfo {
+    isMatch?: (str: string) => boolean;
+    severity: CustomTipSeverity;
+    // (undocumented)
+    tipId: CustomTipId;
+    type: CustomTipType;
+}
+
+// @beta
 export interface ICustomTipItemJson {
     message: string;
-    messagePrefix?: string;
     tipId: CustomTipId;
 }
 
 // @beta
 export interface ICustomTipsJson {
     customTips?: ICustomTipItemJson[];
-    defaultMessagePrefix?: string;
 }
 
 // @beta (undocumented)

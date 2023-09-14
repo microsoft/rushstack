@@ -744,7 +744,7 @@ export class CertificateManager {
       subjectAltNames = generatedCertificate.subjectAltNames;
 
       // Try to set the friendly name, and warn if we can't
-      if (!await this._trySetFriendlyNameAsync(tempCertificatePath, terminal)) {
+      if (!(await this._trySetFriendlyNameAsync(tempCertificatePath, terminal))) {
         terminal.writeWarningLine("Unable to set the certificate's friendly name.");
       }
     } else {

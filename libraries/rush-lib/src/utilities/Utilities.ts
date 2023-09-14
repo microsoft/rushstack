@@ -12,10 +12,10 @@ import {
   FileConstants,
   FileSystemStats
 } from '@rushstack/node-core-library';
-import type * as stream from 'stream';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
+import { PassThrough } from 'stream';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 export const UNINITIALIZED: UNINITIALIZED = 'UNINITIALIZED';
@@ -296,6 +296,26 @@ export class Utilities {
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
+   *
+   * It's basically the same as executeCommand() except that it returns a Promise.
+   */
+  public static async executeCommandAndInspectOutputAsync(
+    options: IExecuteCommandOptions,
+    onStdoutStreamChunk?: (chunkString: string) => void
+  ): Promise<void> {
+    await Utilities._executeCommandAndInspectOutputInternalAsync(
+      options.command,
+      options.args,
+      options.workingDirectory,
+      options.suppressOutput ? undefined : ['inherit', 'pipe', 'inherit'],
+      options.environment,
+      options.keepEnvironment,
+      onStdoutStreamChunk
+    );
+  }
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAndCaptureOutput(
     command: string,
@@ -333,6 +353,50 @@ export class Utilities {
     for (;;) {
       try {
         Utilities.executeCommand(options);
+      } catch (error) {
+        console.log('\nThe command failed:');
+        console.log(` ${options.command} ` + options.args.join(' '));
+        console.log(`ERROR: ${(error as Error).toString()}`);
+
+        if (attemptNumber < maxAttempts) {
+          ++attemptNumber;
+          console.log(`Trying again (attempt #${attemptNumber})...\n`);
+          if (retryCallback) {
+            retryCallback();
+          }
+
+          continue;
+        } else {
+          console.error(`Giving up after ${attemptNumber} attempts\n`);
+          throw error;
+        }
+      }
+
+      break;
+    }
+  }
+
+  /**
+   * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
+   * Using `onStdoutStreamChunk` to process the output of the command.
+   *
+   * Note: This is similar to {@link executeCommandWithRetry} except that it returns a Promise and provides a callback to process the output.
+   */
+  public static async executeCommandAndProcessOutputWithRetryAsync(
+    options: IExecuteCommandOptions,
+    maxAttempts: number,
+    onStdoutStreamChunk?: (chunkString: string) => void,
+    retryCallback?: () => void
+  ): Promise<void> {
+    if (maxAttempts < 1) {
+      throw new Error('The maxAttempts parameter cannot be less than 1');
+    }
+
+    let attemptNumber: number = 1;
+
+    for (;;) {
+      try {
+        await Utilities.executeCommandAndInspectOutputAsync(options, onStdoutStreamChunk);
       } catch (error) {
         console.log('\nThe command failed:');
         console.log(` ${options.command} ` + options.args.join(' '));
@@ -613,17 +677,70 @@ export class Utilities {
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
+   *
+   * It's the same as _executeCommandInternal except that it returns a promise.
+   */
+  private static async _executeCommandAndInspectOutputInternalAsync(
+    command: string,
+    args: string[],
+    workingDirectory: string,
+    stdio: child_process.SpawnSyncOptions['stdio'],
+    environment?: IEnvironment,
+    keepEnvironment: boolean = false,
+    onStdoutStreamChunk?: (chunk: string) => void
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const options: child_process.SpawnOptions = {
+        cwd: workingDirectory,
+        shell: true,
+        stdio: stdio,
+        env: keepEnvironment
+          ? environment
+          : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
+      };
+
+      // Only escape the command if it actually contains spaces:
+      const escapedCommand: string =
+        command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
+
+      const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
+
+      const childProcess: child_process.ChildProcess = child_process.spawn(
+        escapedCommand,
+        escapedArgs,
+        options
+      );
+
+      const inspectStream: PassThrough = new PassThrough();
+
+      inspectStream.on('data', (chunk) => {
+        const strData: string = chunk.toString();
+        onStdoutStreamChunk?.(strData);
+      });
+
+      childProcess.on('close', (code: number, signal: string) => {
+        // TODO: Is it possible that the childProcess is closed before the receiving the last chunks?
+        if (code === 0) {
+          resolve();
+        } else {
+          // mimic the current sync version "_executeCommandInternal" behavior.
+          reject(new Error(`The command failed with exit code ${code}`));
+        }
+      });
+
+      childProcess.stdout?.pipe(inspectStream).pipe(process.stdout);
+    });
+  }
+
+  /**
+   * Executes the command with the specified command-line parameters, and waits for it to complete.
+   * The current directory will be set to the specified workingDirectory.
    */
   private static _executeCommandInternal(
     command: string,
     args: string[],
     workingDirectory: string,
-    stdio:
-      | 'pipe'
-      | 'ignore'
-      | 'inherit'
-      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | stream.Stream | null | undefined)[]
-      | undefined,
+    stdio: child_process.SpawnSyncOptions['stdio'],
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<string | Buffer> {

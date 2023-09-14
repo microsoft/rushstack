@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Remove the \"defaultMessagePrefix\" config in custom-tips.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -63,7 +63,7 @@ export abstract class BaseInstallManager {
   private _syncNpmrcAlreadyCalled: boolean = false;
 
   private readonly _terminalProvider: ITerminalProvider;
-  private readonly _terminal: Terminal;
+  protected readonly _terminal: Terminal;
 
   protected readonly rushConfiguration: RushConfiguration;
   protected readonly rushGlobalFolder: RushGlobalFolder;

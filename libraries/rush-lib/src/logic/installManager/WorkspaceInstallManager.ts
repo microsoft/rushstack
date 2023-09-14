@@ -22,6 +22,12 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import {
+  CustomTipId,
+  CustomTipType,
+  CustomTipsConfiguration,
+  ICustomTipInfo
+} from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -303,9 +309,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    const doInstall = (options: IInstallManagerOptions): void => {
+    const doInstallInternalAsync = async (options: IInstallManagerOptions): Promise<void> => {
       // Run "npm install" in the common folder
-      const installArgs: string[] = ['install'];
+      // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
+      // Without this argument, certain text that should be colored (such as red) will appear white.
+      const installArgs: string[] = ['install', '--color=always'];
       this.pushConfigurationArgs(installArgs, options);
 
       console.log(
@@ -334,28 +342,62 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
       }
 
-      Utilities.executeCommandWithRetry(
-        {
-          command: packageManagerFilename,
-          args: installArgs,
-          workingDirectory: this.rushConfiguration.commonTempFolder,
-          environment: packageManagerEnv,
-          suppressOutput: false
-        },
-        this.options.maxInstallAttempts,
-        () => {
-          if (this.rushConfiguration.packageManager === 'pnpm') {
-            console.log(colors.yellow(`Deleting the "node_modules" folder`));
-            this.installRecycler.moveFolder(commonNodeModulesFolder);
+      // Store the tip IDs that should be printed.
+      // They will be printed all at once *after* the install
+      const tipIDsShouldBePrinted: Set<CustomTipId> = new Set();
+      const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.customTipRegistry)
+        .map((key: string) => {
+          return CustomTipsConfiguration.customTipRegistry[key as CustomTipId];
+        })
+        .filter((tipInfo) => tipInfo.type === CustomTipType.pnpm);
 
-            // Leave the pnpm-store as is for the retry. This ensures that packages that have already
-            // been downloaded need not be downloaded again, thereby potentially increasing the chances
-            // of a subsequent successful install.
-
-            Utilities.createFolderWithRetry(commonNodeModulesFolder);
+      const onPnpmStdoutChunk = (chunk: string): void => {
+        // Iterate over the supported custom tip metadata and try to match the chunk.
+        supportedPnpmTips.forEach((tipInfo: ICustomTipInfo) => {
+          if (tipInfo.isMatch && tipInfo.isMatch(chunk)) {
+            tipIDsShouldBePrinted.add(tipInfo.tipId);
           }
-        }
-      );
+        });
+      };
+
+      try {
+        await Utilities.executeCommandAndProcessOutputWithRetryAsync(
+          {
+            command: packageManagerFilename,
+            args: installArgs,
+            workingDirectory: this.rushConfiguration.commonTempFolder,
+            environment: packageManagerEnv,
+            suppressOutput: false
+          },
+          this.options.maxInstallAttempts,
+          onPnpmStdoutChunk,
+          () => {
+            if (this.rushConfiguration.packageManager === 'pnpm') {
+              this._terminal.writeWarningLine(`Deleting the "node_modules" folder`);
+              this.installRecycler.moveFolder(commonNodeModulesFolder);
+
+              // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+              // been downloaded need not be downloaded again, thereby potentially increasing the chances
+              // of a subsequent successful install.
+
+              Utilities.createFolderWithRetry(commonNodeModulesFolder);
+            }
+          }
+        );
+      } finally {
+        // The try-finally is to avoid the tips NOT being printed if the install fails.
+        // NOT catching the error because we want to keep the other behaviors (i.e., the error will be caught and handle in upper layers).
+
+        // The idx for only printing the the "\n" before the tips.
+        let idx: number = 0;
+        tipIDsShouldBePrinted.forEach((tipID) => {
+          if (idx !== 0) {
+            this._terminal.writeLine();
+          }
+          this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
+          idx++;
+        });
+      }
     };
 
     const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
@@ -363,17 +405,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.options.allowShrinkwrapUpdates &&
       experiments.usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate
     ) {
-      doInstall({
+      await doInstallInternalAsync({
         ...this.options,
         onlyShrinkwrap: true
       });
 
-      doInstall({
+      await doInstallInternalAsync({
         ...this.options,
         allowShrinkwrapUpdates: false
       });
     } else {
-      doInstall(this.options);
+      await doInstallInternalAsync(this.options);
     }
 
     // If all attempts fail we just terminate. No special handling needed.

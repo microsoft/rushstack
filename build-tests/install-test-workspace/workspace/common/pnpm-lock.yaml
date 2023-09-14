@@ -7,13 +7,13 @@ importers:
 
   rush-lib-test:
     specifiers:
-      '@microsoft/rush-lib': file:microsoft-rush-lib-5.103.0.tgz
+      '@microsoft/rush-lib': file:microsoft-rush-lib-5.104.1.tgz
       '@types/node': 14.18.36
       colors: ^1.4.0
       rimraf: ^4.1.2
       typescript: ~5.0.4
     dependencies:
-      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.103.0.tgz_@types+node@14.18.36
+      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz_@types+node@14.18.36
       colors: 1.4.0
     devDependencies:
       '@types/node': 14.18.36
@@ -22,17 +22,17 @@ importers:
 
   rush-sdk-test:
     specifiers:
-      '@microsoft/rush-lib': file:microsoft-rush-lib-5.103.0.tgz
-      '@rushstack/rush-sdk': file:rushstack-rush-sdk-5.103.0.tgz
+      '@microsoft/rush-lib': file:microsoft-rush-lib-5.104.1.tgz
+      '@rushstack/rush-sdk': file:rushstack-rush-sdk-5.104.1.tgz
       '@types/node': 14.18.36
       colors: ^1.4.0
       rimraf: ^4.1.2
       typescript: ~5.0.4
     dependencies:
-      '@rushstack/rush-sdk': file:../temp/tarballs/rushstack-rush-sdk-5.103.0.tgz_@types+node@14.18.36
+      '@rushstack/rush-sdk': file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz_@types+node@14.18.36
       colors: 1.4.0
     devDependencies:
-      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.103.0.tgz_@types+node@14.18.36
+      '@microsoft/rush-lib': file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz_@types+node@14.18.36
       '@types/node': 14.18.36
       rimraf: 4.4.1
       typescript: 5.0.4
@@ -422,6 +422,12 @@ packages:
 
   /@types/argparse/1.0.38:
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
+
+  /@types/error-stack-parser/2.0.0:
+    resolution: {integrity: sha512-O2ZQvaCuvqgpSOFzHST/VELij9sm5P84bouCz6z8DysloeY47JpeUyvv00TE0LrZPsG2qleUK00anUaLsvUMHQ==}
+    deprecated: This is a stub types definition for error-stack-parser (https://github.com/stacktracejs/error-stack-parser). error-stack-parser provides its own type definitions, so you don't need @types/error-stack-parser installed!
+    dependencies:
+      error-stack-parser: 2.1.4
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
@@ -1001,10 +1007,11 @@ packages:
       get-intrinsic: 1.1.1
     dev: true
 
-  /callsite-record/4.1.5:
-    resolution: {integrity: sha512-OqeheDucGKifjQRx524URgV4z4NaKjocGhygTptDea+DLROre4ZEecA4KXDq+P7qlGCohYVNOh3qr+y5XH5Ftg==}
+  /callsite-record/4.1.4:
+    resolution: {integrity: sha512-dJDrDR/pDvsf7GaDAQB+ZVmM0zEHU7I3km5EtwxmTVBwaJuOy+dmTN63/u3Lbm0gDdQN4skEtKa67Oety2dGIA==}
     dependencies:
       '@devexpress/error-stack-parser': 2.0.6
+      '@types/error-stack-parser': 2.0.0
       '@types/lodash': 4.14.195
       callsite: 1.0.0
       chalk: 2.4.2
@@ -1213,7 +1220,6 @@ packages:
 
   /debuglog/1.0.1:
     resolution: {integrity: sha512-syBZ+rnAK3EgMsH2aYEOLUW7mZSY9Gb+0wUMCFsZvcmiz+HigA0LOcq/HoQqVuGG+EKykunc7QG2bzrponfaSw==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   /decamelize-keys/1.1.1:
     resolution: {integrity: sha512-WiPxgEirIV0/eIOMcnFBA3/IJZAZqKnwAwWyvvdi4lsr1WCN22nhdf/3db3DoZcUjTV2SqfzIwNyp6y2xs3nmg==}
@@ -1365,6 +1371,11 @@ packages:
     resolution: {integrity: sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==}
     dependencies:
       is-arrayish: 0.2.1
+
+  /error-stack-parser/2.1.4:
+    resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
+    dependencies:
+      stackframe: 1.3.4
 
   /es-abstract/1.20.1:
     resolution: {integrity: sha512-WEm2oBhfoI2sImeM4OF2zE2V3BYdSF+KnSi9Sidz51fQHd7+JuF8Xgcj9/0o+OWeIeIS/MiuNnlruQrJf16GQA==}
@@ -2670,7 +2681,7 @@ packages:
     engines: {node: '>=10.9.0'}
     hasBin: true
     dependencies:
-      callsite-record: 4.1.5
+      callsite-record: 4.1.4
       chalk: 4.1.1
       co: 4.6.0
       depcheck: 1.4.3
@@ -3902,11 +3913,11 @@ packages:
     optionalDependencies:
       commander: 2.20.3
 
-  file:../temp/tarballs/microsoft-rush-lib-5.103.0.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/microsoft-rush-lib-5.103.0.tgz}
-    id: file:../temp/tarballs/microsoft-rush-lib-5.103.0.tgz
+  file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz}
+    id: file:../temp/tarballs/microsoft-rush-lib-5.104.1.tgz
     name: '@microsoft/rush-lib'
-    version: 5.103.0
+    version: 5.104.1
     engines: {node: '>=5.6.0'}
     dependencies:
       '@pnpm/dependency-path': 2.1.2
@@ -4261,11 +4272,11 @@ packages:
       resolve: 1.22.1
       strip-json-comments: 3.1.1
 
-  file:../temp/tarballs/rushstack-rush-sdk-5.103.0.tgz_@types+node@14.18.36:
-    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.103.0.tgz}
-    id: file:../temp/tarballs/rushstack-rush-sdk-5.103.0.tgz
+  file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz_@types+node@14.18.36:
+    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz}
+    id: file:../temp/tarballs/rushstack-rush-sdk-5.104.1.tgz
     name: '@rushstack/rush-sdk'
-    version: 5.103.0
+    version: 5.104.1
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.59.7.tgz_@types+node@14.18.36
       '@types/node-fetch': 2.6.2
