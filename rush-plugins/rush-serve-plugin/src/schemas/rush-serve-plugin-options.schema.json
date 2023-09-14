@@ -27,6 +27,12 @@
       "pattern": "^--(?:[a-z0-9]+)(?:-[a-z0-9]+)*$"
     },
 
+    "buildStatusWebSocketPath": {
+      "type": "string",
+      "description": "The URL path at which to host the web socket connection for monitoring build status. If not specified, the web socket interface will not be enabled.",
+      "pattern": "^/(?:[a-zA-Z0-9_$-]+(?:/[a-zA-Z0-9_$-]+)*)?$"
+    },
+
     "globalRouting": {
       "type": "array",
       "description": "Routing rules for files that are associated with the entire workspace, rather than a single project (e.g. files output by Rush plugins).",
