@@ -1,6 +1,13 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 14 Sep 2023 15:32:38 GMT and should not be manually modified.
+
+## 1.1.0
+Thu, 14 Sep 2023 15:32:38 GMT
+
+### Minor changes
+
+- Add support for the V6 lockfile used by PNPM 8.
 
 ## 1.0.43
 Tue, 08 Aug 2023 07:10:40 GMT
