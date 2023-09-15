@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - NodeVersion: 14
+          - NodeVersion: 16
             OS: ubuntu-latest
           - NodeVersion: 18
             OS: ubuntu-latest
