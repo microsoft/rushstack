@@ -47,8 +47,8 @@ importers:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': ~0.16.1
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/ts-command-line': workspace:*
@@ -78,8 +78,8 @@ importers:
       typescript: 5.0.4
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 18.17.15
@@ -90,9 +90,9 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
+      '@rushstack/heft': 0.59.0
       '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/ts-command-line': workspace:*
@@ -127,8 +127,8 @@ importers:
     devDependencies:
       '@microsoft/api-extractor': link:../api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/argparse': 1.0.38
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
@@ -1267,7 +1267,7 @@ importers:
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
       '@types/jest': 29.5.4
-      '@types/node': 20.6.0
+      '@types/node': 20.6.1
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -1637,18 +1637,18 @@ importers:
 
   ../../eslint/eslint-patch:
     specifiers:
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@types/node': 18.17.15
     devDependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/node': 18.17.15
 
   ../../eslint/eslint-plugin:
     specifiers:
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/tree-pattern': workspace:*
       '@types/eslint': 8.2.0
       '@types/estree': 0.0.50
@@ -1663,8 +1663,8 @@ importers:
       '@rushstack/tree-pattern': link:../../libraries/tree-pattern
       '@typescript-eslint/experimental-utils': 5.59.11_ucoohk2w7gukx6ccuul7rl7pnq
     devDependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/eslint': 8.2.0
       '@types/estree': 0.0.50
       '@types/heft-jest': 1.0.1
@@ -1676,8 +1676,8 @@ importers:
 
   ../../eslint/eslint-plugin-packlets:
     specifiers:
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/tree-pattern': workspace:*
       '@types/eslint': 8.2.0
       '@types/estree': 0.0.50
@@ -1692,8 +1692,8 @@ importers:
       '@rushstack/tree-pattern': link:../../libraries/tree-pattern
       '@typescript-eslint/experimental-utils': 5.59.11_ucoohk2w7gukx6ccuul7rl7pnq
     devDependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/eslint': 8.2.0
       '@types/estree': 0.0.50
       '@types/heft-jest': 1.0.1
@@ -1705,8 +1705,8 @@ importers:
 
   ../../eslint/eslint-plugin-security:
     specifiers:
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/tree-pattern': workspace:*
       '@types/eslint': 8.2.0
       '@types/estree': 0.0.50
@@ -1721,8 +1721,8 @@ importers:
       '@rushstack/tree-pattern': link:../../libraries/tree-pattern
       '@typescript-eslint/experimental-utils': 5.59.11_ucoohk2w7gukx6ccuul7rl7pnq
     devDependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/eslint': 8.2.0
       '@types/estree': 0.0.50
       '@types/heft-jest': 1.0.1
@@ -1738,7 +1738,7 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
@@ -1753,7 +1753,7 @@ importers:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': 2.2.6_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-node-rig': 2.2.23_nl4bx7nn5sruj7baopjzqxd5oe
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
       '@types/semver': 7.5.0
@@ -1791,7 +1791,7 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
@@ -1819,7 +1819,7 @@ importers:
       '@jest/types': 29.5.0
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': 2.2.6_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-node-rig': 2.2.23_s42vvmu2cycug6ye4h4tjygrh4
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 18.17.15
@@ -1833,7 +1833,7 @@ importers:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/heft-typescript-plugin': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/eslint': 8.2.0
@@ -1850,7 +1850,7 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': 2.2.6_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-node-rig': 2.2.23_nl4bx7nn5sruj7baopjzqxd5oe
       '@rushstack/heft-typescript-plugin': link:../heft-typescript-plugin
       '@types/eslint': 8.2.0
       '@types/heft-jest': 1.0.1
@@ -1934,7 +1934,7 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@types/node': 18.17.15
       '@types/semver': 7.5.0
@@ -1951,7 +1951,7 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': 2.2.6_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-node-rig': 2.2.23_nl4bx7nn5sruj7baopjzqxd5oe
       '@types/node': 18.17.15
       '@types/semver': 7.5.0
       typescript: 5.0.4
@@ -2021,8 +2021,8 @@ importers:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': ~0.16.1
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
@@ -2032,8 +2032,8 @@ importers:
       '@rushstack/node-core-library': link:../node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
 
@@ -2063,8 +2063,8 @@ importers:
   ../../libraries/heft-config-file:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@types/heft-jest': 1.0.1
@@ -2076,8 +2076,8 @@ importers:
       jsonpath-plus: 4.0.0
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
 
@@ -2148,8 +2148,8 @@ importers:
   ../../libraries/node-core-library:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@types/fs-extra': 7.0.0
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
@@ -2173,8 +2173,8 @@ importers:
       z-schema: 5.0.5
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/fs-extra': 7.0.0
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
@@ -2249,8 +2249,8 @@ importers:
   ../../libraries/rig-package:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
       '@types/resolve': 1.20.2
@@ -2262,8 +2262,8 @@ importers:
       strip-json-comments: 3.1.1
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
       '@types/resolve': 1.20.2
@@ -2511,17 +2511,17 @@ importers:
 
   ../../libraries/tree-pattern:
     specifiers:
-      '@rushstack/eslint-config': 3.3.1
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/eslint-config': 3.3.4
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
       eslint: ~7.30.0
       typescript: ~5.0.4
     devDependencies:
-      '@rushstack/eslint-config': 3.3.1_2aulnmwxyjhjxqmg3aruit533m
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/eslint-config': 3.3.4_2aulnmwxyjhjxqmg3aruit533m
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
       eslint: 7.30.0
@@ -2530,8 +2530,8 @@ importers:
   ../../libraries/ts-command-line:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.54.0
-      '@rushstack/heft-node-rig': 2.2.6
+      '@rushstack/heft': 0.59.0
+      '@rushstack/heft-node-rig': 2.2.23
       '@types/argparse': 1.0.38
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
@@ -2545,8 +2545,8 @@ importers:
       string-argv: 0.3.2
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-node-rig': 2.2.6_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-node-rig': 2.2.23_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       '@types/node': 18.17.15
 
@@ -7548,30 +7548,30 @@ packages:
     resolution: {integrity: sha512-H1rQc1ZOHANWBvPcW+JpGwr+juXSxM8Q8YCkm3GhZd8REu1fHR3z99CErO1p9pkcfcxZnMdIZdIsXkOHY0NilA==}
     dev: true
 
-  /@microsoft/api-extractor-model/7.27.2_@types+node@18.17.15:
-    resolution: {integrity: sha512-JWhSfEb4UMYZgI4JsJOws1DjQrb7BaoXoWQV5XW23MWRn1krHVmRHky82Dby5rQPHdr/BBKvEjZV6joFmaGU4Q==}
+  /@microsoft/api-extractor-model/7.28.0_@types+node@18.17.15:
+    resolution: {integrity: sha512-QIMtUVm1tqiKG+M6ciFgRShcDoovyltaeg+CbyOnyr7SMrp6gg0ojK5/nToMqR9kAvsTS4QVgW4Twl50EoAjcw==}
     dependencies:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  /@microsoft/api-extractor/7.35.3_@types+node@18.17.15:
-    resolution: {integrity: sha512-Psh6rZB7BeJznIKJd1+xPhM0AQVXLyYHxIz5ezN7Whu3DIHfx/iRJZLFvMdshpB046ir/JDYBciuYdQbArloHQ==}
+  /@microsoft/api-extractor/7.37.0_@types+node@18.17.15:
+    resolution: {integrity: sha512-df/wffWpDhYRw7kzdxeHGsCpim+dC8aFiZlsJb4uFvVPWhBZpDzOhQxSUTFx3Df1ORY+/JjuPR3fDE9Hq+PHzQ==}
     hasBin: true
     dependencies:
-      '@microsoft/api-extractor-model': 7.27.2_@types+node@18.17.15
+      '@microsoft/api-extractor-model': 7.28.0_@types+node@18.17.15
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      '@rushstack/rig-package': 0.3.20
-      '@rushstack/ts-command-line': 4.15.0
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      '@rushstack/rig-package': 0.5.0
+      '@rushstack/ts-command-line': 4.16.0
       colors: 1.2.5
       lodash: 4.17.21
       resolve: 1.22.4
-      semver: 7.3.8
+      semver: 7.5.4
       source-map: 0.6.1
       typescript: 5.0.4
     transitivePeerDependencies:
@@ -8227,16 +8227,16 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
-  /@rushstack/eslint-config/3.3.1_2aulnmwxyjhjxqmg3aruit533m:
-    resolution: {integrity: sha512-hobfKHqVmQsmiQF2YxqQz9mIm48gwD6njGH3yzycxlEkUR6W+rp7GA8Ok/8GAHEhhAbqB6D5zqit6yCL1CbZ1A==}
+  /@rushstack/eslint-config/3.3.4_2aulnmwxyjhjxqmg3aruit533m:
+    resolution: {integrity: sha512-tYv3+r2OT3olI5fclW9SuSgxe+20KYl9qkFe2gBlm+iMVYRRzcCRSWRe0BCLLUbyWHaPLnCip3cZLKJZ2VkWAA==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
       typescript: '>=4.7.0'
     dependencies:
-      '@rushstack/eslint-patch': 1.3.1
-      '@rushstack/eslint-plugin': 0.12.0_2aulnmwxyjhjxqmg3aruit533m
-      '@rushstack/eslint-plugin-packlets': 0.7.0_2aulnmwxyjhjxqmg3aruit533m
-      '@rushstack/eslint-plugin-security': 0.6.0_2aulnmwxyjhjxqmg3aruit533m
+      '@rushstack/eslint-patch': 1.4.0
+      '@rushstack/eslint-plugin': 0.13.0_2aulnmwxyjhjxqmg3aruit533m
+      '@rushstack/eslint-plugin-packlets': 0.8.0_2aulnmwxyjhjxqmg3aruit533m
+      '@rushstack/eslint-plugin-security': 0.7.0_2aulnmwxyjhjxqmg3aruit533m
       '@typescript-eslint/eslint-plugin': 5.59.11_5mon44wjbprshrigq6xxm7uwqu
       '@typescript-eslint/experimental-utils': 5.59.11_2aulnmwxyjhjxqmg3aruit533m
       '@typescript-eslint/parser': 5.59.11_2aulnmwxyjhjxqmg3aruit533m
@@ -8250,16 +8250,16 @@ packages:
       - supports-color
     dev: true
 
-  /@rushstack/eslint-patch/1.3.1:
-    resolution: {integrity: sha512-RkmuBcqiNioeeBKbgzMlOdreUkJfYaSjwgx9XDgGGpjvWgyaxWvDmZVSN9CS6LjEASadhgPv2BcFp+SeouWXXA==}
+  /@rushstack/eslint-patch/1.4.0:
+    resolution: {integrity: sha512-cEjvTPU32OM9lUFegJagO0mRnIn+rbqrG89vV8/xLnLFX0DoR0r1oy5IlTga71Q7uT3Qus7qm7wgeiMT/+Irlg==}
     dev: true
 
-  /@rushstack/eslint-plugin-packlets/0.7.0_2aulnmwxyjhjxqmg3aruit533m:
-    resolution: {integrity: sha512-ftvrRvN7a5dfpDidDtrqJHH25JvL4huqk3a0S4zv5Rlh1kz6sfPvaKosDQowzEHBIWLvAtTN+P8ygWoyL0/XYw==}
+  /@rushstack/eslint-plugin-packlets/0.8.0_2aulnmwxyjhjxqmg3aruit533m:
+    resolution: {integrity: sha512-PBXjrfPZVuyj3rGy0iNVcQbtOEfL7Q2EZ0kLyBQWJtwCLn3fIwMSlHZD5jUOCsPTkdWRRKSZyAXrVq6BfWXvtg==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
-      '@rushstack/tree-pattern': 0.2.4
+      '@rushstack/tree-pattern': 0.3.0
       '@typescript-eslint/experimental-utils': 5.59.11_2aulnmwxyjhjxqmg3aruit533m
       eslint: 7.30.0
     transitivePeerDependencies:
@@ -8267,12 +8267,12 @@ packages:
       - typescript
     dev: true
 
-  /@rushstack/eslint-plugin-security/0.6.0_2aulnmwxyjhjxqmg3aruit533m:
-    resolution: {integrity: sha512-gJFBGoCCofU34GGFtR3zEjymEsRr2wDLu2u13mHVcDzXyZ3EDlt6ImnJtmn8VRDLGjJ7QFPOiYMSZQaArxWmGg==}
+  /@rushstack/eslint-plugin-security/0.7.0_2aulnmwxyjhjxqmg3aruit533m:
+    resolution: {integrity: sha512-vT+LMd1bWbb5XPpRGwyIk90LquYwA+CRNc9TvrbaXyyPi9X9GjVnYZPg9MRWWBD2to4llAozSdKbTv/eCd3ToA==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
-      '@rushstack/tree-pattern': 0.2.4
+      '@rushstack/tree-pattern': 0.3.0
       '@typescript-eslint/experimental-utils': 5.59.11_2aulnmwxyjhjxqmg3aruit533m
       eslint: 7.30.0
     transitivePeerDependencies:
@@ -8280,12 +8280,12 @@ packages:
       - typescript
     dev: true
 
-  /@rushstack/eslint-plugin/0.12.0_2aulnmwxyjhjxqmg3aruit533m:
-    resolution: {integrity: sha512-kDB35khQeoDjabzHkHDs/NgvNNZzogkoU/UfrXnNSJJlcCxOxmhyscUQn5OptbixiiYCOFZh9TN9v2yGBZ3vJQ==}
+  /@rushstack/eslint-plugin/0.13.0_2aulnmwxyjhjxqmg3aruit533m:
+    resolution: {integrity: sha512-xXV3xdo/r5X+XlWFJ6XiDsV3CRbPV1Q3zZtZ3ajKSpVfDrQBQX9A0v/cOBxDZtsCR+XOlsBsJjxaUgBePvOsrw==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
-      '@rushstack/tree-pattern': 0.2.4
+      '@rushstack/tree-pattern': 0.3.0
       '@typescript-eslint/experimental-utils': 5.59.11_2aulnmwxyjhjxqmg3aruit533m
       eslint: 7.30.0
     transitivePeerDependencies:
@@ -8293,55 +8293,64 @@ packages:
       - typescript
     dev: true
 
-  /@rushstack/heft-api-extractor-plugin/0.1.6_nl4bx7nn5sruj7baopjzqxd5oe:
-    resolution: {integrity: sha512-JVfwQDNq/6IreyGjPhVFevSLMn+IWMRZCC4NTimDE74ZHBb0Sv0CXO0yWPQ5HzExfwuLw7q9/9cno/YzSyIA4g==}
+  /@rushstack/heft-api-extractor-plugin/0.2.0_at3hnq4udk2laguipzh7pfqsce:
+    resolution: {integrity: sha512-QZCCLZxPpA0TVzcB2iame3yn06suY2MSm5gHZlr/ll9KmolcLV2B660ad0nWoiyutGHkn4h094DZYhy4PdiMTw==}
+    peerDependencies:
+      '@rushstack/heft': '*'
+    dependencies:
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      semver: 7.5.4
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: true
+
+  /@rushstack/heft-api-extractor-plugin/0.2.0_nl4bx7nn5sruj7baopjzqxd5oe:
+    resolution: {integrity: sha512-QZCCLZxPpA0TVzcB2iame3yn06suY2MSm5gHZlr/ll9KmolcLV2B660ad0nWoiyutGHkn4h094DZYhy4PdiMTw==}
     peerDependencies:
       '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      semver: 7.3.8
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      semver: 7.5.4
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  /@rushstack/heft-api-extractor-plugin/0.1.6_rskgazp6v2asjwagdvjf34bglm:
-    resolution: {integrity: sha512-JVfwQDNq/6IreyGjPhVFevSLMn+IWMRZCC4NTimDE74ZHBb0Sv0CXO0yWPQ5HzExfwuLw7q9/9cno/YzSyIA4g==}
-    peerDependencies:
-      '@rushstack/heft': '*'
-    dependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      semver: 7.3.8
-    transitivePeerDependencies:
-      - '@types/node'
-    dev: true
-
-  /@rushstack/heft-config-file/0.12.4_@types+node@18.17.15:
-    resolution: {integrity: sha512-tqH5RZH0FyULMUcAlKyU0VgdIRgX8ggCfWbfFwzmMXvPT88X0+GMspNT1QXKSXWYa7WbQ0VuNqfKGwFN5PcEwA==}
+  /@rushstack/heft-config-file/0.14.0_@types+node@18.17.15:
+    resolution: {integrity: sha512-KpOY7vFUQZ4RhnPOed6Lhnm1vpLqjv8wv06ZC3yUtHB749iHLuxUKWjMco7qCDW3Uy7D1E2meuDpr8xvAj9zfQ==}
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      '@rushstack/rig-package': 0.3.20
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      '@rushstack/rig-package': 0.5.0
       jsonpath-plus: 4.0.0
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  /@rushstack/heft-jest-plugin/0.7.7_nl4bx7nn5sruj7baopjzqxd5oe:
-    resolution: {integrity: sha512-R4cCsDf3r+lbJXjJaaJgkOGQ+DPQ0ZorWgR2lNG8JalOzsbUiYAbjgDsDYWcH3ciTYQUivzwz0YYre+00SCNwQ==}
+  /@rushstack/heft-jest-plugin/0.9.0_ktfzu6wgg4rzkt2bwh36obx62i:
+    resolution: {integrity: sha512-f3Kor0dnk0N7NX3alqtrI1InkNMj8EAXniesC9aDhnxIFcH79683XME/7wBNLqLYBMB2MhKjKeT3xihvV6AYMA==}
     peerDependencies:
       '@rushstack/heft': '*'
+      jest-environment-jsdom: ^29.5.0
+      jest-environment-node: ^29.5.0
+    peerDependenciesMeta:
+      jest-environment-jsdom:
+        optional: true
+      jest-environment-node:
+        optional: true
     dependencies:
       '@jest/core': 29.5.0
       '@jest/reporters': 29.5.0
       '@jest/transform': 29.5.0
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
       jest-config: 29.5.0_@types+node@18.17.15
+      jest-environment-jsdom: 29.5.0
+      jest-environment-node: 29.5.0
       jest-resolve: 29.5.0
       jest-snapshot: 29.5.0
       lodash: 4.17.21
@@ -8353,18 +8362,26 @@ packages:
       - ts-node
     dev: true
 
-  /@rushstack/heft-jest-plugin/0.7.7_rskgazp6v2asjwagdvjf34bglm:
-    resolution: {integrity: sha512-R4cCsDf3r+lbJXjJaaJgkOGQ+DPQ0ZorWgR2lNG8JalOzsbUiYAbjgDsDYWcH3ciTYQUivzwz0YYre+00SCNwQ==}
+  /@rushstack/heft-jest-plugin/0.9.0_taee7ymhaqnl4smkyjwonwxat4:
+    resolution: {integrity: sha512-f3Kor0dnk0N7NX3alqtrI1InkNMj8EAXniesC9aDhnxIFcH79683XME/7wBNLqLYBMB2MhKjKeT3xihvV6AYMA==}
     peerDependencies:
       '@rushstack/heft': '*'
+      jest-environment-jsdom: ^29.5.0
+      jest-environment-node: ^29.5.0
+    peerDependenciesMeta:
+      jest-environment-jsdom:
+        optional: true
+      jest-environment-node:
+        optional: true
     dependencies:
       '@jest/core': 29.5.0
       '@jest/reporters': 29.5.0
       '@jest/transform': 29.5.0
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
       jest-config: 29.5.0_@types+node@18.17.15
+      jest-environment-node: 29.5.0
       jest-resolve: 29.5.0
       jest-snapshot: 29.5.0
       lodash: 4.17.21
@@ -8376,45 +8393,29 @@ packages:
       - ts-node
     dev: true
 
-  /@rushstack/heft-lint-plugin/0.1.7_nl4bx7nn5sruj7baopjzqxd5oe:
-    resolution: {integrity: sha512-U9Y7qHdUXdTMuKHBRB79P9T8uB4pSCaf57QNjUQJVGOO1TQN5I7PgPZrZfCARycNI7w8jAML2RwC9mqYdshgZA==}
+  /@rushstack/heft-jest-plugin/0.9.0_u2wb35x6tglfznehjkqqmfd5ue:
+    resolution: {integrity: sha512-f3Kor0dnk0N7NX3alqtrI1InkNMj8EAXniesC9aDhnxIFcH79683XME/7wBNLqLYBMB2MhKjKeT3xihvV6AYMA==}
     peerDependencies:
       '@rushstack/heft': '*'
+      jest-environment-jsdom: ^29.5.0
+      jest-environment-node: ^29.5.0
+    peerDependenciesMeta:
+      jest-environment-jsdom:
+        optional: true
+      jest-environment-node:
+        optional: true
     dependencies:
+      '@jest/core': 29.5.0
+      '@jest/reporters': 29.5.0
+      '@jest/transform': 29.5.0
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      semver: 7.3.8
-    transitivePeerDependencies:
-      - '@types/node'
-    dev: true
-
-  /@rushstack/heft-lint-plugin/0.1.7_rskgazp6v2asjwagdvjf34bglm:
-    resolution: {integrity: sha512-U9Y7qHdUXdTMuKHBRB79P9T8uB4pSCaf57QNjUQJVGOO1TQN5I7PgPZrZfCARycNI7w8jAML2RwC9mqYdshgZA==}
-    peerDependencies:
-      '@rushstack/heft': '*'
-    dependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      semver: 7.3.8
-    transitivePeerDependencies:
-      - '@types/node'
-    dev: true
-
-  /@rushstack/heft-node-rig/2.2.6_nl4bx7nn5sruj7baopjzqxd5oe:
-    resolution: {integrity: sha512-gslmqOgtE4OfeLIAaMe6eI4VO0DwQ8nH0eaboqTdbud9MVk6mnU01CkLKQHTYI1KrHSO0WxkMnKfYNebDcrt8A==}
-    peerDependencies:
-      '@rushstack/heft': '*'
-    dependencies:
-      '@microsoft/api-extractor': 7.35.3_@types+node@18.17.15
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-api-extractor-plugin': 0.1.6_nl4bx7nn5sruj7baopjzqxd5oe
-      '@rushstack/heft-jest-plugin': 0.7.7_nl4bx7nn5sruj7baopjzqxd5oe
-      '@rushstack/heft-lint-plugin': 0.1.7_nl4bx7nn5sruj7baopjzqxd5oe
-      '@rushstack/heft-typescript-plugin': 0.1.7_nl4bx7nn5sruj7baopjzqxd5oe
-      '@types/heft-jest': 1.0.1
-      eslint: 8.7.0
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      jest-config: 29.5.0_@types+node@18.17.15
       jest-environment-node: 29.5.0
-      typescript: 5.0.4
+      jest-resolve: 29.5.0
+      jest-snapshot: 29.5.0
+      lodash: 4.17.21
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -8423,17 +8424,41 @@ packages:
       - ts-node
     dev: true
 
-  /@rushstack/heft-node-rig/2.2.6_rskgazp6v2asjwagdvjf34bglm:
-    resolution: {integrity: sha512-gslmqOgtE4OfeLIAaMe6eI4VO0DwQ8nH0eaboqTdbud9MVk6mnU01CkLKQHTYI1KrHSO0WxkMnKfYNebDcrt8A==}
+  /@rushstack/heft-lint-plugin/0.2.0_at3hnq4udk2laguipzh7pfqsce:
+    resolution: {integrity: sha512-w0ID89qNIVPKAp7FohgEStnGRxRYXyu+JqrXnyu59leoBRlB1c4RNQt0m909A+lwSHaZiQBp2zUBkEUuwUtv9A==}
     peerDependencies:
       '@rushstack/heft': '*'
     dependencies:
-      '@microsoft/api-extractor': 7.35.3_@types+node@18.17.15
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-api-extractor-plugin': 0.1.6_rskgazp6v2asjwagdvjf34bglm
-      '@rushstack/heft-jest-plugin': 0.7.7_rskgazp6v2asjwagdvjf34bglm
-      '@rushstack/heft-lint-plugin': 0.1.7_rskgazp6v2asjwagdvjf34bglm
-      '@rushstack/heft-typescript-plugin': 0.1.7_rskgazp6v2asjwagdvjf34bglm
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      semver: 7.5.4
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: true
+
+  /@rushstack/heft-lint-plugin/0.2.0_nl4bx7nn5sruj7baopjzqxd5oe:
+    resolution: {integrity: sha512-w0ID89qNIVPKAp7FohgEStnGRxRYXyu+JqrXnyu59leoBRlB1c4RNQt0m909A+lwSHaZiQBp2zUBkEUuwUtv9A==}
+    peerDependencies:
+      '@rushstack/heft': '*'
+    dependencies:
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      semver: 7.5.4
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: true
+
+  /@rushstack/heft-node-rig/2.2.23_at3hnq4udk2laguipzh7pfqsce:
+    resolution: {integrity: sha512-QF07TYYAzYA6mocoAtngP0POtNpoTgu/BH78bk2s+aMBSPZ3+FrJ9oAcMoaCrOKpQh43lwCzCP5AMMQ9dx9ZgQ==}
+    peerDependencies:
+      '@rushstack/heft': '*'
+    dependencies:
+      '@microsoft/api-extractor': 7.37.0_@types+node@18.17.15
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-api-extractor-plugin': 0.2.0_at3hnq4udk2laguipzh7pfqsce
+      '@rushstack/heft-jest-plugin': 0.9.0_taee7ymhaqnl4smkyjwonwxat4
+      '@rushstack/heft-lint-plugin': 0.2.0_at3hnq4udk2laguipzh7pfqsce
+      '@rushstack/heft-typescript-plugin': 0.2.0_at3hnq4udk2laguipzh7pfqsce
       '@types/heft-jest': 1.0.1
       eslint: 8.7.0
       jest-environment-node: 29.5.0
@@ -8441,54 +8466,103 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
+      - jest-environment-jsdom
       - node-notifier
       - supports-color
       - ts-node
     dev: true
 
-  /@rushstack/heft-typescript-plugin/0.1.7_nl4bx7nn5sruj7baopjzqxd5oe:
-    resolution: {integrity: sha512-HswnuZT6hXONYwMFTNQRuvmJCi5BmwHYcxS6Dqfm7W9HqrJHlED/jHuxMQAJdTH+K2cdMdYdCCdwRbzBYonaJw==}
+  /@rushstack/heft-node-rig/2.2.23_nl4bx7nn5sruj7baopjzqxd5oe:
+    resolution: {integrity: sha512-QF07TYYAzYA6mocoAtngP0POtNpoTgu/BH78bk2s+aMBSPZ3+FrJ9oAcMoaCrOKpQh43lwCzCP5AMMQ9dx9ZgQ==}
+    peerDependencies:
+      '@rushstack/heft': '*'
+    dependencies:
+      '@microsoft/api-extractor': 7.37.0_@types+node@18.17.15
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': 0.2.0_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-jest-plugin': 0.9.0_u2wb35x6tglfznehjkqqmfd5ue
+      '@rushstack/heft-lint-plugin': 0.2.0_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-typescript-plugin': 0.2.0_nl4bx7nn5sruj7baopjzqxd5oe
+      '@types/heft-jest': 1.0.1
+      eslint: 8.7.0
+      jest-environment-node: 29.5.0
+      typescript: 5.0.4
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - jest-environment-jsdom
+      - node-notifier
+      - supports-color
+      - ts-node
+    dev: true
+
+  /@rushstack/heft-node-rig/2.2.23_s42vvmu2cycug6ye4h4tjygrh4:
+    resolution: {integrity: sha512-QF07TYYAzYA6mocoAtngP0POtNpoTgu/BH78bk2s+aMBSPZ3+FrJ9oAcMoaCrOKpQh43lwCzCP5AMMQ9dx9ZgQ==}
+    peerDependencies:
+      '@rushstack/heft': '*'
+    dependencies:
+      '@microsoft/api-extractor': 7.37.0_@types+node@18.17.15
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-api-extractor-plugin': 0.2.0_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-jest-plugin': 0.9.0_ktfzu6wgg4rzkt2bwh36obx62i
+      '@rushstack/heft-lint-plugin': 0.2.0_nl4bx7nn5sruj7baopjzqxd5oe
+      '@rushstack/heft-typescript-plugin': 0.2.0_nl4bx7nn5sruj7baopjzqxd5oe
+      '@types/heft-jest': 1.0.1
+      eslint: 8.7.0
+      jest-environment-node: 29.5.0
+      typescript: 5.0.4
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - jest-environment-jsdom
+      - node-notifier
+      - supports-color
+      - ts-node
+    dev: true
+
+  /@rushstack/heft-typescript-plugin/0.2.0_at3hnq4udk2laguipzh7pfqsce:
+    resolution: {integrity: sha512-uipJ5z7Otetlx2vt4zbN1GTQqu+T0tvGTyOQ8Vpm0DVs1b20iesy1Mf++U9u3qSGRBgNCWkfxquuzGfKZpkOkQ==}
+    peerDependencies:
+      '@rushstack/heft': '*'
+    dependencies:
+      '@rushstack/heft': 0.59.0_@types+node@18.17.15
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      '@types/tapable': 1.0.6
+      semver: 7.5.4
+      tapable: 1.1.3
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: true
+
+  /@rushstack/heft-typescript-plugin/0.2.0_nl4bx7nn5sruj7baopjzqxd5oe:
+    resolution: {integrity: sha512-uipJ5z7Otetlx2vt4zbN1GTQqu+T0tvGTyOQ8Vpm0DVs1b20iesy1Mf++U9u3qSGRBgNCWkfxquuzGfKZpkOkQ==}
     peerDependencies:
       '@rushstack/heft': '*'
     dependencies:
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
       '@types/tapable': 1.0.6
-      semver: 7.3.8
+      semver: 7.5.4
       tapable: 1.1.3
     transitivePeerDependencies:
       - '@types/node'
     dev: true
 
-  /@rushstack/heft-typescript-plugin/0.1.7_rskgazp6v2asjwagdvjf34bglm:
-    resolution: {integrity: sha512-HswnuZT6hXONYwMFTNQRuvmJCi5BmwHYcxS6Dqfm7W9HqrJHlED/jHuxMQAJdTH+K2cdMdYdCCdwRbzBYonaJw==}
-    peerDependencies:
-      '@rushstack/heft': '*'
-    dependencies:
-      '@rushstack/heft': 0.54.0_@types+node@18.17.15
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      '@types/tapable': 1.0.6
-      semver: 7.3.8
-      tapable: 1.1.3
-    transitivePeerDependencies:
-      - '@types/node'
-    dev: true
-
-  /@rushstack/heft/0.54.0_@types+node@18.17.15:
-    resolution: {integrity: sha512-HUViJaEWEC42JebLOssZoGWsG4WIUgvq9JHXEuccnBPrZYAMHsW5Dc5oejj+qNqik/YFlVTnAOc9ISMO5gGjVg==}
+  /@rushstack/heft/0.59.0_@types+node@18.17.15:
+    resolution: {integrity: sha512-XHP8Sgr6nghZNwdhsOndpVeHA16f/V5kjvIu651WKhTMA2ogNerlHD9bKjYwdcRVyA5a16rdDUfJk9TYygoOSA==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': 0.12.4_@types+node@18.17.15
-      '@rushstack/node-core-library': 3.59.3_@types+node@18.17.15
-      '@rushstack/rig-package': 0.3.20
-      '@rushstack/ts-command-line': 4.15.0
+      '@rushstack/heft-config-file': 0.14.0_@types+node@18.17.15
+      '@rushstack/node-core-library': 3.60.0_@types+node@18.17.15
+      '@rushstack/rig-package': 0.5.0
+      '@rushstack/ts-command-line': 4.16.0
       '@types/tapable': 1.0.6
       argparse: 1.0.10
       chokidar: 3.4.3
-      fast-glob: 3.2.12
+      fast-glob: 3.3.1
       git-repo-info: 2.1.1
       ignore: 5.1.9
       tapable: 1.1.3
@@ -8498,8 +8572,8 @@ packages:
       - '@types/node'
     dev: true
 
-  /@rushstack/node-core-library/3.59.3_@types+node@18.17.15:
-    resolution: {integrity: sha512-OGk0nQc+SvDkn+IQN16co691A/96gPoRIoWdIlpUds+sYPAGWdTcNVjKMwFOAsCSASqOeF2lh1GdPtWoWJCkPQ==}
+  /@rushstack/node-core-library/3.60.0_@types+node@18.17.15:
+    resolution: {integrity: sha512-PcyrqhILvzU+65wMFybQ2VeGNnU5JzhDq2OvUi3j6jPUxyllM7b2hrRUwCuVaYboewYzIbpzXFzgxe2K7ii1nw==}
     peerDependencies:
       '@types/node': '*'
     peerDependenciesMeta:
@@ -8512,23 +8586,23 @@ packages:
       import-lazy: 4.0.0
       jju: 1.4.0
       resolve: 1.22.4
-      semver: 7.3.8
+      semver: 7.5.4
       z-schema: 5.0.5
     dev: true
 
-  /@rushstack/rig-package/0.3.20:
-    resolution: {integrity: sha512-XemFRFbH9FOk1Es1kTjrYydenf3hXtrV3xxMCEWPuOSn2Lcll/dsLzEULbhCL0Nf5nGMe52ewEiVtX3odd5Ukg==}
+  /@rushstack/rig-package/0.5.0:
+    resolution: {integrity: sha512-bGnOW4DWHOePDiABKy6qyqYJl9i7fKn4bRucExRVt5QzyPxuVHMl8CMmCabtoNSpXzgG3qymWOrMoa/W2PpJrw==}
     dependencies:
       resolve: 1.22.4
       strip-json-comments: 3.1.1
     dev: true
 
-  /@rushstack/tree-pattern/0.2.4:
-    resolution: {integrity: sha512-H8i0OinWsdKM1TKEKPeRRTw85e+/7AIFpxm7q1blceZJhuxRBjCGAUZvQXZK4CMLx75xPqh/h1t5WHwFmElAPA==}
+  /@rushstack/tree-pattern/0.3.0:
+    resolution: {integrity: sha512-ivS4cLAYu6cy0K7bHPtafcdS2d+12lTV5oa3NgjfgKcmUSd/jlxkksUdmonKtaGsuVroGn89d5LB56IwsEjaGg==}
     dev: true
 
-  /@rushstack/ts-command-line/4.15.0:
-    resolution: {integrity: sha512-Xl1Xc8d89ioJ6AbOQsSIPyYvrQPqmGG+YrqUZKYEDenZtKq57xuFbBJya9TXgAWSB+uVRmDYYd9ogu6WTwRjCQ==}
+  /@rushstack/ts-command-line/4.16.0:
+    resolution: {integrity: sha512-WJKhdR9ThK9Iy7t78O3at7I3X4Ssp5RRZay/IQa8NywqkFy/DQbT3iLouodMMdUwLZD9n8n++xLubVd3dkmpkg==}
     dependencies:
       '@types/argparse': 1.0.38
       argparse: 1.0.10
@@ -10724,9 +10798,6 @@ packages:
     resolution: {integrity: sha512-FAYBGwC+W6F9+huFIDtn43cpy7+SzG+atzRiTfdp3inUKL2hXnd4rG8hylJLIh4+hqrQy1P17kvJByE/z825hA==}
     dev: true
 
-  /@types/node/14.18.36:
-    resolution: {integrity: sha512-FXKWbsJ6a1hIrRxv+FoukuHnGTgEzKYGi7kilfMae96AL9UNkPFNWJEEYWzdRI9ooIkbr4AKldyuSTLql06vLQ==}
-
   /@types/node/14.18.59:
     resolution: {integrity: sha512-NWJMpBL2Xs3MY93yrD6YrrTKep8eIA6iMnfG4oIc6LrTRlBZgiSCGiY3V/Owlp6umIBLyKb4F8Q7hxWatjYH5A==}
     dev: true
@@ -10738,8 +10809,8 @@ packages:
   /@types/node/18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node/20.6.0:
-    resolution: {integrity: sha512-najjVq5KN2vsH2U/xyh2opaSEz6cZMR2SetLIlxlj08nOcmPOemJmUK2o4kUzfLqfrWE0PIrNeE16XhYDd3nqg==}
+  /@types/node/20.6.1:
+    resolution: {integrity: sha512-4LcJvuXQlv4lTHnxwyHQZ3uR9Zw2j7m1C9DfuwoTFQQP4Pmu04O6IfLYgMmHoOCt0nosItLLZAH+sOrRE0Bo8g==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:
@@ -10970,7 +11041,7 @@ packages:
   /@types/ws/8.5.5:
     resolution: {integrity: sha512-lwhs8hktwxSjf9UaZ9tG5M03PGogvFaH8gUgLNbN9HKIg0dvv6q+gkSuJ8HN4/VbyxkuLzCjlN7GquQ0gUJfIg==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 18.17.15
 
   /@types/xmldoc/1.1.4:
     resolution: {integrity: sha512-a/ONNCf9itbmzEz1ohx0Fv5TLJzXIPQTapxFu+DlYlDtn9UcAa1OhnrOOMwbU8125hFjrkJKL3qllD7vO5Bivw==}
@@ -15586,17 +15657,6 @@ packages:
       is-glob: 4.0.3
       merge2: 1.4.1
       micromatch: 3.1.10
-    dev: true
-
-  /fast-glob/3.2.12:
-    resolution: {integrity: sha512-DVj4CQIYYow0BlaelwK1pHl5n5cRSJfM60UA0zK891sVInoPri2Ekj7+e1CT3/3qxXenpI+nBBmQAcJPJgaj4w==}
-    engines: {node: '>=8.6.0'}
-    dependencies:
-      '@nodelib/fs.stat': 2.0.5
-      '@nodelib/fs.walk': 1.2.8
-      glob-parent: 5.1.2
-      merge2: 1.4.1
-      micromatch: 4.0.5
     dev: true
 
   /fast-glob/3.3.1:
@@ -22378,14 +22438,6 @@ packages:
   /semver/6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
-
-  /semver/7.3.8:
-    resolution: {integrity: sha512-NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      lru-cache: 6.0.0
-    dev: true
 
   /semver/7.5.4:
     resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}

@@ -30,7 +30,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.2.6",
+    "@rushstack/heft-node-rig": "2.2.23",
     "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
     "typescript": "~5.0.4"

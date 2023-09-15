@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-lint-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-lint-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
