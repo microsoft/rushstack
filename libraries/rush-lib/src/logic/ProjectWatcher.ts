@@ -55,8 +55,11 @@ export class ProjectWatcher {
 
   private _initialState: ProjectChangeAnalyzer | undefined;
   private _previousState: ProjectChangeAnalyzer | undefined;
+  private _resolveIfChanged: undefined | (() => Promise<void>);
 
   private _hasRenderedStatus: boolean;
+
+  public isPaused: boolean = false;
 
   public constructor(options: IProjectWatcherOptions) {
     const { debounceMs = 1000, rushConfiguration, projectsToWatch, terminal, initialState } = options;
@@ -75,10 +78,24 @@ export class ProjectWatcher {
     this._hasRenderedStatus = false;
   }
 
+  public pause(): void {
+    this.isPaused = true;
+  }
+
+  public resume(): void {
+    this.isPaused = false;
+    if (this._resolveIfChanged) {
+      this._resolveIfChanged().catch(() => {
+        // Suppress unhandled promise rejection error
+      });
+    }
+  }
+
   /**
    * Waits for a change to the package-deps of one or more of the selected projects, since the previous invocation.
    * Will return immediately the first time it is invoked, since no state has been recorded.
    * If no change is currently present, watches the source tree of all selected projects for file changes.
+   * `waitForChange` is not allowed to be called multiple times concurrently.
    */
   public async waitForChange(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
     const initialChangeResult: IProjectChangeResult = await this._computeChanged();
@@ -139,13 +156,17 @@ export class ProjectWatcher {
 
         this._hasRenderedStatus = false;
 
-        const resolveIfChanged = async (): Promise<void> => {
+        const resolveIfChanged: () => Promise<void> = (this._resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
           if (terminated) {
             return;
           }
 
           try {
+            if (this.isPaused) {
+              this._setStatus(`Project watcher paused. Press 'w' to toggle. Press 'b' to build once.`);
+              return;
+            }
             this._setStatus(`Evaluating changes to tracked files...`);
             const result: IProjectChangeResult = await this._computeChanged();
             this._setStatus(`Finished analyzing.`);
@@ -174,7 +195,7 @@ export class ProjectWatcher {
             terminal.writeLine();
             reject(err as NodeJS.ErrnoException);
           }
-        };
+        });
 
         for (const [pathToWatch, { recurse }] of pathsToWatch) {
           addWatcher(pathToWatch, recurse);
@@ -268,7 +289,9 @@ export class ProjectWatcher {
           return innerListener.bind(0, root, recursive);
         }
       }
-    );
+    ).finally(() => {
+      this._resolveIfChanged = undefined;
+    });
 
     const closePromises: Promise<void>[] = [];
     for (const [watchedPath, watcher] of watchers) {

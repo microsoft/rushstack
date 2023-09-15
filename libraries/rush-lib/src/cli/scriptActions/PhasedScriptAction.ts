@@ -43,6 +43,7 @@ import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperat
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
+import type { ProjectWatcher } from '../../logic/ProjectWatcher';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -459,6 +460,40 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     await this._executeOperations(initialOptions);
   }
 
+  private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
+    const toggleWatcherKey: string = 'w';
+    const buildOnceKey: string = 'b';
+
+    const terminal: ITerminal = this._terminal;
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (key: string) => {
+      switch (key) {
+        case toggleWatcherKey:
+          if (projectWatcher.isPaused) {
+            terminal.writeLine(`Resuming project watcher...`);
+            projectWatcher.resume();
+          } else {
+            terminal.writeLine(`Pausing project watcher...`);
+            projectWatcher.pause();
+          }
+          break;
+        case buildOnceKey:
+          if (projectWatcher.isPaused) {
+            terminal.writeLine(`Building once...`);
+            projectWatcher.resume();
+            projectWatcher.pause();
+          }
+          break;
+        case '\u0003':
+          process.kill(process.pid, 'SIGINT');
+          break;
+      }
+    });
+  }
+
   /**
    * Runs the command in watch mode. Fundamentally is a simple loop:
    * 1) Wait for a change to one or more projects in the selection
@@ -488,6 +523,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       terminal,
       initialState
     });
+
+    this._registerWatchModeInterface(projectWatcher);
 
     const onWaitingForChanges = (): void => {
       // Allow plugins to display their own messages when waiting for changes.
