@@ -22,12 +22,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import {
-  CustomTipId,
-  CustomTipType,
-  CustomTipsConfiguration,
-  ICustomTipInfo
-} from '../../api/CustomTipsConfiguration';
+import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -344,20 +339,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Store the tip IDs that should be printed.
       // They will be printed all at once *after* the install
-      const tipIDsShouldBePrinted: Set<CustomTipId> = new Set();
-      const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.customTipRegistry)
-        .map((key: string) => {
-          return CustomTipsConfiguration.customTipRegistry[key as CustomTipId];
-        })
-        .filter((tipInfo) => tipInfo.type === CustomTipType.pnpm);
+      const tipIDsToBePrinted: Set<CustomTipId> = new Set();
+      const pnpmTips: ICustomTipInfo[] = Object.values(PNPM_CUSTOM_TIPS);
 
       const onPnpmStdoutChunk = (chunk: string): void => {
         // Iterate over the supported custom tip metadata and try to match the chunk.
-        supportedPnpmTips.forEach((tipInfo: ICustomTipInfo) => {
-          if (tipInfo.isMatch && tipInfo.isMatch(chunk)) {
-            tipIDsShouldBePrinted.add(tipInfo.tipId);
+        for (const { isMatch, tipId } of pnpmTips) {
+          if (isMatch?.(chunk)) {
+            tipIDsToBePrinted.add(tipId);
           }
-        });
+        }
       };
 
       try {
@@ -390,7 +381,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
         // The idx for only printing the the "\n" before the tips.
         let idx: number = 0;
-        tipIDsShouldBePrinted.forEach((tipID) => {
+        tipIDsToBePrinted.forEach((tipID) => {
           if (idx !== 0) {
             this._terminal.writeLine();
           }

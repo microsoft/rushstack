@@ -50,8 +50,8 @@ export interface ICustomTipItemJson {
  * @beta
  */
 export enum CustomTipId {
-  TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
   TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
+  TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
   TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION',
   TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE = 'TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE',
   TIP_PNPM_PEER_DEP_ISSUES = 'TIP_PNPM_PEER_DEP_ISSUES',
@@ -121,6 +121,95 @@ export interface ICustomTipInfo {
   isMatch?: (str: string) => boolean;
 }
 
+export const RUSH_CUSTOM_TIPS: Readonly<Record<`TIP_RUSH_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
+    tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.rush
+  }
+};
+
+export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_PNPM_UNEXPECTED_STORE]: {
+    tipId: CustomTipId.TIP_PNPM_UNEXPECTED_STORE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_UNEXPECTED_STORE');
+    }
+  },
+  [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION]: {
+    tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Example message: (do notice the difference between this one and the TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE)
+
+      // Error Message: ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @babel/types@^7.22.5
+      // The latest release of @babel/types is "7.22.4".
+      // Other releases are:
+      // * esm: 7.21.4-esm.4
+
+      return str.includes('No matching version found for') && str.includes('The latest release of');
+    }
+  },
+  [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE]: {
+    tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE');
+    }
+  },
+  [CustomTipId.TIP_PNPM_PEER_DEP_ISSUES]: {
+    tipId: CustomTipId.TIP_PNPM_PEER_DEP_ISSUES,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_PEER_DEP_ISSUES');
+    }
+  },
+  [CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE]: {
+    tipId: CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_OUTDATED_LOCKFILE');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_TARBALL_INTEGRITY]: {
+    tipId: CustomTipId.TIP_PNPM_TARBALL_INTEGRITY,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_TARBALL_INTEGRITY');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL]: {
+    tipId: CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_MISMATCHED_RELEASE_CHANNEL');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_INVALID_NODE_VERSION]: {
+    tipId: CustomTipId.TIP_PNPM_INVALID_NODE_VERSION,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
+    }
+  }
+};
+
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
  * which allows repo maintainers to configure extra details to be printed alongside
@@ -158,90 +247,8 @@ export class CustomTipsConfiguration {
    * See {@link ICustomTipInfo} for the structure of the metadata.
    */
   public static customTipRegistry: Readonly<Record<CustomTipId, ICustomTipInfo>> = {
-    [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
-      tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.rush
-    },
-
-    [CustomTipId.TIP_PNPM_UNEXPECTED_STORE]: {
-      tipId: CustomTipId.TIP_PNPM_UNEXPECTED_STORE,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        return str.includes('ERR_PNPM_UNEXPECTED_STORE');
-      }
-    },
-    [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION]: {
-      tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Example message: (do notice the difference between this one and the TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE)
-
-        // Error Message: ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @babel/types@^7.22.5
-        // The latest release of @babel/types is "7.22.4".
-        // Other releases are:
-        // * esm: 7.21.4-esm.4
-
-        return str.includes('No matching version found for') && str.includes('The latest release of');
-      }
-    },
-    [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE]: {
-      tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        return str.includes('ERR_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE');
-      }
-    },
-    [CustomTipId.TIP_PNPM_PEER_DEP_ISSUES]: {
-      tipId: CustomTipId.TIP_PNPM_PEER_DEP_ISSUES,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        return str.includes('ERR_PNPM_PEER_DEP_ISSUES');
-      }
-    },
-    [CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE]: {
-      tipId: CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_OUTDATED_LOCKFILE');
-      }
-    },
-
-    [CustomTipId.TIP_PNPM_TARBALL_INTEGRITY]: {
-      tipId: CustomTipId.TIP_PNPM_TARBALL_INTEGRITY,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_TARBALL_INTEGRITY');
-      }
-    },
-
-    [CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL]: {
-      tipId: CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_MISMATCHED_RELEASE_CHANNEL');
-      }
-    },
-
-    [CustomTipId.TIP_PNPM_INVALID_NODE_VERSION]: {
-      tipId: CustomTipId.TIP_PNPM_INVALID_NODE_VERSION,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
-      }
-    }
+    ...RUSH_CUSTOM_TIPS,
+    ...PNPM_CUSTOM_TIPS
   };
 
   public constructor(configFilename: string) {
