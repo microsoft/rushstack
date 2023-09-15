@@ -75,6 +75,7 @@ const TIMELINE_WIDTH: number = 109;
  * Timeline - symbols representing each operation status
  */
 const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
+  [OperationStatus.Waiting]: '?',
   [OperationStatus.Ready]: '?',
   [OperationStatus.Queued]: '?',
   [OperationStatus.Executing]: '?',
@@ -92,6 +93,7 @@ const TIMELINE_CHART_SYMBOLS: Record<OperationStatus, string> = {
  * Timeline - colorizer for each operation status
  */
 const TIMELINE_CHART_COLORIZER: Record<OperationStatus, (string: string) => string> = {
+  [OperationStatus.Waiting]: colors.yellow,
   [OperationStatus.Ready]: colors.yellow,
   [OperationStatus.Queued]: colors.yellow,
   [OperationStatus.Executing]: colors.yellow,

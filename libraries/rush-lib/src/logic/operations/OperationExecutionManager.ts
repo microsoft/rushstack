@@ -394,12 +394,6 @@ export class OperationExecutionManager {
     if (record.status !== OperationStatus.RemoteExecuting) {
       // If the operation was not remote, then we can notify queue that it is complete
       this._executionQueue.complete(record);
-
-      // Apply status changes to direct dependents
-      for (const item of record.consumers) {
-        // Remove this operation from the dependencies, to unblock the scheduler
-        item.dependencies.delete(record);
-      }
     }
   }
 }

@@ -7,9 +7,13 @@
  */
 export enum OperationStatus {
   /**
-   * The Operation is on the queue, ready to execute (but may be waiting for dependencies)
+   * The Operation is ready to execute. All its dependencies have succeeded.
    */
   Ready = 'READY',
+  /**
+   * The Operation is waiting for one or more dependencies to complete.
+   */
+  Waiting = 'WAITING',
   /**
    * The Operation is Queued
    */

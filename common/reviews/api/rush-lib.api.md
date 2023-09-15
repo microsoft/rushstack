@@ -877,7 +877,8 @@ export enum OperationStatus {
     RemoteExecuting = "REMOTE EXECUTING",
     Skipped = "SKIPPED",
     Success = "SUCCESS",
-    SuccessWithWarning = "SUCCESS WITH WARNINGS"
+    SuccessWithWarning = "SUCCESS WITH WARNINGS",
+    Waiting = "WAITING"
 }
 
 // @public (undocumented)

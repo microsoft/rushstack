@@ -34,14 +34,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public readonly operation: Operation;
 
   /**
-   * The current execution status of an operation. Operations start in the 'ready' state,
-   * but can be 'blocked' if an upstream operation failed. It is 'executing' when
-   * the operation is executing. Once execution is complete, it is either 'success' or
-   * 'failure'.
-   */
-  public status: OperationStatus = OperationStatus.Ready;
-
-  /**
    * The error which occurred while executing this operation, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
@@ -101,6 +93,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   private readonly _context: IOperationExecutionRecordContext;
 
   private _collatedWriter: CollatedWriter | undefined = undefined;
+  private _status: OperationStatus;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
     const { runner, associatedPhase, associatedProject } = operation;
@@ -123,6 +116,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
       });
     }
     this._context = context;
+    this._status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
   }
 
   public get name(): string {
@@ -159,6 +153,23 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     return this._operationMetadataManager?.stateFile.state?.cobuildRunnerId;
   }
 
+  /**
+   * The current execution status of an operation. Operations start in the 'ready' state,
+   * but can be 'blocked' if an upstream operation failed. It is 'executing' when
+   * the operation is executing. Once execution is complete, it is either 'success' or
+   * 'failure'.
+   */
+  public get status(): OperationStatus {
+    return this._status;
+  }
+  public set status(newStatus: OperationStatus) {
+    if (newStatus === this._status) {
+      return;
+    }
+    this._status = newStatus;
+    this._context.onOperationStatusChanged?.(this);
+  }
+
   public async executeAsync({
     onStart,
     onResult
@@ -169,9 +180,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
     if (this.status === OperationStatus.RemoteExecuting) {
       this.stopwatch.reset();
     }
-    this.status = OperationStatus.Executing;
     this.stopwatch.start();
-    this._context.onOperationStatusChanged?.(this);
+    this.status = OperationStatus.Executing;
 
     try {
       const earlyReturnStatus: OperationStatus | undefined = await onStart(this);
@@ -194,7 +204,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
         this.stdioSummarizer.close();
         this.stopwatch.stop();
       }
-      this._context.onOperationStatusChanged?.(this);
     }
   }
 }

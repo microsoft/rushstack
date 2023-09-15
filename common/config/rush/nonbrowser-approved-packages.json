@@ -407,12 +407,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "cors",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "constructs",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "cors",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "css-loader",
@@ -824,6 +824,10 @@
     },
     {
       "name": "wordwrap",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ws",
       "allowedCategories": [ "libraries" ]
     },
     {
