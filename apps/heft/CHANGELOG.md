@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Sep 2023 00:36:58 GMT and should not be manually modified.
+
+## 0.59.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Migrate plugin name collision detection to the InternalHeftSession instance to allow multiple Heft sessions in the same process.
 
 ## 0.58.2
 Tue, 08 Aug 2023 07:10:39 GMT

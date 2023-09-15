@@ -2,6 +2,40 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-lint-plugin_v0.2.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Reduce verbosity by only printing the \"not supported in watch mode\" warning during the initial build."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.60.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.58.2` to `0.59.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.22",
       "tag": "@rushstack/heft-lint-plugin_v0.1.22",
       "date": "Tue, 08 Aug 2023 07:10:40 GMT",

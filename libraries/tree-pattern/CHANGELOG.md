@@ -1,6 +1,13 @@
 # Change Log - @rushstack/tree-pattern
 
-This log was last generated on Fri, 17 Jun 2022 00:16:18 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Sep 2023 00:36:58 GMT and should not be manually modified.
+
+## 0.3.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
 
 ## 0.2.4
 Fri, 17 Jun 2022 00:16:18 GMT

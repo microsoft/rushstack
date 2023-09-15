@@ -1,6 +1,13 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Thu, 24 Aug 2023 15:20:46 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Sep 2023 00:36:58 GMT and should not be manually modified.
+
+## 0.6.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
 
 ## 0.5.38
 Thu, 24 Aug 2023 15:20:46 GMT

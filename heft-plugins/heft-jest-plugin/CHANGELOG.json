@@ -2,6 +2,43 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.9.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `--log-heap-usage` flag that includes memory usage analysis in each test run."
+          },
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Wait for first test run to be scheduled in initial invocation in watch mode."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.60.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.58.2` to `^0.59.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.1",
       "tag": "@rushstack/heft-jest-plugin_v0.8.1",
       "date": "Tue, 08 Aug 2023 07:10:40 GMT",
