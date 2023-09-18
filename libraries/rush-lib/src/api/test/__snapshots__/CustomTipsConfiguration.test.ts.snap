@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CustomTipsConfiguration loads the config file (custom-tips.json) 1`] = `
+Map {
+  "TIP_RUSH_INCONSISTENT_VERSIONS" => Object {
+    "message": "This is so wrong my friend. Please read this doc for more information: google.com",
+    "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
+  },
+}
+`;

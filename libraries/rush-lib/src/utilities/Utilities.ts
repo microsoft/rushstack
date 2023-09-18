@@ -307,12 +307,13 @@ export class Utilities {
       options.command,
       options.args,
       options.workingDirectory,
-      options.suppressOutput ? undefined : ['inherit', 'pipe', 'inherit'],
+      options.suppressOutput ? undefined : onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : [0, 1, 2],
       options.environment,
       options.keepEnvironment,
       onStdoutStreamChunk
     );
   }
+
   /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
