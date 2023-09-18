@@ -28,11 +28,7 @@ describe(PrintUtilities.name, () => {
           ''
         ].join('\n');
 
-        const result: string[] = PrintUtilities.wrapWordsToLines(
-          userMessage,
-          50,
-          prefix as string // TS is confused by the overloads
-        );
+        const result: string[] = PrintUtilities.wrapWordsToLines(userMessage, 50, prefix);
         expect(result).toMatchSnapshot();
       });
 
@@ -44,11 +40,7 @@ describe(PrintUtilities.name, () => {
           ''
         ].join('\n');
 
-        const result: string[] = PrintUtilities.wrapWordsToLines(
-          userMessage,
-          50,
-          prefix as string // TS is confused by the overloads
-        );
+        const result: string[] = PrintUtilities.wrapWordsToLines(userMessage, 50, prefix);
         expect(result).toMatchSnapshot();
       });
 
@@ -60,11 +52,7 @@ describe(PrintUtilities.name, () => {
           ''
         ].join('\n');
 
-        const result: string[] = PrintUtilities.wrapWordsToLines(
-          userMessage,
-          50,
-          prefix as string // TS is confused by the overloads
-        );
+        const result: string[] = PrintUtilities.wrapWordsToLines(userMessage, 50, prefix);
         expect(result).toMatchSnapshot();
       });
 
@@ -76,22 +64,14 @@ describe(PrintUtilities.name, () => {
           ''
         ].join('\n');
 
-        const result: string[] = PrintUtilities.wrapWordsToLines(
-          userMessage,
-          50,
-          prefix as string // TS is confused by the overloads
-        );
+        const result: string[] = PrintUtilities.wrapWordsToLines(userMessage, 50, prefix);
         expect(result).toMatchSnapshot();
       });
 
       it('handles a line with only a word longer than the max line length', () => {
         const userMessage: string = ['Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'].join('\n');
 
-        const result: string[] = PrintUtilities.wrapWordsToLines(
-          userMessage,
-          50,
-          prefix as string // TS is confused by the overloads
-        );
+        const result: string[] = PrintUtilities.wrapWordsToLines(userMessage, 50, prefix);
         expect(result).toMatchSnapshot();
       });
 
@@ -104,11 +84,7 @@ describe(PrintUtilities.name, () => {
           'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa.'
         ].join('\n');
 
-        const result: string[] = PrintUtilities.wrapWordsToLines(
-          message,
-          50,
-          prefix as string // TS is confused by the overloads
-        );
+        const result: string[] = PrintUtilities.wrapWordsToLines(message, 50, prefix);
         expect(result).toMatchSnapshot();
       });
     });
