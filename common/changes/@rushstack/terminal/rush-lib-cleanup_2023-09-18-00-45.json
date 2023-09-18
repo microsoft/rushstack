@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add support for a custom line prefix in `PrintUtilities.wrapWords`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

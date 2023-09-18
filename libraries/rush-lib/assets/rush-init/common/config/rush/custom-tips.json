@@ -22,7 +22,7 @@
       /**
        * (REQUIRED) The message text to be displayed for this tip.
        */
-      "message": "For additional troubleshooting information, refer this wiki article:\n\nhttps://intranet.contoso.com/docs/pnpm-mismatch",
+      "message": "For additional troubleshooting information, refer this wiki article:\n\nhttps://intranet.contoso.com/docs/pnpm-mismatch"
     }
     /*[END "DEMO"]*/
   ]

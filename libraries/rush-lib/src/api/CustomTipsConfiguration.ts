@@ -50,8 +50,8 @@ export interface ICustomTipItemJson {
  * @beta
  */
 export enum CustomTipId {
-  TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
   TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
+  TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
   TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION',
   TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE = 'TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE',
   TIP_PNPM_PEER_DEP_ISSUES = 'TIP_PNPM_PEER_DEP_ISSUES',
@@ -121,6 +121,95 @@ export interface ICustomTipInfo {
   isMatch?: (str: string) => boolean;
 }
 
+export const RUSH_CUSTOM_TIPS: Readonly<Record<`TIP_RUSH_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
+    tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.rush
+  }
+};
+
+export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_PNPM_UNEXPECTED_STORE]: {
+    tipId: CustomTipId.TIP_PNPM_UNEXPECTED_STORE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_UNEXPECTED_STORE');
+    }
+  },
+  [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION]: {
+    tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Example message: (do notice the difference between this one and the TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE)
+
+      // Error Message: ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @babel/types@^7.22.5
+      // The latest release of @babel/types is "7.22.4".
+      // Other releases are:
+      // * esm: 7.21.4-esm.4
+
+      return str.includes('No matching version found for') && str.includes('The latest release of');
+    }
+  },
+  [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE]: {
+    tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE');
+    }
+  },
+  [CustomTipId.TIP_PNPM_PEER_DEP_ISSUES]: {
+    tipId: CustomTipId.TIP_PNPM_PEER_DEP_ISSUES,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_PEER_DEP_ISSUES');
+    }
+  },
+  [CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE]: {
+    tipId: CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_OUTDATED_LOCKFILE');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_TARBALL_INTEGRITY]: {
+    tipId: CustomTipId.TIP_PNPM_TARBALL_INTEGRITY,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_TARBALL_INTEGRITY');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL]: {
+    tipId: CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_MISMATCHED_RELEASE_CHANNEL');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_INVALID_NODE_VERSION]: {
+    tipId: CustomTipId.TIP_PNPM_INVALID_NODE_VERSION,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
+    }
+  }
+};
+
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
  * which allows repo maintainers to configure extra details to be printed alongside
@@ -130,13 +219,7 @@ export interface ICustomTipInfo {
 export class CustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private readonly _tipMap: Map<CustomTipId, ICustomTipItemJson>;
-  private readonly _jsonFileName: string;
-
-  /**
-   * The JSON settings loaded from `custom-tips.json`.
-   */
-  public readonly configuration: Readonly<ICustomTipsJson>;
+  public readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
 
   /**
    * A registry mapping custom tip IDs to their corresponding metadata.
@@ -158,121 +241,44 @@ export class CustomTipsConfiguration {
    * See {@link ICustomTipInfo} for the structure of the metadata.
    */
   public static customTipRegistry: Readonly<Record<CustomTipId, ICustomTipInfo>> = {
-    [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
-      tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.rush
-    },
-
-    [CustomTipId.TIP_PNPM_UNEXPECTED_STORE]: {
-      tipId: CustomTipId.TIP_PNPM_UNEXPECTED_STORE,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        return str.includes('ERR_PNPM_UNEXPECTED_STORE');
-      }
-    },
-    [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION]: {
-      tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Example message: (do notice the difference between this one and the TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE)
-
-        // Error Message: ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @babel/types@^7.22.5
-        // The latest release of @babel/types is "7.22.4".
-        // Other releases are:
-        // * esm: 7.21.4-esm.4
-
-        return str.includes('No matching version found for') && str.includes('The latest release of');
-      }
-    },
-    [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE]: {
-      tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        return str.includes('ERR_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE');
-      }
-    },
-    [CustomTipId.TIP_PNPM_PEER_DEP_ISSUES]: {
-      tipId: CustomTipId.TIP_PNPM_PEER_DEP_ISSUES,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        return str.includes('ERR_PNPM_PEER_DEP_ISSUES');
-      }
-    },
-    [CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE]: {
-      tipId: CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_OUTDATED_LOCKFILE');
-      }
-    },
-
-    [CustomTipId.TIP_PNPM_TARBALL_INTEGRITY]: {
-      tipId: CustomTipId.TIP_PNPM_TARBALL_INTEGRITY,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_TARBALL_INTEGRITY');
-      }
-    },
-
-    [CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL]: {
-      tipId: CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_MISMATCHED_RELEASE_CHANNEL');
-      }
-    },
-
-    [CustomTipId.TIP_PNPM_INVALID_NODE_VERSION]: {
-      tipId: CustomTipId.TIP_PNPM_INVALID_NODE_VERSION,
-      severity: CustomTipSeverity.Error,
-      type: CustomTipType.pnpm,
-      isMatch: (str: string) => {
-        // Todo: verify this
-        return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
-      }
-    }
+    ...RUSH_CUSTOM_TIPS,
+    ...PNPM_CUSTOM_TIPS
   };
 
-  public constructor(configFilename: string) {
-    this._jsonFileName = configFilename;
-    this._tipMap = new Map();
+  public constructor(configFilePath: string) {
+    const providedCustomTips: Map<CustomTipId, ICustomTipItemJson> = new Map();
 
-    if (!FileSystem.exists(this._jsonFileName)) {
-      this.configuration = {};
-    } else {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, CustomTipsConfiguration._jsonSchema);
+    let configuration: ICustomTipsJson | undefined;
+    try {
+      configuration = JsonFile.loadAndValidate(configFilePath, CustomTipsConfiguration._jsonSchema);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
 
-      const customTips: ICustomTipItemJson[] | undefined = this.configuration?.customTips;
-      if (customTips) {
-        for (const tipItem of customTips) {
-          if (!(tipItem.tipId in CustomTipId)) {
-            throw new Error(
-              `The ${path.basename(this._jsonFileName)} configuration` +
-                ` references an unknown ID "${tipItem.tipId}"`
-            );
-          }
+    const customTips: ICustomTipItemJson[] | undefined = configuration?.customTips;
+    if (customTips) {
+      for (const tipItem of customTips) {
+        if (!(tipItem.tipId in CustomTipId)) {
+          throw new Error(
+            `The ${path.basename(configFilePath)} configuration` +
+              ` references an unknown ID "${tipItem.tipId}"`
+          );
+        }
 
-          if (this._tipMap.has(tipItem.tipId)) {
-            throw new Error(
-              `The ${path.basename(this._jsonFileName)} configuration` +
-                ` specifies a duplicate definition for "${tipItem.tipId}"`
-            );
-          }
-          this._tipMap.set(tipItem.tipId, tipItem);
+        if (providedCustomTips.has(tipItem.tipId)) {
+          throw new Error(
+            `The ${path.basename(configFilePath)} configuration` +
+              ` specifies a duplicate definition for "${tipItem.tipId}"`
+          );
+        } else {
+          providedCustomTips.set(tipItem.tipId, tipItem);
         }
       }
     }
+
+    this.providedCustomTipsByTipId = providedCustomTips;
   }
 
   /**
@@ -286,9 +292,6 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
-    const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
-    if (!customTipJsonItem) return;
-
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
@@ -322,51 +325,29 @@ export class CustomTipsConfiguration {
     this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
 
-  private _formatMessageHeader(tipId: CustomTipId): string {
-    return `| Custom Tip (${tipId})\n|`;
-  }
-
   private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
-    const messageHeader: string = this._formatMessageHeader(tipId);
-    const customTipJsonItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
-    if (!customTipJsonItem) return;
-
-    const message: string = customTipJsonItem?.message;
-
-    const indentToBeRemovedLatter: 2 = 2;
-    const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(
-      message,
-      undefined,
-      indentToBeRemovedLatter
-    );
-    switch (severity) {
-      case CustomTipSeverity.Error:
-        terminal.writeErrorLine(messageHeader);
-        break;
-      case CustomTipSeverity.Warning:
-        terminal.writeWarningLine(messageHeader);
-        break;
-      default:
-        terminal.writeLine(messageHeader);
-        break;
-    }
-
-    wrappedAndIndentedMessage.split('\n').forEach((line) => {
-      line = line.replace(/^ {2}/, '');
-
+    const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
+    if (customTipJsonItem) {
+      let writeFunction: (message: string) => void;
       switch (severity) {
         case CustomTipSeverity.Error:
-          terminal.writeError('| ');
+          writeFunction = terminal.writeErrorLine.bind(terminal);
           break;
         case CustomTipSeverity.Warning:
-          terminal.writeWarning('| ');
+          writeFunction = terminal.writeWarningLine.bind(terminal);
           break;
         default:
-          terminal.writeLine('| ');
+          writeFunction = terminal.writeLine.bind(terminal);
           break;
       }
-      terminal.writeLine(line);
-    });
-    terminal.write('\n');
+
+      writeFunction(`| Custom Tip (${tipId})`);
+      writeFunction('|');
+
+      const message: string = customTipJsonItem.message;
+      const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, '| ');
+      writeFunction(wrappedAndIndentedMessage);
+      terminal.writeLine();
+    }
   }
 }

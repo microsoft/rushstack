@@ -22,12 +22,7 @@ import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import {
-  CustomTipId,
-  CustomTipType,
-  CustomTipsConfiguration,
-  ICustomTipInfo
-} from '../../api/CustomTipsConfiguration';
+import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -344,21 +339,29 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Store the tip IDs that should be printed.
       // They will be printed all at once *after* the install
-      const tipIDsShouldBePrinted: Set<CustomTipId> = new Set();
-      const supportedPnpmTips: ICustomTipInfo[] = Object.keys(CustomTipsConfiguration.customTipRegistry)
-        .map((key: string) => {
-          return CustomTipsConfiguration.customTipRegistry[key as CustomTipId];
-        })
-        .filter((tipInfo) => tipInfo.type === CustomTipType.pnpm);
+      const tipIDsToBePrinted: Set<CustomTipId> = new Set();
+      const pnpmTips: ICustomTipInfo[] = [];
+      for (const [customTipId, customTip] of Object.entries(PNPM_CUSTOM_TIPS)) {
+        if (
+          this.rushConfiguration.customTipsConfiguration.providedCustomTipsByTipId.has(
+            customTipId as CustomTipId
+          )
+        ) {
+          pnpmTips.push(customTip);
+        }
+      }
 
-      const onPnpmStdoutChunk = (chunk: string): void => {
-        // Iterate over the supported custom tip metadata and try to match the chunk.
-        supportedPnpmTips.forEach((tipInfo: ICustomTipInfo) => {
-          if (tipInfo.isMatch && tipInfo.isMatch(chunk)) {
-            tipIDsShouldBePrinted.add(tipInfo.tipId);
-          }
-        });
-      };
+      const onPnpmStdoutChunk: ((chunk: string) => void) | undefined =
+        pnpmTips.length > 0
+          ? (chunk: string): void => {
+              // Iterate over the supported custom tip metadata and try to match the chunk.
+              for (const { isMatch, tipId } of pnpmTips) {
+                if (isMatch?.(chunk)) {
+                  tipIDsToBePrinted.add(tipId);
+                }
+              }
+            }
+          : undefined;
 
       try {
         await Utilities.executeCommandAndProcessOutputWithRetryAsync(
@@ -388,15 +391,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // The try-finally is to avoid the tips NOT being printed if the install fails.
         // NOT catching the error because we want to keep the other behaviors (i.e., the error will be caught and handle in upper layers).
 
-        // The idx for only printing the the "\n" before the tips.
-        let idx: number = 0;
-        tipIDsShouldBePrinted.forEach((tipID) => {
-          if (idx !== 0) {
-            this._terminal.writeLine();
+        if (tipIDsToBePrinted.size > 0) {
+          this._terminal.writeLine();
+          for (const tipID of tipIDsToBePrinted) {
+            this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
           }
-          this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
-          idx++;
-        });
+        }
       }
     };
 

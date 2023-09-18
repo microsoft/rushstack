@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Remove the dependency on `wordwrap`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

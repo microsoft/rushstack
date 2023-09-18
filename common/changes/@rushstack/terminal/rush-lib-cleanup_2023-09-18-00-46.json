@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add a `PrintUtilities.wrapWordsToLines` function that is functionally identical to `PrintUtilities.wrapWords`, except that it returns an array of lines instead of a joined string with line breaks.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}

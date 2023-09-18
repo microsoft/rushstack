@@ -170,9 +170,10 @@ export enum CustomTipId {
 
 // @beta
 export class CustomTipsConfiguration {
-    constructor(configFilename: string);
-    readonly configuration: Readonly<ICustomTipsJson>;
+    constructor(configFilePath: string);
     static customTipRegistry: Readonly<Record<CustomTipId, ICustomTipInfo>>;
+    // (undocumented)
+    readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
     // @internal
     _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
     // @internal
