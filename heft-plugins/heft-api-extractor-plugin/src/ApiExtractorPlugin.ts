@@ -12,12 +12,12 @@ import type {
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
 import { ApiExtractorRunner } from './ApiExtractorRunner';
+import apiExtractorConfigSchema from './schemas/api-extractor-task.schema.json';
 
 // eslint-disable-next-line @rushstack/no-new-null
 const UNINITIALIZED: null = null;
 
 const PLUGIN_NAME: string = 'api-extractor-plugin';
-const TASK_CONFIG_SCHEMA_PATH: string = `${__dirname}/schemas/api-extractor-task.schema.json`;
 const TASK_CONFIG_RELATIVE_PATH: string = './config/api-extractor-task.json';
 const EXTRACTOR_CONFIG_FILENAME: typeof TApiExtractor.ExtractorConfig.FILENAME = 'api-extractor.json';
 const LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH: string = `./${EXTRACTOR_CONFIG_FILENAME}`;
@@ -158,7 +158,7 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     if (!this._apiExtractorTaskConfigurationFileLoader) {
       this._apiExtractorTaskConfigurationFileLoader = new ConfigurationFile<IApiExtractorTaskConfiguration>({
         projectRelativeFilePath: TASK_CONFIG_RELATIVE_PATH,
-        jsonSchemaPath: TASK_CONFIG_SCHEMA_PATH
+        jsonSchemaObject: apiExtractorConfigSchema
       });
     }
 

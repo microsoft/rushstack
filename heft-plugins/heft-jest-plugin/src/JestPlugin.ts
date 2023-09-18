@@ -42,6 +42,7 @@ import {
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';
 import { TerminalWritableStream } from './TerminalWritableStream';
+import anythingSchema from './schemas/anything.schema.json';
 
 const jestPluginSymbol: unique symbol = Symbol('heft-jest-plugin');
 interface IWithJestPlugin {
@@ -642,9 +643,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     projectRelativeFilePath: string
   ): ConfigurationFile<IHeftJestConfiguration> {
     if (!JestPlugin._jestConfigurationFileLoader) {
-      // Bypass Jest configuration validation
-      const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
-
       // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
         currentObject: T,
@@ -690,7 +688,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       JestPlugin._jestConfigurationFileLoader = new ConfigurationFile<IHeftJestConfiguration>({
         projectRelativeFilePath: projectRelativeFilePath,
-        jsonSchemaPath: schemaPath,
+        // Bypass Jest configuration validation
+        jsonSchemaObject: anythingSchema,
         propertyInheritance: {
           moduleNameMapper: {
             inheritanceType: InheritanceType.custom,

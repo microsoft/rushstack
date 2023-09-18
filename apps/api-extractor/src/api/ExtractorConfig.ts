@@ -25,6 +25,8 @@ import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
+import apiExtractorSchema from '../schemas/api-extractor.schema.json';
+
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
  */
@@ -187,9 +189,7 @@ export class ExtractorConfig {
   /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
-  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/api-extractor.schema.json')
-  );
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(apiExtractorSchema);
 
   /**
    * The config file name "api-extractor.json".
