@@ -366,9 +366,23 @@ describe(CommandLineParameter.name, () => {
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[u';
 
-      await expect(
-        commandLineParser.executeWithoutErrorHandling(args)
-      ).rejects.toThrowErrorMatchingSnapshot();
+      // TODO: When Node 18 support is removed, switch this to use
+      // ```
+      // await expect(
+      //   commandLineParser.executeWithoutErrorHandling(args)
+      // ).rejects.toThrowErrorMatchingSnapshot();
+      // ```
+
+      let error: string | undefined;
+      try {
+        await commandLineParser.executeWithoutErrorHandling(args);
+      } catch (e) {
+        error = e.message;
+      }
+
+      expect(error).toMatch(
+        /^The \[u environment variable value looks like a JSON array but failed to parse: Unexpected token /
+      );
     });
 
     it('raises an error if env var value is json containing non-scalars', async () => {
