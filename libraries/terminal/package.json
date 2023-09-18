@@ -16,8 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
-    "wordwrap": "~1.0.0"
+    "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
@@ -25,7 +24,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
-    "@types/wordwrap": "~1.0.0",
     "colors": "~1.2.1"
   },
   "peerDependencies": {

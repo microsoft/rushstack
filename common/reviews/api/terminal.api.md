@@ -115,6 +115,9 @@ export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
     static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
+    static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
+    static wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
+    static wrapWordsToLines(text: string, maxLineLength?: number, linePrefix?: string): string[];
 }
 
 // @public
