@@ -8,6 +8,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { Rush } from '../../api/Rush';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { NodeJsCompatibility } from '../../logic/NodeJsCompatibility';
 
 import { RushXCommandLine } from '../RushXCommandLine';
 
@@ -74,6 +75,8 @@ describe(RushXCommandLine.name, () => {
 
     // Mock console log
     logMock = jest.spyOn(console, 'log');
+
+    jest.spyOn(NodeJsCompatibility, 'isLtsVersion', 'get').mockReturnValue(true);
   });
 
   afterEach(() => {

@@ -15,8 +15,8 @@ jobs:
             OS: ubuntu-latest
           - NodeVersion: 18
             OS: ubuntu-latest
-          - NodeVersion: 16
-            OS: windows-latest
+          - NodeVersion: 20
+            OS: ubuntu-latest
           - NodeVersion: 18
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersion }} (${{ matrix.OS }})
