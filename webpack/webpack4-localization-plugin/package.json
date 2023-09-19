@@ -41,7 +41,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",
     "@types/loader-utils": "1.1.3",
     "@types/minimatch": "3.0.5",

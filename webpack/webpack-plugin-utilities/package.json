@@ -33,7 +33,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
     "webpack": "~5.82.1"
   }

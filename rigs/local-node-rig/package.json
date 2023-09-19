@@ -1,8 +1,9 @@
 {
-  "name": "heft-rushstack-internal-node-rig",
-  "version": "0.1.0",
+  "name": "local-node-rig",
+  "version": "1.0.0",
   "description": "A rig package for Node.js projects that build using Heft inside the RushStack repository.",
   "license": "MIT",
+  "private": "true",
   "scripts": {
     "build": "",
     "_phase:build": ""

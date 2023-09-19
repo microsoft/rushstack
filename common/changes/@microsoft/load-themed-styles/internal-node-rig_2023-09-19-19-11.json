@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/heft-lint-plugin"
+      "packageName": "@microsoft/load-themed-styles"
     }
   ],
-  "packageName": "@rushstack/heft-lint-plugin",
+  "packageName": "@microsoft/load-themed-styles",
   "email": "iclanton@users.noreply.github.com"
 }

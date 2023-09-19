@@ -1085,6 +1085,18 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "local-node-rig",
+      "projectFolder": "rigs/local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "local-web-rig",
+      "projectFolder": "rigs/local-web-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "rush-plugins" folder (alphabetical order)
     {
@@ -1134,14 +1146,6 @@
       "packageName": "@rushstack/rush-vscode-command-webview",
       "projectFolder": "vscode-extensions/rush-vscode-command-webview",
       "reviewCategory": "vscode-extensions"
-    },
-
-    // "rushstack-internal-rigs" folder (alphabetical order)
-    {
-      "packageName": "heft-rushstack-internal-node-rig",
-      "projectFolder": "rushstack-internal-rigs/heft-rushstack-internal-node-rig",
-      "reviewCategory": "libraries",
-      "shouldPublish": false
     },
 
     // "webpack" folder (alphabetical order)

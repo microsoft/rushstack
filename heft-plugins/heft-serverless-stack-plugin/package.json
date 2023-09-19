@@ -25,6 +25,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*"
   }
 }

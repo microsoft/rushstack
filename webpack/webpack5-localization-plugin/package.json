@@ -26,7 +26,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "memfs": "3.4.3",
     "webpack": "~5.82.1"
   },

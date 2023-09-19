@@ -34,6 +34,6 @@
     "@rushstack/heft": "workspace:*",
     "@types/watchpack": "2.4.0",
     "webpack": "~5.82.1",
-    "heft-rushstack-internal-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*"
   }
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
 
-  "rigPackageName": "@rushstack/heft-web-rig",
+  "rigPackageName": "local-web-rig",
   "rigProfile": "app"
 }

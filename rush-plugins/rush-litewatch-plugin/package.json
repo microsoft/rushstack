@@ -21,6 +21,6 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*"
+    "local-node-rig": "workspace:*"
   }
 }

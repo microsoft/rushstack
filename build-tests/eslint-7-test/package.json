@@ -12,7 +12,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@types/node": "18.17.15",
     "@typescript-eslint/parser": "~5.59.2",
     "eslint": "~7.30.0",

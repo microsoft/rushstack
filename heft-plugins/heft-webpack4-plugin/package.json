@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/watchpack": "2.4.0",
     "@types/webpack": "4.41.32",
