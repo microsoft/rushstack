@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/trace-import"
+    }
+  ],
+  "packageName": "@rushstack/trace-import",
+  "email": "iclanton@users.noreply.github.com"
+}

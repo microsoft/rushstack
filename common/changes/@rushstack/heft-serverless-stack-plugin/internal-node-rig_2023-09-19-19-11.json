@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-serverless-stack-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-serverless-stack-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

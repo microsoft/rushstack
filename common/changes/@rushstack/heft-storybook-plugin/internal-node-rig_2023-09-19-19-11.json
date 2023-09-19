@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-storybook-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
