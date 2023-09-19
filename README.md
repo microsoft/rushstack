@@ -180,6 +180,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/rigs/local-node-rig](./rigs/local-node-rig/) | A rig package for Node.js projects that build using Heft inside the RushStack repository. |
+| [/rigs/local-web-rig](./rigs/local-web-rig/) | A rig package for Web projects that build using Heft inside the RushStack repository. |
 | [/rush-plugins/rush-litewatch-plugin](./rush-plugins/rush-litewatch-plugin/) | An experimental alternative approach for multi-project watch mode |
 | [/vscode-extensions/rush-vscode-command-webview](./vscode-extensions/rush-vscode-command-webview/) | Part of the Rush Stack VSCode extension, provides a UI for invoking Rush commands |
 | [/vscode-extensions/rush-vscode-extension](./vscode-extensions/rush-vscode-extension/) | Enhanced experience for monorepos that use the Rush Stack toolchain |
