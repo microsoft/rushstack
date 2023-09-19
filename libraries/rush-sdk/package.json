@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",

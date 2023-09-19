@@ -1,0 +1,23 @@
+{
+  "name": "eslint-config-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An ESLint configuration consumed projects inside the rushstack repo.",
+  "scripts": {
+    "build": "",
+    "_phase:build": ""
+  },
+  "devDependencies": {
+    "eslint": "~8.7.0",
+    "typescript": "~5.0.4"
+  },
+  "dependencies": {
+    "@typescript-eslint/parser": "~5.59.2",
+    "@rushstack/eslint-config": "workspace:*",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "eslint-plugin-deprecation": "2.0.0",
+    "eslint-plugin-jsdoc": "37.6.1",
+    "@rushstack/eslint-patch": "workspace:*"
+  }
+}

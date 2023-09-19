@@ -22,7 +22,7 @@
     "semver": "~7.5.4"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-node-rig": "2.2.23",

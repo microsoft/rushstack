@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/lockfile-explorer-web": "workspace:*",

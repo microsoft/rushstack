@@ -43,7 +43,7 @@
     "tapable": "1.1.3"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@types/webpack": "4.41.32",

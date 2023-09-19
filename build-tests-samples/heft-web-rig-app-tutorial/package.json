@@ -16,7 +16,7 @@
     "tslib": "~2.3.1"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft-web-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/react-dom": "16.9.14",

@@ -637,6 +637,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "eslint-config-local",
+      "projectFolder": "eslint/eslint-config-local",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/eslint-patch",
       "projectFolder": "eslint/eslint-patch",
       "reviewCategory": "libraries",

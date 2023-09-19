@@ -19,7 +19,7 @@
     "loader-utils": "1.4.2"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*"
   }

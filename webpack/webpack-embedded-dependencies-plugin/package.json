@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@rushstack/webpack-plugin-utilities": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "webpack": "~5.82.1",

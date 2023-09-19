@@ -22,7 +22,7 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "0.59.0",
     "@rushstack/heft-node-rig": "2.2.23",
     "@types/heft-jest": "1.0.1",

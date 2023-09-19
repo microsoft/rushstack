@@ -18,7 +18,7 @@
     "js-yaml": "~3.13.1"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@types/js-yaml": "3.12.1"

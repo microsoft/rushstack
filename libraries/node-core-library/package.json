@@ -25,7 +25,7 @@
     "z-schema": "~5.0.2"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "0.59.0",
     "@rushstack/heft-node-rig": "2.2.23",
     "@types/fs-extra": "7.0.0",

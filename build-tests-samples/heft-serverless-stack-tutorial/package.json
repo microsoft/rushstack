@@ -13,7 +13,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-serverless-stack-plugin": "workspace:*",

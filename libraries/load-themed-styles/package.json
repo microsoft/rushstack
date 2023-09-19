@@ -17,7 +17,7 @@
   "typings": "lib/index.d.ts",
   "keywords": [],
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-web-rig": "workspace:*"
   }
