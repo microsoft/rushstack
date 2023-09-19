@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "extends": "../../node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+
+  "compilerOptions": {
+    "resolveJsonModule": true,
+
+    "outDir": "../../../../lib",
+    "rootDir": "../../../../src",
+
+    "types": ["heft-jest", "node"],
+    "typeRoots": ["../../../../node_modules/@types", "../../node_modules/@types"]
+  },
+  "include": ["../../../../src/**/*.ts", "../../../../src/**/*.tsx"]
+}

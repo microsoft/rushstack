@@ -31,9 +31,7 @@
     "@rushstack/webpack-plugin-utilities": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
+    "heft-rushstack-internal-node-rig": "workspace:*",
     "webpack": "~5.82.1",
     "memfs": "3.4.3"
   }

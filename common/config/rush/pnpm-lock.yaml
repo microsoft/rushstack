@@ -43,18 +43,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/resolve':
         specifier: 1.20.2
         version: 1.20.2
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../apps/api-extractor:
     dependencies:
@@ -229,27 +226,21 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/lockfile-explorer-web':
         specifier: workspace:*
         version: link:../lockfile-explorer-web
       '@types/cors':
         specifier: ~2.8.12
         version: 2.8.13
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/update-notifier':
         specifier: ~6.0.1
         version: 6.0.4
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../apps/lockfile-explorer-web:
     dependencies:
@@ -318,15 +309,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../apps/rush:
     dependencies:
@@ -349,9 +334,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/rush-amazon-s3-build-cache-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
@@ -364,12 +346,12 @@ importers:
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../apps/trace-import:
     dependencies:
@@ -398,21 +380,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/resolve':
         specifier: 1.20.2
         version: 1.20.2
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../build-tests-samples/heft-node-basic-tutorial:
     devDependencies:
@@ -1086,9 +1062,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
@@ -1098,6 +1071,9 @@ importers:
       eslint:
         specifier: ~7.30.0
         version: 7.30.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       typescript:
         specifier: ~5.0.4
         version: 5.0.4
@@ -2042,9 +2018,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -2060,6 +2033,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       http-proxy:
         specifier: ~1.18.1
         version: 1.18.1
@@ -2079,15 +2055,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../build-tests/rush-project-change-analyzer-test:
     dependencies:
@@ -2104,12 +2080,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../build-tests/rush-redis-cobuild-plugin-integration-test:
     devDependencies:
@@ -2122,9 +2098,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
@@ -2140,6 +2113,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       http-proxy:
         specifier: ~1.18.1
         version: 1.18.1
@@ -2428,18 +2404,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -2584,18 +2554,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../heft-plugins/heft-serverless-stack-plugin:
     dependencies:
@@ -2609,18 +2573,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack4-plugin':
         specifier: workspace:*
         version: link:../heft-webpack4-plugin
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../heft-webpack5-plugin
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../heft-plugins/heft-storybook-plugin:
     dependencies:
@@ -2634,18 +2595,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack4-plugin':
         specifier: workspace:*
         version: link:../heft-webpack4-plugin
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../heft-webpack5-plugin
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../heft-plugins/heft-typescript-plugin:
     dependencies:
@@ -2711,18 +2669,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/watchpack':
         specifier: 2.4.0
         version: 2.4.0
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~4.47.0
         version: 4.47.0(webpack-cli@3.3.12)
@@ -2754,15 +2709,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/watchpack':
         specifier: 2.4.0
         version: 2.4.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -2813,18 +2765,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/node-forge':
         specifier: 1.0.4
         version: 1.0.4
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/heft-config-file:
     dependencies:
@@ -2893,24 +2839,21 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/xmldoc':
         specifier: 1.1.4
         version: 1.1.4
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/module-minifier:
     dependencies:
       '@rushstack/worker-pool':
         specifier: workspace:*
         version: link:../worker-pool
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
       serialize-javascript:
         specifier: 6.0.0
         version: 6.0.0
@@ -2927,18 +2870,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/serialize-javascript':
         specifier: 5.0.2
         version: 5.0.2
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/node-core-library:
     dependencies:
@@ -3026,15 +2963,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/package-extractor:
     dependencies:
@@ -3069,9 +3000,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
@@ -3081,15 +3009,9 @@ importers:
       '@types/glob':
         specifier: 7.1.1
         version: 7.1.1
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
       '@types/minimatch':
         specifier: 3.0.5
         version: 3.0.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/npm-packlist':
         specifier: ~1.1.1
         version: 1.1.2
@@ -3099,6 +3021,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -3254,9 +3179,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
@@ -3275,9 +3197,6 @@ importers:
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/npm-package-arg':
         specifier: 6.1.0
         version: 6.1.0
@@ -3302,6 +3221,9 @@ importers:
       '@types/webpack-env':
         specifier: 1.18.0
         version: 1.18.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -3327,9 +3249,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
@@ -3339,15 +3258,15 @@ importers:
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../ts-command-line
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/semver':
         specifier: 7.5.0
         version: 7.5.0
       '@types/webpack-env':
         specifier: 1.18.0
         version: 1.18.0
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/rush-themed-ui:
     dependencies:
@@ -3407,15 +3326,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/stream-collator:
     dependencies:
@@ -3432,21 +3345,18 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/terminal:
     dependencies:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
     devDependencies:
       '@rushstack/eslint-config':
         specifier: workspace:*
@@ -3454,18 +3364,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       colors:
         specifier: ~1.2.1
         version: 1.2.5
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/tree-pattern:
     devDependencies:
@@ -3527,6 +3431,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
       chokidar:
         specifier: ~3.4.0
         version: 3.4.3
@@ -3540,14 +3447,18 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      '@types/glob':
+        specifier: 7.1.1
+        version: 7.1.1
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../libraries/worker-pool:
+    dependencies:
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
     devDependencies:
       '@rushstack/eslint-config':
         specifier: workspace:*
@@ -3555,15 +3466,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../repo-scripts/doc-plugin-rush-stack:
     dependencies:
@@ -3589,15 +3494,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../repo-scripts/generate-api-docs:
     devDependencies:
@@ -3632,15 +3534,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/diff':
         specifier: 5.0.1
         version: 5.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../rigs/heft-node-rig:
     dependencies:
@@ -3788,18 +3687,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/node-fetch':
         specifier: 2.6.2
         version: 2.6.2
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../rush-plugins/rush-azure-storage-build-cache-plugin:
     dependencies:
@@ -3828,15 +3721,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../rush-plugins/rush-http-build-cache-plugin:
     dependencies:
@@ -3862,18 +3749,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/node-fetch':
         specifier: 2.6.2
         version: 2.6.2
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../rush-plugins/rush-litewatch-plugin:
     dependencies:
@@ -3890,15 +3771,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../rush-plugins/rush-redis-cobuild-plugin:
     dependencies:
@@ -3921,15 +3796,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../rush-plugins/rush-serve-plugin:
     dependencies:
@@ -3973,9 +3842,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/compression':
         specifier: ~1.7.2
         version: 1.7.2(@types/express@4.17.13)
@@ -3985,15 +3851,39 @@ importers:
       '@types/express':
         specifier: 4.17.13
         version: 4.17.13
+      '@types/ws':
+        specifier: 8.5.5
+        version: 8.5.5
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
+
+  ../../rushstack-internal-rigs/heft-rushstack-internal-node-rig:
+    dependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-node-rig
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
-      '@types/ws':
-        specifier: 8.5.5
-        version: 8.5.5
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+      jest-junit:
+        specifier: 12.3.0
+        version: 12.3.0
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
 
   ../../vscode-extensions/rush-vscode-command-webview:
     dependencies:
@@ -4092,9 +3982,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
@@ -4110,9 +3997,6 @@ importers:
       '@types/mocha':
         specifier: ^9.0.0
         version: 9.1.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/vscode':
         specifier: ^1.63.0
         version: 1.81.0
@@ -4125,6 +4009,9 @@ importers:
       glob:
         specifier: ~7.0.5
         version: 7.0.6
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       mocha:
         specifier: ^9.1.3
         version: 9.2.2
@@ -4150,24 +4037,18 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
       '@types/enhanced-resolve':
         specifier: 3.0.7
         version: 3.0.7
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~4.47.0
         version: 4.47.0(webpack-cli@3.3.12)
@@ -4187,18 +4068,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@types/loader-utils':
         specifier: 1.1.3
         version: 1.1.3
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../webpack/loader-raw-script:
     dependencies:
@@ -4212,15 +4090,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../webpack/preserve-dynamic-require-plugin:
     devDependencies:
@@ -4230,15 +4102,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -4258,24 +4124,18 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
 
   ../../webpack/webpack-deep-imports-plugin:
     dependencies:
@@ -4289,15 +4149,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -4314,18 +4168,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/webpack-plugin-utilities':
         specifier: workspace:*
         version: link:../webpack-plugin-utilities
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       memfs:
         specifier: 3.4.3
         version: 3.4.3
@@ -4351,18 +4199,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
@@ -4391,9 +4233,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/set-webpack-public-path-plugin':
         specifier: workspace:*
         version: link:../set-webpack-public-path-plugin
@@ -4409,6 +4248,9 @@ importers:
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~4.47.0
         version: 4.47.0(webpack-cli@3.3.12)
@@ -4421,6 +4263,9 @@ importers:
       '@rushstack/worker-pool':
         specifier: workspace:*
         version: link:../../libraries/worker-pool
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
@@ -4434,21 +4279,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       '@types/webpack':
         specifier: 4.41.32
         version: 4.41.32
       '@types/webpack-sources':
         specifier: 1.4.2
         version: 1.4.2
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       webpack:
         specifier: ~4.47.0
         version: 4.47.0(webpack-cli@3.3.12)
@@ -4467,21 +4306,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       css-loader:
         specifier: ~6.6.0
         version: 6.6.0(webpack@5.82.1)
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       memfs:
         specifier: 3.4.3
         version: 3.4.3
@@ -4497,6 +4330,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
     devDependencies:
       '@rushstack/eslint-config':
         specifier: workspace:*
@@ -4504,15 +4340,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
+      heft-rushstack-internal-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       memfs:
         specifier: 3.4.3
         version: 3.4.3
@@ -4528,6 +4358,9 @@ importers:
       '@types/estree':
         specifier: 0.0.50
         version: 0.0.50
+      '@types/node':
+        specifier: '*'
+        version: 20.6.2
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
@@ -4541,18 +4374,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-node-rig
       '@rushstack/module-minifier':
         specifier: workspace:*
         version: link:../../libraries/module-minifier
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
+      heft-rushstack-internal-node-rig:
+        specifier: workspace:*
+        version: link:../../rushstack-internal-rigs/heft-rushstack-internal-node-rig
       memfs:
         specifier: 3.4.3
         version: 3.4.3
@@ -11622,7 +11449,6 @@ packages:
 
   /@types/node@20.6.2:
     resolution: {integrity: sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==}
-    dev: true
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -18771,6 +18597,16 @@ packages:
       walker: 1.0.8
     optionalDependencies:
       fsevents: 2.3.2
+
+  /jest-junit@12.3.0:
+    resolution: {integrity: sha512-+NmE5ogsEjFppEl90GChrk7xgz8xzvF0f+ZT5AnhW6suJC93gvQtmQjfyjDnE0Z2nXJqEkxF0WXlvjG/J+wn/g==}
+    engines: {node: '>=10.12.0'}
+    dependencies:
+      mkdirp: 1.0.4
+      strip-ansi: 5.2.0
+      uuid: 8.3.2
+      xml: 1.0.1
+    dev: false
 
   /jest-leak-detector@29.6.2:
     resolution: {integrity: sha512-aNqYhfp5uYEO3tdWMb2bfWv6f0b4I0LOxVRpnRLAeque2uqOVVMLh6khnTcE2qJ5wAKop0HcreM1btoysD6bPQ==}
@@ -26008,6 +25844,10 @@ packages:
     dependencies:
       sax: 1.2.1
       xmlbuilder: 11.0.1
+
+  /xml@1.0.1:
+    resolution: {integrity: sha512-huCv9IH9Tcf95zuYCsQraZtWnJvBtLVE0QHMOs8bWyZAFZNDcYjsPq1nEx8jKA9y+Beo9v+7OBPRisQTjinQMw==}
+    dev: false
 
   /xmlbuilder@11.0.1:
     resolution: {integrity: sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==}

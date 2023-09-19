@@ -28,9 +28,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "18.17.15",
+    "heft-rushstack-internal-node-rig": "workspace:*",
     "@types/resolve": "1.20.2",
     "@types/semver": "7.5.0"
   }

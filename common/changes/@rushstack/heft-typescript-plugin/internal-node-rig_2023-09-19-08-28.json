@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/heft-typescript-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

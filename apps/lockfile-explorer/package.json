@@ -39,14 +39,12 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "heft-rushstack-internal-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/lockfile-explorer-web": "workspace:*",
     "@types/cors": "~2.8.12",
     "@types/express": "4.17.13",
-    "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "18.17.15",
     "@types/update-notifier": "~6.0.1"
   },
   "dependencies": {
