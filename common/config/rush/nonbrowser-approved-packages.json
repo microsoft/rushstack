@@ -191,6 +191,10 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@rushstack/operation-graph",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/package-deps-hash",
       "allowedCategories": [ "libraries" ]
     },

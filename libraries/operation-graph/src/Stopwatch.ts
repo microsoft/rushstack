@@ -1,29 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'perf_hooks';
-
-/**
- * Used with the Stopwatch class.
- */
-export enum StopwatchState {
-  Stopped = 1,
-  Started = 2
-}
-
 /**
  * Represents a typical timer/stopwatch which keeps track
  * of elapsed time in between two events.
+ *
+ * @public
  */
 export class Stopwatch {
   private _startTime: number | undefined;
   private _endTime: number | undefined;
-  private _state: StopwatchState;
+  private _running: boolean;
 
   public constructor() {
     this._startTime = undefined;
     this._endTime = undefined;
-    this._state = StopwatchState.Stopped;
+    this._running = false;
   }
 
   /**
@@ -33,8 +25,8 @@ export class Stopwatch {
     return new Stopwatch().start();
   }
 
-  public get state(): StopwatchState {
-    return this._state;
+  public get isRunning(): boolean {
+    return this._running;
   }
 
   /**
@@ -47,7 +39,7 @@ export class Stopwatch {
     }
     this._startTime = performance.now();
     this._endTime = undefined;
-    this._state = StopwatchState.Started;
+    this._running = true;
     return this;
   }
 
@@ -56,7 +48,7 @@ export class Stopwatch {
    */
   public stop(): Stopwatch {
     this._endTime = this._startTime !== undefined ? performance.now() : undefined;
-    this._state = StopwatchState.Stopped;
+    this._running = false;
     return this;
   }
 
@@ -65,7 +57,7 @@ export class Stopwatch {
    */
   public reset(): Stopwatch {
     this._endTime = this._startTime = undefined;
-    this._state = StopwatchState.Stopped;
+    this._running = false;
     return this;
   }
 
@@ -73,7 +65,7 @@ export class Stopwatch {
    * Displays how long the stopwatch has been executing in a human readable format.
    */
   public toString(): string {
-    if (this._state === StopwatchState.Stopped && this._startTime === undefined) {
+    if (!this._running && this._startTime === undefined) {
       return '0.00 seconds (stopped)';
     }
     const totalSeconds: number = this.duration;

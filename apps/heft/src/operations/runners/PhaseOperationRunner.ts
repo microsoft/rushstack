@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'perf_hooks';
+import {
+  type IOperationRunner,
+  type IOperationRunnerContext,
+  OperationStatus
+} from '@rushstack/operation-graph';
 
-import { OperationStatus } from '../OperationStatus';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
-import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';

@@ -4,8 +4,7 @@
 import type { OperationStatus } from './OperationStatus';
 import type { OperationError } from './OperationError';
 
-import type { CancellationToken } from '../pluginFramework/CancellationToken';
-import type { Stopwatch } from '../utilities/Stopwatch';
+import type { Stopwatch } from './Stopwatch';
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -14,10 +13,10 @@ import type { Stopwatch } from '../utilities/Stopwatch';
  */
 export interface IOperationRunnerContext {
   /**
-   * A cancellation token for the overarching execution. Runners should do their best to gracefully abort
-   * as soon as possible if the cancellation token is canceled.
+   * An abort signal for the overarching execution. Runners should do their best to gracefully abort
+   * as soon as possible if the signal is aborted.
    */
-  cancellationToken: CancellationToken;
+  abortSignal: AbortSignal;
 
   /**
    * If this is the first time this operation has been executed.
@@ -32,16 +31,42 @@ export interface IOperationRunnerContext {
 }
 
 /**
+ * Interface contract for a single state of an operation.
  *
+ * @beta
  */
 export interface IOperationState {
+  /**
+   * The status code for the operation.
+   */
   status: OperationStatus;
+  /**
+   * Whether the operation has been run at least once.
+   */
+  hasBeenRun: boolean;
+  /**
+   * The error, if the status is `OperationStatus.Failure`.
+   */
   error: OperationError | undefined;
+  /**
+   * Timing information for the operation.
+   */
   stopwatch: Stopwatch;
 }
 
+/**
+ * Interface contract for the current and past state of an operation.
+ *
+ * @beta
+ */
 export interface IOperationStates {
+  /**
+   * The current state of the operation.
+   */
   readonly state: Readonly<IOperationState> | undefined;
+  /**
+   * The previous state of the operation.
+   */
   readonly lastState: Readonly<IOperationState> | undefined;
 }
 

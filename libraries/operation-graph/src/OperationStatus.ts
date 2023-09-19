@@ -7,9 +7,13 @@
  */
 export enum OperationStatus {
   /**
-   * The Operation is on the queue, ready to execute (but may be waiting for dependencies)
+   * The Operation is on the queue, ready to execute
    */
   Ready = 'READY',
+  /**
+   * The Operation is on the queue, waiting for one or more depencies
+   */
+  Waiting = 'WAITING',
   /**
    * The Operation is currently executing
    */
@@ -23,9 +27,9 @@ export enum OperationStatus {
    */
   Failure = 'FAILURE',
   /**
-   * The operation was cancelled
+   * The operation was aborted
    */
-  Cancelled = 'CANCELLED',
+  Aborted = 'ABORTED',
   /**
    * The Operation could not be executed because one or more of its dependencies failed
    */

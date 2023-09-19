@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Initial commit. Includes IPC support and watch loop.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}
