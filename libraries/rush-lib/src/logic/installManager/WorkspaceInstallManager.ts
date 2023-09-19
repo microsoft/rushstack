@@ -493,6 +493,26 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
+      if (process.stdout.isTTY) {
+        // If we're on a TTY console and something else didn't set a `--reporter` parameter,
+        // explicitly set the default reporter. This fixes an issue where, when the pnpm
+        // output is being monitored to match custom tips, pnpm will detect a non-TTY
+        // stdout stream and use the `append-only` reporter.
+        //
+        // See docs here: https://pnpm.io/cli/install#--reportername
+        let includesReporterArg: boolean = false;
+        for (const arg of args) {
+          if (arg.startsWith('--reporter')) {
+            includesReporterArg = true;
+            break;
+          }
+        }
+
+        if (!includesReporterArg) {
+          args.push('--reporter', 'default');
+        }
+      }
+
       for (const arg of this.options.pnpmFilterArguments) {
         args.push(arg);
       }
