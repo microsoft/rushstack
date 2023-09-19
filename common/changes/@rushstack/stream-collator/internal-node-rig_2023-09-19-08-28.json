@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/stream-collator"
+    }
+  ],
+  "packageName": "@rushstack/stream-collator",
+  "email": "iclanton@users.noreply.github.com"
+}
