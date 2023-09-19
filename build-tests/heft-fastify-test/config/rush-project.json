@@ -1,7 +1,7 @@
 {
   "operationSettings": [
     {
-      "operationName": "build",
+      "operationName": "_phase:build",
       "outputFolderNames": ["lib", "dist"]
     }
   ]
