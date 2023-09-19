@@ -3,8 +3,12 @@
 
   "operationSettings": [
     {
-      "operationName": "build",
+      "operationName": "_phase:build",
       "outputFolderNames": ["lib", "dist", "temp/sass-ts"]
+    },
+    {
+      "operationName": "_phase:test",
+      "outputFolderNames": ["coverage"]
     }
   ]
 }

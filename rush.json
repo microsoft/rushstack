@@ -1091,6 +1091,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
+    {
+      "packageName": "local-web-rig",
+      "projectFolder": "rigs/local-web-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "rush-plugins" folder (alphabetical order)
     {

@@ -275,21 +275,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../heft
-      '@rushstack/heft-web-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-web-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
       '@types/react':
         specifier: 16.14.23
         version: 16.14.23
       '@types/react-dom':
         specifier: 16.9.14
         version: 16.9.14
-      '@types/webpack-env':
-        specifier: 1.18.0
-        version: 1.18.0
+      local-web-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-web-rig
 
   ../../apps/rundown:
     dependencies:
@@ -2033,12 +2027,12 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
       http-proxy:
         specifier: ~1.18.1
         version: 1.18.1
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       typescript:
         specifier: ~5.0.4
         version: 5.0.4
@@ -2113,12 +2107,12 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
       http-proxy:
         specifier: ~1.18.1
         version: 1.18.1
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       typescript:
         specifier: ~5.0.4
         version: 5.0.4
@@ -2808,15 +2802,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-web-rig':
+      local-web-rig:
         specifier: workspace:*
-        version: link:../../rigs/heft-web-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/webpack-env':
-        specifier: 1.18.0
-        version: 1.18.0
+        version: link:../../rigs/local-web-rig
 
   ../../libraries/localization-utilities:
     dependencies:
@@ -3298,21 +3286,15 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-web-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-web-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
       '@types/react':
         specifier: 16.14.23
         version: 16.14.23
       '@types/react-dom':
         specifier: 16.9.14
         version: 16.9.14
-      '@types/webpack-env':
-        specifier: 1.18.0
-        version: 1.18.0
+      local-web-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-web-rig
 
   ../../libraries/rushell:
     dependencies:
@@ -3575,33 +3557,6 @@ importers:
         specifier: workspace:*
         version: link:../../apps/heft
 
-  ../../rigs/local-node-rig:
-    dependencies:
-      '@microsoft/api-extractor':
-        specifier: workspace:*
-        version: link:../../apps/api-extractor
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/heft-node-rig':
-        specifier: workspace:*
-        version: link:../heft-node-rig
-      '@types/heft-jest':
-        specifier: 1.0.1
-        version: 1.0.1
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      eslint:
-        specifier: ~8.7.0
-        version: 8.7.0
-      jest-junit:
-        specifier: 12.3.0
-        version: 12.3.0
-      typescript:
-        specifier: ~5.0.4
-        version: 5.0.4
-
   ../../rigs/heft-web-rig:
     dependencies:
       '@microsoft/api-extractor':
@@ -3689,6 +3644,60 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+
+  ../../rigs/local-node-rig:
+    dependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-node-rig':
+        specifier: workspace:*
+        version: link:../heft-node-rig
+      '@types/heft-jest':
+        specifier: 1.0.1
+        version: 1.0.1
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+      jest-junit:
+        specifier: 12.3.0
+        version: 12.3.0
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
+
+  ../../rigs/local-web-rig:
+    dependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-web-rig':
+        specifier: workspace:*
+        version: link:../heft-web-rig
+      '@types/heft-jest':
+        specifier: 1.0.1
+        version: 1.0.1
+      '@types/webpack-env':
+        specifier: 1.18.0
+        version: 1.18.0
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+      jest-junit:
+        specifier: 12.3.0
+        version: 12.3.0
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
 
   ../../rush-plugins/rush-amazon-s3-build-cache-plugin:
     dependencies:
@@ -3924,9 +3933,6 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-web-rig':
-        specifier: workspace:*
-        version: link:../../rigs/heft-web-rig
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -3942,15 +3948,15 @@ importers:
       '@types/vscode':
         specifier: ^1.63.0
         version: 1.81.0
-      '@types/webpack-env':
-        specifier: 1.18.0
-        version: 1.18.0
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
       html-webpack-plugin:
         specifier: ~5.5.0
         version: 5.5.3(webpack@5.82.1)
+      local-web-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-web-rig
       webpack:
         specifier: ~5.82.1
         version: 5.82.1

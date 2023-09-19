@@ -511,10 +511,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "local-node-rig",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
       "name": "heft-storybook-react-tutorial",
       "allowedCategories": [ "tests" ]
     },
@@ -613,6 +609,10 @@
     {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "local-node-rig",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "lodash",

@@ -59,6 +59,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "local-web-rig",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },
