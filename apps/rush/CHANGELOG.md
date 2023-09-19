@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 14 Sep 2023 09:20:11 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 00:36:50 GMT and should not be manually modified.
+
+## 5.107.0
+Tue, 19 Sep 2023 00:36:50 GMT
+
+### Updates
+
+- Update @types/node from 14 to 18
+- Remove previously removed fields from the `custom-tips.json` schema.
+- (BREAKING API CHANGE) Refactor the `CustomTipsConfiguration` by removing the `configuration` property and adding a `providedCustomTipsByTipId` map property.
+- Fix an issue where pnpm would would not rewrite the current status line on a TTY console, and instead would print a series of separate status lines during installation. Note that this is only fixed when there are no custom PNPM tips provided.
+- Add "Waiting" operation status for operations that have one or more dependencies still pending. Ensure that the `onOperationStatusChanged` hook fires for every status change.
+- Add support for optional build status notifications over a web socket connection to `@rushstack/rush-serve-plugin`.
+- Add pause/resume option to project watcher
 
 ## 5.106.0
 Thu, 14 Sep 2023 09:20:11 GMT
