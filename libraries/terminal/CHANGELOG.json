@@ -2,6 +2,24 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/terminal_v0.7.0",
+      "date": "Tue, 19 Sep 2023 00:36:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove the dependency on `wordwrap`."
+          },
+          {
+            "comment": "Add support for a custom line prefix in `PrintUtilities.wrapWords`."
+          },
+          {
+            "comment": "Add a `PrintUtilities.wrapWordsToLines` function that is functionally identical to `PrintUtilities.wrapWords`, except that it returns an array of lines instead of a joined string with line breaks."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@rushstack/terminal_v0.6.0",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",

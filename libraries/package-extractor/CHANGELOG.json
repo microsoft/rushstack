@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.6.1",
+      "tag": "@rushstack/package-extractor_v0.6.1",
+      "date": "Tue, 19 Sep 2023 00:36:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@rushstack/package-extractor_v0.6.0",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.1.1",
+      "tag": "@rushstack/stream-collator_v4.1.1",
+      "date": "Tue, 19 Sep 2023 00:36:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.0",
       "tag": "@rushstack/stream-collator_v4.1.0",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",
