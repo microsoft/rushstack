@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 19 Sep 2023 00:36:50 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 21:13:23 GMT and should not be manually modified.
+
+## 5.107.1
+Tue, 19 Sep 2023 21:13:23 GMT
+
+### Updates
+
+- Fix pnpm's install status printing when pnpm custom tips are defined.
 
 ## 5.107.0
 Tue, 19 Sep 2023 00:36:50 GMT

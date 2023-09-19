@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.107.1",
+      "tag": "@microsoft/rush_v5.107.1",
+      "date": "Tue, 19 Sep 2023 21:13:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix pnpm's install status printing when pnpm custom tips are defined."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.107.0",
       "tag": "@microsoft/rush_v5.107.0",
       "date": "Tue, 19 Sep 2023 00:36:50 GMT",
