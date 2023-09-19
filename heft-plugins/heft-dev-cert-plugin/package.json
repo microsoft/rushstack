@@ -24,8 +24,10 @@
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "18.17.15",
     "eslint": "~8.7.0",
     "webpack": "~5.82.1"
   }

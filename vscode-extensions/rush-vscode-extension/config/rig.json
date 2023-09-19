@@ -1,5 +1,5 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
 
-  "rigPackageName": "heft-rushstack-internal-node-rig"
+  "rigPackageName": "@rushstack/heft-node-rig"
 }

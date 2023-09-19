@@ -3,8 +3,8 @@
 
   "operationSettings": [
     {
-      "operationName": "_phase:build",
-      "outputFolderNames": ["lib"]
+      "operationName": "build",
+      "outputFolderNames": ["lib", "dist"]
     }
   ]
 }

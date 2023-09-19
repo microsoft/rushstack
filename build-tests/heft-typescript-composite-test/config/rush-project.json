@@ -3,12 +3,8 @@
 
   "operationSettings": [
     {
-      "operationName": "_phase:build",
+      "operationName": "build",
       "outputFolderNames": ["lib"]
-    },
-    {
-      "operationName": "_phase:test",
-      "outputFolderNames": ["coverage"]
     }
   ]
 }

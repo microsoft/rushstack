@@ -22,7 +22,9 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node-forge": "1.0.4",
-    "heft-rushstack-internal-node-rig": "workspace:*"
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "18.17.15",
+    "@types/node-forge": "1.0.4"
   }
 }

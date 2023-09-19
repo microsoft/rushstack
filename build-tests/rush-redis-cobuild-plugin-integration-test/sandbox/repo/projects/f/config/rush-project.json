@@ -10,7 +10,7 @@
       "outputFolderNames": ["dist"]
     },
     {
-      "operationName": "_phase:build",
+      "operationName": "build",
       "outputFolderNames": ["dist"]
     }
   ]

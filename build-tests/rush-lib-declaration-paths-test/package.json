@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@types/node": "18.17.15"

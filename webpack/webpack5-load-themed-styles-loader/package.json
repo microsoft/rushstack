@@ -27,9 +27,11 @@
   "devDependencies": {
     "@microsoft/load-themed-styles": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "18.17.15",
     "webpack": "~5.82.1",
     "memfs": "3.4.3",
     "css-loader": "~6.6.0"

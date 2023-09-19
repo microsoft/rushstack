@@ -511,10 +511,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "heft-rushstack-internal-node-rig",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
       "name": "heft-storybook-react-tutorial",
       "allowedCategories": [ "tests" ]
     },
@@ -576,10 +572,6 @@
     },
     {
       "name": "jest-environment-node",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-junit",
       "allowedCategories": [ "libraries" ]
     },
     {

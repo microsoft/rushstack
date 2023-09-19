@@ -1,4 +1,9 @@
 {
-  "extends": "./node_modules/heft-rushstack-internal-node-rig/profiles/default/tsconfig-base.json",
+  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+
+  "compilerOptions": {
+    "types": ["node"],
+    "resolveJsonModule": true
+  },
   "include": ["src/**/*.ts", "./custom-typings/**/*.ts"]
 }

@@ -1,8 +1,10 @@
 {
-  "extends": "./node_modules/heft-rushstack-internal-node-rig/profiles/default/tsconfig-base.json",
+  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
+    "types": ["heft-jest", "node"],
     // express hackery makes this necessary
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   }
 }

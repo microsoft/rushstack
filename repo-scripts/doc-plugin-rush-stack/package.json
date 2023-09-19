@@ -20,7 +20,8 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "heft-rushstack-internal-node-rig": "workspace:*",
-    "@types/js-yaml": "3.12.1"
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/js-yaml": "3.12.1",
+    "@types/node": "18.17.15"
   }
 }
