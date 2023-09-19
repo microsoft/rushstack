@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/operation-graph",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/operation-graph_v0.1.0",
+      "date": "Tue, 19 Sep 2023 15:21:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial commit. Includes IPC support and watch loop."
+          }
+        ]
+      }
+    }
+  ]
+}
