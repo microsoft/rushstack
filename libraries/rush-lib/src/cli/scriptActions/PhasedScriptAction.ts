@@ -363,6 +363,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       } else if (!this._disableBuildCache) {
         // Explicitly disabling the build cache also disables legacy skip detection.
         new LegacySkipPlugin({
+          allowWarningsInSuccessfulBuild:
+            !!this.rushConfiguration.experimentsConfiguration.configuration
+              .buildSkipWithAllowWarningsInSuccessfulBuild,
           terminal,
           changedProjectsOnly,
           isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
