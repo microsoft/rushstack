@@ -40,5 +40,7 @@ export {
   IConfigMessageReportingRule,
   IConfigMessageReportingTable,
   IExtractorMessagesConfig,
-  IConfigFile
+  IConfigFile,
+  DeepPartial,
+  IDeepPartialConfigFile
 } from './api/IConfigFile';

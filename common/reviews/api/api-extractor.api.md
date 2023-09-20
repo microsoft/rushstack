@@ -37,6 +37,11 @@ export const enum ConsoleMessageId {
 }
 
 // @public
+export type DeepPartial<T> = T extends object ? {
+    [K in keyof T]?: DeepPartial<T[K]>;
+} : T;
+
+// @public
 export class Extractor {
     static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
     static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
@@ -61,7 +66,7 @@ export class ExtractorConfig {
     _getShortFilePath(absolutePath: string): string;
     static hasDtsFileExtension(filePath: string): boolean;
     static readonly jsonSchema: JsonSchema;
-    static loadFile(jsonFilePath: string): IConfigFile;
+    static loadFile(jsonFilePath: string, customDefaults?: IDeepPartialConfigFile): IConfigFile;
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFilePath: string;
     readonly messages: IExtractorMessagesConfig;
@@ -237,6 +242,9 @@ export interface IConfigTsdocMetadata {
     enabled: boolean;
     tsdocMetadataFilePath?: string;
 }
+
+// @public
+export type IDeepPartialConfigFile = DeepPartial<IConfigFile>;
 
 // @public
 export interface IExtractorConfigLoadForFolderOptions {
