@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `resolutionMode` to `rush init` template for pnpm-config.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
