@@ -287,13 +287,14 @@ export class HeftTaskSession implements IHeftTaskSession {
     };
 
     // Guaranteed to be unique since phases are uniquely named, tasks are uniquely named within
-    // phases, and neither can have '.' in their names. We will also use the phase name and
+    // phases, and neither can have '/' in their names. We will also use the phase name and
     // task name as the folder name (instead of the plugin name) since we want to enable re-use
     // of plugins in multiple phases and tasks while maintaining unique temp/cache folders for
     // each task.
-    const uniqueTaskFolderName: string = `${phase.phaseName}.${task.taskName}`;
+    // Having a parent folder for the phase simplifies interaction with the Rush build cache.
+    const uniqueTaskFolderName: string = `${phase.phaseName}/${task.taskName}`;
 
-    // <projectFolder>/temp/<phaseName>.<taskName>
+    // <projectFolder>/temp/<phaseName>/<taskName>
     this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
 
     this._options = options;

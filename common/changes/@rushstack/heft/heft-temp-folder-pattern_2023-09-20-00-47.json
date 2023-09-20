@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "(BREAKING CHANGE): Rename task temp folder from \"<phase>.<task>\" to \"<phase>/<task>\" to simplify caching phase outputs.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
