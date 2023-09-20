@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add experiment `buildSkipWithAllowWarningsInSuccessfulBuild` to allow skipping builds that succeeded with warnings in the previous run.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
