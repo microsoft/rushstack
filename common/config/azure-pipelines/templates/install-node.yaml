@@ -1,0 +1,10 @@
+parameters:
+  - name: NodeMajorVersion
+    type: number
+    default: 18
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '${{ parameters.NodeMajorVersion }}.x'
+    displayName: 'Install Node.js ${{ parameters.NodeMajorVersion }}'

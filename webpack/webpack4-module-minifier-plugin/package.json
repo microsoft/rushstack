@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-module-minifier-plugin",
-  "version": "0.12.22",
+  "version": "0.13.1",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
   "typings": "dist/webpack4-module-minifier-plugin.d.ts",
@@ -45,12 +45,10 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36",
+    "local-node-rig": "workspace:*",
     "@types/webpack": "4.41.32",
     "@types/webpack-sources": "1.4.2",
-    "webpack": "~4.44.2",
+    "webpack": "~4.47.0",
     "webpack-sources": "~1.4.3"
   },
   "sideEffects": [

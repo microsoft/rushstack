@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-dev-cert-plugin",
-  "version": "0.3.13",
+  "version": "0.4.1",
   "description": "A Heft plugin for generating and using local development certificates",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.56.0"
+    "@rushstack/heft": "^0.60.0"
   },
   "dependencies": {
     "@rushstack/debug-certificate-manager": "workspace:*"
@@ -24,10 +24,8 @@
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36",
     "eslint": "~8.7.0",
     "webpack": "~5.82.1"
   }

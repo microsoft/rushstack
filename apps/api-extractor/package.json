@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.36.0",
+  "version": "7.37.0",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -46,18 +46,18 @@
     "colors": "~1.2.1",
     "lodash": "~4.17.15",
     "resolve": "~1.22.1",
-    "semver": "~7.3.0",
+    "semver": "~7.5.4",
     "source-map": "~0.6.1",
     "typescript": "~5.0.4"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.54.0",
-    "@rushstack/heft-node-rig": "2.2.6",
+    "@rushstack/heft": "0.59.0",
+    "@rushstack/heft-node-rig": "2.2.23",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "@types/resolve": "1.20.2",
-    "@types/semver": "7.3.5"
+    "@types/semver": "7.5.0"
   }
 }

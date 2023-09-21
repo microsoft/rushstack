@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.100.0",
+  "rushVersion": "5.106.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "7.26.1",
+  "pnpmVersion": "8.7.0",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -42,7 +42,8 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
+  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.6.1 <21.0.0",
+  "suppressNodeLtsWarning": true, // TODO: Remove when Node 20 goes LTS
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -139,7 +140,8 @@
      */
     "reviewCategories": [
       "libraries", // library projects that ship
-      "tests" // non-shipping test projects
+      "tests", // non-shipping test projects
+      "vscode-extensions" // vscode extensions
     ],
 
     /**
@@ -534,6 +536,30 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "package-extractor-test-01",
+      "projectFolder": "build-tests/package-extractor-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-02",
+      "projectFolder": "build-tests/package-extractor-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-03",
+      "projectFolder": "build-tests/package-extractor-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-04",
+      "projectFolder": "build-tests/package-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {
@@ -809,6 +835,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-redis-cobuild-plugin-integration-test",
+      "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "set-webpack-public-path-plugin-webpack4-test",
       "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
       "reviewCategory": "tests",
@@ -940,6 +972,13 @@
       "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/operation-graph",
+      "projectFolder": "libraries/operation-graph",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
@@ -1046,6 +1085,18 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "local-node-rig",
+      "projectFolder": "rigs/local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "local-web-rig",
+      "projectFolder": "rigs/local-web-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "rush-plugins" folder (alphabetical order)
     {
@@ -1073,10 +1124,28 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-redis-cobuild-plugin",
+      "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+
+    // "vscode-extensions" folder (alphabetical order)
+    {
+      "packageName": "rushstack",
+      "projectFolder": "vscode-extensions/rush-vscode-extension",
+      "reviewCategory": "vscode-extensions"
+    },
+    {
+      "packageName": "@rushstack/rush-vscode-command-webview",
+      "projectFolder": "vscode-extensions/rush-vscode-command-webview",
+      "reviewCategory": "vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)

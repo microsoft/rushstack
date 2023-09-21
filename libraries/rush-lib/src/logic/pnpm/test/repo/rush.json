@@ -1,0 +1,13 @@
+{
+  "pnpmVersion": "7.0.0",
+  "rushVersion": "5.46.1",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+
+  "projects": [
+    {
+      "packageName": "foo",
+      "projectFolder": "apps/foo"
+    }
+  ]
+}

@@ -189,8 +189,6 @@ export interface IHeftPluginDefinitionOptions {
 }
 
 export abstract class HeftPluginDefinitionBase {
-  private static _loadedPluginPathsByName: Map<string, string> = new Map();
-
   private _heftPluginDefinitionJson: IHeftPluginDefinitionJson;
   private _pluginPackageName: string;
   private _resolvedEntryPoint: string;
@@ -212,20 +210,6 @@ export abstract class HeftPluginDefinitionBase {
         );
       }
       seenParameters.add(parameter.longName);
-    }
-
-    // Ensure that plugin names are unique. Main reason for this restriction is to ensure that command-line
-    // parameter conflicts can be handled/undocumented synonyms can be provided in all scenarios
-    const existingPluginPath: string | undefined = HeftPluginDefinitionBase._loadedPluginPathsByName.get(
-      this.pluginName
-    );
-    if (existingPluginPath && existingPluginPath !== this._resolvedEntryPoint) {
-      throw new Error(
-        `A plugin named ${JSON.stringify(this.pluginName)} has already been loaded from ` +
-          `"${existingPluginPath}". Plugins must have unique names.`
-      );
-    } else if (!existingPluginPath) {
-      HeftPluginDefinitionBase._loadedPluginPathsByName.set(this.pluginName, this._resolvedEntryPoint);
     }
 
     // Unfortunately loading the schema is a synchronous process.

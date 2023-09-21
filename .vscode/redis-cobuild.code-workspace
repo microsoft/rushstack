@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "rush-redis-cobuild-plugin-integration-test",
+      "path": "../build-tests/rush-redis-cobuild-plugin-integration-test"
+    },
+    {
+      "name": "rush-redis-cobuild-plugin",
+      "path": "../rush-plugins/rush-redis-cobuild-plugin"
+    },
+    {
+      "name": "rush-lib",
+      "path": "../libraries/rush-lib"
+    },
+    {
+      "name": ".vscode",
+      "path": "../.vscode"
+    }
+  ]
+}

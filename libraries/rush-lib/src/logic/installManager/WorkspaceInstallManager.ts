@@ -25,6 +25,7 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { PnpmProjectShrinkwrapFile } from '../pnpm/PnpmProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { SplitWorkspacePnpmfileConfiguration } from '../pnpm/SplitWorkspacePnpmfileConfiguration';
+import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -459,53 +460,119 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    // Run "npm install" in the common folder
-    const installArgs: string[] = ['install'];
-    this.pushConfigurationArgs(installArgs, this.options);
+    const doInstallInternalAsync = async (options: IInstallManagerOptions): Promise<void> => {
+      // Run "npm install" in the common folder
+      // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
+      // Without this argument, certain text that should be colored (such as red) will appear white.
+      const installArgs: string[] = ['install', '--color=always'];
+      this.pushConfigurationArgs(installArgs, options);
 
-    console.log(
-      '\n' +
-        colors.bold(
-          `Running "${this.rushConfiguration.packageManager} install" in` +
-            ` ${this.rushConfiguration.commonTempFolder}`
-        ) +
-        '\n'
-    );
-
-    // If any diagnostic options were specified, then show the full command-line
-    if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
       console.log(
         '\n' +
-          colors.green('Invoking package manager: ') +
-          FileSystem.getRealPath(packageManagerFilename) +
-          ' ' +
-          installArgs.join(' ') +
+          colors.bold(
+            `Running "${this.rushConfiguration.packageManager} install" in` +
+              ` ${this.rushConfiguration.commonTempFolder}`
+          ) +
           '\n'
       );
-    }
 
-    Utilities.executeCommandWithRetry(
-      {
-        command: packageManagerFilename,
-        args: installArgs,
-        workingDirectory: this.rushConfiguration.commonTempFolder,
-        environment: packageManagerEnv,
-        suppressOutput: false
-      },
-      this.options.maxInstallAttempts,
-      () => {
-        if (this.rushConfiguration.packageManager === 'pnpm') {
-          console.log(colors.yellow(`Deleting the "node_modules" folder`));
-          this.installRecycler.moveFolder(commonNodeModulesFolder);
+      // If any diagnostic options were specified, then show the full command-line
+      if (
+        this.options.debug ||
+        this.options.collectLogFile ||
+        this.options.networkConcurrency ||
+        this.options.onlyShrinkwrap
+      ) {
+        console.log(
+          '\n' +
+            colors.green('Invoking package manager: ') +
+            FileSystem.getRealPath(packageManagerFilename) +
+            ' ' +
+            installArgs.join(' ') +
+            '\n'
+        );
+      }
 
-          // Leave the pnpm-store as is for the retry. This ensures that packages that have already
-          // been downloaded need not be downloaded again, thereby potentially increasing the chances
-          // of a subsequent successful install.
-
-          Utilities.createFolderWithRetry(commonNodeModulesFolder);
+      // Store the tip IDs that should be printed.
+      // They will be printed all at once *after* the install
+      const tipIDsToBePrinted: Set<CustomTipId> = new Set();
+      const pnpmTips: ICustomTipInfo[] = [];
+      for (const [customTipId, customTip] of Object.entries(PNPM_CUSTOM_TIPS)) {
+        if (
+          this.rushConfiguration.customTipsConfiguration.providedCustomTipsByTipId.has(
+            customTipId as CustomTipId
+          )
+        ) {
+          pnpmTips.push(customTip);
         }
       }
-    );
+
+      const onPnpmStdoutChunk: ((chunk: string) => void) | undefined =
+        pnpmTips.length > 0
+          ? (chunk: string): void => {
+              // Iterate over the supported custom tip metadata and try to match the chunk.
+              for (const { isMatch, tipId } of pnpmTips) {
+                if (isMatch?.(chunk)) {
+                  tipIDsToBePrinted.add(tipId);
+                }
+              }
+            }
+          : undefined;
+
+      try {
+        await Utilities.executeCommandAndProcessOutputWithRetryAsync(
+          {
+            command: packageManagerFilename,
+            args: installArgs,
+            workingDirectory: this.rushConfiguration.commonTempFolder,
+            environment: packageManagerEnv,
+            suppressOutput: false
+          },
+          this.options.maxInstallAttempts,
+          onPnpmStdoutChunk,
+          () => {
+            if (this.rushConfiguration.packageManager === 'pnpm') {
+              this._terminal.writeWarningLine(`Deleting the "node_modules" folder`);
+              this.installRecycler.moveFolder(commonNodeModulesFolder);
+
+              // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+              // been downloaded need not be downloaded again, thereby potentially increasing the chances
+              // of a subsequent successful install.
+
+              Utilities.createFolderWithRetry(commonNodeModulesFolder);
+            }
+          }
+        );
+      } finally {
+        // The try-finally is to avoid the tips NOT being printed if the install fails.
+        // NOT catching the error because we want to keep the other behaviors (i.e., the error will be caught and handle in upper layers).
+
+        if (tipIDsToBePrinted.size > 0) {
+          this._terminal.writeLine();
+          for (const tipID of tipIDsToBePrinted) {
+            this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
+          }
+        }
+      }
+    };
+
+    const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+    if (
+      this.options.allowShrinkwrapUpdates &&
+      experiments.usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate
+    ) {
+      await doInstallInternalAsync({
+        ...this.options,
+        onlyShrinkwrap: true
+      });
+
+      await doInstallInternalAsync({
+        ...this.options,
+        allowShrinkwrapUpdates: false
+      });
+    } else {
+      await doInstallInternalAsync(this.options);
+    }
 
     if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
       // Install for split workspace
@@ -800,6 +867,26 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
+
+      if (process.stdout.isTTY) {
+        // If we're on a TTY console and something else didn't set a `--reporter` parameter,
+        // explicitly set the default reporter. This fixes an issue where, when the pnpm
+        // output is being monitored to match custom tips, pnpm will detect a non-TTY
+        // stdout stream and use the `append-only` reporter.
+        //
+        // See docs here: https://pnpm.io/cli/install#--reportername
+        let includesReporterArg: boolean = false;
+        for (const arg of args) {
+          if (arg.startsWith('--reporter')) {
+            includesReporterArg = true;
+            break;
+          }
+        }
+
+        if (!includesReporterArg) {
+          args.push('--reporter', 'default');
+        }
+      }
 
       for (const arg of this.options.pnpmFilterArguments) {
         args.push(arg);

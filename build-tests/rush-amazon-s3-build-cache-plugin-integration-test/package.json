@@ -13,10 +13,10 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "eslint": "~8.7.0",
     "typescript": "~5.0.4",
     "http-proxy": "~1.18.1",

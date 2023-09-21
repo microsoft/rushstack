@@ -11,8 +11,7 @@ export class MockOperationRunner implements IOperationRunner {
   public readonly name: string;
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
-  public isSkipAllowed: boolean = false;
-  public isCacheWriteAllowed: boolean = false;
+  public readonly cacheable: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
   public constructor(
@@ -31,5 +30,9 @@ export class MockOperationRunner implements IOperationRunner {
       result = await this._action(context.collatedWriter.terminal);
     }
     return result || OperationStatus.Success;
+  }
+
+  public getConfigHash(): string {
+    return 'mock';
   }
 }

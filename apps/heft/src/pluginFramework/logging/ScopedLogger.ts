@@ -53,6 +53,7 @@ export interface IScopedLoggerOptions {
   terminalProvider: ITerminalProvider;
   getShouldPrintStacks: () => boolean;
   errorHasBeenEmittedCallback: () => void;
+  warningHasBeenEmittedCallback: () => void;
 }
 
 export class ScopedLogger implements IScopedLogger {
@@ -104,6 +105,7 @@ export class ScopedLogger implements IScopedLogger {
    * {@inheritdoc IScopedLogger.emitError}
    */
   public emitError(error: Error): void {
+    this._options.errorHasBeenEmittedCallback();
     this._errors.push(error);
     this.terminal.writeErrorLine(`Error: ${LoggingManager.getErrorMessage(error)}`);
     if (this._shouldPrintStacks && error.stack) {
@@ -115,6 +117,7 @@ export class ScopedLogger implements IScopedLogger {
    * {@inheritdoc IScopedLogger.emitWarning}
    */
   public emitWarning(warning: Error): void {
+    this._options.warningHasBeenEmittedCallback();
     this._warnings.push(warning);
     this.terminal.writeWarningLine(`Warning: ${LoggingManager.getErrorMessage(warning)}`);
     if (this._shouldPrintStacks && warning.stack) {

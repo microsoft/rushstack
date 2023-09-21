@@ -2,6 +2,230 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.107.1",
+      "tag": "@microsoft/rush_v5.107.1",
+      "date": "Tue, 19 Sep 2023 21:13:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix pnpm's install status printing when pnpm custom tips are defined."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.0",
+      "tag": "@microsoft/rush_v5.107.0",
+      "date": "Tue, 19 Sep 2023 00:36:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          },
+          {
+            "comment": "Remove previously removed fields from the `custom-tips.json` schema."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Refactor the `CustomTipsConfiguration` by removing the `configuration` property and adding a `providedCustomTipsByTipId` map property."
+          },
+          {
+            "comment": "Fix an issue where pnpm would would not rewrite the current status line on a TTY console, and instead would print a series of separate status lines during installation. Note that this is only fixed when there are no custom PNPM tips provided."
+          },
+          {
+            "comment": "Add \"Waiting\" operation status for operations that have one or more dependencies still pending. Ensure that the `onOperationStatusChanged` hook fires for every status change."
+          },
+          {
+            "comment": "Add support for optional build status notifications over a web socket connection to `@rushstack/rush-serve-plugin`."
+          },
+          {
+            "comment": "Add pause/resume option to project watcher"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.106.0",
+      "tag": "@microsoft/rush_v5.106.0",
+      "date": "Thu, 14 Sep 2023 09:20:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(IMPORTANT) Add a new setting `resolutionMode` in pnpm-config.json; be aware that Rush now overrides the default behavior if you are using PNPM 8.0.0 through 8.6.12 (GitHub #4283)"
+          },
+          {
+            "comment": "Support adding custom tips for pnpm-printed logs"
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"defaultMessagePrefix\" config in custom-tips.json"
+          },
+          {
+            "comment": "Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.105.0",
+      "tag": "@microsoft/rush_v5.105.0",
+      "date": "Fri, 08 Sep 2023 04:09:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache writes in watch rebuilds."
+          },
+          {
+            "comment": "Fix the instance of \"ICreateOperationsContext\" passed to the \"beforeExecuteOperations\" hook in watch mode rebuilds to match the instance passed to the \"createOperations\" hook."
+          },
+          {
+            "comment": "Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases."
+          },
+          {
+            "comment": "Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project."
+          },
+          {
+            "comment": "Add the \"disableBuildCache\" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the \"disableBuildCache\" flag to also disable the legacy skip detection, in the event that the build cache is not configured."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.104.1",
+      "tag": "@microsoft/rush_v5.104.1",
+      "date": "Tue, 05 Sep 2023 18:53:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.104.0",
+      "tag": "@microsoft/rush_v5.104.0",
+      "date": "Fri, 01 Sep 2023 04:54:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.103.0",
+      "tag": "@microsoft/rush_v5.103.0",
+      "date": "Thu, 31 Aug 2023 23:28:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`"
+          },
+          {
+            "comment": "Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile"
+          },
+          {
+            "comment": "Fix an issue where \"undefined\" was sometimes printed instead of a blank line"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.102.0",
+      "tag": "@microsoft/rush_v5.102.0",
+      "date": "Tue, 15 Aug 2023 20:09:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new config file \"custom-tips.json\" for customizing Rush messages (GitHub #4207)"
+          },
+          {
+            "comment": "Improve \"rush scan\" to recognize module patterns such as \"import get from 'lodash.get'\""
+          },
+          {
+            "comment": "Update Node.js version checks to support the new LTS release"
+          },
+          {
+            "comment": "Update \"rush init\" template to use PNPM 7.33.5"
+          },
+          {
+            "comment": "Update the \"rush init\" template's .gitignore to avoid spurious diffs for files such as \"autoinstaller.lock\""
+          },
+          {
+            "comment": "Fix an issue where a pnpm-lock file would fail to parse if a project used a package alias in a repo using pnpm 8."
+          },
+          {
+            "comment": "Fix HTTP/1 backwards compatibility in rush-serve-plugin."
+          },
+          {
+            "comment": "Add experiment \"usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate\" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation. This mitigates issues that may arise when using the `afterAllResolved` hook in `.pnpmfile.cjs`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.101.1",
+      "tag": "@microsoft/rush_v5.101.1",
+      "date": "Fri, 11 Aug 2023 17:57:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression from 5.101.0 where publishing features did not detect changes properly when running on  Windows OS (GitHub #4277)"
+          },
+          {
+            "comment": "Add support in rush-serve-plugin for HTTP/2, gzip compression, and CORS preflight requests."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.101.0",
+      "tag": "@microsoft/rush_v5.101.0",
+      "date": "Tue, 08 Aug 2023 07:11:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Enable the \"http\" option for build-cache providers"
+          },
+          {
+            "comment": "Switch from glob to fast-glob."
+          },
+          {
+            "comment": "Reduce false positive detections of the pnpm shrinkwrap file being out of date in the presence of the `globalOverrides` setting in `pnpm-config.json`, or when a dependency is listed in both `dependencies` and `devDependencies` in the same package."
+          },
+          {
+            "comment": "@rushstack/rush-sdk now exposes a secondary API for manually loading the Rush engine and monitoring installation progress"
+          },
+          {
+            "comment": "Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`."
+          },
+          {
+            "comment": "Improve version resolution logic in common/scripts/install-run.js (see https://github.com/microsoft/rushstack/issues/4256)"
+          },
+          {
+            "comment": "Add `patternsToInclude` and `patternsToExclude` support to Rush deploy.json configurations. This will allow developers to include or exclude provided glob patterns within a local project when running `rush deploy`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.100.2",
+      "tag": "@microsoft/rush_v5.100.2",
+      "date": "Mon, 24 Jul 2023 18:54:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the git pre-push hook would allow push to go through if the script exited with error."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Updated semver dependency"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.100.1",
       "tag": "@microsoft/rush_v5.100.1",
       "date": "Wed, 14 Jun 2023 19:42:12 GMT",

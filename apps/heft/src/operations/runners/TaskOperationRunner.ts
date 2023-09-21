@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'perf_hooks';
+import {
+  type IOperationRunner,
+  type IOperationRunnerContext,
+  OperationStatus
+} from '@rushstack/operation-graph';
 
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
-import { OperationStatus } from '../OperationStatus';
 import { HeftTask } from '../../pluginFramework/HeftTask';
-import { copyFilesAsync } from '../../plugins/CopyFilesPlugin';
+import { copyFilesAsync, normalizeCopyOperation } from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
-import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type {
   HeftTaskSession,
   IHeftTaskFileOperations,
@@ -18,12 +20,9 @@ import type {
 } from '../../pluginFramework/HeftTaskSession';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
-import {
-  type IGlobOptions,
-  normalizeFileSelectionSpecifier,
-  watchGlobAsync
-} from '../../plugins/FileGlobSpecifier';
+import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
 import { type IWatchedFileState, WatchFileSystemAdapter } from '../../utilities/WatchFileSystemAdapter';
+import { CancellationToken } from '../../pluginFramework/CancellationToken';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -78,20 +77,21 @@ export class TaskOperationRunner implements IOperationRunner {
     context: IOperationRunnerContext,
     taskSession: HeftTaskSession
   ): Promise<OperationStatus> {
-    const { cancellationToken, requestRun } = context;
+    const { abortSignal, requestRun } = context;
     const { hooks, logger } = taskSession;
 
     // Need to clear any errors or warnings from the previous invocation, particularly
     // if this is an immediate rerun
     logger.resetErrorsAndWarnings();
 
+    const rootFolderPath: string = this._options.internalHeftSession.heftConfiguration.buildFolderPath;
     const isWatchMode: boolean = taskSession.parameters.watch && !!requestRun;
 
     const { terminal } = logger;
 
     // Exit the task early if cancellation is requested
-    if (cancellationToken.isCancelled) {
-      return OperationStatus.Cancelled;
+    if (abortSignal.aborted) {
+      return OperationStatus.Aborted;
     }
 
     if (!this._fileOperations && hooks.registerFileOperations.isUsed()) {
@@ -100,9 +100,9 @@ export class TaskOperationRunner implements IOperationRunner {
         deleteOperations: new Set()
       });
 
+      // Do this here so that we only need to do it once for each run
       for (const copyOperation of fileOperations.copyOperations) {
-        // Consolidate fileExtensions, includeGlobs, excludeGlobs
-        normalizeFileSelectionSpecifier(copyOperation);
+        normalizeCopyOperation(rootFolderPath, copyOperation);
       }
 
       this._fileOperations = fileOperations;
@@ -129,7 +129,9 @@ export class TaskOperationRunner implements IOperationRunner {
           async (): Promise<OperationStatus> => {
             // Create the options and provide a utility method to obtain paths to copy
             const runHookOptions: IHeftTaskRunHookOptions = {
-              cancellationToken
+              abortSignal,
+              // Included for backwards compatibility
+              cancellationToken: new CancellationToken(abortSignal)
             };
 
             // Run the plugin run hook
@@ -160,15 +162,15 @@ export class TaskOperationRunner implements IOperationRunner {
               return OperationStatus.Failure;
             }
 
-            if (cancellationToken.isCancelled) {
-              return OperationStatus.Cancelled;
+            if (abortSignal.aborted) {
+              return OperationStatus.Aborted;
             }
 
             return OperationStatus.Success;
           },
           () => `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`,
           () => {
-            const finishedWord: string = cancellationToken.isCancelled ? 'Cancelled' : 'Finished';
+            const finishedWord: string = abortSignal.aborted ? 'Aborted' : 'Finished';
             return `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution`;
           },
           terminal.writeVerboseLine.bind(terminal)
@@ -187,7 +189,9 @@ export class TaskOperationRunner implements IOperationRunner {
               isWatchMode ? getWatchFileSystemAdapter() : undefined
             )
           : Promise.resolve(),
-        deleteOperations.size > 0 ? deleteFilesAsync(deleteOperations, logger.terminal) : Promise.resolve()
+        deleteOperations.size > 0
+          ? deleteFilesAsync(rootFolderPath, deleteOperations, logger.terminal)
+          : Promise.resolve()
       ]);
     }
 
@@ -200,8 +204,8 @@ export class TaskOperationRunner implements IOperationRunner {
 
     // Even if the entire process has completed, we should mark the operation as cancelled if
     // cancellation has been requested.
-    if (cancellationToken.isCancelled) {
-      return OperationStatus.Cancelled;
+    if (abortSignal.aborted) {
+      return OperationStatus.Aborted;
     }
 
     if (logger.hasErrors) {

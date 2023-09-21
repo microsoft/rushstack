@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-sass-plugin",
-  "version": "0.11.13",
+  "version": "0.12.1",
   "description": "Heft plugin for SASS",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.56.0"
+    "@rushstack/heft": "^0.60.0"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
@@ -30,9 +30,7 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36",
+    "local-node-rig": "workspace:*",
     "eslint": "~8.7.0"
   }
 }

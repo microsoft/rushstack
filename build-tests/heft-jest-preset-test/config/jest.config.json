@@ -37,7 +37,7 @@
   // This is set to true in the preset for the "heft" package
   // "collectCoverage": false,
 
-  "coverageDirectory": "<rootDir>/temp/coverage",
+  "coverageDirectory": "<rootDir>/coverage",
 
   "collectCoverageFrom": [
     "lib/**/*.cjs",

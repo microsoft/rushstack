@@ -2,6 +2,188 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.60.0",
+      "tag": "@rushstack/heft_v0.60.0",
+      "date": "Tue, 19 Sep 2023 15:21:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow Heft to communicate via IPC with a host process when running in watch mode. The host controls scheduling of incremental re-runs."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.59.0",
+      "tag": "@rushstack/heft_v0.59.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Migrate plugin name collision detection to the InternalHeftSession instance to allow multiple Heft sessions in the same process."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Avoid mutating config files after reading."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.60.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.37.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.58.2",
+      "tag": "@rushstack/heft_v0.58.2",
+      "date": "Tue, 08 Aug 2023 07:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.13.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.58.1",
+      "tag": "@rushstack/heft_v0.58.1",
+      "date": "Sat, 29 Jul 2023 00:22:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the `toolFinish` lifecycle hook so that it is invoked after the `recordMetrics` hook, rather than before. Ensure that the `toolFinish` lifecycle hook is invoked if the user performs a graceful shutdown of Heft (e.g. via Ctrl+C)."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.58.0",
+      "tag": "@rushstack/heft_v0.58.0",
+      "date": "Thu, 20 Jul 2023 20:47:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "BREAKING CHANGE: Update the heft.json \"cleanFiles\" property and the delete-files-plugin to delete the contents of folders specified by \"sourcePath\" instead of deleting the folders themselves. To delete the folders, use the \"includeGlobs\" property to specify the folder to delete."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.57.1",
+      "tag": "@rushstack/heft_v0.57.1",
+      "date": "Wed, 19 Jul 2023 00:20:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.57.0",
+      "tag": "@rushstack/heft_v0.57.0",
+      "date": "Thu, 13 Jul 2023 00:22:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support `--clean` in watch mode. Cleaning in watch mode is now performed only during the first-pass of lifecycle or phase operations. Once the clean has been completed, `--clean` will be ignored until the command is restarted"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.56.3",
+      "tag": "@rushstack/heft_v0.56.3",
+      "date": "Wed, 12 Jul 2023 15:20:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.56.2",
+      "tag": "@rushstack/heft_v0.56.2",
+      "date": "Fri, 07 Jul 2023 00:19:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revise README.md and UPGRADING.md documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.56.1",
+      "tag": "@rushstack/heft_v0.56.1",
+      "date": "Thu, 06 Jul 2023 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.36.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.56.0",
       "tag": "@rushstack/heft_v0.56.0",
       "date": "Mon, 19 Jun 2023 22:40:21 GMT",

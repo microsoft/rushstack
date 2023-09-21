@@ -1,6 +1,116 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 14 Jun 2023 19:42:12 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 21:13:23 GMT and should not be manually modified.
+
+## 5.107.1
+Tue, 19 Sep 2023 21:13:23 GMT
+
+### Updates
+
+- Fix pnpm's install status printing when pnpm custom tips are defined.
+
+## 5.107.0
+Tue, 19 Sep 2023 00:36:50 GMT
+
+### Updates
+
+- Update @types/node from 14 to 18
+- Remove previously removed fields from the `custom-tips.json` schema.
+- (BREAKING API CHANGE) Refactor the `CustomTipsConfiguration` by removing the `configuration` property and adding a `providedCustomTipsByTipId` map property.
+- Fix an issue where pnpm would would not rewrite the current status line on a TTY console, and instead would print a series of separate status lines during installation. Note that this is only fixed when there are no custom PNPM tips provided.
+- Add "Waiting" operation status for operations that have one or more dependencies still pending. Ensure that the `onOperationStatusChanged` hook fires for every status change.
+- Add support for optional build status notifications over a web socket connection to `@rushstack/rush-serve-plugin`.
+- Add pause/resume option to project watcher
+
+## 5.106.0
+Thu, 14 Sep 2023 09:20:11 GMT
+
+### Updates
+
+- (IMPORTANT) Add a new setting `resolutionMode` in pnpm-config.json; be aware that Rush now overrides the default behavior if you are using PNPM 8.0.0 through 8.6.12 (GitHub #4283)
+- Support adding custom tips for pnpm-printed logs
+- (BREAKING CHANGE) Remove the "defaultMessagePrefix" config in custom-tips.json
+- Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`.
+
+## 5.105.0
+Fri, 08 Sep 2023 04:09:06 GMT
+
+### Updates
+
+- Disable build cache writes in watch rebuilds.
+- Fix the instance of "ICreateOperationsContext" passed to the "beforeExecuteOperations" hook in watch mode rebuilds to match the instance passed to the "createOperations" hook.
+- Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases.
+- Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project.
+- Add the "disableBuildCache" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the "disableBuildCache" flag to also disable the legacy skip detection, in the event that the build cache is not configured.
+
+## 5.104.1
+Tue, 05 Sep 2023 18:53:03 GMT
+
+### Updates
+
+- Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)
+
+## 5.104.0
+Fri, 01 Sep 2023 04:54:16 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)
+
+## 5.103.0
+Thu, 31 Aug 2023 23:28:28 GMT
+
+### Updates
+
+- Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`
+- Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile
+- Fix an issue where "undefined" was sometimes printed instead of a blank line
+
+## 5.102.0
+Tue, 15 Aug 2023 20:09:40 GMT
+
+### Updates
+
+- Add a new config file "custom-tips.json" for customizing Rush messages (GitHub #4207)
+- Improve "rush scan" to recognize module patterns such as "import get from 'lodash.get'"
+- Update Node.js version checks to support the new LTS release
+- Update "rush init" template to use PNPM 7.33.5
+- Update the "rush init" template's .gitignore to avoid spurious diffs for files such as "autoinstaller.lock"
+- Fix an issue where a pnpm-lock file would fail to parse if a project used a package alias in a repo using pnpm 8.
+- Fix HTTP/1 backwards compatibility in rush-serve-plugin.
+- Add experiment "usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate" that, when running `rush update`, performs first a `--lockfile-only` update to the lockfile, then a `--frozen-lockfile` installation. This mitigates issues that may arise when using the `afterAllResolved` hook in `.pnpmfile.cjs`.
+
+## 5.101.1
+Fri, 11 Aug 2023 17:57:55 GMT
+
+### Updates
+
+- Fix a regression from 5.101.0 where publishing features did not detect changes properly when running on  Windows OS (GitHub #4277)
+- Add support in rush-serve-plugin for HTTP/2, gzip compression, and CORS preflight requests.
+
+## 5.101.0
+Tue, 08 Aug 2023 07:11:02 GMT
+
+### Updates
+
+- Enable the "http" option for build-cache providers
+- Switch from glob to fast-glob.
+- Reduce false positive detections of the pnpm shrinkwrap file being out of date in the presence of the `globalOverrides` setting in `pnpm-config.json`, or when a dependency is listed in both `dependencies` and `devDependencies` in the same package.
+- @rushstack/rush-sdk now exposes a secondary API for manually loading the Rush engine and monitoring installation progress
+- Add support for npm aliases in `PnpmShrinkwrapFile._getPackageId`.
+- Improve version resolution logic in common/scripts/install-run.js (see https://github.com/microsoft/rushstack/issues/4256)
+- Add `patternsToInclude` and `patternsToExclude` support to Rush deploy.json configurations. This will allow developers to include or exclude provided glob patterns within a local project when running `rush deploy`.
+
+## 5.100.2
+Mon, 24 Jul 2023 18:54:49 GMT
+
+### Patches
+
+- Fix an issue where the git pre-push hook would allow push to go through if the script exited with error.
+
+### Updates
+
+- Updated semver dependency
 
 ## 5.100.1
 Wed, 14 Jun 2023 19:42:12 GMT

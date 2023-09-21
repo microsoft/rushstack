@@ -13,8 +13,7 @@ import {
   FileConstants,
   Sort,
   InternalError,
-  AlreadyReportedError,
-  LegacyAdapters
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -527,11 +526,8 @@ export class RushInstallManager extends BaseInstallManager {
             '/'
           );
 
-          const { default: glob } = await import('glob');
-          const tempModulePaths: string[] = await LegacyAdapters.convertCallbackToPromise(
-            glob,
-            globEscape(normalizedpathToDeleteWithoutStar) + '/*'
-          );
+          const { default: glob } = await import('fast-glob');
+          const tempModulePaths: string[] = await glob(globEscape(normalizedpathToDeleteWithoutStar) + '/*');
           // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
           for (const tempModulePath of tempModulePaths) {
             // We could potentially use AsyncRecycler here, but in practice these folders tend
@@ -654,9 +650,8 @@ export class RushInstallManager extends BaseInstallManager {
 
     let anyChanges: boolean = false;
 
-    const { default: glob } = await import('glob');
-    const packageJsonPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
-      glob,
+    const { default: glob } = await import('fast-glob');
+    const packageJsonPaths: string[] = await glob(
       globEscape(normalizedPathToDeleteWithoutStar) + '/*/package.json'
     );
     // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"

@@ -53,6 +53,12 @@ export interface IExtendedTypeScript {
 
   getNewLineCharacter(compilerOptions: TTypescript.CompilerOptions): string;
 
+  createCompilerHost(
+    options: TTypescript.CompilerOptions,
+    setParentNodes?: boolean,
+    system?: TTypescript.System
+  ): TTypescript.CompilerHost;
+
   /**
    * https://github.com/microsoft/TypeScript/blob/782c09d783e006a697b4ba6d1e7ec2f718ce8393/src/compiler/utilities.ts#L6540
    */

@@ -42,6 +42,7 @@ import {
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';
 import { TerminalWritableStream } from './TerminalWritableStream';
+import anythingSchema from './schemas/anything.schema.json';
 
 const jestPluginSymbol: unique symbol = Symbol('heft-jest-plugin');
 interface IWithJestPlugin {
@@ -109,6 +110,7 @@ export interface IJestPluginOptions {
   testPathPattern?: string;
   testTimeout?: number;
   updateSnapshots?: boolean;
+  logHeapUsage?: boolean;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -152,6 +154,15 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private _changedFiles: Set<string> = new Set();
   private _requestRun!: () => void;
 
+  private _resolveFirstRunQueued!: () => void;
+  private _firstRunQueuedPromise: Promise<void>;
+
+  public constructor() {
+    this._firstRunQueuedPromise = new Promise((resolve) => {
+      this._resolveFirstRunQueued = resolve;
+    });
+  }
+
   public static getJestPlugin(object: object): JestPlugin | undefined {
     return (object as IWithJestPlugin)[jestPluginSymbol];
   }
@@ -178,6 +189,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const silentParameter: CommandLineFlagParameter = parameters.getFlagParameter('--silent');
     const updateSnapshotsParameter: CommandLineFlagParameter =
       parameters.getFlagParameter('--update-snapshots');
+    const logHeapUsageParameter: CommandLineFlagParameter = parameters.getFlagParameter('--log-heap-usage');
 
     // Strings
     const configParameter: CommandLineStringParameter = parameters.getStringParameter('--config');
@@ -204,6 +216,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
       detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
       disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
+      logHeapUsage: logHeapUsageParameter.value || pluginOptions?.logHeapUsage,
       findRelatedTests: findRelatedTestsParameter.values.length
         ? Array.from(findRelatedTestsParameter.values)
         : pluginOptions?.findRelatedTests,
@@ -441,6 +454,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
             return result;
           });
+          host._resolveFirstRunQueued();
         });
       };
 
@@ -467,6 +481,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       this._jestPromise = runCLI(jestArgv, [buildFolderPath]);
     }
+
+    // Wait for the initial run to be queued.
+    await this._firstRunQueuedPromise;
+    // Explicitly wait an async tick for any file watchers
+    await Promise.resolve();
 
     if (pendingTestRuns.size > 0) {
       this._executing = true;
@@ -559,6 +578,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       runInBand: taskSession.parameters.debug,
       debug: taskSession.parameters.debug,
       detectOpenHandles: options.detectOpenHandles || false,
+      logHeapUsage: options.logHeapUsage || false,
 
       // Use the temp folder. Cache is unreliable, so we want it cleared on every --clean run
       cacheDirectory: taskSession.tempFolderPath,
@@ -623,9 +643,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     projectRelativeFilePath: string
   ): ConfigurationFile<IHeftJestConfiguration> {
     if (!JestPlugin._jestConfigurationFileLoader) {
-      // Bypass Jest configuration validation
-      const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
-
       // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
         currentObject: T,
@@ -671,7 +688,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       JestPlugin._jestConfigurationFileLoader = new ConfigurationFile<IHeftJestConfiguration>({
         projectRelativeFilePath: projectRelativeFilePath,
-        jsonSchemaPath: schemaPath,
+        // Bypass Jest configuration validation
+        jsonSchemaObject: anythingSchema,
         propertyInheritance: {
           moduleNameMapper: {
             inheritanceType: InheritanceType.custom,

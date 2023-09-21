@@ -5,6 +5,7 @@ export {
   PackageExtractor,
   type IExtractorOptions,
   type IExtractorProjectConfiguration,
+  type IExtractorDependencyConfiguration,
   type IExtractorMetadataJson,
   type IProjectInfoJson
 } from './PackageExtractor';

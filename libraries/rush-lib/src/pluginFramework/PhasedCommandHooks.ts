@@ -1,18 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
+import { AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
-import { ITelemetryData } from '../logic/Telemetry';
-import { IExecutionResult, IOperationExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../logic/operations/IOperationExecutionResult';
+import type { CobuildConfiguration } from '../api/CobuildConfiguration';
+import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
+import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
+import type { ITelemetryData } from '../logic/Telemetry';
+import type { OperationStatus } from '../logic/operations/OperationStatus';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -34,6 +40,10 @@ export interface ICreateOperationsContext {
    * The configuration for the build cache, if the feature is enabled.
    */
   readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  /**
+   * The configuration for the cobuild, if cobuild feature and build cache feature are both enabled.
+   */
+  readonly cobuildConfiguration: CobuildConfiguration | undefined;
   /**
    * The set of custom parameters for the executing command.
    * Maps from the `longName` field in command-line.json to the parser configuration in ts-command-line.
@@ -70,6 +80,10 @@ export interface ICreateOperationsContext {
    */
   readonly projectSelection: ReadonlySet<RushConfigurationProject>;
   /**
+   * All successfully loaded rush-project.json data for selected projects.
+   */
+  readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
+  /**
    * The set of Rush projects that have not been built in the current process since they were last modified.
    * When `isInitial` is true, this will be an exact match of `projectSelection`.
    */
@@ -96,8 +110,9 @@ export class PhasedCommandHooks {
    * Hook invoked before operation start
    * Hook is series for stable output.
    */
-  public readonly beforeExecuteOperations: AsyncSeriesHook<[Map<Operation, IOperationExecutionResult>]> =
-    new AsyncSeriesHook(['records']);
+  public readonly beforeExecuteOperations: AsyncSeriesHook<
+    [Map<Operation, IOperationExecutionResult>, ICreateOperationsContext]
+  > = new AsyncSeriesHook(['records', 'context']);
 
   /**
    * Hook invoked when operation status changed
@@ -112,6 +127,21 @@ export class PhasedCommandHooks {
    */
   public readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]> =
     new AsyncSeriesHook(['results', 'context']);
+
+  /**
+   * Hook invoked before executing a operation.
+   */
+  public readonly beforeExecuteOperation: AsyncSeriesBailHook<
+    [IOperationRunnerContext & IOperationExecutionResult],
+    OperationStatus | undefined
+  > = new AsyncSeriesBailHook(['runnerContext'], 'beforeExecuteOperation');
+
+  /**
+   * Hook invoked after executing a operation.
+   */
+  public readonly afterExecuteOperation: AsyncSeriesHook<
+    [IOperationRunnerContext & IOperationExecutionResult]
+  > = new AsyncSeriesHook(['runnerContext'], 'afterExecuteOperation');
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.

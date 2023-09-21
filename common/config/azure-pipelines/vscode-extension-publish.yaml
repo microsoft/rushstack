@@ -1,0 +1,28 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: FORCE_COLOR
+    value: 1
+
+steps:
+  - checkout: self
+    persistCredentials: true
+
+  - template: templates/install-node.yaml
+
+  - template: templates/build.yaml
+    parameters:
+      BuildParameters: >
+        --to rushstack
+      PerformValidation: false
+
+  - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js package
+    workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
+    displayName: 'Package vscode extension'
+
+  - script: node $(Build.SourcesDirectory)/common/scripts/install-run-rushx.js deploy
+    workingDirectory: $(Build.SourcesDirectory)/vscode-extensions/rush-vscode-extension
+    displayName: 'Publish vscode extension'
+    env:
+      VSCE_PAT: $(vscePat)

@@ -69,6 +69,8 @@ common/temp/
 common/temp-split/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
+*.lock
 
 # Heft temporary files
+.cache
 .heft

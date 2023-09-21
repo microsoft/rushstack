@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/worker-pool",
-  "version": "0.3.25",
+  "version": "0.4.1",
   "description": "Lightweight worker pool using NodeJS worker_threads",
   "main": "lib/index.js",
   "typings": "dist/worker-pool.d.ts",
@@ -18,9 +18,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36"
+    "local-node-rig": "workspace:*"
   },
   "peerDependencies": {
     "@types/node": "*"

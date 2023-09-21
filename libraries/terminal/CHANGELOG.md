@@ -1,6 +1,94 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:52 GMT and should not be manually modified.
+
+## 0.7.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 19 Sep 2023 00:36:30 GMT
+
+### Minor changes
+
+- Remove the dependency on `wordwrap`.
+- Add support for a custom line prefix in `PrintUtilities.wrapWords`.
+- Add a `PrintUtilities.wrapWordsToLines` function that is functionally identical to `PrintUtilities.wrapWords`, except that it returns an array of lines instead of a joined string with line breaks.
+
+## 0.6.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.5.38
+Thu, 24 Aug 2023 15:20:46 GMT
+
+### Patches
+
+- Fix a minor logic issue for TextRewriterTransform cleanup
+
+## 0.5.37
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.5.36
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.5.35
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.5.34
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.5.33
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.5.32
+Fri, 14 Jul 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.5.31
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.5.30
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.5.29
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.5.28
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.5.27
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.5.26
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 0.5.25
 Mon, 19 Jun 2023 22:40:21 GMT

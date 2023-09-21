@@ -1,0 +1,13 @@
+{
+  "name": "f",
+  "version": "1.0.0",
+  "scripts": {
+    "cobuild": "node ../build.js",
+    "build": "node ../build.js",
+    "_phase:pre-build": "node ../pre-build.js",
+    "_phase:build": "node ../validate-pre-build.js && node ../build.js f"
+  },
+  "dependencies": {
+    "b": "workspace:*"
+  }
+}

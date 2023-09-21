@@ -4,7 +4,8 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [{ "sourcePath": "dist" }, { "sourcePath": "lib" }, { "sourcePath": "temp" }],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "temp"] }],
+
       "tasksByName": {
         "typescript": {
           "taskPlugin": {

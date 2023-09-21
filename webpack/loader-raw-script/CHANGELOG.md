@@ -1,6 +1,78 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:52 GMT and should not be manually modified.
+
+## 1.4.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 1.4.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 1.3.316
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 1.3.315
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 1.3.314
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 1.3.313
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 1.3.312
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 1.3.311
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 1.3.310
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 1.3.309
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 1.3.308
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 1.3.307
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 1.3.306
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 1.3.305
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 1.3.304
 Mon, 19 Jun 2023 22:40:21 GMT

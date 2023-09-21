@@ -57,10 +57,9 @@ import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
+import typescriptSchema from '../yaml/typescript.schema.json';
 
-const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
-  path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
-);
+const yamlApiSchema: JsonSchema = JsonSchema.fromLoadedObject(typescriptSchema);
 
 interface IYamlReferences {
   references: IYamlReference[];

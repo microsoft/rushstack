@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as childProcess from 'child_process';
 import {
   AlreadyExistsBehavior,
   FileSystem,
   Import,
   IParsedPackageNameOrError,
-  PackageName
+  PackageName,
+  SubprocessTerminator,
+  TerminalWritable,
+  type ITerminal,
+  TerminalProviderSeverity
 } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -94,8 +99,10 @@ export interface IStorybookPluginOptions {
 }
 
 interface IRunStorybookOptions {
+  workingDirectory: string;
   resolvedModulePath: string;
   outputFolder: string | undefined;
+  verbose: boolean;
 }
 
 /** @public */
@@ -250,29 +257,66 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     });
 
     return {
+      workingDirectory: heftConfiguration.buildFolderPath,
       resolvedModulePath: resolvedModulePath,
-      outputFolder: outputFolder
+      outputFolder: outputFolder,
+      verbose: taskSession.parameters.verbose
     };
   }
 
   private async _runStorybookAsync(runStorybookOptions: IRunStorybookOptions): Promise<void> {
-    const { resolvedModulePath, outputFolder } = runStorybookOptions;
-    this._logger.terminal.writeLine('Starting Storybook...');
-    this._logger.terminal.writeLine(`Launching "${resolvedModulePath}"`);
+    const { workingDirectory, resolvedModulePath, outputFolder, verbose } = runStorybookOptions;
+    this._logger.terminal.writeLine('Running Storybook compilation');
+    this._logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
 
-    // Internally, the storybook module uses commander to parse the argv, which contains commands for Heft.
-    // We will clear out the argv, and only add back the arguments that are relevant to Storybook.
-    const originalArgv: string[] = process.argv;
-    process.argv = [process.argv[0], resolvedModulePath];
+    const storybookArgs: string[] = [];
     if (outputFolder) {
-      process.argv.push(`--output-dir=${outputFolder}`);
+      storybookArgs.push('--output-dir', outputFolder);
     }
+    if (!verbose) {
+      storybookArgs.push('--quiet');
+    }
+    const storybookEnv: NodeJS.ProcessEnv = { ...process.env };
 
-    require(resolvedModulePath);
+    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+      const forkedProcess: childProcess.ChildProcess = childProcess.fork(resolvedModulePath, storybookArgs, {
+        execArgv: process.execArgv,
+        cwd: workingDirectory,
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        env: storybookEnv,
+        ...SubprocessTerminator.RECOMMENDED_OPTIONS
+      });
 
-    // Reset the argv to the original set of args
-    process.argv = originalArgv;
+      SubprocessTerminator.killProcessTreeOnExit(forkedProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
-    this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
+      // Apply the pipe here instead of doing it in the forked process args due to a bug in Node
+      // We will output stderr to the normal stdout stream since all output is piped through
+      // stdout. We have to rely on the exit code to determine if there was an error.
+      const terminal: ITerminal = this._logger.terminal;
+      const terminalOutStream: TerminalWritable = new TerminalWritable({
+        terminal,
+        severity: TerminalProviderSeverity.log
+      });
+      forkedProcess.stdout!.pipe(terminalOutStream);
+      forkedProcess.stderr!.pipe(terminalOutStream);
+
+      let processFinished: boolean = false;
+      forkedProcess.on('error', (error: Error) => {
+        processFinished = true;
+        reject(new Error(`Storybook returned error: ${error}`));
+      });
+
+      forkedProcess.on('exit', (code: number | null) => {
+        if (processFinished) {
+          return;
+        }
+        processFinished = true;
+        if (code !== 0) {
+          reject(new Error(`Storybook exited with code ${code}`));
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 }

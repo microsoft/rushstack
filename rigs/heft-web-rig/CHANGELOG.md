@@ -1,6 +1,96 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:52 GMT and should not be manually modified.
+
+## 0.18.28
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.18.27
+Fri, 15 Sep 2023 00:36:58 GMT
+
+_Version update only_
+
+## 0.18.26
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 0.18.25
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.18.24
+Sat, 05 Aug 2023 00:20:19 GMT
+
+_Version update only_
+
+## 0.18.23
+Fri, 04 Aug 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.18.22
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 0.18.21
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.18.20
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 0.18.19
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.18.18
+Mon, 17 Jul 2023 15:20:25 GMT
+
+_Version update only_
+
+## 0.18.17
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.18.16
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.18.15
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 0.18.14
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 0.18.13
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 0.18.12
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 0.18.11
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 0.18.10
 Mon, 19 Jun 2023 22:40:21 GMT

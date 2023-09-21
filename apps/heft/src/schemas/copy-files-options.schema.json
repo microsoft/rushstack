@@ -15,20 +15,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "anyOf": [
-          {
-            "required": ["sourcePath"]
-          },
-          {
-            "required": ["includeGlobs"]
-          },
-          {
-            "required": ["fileExtensions"]
-          }
-        ],
-
         "required": ["destinationFolders"],
-
+        "anyOf": [
+          { "required": ["sourcePath"] },
+          { "required": ["fileExtensions"] },
+          { "required": ["includeGlobs"] },
+          { "required": ["excludeGlobs"] }
+        ],
         "properties": {
           "sourcePath": {
             "title": "Source Path",

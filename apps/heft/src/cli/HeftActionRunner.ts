@@ -13,6 +13,14 @@ import {
   type ITerminal,
   type IPackageJson
 } from '@rushstack/node-core-library';
+import {
+  type IOperationExecutionOptions,
+  type IWatchLoopState,
+  Operation,
+  OperationExecutionManager,
+  OperationStatus,
+  WatchLoop
+} from '@rushstack/operation-graph';
 import type {
   CommandLineFlagParameter,
   CommandLineParameterProvider,
@@ -24,21 +32,20 @@ import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
-import {
-  OperationExecutionManager,
-  type IOperationExecutionOptions
-} from '../operations/OperationExecutionManager';
-import { Operation } from '../operations/Operation';
 import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
 import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
-import { LifecycleOperationRunner } from '../operations/runners/LifecycleOperationRunner';
 import type { HeftPhase } from '../pluginFramework/HeftPhase';
 import type { IHeftAction, IHeftActionOptions } from '../cli/actions/IHeftAction';
+import type {
+  IHeftLifecycleCleanHookOptions,
+  IHeftLifecycleSession,
+  IHeftLifecycleToolFinishHookOptions,
+  IHeftLifecycleToolStartHookOptions
+} from '../pluginFramework/HeftLifecycleSession';
+import type { HeftLifecycle } from '../pluginFramework/HeftLifecycle';
 import type { HeftTask } from '../pluginFramework/HeftTask';
-import type { LifecycleOperationRunnerType } from '../operations/runners/LifecycleOperationRunner';
-import { CancellationToken, CancellationTokenSource } from '../pluginFramework/CancellationToken';
+import { deleteFilesAsync, type IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import { Constants } from '../utilities/Constants';
-import { OperationStatus } from '../operations/OperationStatus';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
@@ -75,15 +82,18 @@ export async function runWithLoggingAsync(
   loggingManager: LoggingManager,
   terminal: ITerminal,
   metricsCollector: MetricsCollector,
-  cancellationToken: CancellationToken
-): Promise<void> {
+  abortSignal: AbortSignal,
+  throwOnFailure?: boolean
+): Promise<OperationStatus> {
   const startTime: number = performance.now();
   loggingManager.resetScopedLoggerErrorsAndWarnings();
+
+  let result: OperationStatus = OperationStatus.Failure;
 
   // Execute the action operations
   let encounteredError: boolean = false;
   try {
-    const result: OperationStatus = await fn();
+    result = await fn();
     if (result === OperationStatus.Failure) {
       encounteredError = true;
     }
@@ -94,8 +104,8 @@ export async function runWithLoggingAsync(
     const warningStrings: string[] = loggingManager.getWarningStrings();
     const errorStrings: string[] = loggingManager.getErrorStrings();
 
-    const wasCancelled: boolean = cancellationToken.isCancelled;
-    const encounteredWarnings: boolean = warningStrings.length > 0 || wasCancelled;
+    const wasAborted: boolean = abortSignal.aborted;
+    const encounteredWarnings: boolean = warningStrings.length > 0 || wasAborted;
     encounteredError = encounteredError || errorStrings.length > 0;
 
     await metricsCollector.recordAsync(
@@ -106,7 +116,7 @@ export async function runWithLoggingAsync(
       action.getParameterStringMap()
     );
 
-    const finishedLoggingWord: string = encounteredError ? 'Failed' : wasCancelled ? 'Cancelled' : 'Finished';
+    const finishedLoggingWord: string = encounteredError ? 'Failed' : wasAborted ? 'Aborted' : 'Finished';
     const duration: number = performance.now() - startTime;
     const durationSeconds: number = Math.round(duration) / 1000;
     const finishedLoggingLine: string = `-------------------- ${finishedLoggingWord} (${durationSeconds}s) --------------------`;
@@ -137,9 +147,11 @@ export async function runWithLoggingAsync(
     }
   }
 
-  if (encounteredError) {
+  if (encounteredError && throwOnFailure) {
     throw new AlreadyReportedError();
   }
+
+  return result;
 }
 
 export class HeftActionRunner {
@@ -209,14 +221,17 @@ export class HeftActionRunner {
       description: 'Use the specified locale for this run, if applicable.'
     });
 
-    let cleanFlag: CommandLineFlagParameter | undefined;
-    if (!this._action.watch) {
-      // Only enable the clean flags in non-watch mode
-      cleanFlag = parameterProvider.defineFlagParameter({
-        parameterLongName: Constants.cleanParameterLongName,
-        description: 'If specified, clean the outputs before running each phase.'
-      });
+    let cleanFlagDescription: string =
+      'If specified, clean the outputs at the beginning of the lifecycle and before running each phase.';
+    if (this._action.watch) {
+      cleanFlagDescription =
+        `${cleanFlagDescription} Cleaning will only be performed once for the lifecycle and each phase, ` +
+        `and further incremental runs will not be cleaned for the duration of execution.`;
     }
+    const cleanFlag: CommandLineFlagParameter = parameterProvider.defineFlagParameter({
+      parameterLongName: Constants.cleanParameterLongName,
+      description: cleanFlagDescription
+    });
 
     const parameterManager: HeftParameterManager = new HeftParameterManager({
       getIsDebug: () => this._internalHeftSession.debug,
@@ -255,11 +270,43 @@ export class HeftActionRunner {
 
     const operations: ReadonlySet<Operation> = this._generateOperations();
 
+    const executionManager: OperationExecutionManager = new OperationExecutionManager(operations);
+
+    const cliAbortSignal: AbortSignal = this._createCliAbortSignal();
+
+    try {
+      await _startLifecycleAsync(this._internalHeftSession);
+
+      if (this._action.watch) {
+        const watchLoop: WatchLoop = this._createWatchLoop(executionManager);
+
+        if (process.send) {
+          await watchLoop.runIPCAsync();
+        } else {
+          await watchLoop.runUntilAbortedAsync(cliAbortSignal, () => {
+            terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+            terminal.writeLine('');
+          });
+        }
+      } else {
+        await this._executeOnceAsync(executionManager, cliAbortSignal);
+      }
+    } finally {
+      // Invoke this here both to ensure it always runs and that it does so after recordMetrics
+      // This is treated as a finalizer for any assets created in lifecycle plugins.
+      // It is the responsibility of the lifecycle plugin to ensure that finish gracefully handles
+      // aborted runs.
+      await _finishLifecycleAsync(this._internalHeftSession);
+    }
+  }
+
+  private _createCliAbortSignal(): AbortSignal {
     // Set up the ability to terminate the build via Ctrl+C and have it exit gracefully if pressed once,
     // less gracefully if pressed a second time.
-    const cliCancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
-    const cliCancellationToken: CancellationToken = cliCancellationTokenSource.token;
+    const cliAbortController: AbortController = new AbortController();
+    const cliAbortSignal: AbortSignal = cliAbortController.signal;
     const cli: ReadlineInterface = createInterface(process.stdin, undefined, undefined, true);
+    const terminal: ITerminal = this._terminal;
     let forceTerminate: boolean = false;
     cli.on('SIGINT', () => {
       cli.close();
@@ -274,108 +321,46 @@ export class HeftActionRunner {
       }
 
       forceTerminate = true;
-      cliCancellationTokenSource.cancel();
+      cliAbortController.abort();
     });
 
-    const executionManager: OperationExecutionManager = new OperationExecutionManager(operations);
-
-    if (this._action.watch) {
-      await this._executeWatchAsync(executionManager, cliCancellationToken);
-    } else {
-      await this._executeOnceAsync(executionManager, cliCancellationToken);
-    }
+    return cliAbortSignal;
   }
 
-  private async _executeWatchAsync(
-    executionManager: OperationExecutionManager,
-    cliCancellationToken: CancellationToken
-  ): Promise<void> {
-    let runRequested: boolean = true;
-    let isRunning: boolean = true;
-    let cancellationTokenSource: CancellationTokenSource = new CancellationTokenSource();
-
+  private _createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {
     const { _terminal: terminal } = this;
-
-    let resolveRequestRun!: (requestor?: string) => void;
-    function createRequestRunPromise(): Promise<void> {
-      return new Promise<string | undefined>(
-        (resolve: (requestor?: string) => void, reject: (err: Error) => void) => {
-          resolveRequestRun = resolve;
-        }
-      ).then((requestor: string | undefined) => {
-        terminal.writeLine(Colors.bold(`New run requested by ${requestor || 'unknown task'}`));
-        runRequested = true;
-        if (isRunning) {
-          terminal.writeLine(Colors.bold(`Cancelling incremental build...`));
-          // If there's a source file change, we need to cancel the incremental build and wait for the
-          // execution to finish before we begin execution again.
-          cancellationTokenSource.cancel();
-        }
-      });
-    }
-    let requestRunPromise: Promise<void> = createRequestRunPromise();
-
-    function cancelExecution(): void {
-      cancellationTokenSource.cancel();
-    }
-
-    function requestRun(requestor?: string): void {
-      // The wrapper here allows operation runners to hang onto a single instance, despite the underlying
-      // promise changing.
-      resolveRequestRun(requestor);
-    }
-
-    // eslint-disable-next-line no-constant-condition
-    while (!cliCancellationToken.isCancelled) {
-      if (cancellationTokenSource.isCancelled) {
-        cancellationTokenSource = new CancellationTokenSource();
-        cliCancellationToken.onCancelledPromise.finally(cancelExecution);
-      }
-
-      // Create the cancellation token which is passed to the incremental build.
-      const cancellationToken: CancellationToken = cancellationTokenSource.token;
-
-      // Write an empty line to the terminal for separation between iterations. We've already iterated
-      // at this point, so log out that we're about to start a new run.
-      terminal.writeLine('');
-      terminal.writeLine(Colors.bold('Starting incremental build...'));
-
-      // Start the incremental build and wait for a source file to change
-      runRequested = false;
-      isRunning = true;
-
-      try {
-        await this._executeOnceAsync(executionManager, cancellationToken, requestRun);
-      } catch (err) {
-        if (!(err instanceof AlreadyReportedError)) {
-          throw err;
-        }
-      } finally {
-        isRunning = false;
-      }
-
-      if (!runRequested) {
-        terminal.writeLine(Colors.bold('Waiting for changes. Press CTRL + C to exit...'));
+    const watchLoop: WatchLoop = new WatchLoop({
+      onBeforeExecute: () => {
+        // Write an empty line to the terminal for separation between iterations. We've already iterated
+        // at this point, so log out that we're about to start a new run.
         terminal.writeLine('');
-        await Promise.race([requestRunPromise, cliCancellationToken.onCancelledPromise]);
+        terminal.writeLine(Colors.bold('Starting incremental build...'));
+      },
+      executeAsync: (state: IWatchLoopState): Promise<OperationStatus> => {
+        return this._executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
+      },
+      onRequestRun: (requestor?: string) => {
+        terminal.writeLine(Colors.bold(`New run requested by ${requestor || 'unknown task'}`));
+      },
+      onAbort: () => {
+        terminal.writeLine(Colors.bold(`Cancelling incremental build...`));
       }
-
-      requestRunPromise = createRequestRunPromise();
-    }
+    });
+    return watchLoop;
   }
 
   private async _executeOnceAsync(
     executionManager: OperationExecutionManager,
-    cancellationToken: CancellationToken,
+    abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
-  ): Promise<void> {
+  ): Promise<OperationStatus> {
     // Execute the action operations
-    await runWithLoggingAsync(
+    return await runWithLoggingAsync(
       () => {
         const operationExecutionManagerOptions: IOperationExecutionOptions = {
           terminal: this._terminal,
           parallelism: this._parallelism,
-          cancellationToken,
+          abortSignal,
           requestRun
         };
 
@@ -385,7 +370,8 @@ export class HeftActionRunner {
       this._loggingManager,
       this._terminal,
       this._metricsCollector,
-      cancellationToken
+      abortSignal,
+      !requestRun
     );
   }
 
@@ -394,16 +380,6 @@ export class HeftActionRunner {
 
     const operations: Map<string, Operation> = new Map();
     const internalHeftSession: InternalHeftSession = this._internalHeftSession;
-    const startLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
-      internalHeftSession,
-      'start',
-      operations
-    );
-    const finishLifecycleOperation: Operation = _getOrCreateLifecycleOperation(
-      internalHeftSession,
-      'finish',
-      operations
-    );
 
     let hasWarnedAboutSkippedPhases: boolean = false;
     for (const phase of selectedPhases) {
@@ -426,21 +402,12 @@ export class HeftActionRunner {
 
       // Create operation for the phase start node
       const phaseOperation: Operation = _getOrCreatePhaseOperation(internalHeftSession, phase, operations);
-      // Set the 'start' lifecycle operation as a dependency of all phases to ensure the 'start' lifecycle
-      // operation runs first
-      phaseOperation.addDependency(startLifecycleOperation);
-      // Set the phase operation as a dependency of the 'end' lifecycle operation to ensure the phase
-      // operation runs first
-      finishLifecycleOperation.addDependency(phaseOperation);
 
       // Create operations for each task
       for (const task of phase.tasks) {
         const taskOperation: Operation = _getOrCreateTaskOperation(internalHeftSession, task, operations);
         // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
         taskOperation.addDependency(phaseOperation);
-        // Set the task operation as a dependency of the 'stop' lifecycle operation to ensure the task operation
-        // runs first
-        finishLifecycleOperation.addDependency(taskOperation);
 
         // Set all dependency tasks as dependencies of the task operation
         for (const dependencyTask of task.dependencyTasks) {
@@ -471,25 +438,8 @@ export class HeftActionRunner {
   }
 }
 
-function _getOrCreateLifecycleOperation(
-  internalHeftSession: InternalHeftSession,
-  type: LifecycleOperationRunnerType,
-  operations: Map<string, Operation>
-): Operation {
-  const key: string = `lifecycle.${type}`;
-
-  let operation: Operation | undefined = operations.get(key);
-  if (!operation) {
-    operation = new Operation({
-      groupName: 'lifecycle',
-      runner: new LifecycleOperationRunner({ type, internalHeftSession })
-    });
-    operations.set(key, operation);
-  }
-  return operation;
-}
-
 function _getOrCreatePhaseOperation(
+  this: void,
   internalHeftSession: InternalHeftSession,
   phase: HeftPhase,
   operations: Map<string, Operation>
@@ -509,6 +459,7 @@ function _getOrCreatePhaseOperation(
 }
 
 function _getOrCreateTaskOperation(
+  this: void,
   internalHeftSession: InternalHeftSession,
   task: HeftTask,
   operations: Map<string, Operation>
@@ -527,4 +478,79 @@ function _getOrCreateTaskOperation(
     operations.set(key, operation);
   }
   return operation;
+}
+
+async function _startLifecycleAsync(this: void, internalHeftSession: InternalHeftSession): Promise<void> {
+  const { clean } = internalHeftSession.parameterManager.defaultParameters;
+
+  // Load and apply the lifecycle plugins
+  const lifecycle: HeftLifecycle = internalHeftSession.lifecycle;
+  const { lifecycleLogger } = lifecycle;
+  await lifecycle.applyPluginsAsync(lifecycleLogger.terminal);
+
+  if (lifecycleLogger.hasErrors) {
+    throw new AlreadyReportedError();
+  }
+
+  if (clean) {
+    const startTime: number = performance.now();
+    lifecycleLogger.terminal.writeVerboseLine('Starting clean');
+
+    // Grab the additional clean operations from the phase
+    const deleteOperations: IDeleteOperation[] = [];
+
+    // Delete all temp folders for tasks by default
+    for (const pluginDefinition of lifecycle.pluginDefinitions) {
+      const lifecycleSession: IHeftLifecycleSession = await lifecycle.getSessionForPluginDefinitionAsync(
+        pluginDefinition
+      );
+      deleteOperations.push({ sourcePath: lifecycleSession.tempFolderPath });
+    }
+
+    // Create the options and provide a utility method to obtain paths to delete
+    const cleanHookOptions: IHeftLifecycleCleanHookOptions = {
+      addDeleteOperations: (...deleteOperationsToAdd: IDeleteOperation[]) =>
+        deleteOperations.push(...deleteOperationsToAdd)
+    };
+
+    // Run the plugin clean hook
+    if (lifecycle.hooks.clean.isUsed()) {
+      try {
+        await lifecycle.hooks.clean.promise(cleanHookOptions);
+      } catch (e: unknown) {
+        // Log out using the clean logger, and return an error status
+        if (!(e instanceof AlreadyReportedError)) {
+          lifecycleLogger.emitError(e as Error);
+        }
+        throw new AlreadyReportedError();
+      }
+    }
+
+    // Delete the files if any were specified
+    if (deleteOperations.length) {
+      const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
+      await deleteFilesAsync(rootFolderPath, deleteOperations, lifecycleLogger.terminal);
+    }
+
+    lifecycleLogger.terminal.writeVerboseLine(`Finished clean (${performance.now() - startTime}ms)`);
+
+    if (lifecycleLogger.hasErrors) {
+      throw new AlreadyReportedError();
+    }
+  }
+
+  // Run the start hook
+  if (lifecycle.hooks.toolStart.isUsed()) {
+    const lifecycleToolStartHookOptions: IHeftLifecycleToolStartHookOptions = {};
+    await lifecycle.hooks.toolStart.promise(lifecycleToolStartHookOptions);
+
+    if (lifecycleLogger.hasErrors) {
+      throw new AlreadyReportedError();
+    }
+  }
+}
+
+async function _finishLifecycleAsync(internalHeftSession: InternalHeftSession): Promise<void> {
+  const lifecycleToolFinishHookOptions: IHeftLifecycleToolFinishHookOptions = {};
+  await internalHeftSession.lifecycle.hooks.toolFinish.promise(lifecycleToolFinishHookOptions);
 }
