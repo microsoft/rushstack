@@ -272,8 +272,10 @@ export const EnvironmentVariableNames: {
 enum Event_2 {
     postRushBuild = 4,
     postRushInstall = 2,
+    postRushx = 6,
     preRushBuild = 3,
-    preRushInstall = 1
+    preRushInstall = 1,
+    preRushx = 5
 }
 export { Event_2 as Event }
 

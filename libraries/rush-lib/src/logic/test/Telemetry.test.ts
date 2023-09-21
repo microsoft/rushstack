@@ -32,7 +32,7 @@ describe(Telemetry.name, () => {
       terminalProvider: new ConsoleTerminalProvider(),
       getIsDebugMode: () => false
     });
-    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const telemetry: Telemetry = new Telemetry('test', rushConfig, rushSession.hooks.flushTelemetry);
     const logData1: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -65,7 +65,7 @@ describe(Telemetry.name, () => {
       terminalProvider: new ConsoleTerminalProvider(),
       getIsDebugMode: () => false
     });
-    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const telemetry: Telemetry = new Telemetry('test', rushConfig, rushSession.hooks.flushTelemetry);
     const logData: ITelemetryData = {
       name: 'testData',
       durationInSeconds: 100,
@@ -86,7 +86,7 @@ describe(Telemetry.name, () => {
       terminalProvider: new ConsoleTerminalProvider(),
       getIsDebugMode: () => false
     });
-    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const telemetry: Telemetry = new Telemetry('test', rushConfig, rushSession.hooks.flushTelemetry);
     const logData: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -115,7 +115,7 @@ describe(Telemetry.name, () => {
       terminalProvider: new ConsoleTerminalProvider(),
       getIsDebugMode: () => false
     });
-    const telemetry: Telemetry = new Telemetry(rushConfig, rushSession);
+    const telemetry: Telemetry = new Telemetry('test', rushConfig, rushSession.hooks.flushTelemetry);
     const logData: ITelemetryData = {
       name: 'testData1',
       durationInSeconds: 100,
@@ -139,8 +139,9 @@ describe(Telemetry.name, () => {
     const customFlushTelemetry: jest.Mock = jest.fn();
     rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
     const telemetry: ITelemetryPrivateMembers = new Telemetry(
+      'test',
       rushConfig,
-      rushSession
+      rushSession.hooks.flushTelemetry
     ) as unknown as ITelemetryPrivateMembers;
     const logData: ITelemetryData = {
       name: 'testData1',
@@ -169,8 +170,9 @@ describe(Telemetry.name, () => {
     const customFlushTelemetry: jest.Mock = jest.fn();
     rushSession.hooks.flushTelemetry.tap('test', customFlushTelemetry);
     const telemetry: ITelemetryPrivateMembers = new Telemetry(
+      'test',
       rushConfig,
-      rushSession
+      rushSession.hooks.flushTelemetry
     ) as unknown as ITelemetryPrivateMembers;
     const logData: ITelemetryData = {
       name: 'testData1',

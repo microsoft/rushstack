@@ -99,7 +99,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', '--help'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX('', true);
+      RushXCommandLine.launchRushX('', { isManaged: true });
 
       expect(executeLifecycleCommandMock).not.toHaveBeenCalled();
       expect(logMock!.mock.calls).toMatchSnapshot();
@@ -109,7 +109,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', 'build'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX('', true);
+      RushXCommandLine.launchRushX('', { isManaged: true });
 
       expect(executeLifecycleCommandMock).toHaveBeenCalledWith('an acme project build command', {
         rushConfiguration,
@@ -127,7 +127,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', '--quiet', 'build'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX('', true);
+      RushXCommandLine.launchRushX('', { isManaged: true });
 
       expect(executeLifecycleCommandMock).toHaveBeenCalledWith('an acme project build command', {
         rushConfiguration,
@@ -145,7 +145,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', 'asdf'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX('', true);
+      RushXCommandLine.launchRushX('', { isManaged: true });
 
       expect(executeLifecycleCommandMock).not.toHaveBeenCalled();
       expect(logMock!.mock.calls).toMatchSnapshot();
