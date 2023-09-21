@@ -295,7 +295,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     const uniqueTaskFolderName: string = `${phase.phaseName}/${task.taskName}`;
 
     // <projectFolder>/temp/<phaseName>/<taskName>
-    this.tempFolderPath = path.join(tempFolder, uniqueTaskFolderName);
+    this.tempFolderPath = `${tempFolder}/${uniqueTaskFolderName}`;
 
     this._options = options;
   }
