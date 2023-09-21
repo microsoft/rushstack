@@ -4,7 +4,7 @@
 import colors from 'colors/safe';
 import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { NewlineKind, Async } from '@rushstack/node-core-library';
+import { NewlineKind, Async, InternalError } from '@rushstack/node-core-library';
 
 import {
   AsyncOperationQueue,
@@ -316,11 +316,9 @@ export class OperationExecutionManager {
         }
         terminal.writeStderrLine(colors.red(`"${name}" failed to build.`));
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
-        for (const blockedRecord of blockedQueue) {
-          if (blockedRecord.status === OperationStatus.Ready) {
-            this._executionQueue.complete(blockedRecord);
-            this._completedOperations++;
 
+        for (const blockedRecord of blockedQueue) {
+          if (blockedRecord.status === OperationStatus.Waiting) {
             // Now that we have the concept of architectural no-ops, we could implement this by replacing
             // {blockedRecord.runner} with a no-op that sets status to Blocked and logs the blocking
             // operations. However, the existing behavior is a bit simpler, so keeping that for now.
@@ -328,11 +326,18 @@ export class OperationExecutionManager {
               terminal.writeStdoutLine(`"${blockedRecord.name}" is blocked by "${name}".`);
             }
             blockedRecord.status = OperationStatus.Blocked;
-            this._onOperationStatusChanged?.(blockedRecord);
+
+            this._executionQueue.complete(blockedRecord);
+            this._completedOperations++;
 
             for (const dependent of blockedRecord.consumers) {
               blockedQueue.add(dependent);
             }
+          } else if (blockedRecord.status !== OperationStatus.Blocked) {
+            // It shouldn't be possible for operations to be in any state other than Waiting or Blocked
+            throw new InternalError(
+              `Blocked operation ${blockedRecord.name} is in an unexpected state: ${blockedRecord.status}`
+            );
           }
         }
         this._hasAnyFailures = true;
