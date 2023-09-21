@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 import colors from 'colors/safe';
 
-import {
+import type {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
@@ -14,21 +14,21 @@ import {
   FileSystem,
   AlreadyReportedError,
   Terminal,
-  ITerminal,
+  type ITerminal,
   ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { type IChangeFile, type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { ChangeFiles } from '../../logic/ChangeFiles';
 import {
-  VersionPolicy,
-  IndividualVersionPolicy,
-  LockStepVersionPolicy,
+  type VersionPolicy,
+  type IndividualVersionPolicy,
+  type LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';

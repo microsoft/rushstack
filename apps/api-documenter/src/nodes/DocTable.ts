@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IDocNodeParameters, DocNode } from '@microsoft/tsdoc';
+import { type IDocNodeParameters, DocNode } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 import { DocTableRow } from './DocTableRow';
-import { DocTableCell } from './DocTableCell';
+import type { DocTableCell } from './DocTableCell';
 
 /**
  * Constructor parameters for {@link DocTable}.

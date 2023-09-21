@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as argparse from 'argparse';
+import type * as argparse from 'argparse';
 
-import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
 import type { ICommandLineParserOptions } from './CommandLineParser';
 
 /**

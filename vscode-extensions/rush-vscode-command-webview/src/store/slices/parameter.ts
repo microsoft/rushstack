@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SliceCaseReducers, createSlice, Slice, PayloadAction } from '@reduxjs/toolkit';
+import { type SliceCaseReducers, createSlice, type Slice, type PayloadAction } from '@reduxjs/toolkit';
 import type { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import type { FieldValues } from 'react-hook-form';
 

@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
 
-import { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
+import type { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
 
 interface IRushCommandParams {
   label: string;

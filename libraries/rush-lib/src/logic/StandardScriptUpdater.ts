@@ -3,7 +3,7 @@
 
 import { FileSystem, Async } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import {
   installRunRushScriptFilename,
   installRunRushxScriptFilename,

@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { AlreadyReportedError, ITerminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, type ITerminal } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';

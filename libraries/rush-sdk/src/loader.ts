@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 import type { SpawnSyncReturns } from 'child_process';
-import { JsonFile, JsonObject, Executable } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject, Executable } from '@rushstack/node-core-library';
 
 import {
   tryFindRushJsonLocation,
   RUSH_LIB_NAME,
-  RushLibModuleType,
+  type RushLibModuleType,
   requireRushLibUnderFolderPath,
   sdkContext
 } from './helpers';

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
+import { Async, Colors, type IColorableSequence, type ITerminal } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
-import { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
-import { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
+import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
+import type { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
 import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';

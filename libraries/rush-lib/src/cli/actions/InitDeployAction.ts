@@ -3,10 +3,10 @@
 
 import colors from 'colors/safe';
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
 import { assetsFolderPath } from '../../utilities/PathConstants';
 

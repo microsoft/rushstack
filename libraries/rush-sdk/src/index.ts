@@ -4,8 +4,8 @@
 import * as path from 'path';
 import {
   JsonFile,
-  JsonObject,
-  IPackageJson,
+  type JsonObject,
+  type IPackageJson,
   PackageJsonLookup,
   Executable,
   Terminal,
@@ -15,7 +15,7 @@ import type { SpawnSyncReturns } from 'child_process';
 import {
   RUSH_LIB_NAME,
   RUSH_LIB_PATH_ENV_VAR_NAME,
-  RushLibModuleType,
+  type RushLibModuleType,
   _require,
   requireRushLibUnderFolderPath,
   tryFindRushJsonLocation,

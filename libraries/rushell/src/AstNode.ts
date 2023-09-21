@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Token } from './Tokenizer';
+import type { Token } from './Tokenizer';
 import { TextRange } from './TextRange';
 
 export const enum AstKind {

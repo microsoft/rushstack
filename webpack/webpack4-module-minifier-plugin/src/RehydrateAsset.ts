@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CachedSource, ConcatSource, ReplaceSource, Source } from 'webpack-sources';
+import { CachedSource, ConcatSource, ReplaceSource, type Source } from 'webpack-sources';
 
 import { CHUNK_MODULES_TOKEN } from './Constants';
-import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
+import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
 
 /**
  * Rehydrates an asset with minified modules.

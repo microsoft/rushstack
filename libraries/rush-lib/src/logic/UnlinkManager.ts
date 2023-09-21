@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { LastLinkFlagFactory } from '../api/LastLinkFlag';

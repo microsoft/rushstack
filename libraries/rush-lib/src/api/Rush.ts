@@ -5,8 +5,8 @@ import * as path from 'path';
 
 import {
   InternalError,
-  IPackageJson,
-  ITerminalProvider,
+  type IPackageJson,
+  type ITerminalProvider,
   PackageJsonLookup
 } from '@rushstack/node-core-library';
 
@@ -17,7 +17,7 @@ import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
-import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 
 /**

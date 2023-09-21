@@ -1,6 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { AmazonS3Client } from '@rushstack/rush-amazon-s3-build-cache-plugin';
 import { WebClient } from '@rushstack/rush-amazon-s3-build-cache-plugin';
-import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
 const webClient: WebClient = new WebClient();
 

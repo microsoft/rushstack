@@ -7,7 +7,7 @@ import * as semver from 'semver';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 
 // Refuses to run at all if the PNPM version is older than this, because there

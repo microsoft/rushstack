@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Path } from '@lifaon/path';
-import { LockfileEntry } from './LockfileEntry';
+import type { LockfileEntry } from './LockfileEntry';
 
 export interface ILockfileNode {
   dependencies?: {

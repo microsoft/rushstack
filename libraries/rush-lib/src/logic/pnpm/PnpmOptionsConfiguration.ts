@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonObject, JsonSchema } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
 
 import {
-  IPackageManagerOptionsJsonBase,
+  type IPackageManagerOptionsJsonBase,
   PackageManagerOptionsConfigurationBase
 } from '../base/BasePackageManagerOptionsConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';

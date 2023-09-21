@@ -4,7 +4,11 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter, CommandLineHelper } from '@rushstack/ts-command-line';
+import {
+  CommandLineParser,
+  type CommandLineFlagParameter,
+  CommandLineHelper
+} from '@rushstack/ts-command-line';
 import {
   InternalError,
   AlreadyReportedError,
@@ -16,10 +20,10 @@ import { PrintUtilities } from '@rushstack/terminal';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import {
-  Command,
+  type Command,
   CommandLineConfiguration,
-  IGlobalCommandConfig,
-  IPhasedCommandConfig
+  type IGlobalCommandConfig,
+  type IPhasedCommandConfig
 } from '../api/CommandLineConfiguration';
 
 import { AddAction } from './actions/AddAction';
@@ -44,16 +48,16 @@ import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAc
 import { UpgradeInteractiveAction } from './actions/UpgradeInteractiveAction';
 
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
-import { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
+import type { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
-import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
+import { type ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
-import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 
 /**
  * Options for `RushCommandLineParser`.

@@ -2,25 +2,32 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
-import { Async, InternalError, ITerminal, NewlineKind, Sort, Terminal } from '@rushstack/node-core-library';
-import { CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
+import {
+  Async,
+  InternalError,
+  type ITerminal,
+  NewlineKind,
+  Sort,
+  Terminal
+} from '@rushstack/node-core-library';
+import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { DiscardStdoutTransform, TextRewriterTransform } from '@rushstack/terminal';
-import { SplitterTransform, TerminalWritable } from '@rushstack/terminal';
+import { SplitterTransform, type TerminalWritable } from '@rushstack/terminal';
 
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { OperationStatus } from './OperationStatus';
-import { CobuildLock, ICobuildCompletedState } from '../cobuild/CobuildLock';
+import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
 import { ProjectLogWritable } from './ProjectLogWritable';
-import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { DisjointSet } from '../cobuild/DisjointSet';
 import { PeriodicCallback } from './PeriodicCallback';
 import { NullTerminalProvider } from '../../utilities/NullTerminalProvider';
 
-import { Operation } from './Operation';
+import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {

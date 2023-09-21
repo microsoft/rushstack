@@ -3,11 +3,11 @@
 
 import colors from 'colors/safe';
 
-import { EventHooks } from '../api/EventHooks';
+import type { EventHooks } from '../api/EventHooks';
 import { Utilities } from '../utilities/Utilities';
 import { Event } from '../api/EventHooks';
 import { Stopwatch } from '../utilities/Stopwatch';
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 
 export class EventHooksManager {
   private _rushConfiguration: RushConfiguration;

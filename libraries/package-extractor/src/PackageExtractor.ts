@@ -3,11 +3,11 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { IMinimatch, Minimatch } from 'minimatch';
+import { type IMinimatch, Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
-import ignore, { Ignore } from 'ignore';
+import ignore, { type Ignore } from 'ignore';
 import {
   Async,
   AsyncQueue,

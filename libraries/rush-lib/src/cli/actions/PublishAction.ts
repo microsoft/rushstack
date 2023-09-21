@@ -4,17 +4,17 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
-import {
+import type {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Npm } from '../../utilities/Npm';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { PublishUtilities } from '../../logic/PublishUtilities';
 import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
 import { PrereleaseToken } from '../../logic/PrereleaseToken';
@@ -22,7 +22,7 @@ import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import * as PolicyValidator from '../../logic/policy/PolicyValidator';
-import { VersionPolicy } from '../../api/VersionPolicy';
+import type { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';

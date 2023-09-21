@@ -3,11 +3,11 @@
 
 import stringArgv from 'string-argv';
 
-import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import {
   CommandLineParameterKind,
-  CommandLineParameter,
+  type CommandLineParameter,
   CommandLineParameterWithArgument
 } from '../parameters/BaseClasses';
 import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';

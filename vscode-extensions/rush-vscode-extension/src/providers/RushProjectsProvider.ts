@@ -3,7 +3,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { JsonFile, JsonObject } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { RushTaskProvider } from './TaskProvider';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';

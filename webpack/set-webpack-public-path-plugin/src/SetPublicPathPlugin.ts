@@ -3,14 +3,14 @@
 
 import { EOL } from 'os';
 import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
-import { Text, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import { Text, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
 
 import type * as Webpack from 'webpack';
 import type * as Tapable from 'tapable';
 // Workaround for https://github.com/pnpm/pnpm/issues/4301
 import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
 
-import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
+import { type IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
 /**
  * The base options for setting the webpack public path at runtime.

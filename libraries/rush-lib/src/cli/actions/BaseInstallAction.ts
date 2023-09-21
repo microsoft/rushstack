@@ -9,7 +9,7 @@ import type {
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
-import { BaseRushAction, IBaseRushActionOptions } from './BaseRushAction';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
@@ -20,8 +20,8 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
-import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
+import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.

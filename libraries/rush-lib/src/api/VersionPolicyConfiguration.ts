@@ -3,8 +3,8 @@
 
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
-import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
-import { RushConfigurationProject } from './RushConfigurationProject';
+import { VersionPolicy, type BumpType, type LockStepVersionPolicy } from './VersionPolicy';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import schemaJson from '../schemas/version-policies.schema.json';
 
 export interface IVersionPolicyJson {

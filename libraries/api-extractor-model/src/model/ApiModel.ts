@@ -6,7 +6,7 @@ import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
 import { PackageName } from '@rushstack/node-core-library';
-import { ModelReferenceResolver, IResolveDeclarationReferenceResult } from './ModelReferenceResolver';
+import { ModelReferenceResolver, type IResolveDeclarationReferenceResult } from './ModelReferenceResolver';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 
 /**

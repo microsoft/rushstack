@@ -19,11 +19,11 @@ import {
 import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   PnpmShrinkwrapFile,
-  IPnpmShrinkwrapDependencyYaml,
-  IPnpmVersionSpecifier,
+  type IPnpmShrinkwrapDependencyYaml,
+  type IPnpmVersionSpecifier,
   normalizePnpmVersionSpecifier
 } from './PnpmShrinkwrapFile';
 

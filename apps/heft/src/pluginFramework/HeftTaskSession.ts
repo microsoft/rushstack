@@ -12,7 +12,7 @@ import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { CancellationToken } from './CancellationToken';
-import { WatchGlobFn } from '../plugins/FileGlobSpecifier';
+import type { WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import { InternalError } from '@rushstack/node-core-library';
 
 /**

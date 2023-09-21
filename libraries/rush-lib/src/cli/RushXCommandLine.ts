@@ -3,7 +3,7 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { PackageJsonLookup, IPackageJson, Text } from '@rushstack/node-core-library';
+import { PackageJsonLookup, type IPackageJson, Text } from '@rushstack/node-core-library';
 import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';

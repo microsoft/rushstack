@@ -4,13 +4,13 @@
 import colors from 'colors/safe';
 import {
   CommandLineParser,
-  CommandLineFlagParameter,
-  CommandLineStringParameter,
-  CommandLineChoiceParameter
+  type CommandLineFlagParameter,
+  type CommandLineStringParameter,
+  type CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { InternalError } from '@rushstack/node-core-library';
 
-import { ResolutionType, traceImport } from './traceImport';
+import { type ResolutionType, traceImport } from './traceImport';
 
 export class TraceImportCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;

@@ -12,39 +12,45 @@ import {
   NewlineKind,
   InternalError
 } from '@rushstack/node-core-library';
-import { StringBuilder, DocSection, DocComment, DocBlock, StandardTags } from '@microsoft/tsdoc';
 import {
-  ApiModel,
-  ApiItem,
+  StringBuilder,
+  type DocSection,
+  type DocComment,
+  type DocBlock,
+  StandardTags
+} from '@microsoft/tsdoc';
+import {
+  type ApiModel,
+  type ApiItem,
   ApiItemKind,
   ApiDocumentedItem,
   ApiReleaseTagMixin,
   ReleaseTag,
-  ApiPropertyItem,
+  type ApiPropertyItem,
   ApiItemContainerMixin,
-  ApiPackage,
-  ApiEnumMember,
+  type ApiPackage,
+  type ApiEnumMember,
   ApiClass,
   ApiInterface,
-  ApiMethod,
-  ApiMethodSignature,
-  ApiConstructor,
-  ApiFunction,
+  type ApiMethod,
+  type ApiMethodSignature,
+  type ApiConstructor,
+  type ApiFunction,
   ApiReturnTypeMixin,
   ApiTypeParameterListMixin,
-  Excerpt,
-  ExcerptToken,
+  type Excerpt,
+  type ExcerptToken,
   ExcerptTokenKind,
-  HeritageType,
-  ApiVariable,
-  ApiTypeAlias
+  type HeritageType,
+  type ApiVariable,
+  type ApiTypeAlias
 } from '@microsoft/api-extractor-model';
 import {
-  DeclarationReference,
+  type DeclarationReference,
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import {
+import type {
   IYamlApiFile,
   IYamlItem,
   IYamlSyntax,
@@ -53,7 +59,7 @@ import {
   IYamlReferenceSpec,
   IYamlInheritanceTree
 } from '../yaml/IYamlApiFile';
-import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
+import type { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';

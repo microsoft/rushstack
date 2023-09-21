@@ -12,10 +12,10 @@ import {
   Executable,
   FileConstants,
   FileSystem,
-  ITerminal,
-  ITerminalProvider,
+  type ITerminal,
+  type ITerminalProvider,
   JsonFile,
-  JsonObject,
+  type JsonObject,
   Terminal
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';

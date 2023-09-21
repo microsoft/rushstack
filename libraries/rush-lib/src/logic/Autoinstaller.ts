@@ -4,18 +4,18 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 
-import { FileSystem, IPackageJson, JsonFile, LockFile, NewlineKind } from '@rushstack/node-core-library';
+import { FileSystem, type IPackageJson, JsonFile, LockFile, NewlineKind } from '@rushstack/node-core-library';
 import { Utilities } from '../utilities/Utilities';
 
-import { PackageName, IParsedPackageNameOrError } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../api/RushConfiguration';
+import { PackageName, type IParsedPackageNameOrError } from '@rushstack/node-core-library';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
 import { InstallHelpers } from './installManager/InstallHelpers';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
+import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 interface IAutoinstallerOptions {
   autoinstallerName: string;

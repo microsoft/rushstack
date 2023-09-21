@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import process from 'process';
-import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 
 /**

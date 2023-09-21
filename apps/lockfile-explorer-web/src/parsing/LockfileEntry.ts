@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Path } from '@lifaon/path';
-import { ILockfileNode, LockfileDependency } from './LockfileDependency';
+import { type ILockfileNode, LockfileDependency } from './LockfileDependency';
 
 const ROOT_PACKAGE_PATH: string = 'common/temp/package.json';
 

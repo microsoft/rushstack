@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { SetupPackageRegistry } from '../../logic/setup/SetupPackageRegistry';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export class SetupAction extends BaseRushAction {

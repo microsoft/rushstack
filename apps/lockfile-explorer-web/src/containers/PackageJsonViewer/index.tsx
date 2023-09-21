@@ -6,7 +6,7 @@ import { readPnpmfileAsync, readPackageSpecAsync, readPackageJsonAsync } from '.
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectCurrentEntry } from '../../store/slices/entrySlice';
-import { IPackageJson } from '../../types/IPackageJson';
+import type { IPackageJson } from '../../types/IPackageJson';
 import { compareSpec } from '../../parsing/compareSpec';
 import { loadSpecChanges } from '../../store/slices/workspaceSlice';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';

@@ -4,9 +4,9 @@
 
 ```ts
 
-import { IgnoreStringFunction } from '@rushstack/localization-utilities';
+import type { IgnoreStringFunction } from '@rushstack/localization-utilities';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
-import { IPseudolocaleOptions } from '@rushstack/localization-utilities';
+import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 import { ITerminal } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 

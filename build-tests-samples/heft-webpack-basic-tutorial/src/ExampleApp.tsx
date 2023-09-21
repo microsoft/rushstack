@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as React from 'react';
-import { ToggleSwitch, IToggleEventArgs } from './ToggleSwitch';
+import { ToggleSwitch, type IToggleEventArgs } from './ToggleSwitch';
 
 /**
  * This React component renders the application page.

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { store } from '../store';
-import { IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
+import { type IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
 
 export type IFromExtensionMessage = IFromExtensionMessageInitialize;
 

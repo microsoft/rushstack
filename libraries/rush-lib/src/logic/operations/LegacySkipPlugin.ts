@@ -13,16 +13,16 @@ import {
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { Operation } from './Operation';
+import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { IOperationRunnerContext } from './IOperationRunner';
-import { IOperationExecutionResult } from './IOperationExecutionResult';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { IOperationRunnerContext } from './IOperationRunner';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 

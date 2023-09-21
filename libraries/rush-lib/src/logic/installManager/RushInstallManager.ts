@@ -19,22 +19,26 @@ import { PrintUtilities } from '@rushstack/terminal';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-import { IRushTempPackageJson } from '../../logic/base/BasePackage';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
+import type { IRushTempPackageJson } from '../../logic/base/BasePackage';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
-import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import {
+  type PackageJsonEditor,
+  DependencyType,
+  type PackageJsonDependency
+} from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
 import { TempProjectHelper } from '../TempProjectHelper';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { RushConfiguration } from '../..';
-import { PurgeManager } from '../PurgeManager';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { RushConfiguration } from '../..';
+import type { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
-import { BaseLinkManager } from '../base/BaseLinkManager';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+import type { BaseLinkManager } from '../base/BaseLinkManager';
+import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 

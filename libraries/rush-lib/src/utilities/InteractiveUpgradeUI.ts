@@ -8,7 +8,7 @@
 import inquirer from 'inquirer';
 import colors from 'colors/safe';
 import CliTable from 'cli-table';
-import Separator from 'inquirer/lib/objects/separator';
+import type Separator from 'inquirer/lib/objects/separator';
 import type * as NpmCheck from 'npm-check';
 
 export interface IUIGroup {

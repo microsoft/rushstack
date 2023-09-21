@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { once } from 'events';
-import { MessagePort } from 'worker_threads';
+import type { MessagePort } from 'worker_threads';
 
 import type {
   IMinifierConnection,

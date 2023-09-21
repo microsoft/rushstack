@@ -5,7 +5,7 @@ import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
-import { Text, NewlineKind, Encoding } from './Text';
+import { Text, type NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 import { LegacyAdapters } from './LegacyAdapters';
 

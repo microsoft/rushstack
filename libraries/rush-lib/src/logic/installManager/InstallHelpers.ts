@@ -3,14 +3,20 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { FileConstants, FileSystem, IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
+import {
+  FileConstants,
+  FileSystem,
+  type IPackageJson,
+  JsonFile,
+  LockFile
+} from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
-import { PackageManagerName } from '../../api/packageManager/PackageManager';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { PackageManagerName } from '../../api/packageManager/PackageManager';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
-import { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
+import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { merge } from '../../utilities/objectUtilities';
 

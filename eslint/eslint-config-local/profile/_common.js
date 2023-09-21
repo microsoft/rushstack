@@ -32,7 +32,7 @@ function buildRules(profile) {
     // Since we base our profiles off of the Rushstack profiles, we will extend these by default
     // while providing an option to override and specify your own
     extends: [`@rushstack/eslint-config/profile/${profile}`],
-    plugins: ['eslint-plugin-import'],
+    plugins: ['eslint-plugin-import', 'eslint-plugin-header'],
     settings: {
       // Tell eslint-plugin-import where to find eslint-import-resolver-node
       'import/resolver': eslintImportResolverNode
@@ -91,6 +91,15 @@ function buildRules(profile) {
           // Rationale: If all imports in an import statement are only used as types,
           // then the import statement should be omitted in the compiled JS output.
           '@typescript-eslint/no-import-type-side-effects': 'warn',
+
+          'header/header': [
+            'warn',
+            'line',
+            [
+              ' Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.',
+              ' See LICENSE in the project root for license information.'
+            ]
+          ],
 
           ...profileMixins
         }

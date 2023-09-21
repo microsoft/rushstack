@@ -4,18 +4,18 @@
 /* eslint-disable no-bitwise */ // for ts.SymbolFlags
 
 import * as ts from 'typescript';
-import { PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
+import { type PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 
 import { AstDeclaration } from './AstDeclaration';
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
-import { AstModule, AstModuleExportInfo } from './AstModule';
+import type { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
-import { AstEntity } from './AstEntity';
+import type { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
-import { MessageRouter } from '../collector/MessageRouter';
-import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
+import type { MessageRouter } from '../collector/MessageRouter';
+import { TypeScriptInternals, type IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { SyntaxHelpers } from './SyntaxHelpers';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 

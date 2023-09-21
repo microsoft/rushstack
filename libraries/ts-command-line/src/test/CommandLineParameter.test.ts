@@ -6,8 +6,8 @@ import * as colors from 'colors';
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { CommandLineParameter } from '../parameters/BaseClasses';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineAction } from '../providers/CommandLineAction';
+import type { CommandLineParser } from '../providers/CommandLineParser';
+import type { CommandLineAction } from '../providers/CommandLineAction';
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({

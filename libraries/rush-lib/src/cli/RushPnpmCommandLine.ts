@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ILaunchOptions } from '../api/Rush';
+import type { ILaunchOptions } from '../api/Rush';
 import { RushPnpmCommandLineParser } from './RushPnpmCommandLineParser';
 
 export interface ILaunchRushPnpmInternalOptions extends ILaunchOptions {}

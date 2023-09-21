@@ -4,9 +4,9 @@
 import type { pki } from 'node-forge';
 import * as path from 'path';
 import { EOL } from 'os';
-import { FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, type ITerminal } from '@rushstack/node-core-library';
 
-import { runSudoAsync, IRunResult, runAsync } from './runCommand';
+import { runSudoAsync, type IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';

@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { InternalError, ITerminal } from '@rushstack/node-core-library';
-import {
+import { InternalError, type ITerminal } from '@rushstack/node-core-library';
+import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
-import { Operation } from './Operation';
+import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
+import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 
 const PLUGIN_NAME: 'OperationResultSummarizerPlugin' = 'OperationResultSummarizerPlugin';

@@ -10,7 +10,10 @@ import { Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
-import { OperationExecutionManager, IOperationExecutionManagerOptions } from '../OperationExecutionManager';
+import {
+  OperationExecutionManager,
+  type IOperationExecutionManagerOptions
+} from '../OperationExecutionManager';
 import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
 import { _printTimeline } from '../ConsoleTimelinePlugin';
 import { OperationStatus } from '../OperationStatus';

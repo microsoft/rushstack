@@ -5,7 +5,7 @@ import { AlreadyReportedError, Async, type ITerminal, Path } from '@rushstack/no
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
-import { RushConfigurationProject } from './RushConfigurationProject';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';

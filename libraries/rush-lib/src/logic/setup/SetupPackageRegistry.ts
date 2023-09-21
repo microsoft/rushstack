@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 import {
   AlreadyReportedError,
   Colors,
@@ -10,17 +10,17 @@ import {
   Executable,
   FileSystem,
   InternalError,
-  JsonObject,
+  type JsonObject,
   NewlineKind,
   Terminal,
   Text
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
-import { IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
-import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { type IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
+import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
 import { TerminalInput } from './TerminalInput';
 
 interface IArtifactoryCustomizableMessages {

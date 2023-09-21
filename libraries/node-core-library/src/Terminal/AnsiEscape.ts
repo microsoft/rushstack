@@ -54,7 +54,7 @@ export class AnsiEscape {
       // If it is an SGR code, then try to show a friendly token
       const match: RegExpMatchArray | null = csiCode.match(AnsiEscape._sgrRegExp);
       if (match) {
-        const sgrParameter: number = parseInt(match[1]);
+        const sgrParameter: number = parseInt(match[1], 10);
         const sgrParameterName: string | undefined = AnsiEscape._tryGetSgrFriendlyName(sgrParameter);
         if (sgrParameterName) {
           // Example: "[black-bg]"

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError } from '@rushstack/node-core-library';
-import { TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
+import type { TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
 
 import { CollatedWriter } from './CollatedWriter';
 import { CollatedTerminal } from './CollatedTerminal';

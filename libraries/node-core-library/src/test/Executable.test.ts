@@ -3,9 +3,9 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 
-import { Executable, IExecutableSpawnSyncOptions } from '../Executable';
+import { Executable, type IExecutableSpawnSyncOptions } from '../Executable';
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
 import { Text } from '../Text';

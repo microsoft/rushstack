@@ -4,37 +4,37 @@
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError, ITerminal, Terminal } from '@rushstack/node-core-library';
-import {
+import { AlreadyReportedError, InternalError, type ITerminal, Terminal } from '@rushstack/node-core-library';
+import type {
   CommandLineFlagParameter,
   CommandLineParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
-import { PhasedCommandHooks, ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
+import { PhasedCommandHooks, type ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
-import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
+import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
 import {
-  IOperationExecutionManagerOptions,
+  type IOperationExecutionManagerOptions,
   OperationExecutionManager
 } from '../../logic/operations/OperationExecutionManager';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
-import { Operation } from '../../logic/operations/Operation';
-import { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
+import type { Operation } from '../../logic/operations/Operation';
+import type { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';

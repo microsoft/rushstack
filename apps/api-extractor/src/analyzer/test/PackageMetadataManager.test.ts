@@ -3,7 +3,12 @@
 
 import * as path from 'path';
 import { PackageMetadataManager } from '../PackageMetadataManager';
-import { FileSystem, PackageJsonLookup, INodePackageJson, NewlineKind } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  PackageJsonLookup,
+  type INodePackageJson,
+  NewlineKind
+} from '@rushstack/node-core-library';
 
 const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 

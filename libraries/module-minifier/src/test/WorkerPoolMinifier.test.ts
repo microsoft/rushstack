@@ -15,6 +15,7 @@ jest.mock('terser/package.json', () => {
 describe('WorkerPoolMinifier', () => {
   it('Includes terserOptions in config hash', async () => {
     const { WorkerPoolMinifier } = await import('../WorkerPoolMinifier');
+    // eslint-disable-next-line @typescript-eslint/no-redeclare
     type WorkerPoolMinifier = typeof WorkerPoolMinifier.prototype;
 
     const minifier1: WorkerPoolMinifier = new WorkerPoolMinifier({
@@ -40,6 +41,7 @@ describe('WorkerPoolMinifier', () => {
 
   it('Includes terser package version in config hash', async () => {
     const { WorkerPoolMinifier } = await import('../WorkerPoolMinifier');
+    // eslint-disable-next-line @typescript-eslint/no-redeclare
     type WorkerPoolMinifier = typeof WorkerPoolMinifier.prototype;
 
     terserVersion = '5.9.1';

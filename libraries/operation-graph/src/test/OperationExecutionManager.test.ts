@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Operation } from '../Operation';
 import { OperationExecutionManager } from '../OperationExecutionManager';
 import { OperationStatus } from '../OperationStatus';
-import { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 
 type ExecuteAsyncMock = jest.Mock<
   ReturnType<IOperationRunner['executeAsync']>,

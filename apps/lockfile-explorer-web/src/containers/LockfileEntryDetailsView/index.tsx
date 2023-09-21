@@ -5,15 +5,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollArea, Text } from '@rushstack/rush-themed-ui';
 import styles from './styles.scss';
 import appStyles from '../../App.scss';
-import { IDependencyType, LockfileDependency } from '../../parsing/LockfileDependency';
+import { IDependencyType, type LockfileDependency } from '../../parsing/LockfileDependency';
 import { readPackageJsonAsync } from '../../parsing/getPackageFiles';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { pushToStack, selectCurrentEntry } from '../../store/slices/entrySlice';
 import { ReactNull } from '../../types/ReactNull';
-import { LockfileEntry } from '../../parsing/LockfileEntry';
+import type { LockfileEntry } from '../../parsing/LockfileEntry';
 import { logDiagnosticInfo } from '../../helpers/logDiagnosticInfo';
 import { displaySpecChanges } from '../../helpers/displaySpecChanges';
-import { IPackageJson } from '../../types/IPackageJson';
+import type { IPackageJson } from '../../types/IPackageJson';
 
 enum DependencyType {
   Determinant,

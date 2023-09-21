@@ -18,6 +18,7 @@
     "eslint-plugin-react-hooks": "4.3.0",
     "eslint-plugin-deprecation": "2.0.0",
     "eslint-plugin-jsdoc": "37.6.1",
-    "@rushstack/eslint-patch": "workspace:*"
+    "@rushstack/eslint-patch": "workspace:*",
+    "eslint-plugin-header": "~3.1.1"
   }
 }

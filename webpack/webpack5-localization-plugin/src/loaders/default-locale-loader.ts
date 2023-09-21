@@ -3,7 +3,7 @@
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 import { Terminal } from '@rushstack/node-core-library';
-import { ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
+import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
 import type { IResxLoaderOptions } from './IResxLoaderOptions';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';

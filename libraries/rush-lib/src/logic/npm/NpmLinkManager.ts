@@ -9,9 +9,9 @@ import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import { NpmPackage, IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
+import { NpmPackage, type IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
 import { PackageLookup } from '../PackageLookup';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 

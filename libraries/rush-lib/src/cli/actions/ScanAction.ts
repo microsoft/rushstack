@@ -6,8 +6,8 @@ import * as path from 'path';
 import builtinPackageNames from 'builtin-modules';
 
 import { FileSystem } from '@rushstack/node-core-library';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 export interface IJsonOutput {

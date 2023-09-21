@@ -3,10 +3,10 @@
 
 import {
   RedisCobuildLockProvider,
-  IRedisCobuildLockProviderOptions
+  type IRedisCobuildLockProviderOptions
 } from '@rushstack/rush-redis-cobuild-plugin';
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
-import { OperationStatus, ICobuildContext, RushSession } from '@microsoft/rush-lib';
+import { OperationStatus, type ICobuildContext, RushSession } from '@microsoft/rush-lib';
 
 const options: IRedisCobuildLockProviderOptions = {
   url: 'redis://localhost:6379',

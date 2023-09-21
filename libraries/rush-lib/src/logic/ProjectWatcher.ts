@@ -6,12 +6,12 @@ import * as os from 'os';
 import * as readline from 'readline';
 import { once } from 'events';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
-import { Colors, Path, ITerminal, FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import { Colors, Path, type ITerminal, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 
 import { Git } from './Git';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IProjectWatcherOptions {
   debounceMs?: number;

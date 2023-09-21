@@ -3,8 +3,8 @@
 
 import {
   FileSystem,
-  IPackageJson,
-  IParsedPackageName,
+  type IPackageJson,
+  type IParsedPackageName,
   JsonFile,
   PackageName
 } from '@rushstack/node-core-library';

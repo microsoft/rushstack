@@ -4,17 +4,17 @@
 import * as path from 'path';
 import * as ts from 'typescript';
 
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
-import { CollectorEntity } from '../collector/CollectorEntity';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { SymbolMetadata } from '../collector/SymbolMetadata';
+import type { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstModuleExportInfo } from '../analyzer/AstModule';
-import { AstEntity } from '../analyzer/AstEntity';
+import type { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { AstEntity } from '../analyzer/AstEntity';
 
 export class ValidationEnhancer {
   public static analyze(collector: Collector): void {

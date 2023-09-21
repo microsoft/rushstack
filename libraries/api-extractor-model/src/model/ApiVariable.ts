@@ -5,19 +5,23 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { ApiReadonlyMixin, IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
-import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
-import { DeserializerContext } from './DeserializerContext';
 import {
-  IApiExportedMixinJson,
-  IApiExportedMixinOptions,
+  ApiDeclaredItem,
+  type IApiDeclaredItemOptions,
+  type IApiDeclaredItemJson
+} from '../items/ApiDeclaredItem';
+import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { ApiReadonlyMixin, type IApiReadonlyMixinOptions } from '../mixins/ApiReadonlyMixin';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
+import type { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
+import type { DeserializerContext } from './DeserializerContext';
+import {
+  type IApiExportedMixinJson,
+  type IApiExportedMixinOptions,
   ApiExportedMixin
 } from '../mixins/ApiExportedMixin';
 

@@ -1,4 +1,7 @@
-import * as fs from 'fs';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type * as fs from 'fs';
 import * as path from 'path';
 import type { FileSystemAdapter } from 'fast-glob';
 import { Path } from '@rushstack/node-core-library';

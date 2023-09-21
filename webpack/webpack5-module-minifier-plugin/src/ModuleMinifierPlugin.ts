@@ -15,7 +15,7 @@ import type {
   sources,
   Chunk
 } from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook, Tap } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncWaterfallHook, type Tap } from 'tapable';
 
 import {
   CHUNK_MODULE_TOKEN,

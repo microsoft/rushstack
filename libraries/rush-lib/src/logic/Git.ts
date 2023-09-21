@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import child_process from 'child_process';
+import type child_process from 'child_process';
 import gitInfo from 'git-repo-info';
 import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
 import { trueCasePathSync } from 'true-case-path';
-import { Executable, AlreadyReportedError, Path, ITerminal } from '@rushstack/node-core-library';
+import { Executable, AlreadyReportedError, Path, type ITerminal } from '@rushstack/node-core-library';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';
 import * as GitEmailPolicy from './policy/GitEmailPolicy';
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-import { IChangedGitStatusEntry, IGitStatusEntry, parseGitStatus } from './GitStatusParser';
+import { type IChangedGitStatusEntry, type IGitStatusEntry, parseGitStatus } from './GitStatusParser';
 
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 

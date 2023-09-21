@@ -1,4 +1,7 @@
-import { RushConfiguration, ProjectChangeAnalyzer, RushConfigurationProject } from '@microsoft/rush-lib';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { RushConfiguration, ProjectChangeAnalyzer, type RushConfigurationProject } from '@microsoft/rush-lib';
 import { Terminal, ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 async function runAsync(): Promise<void> {

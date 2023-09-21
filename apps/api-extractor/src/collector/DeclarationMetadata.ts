@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tsdoc from '@microsoft/tsdoc';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
+import type * as tsdoc from '@microsoft/tsdoc';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
 
 /**
  * Stores the Collector's additional analysis for a specific `AstDeclaration` signature.  This object is assigned to

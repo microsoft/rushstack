@@ -4,15 +4,15 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 
-import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
 import { LockFile } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { RushSession } from '../../pluginFramework/RushSession';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { RushSession } from '../../pluginFramework/RushSession';
 import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {

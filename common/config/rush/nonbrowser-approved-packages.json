@@ -443,7 +443,15 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "eslint-config-local",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
       "name": "eslint-plugin-deprecation",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-header",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -625,10 +633,6 @@
     {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "eslint-config-local",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "local-node-rig",

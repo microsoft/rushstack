@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import readPackageTree from 'read-package-tree';
-import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
+import type readPackageTree from 'read-package-tree';
+import { JsonFile, type IPackageJson } from '@rushstack/node-core-library';
 
-import { BasePackage, IRushTempPackageJson } from '../base/BasePackage';
+import { BasePackage, type IRushTempPackageJson } from '../base/BasePackage';
 
 /**
  * Used by the linking algorithm when doing NPM package resolution.

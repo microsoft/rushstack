@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson, IPackageJsonScriptTable } from '@rushstack/node-core-library';
+import type { IPackageJson, IPackageJsonScriptTable } from '@rushstack/node-core-library';
 
 /**
  * Parses the "scripts" section from package.json and provides support for executing scripts.

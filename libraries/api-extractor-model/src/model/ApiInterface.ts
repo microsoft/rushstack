@@ -5,32 +5,36 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import {
   ApiItemContainerMixin,
-  IApiItemContainerMixinOptions,
-  IApiItemContainerJson
+  type IApiItemContainerMixinOptions,
+  type IApiItemContainerJson
 } from '../mixins/ApiItemContainerMixin';
-import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import {
-  IApiReleaseTagMixinOptions,
+  ApiDeclaredItem,
+  type IApiDeclaredItemOptions,
+  type IApiDeclaredItemJson
+} from '../items/ApiDeclaredItem';
+import {
+  type IApiReleaseTagMixinOptions,
   ApiReleaseTagMixin,
-  IApiReleaseTagMixinJson
+  type IApiReleaseTagMixinJson
 } from '../mixins/ApiReleaseTagMixin';
-import { IExcerptTokenRange } from '../mixins/Excerpt';
+import type { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
-import { IApiNameMixinOptions, ApiNameMixin, IApiNameMixinJson } from '../mixins/ApiNameMixin';
+import { type IApiNameMixinOptions, ApiNameMixin, type IApiNameMixinJson } from '../mixins/ApiNameMixin';
 import {
-  IApiTypeParameterListMixinOptions,
-  IApiTypeParameterListMixinJson,
+  type IApiTypeParameterListMixinOptions,
+  type IApiTypeParameterListMixinJson,
   ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
-import { DeserializerContext } from './DeserializerContext';
+import type { DeserializerContext } from './DeserializerContext';
 import {
-  IApiExportedMixinJson,
-  IApiExportedMixinOptions,
+  type IApiExportedMixinJson,
+  type IApiExportedMixinOptions,
   ApiExportedMixin
 } from '../mixins/ApiExportedMixin';
 

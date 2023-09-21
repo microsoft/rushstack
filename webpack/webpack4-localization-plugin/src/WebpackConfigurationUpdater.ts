@@ -3,15 +3,15 @@
 
 import minimatch from 'minimatch';
 import * as path from 'path';
-import * as Webpack from 'webpack';
-import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
-import { NewlineKind, Text } from '@rushstack/node-core-library';
-import { IgnoreStringFunction } from '@rushstack/localization-utilities';
+import type * as Webpack from 'webpack';
+import type * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
+import { type NewlineKind, Text } from '@rushstack/node-core-library';
+import type { IgnoreStringFunction } from '@rushstack/localization-utilities';
 
 import { Constants } from './utilities/Constants';
-import { LocalizationPlugin } from './LocalizationPlugin';
-import { ILocLoaderOptions } from './loaders/LocLoader';
-import { IBaseLoaderOptions } from './loaders/LoaderFactory';
+import type { LocalizationPlugin } from './LocalizationPlugin';
+import type { ILocLoaderOptions } from './loaders/LocLoader';
+import type { IBaseLoaderOptions } from './loaders/LoaderFactory';
 
 export interface IWebpackConfigurationUpdaterOptions {
   pluginInstance: LocalizationPlugin;

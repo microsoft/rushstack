@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as ts from 'typescript';
+import type * as tsdoc from '@microsoft/tsdoc';
 
-import { INodePackageJson } from '@rushstack/node-core-library';
+import type { INodePackageJson } from '@rushstack/node-core-library';
 
 /**
  * Constructor options for WorkingPackage

@@ -4,10 +4,10 @@
 import * as colors from 'colors';
 
 import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 class TestScopedAction extends ScopedCommandLineAction {
   public done: boolean = false;

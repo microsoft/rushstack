@@ -7,13 +7,13 @@ import * as path from 'path';
 import { performance } from 'perf_hooks';
 import {
   JsonFile,
-  IPackageJson,
+  type IPackageJson,
   FileSystem,
   FileConstants,
-  FileSystemStats
+  type FileSystemStats
 } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { PassThrough } from 'stream';
 

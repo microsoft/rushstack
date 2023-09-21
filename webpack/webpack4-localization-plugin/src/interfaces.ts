@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IgnoreStringFunction, IPseudolocaleOptions } from '@rushstack/localization-utilities';
+import type { IgnoreStringFunction, IPseudolocaleOptions } from '@rushstack/localization-utilities';
 
 /**
  * Options for the passthrough locale.

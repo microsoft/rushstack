@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { TerminalWritable } from './TerminalWritable';
-import { ITerminalChunk } from './ITerminalChunk';
+import type { ITerminalChunk } from './ITerminalChunk';
 
 /**
  * Constructor options for {@link CallbackWritable}.

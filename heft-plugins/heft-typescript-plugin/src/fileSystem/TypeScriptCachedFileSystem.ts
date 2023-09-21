@@ -4,15 +4,15 @@
 import {
   Encoding,
   Text,
-  IFileSystemWriteFileOptions,
-  IFileSystemReadFileOptions,
-  IFileSystemCopyFileOptions,
-  IFileSystemDeleteFileOptions,
-  IFileSystemCreateLinkOptions,
+  type IFileSystemWriteFileOptions,
+  type IFileSystemReadFileOptions,
+  type IFileSystemCopyFileOptions,
+  type IFileSystemDeleteFileOptions,
+  type IFileSystemCreateLinkOptions,
   FileSystem,
-  FileSystemStats,
+  type FileSystemStats,
   Sort,
-  FolderItem
+  type FolderItem
 } from '@rushstack/node-core-library';
 
 export interface IReadFolderFilesAndDirectoriesResult {

@@ -3,20 +3,20 @@
 
 import colors from 'colors';
 import * as ts from 'typescript';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError } from '@rushstack/node-core-library';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { AstSymbol } from '../analyzer/AstSymbol';
+import type { AstSymbol } from '../analyzer/AstSymbol';
 import {
   ExtractorMessage,
   ExtractorMessageCategory,
-  IExtractorMessageOptions,
-  IExtractorMessageProperties
+  type IExtractorMessageOptions,
+  type IExtractorMessageProperties
 } from '../api/ExtractorMessage';
-import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
-import { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
-import { ISourceLocation, SourceMapper } from './SourceMapper';
+import { type ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
+import type { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
+import type { ISourceLocation, SourceMapper } from './SourceMapper';
 import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';
 

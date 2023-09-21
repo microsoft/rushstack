@@ -1,9 +1,12 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { FileConstants, FileSystem, PosixModeBits } from '@rushstack/node-core-library';
 import * as tar from 'tar';
 import * as path from 'path';
 
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from './RushConstants';
 
 // The PosixModeBits are intended to be used with bitwise operations.

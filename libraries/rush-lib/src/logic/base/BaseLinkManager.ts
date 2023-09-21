@@ -6,15 +6,15 @@ import * as path from 'path';
 
 import {
   FileSystem,
-  FileSystemStats,
-  IFileSystemCreateLinkOptions,
+  type FileSystemStats,
+  type IFileSystemCreateLinkOptions,
   InternalError
 } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { BasePackage } from './BasePackage';
+import type { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 

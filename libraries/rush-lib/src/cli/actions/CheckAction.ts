@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
-import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
 export class CheckAction extends BaseRushAction {
   private readonly _terminal: ITerminal;

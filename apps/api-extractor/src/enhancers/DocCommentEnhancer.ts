@@ -4,10 +4,10 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';

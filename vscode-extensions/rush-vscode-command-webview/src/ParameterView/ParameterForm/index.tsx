@@ -2,19 +2,25 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import { CSSProperties, ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line/lib/parameters/BaseClasses';
-import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceListParameter';
-import { CommandLineChoiceParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceParameter';
-import { CommandLineIntegerParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineIntegerParameter';
-import { FieldValues, FormProvider, UseControllerProps, useForm, UseFormReturn } from 'react-hook-form';
+import type { CommandLineChoiceListParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceListParameter';
+import type { CommandLineChoiceParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceParameter';
+import type { CommandLineIntegerParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineIntegerParameter';
+import {
+  type FieldValues,
+  FormProvider,
+  type UseControllerProps,
+  useForm,
+  type UseFormReturn
+} from 'react-hook-form';
 import { DefaultButton, Label } from '@fluentui/react';
 
 import { ControlledTextField } from '../../ControlledFormComponents/ControlledTextField';
 import { ControlledComboBox } from '../../ControlledFormComponents/ControlledComboBox';
 import { ControlledTextFieldArray } from '../../ControlledFormComponents/ControlledTextFieldArray';
 import {
-  ICommandLineParameter,
+  type ICommandLineParameter,
   onChangeFormDefaultValues,
   onChangeSearchText,
   useArgsTextList,

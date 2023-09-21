@@ -4,14 +4,20 @@
 import * as path from 'path';
 import * as crypto from 'crypto';
 
-import { FileSystem, ITerminal, FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  type ITerminal,
+  type FolderItem,
+  InternalError,
+  Async
+} from '@rushstack/node-core-library';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushConstants } from '../RushConstants';
-import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
-import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
+import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 

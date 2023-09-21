@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as fetch from 'node-fetch';
+import type * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -13,37 +13,37 @@ import {
   PosixModeBits,
   NewlineKind,
   AlreadyReportedError,
-  FileSystemStats,
+  type FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider,
+  type ITerminalProvider,
   Path
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
-import { AsyncRecycler } from '../../utilities/AsyncRecycler';
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
-import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { PurgeManager } from '../PurgeManager';
-import { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
+import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
+import type { PurgeManager } from '../PurgeManager';
+import type { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConstants } from '../RushConstants';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import * as PolicyValidator from '../policy/PolicyValidator';
-import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
-import { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
+import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.

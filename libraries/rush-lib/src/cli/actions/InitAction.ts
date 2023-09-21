@@ -8,11 +8,11 @@ import {
   NewlineKind,
   InternalError,
   AlreadyReportedError,
-  FileSystemStats
+  type FileSystemStats
 } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 import { Rush } from '../../api/Rush';

@@ -9,7 +9,13 @@ import { fromExtensionListener } from './Message/fromExtension';
 // import { Toolbar } from './Toolbar';
 // import { useAppSelector } from './store/hooks';
 import { ProjectView } from './ProjectView';
-import { SelectTabData, SelectTabEvent, Tab, TabList, TabValue } from '@fluentui/react-components';
+import {
+  type SelectTabData,
+  type SelectTabEvent,
+  Tab,
+  TabList,
+  type TabValue
+} from '@fluentui/react-components';
 import { VersionsView } from './VersionsView';
 
 initializeIcons();

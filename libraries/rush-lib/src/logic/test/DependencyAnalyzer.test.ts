@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { DependencyAnalyzer, IDependencyAnalysis } from '../DependencyAnalyzer';
+import { DependencyAnalyzer, type IDependencyAnalysis } from '../DependencyAnalyzer';
 
 describe(DependencyAnalyzer.name, () => {
   function getAnalysisForRepoByName(repoName: string): IDependencyAnalysis {
