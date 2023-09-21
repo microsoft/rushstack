@@ -200,7 +200,9 @@ export class SubprocessTerminator {
         // not a trivial issue such as a nonexistent PID.   Since this occurs during process shutdown,
         // we should not interfere with control flow by throwing an exception  or calling process.exit().
         // So simply write to STDERR and ensure our exit code indicates the problem.
+        // eslint-disable-next-line no-console
         console.error('\nAn unexpected error was encountered while attempting to clean up child processes:');
+        // eslint-disable-next-line no-console
         console.error(firstError.toString());
         if (!process.exitCode) {
           process.exitCode = 1;

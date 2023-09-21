@@ -157,7 +157,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     const scopedArgs: string[] = [];
     if (this.remainder.values.length) {
       if (this.remainder.values[0] !== '--') {
-        // Immitate argparse behavior and log out usage text before throwing.
+        // Imitate argparse behavior and log out usage text before throwing.
+        // eslint-disable-next-line no-console
         console.log(this.renderUsageText());
         throw new CommandLineParserExitError(
           // argparse sets exit code 2 for invalid arguments

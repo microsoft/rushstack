@@ -43,6 +43,9 @@ async function runAsync(): Promise<void> {
 }
 
 process.exitCode = 1;
-runAsync().then(() => {
-  process.exitCode = 0;
-}, console.error);
+runAsync()
+  .then(() => {
+    process.exitCode = 0;
+  })
+  // eslint-disable-next-line no-console
+  .catch(console.error);

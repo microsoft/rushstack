@@ -121,7 +121,9 @@ export function syncNpmrc(
   targetNpmrcFolder: string,
   useNpmrcPublish?: boolean,
   logger: ILogger = {
+    // eslint-disable-next-line no-console
     info: console.log,
+    // eslint-disable-next-line no-console
     error: console.error
   }
 ): string | undefined {

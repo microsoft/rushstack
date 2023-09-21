@@ -253,6 +253,7 @@ export class Autoinstaller {
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
     if (!this._restrictConsoleOutput) {
+      // eslint-disable-next-line no-console
       console.log(message ?? '');
     }
   }

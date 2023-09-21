@@ -194,6 +194,7 @@ export class ReadmeAction extends CommandLineAction {
         terminal.writeLine(Colors.green('\nSuccess.'));
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log(`The README.md is up to date.`);
     }
   }

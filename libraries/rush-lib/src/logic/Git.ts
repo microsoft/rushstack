@@ -109,6 +109,7 @@ export class Git {
     // Ex: "bob@example.com"
     const emailResult: IResultOrError<string> = this._tryGetGitEmail();
     if (emailResult.error) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           `Error: ${emailResult.error.message}`,
@@ -122,6 +123,7 @@ export class Git {
     }
 
     if (emailResult.result === undefined || emailResult.result.length === 0) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           'This operation requires that a Git email be specified.',
@@ -165,6 +167,7 @@ export class Git {
     const defaultHooksPath: string = path.resolve(commonGitDir, 'hooks');
     const hooksResult: IResultOrError<string> = this._tryGetGitHooksPath();
     if (hooksResult.error) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           `Error: ${hooksResult.error.message}`,
@@ -350,6 +353,7 @@ export class Git {
 
       if (matchingRemotes.length > 0) {
         if (matchingRemotes.length > 1) {
+          // eslint-disable-next-line no-console
           console.log(
             `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
           );
@@ -363,11 +367,13 @@ export class Git {
                 ', '
               )}). `
             : `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `;
+        // eslint-disable-next-line no-console
         console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log(
         colors.yellow(
           'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
@@ -562,6 +568,7 @@ export class Git {
   }
 
   private _fetchRemoteBranch(remoteBranchName: string, terminal: ITerminal): void {
+    // eslint-disable-next-line no-console
     console.log(`Checking for updates to ${remoteBranchName}...`);
     const fetchResult: boolean = this._tryFetchRemoteBranch(remoteBranchName);
     if (!fetchResult) {

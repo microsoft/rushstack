@@ -182,6 +182,7 @@ export function generateLockfileGraph(lockfile: ILockfilePackageType): LockfileE
         matchedEntry.referrers.push(entry);
       } else {
         // Local package
+        // eslint-disable-next-line no-console
         console.error('Could not resolve dependency entryId: ', dependency.entryId, dependency);
       }
     }

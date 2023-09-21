@@ -43,6 +43,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'Linking is not supported when using workspaces. Run "rush install" or "rush update" ' +
@@ -73,6 +74,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         await this._linkProject(rushProject, pnpmShrinkwrapFile);
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log(
         colors.yellow(
           '\nWarning: Nothing to do. Please edit rush.json and add at least one project' +
@@ -91,6 +93,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     project: RushConfigurationProject,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
+    // eslint-disable-next-line no-console
     console.log(`\nLINKING: ${project.packageName}`);
 
     // first, read the temp package.json information
@@ -276,7 +279,10 @@ export class PnpmLinkManager extends BaseLinkManager {
     const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
     await pnpmLinkBins(projectFolder, projectBinFolder, {
-      warn: (msg: string) => console.warn(colors.yellow(msg))
+      warn: (msg: string) => {
+        // eslint-disable-next-line no-console
+        console.warn(colors.yellow(msg));
+      }
     });
   }
 

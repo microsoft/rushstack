@@ -115,6 +115,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
               return;
             }
 
+            // eslint-disable-next-line no-console
             console.error(`Missing resolution data for ${mod.resource}`);
           }
         );

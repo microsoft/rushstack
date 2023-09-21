@@ -185,6 +185,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     }
 
     if (exitCode > 0) {
+      // eslint-disable-next-line no-console
       console.log('\n' + colors.red(`The script failed with exit code ${exitCode}`));
       throw new AlreadyReportedError();
     }

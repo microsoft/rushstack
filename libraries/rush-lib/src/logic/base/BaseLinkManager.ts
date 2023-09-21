@@ -95,6 +95,7 @@ export abstract class BaseLinkManager {
 
     // The root-level folder is the project itself, so we simply delete its node_modules
     // to start clean
+    // eslint-disable-next-line no-console
     console.log('Purging ' + localModuleFolder);
     Utilities.dangerouslyDeletePath(localModuleFolder);
 
@@ -189,6 +190,7 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -198,7 +200,9 @@ export abstract class BaseLinkManager {
     LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
 
     stopwatch.stop();
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    // eslint-disable-next-line no-console
     console.log('\nNext you should probably run "rush build" or "rush rebuild"');
   }
 

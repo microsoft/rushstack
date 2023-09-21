@@ -320,6 +320,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     if (!policyOptions.allowShrinkwrapUpdates) {
       if (!policyOptions.repoState.isValid) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.red(
             `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker ` +
@@ -333,6 +334,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       // may have changed and the hash could be invalid.
       if (packageManagerOptionsConfig.preventManualShrinkwrapChanges) {
         if (!policyOptions.repoState.pnpmShrinkwrapHash) {
+          // eslint-disable-next-line no-console
           console.log(
             colors.red(
               'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
@@ -343,6 +345,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         }
 
         if (this.getShrinkwrapHash(experimentsConfig) !== policyOptions.repoState.pnpmShrinkwrapHash) {
+          // eslint-disable-next-line no-console
           console.log(
             colors.red(
               'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +

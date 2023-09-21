@@ -57,6 +57,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     }
 
     loadPackageJson(selectedEntry?.referrers || []).catch((e) => {
+      // eslint-disable-next-line no-console
       console.error(`Failed to load referrers package.json: ${e}`);
     });
     if (selectedEntry) {
@@ -73,6 +74,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
           logDiagnosticInfo('No resolved entry for dependency:', dependencyToTrace);
         }
       } else if (selectedEntry) {
+        // eslint-disable-next-line no-console
         console.log('dependency to trace: ', dependencyToTrace);
         setInspectDependency(dependencyToTrace);
 
@@ -110,6 +112,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   // YAML file.  If not, either something is wrong with our algorithm, or else
                   // something has changed about how PNPM manages its "transitivePeerDependencies"
                   // field.
+                  // eslint-disable-next-line no-console
                   console.error(
                     'Error analyzing influencers: A referrer appears to be missing its "transitivePeerDependencies" field in the YAML file: ',
                     dependencyToTrace,

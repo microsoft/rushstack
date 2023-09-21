@@ -189,6 +189,7 @@ export const upgradeInteractive = async (
   }
 
   if (!choices.length) {
+    // eslint-disable-next-line no-console
     console.log('All dependencies are up to date!');
     return { packages: [] };
   }

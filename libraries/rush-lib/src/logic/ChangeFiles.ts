@@ -35,6 +35,7 @@ export class ChangeFiles {
 
     const projectsWithChangeDescriptions: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {
+      // eslint-disable-next-line no-console
       console.log(`Found change file: ${filePath}`);
 
       const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
@@ -80,6 +81,7 @@ export class ChangeFiles {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
     newChangeFilePaths.forEach((filePath) => {
+      // eslint-disable-next-line no-console
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
@@ -159,11 +161,13 @@ export class ChangeFiles {
 
   private async _deleteFilesAsync(files: string[], shouldDelete: boolean): Promise<number> {
     if (files.length) {
+      // eslint-disable-next-line no-console
       console.log(`\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`);
 
       await Async.forEachAsync(
         files,
         async (filePath) => {
+          // eslint-disable-next-line no-console
           console.log(` - ${filePath}`);
           if (shouldDelete) {
             await FileSystem.deleteFileAsync(filePath);

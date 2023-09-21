@@ -249,6 +249,7 @@ export class RushSdkLoader {
 
           progressPercent = 100;
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error(`${installAndRunRushStderrContent}`);
           throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
         }

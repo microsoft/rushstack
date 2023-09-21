@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-console */
+
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';

@@ -42,6 +42,7 @@ export class UpdateAutoinstallerAction extends BaseRushAction {
 
     await autoinstaller.updateAsync();
 
+    // eslint-disable-next-line no-console
     console.log('\nSuccess.');
   }
 }

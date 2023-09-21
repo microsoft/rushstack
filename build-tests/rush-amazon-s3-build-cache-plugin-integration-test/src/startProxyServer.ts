@@ -13,12 +13,14 @@ const server: http.Server = http.createServer((req, res) => {
   requestCount += 1;
 
   if (req.url && requestCount % 2 === 0 && !hasFailed[req.url]) {
+    // eslint-disable-next-line no-console
     console.log('failing', req.url);
     hasFailed[req.url] = true;
     res.statusCode = 500;
     res.end();
     return;
   } else if (req.url) {
+    // eslint-disable-next-line no-console
     console.log('proxying', req.url);
   }
 

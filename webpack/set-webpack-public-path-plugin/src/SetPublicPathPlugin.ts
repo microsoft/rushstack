@@ -287,6 +287,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     return [
       '// Set the webpack public path',
       '(function () {',
+      // eslint-disable-next-line no-console
       getSetPublicPathCode(moduleOptions, console.error),
       '})();',
       '',

@@ -114,7 +114,9 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   }
 
   public getChildren(element?: vscode.TreeItem): Thenable<RushCommand[]> {
+    // eslint-disable-next-line no-console
     console.log('children: ', this._commandLineActions);
+    // eslint-disable-next-line no-console
     console.log('element: ', element);
     if (!this._commandLineActions) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises

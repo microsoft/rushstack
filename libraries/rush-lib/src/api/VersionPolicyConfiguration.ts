@@ -138,6 +138,7 @@ export class VersionPolicyConfiguration {
     const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
     const previousVersion: string = lockStepVersionPolicy.version;
     if (lockStepVersionPolicy.update(newVersion)) {
+      // eslint-disable-next-line no-console
       console.log(`\nUpdate version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`);
       this._saveFile(!!shouldCommit);
     }

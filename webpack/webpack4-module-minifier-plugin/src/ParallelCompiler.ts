@@ -124,6 +124,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
       }
 
       ++processed;
+      // eslint-disable-next-line no-console
       console.log(
         `${processed}/${configCount} complete (${formatTime(process.hrtime.bigint() - startTime)})`
       );

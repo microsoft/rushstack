@@ -33,6 +33,7 @@ export class SetupChecks {
     const errorMessage: string | undefined = SetupChecks._validate(rushConfiguration);
 
     if (errorMessage) {
+      // eslint-disable-next-line no-console
       console.error(colors.red(PrintUtilities.wrapWords(errorMessage)));
       throw new AlreadyReportedError();
     }
@@ -75,6 +76,7 @@ export class SetupChecks {
 
     if (phantomFolders.length > 0) {
       if (phantomFolders.length === 1) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             PrintUtilities.wrapWords(
@@ -85,6 +87,7 @@ export class SetupChecks {
           )
         );
       } else {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             PrintUtilities.wrapWords(
@@ -96,8 +99,10 @@ export class SetupChecks {
         );
       }
       for (const folder of phantomFolders) {
+        // eslint-disable-next-line no-console
         console.log(colors.yellow(`"${folder}"`));
       }
+      // eslint-disable-next-line no-console
       console.log(); // add a newline
     }
   }

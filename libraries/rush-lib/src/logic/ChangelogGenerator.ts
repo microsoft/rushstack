@@ -72,6 +72,7 @@ export class ChangelogGenerator {
       const markdownJSONPath: string = path.resolve(project.projectFolder, CHANGELOG_JSON);
 
       if (FileSystem.exists(markdownPath)) {
+        // eslint-disable-next-line no-console
         console.log('Found: ' + markdownPath);
         if (!FileSystem.exists(markdownJSONPath)) {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
@@ -151,6 +152,7 @@ export class ChangelogGenerator {
 
       const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
 
+      // eslint-disable-next-line no-console
       console.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ` +
           `Changelog update for "${change.packageName}@${change.newVersion}".`

@@ -582,6 +582,7 @@ export class PackageExtractor {
           } catch (resolveErr) {
             // The virtual store link isn't guaranteed to exist, so ignore if it's missing
             // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
+            // eslint-disable-next-line no-console
             console.log('Ignoring missing PNPM virtual store link for ' + packageJsonFolderPath);
           }
         }

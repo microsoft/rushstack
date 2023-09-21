@@ -41,6 +41,7 @@ export const PackageJsonViewer = (): JSX.Element => {
       setPnpmfile(pnpmfile);
     }
     loadPnpmFileAsync().catch((e) => {
+      // eslint-disable-next-line no-console
       console.error(`Failed to load project's pnpm file: ${e}`);
     });
   }, []);
@@ -60,10 +61,12 @@ export const PackageJsonViewer = (): JSX.Element => {
     if (selectedEntry) {
       if (selectedEntry.entryPackageName) {
         loadPackageDetailsAsync(selectedEntry.packageJsonFolderPath).catch((e) => {
+          // eslint-disable-next-line no-console
           console.error(`Failed to load project information: ${e}`);
         });
       } else {
         // This is used to develop the lockfile explorer application in case there is a mistake in our logic
+        // eslint-disable-next-line no-console
         console.log('The selected entry has no entry name: ', selectedEntry.entryPackageName);
       }
     }

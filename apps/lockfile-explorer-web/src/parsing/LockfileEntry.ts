@@ -79,6 +79,7 @@ export class LockfileEntry {
       const packageName = new Path(rawEntryId).basename();
 
       if (!packageJsonFolderPath || !packageName) {
+        // eslint-disable-next-line no-console
         console.error('Could not construct path for entry: ', rawEntryId);
         return;
       }

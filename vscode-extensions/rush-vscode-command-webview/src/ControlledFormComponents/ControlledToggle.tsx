@@ -19,6 +19,7 @@ export const ControlledToggle = (props: IControlledToggleProps): JSX.Element => 
       rules={rules}
       defaultValue={defaultValue}
       render={({ field: { onChange, value, onBlur, name: fieldName }, fieldState: { error } }) => {
+        // eslint-disable-next-line no-console
         console.log('ControlledToggle', fieldName, value);
         return (
           <>

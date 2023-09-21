@@ -40,6 +40,7 @@ async function main(): Promise<void> {
     cacheId: 'cache_id'
   });
   const completedState = await lockProvider.getCompletedStateAsync(context);
+  // eslint-disable-next-line no-console
   console.log('Completed state: ', completedState);
   await lockProvider.disconnectAsync();
 }
@@ -51,6 +52,7 @@ main()
     process.exitCode = 0;
   })
   .catch((err) => {
+    // eslint-disable-next-line no-console
     console.error(err);
   })
   .finally(() => {

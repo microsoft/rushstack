@@ -589,6 +589,7 @@ export class RushConfiguration {
         }
 
         if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
+          // eslint-disable-next-line no-console
           console.warn(message);
         } else {
           throw new Error(message);
@@ -993,10 +994,12 @@ export class RushConfiguration {
 
       if (FileSystem.exists(rushJsonFilename)) {
         if (i > 0 && verbose) {
+          // eslint-disable-next-line no-console
           console.log('Found configuration in ' + rushJsonFilename);
         }
 
         if (verbose) {
+          // eslint-disable-next-line no-console
           console.log('');
         }
 
@@ -1052,6 +1055,7 @@ export class RushConfiguration {
     experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
+      // eslint-disable-next-line no-console
       console.log(`Creating folder: ${commonRushConfigFolder}`);
       FileSystem.ensureFolder(commonRushConfigFolder);
       return;

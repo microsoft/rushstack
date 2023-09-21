@@ -15,6 +15,7 @@ export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorO
  *  A policy that validates shrinkwrap files used by package managers.
  */
 export function validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions): void {
+  // eslint-disable-next-line no-console
   console.log('Validating package manager shrinkwrap file.\n');
   const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
     rushConfiguration.packageManager,
@@ -23,6 +24,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
   );
 
   if (!shrinkwrapFile) {
+    // eslint-disable-next-line no-console
     console.log('Shrinkwrap file could not be found, skipping validation.\n');
     return;
   }

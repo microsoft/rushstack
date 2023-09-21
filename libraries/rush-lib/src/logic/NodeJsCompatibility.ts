@@ -50,6 +50,7 @@ export class NodeJsCompatibility {
     // Only increment it when our code base is known to use newer features (e.g. "async"/"await") that
     // have no hope of working with older Node.js.
     if (semver.satisfies(nodeVersion, '< 8.9.0')) {
+      // eslint-disable-next-line no-console
       console.error(
         colors.red(
           `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush. ` +
@@ -86,6 +87,7 @@ export class NodeJsCompatibility {
       if (!options.alreadyReportedNodeTooNewError) {
         // We are on a much newer release than we have tested and support
         if (options.isRushLib) {
+          // eslint-disable-next-line no-console
           console.warn(
             colors.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
@@ -94,6 +96,7 @@ export class NodeJsCompatibility {
             )
           );
         } else {
+          // eslint-disable-next-line no-console
           console.warn(
             colors.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
@@ -112,6 +115,7 @@ export class NodeJsCompatibility {
 
   private static _warnAboutNonLtsVersion(rushConfiguration: RushConfiguration | undefined): boolean {
     if (rushConfiguration && !rushConfiguration.suppressNodeLtsWarning && !NodeJsCompatibility.isLtsVersion) {
+      // eslint-disable-next-line no-console
       console.warn(
         colors.yellow(
           `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
@@ -127,6 +131,7 @@ export class NodeJsCompatibility {
 
   private static _warnAboutOddNumberedVersion(): boolean {
     if (NodeJsCompatibility.isOddNumberedVersion) {
+      // eslint-disable-next-line no-console
       console.warn(
         colors.yellow(
           `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +

@@ -169,11 +169,13 @@ export class ListAction extends BaseRushAction {
     const output: IJsonOutput = {
       projects
     };
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(output, undefined, 2));
   }
 
   private _printList(selection: Set<RushConfigurationProject>): void {
     for (const project of selection) {
+      // eslint-disable-next-line no-console
       console.log(project.packageName);
     }
   }
@@ -254,6 +256,7 @@ export class ListAction extends BaseRushAction {
       table.push(packageRow);
     }
 
+    // eslint-disable-next-line no-console
     console.log(table.toString());
   }
 }

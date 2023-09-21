@@ -28,11 +28,13 @@ export class EventHooksManager {
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
       if (ignoreHooks) {
+        // eslint-disable-next-line no-console
         console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
         return;
       }
 
       const stopwatch: Stopwatch = Stopwatch.start();
+      // eslint-disable-next-line no-console
       console.log('\n' + colors.green(`Executing event hooks for ${Event[event]}`));
 
       const printEventHooksOutputToConsole: boolean | undefined =
@@ -50,6 +52,7 @@ export class EventHooksManager {
             }
           });
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error(
             '\n' +
               colors.yellow(
@@ -58,11 +61,13 @@ export class EventHooksManager {
               )
           );
           if (isDebug) {
+            // eslint-disable-next-line no-console
             console.error('\n' + (error as Error).message);
           }
         }
       });
       stopwatch.stop();
+      // eslint-disable-next-line no-console
       console.log('\n' + colors.green(`Event hooks finished. (${stopwatch.toString()})`));
     }
   }

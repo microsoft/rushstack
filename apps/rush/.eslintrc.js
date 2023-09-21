@@ -3,5 +3,14 @@ require('eslint-config-local/patch/modern-module-resolution');
 
 module.exports = {
   extends: ['eslint-config-local/profile/node-trusted-tool', 'eslint-config-local/mixins/friendly-locals'],
-  parserOptions: { tsconfigRootDir: __dirname }
+  parserOptions: { tsconfigRootDir: __dirname },
+
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        'no-console': 'off'
+      }
+    }
+  ]
 };

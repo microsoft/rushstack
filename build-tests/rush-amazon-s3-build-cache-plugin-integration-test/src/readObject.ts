@@ -34,17 +34,21 @@ async function main(): Promise<void> {
   const response: Buffer | undefined = await client.getObjectAsync('rush-build-cache/testfile.txt');
   if (response) {
     if (response.toString().match('remote file from the rush build cache')) {
+      // eslint-disable-next-line no-console
       console.log('✅ Success!');
     } else {
+      // eslint-disable-next-line no-console
       console.log('❌ Error: response does not match the file in s3data/rush-build-cache/testfile.txt');
       process.exit(1);
     }
   } else {
+    // eslint-disable-next-line no-console
     console.error('❌ Error: no response');
     process.exit(1);
   }
 }
 main().catch((err) => {
+  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });

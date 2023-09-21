@@ -24,6 +24,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
   private _apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
 
   public onInitialized(): void {
+    // eslint-disable-next-line no-console
     console.log('RushStackFeature: onInitialized()');
   }
 

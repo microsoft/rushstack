@@ -69,6 +69,7 @@ export class RushCommandWebViewPanel {
         command: 'initialize',
         state: state.project
       };
+      // eslint-disable-next-line no-console
       console.log('message', message);
       thisWebview.webview.options = { enableScripts: true };
       thisWebview.webview.html = this._getWebviewContent();
@@ -129,6 +130,7 @@ export class RushCommandWebViewPanel {
     //       }
     //       default: {
     //         const _command: never = message.command;
+    //         // eslint-disable-next-line no-console
     //         console.error(`Unknown command: ${_command}`);
     //         break;
     //       }
@@ -142,6 +144,7 @@ export class RushCommandWebViewPanel {
     //       parameters: state.parameter.parameters
     //     }
     //   };
+    //   // eslint-disable-next-line no-console
     //   console.log('message', message);
     //   this._panel.reveal();
     //   // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -157,6 +160,7 @@ export class RushCommandWebViewPanel {
   }
 
   private _getWebviewContent(state: unknown = {}): string {
+    // eslint-disable-next-line no-console
     console.log('loading rush command webview html and bundle');
     let html: string = FileSystem.readFile(
       path.join(this._extensionPath, 'webview/rush-command-webview/index.html')

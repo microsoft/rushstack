@@ -71,6 +71,7 @@ export class LockfileDependency {
         new Path(containingEntry.packageJsonFolderPath).concat(relativePath)
       );
       if (!rootRelativePath) {
+        // eslint-disable-next-line no-console
         console.error('No root relative path for dependency!', name);
         return;
       }
@@ -89,6 +90,7 @@ export class LockfileDependency {
         };
         this.entryId = 'Peer: ' + this.name;
       } else {
+        // eslint-disable-next-line no-console
         console.error('Peer dependencies info missing!', node);
       }
     } else {

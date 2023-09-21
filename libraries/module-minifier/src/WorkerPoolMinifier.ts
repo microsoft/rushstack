@@ -161,12 +161,14 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       disconnect: async () => {
         if (--this._refCount === 0) {
           if (this._verbose) {
+            // eslint-disable-next-line no-console
             console.log(`Shutting down minifier worker pool`);
           }
           await this._pool.finishAsync();
           this._resultCache.clear();
           this._activeRequests.clear();
           if (this._verbose) {
+            // eslint-disable-next-line no-console
             console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
           }
         }

@@ -3,7 +3,9 @@
 
 import { ToolboxCommandLine } from './ToolboxCommandLine';
 
+// eslint-disable-next-line no-console
 console.log('repo-toolbox\n');
 
 const commandLine: ToolboxCommandLine = new ToolboxCommandLine();
+// eslint-disable-next-line no-console
 commandLine.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise

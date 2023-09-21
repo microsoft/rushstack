@@ -12,7 +12,9 @@ export class SoundPlayer {
   }
 
   public playSoundFile(fileName: string): void {
+    // eslint-disable-next-line no-console
     console.log('Playing sound file ' + fileName);
+    // eslint-disable-next-line no-console
     console.log('Foo=' + this._foo);
   }
 }

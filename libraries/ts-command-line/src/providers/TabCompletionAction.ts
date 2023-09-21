@@ -76,6 +76,7 @@ export class TabCompleteAction extends CommandLineAction {
     const caretPosition: number = this._positionParameter.value || (commandLine && commandLine.length) || 0;
 
     for await (const value of this.getCompletions(commandLine, caretPosition)) {
+      // eslint-disable-next-line no-console
       console.log(value);
     }
   }

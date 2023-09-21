@@ -80,6 +80,7 @@ export class ChangeFile {
     const repoInfo: gitInfo.GitRepoInfo | undefined = git.getGitInfo();
     branch = repoInfo && repoInfo.branch;
     if (!branch) {
+      // eslint-disable-next-line no-console
       console.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 

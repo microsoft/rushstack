@@ -47,6 +47,7 @@ export class CheckAction extends BaseRushAction {
     const variant: string | undefined = this.rushConfiguration.currentInstalledVariant;
 
     if (!this._variant.value && variant) {
+      // eslint-disable-next-line no-console
       console.log(
         colors.yellow(
           `Variant '${variant}' has been installed, but 'rush check' is currently checking the default variant. ` +

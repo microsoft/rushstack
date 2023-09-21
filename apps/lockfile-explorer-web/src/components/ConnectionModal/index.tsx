@@ -31,6 +31,7 @@ export const ConnectionModal = (): JSX.Element | ReactNull => {
     setManualChecked(true);
     keepAliveAsync().catch((e) => {
       // Keep alive cannot fail
+      // eslint-disable-next-line no-console
       console.error(`Unexpected exception: ${e}`);
     });
   }, []);

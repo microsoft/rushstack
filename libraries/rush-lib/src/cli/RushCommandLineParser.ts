@@ -423,12 +423,14 @@ export class RushCommandLineParser extends CommandLineParser {
         .split(/\r?\n/)
         .map((line) => colors.red(line))
         .join('\n');
+      // eslint-disable-next-line no-console
       console.error(`\n${message}`);
     }
 
     if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
+      // eslint-disable-next-line no-console
       console.error(`\n${error.stack}`);
     }
 

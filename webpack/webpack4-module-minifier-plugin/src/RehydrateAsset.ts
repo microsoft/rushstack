@@ -206,6 +206,7 @@ function handleExternals(source: Source, asset: IAssetInfo): Source {
       const mapped: string | undefined = externalNames.get(id);
 
       if (mapped === undefined) {
+        // eslint-disable-next-line no-console
         console.error(`Missing minified external for ${id} in ${asset.fileName}!`);
       } else {
         replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);

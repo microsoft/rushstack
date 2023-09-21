@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-console */
+
 // NOTE: Since startWithVersionSelector.ts is loaded in the same process as start.ts, any dependencies that
 // we import here may become side-by-side versions.  We want to minimize any dependencies.
 import * as path from 'path';

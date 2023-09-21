@@ -162,6 +162,7 @@ if (sdkContext.rushLibModule === undefined) {
         );
         sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(`${installAndRunRushStderrContent}`);
         throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
       }
@@ -182,6 +183,7 @@ if (sdkContext.rushLibModule === undefined) {
   // This error indicates that a project is trying to import "@rushstack/rush-sdk", but the Rush engine
   // instance cannot be found.  If you are writing Jest tests for a Rush plugin, add "@microsoft/rush-lib"
   // to the devDependencies for your project.
+  // eslint-disable-next-line no-console
   console.error(`Error: The @rushstack/rush-sdk package was not able to load the Rush engine:
 ${errorMessage}
 `);

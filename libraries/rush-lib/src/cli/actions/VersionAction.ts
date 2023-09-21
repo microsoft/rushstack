@@ -124,6 +124,7 @@ export class VersionAction extends BaseRushAction {
 
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
+        // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch, this._targetBranch.value);
       }

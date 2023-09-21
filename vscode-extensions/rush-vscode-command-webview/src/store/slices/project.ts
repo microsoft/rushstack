@@ -20,10 +20,12 @@ export const projectSlide: Slice<IProjectState, SliceCaseReducers<IProjectState>
   initialState,
   reducers: {
     initializeProjectInfo: (state, action: PayloadAction<IProjectState>) => {
+      // eslint-disable-next-line no-console
       console.log('action payload: ', action.payload);
       Object.assign(state, action.payload);
     },
     onChangeProject: (state, action: PayloadAction<string>) => {
+      // eslint-disable-next-line no-console
       console.log('action payload: ', action.payload);
       Object.assign(state, action.payload);
     }

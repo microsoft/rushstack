@@ -34,6 +34,7 @@ export const store: EnhancedStore<IRootState> = configureStore({
 });
 
 store.subscribe(() => {
+  // eslint-disable-next-line no-console
   console.log('store changes', store.getState());
 });
 

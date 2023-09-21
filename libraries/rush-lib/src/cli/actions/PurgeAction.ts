@@ -50,6 +50,7 @@ export class PurgeAction extends BaseRushAction {
 
     purgeManager.deleteAll();
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
         colors.green(

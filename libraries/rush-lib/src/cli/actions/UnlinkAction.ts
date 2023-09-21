@@ -22,8 +22,10 @@ export class UnlinkAction extends BaseRushAction {
     const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
 
     if (!unlinkManager.unlink()) {
+      // eslint-disable-next-line no-console
       console.log('Nothing to do.');
     } else {
+      // eslint-disable-next-line no-console
       console.log('\nDone.');
     }
   }

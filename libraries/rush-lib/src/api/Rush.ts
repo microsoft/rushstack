@@ -90,6 +90,7 @@ export class Rush {
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
       builtInPluginConfigurations: options.builtInPluginConfigurations
     });
+    // eslint-disable-next-line no-console
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 

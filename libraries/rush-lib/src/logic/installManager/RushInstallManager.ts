@@ -92,6 +92,7 @@ export class RushInstallManager extends BaseInstallManager {
       RushConstants.rushTempProjectsFolderName
     );
 
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.bold('Updating temp projects in ' + tempProjectsFolder));
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
@@ -105,7 +106,9 @@ export class RushInstallManager extends BaseInstallManager {
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
     } else if (shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
@@ -306,8 +309,10 @@ export class RushInstallManager extends BaseInstallManager {
           // Delete the existing tarball and create a new one
           this._tempProjectHelper.createTempProjectTarball(rushProject);
 
+          // eslint-disable-next-line no-console
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.log(colors.yellow(error as string));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
@@ -337,6 +342,7 @@ export class RushInstallManager extends BaseInstallManager {
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
       if (packageJson.saveIfModified()) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             `"${rushProject.packageName}" depends on one or more local packages which used "workspace:" ` +
@@ -365,6 +371,7 @@ export class RushInstallManager extends BaseInstallManager {
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, commonDependencies);
 
     stopwatch.stop();
+    // eslint-disable-next-line no-console
     console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
@@ -457,10 +464,12 @@ export class RushInstallManager extends BaseInstallManager {
     // The user must request that via the command line.
     if (cleanInstall) {
       if (this.rushConfiguration.packageManager === 'npm') {
+        // eslint-disable-next-line no-console
         console.log(`Deleting the "npm-cache" folder`);
         // This is faster and more thorough than "npm cache clean"
         this.installRecycler.moveFolder(this.rushConfiguration.npmCacheFolder);
 
+        // eslint-disable-next-line no-console
         console.log(`Deleting the "npm-tmp" folder`);
         this.installRecycler.moveFolder(this.rushConfiguration.npmTmpFolder);
       }
@@ -486,6 +495,7 @@ export class RushInstallManager extends BaseInstallManager {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
+        // eslint-disable-next-line no-console
         console.log('Deleting files from ' + commonNodeModulesFolder);
 
         this.installRecycler.moveFolder(commonNodeModulesFolder);
@@ -496,6 +506,7 @@ export class RushInstallManager extends BaseInstallManager {
 
         // note: it is not necessary to run "prune" with pnpm
         if (this.rushConfiguration.packageManager === 'npm') {
+          // eslint-disable-next-line no-console
           console.log(
             `Running "${this.rushConfiguration.packageManager} prune"` +
               ` in ${this.rushConfiguration.commonTempFolder}`
@@ -522,16 +533,17 @@ export class RushInstallManager extends BaseInstallManager {
             commonNodeModulesFolder,
             RushConstants.rushTempNpmScope
           );
+          // eslint-disable-next-line no-console
           console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
           // Glob can't handle Windows paths
-          const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(
+          const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(
             pathToDeleteWithoutStar,
             '\\',
             '/'
           );
 
           const { default: glob } = await import('fast-glob');
-          const tempModulePaths: string[] = await glob(globEscape(normalizedpathToDeleteWithoutStar) + '/*');
+          const tempModulePaths: string[] = await glob(globEscape(normalizedPathToDeleteWithoutStar) + '/*');
           // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
           for (const tempModulePath of tempModulePaths) {
             // We could potentially use AsyncRecycler here, but in practice these folders tend
@@ -550,6 +562,7 @@ export class RushInstallManager extends BaseInstallManager {
         'npm-@rush-temp'
       );
       if (FileSystem.exists(yarnRushTempCacheFolder)) {
+        // eslint-disable-next-line no-console
         console.log('Deleting ' + yarnRushTempCacheFolder);
         Utilities.dangerouslyDeletePath(yarnRushTempCacheFolder);
       }
@@ -559,6 +572,7 @@ export class RushInstallManager extends BaseInstallManager {
     const installArgs: string[] = ['install'];
     this.pushConfigurationArgs(installArgs, this.options);
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
         colors.bold(
@@ -570,6 +584,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // If any diagnostic options were specified, then show the full command-line
     if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+      // eslint-disable-next-line no-console
       console.log(
         '\n' +
           colors.green('Invoking package manager: ') +
@@ -591,6 +606,7 @@ export class RushInstallManager extends BaseInstallManager {
       this.options.maxInstallAttempts,
       () => {
         if (this.rushConfiguration.packageManager === 'pnpm') {
+          // eslint-disable-next-line no-console
           console.log(colors.yellow(`Deleting the "node_modules" folder`));
           this.installRecycler.moveFolder(commonNodeModulesFolder);
 
@@ -604,6 +620,7 @@ export class RushInstallManager extends BaseInstallManager {
     );
 
     if (this.rushConfiguration.packageManager === 'npm') {
+      // eslint-disable-next-line no-console
       console.log('\n' + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options);
@@ -612,6 +629,7 @@ export class RushInstallManager extends BaseInstallManager {
         args: npmArgs,
         workingDirectory: this.rushConfiguration.commonTempFolder
       });
+      // eslint-disable-next-line no-console
       console.log('"npm shrinkwrap" completed\n');
 
       await this._fixupNpm5RegressionAsync();
@@ -623,6 +641,7 @@ export class RushInstallManager extends BaseInstallManager {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
       await linkManager.createSymlinksForProjects(false);
     } else {
+      // eslint-disable-next-line no-console
       console.log(
         '\n' + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
       );
@@ -672,6 +691,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     if (anyChanges) {
+      // eslint-disable-next-line no-console
       console.log('\n' + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + '\n');
     }
   }
@@ -687,6 +707,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     for (const rushProject of this.rushConfiguration.projects) {
       if (!tempProjectNames.has(rushProject.tempProjectName)) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.yellow(

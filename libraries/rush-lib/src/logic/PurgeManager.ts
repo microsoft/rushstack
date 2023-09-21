@@ -50,6 +50,7 @@ export class PurgeManager {
    */
   public purgeNormal(): void {
     // Delete everything under common\temp except for the recycler folder itself
+    // eslint-disable-next-line no-console
     console.log('Purging ' + this._rushConfiguration.commonTempFolder);
 
     this.commonTempFolderRecycler.moveAllItemsInFolder(
@@ -66,6 +67,7 @@ export class PurgeManager {
     this.purgeNormal();
 
     // We will delete everything under ~/.rush/ except for the recycler folder itself
+    // eslint-disable-next-line no-console
     console.log('Purging ' + this._rushGlobalFolder.path);
 
     // If Rush itself is running under a folder such as  ~/.rush/node-v4.5.6/rush-1.2.3,
@@ -88,6 +90,7 @@ export class PurgeManager {
       this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
       this._rushConfiguration.pnpmOptions.pnpmStorePath
     ) {
+      // eslint-disable-next-line no-console
       console.warn(colors.yellow(`Purging the global pnpm-store`));
       this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
     }
@@ -115,6 +118,7 @@ export class PurgeManager {
 
         if (showWarning) {
           // Warn that we won't dispose this folder
+          // eslint-disable-next-line no-console
           console.log(
             colors.yellow(
               "The active process's folder will not be deleted: " + path.join(folderToRecycle, firstPart)

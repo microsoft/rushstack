@@ -29,7 +29,6 @@ Utilities.getTimeInMs = mockGetTimeInMs;
 
 let mockTimeInMs: number = 0;
 mockGetTimeInMs.mockImplementation(() => {
-  console.log('CALLED mockGetTimeInMs');
   mockTimeInMs += 100;
   return mockTimeInMs;
 });

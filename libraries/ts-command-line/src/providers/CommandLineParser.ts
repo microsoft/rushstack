@@ -157,6 +157,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // executeWithoutErrorHandling() handles the successful cases,
         // so here we can assume err has a nonzero exit code
         if (err.message) {
+          // eslint-disable-next-line no-console
           console.error(err.message);
         }
         if (!process.exitCode) {
@@ -170,7 +171,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           message = 'Error: ' + message;
         }
 
+        // eslint-disable-next-line no-console
         console.error();
+        // eslint-disable-next-line no-console
         console.error(colors.red(message));
 
         if (!process.exitCode) {
@@ -246,6 +249,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         if (!err.exitCode) {
           // non-error exit modeled using exception handling
           if (err.message) {
+            // eslint-disable-next-line no-console
             console.log(err.message);
           }
 

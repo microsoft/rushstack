@@ -3,6 +3,7 @@
 
 export class ChunkClass {
   public doStuff(): void {
+    // eslint-disable-next-line no-console
     console.log('CHUNK');
   }
 

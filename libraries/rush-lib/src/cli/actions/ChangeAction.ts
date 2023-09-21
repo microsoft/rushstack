@@ -170,6 +170,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public async runAsync(): Promise<void> {
+    // eslint-disable-next-line no-console
     console.log(`The target branch is ${this._targetBranch}`);
 
     if (this._verifyParameter.value) {
@@ -188,7 +189,10 @@ export class ChangeAction extends BaseRushAction {
         })
         .filter((error) => error !== '');
       if (errors.length > 0) {
-        errors.forEach((error) => console.error(error));
+        errors.forEach((error) => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        });
         throw new AlreadyReportedError();
       }
 
@@ -264,6 +268,7 @@ export class ChangeAction extends BaseRushAction {
 
       if (errors.length > 0) {
         for (const error of errors) {
+          // eslint-disable-next-line no-console
           console.error(error);
         }
 
@@ -441,11 +446,14 @@ export class ChangeAction extends BaseRushAction {
     packageName: string,
     existingChangeComments: Map<string, string[]>
   ): Promise<IChangeInfo | undefined> {
+    // eslint-disable-next-line no-console
     console.log(`\n${packageName}`);
     const comments: string[] | undefined = existingChangeComments.get(packageName);
     if (comments) {
+      // eslint-disable-next-line no-console
       console.log(`Found existing comments:`);
       comments.forEach((comment) => {
+        // eslint-disable-next-line no-console
         console.log(`    > ${comment}`);
       });
       const { appendComment }: { appendComment: 'skip' | 'append' } = await promptModule({
@@ -578,6 +586,7 @@ export class ChangeAction extends BaseRushAction {
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log('There was an issue detecting your Git email...');
       return undefined;
     }
@@ -625,6 +634,7 @@ export class ChangeAction extends BaseRushAction {
   private _warnUnstagedChanges(): void {
     try {
       if (this._git.hasUnstagedChanges()) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.yellow(
@@ -634,6 +644,7 @@ export class ChangeAction extends BaseRushAction {
         );
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.log(`An error occurred when detecting unstaged changes: ${error}`);
     }
   }
@@ -703,6 +714,7 @@ export class ChangeAction extends BaseRushAction {
     if (overwrite) {
       return true;
     } else {
+      // eslint-disable-next-line no-console
       console.log(`Not overwriting ${filePath}`);
       return false;
     }
@@ -714,13 +726,16 @@ export class ChangeAction extends BaseRushAction {
   private _writeFile(fileName: string, output: string, isOverwrite: boolean): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
     if (isOverwrite) {
+      // eslint-disable-next-line no-console
       console.log(`Overwrote file: ${fileName}`);
     } else {
+      // eslint-disable-next-line no-console
       console.log(`Created file: ${fileName}`);
     }
   }
 
   private _logNoChangeFileRequired(): void {
+    // eslint-disable-next-line no-console
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 

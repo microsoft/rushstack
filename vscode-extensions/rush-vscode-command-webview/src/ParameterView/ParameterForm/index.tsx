@@ -102,11 +102,13 @@ export const ParameterForm = (): JSX.Element => {
   //   // deep clone
   //   const clonedValues: FieldValues = JSON.parse(JSON.stringify(defaultValues));
   //   defaultValuesRef.current = clonedValues;
+  //   // eslint-disable-next-line no-console
   //   console.log('change default values', defaultValues);
   // }, [defaultValues]);
 
   useEffect(() => {
     // const defaultValues: FieldValues = defaultValuesRef.current;
+    // eslint-disable-next-line no-console
     console.log('rest', defaultValues);
     reset(defaultValues);
     dispatch(onChangeFormDefaultValues(defaultValues));
@@ -155,9 +157,11 @@ export const ParameterForm = (): JSX.Element => {
             control
           };
           if (parameter.required) {
+            // eslint-disable-next-line no-console
             console.log('required param', parameter.longName);
             baseControllerProps.rules = {
               validate: (value: undefined | string | number | boolean) => {
+                // eslint-disable-next-line no-console
                 console.log('validating', value, parameter.longName);
 
                 if (typeof value === 'undefined' || !String(value)) {
@@ -228,6 +232,7 @@ export const ParameterForm = (): JSX.Element => {
               break;
             }
             default: {
+              // eslint-disable-next-line no-console
               console.error(`Unhandled parameter kind: ${parameter.kind}`);
               return null;
             }

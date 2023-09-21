@@ -76,6 +76,7 @@ export async function minifySingleFileAsync(
       hash
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     return {
       error: error as Error,

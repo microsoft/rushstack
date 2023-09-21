@@ -24,6 +24,7 @@ export async function readPnpmfileAsync(): Promise<string> {
     const response = await fetch(`${apiPath}/pnpmfile`);
     return await response.text();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Could not load cjs file: ', e);
     return 'Missing CJS';
   }
@@ -42,6 +43,7 @@ export async function readPackageJsonAsync(projectPath: string): Promise<IPackag
     });
     return await response.json();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Could not load package json file: ', e);
     return undefined;
   }
@@ -60,6 +62,7 @@ export async function readPackageSpecAsync(projectPath: string): Promise<IPackag
     });
     return await response.json();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Could not load cjs file: ', e);
     return undefined;
   }

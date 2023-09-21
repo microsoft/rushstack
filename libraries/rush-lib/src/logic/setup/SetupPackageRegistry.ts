@@ -304,6 +304,7 @@ export class SetupPackageRegistry {
     try {
       response = await webClient.fetchAsync(queryUrl);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log((e as Error).toString());
       return;
     }

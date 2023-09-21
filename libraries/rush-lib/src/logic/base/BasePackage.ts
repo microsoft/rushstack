@@ -202,6 +202,8 @@ export class BasePackage {
     if (!indent) {
       indent = '';
     }
+
+    // eslint-disable-next-line no-console
     console.log(indent + this.nameAndVersion);
     for (const child of this.children) {
       child.printTree(indent + '  ');

@@ -211,6 +211,7 @@ export abstract class BaseShrinkwrapFile {
         // Only warn once for each versionSpecifier
         if (!this._alreadyWarnedSpecs.has(projectDependency.versionSpecifier)) {
           this._alreadyWarnedSpecs.add(projectDependency.versionSpecifier);
+          // eslint-disable-next-line no-console
           console.log(
             colors.yellow(
               `WARNING: Not validating ${projectDependency.specifierType}-based` +

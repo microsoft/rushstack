@@ -50,6 +50,7 @@ export const ControlledTextFieldArray = (props: IControlledTextFieldArrayProps):
                         styles={textFieldStyles}
                         {...props}
                         onChange={(e, v) => {
+                          // eslint-disable-next-line no-console
                           console.log('-------newValue', `${name}.${index}.value`, v);
                           onChange(v);
                         }}

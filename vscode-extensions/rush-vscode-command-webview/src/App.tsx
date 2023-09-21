@@ -46,6 +46,7 @@ export const App = (): JSX.Element => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('initializing app in effect');
     window.addEventListener('message', fromExtensionListener);
     return () => {
@@ -53,6 +54,7 @@ export const App = (): JSX.Element => {
     };
   }, []);
 
+  // eslint-disable-next-line no-console
   console.log('initializing app');
 
   return (

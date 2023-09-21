@@ -285,6 +285,7 @@ export class VersionManager {
       if (dependencies[updatedDependentProjectName]) {
         if (rushProject.decoupledLocalDependencies.has(updatedDependentProjectName)) {
           // Skip if cyclic
+          // eslint-disable-next-line no-console
           console.log(`Found cyclic ${rushProject.packageName} ${updatedDependentProjectName}`);
           return;
         }

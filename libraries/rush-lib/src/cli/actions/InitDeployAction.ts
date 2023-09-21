@@ -62,6 +62,7 @@ export class InitDeployAction extends BaseRushAction {
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log(colors.green('Creating scenario file: ') + scenarioFilePath);
 
     const shortProjectName: string = this._project.value!;
@@ -82,6 +83,7 @@ export class InitDeployAction extends BaseRushAction {
       convertLineEndings: NewlineKind.OsDefault
     });
 
+    // eslint-disable-next-line no-console
     console.log('\nFile successfully written. Please review the file contents before committing.');
   }
 }

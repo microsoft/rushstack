@@ -461,6 +461,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                 (result: IModuleMinificationResult) => {
                   if (isMinificationResultError(result)) {
                     compilation.errors.push(result.error as WebpackError);
+                    // eslint-disable-next-line no-console
                     console.error(result.error);
                   } else {
                     try {

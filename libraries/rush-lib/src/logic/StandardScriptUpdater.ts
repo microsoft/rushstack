@@ -117,6 +117,7 @@ export class StandardScriptUpdater {
     );
 
     if (anyChanges) {
+      // eslint-disable-next-line no-console
       console.log(); // print a newline after the notices
     }
 
@@ -179,6 +180,7 @@ export class StandardScriptUpdater {
             ' for this Rush version.  Please run "rush update" and commit the changes.'
         );
       } else {
+        // eslint-disable-next-line no-console
         console.log(`Script is out of date; updating "${targetFilePath}"`);
         sourceNormalized ||= await StandardScriptUpdater._getExpectedFileDataAsync(script);
         await FileSystem.writeFileAsync(targetFilePath, sourceNormalized);

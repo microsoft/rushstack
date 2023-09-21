@@ -11,6 +11,7 @@ export class RushPnpmCommandLine {
     RushPnpmCommandLineParser.initializeAsync(options)
       // RushPnpmCommandLineParser.executeAsync should never reject the promise
       .then((rushPnpmCommandLineParser) => rushPnpmCommandLineParser.executeAsync())
+      // eslint-disable-next-line no-console
       .catch(console.error);
   }
 }

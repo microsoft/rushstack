@@ -117,6 +117,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
 
   public async revealProjectDetailAsync(element: RushProject): Promise<void> {
     const { rushConfigurationProject } = element;
+    // eslint-disable-next-line no-console
     console.log('Explorer clicked: ', rushConfigurationProject.packageName);
     RushCommandWebViewPanel.getInstance().postMessage({
       command: 'updateProject',

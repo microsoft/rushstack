@@ -56,6 +56,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
       dependencies: {}
     };
 
+    // eslint-disable-next-line no-console
     console.log(colors.green('Creating package: ') + autoinstaller.packageJsonPath);
 
     JsonFile.save(packageJson, autoinstaller.packageJsonPath, {
@@ -63,6 +64,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
       newlineConversion: NewlineKind.OsDefault
     });
 
+    // eslint-disable-next-line no-console
     console.log('\nFile successfully written. Add your dependencies before committing.');
   }
 }

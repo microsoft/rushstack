@@ -117,8 +117,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
     if (this._purgeParameter.value!) {
+      // eslint-disable-next-line no-console
       console.log('The --purge flag was specified, so performing "rush purge"');
       purgeManager.purgeNormal();
+      // eslint-disable-next-line no-console
       console.log('');
     }
 
@@ -156,6 +158,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       await installManager.doInstallAsync();
 
       if (warnAboutScriptUpdate) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.yellow(
@@ -165,6 +168,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         );
       }
 
+      // eslint-disable-next-line no-console
       console.log(
         '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
       );

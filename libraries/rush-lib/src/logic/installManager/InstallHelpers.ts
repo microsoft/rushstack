@@ -137,6 +137,7 @@ export class InstallHelpers {
       };
     } else {
       logIfConsoleOutputIsNotRestricted = (message?: string) => {
+        // eslint-disable-next-line no-console
         console.log(message);
       };
     }
@@ -242,27 +243,37 @@ export class InstallHelpers {
       // eslint-disable-next-line guard-for-in
       for (const envVar in environmentVariables) {
         let setEnvironmentVariable: boolean = true;
+        // eslint-disable-next-line no-console
         console.log(`\nProcessing definition for environment variable: ${envVar}`);
 
         if (baseEnv.hasOwnProperty(envVar)) {
           setEnvironmentVariable = false;
+          // eslint-disable-next-line no-console
           console.log(`Environment variable already defined:`);
+          // eslint-disable-next-line no-console
           console.log(`  Name: ${envVar}`);
+          // eslint-disable-next-line no-console
           console.log(`  Existing value: ${baseEnv[envVar]}`);
+          // eslint-disable-next-line no-console
           console.log(`  Value set in rush.json: ${environmentVariables[envVar].value}`);
 
           if (environmentVariables[envVar].override) {
             setEnvironmentVariable = true;
+            // eslint-disable-next-line no-console
             console.log(`Overriding the environment variable with the value set in rush.json.`);
           } else {
+            // eslint-disable-next-line no-console
             console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
           }
         }
 
         if (setEnvironmentVariable) {
           if (options.debug) {
+            // eslint-disable-next-line no-console
             console.log(`Setting environment variable for package manager.`);
+            // eslint-disable-next-line no-console
             console.log(`  Name: ${envVar}`);
+            // eslint-disable-next-line no-console
             console.log(`  Value: ${environmentVariables[envVar].value}`);
           }
           packageManagerEnv[envVar] = environmentVariables[envVar].value;
