@@ -36,6 +36,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _debugPackageManagerParameter: CommandLineFlagParameter;
   protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
+  protected readonly _offlineParameter: CommandLineFlagParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -87,6 +88,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
+    this._offlineParameter = this.defineFlagParameter({
+      parameterLongName: '--offline',
+      description: `Do not attempt to access the network. Report an error if the required dependencies cannot be obtained from the local cache.`
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }

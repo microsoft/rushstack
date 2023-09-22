@@ -520,6 +520,9 @@ ${gitLfsHookHandling}
    * to the command-line.
    */
   protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
+    if (options.offline && this.rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error('The "--offline" parameter is only supported when using the PNPM package manager.');
+    }
     if (this.rushConfiguration.packageManager === 'npm') {
       if (semver.lt(this.rushConfiguration.packageManagerToolVersion, '5.0.0')) {
         // NOTE:
@@ -591,6 +594,10 @@ ${gitLfsHookHandling}
 
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
+      }
+
+      if (options.offline) {
+        args.push('--offline');
       }
 
       if (this.rushConfiguration.pnpmOptions.strictPeerDependencies === false) {
