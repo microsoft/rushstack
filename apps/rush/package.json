@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.107.1-pr3481.20-pr3481.20-pr3481.20-pr3481.20-pr3481.20",
+  "version": "5.107.1-pr3481.20",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
