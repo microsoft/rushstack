@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.61.0",
+      "tag": "@rushstack/heft_v0.61.0",
+      "date": "Fri, 22 Sep 2023 00:05:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE): Rename task temp folder from \"<phase>.<task>\" to \"<phase>/<task>\" to simplify caching phase outputs."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.60.0",
       "tag": "@rushstack/heft_v0.60.0",
       "date": "Tue, 19 Sep 2023 15:21:51 GMT",
