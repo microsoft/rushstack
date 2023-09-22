@@ -575,7 +575,7 @@ ${gitLfsHookHandling}
 
         if (
           options.pnpmFilterArguments.length > 0 &&
-          semver.satisfies(this.rushConfiguration.packageManagerToolVersion, '^8')
+          Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
         ) {
           // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.
           args.push('--config.dedupe-peer-dependents=false');
