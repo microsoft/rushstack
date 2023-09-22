@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 19 Sep 2023 21:13:23 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2023 00:06:12 GMT and should not be manually modified.
+
+## 5.107.2
+Fri, 22 Sep 2023 00:06:12 GMT
+
+### Updates
+
+- Fix a bug in which an operation failing incorrectly does not block its consumers.
+- Add `resolutionMode` to `rush init` template for pnpm-config.json
 
 ## 5.107.1
 Tue, 19 Sep 2023 21:13:23 GMT
