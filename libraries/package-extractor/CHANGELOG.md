@@ -1,6 +1,121 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:52 GMT and should not be manually modified.
+
+## 0.6.2
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.6.1
+Tue, 19 Sep 2023 00:36:30 GMT
+
+_Version update only_
+
+## 0.6.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.5.3
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 0.5.2
+Wed, 06 Sep 2023 19:00:39 GMT
+
+### Patches
+
+- Fix an issue where subdirectory inclusion patterns (ex. "src/subdir/**/*") would get ignored during extraction
+
+## 0.5.1
+Thu, 24 Aug 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.5.0
+Wed, 23 Aug 2023 00:20:45 GMT
+
+### Minor changes
+
+- Add option field dependenciesConfigurations in PackageExtractor to filter files for third party dependencies
+
+## 0.4.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.4.0
+Fri, 04 Aug 2023 15:22:44 GMT
+
+### Minor changes
+
+- Include an API for getting files that are included in a npm package.
+
+## 0.3.13
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 0.3.12
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.3.11
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 0.3.10
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.3.9
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.3.8
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.3.7
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 0.3.6
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 0.3.5
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 0.3.4
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.3.3
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.3.2
+Mon, 26 Jun 2023 23:45:21 GMT
+
+### Patches
+
+- Fix patternsToInclude and patternsToExclude filters when provided patterns target subdirectories of folders that do not match the provided patterns
 
 ## 0.3.1
 Mon, 19 Jun 2023 22:40:21 GMT

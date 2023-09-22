@@ -1,5 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
 import { PnpmShrinkwrapFile, parsePnpmDependencyKey } from '../PnpmShrinkwrapFile';
+import { RushConfiguration } from '../../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 
 const DEPENDENCY_NAME: string = 'dependency_name';
 const SCOPED_DEPENDENCY_NAME: string = '@scope/dependency_name';
@@ -75,7 +80,7 @@ describe(PnpmShrinkwrapFile.name, () => {
       );
     });
 
-    it('Supports aliased package specifiers', () => {
+    it('Supports aliased package specifiers (v5)', () => {
       const parsedSpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
         SCOPED_DEPENDENCY_NAME,
         `/${DEPENDENCY_NAME}/${VERSION}`
@@ -83,7 +88,18 @@ describe(PnpmShrinkwrapFile.name, () => {
       expect(parsedSpecifier).toBeDefined();
       expect(parsedSpecifier!.specifierType).toBe(DependencySpecifierType.Alias);
       expect(parsedSpecifier!.packageName).toBe(SCOPED_DEPENDENCY_NAME);
-      expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:dependency_name@1.4.0"`);
+      expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:${DEPENDENCY_NAME}@${VERSION}"`);
+    });
+
+    it('Supports aliased package specifiers (v6)', () => {
+      const parsedSpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+        SCOPED_DEPENDENCY_NAME,
+        `/${DEPENDENCY_NAME}@${VERSION}`
+      );
+      expect(parsedSpecifier).toBeDefined();
+      expect(parsedSpecifier!.specifierType).toBe(DependencySpecifierType.Alias);
+      expect(parsedSpecifier!.packageName).toBe(SCOPED_DEPENDENCY_NAME);
+      expect(parsedSpecifier!.versionSpecifier).toMatchInlineSnapshot(`"npm:${DEPENDENCY_NAME}@${VERSION}"`);
     });
 
     it('Supports URL package specifiers', () => {
@@ -109,4 +125,94 @@ describe(PnpmShrinkwrapFile.name, () => {
       }
     });
   });
+
+  describe('Check is workspace project modified', () => {
+    describe('pnpm lockfile major version 5', () => {
+      it('can detect not modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+
+      it('can detect modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+      });
+
+      it('can detect overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v5/overrides-not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+    });
+
+    describe('pnpm lockfile major version 6', () => {
+      it('can detect not modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+
+      it('can detect modified', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+      });
+
+      it('can detect overrides', async () => {
+        const project = getMockRushProject();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/overrides-not-modified.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+
+      it('can handle the inconsistent version of a package declared in dependencies and devDependencies', async () => {
+        const project = getMockRushProject2();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v6/inconsistent-dep-devDep.yaml`
+        );
+        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+      });
+    });
+  });
 });
+
+function getPnpmShrinkwrapFileFromFile(filepath: string): PnpmShrinkwrapFile {
+  const pnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(filepath);
+  if (!pnpmShrinkwrapFile) {
+    throw new Error(`Get PnpmShrinkwrapFileFromFile failed from ${filepath}`);
+  }
+  return pnpmShrinkwrapFile;
+}
+
+function getMockRushProject(): RushConfigurationProject {
+  const rushFilename: string = `${__dirname}/repo/rush.json`;
+  const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+  const project = rushConfiguration.projectsByName.get('foo');
+  if (!project) {
+    throw new Error(`Can not get project "foo"`);
+  }
+  return project;
+}
+
+function getMockRushProject2(): RushConfigurationProject {
+  const rushFilename: string = `${__dirname}/repo/rush2.json`;
+  const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+  const project = rushConfiguration.projectsByName.get('bar');
+  if (!project) {
+    throw new Error(`Can not get project "bar"`);
+  }
+  return project;
+}

@@ -41,6 +41,7 @@ import schemaJson from '../schemas/rush.schema.json';
 
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
+import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -57,8 +58,10 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.buildCacheFilename,
+  RushConstants.cobuildFilename,
   RushConstants.commandLineFilename,
   RushConstants.commonVersionsFilename,
+  RushConstants.customTipsFilename,
   RushConstants.experimentsFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
@@ -575,6 +578,18 @@ export class RushConfiguration {
   public readonly versionPolicyConfigurationFilePath: string;
 
   /**
+   * Accesses the custom-tips.json configuration.
+   * @beta
+   */
+  public readonly customTipsConfiguration: CustomTipsConfiguration;
+
+  /**
+   * The absolute path to the custom tips configuration file.
+   * @beta
+   */
+  public readonly customTipsConfigurationFilePath: string;
+
+  /**
    * This configuration object contains settings repo maintainers have specified to enable
    * and disable experimental Rush features.
    *
@@ -859,6 +874,12 @@ export class RushConfiguration {
       RushConstants.versionPoliciesFilename
     );
     this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
+
+    this.customTipsConfigurationFilePath = path.join(
+      this.commonRushConfigFolder,
+      RushConstants.customTipsFilename
+    );
+    this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
 
     this._variants = new Set<string>();
 

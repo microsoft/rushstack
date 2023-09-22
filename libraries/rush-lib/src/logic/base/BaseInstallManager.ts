@@ -45,6 +45,8 @@ import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { SplitWorkspacePnpmfileConfiguration } from '../pnpm/SplitWorkspacePnpmfileConfiguration';
 
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
+import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
+import { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -74,7 +76,7 @@ export abstract class BaseInstallManager {
   private _deferredInstallationScripts: boolean = false;
 
   private readonly _terminalProvider: ITerminalProvider;
-  private readonly _terminal: Terminal;
+  protected readonly _terminal: Terminal;
 
   protected readonly rushConfiguration: RushConfiguration;
   protected readonly rushGlobalFolder: RushGlobalFolder;
@@ -655,6 +657,7 @@ fi
             : '';
 
           const hookFileContent: string = `#!/bin/bash
+set -e
 SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
 
@@ -739,7 +742,7 @@ ${gitLfsHookHandling}
 
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-      if (experiments.usePnpmFrozenLockfileForRushInstall && !this.options.allowShrinkwrapUpdates) {
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
@@ -748,6 +751,10 @@ ${gitLfsHookHandling}
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
         args.push('--no-prefer-frozen-lockfile');
+      }
+
+      if (options.onlyShrinkwrap) {
+        args.push(`--lockfile-only`);
       }
 
       if (options.collectLogFile) {
@@ -766,6 +773,34 @@ ${gitLfsHookHandling}
 
       if (this._deferredInstallationScripts || this.options.ignoreScripts) {
         args.push('--ignore-scripts');
+      }
+
+      /*
+        If user set resolution-mode in pnpm-config.json only, use the value in pnpm-config.json
+        If user set resolution-mode in pnpm-config.json and .npmrc, use the value in pnpm-config.json
+        If user set resolution-mode in .npmrc only, do nothing, let pnpm handle it
+        If user does not set resolution-mode in pnpm-config.json and .npmrc, rush will default it to "highest"
+      */
+      const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
+        this.rushConfiguration.commonRushConfigFolder,
+        'resolution-mode'
+      );
+
+      let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;
+      if (resolutionMode) {
+        if (isResolutionModeInNpmrc) {
+          this._terminal.writeWarningLine(
+            `Warning: PNPM's resolution-mode is specified in both .npmrc and pnpm-config.json. ` +
+              `The value in pnpm-config.json will take precedence.`
+          );
+        }
+      } else if (!isResolutionModeInNpmrc) {
+        // if resolution-mode isn't specified in either .npmrc or pnpm-config.json,
+        // then rush will default it to "highest"
+        resolutionMode = 'highest';
+      }
+      if (resolutionMode) {
+        args.push(`--config.resolutionMode=${resolutionMode}`);
       }
 
       if (
@@ -929,12 +964,10 @@ ${gitLfsHookHandling}
       if (this.rushConfiguration.packageManager === 'pnpm') {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
-        // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
-        // a new lockfile can be generated. But because of the above bug "pnpm install" would
-        // respect "common/temp/node_modules/.pnpm-lock.yaml" and thus would not generate a
-        // new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
-        // ensures that a new lockfile will be generated with "rush update --full".
-
+        // When "rush update --full" is run, Rush deletes "common/temp/pnpm-lock.yaml"
+        // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
+        // "pnpm-lock.yaml" from "common/temp/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
+        // Deleting both files ensures that a new lockfile will always be generated.
         const pnpmPackageManager: PnpmPackageManager = this.rushConfiguration
           .packageManagerWrapper as PnpmPackageManager;
 

@@ -164,7 +164,9 @@ export class DeployAction extends BaseRushAction {
         projectFolder: project.projectFolder,
         additionalProjectsToInclude: scenarioProjectJson?.additionalProjectsToInclude,
         additionalDependenciesToInclude: scenarioProjectJson?.additionalDependenciesToInclude,
-        dependenciesToExclude: scenarioProjectJson?.dependenciesToExclude
+        dependenciesToExclude: scenarioProjectJson?.dependenciesToExclude,
+        patternsToInclude: scenarioProjectJson?.patternsToInclude,
+        patternsToExclude: scenarioProjectJson?.patternsToExclude
       });
     }
 
@@ -185,6 +187,7 @@ export class DeployAction extends BaseRushAction {
       targetRootFolder,
       mainProjectName,
       projectConfigurations,
+      dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
       createArchiveOnly,
       pnpmInstallFolder,

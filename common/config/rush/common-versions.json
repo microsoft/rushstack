@@ -95,7 +95,7 @@
     "style-loader": ["~2.0.0"],
     "terser-webpack-plugin": ["~3.0.8"],
     "terser": ["~4.8.0"],
-    "webpack": ["~4.44.2"],
+    "webpack": ["~4.47.0"],
     "@types/node": [
       // These versions are used by testing projects
       "ts2.9",

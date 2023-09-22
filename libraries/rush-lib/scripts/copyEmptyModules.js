@@ -1,4 +1,4 @@
-'ues strict';
+'use strict';
 
 const { FileSystem } = require('@rushstack/node-core-library');
 
@@ -12,7 +12,7 @@ module.exports = {
     },
     heftConfiguration: { buildFolderPath }
   }) => {
-    // We're using a Webpack plugin called `@rushstack/webpack-preserve-dynamic-require-plugin` to
+    // We're using a Webpack plugin called `@rushstack/webpack-deep-imports-plugin` to
     // examine all of the modules that are imported by the entrypoints (index, and the start* scripts)
     // to `rush-lib` and generate stub JS files in the `lib` folder that reference the original modules
     // in the webpack bundle. The plugin also copies the `.d.ts` files for those modules to the `lib` folder.
@@ -61,16 +61,19 @@ module.exports = {
           const jsFileText = await FileSystem.readFileAsync(jsInPath);
           const strippedJsFileText = stripCommentsFromJsFile(jsFileText);
           if (strippedJsFileText === 'export {};') {
-            await FileSystem.ensureFolderAsync(`${outFolderPath}/${relativeFolderPath}`);
             const outJsPath = `${outFolderPath}/${relativeItemPath}`;
             terminal.writeVerboseLine(`Writing stub to ${outJsPath}`);
-            await FileSystem.writeFileAsync(outJsPath, 'module.exports = {};');
+            await FileSystem.writeFileAsync(outJsPath, 'module.exports = {};', {
+              ensureFolderExists: true
+            });
 
             const relativeDtsPath = relativeItemPath.slice(0, -JS_FILE_EXTENSION.length) + DTS_FILE_EXTENSION;
             const inDtsPath = `${dtsInFolderPath}/${relativeDtsPath}`;
             const outDtsPath = `${outFolderPath}/${relativeDtsPath}`;
             terminal.writeVerboseLine(`Copying ${inDtsPath} to ${outDtsPath}`);
-            await FileSystem.copyFileAsync({ sourcePath: inDtsPath, destinationPath: outDtsPath });
+            // We know this is a file, don't need the redundant checks in FileSystem.copyFileAsync
+            const buffer = await FileSystem.readFileToBufferAsync(inDtsPath);
+            await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
           }
         }
       }

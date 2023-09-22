@@ -1,6 +1,97 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:52 GMT and should not be manually modified.
+
+## 0.10.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.10.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.9.1
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 0.9.0
+Thu, 07 Sep 2023 03:35:42 GMT
+
+### Minor changes
+
+- Update Webpack peerDependency to ~4.47.0 and removes the warning about Node <v18, as Webpack 4.47.0 fixes the underlying issue.
+
+## 0.8.0
+Sat, 12 Aug 2023 00:21:48 GMT
+
+### Minor changes
+
+- Display a warning if Node.js 17 or newer is used without the "--openssl-legacy-provider" workaround
+
+## 0.7.14
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 0.7.13
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 0.7.12
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.7.11
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 0.7.10
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.7.9
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.7.8
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.7.7
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 0.7.6
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 0.7.5
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 0.7.4
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 0.7.3
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 0.7.2
 Mon, 19 Jun 2023 22:40:21 GMT

@@ -55,8 +55,11 @@ export class ProjectWatcher {
 
   private _initialState: ProjectChangeAnalyzer | undefined;
   private _previousState: ProjectChangeAnalyzer | undefined;
+  private _resolveIfChanged: undefined | (() => Promise<void>);
 
   private _hasRenderedStatus: boolean;
+
+  public isPaused: boolean = false;
 
   public constructor(options: IProjectWatcherOptions) {
     const { debounceMs = 1000, rushConfiguration, projectsToWatch, terminal, initialState } = options;
@@ -75,10 +78,24 @@ export class ProjectWatcher {
     this._hasRenderedStatus = false;
   }
 
+  public pause(): void {
+    this.isPaused = true;
+  }
+
+  public resume(): void {
+    this.isPaused = false;
+    if (this._resolveIfChanged) {
+      this._resolveIfChanged().catch(() => {
+        // Suppress unhandled promise rejection error
+      });
+    }
+  }
+
   /**
    * Waits for a change to the package-deps of one or more of the selected projects, since the previous invocation.
    * Will return immediately the first time it is invoked, since no state has been recorded.
    * If no change is currently present, watches the source tree of all selected projects for file changes.
+   * `waitForChange` is not allowed to be called multiple times concurrently.
    */
   public async waitForChange(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
     const initialChangeResult: IProjectChangeResult = await this._computeChanged();
@@ -139,13 +156,17 @@ export class ProjectWatcher {
 
         this._hasRenderedStatus = false;
 
-        const resolveIfChanged = async (): Promise<void> => {
+        const resolveIfChanged: () => Promise<void> = (this._resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
           if (terminated) {
             return;
           }
 
           try {
+            if (this.isPaused) {
+              this._setStatus(`Project watcher paused. Press 'w' to toggle. Press 'b' to build once.`);
+              return;
+            }
             this._setStatus(`Evaluating changes to tracked files...`);
             const result: IProjectChangeResult = await this._computeChanged();
             this._setStatus(`Finished analyzing.`);
@@ -174,7 +195,7 @@ export class ProjectWatcher {
             terminal.writeLine();
             reject(err as NodeJS.ErrnoException);
           }
-        };
+        });
 
         for (const [pathToWatch, { recurse }] of pathsToWatch) {
           addWatcher(pathToWatch, recurse);
@@ -198,7 +219,7 @@ export class ProjectWatcher {
           if (watchers.has(watchedPath)) {
             return;
           }
-          const listener: (event: string, fileName: string) => void = changeListener(watchedPath, recursive);
+          const listener: fs.WatchListener<string> = changeListener(watchedPath, recursive);
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
             {
@@ -214,7 +235,12 @@ export class ProjectWatcher {
           });
         }
 
-        function innerListener(root: string, recursive: boolean, event: string, fileName: string): void {
+        function innerListener(
+          root: string,
+          recursive: boolean,
+          event: string,
+          fileName: string | null
+        ): void {
           try {
             if (terminated) {
               return;
@@ -226,7 +252,7 @@ export class ProjectWatcher {
 
             // Handling for added directories
             if (recursive && !useNativeRecursiveWatch) {
-              const decodedName: string = fileName && fileName.toString();
+              const decodedName: string = fileName ? fileName.toString() : '';
               const normalizedName: string = decodedName && Path.convertToSlashes(decodedName);
               const fullName: string = normalizedName && `${root}/${normalizedName}`;
 
@@ -259,11 +285,13 @@ export class ProjectWatcher {
           }
         }
 
-        function changeListener(root: string, recursive: boolean): (event: string, fileName: string) => void {
+        function changeListener(root: string, recursive: boolean): fs.WatchListener<string> {
           return innerListener.bind(0, root, recursive);
         }
       }
-    );
+    ).finally(() => {
+      this._resolveIfChanged = undefined;
+    });
 
     const closePromises: Promise<void>[] = [];
     for (const [watchedPath, watcher] of watchers) {

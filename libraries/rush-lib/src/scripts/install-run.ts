@@ -124,6 +124,24 @@ export interface IPackageSpecifier {
 }
 
 /**
+ * Compare version strings according to semantic versioning.
+ * Returns a positive integer if "a" is a later version than "b",
+ * a negative integer if "b" is later than "a",
+ * and 0 otherwise.
+ */
+function _compareVersionStrings(a: string, b: string): number {
+  const aParts: string[] = a.split(/[.-]/);
+  const bParts: string[] = b.split(/[.-]/);
+  const numberOfParts: number = Math.max(aParts.length, bParts.length);
+  for (let i: number = 0; i < numberOfParts; i++) {
+    if (aParts[i] !== bParts[i]) {
+      return (Number(aParts[i]) || 0) - (Number(bParts[i]) || 0);
+    }
+  }
+  return 0;
+}
+
+/**
  * Resolve a package specifier to a static version
  */
 function _resolvePackageVersion(
@@ -150,14 +168,25 @@ function _resolvePackageVersion(
       const npmPath: string = getNpmPath();
 
       // This returns something that looks like:
-      //  @microsoft/rush@3.0.0 '3.0.0'
-      //  @microsoft/rush@3.0.1 '3.0.1'
-      //  ...
-      //  @microsoft/rush@3.0.20 '3.0.20'
-      //  <blank line>
+      // ```
+      // [
+      //   "3.0.0",
+      //   "3.0.1",
+      //   ...
+      //   "3.0.20"
+      // ]
+      // ```
+      //
+      // if multiple versions match the selector, or
+      //
+      // ```
+      // "3.0.0"
+      // ```
+      //
+      // if only a single version matches.
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
         npmPath,
-        ['view', `${name}@${version}`, 'version', '--no-update-notifier'],
+        ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
         {
           cwd: rushTempFolder,
           stdio: []
@@ -169,18 +198,23 @@ function _resolvePackageVersion(
       }
 
       const npmViewVersionOutput: string = npmVersionSpawnResult.stdout.toString();
-      const versionLines: string[] = npmViewVersionOutput.split('\n').filter((line) => !!line);
-      const latestVersion: string | undefined = versionLines[versionLines.length - 1];
+      const parsedVersionOutput: string | string[] = JSON.parse(npmViewVersionOutput);
+      const versions: string[] = Array.isArray(parsedVersionOutput)
+        ? parsedVersionOutput
+        : [parsedVersionOutput];
+      let latestVersion: string | undefined = versions[0];
+      for (let i: number = 1; i < versions.length; i++) {
+        const version: string = versions[i];
+        if (_compareVersionStrings(version, latestVersion) > 0) {
+          latestVersion = version;
+        }
+      }
+
       if (!latestVersion) {
         throw new Error('No versions found for the specified version range.');
       }
 
-      const versionMatches: string[] | null = latestVersion.match(/^.+\s\'(.+)\'$/);
-      if (!versionMatches) {
-        throw new Error(`Invalid npm output ${latestVersion}`);
-      }
-
-      return versionMatches[1];
+      return latestVersion;
     } catch (e) {
       throw new Error(`Unable to resolve version ${version} of package ${name}: ${e}`);
     }

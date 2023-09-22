@@ -64,17 +64,26 @@ jspm_packages/
 *.iml
 
 # Visual Studio Code
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!*.code-workspace
 
 # Rush temporary files
 common/deploy/
 common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
+*.lock
 
 # Heft temporary files
 .cache
 .heft
+
+# Visual Studio Code
+.vscode
 
 # Common toolchain intermediate files
 temp
@@ -85,5 +94,6 @@ lib-esnext
 lib-commonjs
 lib-shim
 dist
+dist-storybook
 *.scss.ts
 *.sass.ts

@@ -1,6 +1,37 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Sep 2023 00:36:58 GMT and should not be manually modified.
+
+## 7.37.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 7.36.4
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 7.36.3
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 7.36.2
+Wed, 12 Jul 2023 15:20:39 GMT
+
+### Patches
+
+- Add api-extractor support for .d.mts and .d.cts files
+
+## 7.36.1
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
 
 ## 7.36.0
 Mon, 19 Jun 2023 22:40:21 GMT

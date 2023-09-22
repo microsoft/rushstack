@@ -131,7 +131,7 @@ export interface IPnpmShrinkwrapYaml {
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: Record<string, string>;
   /** The list of override version number for dependencies */
-  overrides: { [dependency: string]: string };
+  overrides?: { [dependency: string]: string };
 }
 
 /**
@@ -166,12 +166,14 @@ export function parsePnpmDependencyKey(
   // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"  --> 0="@scope/depame" 1="1.4.0"
   // Example: "/isarray/2.0.1"                                  --> 0="isarray"       1="2.0.1"
   // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7"       --> 0="sinon-chai"    1="2.8.0/chai@3.5.0+sinon@1.17.7"
+  // Example: "/typescript@5.1.6"                               --> 0=typescript      1="5.1.6"
   // Example: 1.2.3_peer-dependency@.4.5.6                      --> no match
   // Example: 1.2.3_@scope+peer-dependency@.4.5.6               --> no match
   // Example: 1.2.3(peer-dependency@.4.5.6)                     --> no match
   // Example: 1.2.3(@scope/peer-dependency@.4.5.6)              --> no match
-  const packageNameMatch: RegExpMatchArray | null =
-    /^[^\/]*(?<!\([^\(]*)\/((?:@[^\/]+\/)?[^\/]+)\/(.*)$/.exec(dependencyKey);
+  const packageNameMatch: RegExpMatchArray | null = /^[^\/(]*\/((?:@[^\/(]+\/)?[^\/(]+)[\/@](.*)$/.exec(
+    dependencyKey
+  );
   if (packageNameMatch) {
     parsedPackageName = packageNameMatch[1];
     parsedInstallPath = packageNameMatch[2];
@@ -939,15 +941,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (!foundDependency) {
           return true;
         }
-
-        if (this.overrides.has(importerPackageName)) {
-          if (this.overrides.get(importerPackageName) !== importerVersionSpecifier) {
-            return true;
-          }
-        } else {
-          if (foundDependency.version !== importerVersionSpecifier) {
-            return true;
-          }
+        const resolvedVersion: string = this.overrides.get(importerPackageName) ?? foundDependency.version;
+        if (resolvedVersion !== importerVersionSpecifier) {
+          return true;
         }
       }
     } else {
@@ -961,6 +957,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       for (const { dependencyType, name, version } of allDependencies) {
         let isOptional: boolean = false;
         let specifierFromLockfile: IPnpmVersionSpecifier | undefined;
+        let isDevDepFallThrough: boolean = false;
         switch (dependencyType) {
           case DependencyType.Optional: {
             specifierFromLockfile = importer.optionalDependencies?.[name];
@@ -981,6 +978,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               importerDevDependencies.delete(name);
               break;
             }
+            // If fall through, there is a chance the package declares an inconsistent version, ignore it.
+            isDevDepFallThrough = true;
           }
 
           // eslint-disable-next-line no-fallthrough
@@ -1001,7 +1000,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
                 `"${specifierFromLockfile}" instead of an object.`
             );
           } else {
-            if (specifierFromLockfile.specifier !== version && !isOptional) {
+            // TODO: Emit an error message when someone tries to override a version of something in one of their
+            // local repo packages.
+            const resolvedVersion: string = this.overrides.get(name) ?? version;
+            if (specifierFromLockfile.specifier !== resolvedVersion && !isDevDepFallThrough && !isOptional) {
               return true;
             }
           }
@@ -1119,7 +1121,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         // This is a github repo reference
         return version;
       } else {
-        return `/${name}@${version}`;
+        return version.startsWith('/') ? version : `/${name}@${version}`;
       }
     } else {
       // Version can sometimes be in the form of a path that's already in the /name/version format.

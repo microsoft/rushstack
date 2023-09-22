@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook } from 'tapable';
-import { InternalError } from '@rushstack/node-core-library';
+import { InternalError, type ITerminal } from '@rushstack/node-core-library';
 
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { IHeftPlugin } from './IHeftPlugin';
@@ -12,11 +12,12 @@ export abstract class HeftPluginHost {
   private readonly _pluginAccessRequestHooks: Map<string, SyncHook<any>> = new Map();
   private _pluginsApplied: boolean = false;
 
-  public async applyPluginsAsync(): Promise<void> {
+  public async applyPluginsAsync(terminal: ITerminal): Promise<void> {
     if (this._pluginsApplied) {
       // No need to apply them a second time.
       return;
     }
+    terminal.writeVerboseLine('Applying plugins');
     await this.applyPluginsInternalAsync();
     this._pluginsApplied = true;
   }

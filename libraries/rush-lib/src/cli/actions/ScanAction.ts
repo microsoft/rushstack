@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import builtinPackageNames from 'builtin-modules';
 
-import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
@@ -101,15 +101,13 @@ export class ScanAction extends BaseConfiglessRushAction {
 
     // Example: "my-package/lad/dee/dah" --> "my-package"
     // Example: "@ms/my-package" --> "@ms/my-package"
-    const packageRegExp: RegExp = /^((@[a-z\-0-9!_]+\/)?[a-z\-0-9!_]+)\/?/;
+    // Example: "lodash.get" --> "lodash.get"
+    const packageRegExp: RegExp = /^((@[a-z\-0-9!_]+\/)?[a-z\-0-9!_][a-z\-0-9!_.]*)\/?/;
 
     const requireMatches: Set<string> = new Set<string>();
 
-    const { default: glob } = await import('glob');
-    const scanResults: string[] = await LegacyAdapters.convertCallbackToPromise(
-      glob,
-      '{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}'
-    );
+    const { default: glob } = await import('fast-glob');
+    const scanResults: string[] = await glob(['./*.{ts,js,tsx,jsx}', './{src,lib}/**/*.{ts,js,tsx,jsx}']);
     for (const filename of scanResults) {
       try {
         const contents: string = FileSystem.readFile(filename);

@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';
@@ -19,22 +21,12 @@ import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 
-// @beta
+// @beta @deprecated
 export class CancellationToken {
     // @internal
-    constructor(options?: _ICancellationTokenOptions);
+    constructor(abortSignal: AbortSignal);
     get isCancelled(): boolean;
     get onCancelledPromise(): Promise<void>;
-}
-
-// @beta
-export class CancellationTokenSource {
-    constructor(options?: ICancellationTokenSourceOptions);
-    cancel(): void;
-    get isCancelled(): boolean;
-    // @internal (undocumented)
-    get _onCancelledPromise(): Promise<void>;
-    get token(): CancellationToken;
 }
 
 export { CommandLineChoiceListParameter }
@@ -73,17 +65,6 @@ export class HeftConfiguration {
     get terminalProvider(): ITerminalProvider;
 }
 
-// @internal
-export interface _ICancellationTokenOptions {
-    cancellationTokenSource?: CancellationTokenSource;
-    isCancelled?: boolean;
-}
-
-// @beta
-export interface ICancellationTokenSourceOptions {
-    delayMs?: number;
-}
-
 // @public
 export interface ICopyOperation extends IFileSelectionSpecifier {
     destinationFolders: string[];
@@ -100,7 +81,7 @@ export interface IFileSelectionSpecifier {
     excludeGlobs?: string[];
     fileExtensions?: string[];
     includeGlobs?: string[];
-    sourcePath: string;
+    sourcePath?: string;
 }
 
 // @public
@@ -135,7 +116,6 @@ export interface IHeftLifecycleCleanHookOptions {
 // @public
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
-    // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
@@ -213,6 +193,8 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 // @public
 export interface IHeftTaskRunHookOptions {
     // @beta
+    readonly abortSignal: AbortSignal;
+    // @beta @deprecated
     readonly cancellationToken: CancellationToken;
 }
 

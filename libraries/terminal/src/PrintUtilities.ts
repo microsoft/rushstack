@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tty from 'tty';
-import wordwrap from 'wordwrap';
 import { ITerminal } from '@rushstack/node-core-library';
 
 /**
@@ -22,40 +20,149 @@ export class PrintUtilities {
    * Returns the width of the console, measured in columns
    */
   public static getConsoleWidth(): number | undefined {
-    const stdout: tty.WriteStream = process.stdout as tty.WriteStream;
-    if (stdout && stdout.columns) {
-      return stdout.columns;
-    }
+    return process.stdout?.columns;
   }
 
   /**
-   * Applies word wrapping.  If maxLineLength is unspecified, then it defaults to the
-   * console width.
+   * Applies word wrapping.
+   *
+   * @param text - The text to wrap
+   * @param maxLineLength - The maximum length of a line, defaults to the console width
+   * @param indent - The number of spaces to indent the wrapped lines, defaults to 0
    */
-  public static wrapWords(text: string, maxLineLength?: number, indent?: number): string {
-    if (!indent) {
-      indent = 0;
+  public static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
+  /**
+   * Applies word wrapping.
+   *
+   * @param text - The text to wrap
+   * @param maxLineLength - The maximum length of a line, defaults to the console width
+   * @param linePrefix - The string to prefix each line with, defaults to ''
+   */
+  public static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
+  /**
+   * Applies word wrapping.
+   *
+   * @param text - The text to wrap
+   * @param maxLineLength - The maximum length of a line, defaults to the console width
+   * @param indentOrLinePrefix - The number of spaces to indent the wrapped lines or the string to prefix
+   * each line with, defaults to no prefix
+   */
+  public static wrapWords(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string;
+  public static wrapWords(
+    text: string,
+    maxLineLength?: number,
+    indentOrLinePrefix?: number | string
+  ): string {
+    const wrappedLines: string[] = PrintUtilities.wrapWordsToLines(
+      text,
+      maxLineLength,
+      indentOrLinePrefix as string | undefined // TS is confused by the overloads
+    );
+    return wrappedLines.join('\n');
+  }
+
+  /**
+   * Applies word wrapping and returns an array of lines.
+   *
+   * @param text - The text to wrap
+   * @param maxLineLength - The maximum length of a line, defaults to the console width
+   * @param indent - The number of spaces to indent the wrapped lines, defaults to 0
+   */
+  public static wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
+  /**
+   * Applies word wrapping and returns an array of lines.
+   *
+   * @param text - The text to wrap
+   * @param maxLineLength - The maximum length of a line, defaults to the console width
+   * @param linePrefix - The string to prefix each line with, defaults to ''
+   */
+  public static wrapWordsToLines(text: string, maxLineLength?: number, linePrefix?: string): string[];
+  /**
+   * Applies word wrapping and returns an array of lines.
+   *
+   * @param text - The text to wrap
+   * @param maxLineLength - The maximum length of a line, defaults to the console width
+   * @param indentOrLinePrefix - The number of spaces to indent the wrapped lines or the string to prefix
+   * each line with, defaults to no prefix
+   */
+  public static wrapWordsToLines(
+    text: string,
+    maxLineLength?: number,
+    indentOrLinePrefix?: number | string
+  ): string[];
+  public static wrapWordsToLines(
+    text: string,
+    maxLineLength?: number,
+    indentOrLinePrefix?: number | string
+  ): string[] {
+    let linePrefix: string;
+    switch (typeof indentOrLinePrefix) {
+      case 'number':
+        linePrefix = ' '.repeat(indentOrLinePrefix);
+        break;
+      case 'string':
+        linePrefix = indentOrLinePrefix;
+        break;
+      default:
+        linePrefix = '';
+        break;
     }
+
+    const linePrefixLength: number = linePrefix.length;
 
     if (!maxLineLength) {
       maxLineLength = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
     }
 
-    // Apply word wrapping and the provided indent, while also respecting existing newlines
+    // Apply word wrapping and the provided line prefix, while also respecting existing newlines
     // and prefix spaces that may exist in the text string already.
     const lines: string[] = text.split(/\r?\n/);
-    const wrappedLines: string[] = lines.map((line) => {
-      const startingSpace: RegExpMatchArray | null = line.match(/^ +/);
-      const addlIndent: number = startingSpace?.[0]?.length || 0;
 
-      if (addlIndent > 0) {
-        line = line.replace(/^ +/, '');
+    const wrappedLines: string[] = [];
+    for (const line of lines) {
+      if (line.length + linePrefixLength <= maxLineLength) {
+        wrappedLines.push(linePrefix + line);
+      } else {
+        const lineAdditionalPrefix: string = line.match(/^\s*/)?.[0] || '';
+        const whitespaceRegexp: RegExp = /\s+/g;
+        let currentWhitespaceMatch: RegExpExecArray | null = null;
+        let previousWhitespaceMatch: RegExpExecArray | undefined;
+        let currentLineStartIndex: number = lineAdditionalPrefix.length;
+        let previousBreakRanOver: boolean = false;
+        while ((currentWhitespaceMatch = whitespaceRegexp.exec(line)) !== null) {
+          if (currentWhitespaceMatch.index + linePrefixLength - currentLineStartIndex > maxLineLength) {
+            let whitespaceToSplitAt: RegExpExecArray | undefined;
+            if (
+              !previousWhitespaceMatch ||
+              // Handle the case where there are two words longer than the maxLineLength in a row
+              previousBreakRanOver
+            ) {
+              whitespaceToSplitAt = currentWhitespaceMatch;
+            } else {
+              whitespaceToSplitAt = previousWhitespaceMatch;
+            }
+
+            wrappedLines.push(
+              linePrefix +
+                lineAdditionalPrefix +
+                line.substring(currentLineStartIndex, whitespaceToSplitAt.index)
+            );
+            previousBreakRanOver = whitespaceToSplitAt.index - currentLineStartIndex > maxLineLength;
+            currentLineStartIndex = whitespaceToSplitAt.index + whitespaceToSplitAt[0].length;
+          } else {
+            previousBreakRanOver = false;
+          }
+
+          previousWhitespaceMatch = currentWhitespaceMatch;
+        }
+
+        if (currentLineStartIndex < line.length) {
+          wrappedLines.push(linePrefix + lineAdditionalPrefix + line.substring(currentLineStartIndex));
+        }
       }
+    }
 
-      return wordwrap(indent! + addlIndent, maxLineLength! - indent! - addlIndent, { mode: 'soft' })(line);
-    });
-
-    return wrappedLines.join('\n');
+    return wrappedLines;
   }
 
   /**
@@ -69,8 +176,7 @@ export class PrintUtilities {
       boxWidth = Math.floor(consoleWidth / 2);
     }
     const maxLineLength: number = boxWidth - 10;
-    const wrappedMessage: string = PrintUtilities.wrapWords(message, maxLineLength);
-    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
+    const wrappedMessageLines: string[] = PrintUtilities.wrapWordsToLines(message, maxLineLength);
 
     // ╔═══════════╗
     // ║  Message  ║

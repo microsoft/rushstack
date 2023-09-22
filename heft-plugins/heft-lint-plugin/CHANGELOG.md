@@ -1,6 +1,81 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:51 GMT and should not be manually modified.
+
+## 0.2.1
+Tue, 19 Sep 2023 15:21:51 GMT
+
+_Version update only_
+
+## 0.2.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Reduce verbosity by only printing the "not supported in watch mode" warning during the initial build.
+
+## 0.1.22
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.1.21
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.1.20
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.1.19
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 0.1.18
+Fri, 14 Jul 2023 15:20:45 GMT
+
+### Patches
+
+- Treat a malformed cache file the same as no cache file (i.e. recheck everything) instead of throwing an error..
+
+## 0.1.17
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.1.16
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.1.15
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 0.1.14
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.1.13
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.1.12
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
 
 ## 0.1.11
 Mon, 19 Jun 2023 22:40:21 GMT

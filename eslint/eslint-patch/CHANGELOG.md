@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Sep 2023 00:36:58 GMT and should not be manually modified.
+
+## 1.4.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 1.3.3
+Tue, 08 Aug 2023 07:10:39 GMT
+
+### Patches
+
+- Fix patching for running eslint via eslint/use-at-your-own-risk, which VS Code's eslint extension does when enabling flat config support
 
 ## 1.3.2
 Thu, 15 Jun 2023 00:21:01 GMT

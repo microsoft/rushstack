@@ -1,6 +1,70 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Mon, 19 Jun 2023 22:40:21 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Sep 2023 15:21:51 GMT and should not be manually modified.
+
+## 0.9.1
+Tue, 19 Sep 2023 15:21:51 GMT
+
+_Version update only_
+
+## 0.9.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Add a `--log-heap-usage` flag that includes memory usage analysis in each test run.
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Wait for first test run to be scheduled in initial invocation in watch mode.
+
+## 0.8.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.8.0
+Mon, 31 Jul 2023 15:19:05 GMT
+
+### Minor changes
+
+- Make `jest-environment-jsdom` and `jest-environment-node` optional peerDependencies.
+
+## 0.7.18
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.7.17
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.7.16
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.7.15
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.7.14
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.7.13
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.7.12
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
 
 ## 0.7.11
 Mon, 19 Jun 2023 22:40:21 GMT
