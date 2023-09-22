@@ -358,12 +358,12 @@ export class RushConfiguration {
   public readonly currentVariantJsonFilename: string;
 
   /**
-   * The version of the locally installed NPM tool.  (Example: "1.2.3")
+   * The version of the locally package manager tool.  (Example: "1.2.3")
    */
   public readonly packageManagerToolVersion: string;
 
   /**
-   * The absolute path to the locally installed NPM tool.  If "rush install" has not
+   * The absolute path to the locally package manager tool.  If "rush install" has not
    * been run, then this file may not exist yet.
    * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
    */

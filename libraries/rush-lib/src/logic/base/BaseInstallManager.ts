@@ -572,6 +572,14 @@ ${gitLfsHookHandling}
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
+
+        if (
+          options.pnpmFilterArguments.length > 0 &&
+          Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
+        ) {
+          // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.
+          args.push('--config.dedupe-peer-dependents=false');
+        }
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
         args.push('--prefer-frozen-lockfile');
