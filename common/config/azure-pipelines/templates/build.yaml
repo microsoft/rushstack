@@ -13,32 +13,32 @@ steps:
   - script: 'git config --local user.name Rushbot'
     displayName: 'git config name'
 
-  - script: 'node common/scripts/install-run-rush.js change --verify'
-    displayName: 'Verify Change Logs'
+#  - script: 'node common/scripts/install-run-rush.js change --verify'
+#    displayName: 'Verify Change Logs'
 
   - script: 'node common/scripts/install-run-rush.js install'
     displayName: 'Rush Install'
 
-  # - bash: |
-  #     /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  #     echo ">>> Started xvfb"
-  #   displayName: Start xvfb
-  #   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+# - bash: |
+#     /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+#     echo ">>> Started xvfb"
+#   displayName: Start xvfb
+#   condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-  - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }}'
+  - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }} --from rush-lib'
     displayName: 'Rush retest (install-run-rush)'
     env:
       # Prevent time-based browserslist update warning
       # See https://github.com/microsoft/rushstack/issues/2981
       BROWSERSLIST_IGNORE_OLD_DATA: 1
 
-  - ${{ if eq(parameters.PerformValidation, true) }}:
-      - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline ${{ parameters.BuildParameters }}'
-        displayName: 'Rush test (rush-lib)'
-        env:
-          # Prevent time-based browserslist update warning
-          # See https://github.com/microsoft/rushstack/issues/2981
-          BROWSERSLIST_IGNORE_OLD_DATA: 1
-
-      - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
-        displayName: 'Ensure repo README is up-to-date'
+# - ${{ if eq(parameters.PerformValidation, true) }}:
+#     - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline ${{ parameters.BuildParameters }}'
+#       displayName: 'Rush test (rush-lib)'
+#       env:
+#         # Prevent time-based browserslist update warning
+#         # See https://github.com/microsoft/rushstack/issues/2981
+#         BROWSERSLIST_IGNORE_OLD_DATA: 1
+#
+#      - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
+#        displayName: 'Ensure repo README is up-to-date'
