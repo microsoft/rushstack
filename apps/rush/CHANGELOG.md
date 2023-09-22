@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 22 Sep 2023 00:06:12 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Sep 2023 09:01:38 GMT and should not be manually modified.
+
+## 5.107.3
+Fri, 22 Sep 2023 09:01:38 GMT
+
+### Updates
+
+- Fix filtered installs in pnpm@8.
 
 ## 5.107.2
 Fri, 22 Sep 2023 00:06:12 GMT
