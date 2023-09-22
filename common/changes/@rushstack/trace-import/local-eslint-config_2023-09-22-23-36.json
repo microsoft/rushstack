@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update type-only imports to include the type modifier.",
+      "type": "patch",
+      "packageName": "@rushstack/trace-import"
+    }
+  ],
+  "packageName": "@rushstack/trace-import",
+  "email": "iclanton@users.noreply.github.com"
+}

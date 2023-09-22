@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update type-only imports to include the type modifier.",
+      "type": "patch",
+      "packageName": "@rushstack/heft-typescript-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update type-only imports to include the type modifier.",
+      "type": "patch",
+      "packageName": "@rushstack/worker-pool"
+    }
+  ],
+  "packageName": "@rushstack/worker-pool",
+  "email": "iclanton@users.noreply.github.com"
+}
