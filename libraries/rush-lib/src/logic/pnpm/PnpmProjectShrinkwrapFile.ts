@@ -159,16 +159,18 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     projectShrinkwrapMap.set(specifier, integrity);
 
     // Add the dependencies of the dependency
-    for (const [name, version] of Object.entries(shrinkwrapEntry.dependencies || {})) {
-      this._addDependencyRecursive(projectShrinkwrapMap, name, version, shrinkwrapEntry);
+    for (const [dependencyName, dependencyVersion] of Object.entries(shrinkwrapEntry.dependencies || {})) {
+      this._addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
     }
 
     // Add the optional dependencies of the dependency, and don't blow up if they don't exist
-    for (const [name, version] of Object.entries(shrinkwrapEntry.optionalDependencies || {})) {
+    for (const [dependencyName, dependencyVersion] of Object.entries(
+      shrinkwrapEntry.optionalDependencies || {}
+    )) {
       this._addDependencyRecursive(
         projectShrinkwrapMap,
-        name,
-        version,
+        dependencyName,
+        dependencyVersion,
         shrinkwrapEntry,
         /* throwIfShrinkwrapEntryMissing */ false
       );

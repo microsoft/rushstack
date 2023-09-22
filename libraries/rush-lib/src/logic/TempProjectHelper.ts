@@ -41,7 +41,7 @@ export class TempProjectHelper {
       noPax: true,
       sync: true,
       prefix: npmPackageFolder,
-      filter: (path: string, stat: tar.FileStat): boolean => {
+      filter: (tarPath: string, stat: tar.FileStat): boolean => {
         if (
           !this._rushConfiguration.experimentsConfiguration.configuration.noChmodFieldInTarHeaderNormalization
         ) {

@@ -29,7 +29,7 @@ export const App = (): JSX.Element => {
       // eslint-disable-next-line no-console
       console.log(`Failed to read lockfile: ${e}`);
     });
-  }, []);
+  }, [dispatch]);
 
   return (
     <>

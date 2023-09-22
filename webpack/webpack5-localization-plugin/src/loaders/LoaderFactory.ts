@@ -14,6 +14,7 @@ export interface IBaseLocLoaderOptions {
 export function createLoader<T extends IBaseLocLoaderOptions>(
   parseFile: (content: string, filePath: string, context: LoaderContext<T>) => ILocalizationFile
 ): LoaderDefinitionFunction<T> {
+  // eslint-disable-next-line func-style
   const loader: LoaderDefinitionFunction<T> = async function (
     this: LoaderContext<T>,
     content: string

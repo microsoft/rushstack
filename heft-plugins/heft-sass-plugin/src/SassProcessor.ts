@@ -337,8 +337,8 @@ function buildExtensionClassifier(sassConfiguration: ISassConfiguration): IExten
   };
 }
 
-function determineSyntaxFromFilePath(path: string): Syntax {
-  switch (path.substring(path.lastIndexOf('.'))) {
+function determineSyntaxFromFilePath(filePath: string): Syntax {
+  switch (filePath.substring(filePath.lastIndexOf('.'))) {
     case '.sass':
       return 'indented';
     case '.scss':

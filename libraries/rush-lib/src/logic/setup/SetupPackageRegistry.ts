@@ -167,10 +167,11 @@ export class SetupPackageRegistry {
     let jsonOutput: JsonObject;
     try {
       jsonOutput = JSON.parse(jsonContent);
-    } catch (error) {
+    } catch (e) {
       this._terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
       throw new InternalError('The "npm view" command returned an invalid JSON structure');
     }
+
     const errorCode: JsonObject = jsonOutput?.error?.code;
     if (typeof errorCode !== 'string') {
       this._terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');

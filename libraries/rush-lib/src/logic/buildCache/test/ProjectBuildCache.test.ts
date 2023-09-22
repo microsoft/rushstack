@@ -28,8 +28,8 @@ describe(ProjectBuildCache.name, () => {
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
-        getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
-          `${options.projectName}/${options.projectStateHash}`,
+        getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
+          `${opts.projectName}/${opts.projectStateHash}`,
         localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
         cloudCacheProvider: {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false

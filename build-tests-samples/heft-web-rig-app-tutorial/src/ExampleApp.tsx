@@ -24,7 +24,10 @@ export class ExampleApp extends React.Component {
         <ToggleSwitch leftColor={'#800000'} rightColor={'#008000'} onToggle={this._onToggle} />
 
         <p>Here is an example image:</p>
-        <img src={require('./example-image.png')} />
+        <img
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          src={require('./example-image.png')}
+        />
       </div>
     );
   }

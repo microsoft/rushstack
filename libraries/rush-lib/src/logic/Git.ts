@@ -472,12 +472,12 @@ export class Git {
       // Example: "host.ext"
       const host: string = scpLikeSyntaxMatch[1];
       // Example: "path/to/repo"
-      const path: string = scpLikeSyntaxMatch[2];
+      const urlPath: string = scpLikeSyntaxMatch[2];
 
-      if (path.startsWith('/')) {
-        result = `https://${host}${path}`;
+      if (urlPath.startsWith('/')) {
+        result = `https://${host}${urlPath}`;
       } else {
-        result = `https://${host}/${path}`;
+        result = `https://${host}/${urlPath}`;
       }
     }
 

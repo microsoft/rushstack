@@ -100,7 +100,7 @@ function short(dep: NpmCheck.INpmCheckPackage): string {
   return `${dep.moduleName}@${dep.latest}`;
 }
 
-function choice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
+function getChoice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
   if (!dep.mismatch && !dep.bump && !dep.notInstalled) {
     return false;
   }
@@ -131,7 +131,7 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
   }) as NpmCheck.INpmCheckPackage[];
 
   const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
-    .map(choice)
+    .map(getChoice)
     .filter(Boolean);
 
   const cliTable: CliTable = new CliTable({

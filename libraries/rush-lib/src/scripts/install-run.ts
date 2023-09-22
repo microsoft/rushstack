@@ -206,9 +206,9 @@ function _resolvePackageVersion(
         : [parsedVersionOutput];
       let latestVersion: string | undefined = versions[0];
       for (let i: number = 1; i < versions.length; i++) {
-        const version: string = versions[i];
-        if (_compareVersionStrings(version, latestVersion) > 0) {
-          latestVersion = version;
+        const latestVersionCandidate: string = versions[i];
+        if (_compareVersionStrings(latestVersionCandidate, latestVersion) > 0) {
+          latestVersion = latestVersionCandidate;
         }
       }
 

@@ -249,23 +249,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           return;
         }
 
-        const runBeforeExecute = async ({
-          buildCacheConfiguration,
-          cobuildConfiguration,
-          project,
-          phase,
-          operationMetadataManager,
-          buildCacheContext,
-          record
-        }: {
-          buildCacheConfiguration: BuildCacheConfiguration | undefined;
-          cobuildConfiguration: CobuildConfiguration | undefined;
-          project: RushConfigurationProject;
-          phase: IPhase;
-          operationMetadataManager: OperationMetadataManager | undefined;
-          buildCacheContext: IOperationBuildCacheContext;
-          record: OperationExecutionRecord;
-        }): Promise<OperationStatus | undefined> => {
+        const runBeforeExecute = async (): Promise<OperationStatus | undefined> => {
           const buildCacheTerminal: ITerminal = this._getBuildCacheTerminal({
             record,
             buildCacheContext,
@@ -277,7 +261,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           });
           buildCacheContext.buildCacheTerminal = buildCacheTerminal;
 
-          const configHash: string = record.runner.getConfigHash() || '';
+          const configHash: string = runner.getConfigHash() || '';
 
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheContext,
@@ -350,12 +334,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             logFilenameIdentifier: phase.logFilenameIdentifier
           });
           const restoreCacheAsync = async (
-            projectBuildCache: ProjectBuildCache | undefined,
+            // TODO: Investigate if `projectBuildCacheForRestore` is always the same instance as `projectBuildCache`
+            // above, and if it is, remove this parameter
+            projectBuildCacheForRestore: ProjectBuildCache | undefined,
             specifiedCacheId?: string
           ): Promise<boolean> => {
             buildCacheContext.isCacheReadAttempted = true;
             const restoreFromCacheSuccess: boolean | undefined =
-              await projectBuildCache?.tryRestoreFromCacheAsync(buildCacheTerminal, specifiedCacheId);
+              await projectBuildCacheForRestore?.tryRestoreFromCacheAsync(
+                buildCacheTerminal,
+                specifiedCacheId
+              );
             if (restoreFromCacheSuccess) {
               buildCacheContext.cacheRestored = true;
               // Restore the original state of the operation without cache
@@ -419,15 +408,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         };
 
         try {
-          const earlyReturnStatus: OperationStatus | undefined = await runBeforeExecute({
-            buildCacheConfiguration,
-            cobuildConfiguration,
-            project,
-            phase,
-            operationMetadataManager,
-            buildCacheContext,
-            record
-          });
+          const earlyReturnStatus: OperationStatus | undefined = await runBeforeExecute();
           return earlyReturnStatus;
         } catch (e) {
           buildCacheContext.buildCacheProjectLogWritable?.close();

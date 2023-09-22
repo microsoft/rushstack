@@ -136,7 +136,7 @@ if (sdkContext.rushLibModule === undefined) {
       // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
       terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`);
       sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-    } catch (e) {
+    } catch (e1) {
       let installAndRunRushStderrContent: string = '';
       try {
         const installAndRunRushJSPath: string = path.join(monorepoRoot, 'common/scripts/install-run-rush.js');
@@ -161,7 +161,7 @@ if (sdkContext.rushLibModule === undefined) {
           `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
         );
         sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-      } catch (e) {
+      } catch (e2) {
         // eslint-disable-next-line no-console
         console.error(`${installAndRunRushStderrContent}`);
         throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);

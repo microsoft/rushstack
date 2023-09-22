@@ -220,7 +220,7 @@ export type FileLocationStyle = 'Unix' | 'VisualStudio';
 export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
-    static changePosixModeBits(path: string, mode: PosixModeBits): void;
+    static changePosixModeBits(path: string, modeBits: PosixModeBits): void;
     static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;

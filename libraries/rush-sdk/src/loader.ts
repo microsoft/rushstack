@@ -193,7 +193,7 @@ export class RushSdkLoader {
           });
         }
         sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-      } catch (e) {
+      } catch (e1) {
         let installAndRunRushStderrContent: string = '';
         try {
           const installAndRunRushJSPath: string = path.join(
@@ -248,7 +248,7 @@ export class RushSdkLoader {
           sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
 
           progressPercent = 100;
-        } catch (e) {
+        } catch (e2) {
           // eslint-disable-next-line no-console
           console.error(`${installAndRunRushStderrContent}`);
           throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);

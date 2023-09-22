@@ -93,18 +93,18 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
         while (stack.length) {
           const currEntry = stack.pop();
           if (currEntry) {
-            for (const referrer of currEntry.referrers) {
+            for (const referrer1 of currEntry.referrers) {
               let hasDependency = false;
-              for (const dependency of referrer.dependencies) {
+              for (const dependency of referrer1.dependencies) {
                 if (dependency.name === dependencyToTrace.name) {
-                  determinants.add(referrer);
+                  determinants.add(referrer1);
                   hasDependency = true;
                   break;
                 }
               }
               if (!hasDependency) {
-                if (referrer.transitivePeerDependencies.has(dependencyToTrace.name)) {
-                  transitiveReferrers.add(referrer);
+                if (referrer1.transitivePeerDependencies.has(dependencyToTrace.name)) {
+                  transitiveReferrers.add(referrer1);
                 } else {
                   // Since this referrer does not declare "dependency", it is a
                   // transitive peer dependency, and we call the referrer a "transitive referrer".
@@ -116,36 +116,38 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
                   console.error(
                     'Error analyzing influencers: A referrer appears to be missing its "transitivePeerDependencies" field in the YAML file: ',
                     dependencyToTrace,
-                    referrer,
+                    referrer1,
                     currEntry
                   );
                 }
-                for (const referrer of currEntry.referrers) {
-                  if (!visitedNodes.has(referrer)) {
-                    stack.push(referrer);
-                    visitedNodes.add(referrer);
+
+                for (const referrer2 of currEntry.referrers) {
+                  if (!visitedNodes.has(referrer2)) {
+                    stack.push(referrer2);
+                    visitedNodes.add(referrer2);
                   }
                 }
               }
             }
           }
         }
-        const influencers: IInfluencerType[] = [];
+        const newInfluencers: IInfluencerType[] = [];
         for (const determinant of determinants.values()) {
-          influencers.push({
+          newInfluencers.push({
             entry: determinant,
             type: DependencyType.Determinant
           });
         }
         for (const referrer of transitiveReferrers.values()) {
-          influencers.push({
+          newInfluencers.push({
             entry: referrer,
             type: DependencyType.TransitiveReferrer
           });
         }
-        setInfluencers(influencers);
+        setInfluencers(newInfluencers);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedEntry, inspectDependency]
   );
 
@@ -153,6 +155,7 @@ export const LockfileEntryDetailsView = (): JSX.Element | ReactNull => {
     (referrer) => () => {
       dispatch(pushToStack(referrer));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedEntry]
   );
 

@@ -14,12 +14,8 @@ export enum PnpmLockfileVersion {
 
 export interface IPackageJsonType {
   name: string;
-  dependencies: {
-    [key in string]: string;
-  };
-  devDependencies: {
-    [key in string]: string;
-  };
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
 }
 export interface ILockfileImporterV6 {
   dependencies?: {
@@ -36,15 +32,9 @@ export interface ILockfileImporterV6 {
   };
 }
 export interface ILockfileImporterV5 {
-  specifiers?: {
-    [key in string]: string;
-  };
-  dependencies?: {
-    [key in string]: string;
-  };
-  devDependencies?: {
-    [key in string]: string;
-  };
+  specifiers?: Record<string, string>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
 }
 export interface ILockfilePackageType {
   lockfileVersion: number | string;
@@ -56,12 +46,8 @@ export interface ILockfilePackageType {
       resolution: {
         integrity: string;
       };
-      dependencies?: {
-        [key in string]: string;
-      };
-      peerDependencies?: {
-        [key in string]: string;
-      };
+      dependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
       dev: boolean;
     };
   };

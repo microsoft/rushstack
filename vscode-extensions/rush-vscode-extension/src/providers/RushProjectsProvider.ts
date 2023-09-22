@@ -60,7 +60,7 @@ class RushProjectScript extends vscode.TreeItem {
     this.scriptValue = scriptValue;
 
     // this.tooltip = '';
-    this.description = 'test descriptiosn';
+    this.description = 'test description';
   }
 }
 
@@ -76,8 +76,8 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
 
   public constructor(context: vscode.ExtensionContext) {
     const rushWorkspace: RushWorkspace = RushWorkspace.getCurrentInstance();
-    RushWorkspace.onDidChangeWorkspace((rushWorkspace: RushWorkspace) => {
-      this._rushConfiguration = rushWorkspace.rushConfiguration;
+    RushWorkspace.onDidChangeWorkspace((newWorkspace: RushWorkspace) => {
+      this._rushConfiguration = newWorkspace.rushConfiguration;
       this.refresh();
     });
     this._rushConfiguration = rushWorkspace.rushConfiguration;

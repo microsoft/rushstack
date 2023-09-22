@@ -37,8 +37,8 @@ export const PackageJsonViewer = (): JSX.Element => {
 
   useEffect(() => {
     async function loadPnpmFileAsync(): Promise<void> {
-      const pnpmfile = await readPnpmfileAsync();
-      setPnpmfile(pnpmfile);
+      const repoPnpmfile = await readPnpmfileAsync();
+      setPnpmfile(repoPnpmfile);
     }
     loadPnpmFileAsync().catch((e) => {
       // eslint-disable-next-line no-console
@@ -70,7 +70,7 @@ export const PackageJsonViewer = (): JSX.Element => {
         console.log('The selected entry has no entry name: ', selectedEntry.entryPackageName);
       }
     }
-  }, [selectedEntry]);
+  }, [dispatch, selectedEntry]);
 
   const renderDep =
     (name: boolean): ((dependencyDetails: [string, string]) => JSX.Element) =>

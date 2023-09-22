@@ -447,19 +447,19 @@ export class AmazonS3Client {
 
           log(`Will retry request in ${delay}s...`);
           await Async.sleep(delay);
-          const response: RetryableRequestResponse<T> = await sendRequest();
+          const retryResponse: RetryableRequestResponse<T> = await sendRequest();
 
-          if (response.hasNetworkError) {
+          if (retryResponse.hasNetworkError) {
             if (retryAttempt < maxTries - 1) {
               log('The retried request failed, will try again');
               return retry(retryAttempt + 1);
             } else {
               log('The retried request failed and has reached the maxTries limit');
-              throw response.error;
+              throw retryResponse.error;
             }
           }
 
-          return response.response;
+          return retryResponse.response;
         }
         return retry(1);
       } else {

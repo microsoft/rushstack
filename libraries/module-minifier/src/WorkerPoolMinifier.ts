@@ -124,11 +124,13 @@ export class WorkerPoolMinifier implements IModuleMinifier {
           message: IModuleMinificationResult
         ): void => {
           worker.off('message', cb);
-          const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(message.hash)!;
+          const workerCallbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(
+            message.hash
+          )!;
           activeRequests.delete(message.hash);
           this._resultCache.set(message.hash, message);
-          for (const callback of callbacks) {
-            callback(message);
+          for (const workerCallback of workerCallbacks) {
+            workerCallback(message);
           }
           // This should always be the last thing done with the worker
           this._pool.checkinWorker(worker);

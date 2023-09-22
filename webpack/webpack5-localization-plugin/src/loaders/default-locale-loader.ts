@@ -11,6 +11,7 @@ import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 /**
  * This loader passes through the raw untranslated strings and may be used without a LocalizationPlugin instance.
  */
+// eslint-disable-next-line func-style
 const loader: LoaderDefinitionFunction<IResxLoaderOptions> = function (
   this: LoaderContext<IResxLoaderOptions>,
   content: string

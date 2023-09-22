@@ -387,7 +387,7 @@ export class SelectionParameterSet {
           `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
             ` Supported prefixes: ${Array.from(
               this._selectorParserByScope.keys(),
-              (scope: string) => `"${scope}:"`
+              (selectorParserScope: string) => `"${selectorParserScope}:"`
             ).join(', ')}`
         );
         throw new AlreadyReportedError();

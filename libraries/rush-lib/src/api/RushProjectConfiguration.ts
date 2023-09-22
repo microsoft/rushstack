@@ -427,7 +427,7 @@ export class RushProjectConfiguration {
         project.projectFolder,
         rigConfig
       );
-    } catch (e) {
+    } catch (e1) {
       // Detect if the project is using the old rush-project.json schema
       let oldRushProjectJson: IOldRushProjectJson | undefined;
       try {
@@ -437,7 +437,7 @@ export class RushProjectConfiguration {
             project.projectFolder,
             rigConfig
           );
-      } catch (e) {
+      } catch (e2) {
         // Ignore
       }
 
@@ -452,7 +452,7 @@ export class RushProjectConfiguration {
             'Quick link: https://rushjs.io/link/upgrading'
         );
       } else {
-        throw e;
+        throw e1;
       }
     }
   }

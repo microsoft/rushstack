@@ -698,7 +698,6 @@ export class PackageExtractor {
     const isFileExcluded = (filePath: string): boolean => {
       // Encapsulate exclude logic into a function, so it can be reused.
       const excludeFileByPatterns = (
-        filePath: string,
         patternsToInclude: string[] | undefined,
         patternsToExclude: string[] | undefined
       ): boolean => {
@@ -725,7 +724,6 @@ export class PackageExtractor {
 
       if (isLocalProject) {
         return excludeFileByPatterns(
-          filePath,
           sourceProjectConfiguration?.patternsToInclude,
           sourceProjectConfiguration?.patternsToExclude
         );
@@ -743,7 +741,7 @@ export class PackageExtractor {
             semver.satisfies(packagesJson.version, d.dependencyVersionRange)
           );
         return matchedDependenciesConfigurations.some((d) =>
-          excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
+          excludeFileByPatterns(d.patternsToInclude, d.patternsToExclude)
         );
       }
     };

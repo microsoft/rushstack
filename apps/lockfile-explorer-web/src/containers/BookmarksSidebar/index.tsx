@@ -17,13 +17,13 @@ export const BookmarksSidebar = (): JSX.Element => {
     (entry: LockfileEntry) => () => {
       dispatch(clearStackAndPush(entry));
     },
-    []
+    [dispatch]
   );
   const deleteEntry = useCallback(
     (entry: LockfileEntry) => () => {
       dispatch(removeBookmark(entry));
     },
-    []
+    [dispatch]
   );
 
   return (

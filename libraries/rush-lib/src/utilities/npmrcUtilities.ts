@@ -44,7 +44,7 @@ function _trimNpmrcFile(sourceNpmrcPath: string): string {
     //remove spaces before or after key and value
     line = line
       .split('=')
-      .map((line) => line.trim())
+      .map((lineToTrim) => lineToTrim.trim())
       .join('=');
 
     // Ignore comment lines

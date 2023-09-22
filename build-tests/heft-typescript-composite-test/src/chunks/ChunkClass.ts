@@ -8,6 +8,7 @@ export class ChunkClass {
   }
 
   public getImageUrl(): string {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('./image.png');
   }
 }

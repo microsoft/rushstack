@@ -136,15 +136,15 @@ export class ChangeFiles {
         files,
         async (filePath) => {
           const changeRequest: IChangeInfo = await JsonFile.loadAsync(filePath);
-          let shouldDelete: boolean = true;
+          let shouldDeleteFile: boolean = true;
           for (const changeInfo of changeRequest.changes!) {
             if (!packagesToInclude.has(changeInfo.packageName)) {
-              shouldDelete = false;
+              shouldDeleteFile = false;
               break;
             }
           }
 
-          if (shouldDelete) {
+          if (shouldDeleteFile) {
             filesToDelete.push(filePath);
           }
         },

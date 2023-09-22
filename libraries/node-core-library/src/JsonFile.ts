@@ -328,7 +328,8 @@ export class JsonFile {
 
   /**
    * Serializes the specified JSON object to a string buffer.
-   * @param jsonObject - the object to be serialized
+   * @param previousJson - the previous JSON string, which will be updated
+   * @param newJsonObject - the object to be serialized
    * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */

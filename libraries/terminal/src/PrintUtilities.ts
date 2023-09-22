@@ -168,6 +168,8 @@ export class PrintUtilities {
   /**
    * Displays a message in the console wrapped in a box UI.
    *
+   * @param message - The message to display.
+   * @param terminal - The terminal to write the message to.
    * @param boxWidth - The width of the box, defaults to half of the console width.
    */
   public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void {

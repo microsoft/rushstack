@@ -39,8 +39,8 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   public constructor(context: vscode.ExtensionContext) {
     this._context = context;
     const rushWorkspace: RushWorkspace = RushWorkspace.getCurrentInstance();
-    RushWorkspace.onDidChangeWorkspace((rushWorkspace: RushWorkspace) => {
-      this._commandLineActions = rushWorkspace.commandLineActions;
+    RushWorkspace.onDidChangeWorkspace((newWorkspace: RushWorkspace) => {
+      this._commandLineActions = newWorkspace.commandLineActions;
       this.refresh();
     });
     this._commandLineActions = rushWorkspace.commandLineActions;
