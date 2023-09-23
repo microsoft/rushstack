@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "make project watcher pause status and keybinds message more visible",
+      "comment": "Make the project watcher status and keyboard commands message more visible.",
       "type": "none"
     }
   ],
