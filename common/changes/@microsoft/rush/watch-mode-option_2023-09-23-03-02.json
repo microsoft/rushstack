@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make the project watcher status and keyboard commands message more visible.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

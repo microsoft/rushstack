@@ -164,7 +164,7 @@ export class ProjectWatcher {
 
           try {
             if (this.isPaused) {
-              this._setStatus(`Project watcher paused. Press 'w' to toggle. Press 'b' to build once.`);
+              this._setStatus(`Project watcher paused.`);
               return;
             }
             this._setStatus(`Evaluating changes to tracked files...`);
@@ -315,7 +315,16 @@ export class ProjectWatcher {
     } else {
       this._hasRenderedStatus = true;
     }
-    this._terminal.write(Colors.bold(Colors.cyan(`Watch Status: ${status}`)));
+
+    this._terminal.write(
+      Colors.bold(
+        Colors.cyan(
+          `[${this.isPaused ? 'PAUSED' : 'WATCHING'}] Watch Status: ${status} ${
+            this.isPaused ? 'Press <w> to resume. Press <b> to build once.' : 'Press <w> to pause.'
+          }`
+        )
+      )
+    );
   }
 
   /**
