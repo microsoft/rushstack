@@ -35,24 +35,26 @@ describe(Git.name, () => {
     });
   });
 
-  describe(Git.prototype.getGitStatus.name, () => {
-    function getGitStatusEntriesForCommandOutput(outputSections: string[]): IGitStatusEntry[] {
+  describe(Git.prototype.getGitStatusAsync.name, () => {
+    async function getGitStatusEntriesForCommandOutputAsync(
+      outputSections: string[]
+    ): Promise<IGitStatusEntry[]> {
       const gitInstance: Git = new Git({ rushJsonFolder: '/repo/root' } as RushConfiguration);
       jest.spyOn(gitInstance, 'getGitPathOrThrow').mockReturnValue('/git/bin/path');
       jest
-        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutput')
-        .mockImplementation((gitPath: string, args: string[]) => {
+        .spyOn(gitInstance, '_executeGitCommandAndCaptureOutputAsync')
+        .mockImplementation(async (gitPath: string, args: string[]) => {
           expect(gitPath).toEqual('/git/bin/path');
           expect(args).toEqual(['status', '--porcelain=2', '--null', '--ignored=no']);
           return outputSections.join('\0');
         });
 
-      return Array.from(gitInstance.getGitStatus());
+      return Array.from(await gitInstance.getGitStatusAsync());
     }
 
-    it('parses a git status', () => {
-      expect(
-        getGitStatusEntriesForCommandOutput([
+    it('parses a git status', async () => {
+      await expect(
+        getGitStatusEntriesForCommandOutputAsync([
           // Staged add
           '1 A. N... 000000 100644 100644 0000000000000000000000000000000000000000 a171a25d2c978ba071959f39dbeaa339fe84f768 path/a.ts',
           // Modifications, some staged and some unstaged
@@ -73,7 +75,7 @@ describe(Git.name, () => {
           '1 AM N... 000000 100644 100644 0000000000000000000000000000000000000000 9d9ab4adc79c591c0aa72f7fd29a008c80893e3e path/h.ts',
           ''
         ])
-      ).toMatchInlineSnapshot(`
+      ).resolves.toMatchInlineSnapshot(`
         Array [
           Object {
             "headFileMode": "000000",
@@ -183,10 +185,10 @@ describe(Git.name, () => {
       `);
     });
 
-    it('throws with invalid git output', () => {
-      expect(() =>
-        getGitStatusEntriesForCommandOutput(['1 A. N... 000000 100644 100644 000000000000000000'])
-      ).toThrowErrorMatchingInlineSnapshot(`"Unexpected end of git status output after position 31"`);
+    it('throws with invalid git output', async () => {
+      await expect(() =>
+        getGitStatusEntriesForCommandOutputAsync(['1 A. N... 000000 100644 100644 000000000000000000'])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unexpected end of git status output after position 31"`);
     });
   });
 });

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update the functionality that runs external lifecycle processes to be async.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
