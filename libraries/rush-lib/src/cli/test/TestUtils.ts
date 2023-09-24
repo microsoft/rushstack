@@ -73,8 +73,10 @@ export async function getCommandLineParserInstanceAsync(
 
   // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
-  FileSystem.deleteFolder(`${startPath}/a/.rush/temp`);
-  FileSystem.deleteFolder(`${startPath}/b/.rush/temp`);
+  await Promise.all([
+    FileSystem.deleteFolderAsync(`${startPath}/a/.rush/temp`),
+    FileSystem.deleteFolderAsync(`${startPath}/b/.rush/temp`)
+  ]);
 
   const { RushCommandLineParser } = await import('../RushCommandLineParser');
 

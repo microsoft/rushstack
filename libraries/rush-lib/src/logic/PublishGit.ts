@@ -19,7 +19,7 @@ export class PublishGit {
     this._gitTagSeparator = git.getTagSeparator();
   }
 
-  public checkout(branchName: string | undefined, createBranch: boolean = false): void {
+  public async checkoutAsync(branchName: string | undefined, createBranch: boolean = false): Promise<void> {
     const params: string[] = ['checkout'];
     if (createBranch) {
       params.push('-b');
@@ -27,11 +27,11 @@ export class PublishGit {
 
     params.push(branchName || DUMMY_BRANCH_NAME);
 
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
+    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, params);
   }
 
-  public merge(branchName: string, verify: boolean = false): void {
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
+  public async mergeAsync(branchName: string, verify: boolean = false): Promise<void> {
+    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
       'merge',
       branchName,
       '--no-edit',
@@ -39,18 +39,22 @@ export class PublishGit {
     ]);
   }
 
-  public deleteBranch(
+  public async deleteBranchAsync(
     branchName: string | undefined,
     hasRemote: boolean = true,
     verify: boolean = false
-  ): void {
+  ): Promise<void> {
     if (!branchName) {
       branchName = DUMMY_BRANCH_NAME;
     }
 
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['branch', '-d', branchName]);
+    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
+      'branch',
+      '-d',
+      branchName
+    ]);
     if (hasRemote) {
-      PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
+      await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
         'push',
         'origin',
         '--delete',
@@ -60,7 +64,7 @@ export class PublishGit {
     }
   }
 
-  public pull(verify: boolean = false): void {
+  public async pullAsync(verify: boolean = false): Promise<void> {
     const params: string[] = ['pull', 'origin'];
     if (this._targetBranch) {
       params.push(this._targetBranch);
@@ -69,16 +73,16 @@ export class PublishGit {
       params.push('--no-verify');
     }
 
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
+    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, params);
   }
 
-  public fetch(): void {
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['fetch', 'origin']);
+  public async fetchAsync(): Promise<void> {
+    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, ['fetch', 'origin']);
   }
 
-  public addChanges(pathspec?: string, workingDirectory?: string): void {
+  public async addChangesAsync(pathspec?: string, workingDirectory?: string): Promise<void> {
     const files: string = pathspec ? pathspec : '.';
-    PublishUtilities.execCommand(
+    await PublishUtilities.execCommandAsync(
       !!this._targetBranch,
       this._gitPath,
       ['add', files],
@@ -86,20 +90,20 @@ export class PublishGit {
     );
   }
 
-  public addTag(
+  public async addTagAsync(
     shouldExecute: boolean,
     packageName: string,
     packageVersion: string,
     commitId: string | undefined,
     preReleaseName?: string
-  ): void {
+  ): Promise<void> {
     // Tagging only happens if we're publishing to real NPM and committing to git.
     const tagName: string = PublishUtilities.createTagname(
       packageName,
       packageVersion,
       this._gitTagSeparator
     );
-    PublishUtilities.execCommand(!!this._targetBranch && shouldExecute, this._gitPath, [
+    await PublishUtilities.execCommandAsync(!!this._targetBranch && shouldExecute, this._gitPath, [
       'tag',
       '-a',
       preReleaseName ? `${tagName}-${preReleaseName}` : tagName,
@@ -111,25 +115,27 @@ export class PublishGit {
     ]);
   }
 
-  public hasTag(packageConfig: RushConfigurationProject): boolean {
+  public async hasTagAsync(packageConfig: RushConfigurationProject): Promise<boolean> {
     const tagName: string = PublishUtilities.createTagname(
       packageConfig.packageName,
       packageConfig.packageJson.version,
       this._gitTagSeparator
     );
-    const tagOutput: string = Utilities.executeCommandAndCaptureOutput(
-      this._gitPath,
-      ['tag', '-l', tagName],
-      packageConfig.projectFolder,
-      PublishUtilities.getEnvArgs(),
-      true
+    const tagOutput: string = (
+      await Utilities.executeCommandAndCaptureOutputAsync(
+        this._gitPath,
+        ['tag', '-l', tagName],
+        packageConfig.projectFolder,
+        PublishUtilities.getEnvArgs(),
+        true
+      )
     ).replace(/(\r\n|\n|\r)/gm, '');
 
     return tagOutput === tagName;
   }
 
-  public commit(commitMessage: string, verify: boolean = false): void {
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
+  public async commitAsync(commitMessage: string, verify: boolean = false): Promise<void> {
+    await PublishUtilities.execCommandAsync(!!this._targetBranch, this._gitPath, [
       'commit',
       '-m',
       commitMessage,
@@ -137,8 +143,8 @@ export class PublishGit {
     ]);
   }
 
-  public push(branchName: string | undefined, verify: boolean = false): void {
-    PublishUtilities.execCommand(
+  public async pushAsync(branchName: string | undefined, verify: boolean = false): Promise<void> {
+    await PublishUtilities.execCommandAsync(
       !!this._targetBranch,
       this._gitPath,
       // We append "--no-verify" to prevent Git hooks from running.  For example, people may

@@ -301,10 +301,7 @@ describe('RushCommandLineParser', () => {
 
         expect(FileSystem.exists(telemetryFilePath)).toEqual(true);
 
-        let telemetryStore: ITelemetryData[] = [];
-        expect(() => {
-          telemetryStore = JsonFile.load(telemetryFilePath);
-        }).not.toThrowError();
+        const telemetryStore: ITelemetryData[] = await JsonFile.loadAsync(telemetryFilePath);
         expect(telemetryStore?.[0].name).toEqual('build');
         expect(telemetryStore?.[0].result).toEqual('Succeeded');
       });

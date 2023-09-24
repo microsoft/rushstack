@@ -524,7 +524,7 @@ export class RushInstallManager extends BaseInstallManager {
           const args: string[] = ['prune'];
           this.pushConfigurationArgs(args, this.options, subspace);
 
-          Utilities.executeCommandWithRetry(
+          await Utilities.executeCommandWithRetryAsync(
             {
               command: packageManagerFilename,
               args: args,
@@ -605,7 +605,7 @@ export class RushInstallManager extends BaseInstallManager {
       );
     }
 
-    Utilities.executeCommandWithRetry(
+    await Utilities.executeCommandWithRetryAsync(
       {
         command: packageManagerFilename,
         args: installArgs,
@@ -634,7 +634,7 @@ export class RushInstallManager extends BaseInstallManager {
       console.log('\n' + Colorize.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options, subspace);
-      Utilities.executeCommand({
+      await Utilities.executeCommandAsync({
         command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
         workingDirectory: this.rushConfiguration.commonTempFolder
