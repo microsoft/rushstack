@@ -13,10 +13,6 @@ const fs = require('fs');
 const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';
 
-// error: "The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received ''"
-const isInvalidImporterPath: (ex: unknown) => boolean = (ex) =>
-  (ex as { code: unknown } | undefined)?.code === 'ERR_INVALID_ARG_VALUE';
-
 // Module path for eslintrc.cjs
 // Example: ".../@eslint/eslintrc/dist/eslintrc.cjs"
 let eslintrcBundlePath: string | undefined = undefined;
@@ -39,7 +35,7 @@ let eslintFolder: string | undefined = undefined;
 
 // Probe for the ESLint >=8.0.0 layout:
 for (let currentModule = module; ; ) {
-  if (!eslintrcBundlePath) {
+  if (!eslintrcBundlePath && currentModule.filename.endsWith('eslintrc.cjs')) {
     // For ESLint >=8.0.0, all @eslint/eslintrc code is bundled at this path:
     //   .../@eslint/eslintrc/dist/eslintrc.cjs
     try {
@@ -49,8 +45,9 @@ for (let currentModule = module; ; ) {
 
       // Make sure we actually resolved the module in our call path
       // and not some other spurious dependency.
-      if (path.join(eslintrcFolder, 'dist/eslintrc.cjs') === currentModule.filename) {
-        eslintrcBundlePath = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
+      const resolvedEslintrcBundlePath: string = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
+      if (resolvedEslintrcBundlePath === currentModule.filename) {
+        eslintrcBundlePath = resolvedEslintrcBundlePath;
       }
     } catch (ex: unknown) {
       // Module resolution failures are expected, as we're walking
@@ -95,7 +92,7 @@ for (let currentModule = module; ; ) {
 if (!eslintFolder) {
   // Probe for the ESLint >=7.8.0 layout:
   for (let currentModule = module; ; ) {
-    if (!configArrayFactoryPath) {
+    if (!configArrayFactoryPath && currentModule.filename.endsWith('config-array-factory.js')) {
       // For ESLint >=7.8.0, config-array-factory.js is at this path:
       //   .../@eslint/eslintrc/lib/config-array-factory.js
       try {
@@ -105,8 +102,12 @@ if (!eslintFolder) {
           })
         );
 
-        if (path.join(eslintrcFolder, '/lib/config-array-factory.js') == currentModule.filename) {
-          configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory.js');
+        const resolvedConfigArrayFactoryPath: string = path.join(
+          eslintrcFolder,
+          '/lib/config-array-factory.js'
+        );
+        if (resolvedConfigArrayFactoryPath === currentModule.filename) {
+          configArrayFactoryPath = resolvedConfigArrayFactoryPath;
           moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
           namingPath = path.join(eslintrcFolder, 'lib/shared/naming');
         }
@@ -118,7 +119,7 @@ if (!eslintFolder) {
           throw ex;
         }
       }
-    } else {
+    } else if (currentModule.filename.endsWith('cli-engine.js')) {
       // Next look for a file in ESLint's folder
       //   .../eslint/lib/cli-engine/cli-engine.js
       try {
@@ -209,4 +210,10 @@ if (eslintMajorVersion === 8) {
   Naming = require(namingPath!);
 }
 
-export { ConfigArrayFactory, ModuleResolver, Naming, eslintMajorVersion as EslintMajorVersion };
+export {
+  ConfigArrayFactory,
+  ModuleResolver,
+  Naming,
+  eslintMajorVersion as EslintMajorVersion,
+  isModuleResolutionError
+};
