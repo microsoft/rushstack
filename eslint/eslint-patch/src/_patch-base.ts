@@ -29,6 +29,10 @@ let configArrayFactoryPath: string | undefined = undefined;
 // Example: ".../@eslint/eslintrc/lib/shared/relative-module-resolver"
 let moduleResolverPath: string | undefined = undefined;
 
+// Module path for naming.js
+// Example: ".../@eslint/eslintrc/lib/shared/naming"
+let namingPath: string | undefined = undefined;
+
 // Folder path where ESLint's package.json can be found
 // Example: ".../node_modules/eslint"
 let eslintFolder: string | undefined = undefined;
@@ -104,6 +108,7 @@ if (!eslintFolder) {
         if (path.join(eslintrcFolder, '/lib/config-array-factory.js') == currentModule.filename) {
           configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory.js');
           moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
+          namingPath = path.join(eslintrcFolder, 'lib/shared/naming');
         }
       } catch (ex: unknown) {
         // Module resolution failures are expected, as we're walking
@@ -153,6 +158,7 @@ if (!eslintFolder) {
       eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
       configArrayFactoryPath = path.join(eslintFolder, 'lib/cli-engine/config-array-factory');
       moduleResolverPath = path.join(eslintFolder, 'lib/shared/relative-module-resolver');
+      namingPath = path.join(eslintFolder, 'lib/shared/naming');
       break;
     }
 
@@ -192,62 +198,15 @@ if (eslintMajorVersion === 8) {
 } else {
   ConfigArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
 }
-if (!ConfigArrayFactory.__patched) {
-  ConfigArrayFactory.__patched = true;
 
-  let ModuleResolver: { resolve: any };
-  if (eslintMajorVersion === 8) {
-    ModuleResolver = require(eslintrcBundlePath!).Legacy.ModuleResolver;
-  } else {
-    ModuleResolver = require(moduleResolverPath!);
-  }
-  const originalLoadPlugin = ConfigArrayFactory.prototype._loadPlugin;
-
-  if (eslintMajorVersion === 6) {
-    // ESLint 6.x
-    ConfigArrayFactory.prototype._loadPlugin = function (
-      name: string,
-      importerPath: string,
-      importerName: string
-    ) {
-      const originalResolve = ModuleResolver.resolve;
-      try {
-        ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
-          try {
-            // resolve using importerPath instead of relativeToPath
-            return originalResolve.call(this, moduleName, importerPath);
-          } catch (e) {
-            if (isModuleResolutionError(e) || isInvalidImporterPath(e)) {
-              return originalResolve.call(this, moduleName, relativeToPath);
-            }
-            throw e;
-          }
-        };
-        return originalLoadPlugin.apply(this, arguments);
-      } finally {
-        ModuleResolver.resolve = originalResolve;
-      }
-    };
-  } else {
-    // ESLint 7.x || 8.x
-    ConfigArrayFactory.prototype._loadPlugin = function (name: string, ctx: Record<string, unknown>) {
-      const originalResolve = ModuleResolver.resolve;
-      try {
-        ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
-          try {
-            // resolve using ctx.filePath instead of relativeToPath
-            return originalResolve.call(this, moduleName, ctx.filePath);
-          } catch (e) {
-            if (isModuleResolutionError(e) || isInvalidImporterPath(e)) {
-              return originalResolve.call(this, moduleName, relativeToPath);
-            }
-            throw e;
-          }
-        };
-        return originalLoadPlugin.apply(this, arguments);
-      } finally {
-        ModuleResolver.resolve = originalResolve;
-      }
-    };
-  }
+let ModuleResolver: { resolve: any };
+let Naming: { normalizePackageName: any };
+if (eslintMajorVersion === 8) {
+  ModuleResolver = require(eslintrcBundlePath!).Legacy.ModuleResolver;
+  Naming = require(eslintrcBundlePath!).Legacy.naming;
+} else {
+  ModuleResolver = require(moduleResolverPath!);
+  Naming = require(namingPath!);
 }
+
+export { ConfigArrayFactory, ModuleResolver, Naming, eslintMajorVersion as EslintMajorVersion };
