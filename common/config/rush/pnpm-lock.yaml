@@ -1713,7 +1713,7 @@ importers:
         version: 29.5.5
       '@types/node':
         specifier: ts4.9
-        version: 20.6.2
+        version: 20.7.0
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -3528,6 +3528,9 @@ importers:
       '@microsoft/api-extractor':
         specifier: workspace:*
         version: link:../../apps/api-extractor
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
       '@rushstack/heft-api-extractor-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-api-extractor-plugin
@@ -3562,6 +3565,9 @@ importers:
       '@microsoft/api-extractor':
         specifier: workspace:*
         version: link:../../apps/api-extractor
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
       '@rushstack/heft-api-extractor-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-api-extractor-plugin
@@ -11455,6 +11461,11 @@ packages:
 
   /@types/node@20.6.2:
     resolution: {integrity: sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==}
+    dev: false
+
+  /@types/node@20.7.0:
+    resolution: {integrity: sha512-zI22/pJW2wUZOVyguFaUL1HABdmSVxpXrzIqkjsHmyUjNhPoWM1CKfvVuXfetHhIok4RY573cqS0mZ1SJEnoTg==}
+    dev: true
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
