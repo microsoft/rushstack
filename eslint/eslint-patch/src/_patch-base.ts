@@ -193,7 +193,7 @@ if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
   );
 }
 
-let ConfigArrayFactory;
+let ConfigArrayFactory: any;
 if (eslintMajorVersion === 8) {
   ConfigArrayFactory = require(eslintrcBundlePath!).Legacy.ConfigArrayFactory;
 } else {
