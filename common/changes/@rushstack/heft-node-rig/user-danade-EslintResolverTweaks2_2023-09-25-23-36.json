@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Adds an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the \"eslint-config-\" prefix. This change also includes the ESLint configurations sourced from \"@rushstack/eslint-config\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
