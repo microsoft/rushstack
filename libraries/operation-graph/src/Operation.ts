@@ -256,6 +256,7 @@ export class Operation implements IOperationStates {
       requestRun: requestRun
         ? () => {
             switch (this.state?.status) {
+              case OperationStatus.Waiting:
               case OperationStatus.Ready:
               case OperationStatus.Executing:
                 // If current status has not yet resolved to a fixed value,
@@ -278,7 +279,9 @@ export class Operation implements IOperationStates {
                 // to capture here.
                 return requestRun(this.name);
               default:
-                throw new InternalError(`Unexpected status: ${this.state?.status}`);
+                // This line is here to enforce exhaustiveness
+                const currentStatus: undefined = this.state?.status;
+                throw new InternalError(`Unexpected status: ${currentStatus}`);
             }
           }
         : undefined
