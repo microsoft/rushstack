@@ -2,6 +2,18 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/operation-graph_v0.1.1",
+      "date": "Mon, 25 Sep 2023 23:38:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add OperationStatus.Waiting to possible states in watcher loop, add exhaustiveness check."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/operation-graph_v0.1.0",
       "date": "Tue, 19 Sep 2023 15:21:51 GMT",
