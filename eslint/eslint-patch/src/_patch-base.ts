@@ -108,8 +108,8 @@ if (!eslintFolder) {
         );
         if (resolvedConfigArrayFactoryPath === currentModule.filename) {
           configArrayFactoryPath = resolvedConfigArrayFactoryPath;
-          moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
-          namingPath = path.join(eslintrcFolder, 'lib/shared/naming');
+          moduleResolverPath = `${eslintrcFolder}/lib/shared/relative-module-resolver`;
+          namingPath = `${eslintrcFolder}/lib/shared/naming`;
         }
       } catch (ex: unknown) {
         // Module resolution failures are expected, as we're walking
@@ -157,9 +157,9 @@ if (!eslintFolder) {
     //   .../eslint/lib/cli-engine/config-array-factory.js
     if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
       eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
-      configArrayFactoryPath = path.join(eslintFolder, 'lib/cli-engine/config-array-factory');
-      moduleResolverPath = path.join(eslintFolder, 'lib/shared/relative-module-resolver');
-      namingPath = path.join(eslintFolder, 'lib/shared/naming');
+      configArrayFactoryPath = `${eslintFolder}/lib/cli-engine/config-array-factory`;
+      moduleResolverPath = `${eslintFolder}/lib/shared/relative-module-resolver`;
+      namingPath = `${eslintFolder}/lib/shared/naming`;
       break;
     }
 
@@ -176,10 +176,10 @@ if (!eslintFolder) {
 }
 
 // Detect the ESLint package version
-const eslintPackageJson = fs.readFileSync(path.join(eslintFolder, 'package.json')).toString();
+const eslintPackageJson = fs.readFileSync(`${eslintFolder}/package.json`).toString();
 const eslintPackageObject = JSON.parse(eslintPackageJson);
 const eslintPackageVersion = eslintPackageObject.version;
-const versionMatch = /^([0-9]+)\./.exec(eslintPackageVersion); // parse the SemVer MAJOR part
+const versionMatch = parseInt(eslintPackageVersion, 10);
 if (!versionMatch) {
   throw new Error('Unable to parse ESLint version: ' + eslintPackageVersion);
 }

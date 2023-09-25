@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-config",
-      "comment": "Adds an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the \"eslint-config-\" prefix",
+      "comment": "Add an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the \"eslint-config-\" prefix",
       "type": "minor"
     }
   ],
