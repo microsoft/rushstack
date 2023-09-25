@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Add OperationStatus.Waiting to possible states in watcher loop, add exhaustiveness check.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}
