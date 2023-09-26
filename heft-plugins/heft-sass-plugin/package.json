@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-sass-plugin",
-  "version": "0.12.4",
+  "version": "0.12.5",
   "description": "Heft plugin for SASS",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.61.2"
+    "@rushstack/heft": "^0.61.3"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
