@@ -9,10 +9,10 @@
 //
 
 import {
-  EslintMajorVersion,
   ConfigArrayFactory,
   ModuleResolver,
-  isModuleResolutionError
+  isModuleResolutionError,
+  ESLINT_MAJOR_VERSION
 } from './_patch-base';
 
 // error: "The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received ''"
@@ -23,7 +23,7 @@ if (!ConfigArrayFactory.__loadPluginPatched) {
   ConfigArrayFactory.__loadPluginPatched = true;
   const originalLoadPlugin = ConfigArrayFactory.prototype._loadPlugin;
 
-  if (EslintMajorVersion === 6) {
+  if (ESLINT_MAJOR_VERSION === 6) {
     // ESLint 6.x
     // https://github.com/eslint/eslint/blob/9738f8cc864d769988ccf42bb70f524444df1349/lib/cli-engine/config-array-factory.js#L915
     ConfigArrayFactory.prototype._loadPlugin = function (

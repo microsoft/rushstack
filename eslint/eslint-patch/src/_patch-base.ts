@@ -179,14 +179,16 @@ if (!eslintFolder) {
 const eslintPackageJson = fs.readFileSync(`${eslintFolder}/package.json`).toString();
 const eslintPackageObject = JSON.parse(eslintPackageJson);
 const eslintPackageVersion = eslintPackageObject.version;
-const versionMatch = parseInt(eslintPackageVersion, 10);
-if (!versionMatch) {
-  throw new Error('Unable to parse ESLint version: ' + eslintPackageVersion);
+let eslintMajorVersion: number;
+try {
+  eslintMajorVersion = parseInt(eslintPackageVersion, 10);
+} catch (e) {
+  throw new Error(`Unable to parse ESLint version "${eslintPackageVersion}": ${e}`);
 }
-const eslintMajorVersion = Number(versionMatch[1]);
+
 if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
   throw new Error(
-    'The patch-eslint.js script has only been tested with ESLint version 6.x, 7.x, and 8.x.' +
+    'The ESLint patch script has only been tested with ESLint version 6.x, 7.x, and 8.x.' +
       ` (Your version: ${eslintPackageVersion})\n` +
       'Consider reporting a GitHub issue:\n' +
       'https://github.com/microsoft/rushstack/issues'
@@ -214,6 +216,6 @@ export {
   ConfigArrayFactory,
   ModuleResolver,
   Naming,
-  eslintMajorVersion as EslintMajorVersion,
+  eslintMajorVersion as ESLINT_MAJOR_VERSION,
   isModuleResolutionError
 };
