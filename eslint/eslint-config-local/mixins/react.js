@@ -25,8 +25,7 @@ module.exports = {
         // eslint-plugin-react-hooks
         // =====================================================================
         'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'warn',
-        'deprecation/deprecation': 'off'
+        'react-hooks/exhaustive-deps': 'warn'
       }
     },
     {
