@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.61.3",
+      "tag": "@rushstack/heft_v0.61.3",
+      "date": "Tue, 26 Sep 2023 21:02:30 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where `heft clean` would crash with `ERR_ILLEGAL_CONSTRUCTOR`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.61.2",
       "tag": "@rushstack/heft_v0.61.2",
       "date": "Tue, 26 Sep 2023 09:30:33 GMT",

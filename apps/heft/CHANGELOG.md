@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 26 Sep 2023 09:30:33 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Sep 2023 21:02:30 GMT and should not be manually modified.
+
+## 0.61.3
+Tue, 26 Sep 2023 21:02:30 GMT
+
+### Patches
+
+- Fix an issue where `heft clean` would crash with `ERR_ILLEGAL_CONSTRUCTOR`.
 
 ## 0.61.2
 Tue, 26 Sep 2023 09:30:33 GMT
