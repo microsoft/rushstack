@@ -138,6 +138,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/api-extractor-test-03](./build-tests/api-extractor-test-03/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-test-04](./build-tests/api-extractor-test-04/) | Building this project is a regression test for api-extractor |
 | [/build-tests/eslint-7-test](./build-tests/eslint-7-test/) | This project contains a build test to validate ESLint 7 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin) |
+| [/build-tests/eslint-8-test](./build-tests/eslint-8-test/) | This project contains a build test to validate ESLint 8 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin) |
 | [/build-tests/hashed-folder-copy-plugin-webpack4-test](./build-tests/hashed-folder-copy-plugin-webpack4-test/) | Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 4. |
 | [/build-tests/hashed-folder-copy-plugin-webpack5-test](./build-tests/hashed-folder-copy-plugin-webpack5-test/) | Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 5. NOTE - THIS TEST IS CURRENTLY EXPECTED TO BE BROKEN |
 | [/build-tests/heft-copy-files-test](./build-tests/heft-copy-files-test/) | Building this project tests copying files with Heft |
