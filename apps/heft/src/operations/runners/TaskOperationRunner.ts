@@ -22,7 +22,6 @@ import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 import { watchGlobAsync, type IGlobOptions } from '../../plugins/FileGlobSpecifier';
 import { type IWatchedFileState, WatchFileSystemAdapter } from '../../utilities/WatchFileSystemAdapter';
-import { CancellationToken } from '../../pluginFramework/CancellationToken';
 
 export interface ITaskOperationRunnerOptions {
   internalHeftSession: InternalHeftSession;
@@ -129,9 +128,7 @@ export class TaskOperationRunner implements IOperationRunner {
           async (): Promise<OperationStatus> => {
             // Create the options and provide a utility method to obtain paths to copy
             const runHookOptions: IHeftTaskRunHookOptions = {
-              abortSignal,
-              // Included for backwards compatibility
-              cancellationToken: new CancellationToken(abortSignal)
+              abortSignal
             };
 
             // Run the plugin run hook

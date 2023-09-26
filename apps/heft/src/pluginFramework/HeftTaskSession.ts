@@ -11,7 +11,6 @@ import type { HeftParameterManager, IHeftParameters } from './HeftParameterManag
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
-import type { CancellationToken } from './CancellationToken';
 import type { WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import { InternalError } from '@rushstack/node-core-library';
 
@@ -169,16 +168,6 @@ export interface IHeftTaskRunHookOptions {
    * @beta
    */
   readonly abortSignal: AbortSignal;
-
-  /**
-   * A cancellation token that is used to signal that the build is cancelled. This
-   * can be used to stop operations early and allow for a new build to
-   * be started.
-   *
-   * @beta
-   * @deprecated Use `abortSignal` instead.
-   */
-  readonly cancellationToken: CancellationToken;
 }
 
 /**
