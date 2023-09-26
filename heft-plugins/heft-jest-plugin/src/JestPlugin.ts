@@ -179,6 +179,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   ): void {
     const { parameters } = taskSession;
 
+    // set env variable if not already set
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = 'test';
+    }
+
     // Flags
     const detectOpenHandlesParameter: CommandLineFlagParameter =
       parameters.getFlagParameter('--detect-open-handles');

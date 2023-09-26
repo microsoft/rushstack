@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "add new test that covers setting NODE_ENV var if not set",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
