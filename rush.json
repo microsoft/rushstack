@@ -537,6 +537,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-8-test",
+      "projectFolder": "build-tests/eslint-8-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "package-extractor-test-01",
       "projectFolder": "build-tests/package-extractor-test-01",
       "reviewCategory": "tests",

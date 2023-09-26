@@ -1072,6 +1072,30 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  ../../build-tests/eslint-8-test:
+    devDependencies:
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      '@typescript-eslint/parser':
+        specifier: ~5.59.2
+        version: 5.59.11(eslint@8.7.0)(typescript@5.0.4)
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
+
   ../../build-tests/hashed-folder-copy-plugin-webpack4-test:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin':
@@ -16029,7 +16053,7 @@ packages:
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       natural-compare: 1.4.0
       optionator: 0.9.3
       regexpp: 3.2.0
@@ -25697,7 +25721,7 @@ packages:
   /wide-align@1.1.5:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==}
     dependencies:
-      string-width: 1.0.2
+      string-width: 4.2.3
     dev: true
 
   /widest-line@3.1.0:
