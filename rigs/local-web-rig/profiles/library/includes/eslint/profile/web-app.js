@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 module.exports = {
-  extends: ['@rushstack/heft-web-rig/profiles/library/includes/eslint/profile/web-app']
+  extends: ['eslint-config-local/profile/web-app']
 };

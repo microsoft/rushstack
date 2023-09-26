@@ -263,7 +263,6 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "eslint-config-local": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",

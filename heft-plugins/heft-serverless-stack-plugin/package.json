@@ -21,7 +21,6 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",

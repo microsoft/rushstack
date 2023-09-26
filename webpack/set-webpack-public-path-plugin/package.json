@@ -27,7 +27,6 @@
     "@rushstack/webpack-plugin-utilities": "workspace:*"
   },
   "devDependencies": {
-    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",

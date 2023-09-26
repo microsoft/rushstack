@@ -29,7 +29,6 @@
     "fast-glob": "~3.3.1"
   },
   "devDependencies": {
-    "eslint-config-local": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/enhanced-resolve": "3.0.7",

@@ -10,7 +10,6 @@
   },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",
-    "eslint-config-local": "workspace:*",
     "doc-plugin-rush-stack": "workspace:*"
   }
 }

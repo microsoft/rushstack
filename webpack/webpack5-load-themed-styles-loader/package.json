@@ -26,7 +26,6 @@
   },
   "devDependencies": {
     "@microsoft/load-themed-styles": "workspace:*",
-    "eslint-config-local": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",

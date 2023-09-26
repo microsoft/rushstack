@@ -26,7 +26,6 @@
     "typescript": "~5.0.4"
   },
   "devDependencies": {
-    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@types/resolve": "1.20.2",

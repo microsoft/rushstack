@@ -25,7 +25,6 @@
     "fast-glob": "~3.3.1"
   },
   "devDependencies": {
-    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@types/glob": "7.1.1"

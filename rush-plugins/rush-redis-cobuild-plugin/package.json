@@ -25,7 +25,6 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "eslint-config-local": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*"
   }
