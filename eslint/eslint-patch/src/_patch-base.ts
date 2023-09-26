@@ -176,14 +176,15 @@ if (!eslintFolder) {
 }
 
 // Detect the ESLint package version
-const eslintPackageJson = fs.readFileSync(`${eslintFolder}/package.json`).toString();
+const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
+const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
 const eslintPackageObject = JSON.parse(eslintPackageJson);
 const eslintPackageVersion = eslintPackageObject.version;
-let eslintMajorVersion: number;
-try {
-  eslintMajorVersion = parseInt(eslintPackageVersion, 10);
-} catch (e) {
-  throw new Error(`Unable to parse ESLint version "${eslintPackageVersion}": ${e}`);
+const eslintMajorVersion: number = parseInt(eslintPackageVersion, 10);
+if (isNaN(eslintMajorVersion)) {
+  throw new Error(
+    `Unable to parse ESLint version "${eslintPackageVersion}" in file "${eslintPackageJsonPath}"`
+  );
 }
 
 if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
