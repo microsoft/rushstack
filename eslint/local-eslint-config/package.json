@@ -1,5 +1,5 @@
 {
-  "name": "eslint-config-local",
+  "name": "local-eslint-config",
   "version": "1.0.0",
   "private": true,
   "description": "An ESLint configuration consumed projects inside the rushstack repo.",

@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 module.exports = {
-  extends: ['eslint-config-local/profile/node-trusted-tool']
+  extends: ['local-eslint-config/profile/node-trusted-tool']
 };

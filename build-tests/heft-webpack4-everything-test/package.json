@@ -10,7 +10,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "eslint-config-local": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",

@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 module.exports = {
-  extends: ['eslint-config-local/mixins/packlets']
+  extends: ['local-eslint-config/mixins/packlets']
 };

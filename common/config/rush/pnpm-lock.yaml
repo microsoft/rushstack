@@ -3695,9 +3695,6 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
-      eslint-config-local:
-        specifier: workspace:*
-        version: link:../../eslint/eslint-config-local
       jest-junit:
         specifier: 12.3.0
         version: 12.3.0
@@ -3725,9 +3722,6 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
-      eslint-config-local:
-        specifier: workspace:*
-        version: link:../../eslint/eslint-config-local
       jest-junit:
         specifier: 12.3.0
         version: 12.3.0

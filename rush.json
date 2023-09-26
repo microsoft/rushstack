@@ -637,8 +637,8 @@
       "shouldPublish": true
     },
     {
-      "packageName": "eslint-config-local",
-      "projectFolder": "eslint/eslint-config-local",
+      "packageName": "local-eslint-config",
+      "projectFolder": "eslint/local-eslint-config",
       "reviewCategory": "libraries",
       "shouldPublish": false
     },

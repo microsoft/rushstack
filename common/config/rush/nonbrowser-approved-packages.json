@@ -443,7 +443,7 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
-      "name": "eslint-config-local",
+      "name": "local-eslint-config",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {

@@ -12,7 +12,7 @@
   "devDependencies": {
     "@jest/reporters": "~29.5.0",
     "@jest/types": "29.5.0",
-    "eslint-config-local": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
