@@ -221,7 +221,7 @@ export class ProjectChangeAnalyzer {
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
 
-    const mergeCommit: string = this._git.getMergeBase(targetBranchName, terminal, shouldFetch);
+    const mergeCommit: string = await this._git.getMergeBaseAsync(targetBranchName, terminal, shouldFetch);
 
     const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
 
@@ -255,7 +255,7 @@ export class ProjectChangeAnalyzer {
             throw new Error(`Unable to obtain current shrinkwrap file.`);
           }
 
-          const oldShrinkwrapText: string = this._git.getBlobContent({
+          const oldShrinkwrapText: string = await this._git.getBlobContentAsync({
             // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
             blobSpec: `${mergeCommit}:${shrinkwrapFile}`,
             repositoryRoot: repoRoot

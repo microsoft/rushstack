@@ -421,14 +421,14 @@ export abstract class BaseInstallManager {
       if (hookFilenames.length > 0) {
         console.log('\n' + colors.bold('Found files in the "common/git-hooks" folder.'));
 
-        if (!git.isHooksPathDefault()) {
+        if (!git.getIsHooksPathDefaultAsync()) {
           const color: (str: string) => string = this.options.bypassPolicy ? colors.yellow : colors.red;
           console.error(
             color(
               [
                 ' ',
                 `Rush cannot install the "common/git-hooks" scripts because your Git configuration `,
-                `specifies "core.hooksPath=${git.getConfigHooksPath()}". You can remove the setting by running:`,
+                `specifies "core.hooksPath=${git.getConfigHooksPathAsync()}". You can remove the setting by running:`,
                 ' ',
                 '    git config --unset core.hooksPath',
                 ' '

@@ -10,8 +10,8 @@ describe('CLI', () => {
     const workingDir: string = '/';
     const startPath: string = path.resolve(__dirname, '../../../lib-commonjs/start.js');
 
-    expect(() => {
-      Utilities.executeCommand({
+    expect(async () => {
+      await Utilities.executeCommandAsync({
         command: 'node',
         args: [startPath],
         workingDirectory: workingDir,
@@ -20,12 +20,12 @@ describe('CLI', () => {
     }).not.toThrow();
   });
 
-  it('rushx should pass args to scripts', () => {
+  it('rushx should pass args to scripts', async () => {
     // Invoke "rushx"
     const startPath: string = path.resolve(__dirname, '../../../lib-commonjs/startx.js');
 
     // Run "rushx show-args 1 2 -x" in the "repo/rushx-project" folder
-    const output: string = Utilities.executeCommandAndCaptureOutput(
+    const output: string = await Utilities.executeCommandAndCaptureOutputAsync(
       'node',
       [startPath, 'show-args', '1', '2', '-x'],
       `${__dirname}/repo/rushx-project`
@@ -38,17 +38,15 @@ describe('CLI', () => {
     expect(lastLine).toEqual('build.js: ARGS=["1","2","-x"]');
   });
 
-  it('rushx should fail in un-rush project', () => {
+  it('rushx should fail in un-rush project', async () => {
     // Invoke "rushx"
     const startPath: string = path.resolve(__dirname, '../../../lib-commonjs/startx.js');
 
-    const output = Utilities.executeCommandAndCaptureOutput(
+    const output: string = await Utilities.executeCommandAndCaptureOutputAsync(
       'node',
       [startPath, 'show-args', '1', '2', '-x'],
       `${__dirname}/repo/rushx-not-in-rush-project`
     );
-
-    console.log(output);
 
     expect(output).toEqual(
       expect.stringMatching(
