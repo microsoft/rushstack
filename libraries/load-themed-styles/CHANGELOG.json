@@ -2,6 +2,23 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "2.0.80",
+      "tag": "@microsoft/load-themed-styles_v2.0.80",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.61.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.79",
       "tag": "@microsoft/load-themed-styles_v2.0.79",
       "date": "Mon, 25 Sep 2023 23:38:28 GMT",

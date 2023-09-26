@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@rushstack/eslint-patch_v1.5.0",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the \"eslint-config-\" prefix"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@rushstack/eslint-patch_v1.4.0",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",

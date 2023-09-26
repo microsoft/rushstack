@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.60.1",
+      "tag": "@rushstack/node-core-library_v3.60.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.60.0",
       "tag": "@rushstack/node-core-library_v3.60.0",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",
