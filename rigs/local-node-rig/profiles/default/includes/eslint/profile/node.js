@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 module.exports = {
-  extends: ['@rushstack/heft-node-rig/profiles/default/includes/eslint/profile/node']
+  extends: ['local-eslint-config/profile/node']
 };

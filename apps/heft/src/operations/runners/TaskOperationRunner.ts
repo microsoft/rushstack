@@ -9,7 +9,7 @@ import {
 
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
-import { HeftTask } from '../../pluginFramework/HeftTask';
+import type { HeftTask } from '../../pluginFramework/HeftTask';
 import { copyFilesAsync, normalizeCopyOperation } from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
 import type {

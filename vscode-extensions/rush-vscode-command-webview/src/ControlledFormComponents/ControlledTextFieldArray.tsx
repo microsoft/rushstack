@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IStackTokens, ITextFieldProps, Stack, TextField } from '@fluentui/react';
+import { type IStackTokens, type ITextFieldProps, Stack, TextField } from '@fluentui/react';
 import * as React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
@@ -50,6 +50,7 @@ export const ControlledTextFieldArray = (props: IControlledTextFieldArrayProps):
                         styles={textFieldStyles}
                         {...props}
                         onChange={(e, v) => {
+                          // eslint-disable-next-line no-console
                           console.log('-------newValue', `${name}.${index}.value`, v);
                           onChange(v);
                         }}

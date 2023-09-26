@@ -3,7 +3,7 @@
 
 import { once } from 'node:events';
 import type { Server as HTTPSecureServer } from 'node:https';
-import http2, { Http2SecureServer } from 'node:http2';
+import http2, { type Http2SecureServer } from 'node:http2';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
 
@@ -13,24 +13,24 @@ import cors from 'cors';
 import compression from 'compression';
 import { WebSocketServer, type WebSocket, type MessageEvent } from 'ws';
 
-import { CertificateManager, ICertificate } from '@rushstack/debug-certificate-manager';
+import { CertificateManager, type ICertificate } from '@rushstack/debug-certificate-manager';
 import { AlreadyReportedError, Sort } from '@rushstack/node-core-library';
 import {
-  ILogger,
-  RushConfiguration,
-  RushConfigurationProject,
-  RushSession,
-  IPhasedCommand,
-  Operation,
-  ICreateOperationsContext,
-  IOperationExecutionResult,
+  type ILogger,
+  type RushConfiguration,
+  type RushConfigurationProject,
+  type RushSession,
+  type IPhasedCommand,
+  type Operation,
+  type ICreateOperationsContext,
+  type IOperationExecutionResult,
   OperationStatus,
-  IExecutionResult
+  type IExecutionResult
 } from '@rushstack/rush-sdk';
 import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { PLUGIN_NAME } from './constants';
-import { IRoutingRule, RushServeConfiguration } from './RushProjectServeConfigFile';
+import { type IRoutingRule, RushServeConfiguration } from './RushProjectServeConfigFile';
 
 import type {
   IOperationInfo,

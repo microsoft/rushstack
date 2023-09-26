@@ -61,7 +61,6 @@
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",
-    "@rushstack/eslint-config": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",

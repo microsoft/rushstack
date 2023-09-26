@@ -7,7 +7,7 @@ import * as colorsPackage from 'colors';
 import { Utilities } from '../../utilities/Utilities';
 import { Rush } from '../../api/Rush';
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { NodeJsCompatibility } from '../../logic/NodeJsCompatibility';
 
 import { RushXCommandLine } from '../RushXCommandLine';

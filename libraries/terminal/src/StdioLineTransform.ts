@@ -3,8 +3,8 @@
 
 import { Text, NewlineKind } from '@rushstack/node-core-library';
 
-import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
+import { TerminalTransform, type ITerminalTransformOptions } from './TerminalTransform';
 
 /**
  * Constructor options for {@link StderrLineTransform}

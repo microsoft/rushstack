@@ -22,7 +22,6 @@
     "xmldoc": "~1.1.2"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/xmldoc": "1.1.4",
     "local-node-rig": "workspace:*"

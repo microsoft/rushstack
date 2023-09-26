@@ -5,7 +5,7 @@ import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import {
   HeftLifecyclePluginDefinition,
-  HeftPluginDefinitionBase,
+  type HeftPluginDefinitionBase,
   HeftTaskPluginDefinition,
   type IHeftLifecyclePluginDefinitionJson,
   type IHeftTaskPluginDefinitionJson

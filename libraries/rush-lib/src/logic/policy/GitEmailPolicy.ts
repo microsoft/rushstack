@@ -16,6 +16,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
   if (!git.isGitPresent()) {
     // If Git isn't installed, or this Rush project is not under a Git working folder,
     // then we don't care about the Git email
+    // eslint-disable-next-line no-console
     console.log(
       colors.cyan('Ignoring Git validation because the Git binary was not found in the shell path.') + '\n'
     );
@@ -25,6 +26,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
   if (!git.isPathUnderGitWorkingTree()) {
     // If Git isn't installed, or this Rush project is not under a Git working folder,
     // then we don't care about the Git email
+    // eslint-disable-next-line no-console
     console.log(colors.cyan('Ignoring Git validation because this is not a Git working folder.') + '\n');
     return;
   }
@@ -47,6 +49,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     // sanity check; a valid email should not contain any whitespace
     // if this fails, then we have another issue to report
     if (!userEmail.match(/^\S+$/g)) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           colors.red('Your Git email address is invalid: ' + JSON.stringify(userEmail)),
@@ -66,6 +69,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
         errorMessage += ` (Or use "${RushConstants.bypassPolicyFlagLongName}" to skip.)`;
       }
 
+      // eslint-disable-next-line no-console
       console.log(colors.red(errorMessage));
       throw e;
     } else {
@@ -78,6 +82,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     return;
   }
 
+  // eslint-disable-next-line no-console
   console.log('Checking Git policy for this repository.\n');
 
   // If there is a policy, at least one of the RegExp's must match
@@ -104,6 +109,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     // but if it fails, this isn't critical, so don't bother them about it
   }
 
+  // eslint-disable-next-line no-console
   console.log(
     [
       'Hey there!  To keep things tidy, this repo asks you to submit your Git commits using an email like ' +
@@ -127,6 +133,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     errorMessage += ` (Or use "${RushConstants.bypassPolicyFlagLongName}" to skip.)`;
   }
 
+  // eslint-disable-next-line no-console
   console.log(colors.red(errorMessage));
   throw new AlreadyReportedError();
 }

@@ -20,7 +20,6 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node-forge": "1.0.4",
     "local-node-rig": "workspace:*"

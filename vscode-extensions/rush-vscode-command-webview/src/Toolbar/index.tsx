@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IStackItemStyles, IStackStyles, IStackTokens, IStyle, Stack } from '@fluentui/react';
+import {
+  type IStackItemStyles,
+  type IStackStyles,
+  type IStackTokens,
+  type IStyle,
+  Stack
+} from '@fluentui/react';
 import * as React from 'react';
 import { useStickyToolbar } from '../hooks/parametersFormScroll';
 import { RunButton } from './RunButton';

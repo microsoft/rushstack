@@ -22,7 +22,6 @@
     "terser": "^5.9.0"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@types/serialize-javascript": "5.0.2"

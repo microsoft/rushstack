@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * A sensible fallback column width for consoles.
@@ -168,6 +168,8 @@ export class PrintUtilities {
   /**
    * Displays a message in the console wrapped in a box UI.
    *
+   * @param message - The message to display.
+   * @param terminal - The terminal to write the message to.
    * @param boxWidth - The width of the box, defaults to half of the console width.
    */
   public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void {

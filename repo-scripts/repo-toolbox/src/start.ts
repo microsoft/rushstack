@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
 
 import { ToolboxCommandLine } from './ToolboxCommandLine';
 
+// eslint-disable-next-line no-console
 console.log('repo-toolbox\n');
 
 const commandLine: ToolboxCommandLine = new ToolboxCommandLine();
+// eslint-disable-next-line no-console
 commandLine.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise

@@ -5,6 +5,7 @@
 // problems with the algorithm.
 export const logDiagnosticInfo = (...args: string[]): void => {
   if (window.appContext.debugMode) {
+    // eslint-disable-next-line no-console
     console.log('Diagnostic: ', ...args);
   }
 };

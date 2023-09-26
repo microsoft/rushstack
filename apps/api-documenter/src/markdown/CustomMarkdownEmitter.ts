@@ -3,17 +3,21 @@
 
 import colors from 'colors';
 
-import { DocNode, DocLinkTag, StringBuilder } from '@microsoft/tsdoc';
-import { ApiModel, IResolveDeclarationReferenceResult, ApiItem } from '@microsoft/api-extractor-model';
+import type { DocNode, DocLinkTag, StringBuilder } from '@microsoft/tsdoc';
+import type { ApiModel, IResolveDeclarationReferenceResult, ApiItem } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind';
-import { DocHeading } from '../nodes/DocHeading';
-import { DocNoteBox } from '../nodes/DocNoteBox';
-import { DocTable } from '../nodes/DocTable';
-import { DocTableCell } from '../nodes/DocTableCell';
-import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
-import { MarkdownEmitter, IMarkdownEmitterContext, IMarkdownEmitterOptions } from './MarkdownEmitter';
-import { IndentedWriter } from '../utils/IndentedWriter';
+import type { DocHeading } from '../nodes/DocHeading';
+import type { DocNoteBox } from '../nodes/DocNoteBox';
+import type { DocTable } from '../nodes/DocTable';
+import type { DocTableCell } from '../nodes/DocTableCell';
+import type { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
+import {
+  MarkdownEmitter,
+  type IMarkdownEmitterContext,
+  type IMarkdownEmitterOptions
+} from './MarkdownEmitter';
+import type { IndentedWriter } from '../utils/IndentedWriter';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
   contextApiItem: ApiItem | undefined;

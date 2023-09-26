@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
 
-import { IEnvironment } from '../utilities/Utilities';
+import type { IEnvironment } from '../utilities/Utilities';
 
 /**
  * @beta

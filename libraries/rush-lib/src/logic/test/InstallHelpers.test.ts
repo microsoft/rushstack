@@ -1,6 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 
 describe('InstallHelpers', () => {
   describe('generateCommonPackageJson', () => {

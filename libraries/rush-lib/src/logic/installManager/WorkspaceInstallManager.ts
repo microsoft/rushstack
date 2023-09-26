@@ -8,16 +8,16 @@ import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushsta
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
+import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
+import { type PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { RepoStateFile } from '../RepoStateFile';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { RepoStateFile } from '../RepoStateFile';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
@@ -34,6 +34,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   public async doInstallAsync(): Promise<void> {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
@@ -65,6 +66,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder));
 
     const shrinkwrapWarnings: string[] = [];
@@ -77,7 +79,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     } else {
       if (!shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+        // eslint-disable-next-line no-console
         console.log();
+        // eslint-disable-next-line no-console
         console.log(
           colors.red(
             'The shrinkwrap file has not been updated to support workspaces. Run "rush update --full" to update ' +
@@ -167,7 +171,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               dependencySpecifier.versionSpecifier
             )
           ) {
+            // eslint-disable-next-line no-console
             console.log();
+            // eslint-disable-next-line no-console
             console.log(
               colors.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists ` +
@@ -179,7 +185,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
 
           if (!this.options.allowShrinkwrapUpdates) {
+            // eslint-disable-next-line no-console
             console.log();
+            // eslint-disable-next-line no-console
             console.log(
               colors.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
@@ -209,6 +217,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
       if (packageJson.saveIfModified()) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             `"${rushProject.packageName}" depends on one or more workspace packages which did not use "workspace:" ` +
@@ -296,6 +305,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
+        // eslint-disable-next-line no-console
         console.log('Deleting files from ' + commonNodeModulesFolder);
 
         this.installRecycler.moveFolder(commonNodeModulesFolder);
@@ -311,6 +321,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       const installArgs: string[] = ['install', '--color=always'];
       this.pushConfigurationArgs(installArgs, options);
 
+      // eslint-disable-next-line no-console
       console.log(
         '\n' +
           colors.bold(
@@ -327,6 +338,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.options.networkConcurrency ||
         this.options.onlyShrinkwrap
       ) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.green('Invoking package manager: ') +
@@ -433,6 +445,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       FileSystem.ensureFolder(nodeModulesFolder);
     }
 
+    // eslint-disable-next-line no-console
     console.log('');
   }
 

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 // TODO: Jest tests should not be invoking ESBuild or making network calls! Reenable this once
 // we have a fix for https://github.com/serverless-stack/serverless-stack/issues/1537
 

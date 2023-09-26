@@ -6,7 +6,7 @@ import {
   AlreadyExistsBehavior,
   FileSystem,
   Import,
-  IParsedPackageNameOrError,
+  type IParsedPackageNameOrError,
   PackageName,
   SubprocessTerminator,
   TerminalWritable,

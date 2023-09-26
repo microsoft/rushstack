@@ -3,5 +3,5 @@
 
 // eslint-disable-next-line @rushstack/no-new-null
 export type ReactNull = null;
-// eslint-disable-next-line @rushstack/no-new-null
+// eslint-disable-next-line @rushstack/no-new-null, @typescript-eslint/no-redeclare
 export const ReactNull: null = null;

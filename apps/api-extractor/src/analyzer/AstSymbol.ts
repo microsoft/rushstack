@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
-import { AstDeclaration } from './AstDeclaration';
+import type * as ts from 'typescript';
+import type { AstDeclaration } from './AstDeclaration';
 import { InternalError } from '@rushstack/node-core-library';
 import { AstEntity } from './AstEntity';
 

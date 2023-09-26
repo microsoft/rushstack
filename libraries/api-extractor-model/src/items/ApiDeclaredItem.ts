@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.s
+// See LICENSE in the project root for license information.
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { ApiDocumentedItem, IApiDocumentedItemJson, IApiDocumentedItemOptions } from './ApiDocumentedItem';
-import { ApiItem } from './ApiItem';
-import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mixins/Excerpt';
-import { DeserializerContext } from '../model/DeserializerContext';
+import {
+  ApiDocumentedItem,
+  type IApiDocumentedItemJson,
+  type IApiDocumentedItemOptions
+} from './ApiDocumentedItem';
+import type { ApiItem } from './ApiItem';
+import { Excerpt, ExcerptToken, type IExcerptTokenRange, type IExcerptToken } from '../mixins/Excerpt';
+import type { DeserializerContext } from '../model/DeserializerContext';
 import { SourceLocation } from '../model/SourceLocation';
 
 /**

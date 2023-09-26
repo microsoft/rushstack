@@ -9,9 +9,9 @@ import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import { NpmPackage, IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
+import { NpmPackage, type IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
 import { PackageLookup } from '../PackageLookup';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 
@@ -41,6 +41,7 @@ export class NpmLinkManager extends BaseLinkManager {
     commonPackageLookup.loadTree(commonRootPackage);
 
     for (const rushProject of this._rushConfiguration.projects) {
+      // eslint-disable-next-line no-console
       console.log(`\nLINKING: ${rushProject.packageName}`);
       this._linkProject(rushProject, commonRootPackage, commonPackageLookup);
     }
@@ -177,6 +178,7 @@ export class NpmLinkManager extends BaseLinkManager {
             // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
             // Is this wise?)
 
+            // eslint-disable-next-line no-console
             console.log(
               colors.yellow(
                 `Rush will not locally link ${dependency.name} for ${localPackage.name}` +
@@ -287,6 +289,7 @@ export class NpmLinkManager extends BaseLinkManager {
                 ` was not found in the common folder -- do you need to run "rush install"?`
             );
           } else {
+            // eslint-disable-next-line no-console
             console.log('Skipping optional dependency: ' + dependency.name);
           }
         }

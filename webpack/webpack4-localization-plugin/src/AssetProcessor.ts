@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as Webpack from 'webpack';
+import type * as Webpack from 'webpack';
 
 import { Constants } from './utilities/Constants';
-import { ILocaleElementMap } from './interfaces';
-import { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
+import type { ILocaleElementMap } from './interfaces';
+import type { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
 
 interface IReconstructionElement {
   kind: 'static' | 'localized' | 'dynamic';

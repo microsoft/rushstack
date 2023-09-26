@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CachedSource, ConcatSource, ReplaceSource, Source } from 'webpack-sources';
+import { CachedSource, ConcatSource, ReplaceSource, type Source } from 'webpack-sources';
 
 import { CHUNK_MODULES_TOKEN } from './Constants';
-import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
+import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
 
 /**
  * Rehydrates an asset with minified modules.
@@ -206,6 +206,7 @@ function handleExternals(source: Source, asset: IAssetInfo): Source {
       const mapped: string | undefined = externalNames.get(id);
 
       if (mapped === undefined) {
+        // eslint-disable-next-line no-console
         console.error(`Missing minified external for ${id} in ${asset.fileName}!`);
       } else {
         replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);

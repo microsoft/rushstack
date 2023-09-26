@@ -4,7 +4,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { LogLevel, setLogLevel, terminal } from './logic/logger';
+import { type LogLevel, setLogLevel, terminal } from './logic/logger';
 import { RushWorkspace } from './logic/RushWorkspace';
 import { RushProjectsProvider } from './providers/RushProjectsProvider';
 import { RushTaskProvider } from './providers/TaskProvider';

@@ -2,19 +2,25 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import { CSSProperties, ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line/lib/parameters/BaseClasses';
-import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceListParameter';
-import { CommandLineChoiceParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceParameter';
-import { CommandLineIntegerParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineIntegerParameter';
-import { FieldValues, FormProvider, UseControllerProps, useForm, UseFormReturn } from 'react-hook-form';
+import type { CommandLineChoiceListParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceListParameter';
+import type { CommandLineChoiceParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineChoiceParameter';
+import type { CommandLineIntegerParameter } from '@rushstack/ts-command-line/lib/parameters/CommandLineIntegerParameter';
+import {
+  type FieldValues,
+  FormProvider,
+  type UseControllerProps,
+  useForm,
+  type UseFormReturn
+} from 'react-hook-form';
 import { DefaultButton, Label } from '@fluentui/react';
 
 import { ControlledTextField } from '../../ControlledFormComponents/ControlledTextField';
 import { ControlledComboBox } from '../../ControlledFormComponents/ControlledComboBox';
 import { ControlledTextFieldArray } from '../../ControlledFormComponents/ControlledTextFieldArray';
 import {
-  ICommandLineParameter,
+  type ICommandLineParameter,
   onChangeFormDefaultValues,
   onChangeSearchText,
   useArgsTextList,
@@ -96,11 +102,13 @@ export const ParameterForm = (): JSX.Element => {
   //   // deep clone
   //   const clonedValues: FieldValues = JSON.parse(JSON.stringify(defaultValues));
   //   defaultValuesRef.current = clonedValues;
+  //   // eslint-disable-next-line no-console
   //   console.log('change default values', defaultValues);
   // }, [defaultValues]);
 
   useEffect(() => {
     // const defaultValues: FieldValues = defaultValuesRef.current;
+    // eslint-disable-next-line no-console
     console.log('rest', defaultValues);
     reset(defaultValues);
     dispatch(onChangeFormDefaultValues(defaultValues));
@@ -149,9 +157,11 @@ export const ParameterForm = (): JSX.Element => {
             control
           };
           if (parameter.required) {
+            // eslint-disable-next-line no-console
             console.log('required param', parameter.longName);
             baseControllerProps.rules = {
               validate: (value: undefined | string | number | boolean) => {
+                // eslint-disable-next-line no-console
                 console.log('validating', value, parameter.longName);
 
                 if (typeof value === 'undefined' || !String(value)) {
@@ -222,6 +232,7 @@ export const ParameterForm = (): JSX.Element => {
               break;
             }
             default: {
+              // eslint-disable-next-line no-console
               console.error(`Unhandled parameter kind: ${parameter.kind}`);
               return null;
             }

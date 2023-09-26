@@ -12,10 +12,10 @@ import {
   Executable,
   FileConstants,
   FileSystem,
-  ITerminal,
-  ITerminalProvider,
+  type ITerminal,
+  type ITerminalProvider,
   JsonFile,
-  JsonObject,
+  type JsonObject,
   Terminal
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
@@ -410,7 +410,9 @@ export class RushPnpmCommandLineParser {
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
             FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
+            // eslint-disable-next-line no-console
             console.log(`Copying ${commonTempPnpmPatchesFolder}`);
+            // eslint-disable-next-line no-console
             console.log(`  --> ${rushPnpmPatchesFolder}`);
             FileSystem.copyFiles({
               sourcePath: commonTempPnpmPatchesFolder,
@@ -418,6 +420,7 @@ export class RushPnpmCommandLineParser {
             });
           } else {
             if (FileSystem.exists(rushPnpmPatchesFolder)) {
+              // eslint-disable-next-line no-console
               console.log(`Deleting ${rushPnpmPatchesFolder}`);
               FileSystem.deleteFolder(rushPnpmPatchesFolder);
             }

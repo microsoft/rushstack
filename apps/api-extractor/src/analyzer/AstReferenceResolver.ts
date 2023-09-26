@@ -4,13 +4,13 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { AstSymbolTable } from './AstSymbolTable';
-import { AstEntity } from './AstEntity';
-import { AstDeclaration } from './AstDeclaration';
-import { WorkingPackage } from '../collector/WorkingPackage';
-import { AstModule } from './AstModule';
-import { Collector } from '../collector/Collector';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import type { AstSymbolTable } from './AstSymbolTable';
+import type { AstEntity } from './AstEntity';
+import type { AstDeclaration } from './AstDeclaration';
+import type { WorkingPackage } from '../collector/WorkingPackage';
+import type { AstModule } from './AstModule';
+import type { Collector } from '../collector/Collector';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstSymbol } from './AstSymbol';
 
 /**
@@ -245,7 +245,7 @@ export class AstReferenceResolver {
     memberSelector: tsdoc.DocMemberSelector,
     astSymbolName: string
   ): AstDeclaration | ResolverFailure {
-    const selectorOverloadIndex: number = parseInt(memberSelector.selector);
+    const selectorOverloadIndex: number = parseInt(memberSelector.selector, 10);
 
     const matches: AstDeclaration[] = [];
     for (const astDeclaration of astDeclarations) {

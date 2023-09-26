@@ -30,7 +30,6 @@
     "webpack-dev-server": "~4.9.3"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/watchpack": "2.4.0",
     "webpack": "~5.82.1",

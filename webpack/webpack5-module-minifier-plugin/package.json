@@ -30,7 +30,6 @@
     "tapable": "2.2.1"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",

@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CacheEntryId, GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from '../CacheEntryId';
+import {
+  CacheEntryId,
+  type GetCacheEntryIdFunction,
+  type IGenerateCacheEntryIdOptions
+} from '../CacheEntryId';
 
 describe(CacheEntryId.name, () => {
   describe('Valid pattern names', () => {

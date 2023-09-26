@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 module.exports = {
-  extends: ['@rushstack/eslint-config/mixins/todoc']
+  extends: ['local-eslint-config/mixins/tsdoc']
 };

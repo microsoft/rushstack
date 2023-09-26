@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk } from './ITerminalChunk';
+import type { ITerminalChunk } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 import { AnsiEscape } from '@rushstack/node-core-library';
 

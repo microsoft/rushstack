@@ -1,6 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { IPhase } from '../CommandLineConfiguration';
-import { RushConfigurationProject } from '../RushConfigurationProject';
+import type { IPhase } from '../CommandLineConfiguration';
+import type { RushConfigurationProject } from '../RushConfigurationProject';
 import { RushProjectConfiguration } from '../RushProjectConfiguration';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

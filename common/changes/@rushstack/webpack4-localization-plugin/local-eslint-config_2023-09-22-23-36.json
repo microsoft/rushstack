@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update type-only imports to include the type modifier.",
+      "type": "patch",
+      "packageName": "@rushstack/webpack4-localization-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack4-localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

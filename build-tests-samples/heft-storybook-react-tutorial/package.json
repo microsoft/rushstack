@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@babel/core": "~7.20.0",
-    "@rushstack/eslint-config": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-storybook-plugin": "workspace:*",

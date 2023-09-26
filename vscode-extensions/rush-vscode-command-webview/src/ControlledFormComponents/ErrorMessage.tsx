@@ -8,6 +8,7 @@ export interface IErrorMessageProps {
 }
 
 export const ErrorMessage = ({ message }: IErrorMessageProps): JSX.Element => {
+  // eslint-disable-next-line no-console
   console.log('ErrorMessage...', message);
   return message ? (
     <div role={'alert'}>

@@ -2,20 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
-import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
+import { type TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
+import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError } from '@rushstack/node-core-library';
 
 import {
   AsyncOperationQueue,
-  IOperationIteratorResult,
-  IOperationSortFunction,
+  type IOperationIteratorResult,
+  type IOperationSortFunction,
   UNASSIGNED_OPERATION
 } from './AsyncOperationQueue';
-import { Operation } from './Operation';
+import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
-import { IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
-import { IExecutionResult } from './IOperationExecutionResult';
+import { type IOperationExecutionRecordContext, OperationExecutionRecord } from './OperationExecutionRecord';
+import type { IExecutionResult } from './IOperationExecutionResult';
 
 export interface IOperationExecutionManagerOptions {
   quietMode: boolean;

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushSdkLoader, ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
+import { RushSdkLoader, type ISdkCallbackEvent } from '@rushstack/rush-sdk/loader';
 
 import * as vscode from 'vscode';
 import { terminal } from './logger';

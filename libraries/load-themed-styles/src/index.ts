@@ -336,6 +336,7 @@ function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayRes
           typeof DEBUG !== 'undefined' &&
           DEBUG
         ) {
+          // eslint-disable-next-line no-console
           console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
         }
 

@@ -2,21 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import colors from 'colors/safe';
 
 import {
   CommandLineAction,
-  CommandLineStringParameter,
+  type CommandLineStringParameter,
   type ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
 import {
   ApiModel,
-  ApiItem,
+  type ApiItem,
   ApiItemContainerMixin,
   ApiDocumentedItem,
-  IResolveDeclarationReferenceResult
+  type IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
 
 export interface IBuildApiModelResult {

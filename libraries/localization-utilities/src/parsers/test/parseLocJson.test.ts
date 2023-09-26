@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IgnoreStringFunction } from '../../interfaces';
+import type { IgnoreStringFunction } from '../../interfaces';
 import { parseLocJson } from '../parseLocJson';
 
 describe(parseLocJson.name, () => {

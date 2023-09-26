@@ -4,7 +4,7 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { JsonFile, JsonObject } from './JsonFile';
+import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
 
 import type ValidatorType from 'z-schema';

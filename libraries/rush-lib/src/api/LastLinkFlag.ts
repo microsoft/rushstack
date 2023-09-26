@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { LastInstallFlag } from './LastInstallFlag';
-import { JsonObject, JsonFile, InternalError } from '@rushstack/node-core-library';
-import { RushConfiguration } from './RushConfiguration';
+import { type JsonObject, JsonFile, InternalError } from '@rushstack/node-core-library';
+import type { RushConfiguration } from './RushConfiguration';
 
 export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
 

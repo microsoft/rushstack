@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 import { Text, NewlineKind, InternalError, Terminal } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
@@ -15,7 +15,7 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 import { Utilities } from '../../utilities/Utilities';
 import { OperationStatus } from './OperationStatus';
 import { OperationError } from './OperationError';
-import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';

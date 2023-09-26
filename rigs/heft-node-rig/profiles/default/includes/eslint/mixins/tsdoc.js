@@ -2,5 +2,5 @@
 // See LICENSE in the project root for license information.
 
 module.exports = {
-  extends: ['@rushstack/heft-web-rig/profiles/default/includes/eslint/mixins/todoc']
+  extends: ['@rushstack/eslint-config/mixins/tsdoc']
 };

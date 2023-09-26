@@ -3,10 +3,10 @@
 
 import {
   RedisCobuildLockProvider,
-  IRedisCobuildLockProviderOptions
+  type IRedisCobuildLockProviderOptions
 } from '@rushstack/rush-redis-cobuild-plugin';
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
-import { OperationStatus, ICobuildContext, RushSession } from '@microsoft/rush-lib';
+import { OperationStatus, type ICobuildContext, RushSession } from '@microsoft/rush-lib';
 
 const options: IRedisCobuildLockProviderOptions = {
   url: 'redis://localhost:6379',
@@ -40,6 +40,7 @@ async function main(): Promise<void> {
     cacheId: 'cache_id'
   });
   const completedState = await lockProvider.getCompletedStateAsync(context);
+  // eslint-disable-next-line no-console
   console.log('Completed state: ', completedState);
   await lockProvider.disconnectAsync();
 }
@@ -51,6 +52,7 @@ main()
     process.exitCode = 0;
   })
   .catch((err) => {
+    // eslint-disable-next-line no-console
     console.error(err);
   })
   .finally(() => {

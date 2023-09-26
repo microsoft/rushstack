@@ -24,7 +24,7 @@ import {
 } from './shared';
 import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
 import {
-  DeferredWatchFileSystem,
+  type DeferredWatchFileSystem,
   type IWatchFileSystem,
   OverrideNodeWatchFSPlugin
 } from './DeferredWatchFileSystem';

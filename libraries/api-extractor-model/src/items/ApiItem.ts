@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { Constructor, PropertiesOf } from '../mixins/Mixin';
-import { ApiPackage } from '../model/ApiPackage';
+import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+import type { Constructor, PropertiesOf } from '../mixins/Mixin';
+import type { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import { DeserializerContext } from '../model/DeserializerContext';
+import type { DeserializerContext } from '../model/DeserializerContext';
 import { InternalError } from '@rushstack/node-core-library';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
-import { ApiModel } from '../model/ApiModel';
+import type { ApiModel } from '../model/ApiModel';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
