@@ -18,7 +18,7 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type { IConfigFile, IExtractorMessagesConfig, IDeepPartialConfigFile } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
@@ -503,11 +503,14 @@ export class ExtractorConfig {
    * Performs only the first half of {@link ExtractorConfig.loadFileAndPrepare}, providing an opportunity to
    * modify the object before it is passed to {@link ExtractorConfig.prepare}.
    *
+   * @param jsonFilePath - The path to the JSON config file to load.
+   * @param customDefaults - Optional overrides for the built-in default values. These will be overridden by any settings in the loaded config file.
+   *
    * @remarks
    * Loads the api-extractor.json config file from the specified file path.   If the "extends" field is present,
    * the referenced file(s) will be merged.  For any omitted fields, the API Extractor default values are merged.
    */
-  public static loadFile(jsonFilePath: string): IConfigFile {
+  public static loadFile(jsonFilePath: string, customDefaults?: IDeepPartialConfigFile): IConfigFile {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
@@ -567,8 +570,13 @@ export class ExtractorConfig {
       throw new Error(`Error loading ${currentConfigFilePath}:\n` + (e as Error).message);
     }
 
+    const defaultConfig: Partial<IConfigFile> = lodash.cloneDeep(ExtractorConfig._defaultConfig);
+    const defaultWithOverrides: Partial<IConfigFile> = customDefaults
+      ? lodash.merge(defaultConfig, lodash.cloneDeep(customDefaults))
+      : defaultConfig;
+
     // Lastly, apply the defaults
-    configObject = lodash.merge(lodash.cloneDeep(ExtractorConfig._defaultConfig), configObject);
+    configObject = lodash.merge(defaultWithOverrides, configObject);
 
     ExtractorConfig.jsonSchema.validateObject(configObject, jsonFilePath);
 

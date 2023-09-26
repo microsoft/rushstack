@@ -5,6 +5,7 @@ import * as path from 'path';
 import { Path } from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from '../ExtractorConfig';
+import type { IConfigFile } from '../IConfigFile';
 
 const testDataFolder: string = path.join(__dirname, 'test-data');
 
@@ -16,22 +17,40 @@ function expectEqualPaths(path1: string, path2: string): void {
 
 // Tests for expanding the "<lookup>" token for the "projectFolder" setting in api-extractor.json
 describe(`${ExtractorConfig.name}.${ExtractorConfig.loadFileAndPrepare.name}`, () => {
-  it.only('config-lookup1: looks up ./api-extractor.json', () => {
+  it('config-lookup1: looks up ./api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup1/api-extractor.json')
     );
     expectEqualPaths(extractorConfig.projectFolder, path.join(testDataFolder, 'config-lookup1'));
   });
-  it.only('config-lookup2: looks up ./config/api-extractor.json', () => {
+  it('config-lookup2: looks up ./config/api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup2/config/api-extractor.json')
     );
     expectEqualPaths(extractorConfig.projectFolder, path.join(testDataFolder, 'config-lookup2'));
   });
-  it.only('config-lookup3a: looks up ./src/test/config/api-extractor.json', () => {
+  it('config-lookup3a: looks up ./src/test/config/api-extractor.json', () => {
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(
       path.join(testDataFolder, 'config-lookup3/src/test/config/api-extractor.json')
     );
     expectEqualPaths(extractorConfig.projectFolder, path.join(testDataFolder, 'config-lookup3/src/test/'));
+  });
+});
+
+describe(`${ExtractorConfig.name}.${ExtractorConfig.loadFile.name}`, () => {
+  it('config-lookup1: respects customDefaults', () => {
+    const extractorConfig: IConfigFile = ExtractorConfig.loadFile(
+      path.join(testDataFolder, 'config-lookup1/api-extractor.json'),
+      {
+        apiReport: {
+          enabled: false,
+          reportTempFolder: '/foo'
+        }
+      }
+    );
+
+    expect(extractorConfig.apiReport?.enabled).toEqual(true);
+    expect(extractorConfig.apiReport?.reportTempFolder).toEqual('/foo');
+    expect(extractorConfig.apiReport?.reportFolder).toEqual('<projectFolder>/etc/');
   });
 });

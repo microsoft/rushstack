@@ -122,7 +122,11 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
       heftConfiguration
     );
     const apiExtractorConfigurationObject: TApiExtractor.IConfigFile =
-      apiExtractorPackage.ExtractorConfig.loadFile(apiExtractorConfigurationFilePath);
+      apiExtractorPackage.ExtractorConfig.loadFile(apiExtractorConfigurationFilePath, {
+        apiReport: {
+          reportTempFolder: taskSession.tempFolderPath
+        }
+      });
 
     // Load the configuration file. Always load from scratch.
     const apiExtractorConfiguration: TApiExtractor.ExtractorConfig =

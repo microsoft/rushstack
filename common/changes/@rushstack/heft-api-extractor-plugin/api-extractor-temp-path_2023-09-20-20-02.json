@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-api-extractor-plugin",
+      "comment": "Move temp path for api report into task temp folder.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-api-extractor-plugin"
+}
