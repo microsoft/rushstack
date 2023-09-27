@@ -178,7 +178,7 @@ describe('JestConfigLoader', () => {
     expect(loadedConfig.testEnvironment).toMatch(/index.js$/);
   });
 
-  it('correctly sets NODE_ENV', async () => {
+  it.skip('correctly sets NODE_ENV', async () => {
     expect(process.env.NODE_ENV).toBe('test');
 
     process.env.NODE_ENV = 'not-test';

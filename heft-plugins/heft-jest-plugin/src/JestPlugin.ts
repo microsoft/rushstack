@@ -179,11 +179,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   ): void {
     const { parameters } = taskSession;
 
-    // set env variable if not already set
-    if (!process.env.NODE_ENV) {
-      process.env.NODE_ENV = 'test';
-    }
-
     // Flags
     const detectOpenHandlesParameter: CommandLineFlagParameter =
       parameters.getFlagParameter('--detect-open-handles');
@@ -278,6 +273,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       return;
     }
 
+    // set env variable if not already set
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = 'test';
+    }
+
     const {
       // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
       // in the debugger to validate that your changes are being applied as expected.
@@ -285,6 +285,9 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       globalConfig,
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
+
+    // unset the NODE_ENV
+    delete process.env.NODE_ENV;
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(
@@ -493,6 +496,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     await Promise.resolve();
 
     if (pendingTestRuns.size > 0) {
+      // set env variable if not already set
+      if (!process.env.NODE_ENV) {
+        process.env.NODE_ENV = 'test';
+      }
+
       this._executing = true;
       for (const pendingTestRun of pendingTestRuns) {
         pendingTestRuns.delete(pendingTestRun);
@@ -516,6 +524,11 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         } else {
           terminal.writeLine(`No tests were executed.`);
         }
+      }
+
+      // unset the NODE_ENV only if it's test
+      if (process.env.NODE_ENV === 'test') {
+        delete process.env.NODE_ENV;
       }
 
       if (!logger.hasErrors) {
