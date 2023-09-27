@@ -60,7 +60,7 @@ function _trimNpmrcFile(sourceNpmrcPath) {
         //remove spaces before or after key and value
         line = line
             .split('=')
-            .map((line) => line.trim())
+            .map((lineToTrim) => lineToTrim.trim())
             .join('=');
         // Ignore comment lines
         if (!commentRegExp.test(line)) {
@@ -123,7 +123,9 @@ function _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath) {
  * The text of the the synced .npmrc, if one exists. If one does not exist, then undefined is returned.
  */
 function syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder, useNpmrcPublish, logger = {
+    // eslint-disable-next-line no-console
     info: console.log,
+    // eslint-disable-next-line no-console
     error: console.error
 }) {
     const sourceNpmrcPath = path__WEBPACK_IMPORTED_MODULE_1__.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
@@ -288,7 +290,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utilities/npmrcUtilities */ 679877);
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
+/* eslint-disable no-console */
 
 
 
@@ -461,9 +464,9 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
                 : [parsedVersionOutput];
             let latestVersion = versions[0];
             for (let i = 1; i < versions.length; i++) {
-                const version = versions[i];
-                if (_compareVersionStrings(version, latestVersion) > 0) {
-                    latestVersion = version;
+                const latestVersionCandidate = versions[i];
+                if (_compareVersionStrings(latestVersionCandidate, latestVersion) > 0) {
+                    latestVersion = latestVersionCandidate;
                 }
             }
             if (!latestVersion) {
