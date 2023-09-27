@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add \"--offline\" parameter for \"rush install\" and \"rush update\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
