@@ -803,7 +803,6 @@ export class MinimumHeap<T> {
     peek(): T | undefined;
     poll(): T | undefined;
     push(item: T): void;
-    // (undocumented)
     get size(): number;
 }
 

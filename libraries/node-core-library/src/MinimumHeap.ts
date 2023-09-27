@@ -23,6 +23,7 @@ export class MinimumHeap<T> {
   }
 
   /**
+   * Returns the number of items in the heap.
    * @returns the number of items in the heap.
    */
   public get size(): number {
@@ -54,7 +55,7 @@ export class MinimumHeap<T> {
 
       let index: number = 0;
 
-      let smallerChildIndex: number = index * 2 + 1;
+      let smallerChildIndex: number = 1;
 
       while (smallerChildIndex < size) {
         let smallerChild: T = this._items[smallerChildIndex];
