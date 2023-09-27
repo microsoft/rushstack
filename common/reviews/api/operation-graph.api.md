@@ -32,7 +32,7 @@ export interface ICancelCommandMessage {
 export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 'isFirstRun' | 'requestRun'> {
     afterExecute(operation: Operation, state: IOperationState): void;
     beforeExecute(operation: Operation, state: IOperationState): void;
-    queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
+    queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
     requestRun?: (requestor?: string) => void;
     terminal: ITerminal;
 }
