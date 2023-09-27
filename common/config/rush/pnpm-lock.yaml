@@ -1053,9 +1053,6 @@ importers:
 
   ../../build-tests/eslint-8-test:
     devDependencies:
-      '@rushstack/eslint-config':
-        specifier: workspace:*
-        version: link:../../eslint/eslint-config
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
@@ -15888,7 +15885,7 @@ packages:
       eslint: 7.30.0
       estraverse: 5.3.0
       jsx-ast-utils: 3.3.5
-      minimatch: 3.0.8
+      minimatch: 3.1.2
       object.entries: 1.1.6
       object.fromentries: 2.0.6
       object.hasown: 1.1.2
