@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 26 Sep 2023 21:02:30 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Sep 2023 00:21:38 GMT and should not be manually modified.
+
+## 0.62.0
+Wed, 27 Sep 2023 00:21:38 GMT
+
+### Minor changes
+
+- (BREAKING API CHANGE) Remove the deprecated `cancellationToken` property of `IHeftTaskRunHookOptions`. Use `abortSignal` on that object instead.
 
 ## 0.61.3
 Tue, 26 Sep 2023 21:02:30 GMT

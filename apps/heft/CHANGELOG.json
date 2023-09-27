@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.62.0",
+      "tag": "@rushstack/heft_v0.62.0",
+      "date": "Wed, 27 Sep 2023 00:21:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING API CHANGE) Remove the deprecated `cancellationToken` property of `IHeftTaskRunHookOptions`. Use `abortSignal` on that object instead."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.61.3",
       "tag": "@rushstack/heft_v0.61.3",
       "date": "Tue, 26 Sep 2023 21:02:30 GMT",
