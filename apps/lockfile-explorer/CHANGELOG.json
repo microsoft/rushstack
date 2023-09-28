@@ -2,6 +2,21 @@
   "name": "@rushstack/lockfile-explorer",
   "entries": [
     {
+      "version": "1.2.7",
+      "tag": "@rushstack/lockfile-explorer_v1.2.7",
+      "date": "Thu, 28 Sep 2023 20:53:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.61.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.6",
       "tag": "@rushstack/lockfile-explorer_v1.2.6",
       "date": "Wed, 27 Sep 2023 00:21:38 GMT",
