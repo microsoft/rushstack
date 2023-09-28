@@ -6,6 +6,7 @@ import { Operation } from '../Operation';
 import { OperationExecutionManager } from '../OperationExecutionManager';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
+import { Async } from '@rushstack/node-core-library';
 
 type ExecuteAsyncMock = jest.Mock<
   ReturnType<IOperationRunner['executeAsync']>,
@@ -106,7 +107,7 @@ describe(OperationExecutionManager.name, () => {
         const beta: Operation = new Operation({
           name: 'beta',
           runner: {
-            name: 'alpha',
+            name: 'beta',
             executeAsync: runBeta,
             silent: false
           }
@@ -158,7 +159,7 @@ describe(OperationExecutionManager.name, () => {
         const beta: Operation = new Operation({
           name: 'beta',
           runner: {
-            name: 'alpha',
+            name: 'beta',
             executeAsync: runBeta,
             silent: false
           }
@@ -219,6 +220,119 @@ describe(OperationExecutionManager.name, () => {
         expect(result).toBe(OperationStatus.NoOp);
         expect(terminalProvider.getOutput()).toMatchSnapshot();
       });
+
+      it('respects priority order', async () => {
+        const runAlpha: ExecuteAsyncMock = jest.fn();
+        const runBeta: ExecuteAsyncMock = jest.fn();
+
+        const alpha: Operation = new Operation({
+          name: 'alpha',
+          runner: {
+            name: 'alpha',
+            executeAsync: runAlpha,
+            silent: false
+          }
+        });
+        const beta: Operation = new Operation({
+          name: 'beta',
+          runner: {
+            name: 'beta',
+            executeAsync: runBeta,
+            silent: false
+          }
+        });
+        const manager: OperationExecutionManager = new OperationExecutionManager(new Set([alpha, beta]));
+
+        // Override default sort order.
+        alpha.criticalPathLength = 1;
+        beta.criticalPathLength = 2;
+
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(false);
+        const terminal: ITerminal = new Terminal(terminalProvider);
+
+        const executed: Operation[] = [];
+
+        runAlpha.mockImplementationOnce(async () => {
+          executed.push(alpha);
+          return OperationStatus.Success;
+        });
+
+        runBeta.mockImplementationOnce(async () => {
+          executed.push(beta);
+          return OperationStatus.Success;
+        });
+
+        const result: OperationStatus = await manager.executeAsync({
+          abortSignal: new AbortController().signal,
+          parallelism: 1,
+          terminal
+        });
+
+        expect(executed).toEqual([beta, alpha]);
+
+        expect(result).toBe(OperationStatus.Success);
+        expect(terminalProvider.getOutput()).toMatchSnapshot();
+
+        expect(runAlpha).toHaveBeenCalledTimes(1);
+        expect(runBeta).toHaveBeenCalledTimes(1);
+
+        expect(alpha.state?.status).toBe(OperationStatus.Success);
+        expect(beta.state?.status).toBe(OperationStatus.Success);
+      });
+
+      it('respects concurrency', async () => {
+        let concurrency: number = 0;
+        let maxConcurrency: number = 0;
+
+        const run: ExecuteAsyncMock = jest.fn(
+          async (context: IOperationRunnerContext): Promise<OperationStatus> => {
+            ++concurrency;
+            await Async.sleep(1);
+            if (concurrency > maxConcurrency) {
+              maxConcurrency = concurrency;
+            }
+            --concurrency;
+            return OperationStatus.Success;
+          }
+        );
+
+        const alpha: Operation = new Operation({
+          name: 'alpha',
+          runner: {
+            name: 'alpha',
+            executeAsync: run,
+            silent: false
+          }
+        });
+        const beta: Operation = new Operation({
+          name: 'beta',
+          runner: {
+            name: 'beta',
+            executeAsync: run,
+            silent: false
+          }
+        });
+        const manager: OperationExecutionManager = new OperationExecutionManager(new Set([alpha, beta]));
+
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(false);
+        const terminal: ITerminal = new Terminal(terminalProvider);
+
+        const result: OperationStatus = await manager.executeAsync({
+          abortSignal: new AbortController().signal,
+          parallelism: 2,
+          terminal
+        });
+
+        expect(result).toBe(OperationStatus.Success);
+        expect(terminalProvider.getOutput()).toMatchSnapshot();
+
+        expect(run).toHaveBeenCalledTimes(2);
+
+        expect(maxConcurrency).toBe(2);
+
+        expect(alpha.state?.status).toBe(OperationStatus.Success);
+        expect(beta.state?.status).toBe(OperationStatus.Success);
+      });
     });
 
     describe('watch mode', () => {
@@ -239,11 +353,12 @@ describe(OperationExecutionManager.name, () => {
         const beta: Operation = new Operation({
           name: 'beta',
           runner: {
-            name: 'alpha',
+            name: 'beta',
             executeAsync: runBeta,
             silent: false
           }
         });
+        const executed: Operation[] = [];
         beta.addDependency(alpha);
         const manager: OperationExecutionManager = new OperationExecutionManager(new Set([alpha, beta]));
 
@@ -253,13 +368,13 @@ describe(OperationExecutionManager.name, () => {
         let betaRequestRun: IOperationRunnerContext['requestRun'];
 
         runAlpha.mockImplementationOnce(async () => {
-          expect(runBeta).not.toHaveBeenCalled();
+          executed.push(alpha);
           return OperationStatus.Success;
         });
 
         runBeta.mockImplementationOnce(async (options) => {
+          executed.push(beta);
           betaRequestRun = options.requestRun;
-          expect(runAlpha).toHaveBeenCalledTimes(1);
           return OperationStatus.Success;
         });
 
@@ -269,6 +384,8 @@ describe(OperationExecutionManager.name, () => {
           terminal: terminal1,
           requestRun
         });
+
+        expect(executed).toEqual([alpha, beta]);
 
         expect(requestRun).not.toHaveBeenCalled();
         expect(betaRequestRun).toBeDefined();

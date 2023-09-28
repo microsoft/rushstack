@@ -34,6 +34,7 @@ export class AnsiEscape {
 // @beta
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static getSignal(): [Promise<void>, () => void, (err: Error) => void];
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
@@ -794,6 +795,15 @@ export class MapExtensions {
     static toObject<TValue>(map: Map<string, TValue>): {
         [key: string]: TValue;
     };
+}
+
+// @beta
+export class MinimumHeap<T> {
+    constructor(comparator: (a: T, b: T) => number);
+    peek(): T | undefined;
+    poll(): T | undefined;
+    push(item: T): void;
+    get size(): number;
 }
 
 // @public
