@@ -524,7 +524,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       initialState
     });
 
-    this._registerWatchModeInterface(projectWatcher);
+    // Ensure process.stdin allows interactivity before using TTY-only APIs
+    if (process.stdin.isTTY) {
+      this._registerWatchModeInterface(projectWatcher);
+    }
 
     const onWaitingForChanges = (): void => {
       // Allow plugins to display their own messages when waiting for changes.
