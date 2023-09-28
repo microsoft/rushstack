@@ -1,5 +1,5 @@
 import path from 'path';
-import { findEslintLibraryLocation } from './global-suppressions-patch';
+import { findEslintLibraryLocation } from './bulk-suppressions-patch';
 import { Linter as LinterPatch } from './linter-patch-for-eslint-v8.7.0';
 
 const eslintLibraryLocation = findEslintLibraryLocation();

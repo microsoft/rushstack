@@ -1,12 +1,12 @@
 {
-  "name": "eslint-global-suppressions-test",
-  "description": "Sample code to test eslint global suppressions",
+  "name": "eslint-bulk-suppressions-test",
+  "description": "Sample code to test eslint bulk suppressions",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "eslint": "eslint .",
-    "eslint-global-suppress-all": "ESLINT_GLOBAL_SUPPRESS_RULES=* eslint .",
-    "eslint-without-global-suppressions": "USE_ESLINT_GLOBAL_SUPPRESSIONS=false eslint ."
+    "eslint-bulk-suppress-all": "ESLINT_BULK_SUPPRESS_RULES=* eslint .",
+    "eslint-without-bulk-suppressions": "USE_ESLINT_BULK_SUPPRESSIONS=false eslint ."
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

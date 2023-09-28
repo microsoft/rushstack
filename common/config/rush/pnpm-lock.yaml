@@ -799,7 +799,7 @@ importers:
       eslint: 7.30.0
       typescript: 5.0.4
 
-  ../../build-tests/eslint-global-suppressions-test:
+  ../../build-tests/eslint-bulk-suppressions-test:
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@typescript-eslint/eslint-plugin': ~5.59.2
@@ -1280,8 +1280,8 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-lint-plugin': link:../../heft-plugins/heft-lint-plugin
       '@rushstack/heft-typescript-plugin': link:../../heft-plugins/heft-typescript-plugin
-      '@types/jest': 29.5.4
-      '@types/node': 20.5.8
+      '@types/jest': 29.5.5
+      '@types/node': 20.7.1
       eslint: 8.7.0
       tslint: 5.20.1_typescript@4.9.5
       tslint-microsoft-contrib: 6.2.0_uwqr5pcif4g7c56scrk6kqzf7i
@@ -10311,8 +10311,8 @@ packages:
       expect: 29.5.0
       pretty-format: 29.5.0
 
-  /@types/jest/29.5.4:
-    resolution: {integrity: sha512-PhglGmhWeD46FYOVLt3X7TiWjzwuVGW9wG/4qocPevXMjCmrIc5b6db9WjeGE4QYVpUAWMDv3v0IiBwObY289A==}
+  /@types/jest/29.5.5:
+    resolution: {integrity: sha512-ebylz2hnsWR9mYvmBFbXJXr+33UPc4+ZdxyDXh5w0FlPBTfCVN3wPL+kuOiQt3xvrK419v7XWeAs+AeOksafXg==}
     dependencies:
       expect: 29.5.0
       pretty-format: 29.5.0
@@ -10413,8 +10413,8 @@ packages:
     resolution: {integrity: sha512-xA6drNNeqb5YyV5fO3OAEsnXLfO7uF0whiOfPTz5AeDo8KeZFmODKnvwPymMNO8qE/an8pVY/O50tig2SQCrGw==}
     dev: true
 
-  /@types/node/20.5.8:
-    resolution: {integrity: sha512-eajsR9aeljqNhK028VG0Wuw+OaY5LLxYmxeoXynIoE6jannr9/Ucd1LL0hSSoafk5LTYG+FfqsyGt81Q6Zkybw==}
+  /@types/node/20.7.1:
+    resolution: {integrity: sha512-LT+OIXpp2kj4E2S/p91BMe+VgGX2+lfO+XTpfXhh+bCk2LkQtHZSub8ewFBMGP5ClysPjTDFa4sMI8Q3n4T0wg==}
     dev: true
 
   /@types/normalize-package-data/2.4.1:
@@ -14958,7 +14958,7 @@ packages:
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       natural-compare: 1.4.0
       optionator: 0.9.1
       regexpp: 3.2.0

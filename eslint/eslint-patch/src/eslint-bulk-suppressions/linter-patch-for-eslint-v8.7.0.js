@@ -2,7 +2,7 @@
  * @fileoverview Patched Linter class
  * @author Kevin Yang
  *
- * Copy of linter.js file from ESLint v8.23.1 with a few changes to implement suppression
+ * Copy of linter.js file from ESLint v8.7.0 with a few changes to implement suppression
  * feature. This is necessary because original Linter class has encapsulated its internal data
  * and utility functions by using closures. For example the runRules function and the
  * internalSlotsMap variable. The intended use of this file is to 1 by 1 overwrite the prototype
@@ -24,8 +24,8 @@
 //------------------------------------------------------------------------------
 
 // --- BEGIN MONKEY PATCH ---
-const globalSuppressionsPatch = require('./global-suppressions-patch');
-const requireFromPathToLinterJS = globalSuppressionsPatch.requireFromPathToLinterJS;
+const bulkSuppressionsPatch = require('./bulk-suppressions-patch');
+const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJS;
 const path = require('path'),
   eslintScope = requireFromPathToLinterJS('eslint-scope'),
   evk = requireFromPathToLinterJS('eslint-visitor-keys'),
@@ -71,7 +71,6 @@ const globals = requireFromPathToLinterJS('../../conf/globals');
 /** @typedef {import("../shared/types").Environment} Environment */
 /** @typedef {import("../shared/types").GlobalConf} GlobalConf */
 /** @typedef {import("../shared/types").LintMessage} LintMessage */
-/** @typedef {import("../shared/types").SuppressedLintMessage} SuppressedLintMessage */
 /** @typedef {import("../shared/types").ParserOptions} ParserOptions */
 /** @typedef {import("../shared/types").LanguageOptions} LanguageOptions */
 /** @typedef {import("../shared/types").Processor} Processor */
@@ -90,7 +89,6 @@ const globals = requireFromPathToLinterJS('../../conf/globals');
  * @property {number} line The line number
  * @property {number} column The column number
  * @property {(string|null)} ruleId The rule ID
- * @property {string} justification The justification of directive
  */
 
 /**
@@ -98,7 +96,6 @@ const globals = requireFromPathToLinterJS('../../conf/globals');
  * @typedef {Object} LinterInternalSlots
  * @property {ConfigArray|null} lastConfigArray The `ConfigArray` instance that the last `verify()` call used.
  * @property {SourceCode|null} lastSourceCode The `SourceCode` instance that the last `verify()` call used.
- * @property {SuppressedLintMessage[]} lastSuppressedMessages The `SuppressedLintMessage[]` instance that the last `verify()` call produced.
  * @property {Map<string, Parser>} parserMap The loaded parsers.
  * @property {Rules} ruleMap The loaded rules.
  */
@@ -299,12 +296,11 @@ function createLintingProblem(options) {
  * @param {token} options.commentToken The Comment token
  * @param {string} options.value The value after the directive in the comment
  * comment specified no specific rules, so it applies to all rules (e.g. `eslint-disable`)
- * @param {string} options.justification The justification of the directive
  * @param {function(string): {create: Function}} options.ruleMapper A map from rule IDs to defined rules
  * @returns {Object} Directives and problems from the comment
  */
 function createDisableDirectives(options) {
-  const { commentToken, type, value, justification, ruleMapper } = options;
+  const { commentToken, type, value, ruleMapper } = options;
   const ruleIds = Object.keys(commentParser.parseListConfig(value));
   const directiveRules = ruleIds.length ? ruleIds : [null];
   const result = {
@@ -323,8 +319,7 @@ function createDisableDirectives(options) {
           type,
           line: commentToken.loc.end.line,
           column: commentToken.loc.end.column + 1,
-          ruleId,
-          justification
+          ruleId
         });
       } else {
         result.directives.push({
@@ -332,8 +327,7 @@ function createDisableDirectives(options) {
           type,
           line: commentToken.loc.start.line,
           column: commentToken.loc.start.column + 1,
-          ruleId,
-          justification
+          ruleId
         });
       }
     } else {
@@ -344,21 +338,12 @@ function createDisableDirectives(options) {
 }
 
 /**
- * Extract the directive and the justification from a given directive comment and trim them.
- * @param {string} value The comment text to extract.
- * @returns {{directivePart: string, justificationPart: string}} The extracted directive and justification.
+ * Remove the ignored part from a given directive comment and trim it.
+ * @param {string} value The comment text to strip.
+ * @returns {string} The stripped text.
  */
-function extractDirectiveComment(value) {
-  const match = /\s-{2,}\s/u.exec(value);
-
-  if (!match) {
-    return { directivePart: value.trim(), justificationPart: '' };
-  }
-
-  const directive = value.slice(0, match.index).trim();
-  const justification = value.slice(match.index + match[0].length).trim();
-
-  return { directivePart: directive, justificationPart: justification };
+function stripDirectiveComment(value) {
+  return value.split(/\s-{2,}\s/u)[0].trim();
 }
 
 /**
@@ -384,10 +369,9 @@ function getDirectiveComments(ast, ruleMapper, warnInlineConfig) {
   ast.comments
     .filter((token) => token.type !== 'Shebang')
     .forEach((comment) => {
-      const { directivePart, justificationPart } = extractDirectiveComment(comment.value);
-
+      const trimmedCommentText = stripDirectiveComment(comment.value);
       const match = /^(eslint(?:-env|-enable|-disable(?:(?:-next)?-line)?)?|exported|globals?)(?:\s|$)/u.exec(
-        directivePart
+        trimmedCommentText
       );
 
       if (!match) {
@@ -427,7 +411,7 @@ function getDirectiveComments(ast, ruleMapper, warnInlineConfig) {
         return;
       }
 
-      const directiveValue = directivePart.slice(match.index + directiveText.length);
+      const directiveValue = trimmedCommentText.slice(match.index + directiveText.length);
 
       switch (directiveText) {
         case 'eslint-disable':
@@ -435,13 +419,7 @@ function getDirectiveComments(ast, ruleMapper, warnInlineConfig) {
         case 'eslint-disable-next-line':
         case 'eslint-disable-line': {
           const directiveType = directiveText.slice('eslint-'.length);
-          const options = {
-            commentToken: comment,
-            type: directiveType,
-            value: directiveValue,
-            justification: justificationPart,
-            ruleMapper
-          };
+          const options = { commentToken: comment, type: directiveType, value: directiveValue, ruleMapper };
           const { directives, directiveProblems } = createDisableDirectives(options);
 
           disableDirectives.push(...directives);
@@ -600,10 +578,7 @@ function findEslintEnv(text) {
 
   while ((match = eslintEnvPattern.exec(text)) !== null) {
     if (match[0].endsWith('*/')) {
-      retv = Object.assign(
-        retv || {},
-        commentParser.parseListConfig(extractDirectiveComment(match[1]).directivePart)
-      );
+      retv = Object.assign(retv || {}, commentParser.parseListConfig(stripDirectiveComment(match[1])));
     }
   }
 
@@ -815,21 +790,14 @@ function parse(text, languageOptions, filePath) {
    * problem that ESLint identified just like any other.
    */
   try {
-    debug('Parsing:', filePath);
     const parseResult =
       typeof parser.parseForESLint === 'function'
         ? parser.parseForESLint(textToParse, parserOptions)
         : { ast: parser.parse(textToParse, parserOptions) };
-
-    debug('Parsing successful:', filePath);
     const ast = parseResult.ast;
     const parserServices = parseResult.services || {};
     const visitorKeys = parseResult.visitorKeys || evk.KEYS;
-
-    debug('Scope analysis:', filePath);
     const scopeManager = parseResult.scopeManager || analyzeScope(ast, languageOptions, visitorKeys);
-
-    debug('Scope analysis successful:', filePath);
 
     return {
       success: true,
@@ -1084,7 +1052,7 @@ function runRules(
         options: getRuleOptions(configuredRules[ruleId]),
         report(...args) {
           // --- BEGIN MONKEY PATCH ---
-          if (globalSuppressionsPatch.shouldGlobalSuppress({ filename, currentNode, ruleId })) return;
+          if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
           // --- END MONKEY PATCH ---
           /*
            * Create a report translator lazily.
@@ -1124,9 +1092,7 @@ function runRules(
       })
     );
 
-    const ruleListeners = timing.enabled
-      ? timing.time(ruleId, createRuleListeners)(rule, ruleContext)
-      : createRuleListeners(rule, ruleContext);
+    const ruleListeners = createRuleListeners(rule, ruleContext);
 
     /**
      * Include `ruleId` in error logs
@@ -1142,10 +1108,6 @@ function runRules(
           throw e;
         }
       };
-    }
-
-    if (typeof ruleListeners === 'undefined' || ruleListeners === null) {
-      throw new Error(`The create() function for rule '${ruleId}' did not return an object.`);
     }
 
     // add all the selectors from the rule as listeners
@@ -1313,7 +1275,6 @@ class Linter {
       cwd: normalizeCwd(cwd),
       lastConfigArray: null,
       lastSourceCode: null,
-      lastSuppressedMessages: [],
       configType, // TODO: Remove after flat config conversion
       parserMap: new Map([['espree', espree]]),
       ruleMap: new Rules()
@@ -1337,7 +1298,7 @@ class Linter {
    * @param {ConfigData} providedConfig An ESLintConfig instance to configure everything.
    * @param {VerifyOptions} [providedOptions] The optional filename of the file being checked.
    * @throws {Error} If during rule execution.
-   * @returns {(LintMessage|SuppressedLintMessage)[]} The results as an array of messages or an empty array if no messages.
+   * @returns {LintMessage[]} The results as an array of messages or an empty array if no messages.
    */
   _verifyWithoutProcessors(textOrSourceCode, providedConfig, providedOptions) {
     const slots = internalSlotsMap.get(this);
@@ -1520,15 +1481,11 @@ class Linter {
           configArray.normalizeSync();
         }
 
-        return this._distinguishSuppressedMessages(
-          this._verifyWithFlatConfigArray(textOrSourceCode, configArray, options, true)
-        );
+        return this._verifyWithFlatConfigArray(textOrSourceCode, configArray, options, true);
       }
 
       if (typeof config.extractConfig === 'function') {
-        return this._distinguishSuppressedMessages(
-          this._verifyWithConfigArray(textOrSourceCode, config, options)
-        );
+        return this._verifyWithConfigArray(textOrSourceCode, config, options);
       }
     }
 
@@ -1542,13 +1499,9 @@ class Linter {
      * So we cannot apply multiple processors.
      */
     if (options.preprocess || options.postprocess) {
-      return this._distinguishSuppressedMessages(
-        this._verifyWithProcessor(textOrSourceCode, config, options)
-      );
+      return this._verifyWithProcessor(textOrSourceCode, config, options);
     }
-    return this._distinguishSuppressedMessages(
-      this._verifyWithoutProcessors(textOrSourceCode, config, options)
-    );
+    return this._verifyWithoutProcessors(textOrSourceCode, config, options);
   }
 
   /**
@@ -1557,7 +1510,7 @@ class Linter {
    * @param {FlatConfig} config The config array.
    * @param {VerifyOptions&ProcessorOptions} options The options.
    * @param {FlatConfigArray} [configForRecursive] The `ConfigArray` object to apply multiple processors recursively.
-   * @returns {(LintMessage|SuppressedLintMessage)[]} The found problems.
+   * @returns {LintMessage[]} The found problems.
    */
   _verifyWithFlatConfigArrayAndProcessor(textOrSourceCode, config, options, configForRecursive) {
     const filename = options.filename || '<input>';
@@ -1568,30 +1521,7 @@ class Linter {
     const postprocess = options.postprocess || ((messagesList) => messagesList.flat());
     const filterCodeBlock = options.filterCodeBlock || ((blockFilename) => blockFilename.endsWith('.js'));
     const originalExtname = path.extname(filename);
-
-    let blocks;
-
-    try {
-      blocks = preprocess(text, filenameToExpose);
-    } catch (ex) {
-      // If the message includes a leading line number, strip it:
-      const message = `Preprocessing error: ${ex.message.replace(/^line \d+:/iu, '').trim()}`;
-
-      debug('%s\n%s', message, ex.stack);
-
-      return [
-        {
-          ruleId: null,
-          fatal: true,
-          severity: 2,
-          message,
-          line: ex.lineNumber,
-          column: ex.column
-        }
-      ];
-    }
-
-    const messageLists = blocks.map((block, i) => {
+    const messageLists = preprocess(text, filenameToExpose).map((block, i) => {
       debug('A code block was found: %o', block.filename || '(unnamed)');
 
       // Keep the legacy behavior.
@@ -1635,7 +1565,7 @@ class Linter {
    * @param {FlatConfig} providedConfig An ESLintConfig instance to configure everything.
    * @param {VerifyOptions} [providedOptions] The optional filename of the file being checked.
    * @throws {Error} If during rule execution.
-   * @returns {(LintMessage|SuppressedLintMessage)[]} The results as an array of messages or an empty array if no messages.
+   * @returns {LintMessage[]} The results as an array of messages or an empty array if no messages.
    */
   _verifyWithFlatConfigArrayAndWithoutProcessors(textOrSourceCode, providedConfig, providedOptions) {
     const slots = internalSlotsMap.get(this);
@@ -1662,11 +1592,6 @@ class Linter {
       ...(languageOptions.sourceType === 'commonjs' ? globals.commonjs : void 0),
       ...languageOptions.globals
     };
-
-    // double check that there is a parser to avoid mysterious error messages
-    if (!languageOptions.parser) {
-      throw new TypeError(`No parser specified for ${options.filename}`);
-    }
 
     // Espree expects this information to be passed in
     if (isEspree(languageOptions.parser)) {
@@ -1786,7 +1711,7 @@ class Linter {
    * @param {string|SourceCode} textOrSourceCode The source code.
    * @param {ConfigArray} configArray The config array.
    * @param {VerifyOptions&ProcessorOptions} options The options.
-   * @returns {(LintMessage|SuppressedLintMessage)[]} The found problems.
+   * @returns {LintMessage[]} The found problems.
    */
   _verifyWithConfigArray(textOrSourceCode, configArray, options) {
     debug('With ConfigArray: %s', options.filename);
@@ -1821,29 +1746,17 @@ class Linter {
    * @param {VerifyOptions&ProcessorOptions} options The options.
    * @param {boolean} [firstCall=false] Indicates if this is being called directly
    *      from verify(). (TODO: Remove once eslintrc is removed.)
-   * @returns {(LintMessage|SuppressedLintMessage)[]} The found problems.
+   * @returns {LintMessage[]} The found problems.
    */
   _verifyWithFlatConfigArray(textOrSourceCode, configArray, options, firstCall = false) {
     debug('With flat config: %s', options.filename);
 
     // we need a filename to match configs against
-    const filename = options.filename || '__placeholder__.js';
+    const filename = options.filename || '<input>';
 
     // Store the config array in order to get plugin envs and rules later.
     internalSlotsMap.get(this).lastConfigArray = configArray;
     const config = configArray.getConfig(filename);
-
-    if (!config) {
-      return [
-        {
-          ruleId: null,
-          severity: 1,
-          message: `No matching configuration found for ${filename}.`,
-          line: 0,
-          column: 0
-        }
-      ];
-    }
 
     // Verify.
     if (config.processor) {
@@ -1873,7 +1786,7 @@ class Linter {
    * @param {ConfigData|ExtractedConfig} config The config array.
    * @param {VerifyOptions&ProcessorOptions} options The options.
    * @param {ConfigArray} [configForRecursive] The `ConfigArray` object to apply multiple processors recursively.
-   * @returns {(LintMessage|SuppressedLintMessage)[]} The found problems.
+   * @returns {LintMessage[]} The found problems.
    */
   _verifyWithProcessor(textOrSourceCode, config, options, configForRecursive) {
     const filename = options.filename || '<input>';
@@ -1881,33 +1794,11 @@ class Linter {
     const physicalFilename = options.physicalFilename || filenameToExpose;
     const text = ensureText(textOrSourceCode);
     const preprocess = options.preprocess || ((rawText) => [rawText]);
+
     const postprocess = options.postprocess || ((messagesList) => messagesList.flat());
     const filterCodeBlock = options.filterCodeBlock || ((blockFilename) => blockFilename.endsWith('.js'));
     const originalExtname = path.extname(filename);
-
-    let blocks;
-
-    try {
-      blocks = preprocess(text, filenameToExpose);
-    } catch (ex) {
-      // If the message includes a leading line number, strip it:
-      const message = `Preprocessing error: ${ex.message.replace(/^line \d+:/iu, '').trim()}`;
-
-      debug('%s\n%s', message, ex.stack);
-
-      return [
-        {
-          ruleId: null,
-          fatal: true,
-          severity: 2,
-          message,
-          line: ex.lineNumber,
-          column: ex.column
-        }
-      ];
-    }
-
-    const messageLists = blocks.map((block, i) => {
+    const messageLists = preprocess(text, filenameToExpose).map((block, i) => {
       debug('A code block was found: %o', block.filename || '(unnamed)');
 
       // Keep the legacy behavior.
@@ -1946,30 +1837,6 @@ class Linter {
   }
 
   /**
-   * Given a list of reported problems, distinguish problems between normal messages and suppressed messages.
-   * The normal messages will be returned and the suppressed messages will be stored as lastSuppressedMessages.
-   * @param {Problem[]} problems A list of reported problems.
-   * @returns {LintMessage[]} A list of LintMessage.
-   */
-  _distinguishSuppressedMessages(problems) {
-    const messages = [];
-    const suppressedMessages = [];
-    const slots = internalSlotsMap.get(this);
-
-    for (const problem of problems) {
-      if (problem.suppressions) {
-        suppressedMessages.push(problem);
-      } else {
-        messages.push(problem);
-      }
-    }
-
-    slots.lastSuppressedMessages = suppressedMessages;
-
-    return messages;
-  }
-
-  /**
    * Gets the SourceCode object representing the parsed source.
    * @returns {SourceCode} The SourceCode object.
    */
@@ -1978,17 +1845,6 @@ class Linter {
     this._conditionallyReinitialize();
     // --- END MONKEY PATCH ---
     return internalSlotsMap.get(this).lastSourceCode;
-  }
-
-  /**
-   * Gets the list of SuppressedLintMessage produced in the last running.
-   * @returns {SuppressedLintMessage[]} The list of SuppressedLintMessage
-   */
-  getSuppressedMessages() {
-    // --- BEGIN MONKEY PATCH ---
-    this._conditionallyReinitialize();
-    // --- END MONKEY PATCH ---
-    return internalSlotsMap.get(this).lastSuppressedMessages;
   }
 
   /**
@@ -2069,7 +1925,6 @@ class Linter {
     // --- BEGIN MONKEY PATCH ---
     this._conditionallyReinitialize();
     // --- END MONKEY PATCH ---
-
     let messages = [],
       fixedResult,
       fixed = false,

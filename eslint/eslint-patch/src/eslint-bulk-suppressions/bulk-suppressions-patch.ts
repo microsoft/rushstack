@@ -11,7 +11,7 @@ interface Suppression {
   rule: string;
 }
 
-interface GlobalSuppressionsJson {
+interface BulkSuppressionsJson {
   suppressions: Suppression[];
 }
 
@@ -109,7 +109,7 @@ function findEslintrcDirectory(fileAbsolutePath: string): string {
   throw new Error('Cannot locate eslintrc');
 }
 
-function validateSuppressionsJson(json: GlobalSuppressionsJson): json is GlobalSuppressionsJson {
+function validateSuppressionsJson(json: BulkSuppressionsJson): json is BulkSuppressionsJson {
   if (typeof json !== 'object') return false;
   if (json === null) return false;
   if (!json.hasOwnProperty('suppressions')) return false;
@@ -134,8 +134,8 @@ function validateSuppressionsJson(json: GlobalSuppressionsJson): json is GlobalS
   return true;
 }
 
-function readSuppressionsJson(eslintrcDirectory: string): GlobalSuppressionsJson {
-  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-global-suppressions.json');
+function readSuppressionsJson(eslintrcDirectory: string): BulkSuppressionsJson {
+  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
   let suppressionsJson = { suppressions: [] };
   try {
     const fileContent = fs.readFileSync(suppressionsPath, 'utf-8');
@@ -143,7 +143,7 @@ function readSuppressionsJson(eslintrcDirectory: string): GlobalSuppressionsJson
 
     if (!validateSuppressionsJson(suppressionsJson)) {
       console.log(
-        `Unexpected file content in .eslint-global-suppressions.json. JSON expected to be in the following format:
+        `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
 {
   suppressions: {
       file: string;
@@ -173,9 +173,9 @@ function serializeFileScopeTargetRule(suppression: {
 }
 
 function shouldWriteSuppression(rule: string): boolean {
-  if (process.env.ESLINT_GLOBAL_SUPPRESS_RULES === undefined) return false;
+  if (process.env.ESLINT_BULK_SUPPRESS_RULES === undefined) return false;
 
-  const rulesToSuppress = process.env.ESLINT_GLOBAL_SUPPRESS_RULES.split(',');
+  const rulesToSuppress = process.env.ESLINT_BULK_SUPPRESS_RULES.split(',');
 
   if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
 
@@ -212,7 +212,7 @@ function writeSuppression(params: {
 
   insort(suppressionsJson.suppressions, { file, scope, target, rule }, compareSuppressions);
 
-  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-global-suppressions.json');
+  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
 }
 
@@ -224,13 +224,13 @@ function readSerializedSuppressionsSet(fileAbsolutePath: string) {
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
-export function shouldGlobalSuppress(params: {
+export function shouldBulkSuppress(params: {
   filename: string;
   currentNode: BaseNode;
   ruleId: string;
 }): boolean {
-  // Use this ENV variable to turn off eslint-global-suppressions functionality, default behavior is on
-  if (process.env.USE_ESLINT_GLOBAL_SUPPRESSIONS === 'false') return false;
+  // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
+  if (process.env.USE_ESLINT_BULK_SUPPRESSIONS === 'false') return false;
 
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
@@ -249,11 +249,11 @@ export function shouldGlobalSuppress(params: {
   )
     writeSuppression({ eslintrcDirectory, file: fileRelativePath, scope, target, rule: rule });
 
-  const shouldGlobalSuppress: boolean = readSerializedSuppressionsSet(fileAbsolutePath).has(
+  const shouldBulkSuppress: boolean = readSerializedSuppressionsSet(fileAbsolutePath).has(
     serializedFileScopeTargetRule
   );
 
-  return shouldGlobalSuppress;
+  return shouldBulkSuppress;
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
@@ -306,6 +306,6 @@ export function findEslintLibraryLocation() {
 
 module.exports = {
   requireFromPathToLinterJS,
-  shouldGlobalSuppress,
+  shouldBulkSuppress,
   findEslintLibraryLocation
 };

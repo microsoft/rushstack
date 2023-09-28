@@ -1,0 +1,100 @@
+{
+  "suppressions": [
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".",
+      "target": ".",
+      "rule": "prefer-const"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ArrowFunctionExpression",
+      "target": ".x",
+      "rule": "@typescript-eslint/no-empty-function"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ArrowFunctionExpression",
+      "target": ".y",
+      "rule": "@typescript-eslint/no-empty-function"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ArrowFunctionExpression",
+      "target": ".z",
+      "rule": "@typescript-eslint/no-empty-function"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ClassDeclaration",
+      "target": ".ExampleClass",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ClassDeclaration.MethodDefinition",
+      "target": ".ExampleClass.exampleMethod",
+      "rule": "no-var"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ClassDeclaration.MethodDefinition.ClassExpression.MethodDefinition.ObjectExpression.FunctionExpression",
+      "target": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject.absurdObjectMethod",
+      "rule": "@typescript-eslint/no-empty-function"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ClassExpression.MethodDefinition",
+      "target": ".exampleAnonymousClass.constructor",
+      "rule": "@typescript-eslint/no-empty-function"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ClassExpression.MethodDefinition",
+      "target": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".FunctionDeclaration",
+      "target": ".exampleFunction",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ObjectExpression.ArrowFunctionExpression",
+      "target": ".exampleObject2.exampleObjectProperty",
+      "rule": "@typescript-eslint/no-empty-function"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".ObjectExpression.FunctionExpression",
+      "target": ".exampleObject2.exampleObjectMethod",
+      "rule": "@typescript-eslint/no-inferrable-types"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".TSInterfaceDeclaration",
+      "target": ".ExampleInterface",
+      "rule": "@typescript-eslint/no-empty-interface"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".TSModuleDeclaration",
+      "target": ".ExampleModule",
+      "rule": "@typescript-eslint/no-namespace"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".TSModuleDeclaration.TSInterfaceDeclaration",
+      "target": ".ExampleModule.ExampleInterface2",
+      "rule": "@typescript-eslint/no-empty-interface"
+    },
+    {
+      "file": "src/test-lab.ts",
+      "scope": ".TSTypeAliasDeclaration",
+      "target": ".ExampleObjectType",
+      "rule": "@typescript-eslint/ban-types"
+    }
+  ]
+}

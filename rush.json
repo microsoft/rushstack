@@ -536,8 +536,8 @@
       "shouldPublish": false
     },
     {
-      "packageName": "eslint-global-suppressions-test",
-      "projectFolder": "build-tests/eslint-global-suppressions-test",
+      "packageName": "eslint-bulk-suppressions-test",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

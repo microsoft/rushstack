@@ -47,8 +47,16 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@typescript-eslint/type-utils",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@typescript-eslint/types",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@typescript-eslint/utils",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@vscode/test-electron",
