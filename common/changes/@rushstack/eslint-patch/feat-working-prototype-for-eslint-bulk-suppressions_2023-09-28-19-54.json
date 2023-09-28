@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Implementaton for eslint-bulk-suppressions (final name), a monkey-patch for ESLint inspired by .NET Code Analysis Global Suppressions",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
