@@ -20,6 +20,7 @@ import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import type { AstEntity } from '../analyzer/AstEntity';
 import type { AstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
@@ -522,8 +523,14 @@ export class ApiReportGenerator {
         }
       }
 
-      if (apiItemMetadata.needsDocumentation) {
+      if (apiItemMetadata.undocumented) {
         footerParts.push('(undocumented)');
+
+        collector.messageRouter.addAnalyzerIssue(
+          ExtractorMessageId.Undocumented,
+          `Missing documentation for "${astDeclaration.astSymbol.localName}".`,
+          astDeclaration
+        );
       }
 
       if (footerParts.length > 0) {

@@ -73,7 +73,7 @@ export class DocCommentEnhancer {
       // Constructors always do pretty much the same thing, so it's annoying to require people to write
       // descriptions for them.  Instead, if the constructor lacks a TSDoc summary, then API Extractor
       // will auto-generate one.
-      metadata.needsDocumentation = false;
+      metadata.undocumented = false;
 
       // The class that contains this constructor
       const classDeclaration: AstDeclaration = astDeclaration.parent!;
@@ -135,12 +135,12 @@ export class DocCommentEnhancer {
 
     if (metadata.tsdocComment) {
       // Require the summary to contain at least 10 non-spacing characters
-      metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
+      metadata.undocumented = !tsdoc.PlainTextEmitter.hasAnyTextContent(
         metadata.tsdocComment.summarySection,
         10
       );
     } else {
-      metadata.needsDocumentation = true;
+      metadata.undocumented = true;
     }
   }
 
