@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "add new test that covers setting NODE_ENV var if not set",
+      "comment": "Ensure that the NODE_ENV environment variable is set correctly when running Jest tests",
       "type": "patch"
     }
   ],
