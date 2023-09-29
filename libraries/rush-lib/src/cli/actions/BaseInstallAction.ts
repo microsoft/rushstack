@@ -91,7 +91,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._offlineParameter = this.defineFlagParameter({
       parameterLongName: '--offline',
-      description: `Do not attempt to access the network. Report an error if the required dependencies cannot be obtained from the local cache.`
+      description:
+        `Enables installation to be performed without internet access. PNPM will instead report an error` +
+        ` if the necessary NPM packages cannot be obtained from the local cache.` +
+        ` For details, see the documentation for PNPM's "--offline" parameter.`
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
