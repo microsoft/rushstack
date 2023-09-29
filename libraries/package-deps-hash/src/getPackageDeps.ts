@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
@@ -184,12 +184,12 @@ export function getGitHashForFiles(
 /**
  * Executes "git ls-tree" in a folder
  */
-export function gitLsTree(path: string, gitPath?: string): string {
+export function gitLsTree(cwdPath: string, gitPath?: string): string {
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
     gitPath || 'git',
     ['ls-tree', 'HEAD', '-r'],
     {
-      currentWorkingDirectory: path
+      currentWorkingDirectory: cwdPath
     }
   );
 
@@ -205,7 +205,7 @@ export function gitLsTree(path: string, gitPath?: string): string {
 /**
  * Executes "git status" in a folder
  */
-export function gitStatus(path: string, gitPath?: string): string {
+export function gitStatus(cwdPath: string, gitPath?: string): string {
   /**
    * -s - Short format. Will be printed as 'XY PATH' or 'XY ORIG_PATH -> PATH'. Paths with non-standard
    *      characters will be escaped using double-quotes, and non-standard characters will be backslash
@@ -218,7 +218,7 @@ export function gitStatus(path: string, gitPath?: string): string {
     gitPath || 'git',
     ['status', '-s', '-u', '.'],
     {
-      currentWorkingDirectory: path
+      currentWorkingDirectory: cwdPath
     }
   );
 

@@ -6,13 +6,13 @@
 
 /// <reference types="node" />
 
-import { ICobuildCompletedState } from '@rushstack/rush-sdk';
-import { ICobuildContext } from '@rushstack/rush-sdk';
-import { ICobuildLockProvider } from '@rushstack/rush-sdk';
+import type { ICobuildCompletedState } from '@rushstack/rush-sdk';
+import type { ICobuildContext } from '@rushstack/rush-sdk';
+import type { ICobuildLockProvider } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { RedisClientOptions } from '@redis/client';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
-import { RushSession } from '@rushstack/rush-sdk';
+import type { RushSession } from '@rushstack/rush-sdk';
 
 // @beta
 export interface IRedisCobuildLockProviderOptions extends RedisClientOptions {

@@ -1,11 +1,14 @@
-import {
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type {
   IYamlItem,
   IYamlApiFile,
   IYamlSyntax,
   IYamlReferenceSpec,
   IYamlReference
 } from '../yaml/IYamlApiFile';
-import {
+import type {
   PackageYamlModel,
   EnumYamlModel,
   TypeAliasYamlModel,

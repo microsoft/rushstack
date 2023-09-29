@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash, Hash } from 'crypto';
+import { createHash, type Hash } from 'crypto';
 
 import {
   CachedSource,
   ConcatSource,
   RawSource,
   ReplaceSource,
-  Source,
+  type Source,
   SourceMapSource
 } from 'webpack-sources';
 import * as webpack from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncHook, SyncWaterfallHook, TapOptions } from 'tapable';
+import { AsyncSeriesWaterfallHook, type SyncHook, SyncWaterfallHook, type TapOptions } from 'tapable';
 
 import {
   CHUNK_MODULES_TOKEN,
@@ -507,6 +507,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                     (result: IModuleMinificationResult) => {
                       if (isMinificationResultError(result)) {
                         compilation.errors.push(result.error);
+                        // eslint-disable-next-line no-console
                         console.error(result.error);
                       } else {
                         try {

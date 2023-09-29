@@ -7,22 +7,22 @@ import {
   DocSection,
   DocPlainText,
   DocLinkTag,
-  TSDocConfiguration,
+  type TSDocConfiguration,
   StringBuilder,
   DocNodeKind,
   DocParagraph,
   DocCodeSpan,
   DocFencedCode,
   StandardTags,
-  DocBlock,
-  DocComment,
-  DocNodeContainer
+  type DocBlock,
+  type DocComment,
+  type DocNodeContainer
 } from '@microsoft/tsdoc';
 import {
-  ApiModel,
-  ApiItem,
-  ApiEnum,
-  ApiPackage,
+  type ApiModel,
+  type ApiItem,
+  type ApiEnum,
+  type ApiPackage,
   ApiItemKind,
   ApiReleaseTagMixin,
   ApiDocumentedItem,
@@ -31,21 +31,21 @@ import {
   ApiStaticMixin,
   ApiPropertyItem,
   ApiInterface,
-  Excerpt,
+  type Excerpt,
   ApiAbstractMixin,
   ApiParameterListMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
-  ApiNamespace,
+  type ApiNamespace,
   ExcerptTokenKind,
-  IResolveDeclarationReferenceResult,
+  type IResolveDeclarationReferenceResult,
   ApiTypeAlias,
-  ExcerptToken,
+  type ExcerptToken,
   ApiOptionalMixin,
   ApiInitializerMixin,
   ApiProtectedMixin,
   ApiReadonlyMixin,
-  IFindApiItemsResult
+  type IFindApiItemsResult
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -59,10 +59,10 @@ import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { PluginLoader } from '../plugin/PluginLoader';
 import {
-  IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
+  type IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   MarkdownDocumenterFeatureContext
 } from '../plugin/MarkdownDocumenterFeature';
-import { DocumenterConfig } from './DocumenterConfig';
+import type { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
 export interface IMarkdownDocumenterOptions {

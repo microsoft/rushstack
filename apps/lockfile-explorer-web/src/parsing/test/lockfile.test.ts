@@ -3,7 +3,7 @@
 
 import { TEST_LOCKFILE } from './testLockfile';
 import { generateLockfileGraph } from '../readLockfile';
-import { LockfileEntry } from '../LockfileEntry';
+import type { LockfileEntry } from '../LockfileEntry';
 
 describe('LockfileGeneration', () => {
   it('creates a valid bi-directional graph', () => {

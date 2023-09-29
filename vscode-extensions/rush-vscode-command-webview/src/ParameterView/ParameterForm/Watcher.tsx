@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 
-import { FieldValues, UseFormWatch } from 'react-hook-form';
+import type { FieldValues, UseFormWatch } from 'react-hook-form';
 import { useAppDispatch } from '../../store/hooks';
 import { onChangeFormValues } from '../../store/slices/parameter';
 
@@ -20,6 +20,7 @@ export const ParameterFormWatcher = ({ watch }: IParameterFormWatcherProps): JSX
 
   useEffect((): (() => void) => {
     const subscription: Subscription = watch((values) => {
+      // eslint-disable-next-line no-console
       console.log('watch', values);
       dispatch(onChangeFormValues(values));
     });

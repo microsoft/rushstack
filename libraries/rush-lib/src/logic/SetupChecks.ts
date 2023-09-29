@@ -7,7 +7,7 @@ import * as semver from 'semver';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 
 // Refuses to run at all if the PNPM version is older than this, because there
@@ -33,6 +33,7 @@ export class SetupChecks {
     const errorMessage: string | undefined = SetupChecks._validate(rushConfiguration);
 
     if (errorMessage) {
+      // eslint-disable-next-line no-console
       console.error(colors.red(PrintUtilities.wrapWords(errorMessage)));
       throw new AlreadyReportedError();
     }
@@ -75,6 +76,7 @@ export class SetupChecks {
 
     if (phantomFolders.length > 0) {
       if (phantomFolders.length === 1) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             PrintUtilities.wrapWords(
@@ -85,6 +87,7 @@ export class SetupChecks {
           )
         );
       } else {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             PrintUtilities.wrapWords(
@@ -96,8 +99,10 @@ export class SetupChecks {
         );
       }
       for (const folder of phantomFolders) {
+        // eslint-disable-next-line no-console
         console.log(colors.yellow(`"${folder}"`));
       }
+      // eslint-disable-next-line no-console
       console.log(); // add a newline
     }
   }

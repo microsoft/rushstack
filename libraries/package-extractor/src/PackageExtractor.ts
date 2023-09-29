@@ -3,11 +3,11 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { IMinimatch, Minimatch } from 'minimatch';
+import { type IMinimatch, Minimatch } from 'minimatch';
 import semver from 'semver';
 import npmPacklist from 'npm-packlist';
 import pnpmLinkBins from '@pnpm/link-bins';
-import ignore, { Ignore } from 'ignore';
+import ignore, { type Ignore } from 'ignore';
 import {
   Async,
   AsyncQueue,
@@ -582,6 +582,7 @@ export class PackageExtractor {
           } catch (resolveErr) {
             // The virtual store link isn't guaranteed to exist, so ignore if it's missing
             // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
+            // eslint-disable-next-line no-console
             console.log('Ignoring missing PNPM virtual store link for ' + packageJsonFolderPath);
           }
         }
@@ -697,7 +698,6 @@ export class PackageExtractor {
     const isFileExcluded = (filePath: string): boolean => {
       // Encapsulate exclude logic into a function, so it can be reused.
       const excludeFileByPatterns = (
-        filePath: string,
         patternsToInclude: string[] | undefined,
         patternsToExclude: string[] | undefined
       ): boolean => {
@@ -724,7 +724,6 @@ export class PackageExtractor {
 
       if (isLocalProject) {
         return excludeFileByPatterns(
-          filePath,
           sourceProjectConfiguration?.patternsToInclude,
           sourceProjectConfiguration?.patternsToExclude
         );
@@ -742,7 +741,7 @@ export class PackageExtractor {
             semver.satisfies(packagesJson.version, d.dependencyVersionRange)
           );
         return matchedDependenciesConfigurations.some((d) =>
-          excludeFileByPatterns(filePath, d.patternsToInclude, d.patternsToExclude)
+          excludeFileByPatterns(d.patternsToInclude, d.patternsToExclude)
         );
       }
     };

@@ -21,14 +21,6 @@ import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 
-// @beta @deprecated
-export class CancellationToken {
-    // @internal
-    constructor(abortSignal: AbortSignal);
-    get isCancelled(): boolean;
-    get onCancelledPromise(): Promise<void>;
-}
-
 export { CommandLineChoiceListParameter }
 
 export { CommandLineChoiceParameter }
@@ -194,8 +186,6 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 export interface IHeftTaskRunHookOptions {
     // @beta
     readonly abortSignal: AbortSignal;
-    // @beta @deprecated
-    readonly cancellationToken: CancellationToken;
 }
 
 // @public

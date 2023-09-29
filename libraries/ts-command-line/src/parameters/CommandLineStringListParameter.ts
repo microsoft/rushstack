@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineStringListDefinition } from './CommandLineDefinition';
+import type { ICommandLineStringListDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
 import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 

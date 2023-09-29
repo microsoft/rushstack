@@ -3,7 +3,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './styles.scss';
-import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
 import { ReactNull } from '../../types/ReactNull';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
@@ -29,7 +29,7 @@ const LockfileEntryLi = ({ group }: { group: ILockfileEntryGroup }): JSX.Element
     (entry: LockfileEntry) => () => {
       dispatch(pushToStack(entry));
     },
-    []
+    [dispatch]
   );
 
   useEffect(() => {
@@ -112,8 +112,6 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     setPackageFilter(getFilterFromLocalStorage(LockfileEntryFilter.Package));
   }, []);
 
-  if (!entries) return ReactNull;
-
   const getEntriesToShow = (): ILockfileEntryGroup[] => {
     let filteredEntries: LockfileEntry[] = entries;
     if (projectFilter && activeFilters[LockfileEntryFilter.Project]) {
@@ -129,10 +127,10 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
       return groups;
     }, {});
     let groupedEntries: ILockfileEntryGroup[] = [];
-    for (const [packageName, entries] of Object.entries(reducedEntries)) {
+    for (const [packageName, versions] of Object.entries(reducedEntries)) {
       groupedEntries.push({
         entryName: packageName,
-        versions: entries
+        versions
       });
     }
 
@@ -156,7 +154,7 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
     (filter: LockfileEntryFilter, enabled: boolean) => (): void => {
       dispatch(selectFilter({ filter, state: enabled }));
     },
-    []
+    [dispatch]
   );
 
   const togglePackageView = useCallback(
@@ -169,63 +167,68 @@ export const LockfileViewer = (): JSX.Element | ReactNull => {
         dispatch(selectFilter({ filter: LockfileEntryFilter.Project, state: false }));
       }
     },
-    [activeFilters]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dispatch, activeFilters]
   );
 
-  return (
-    <div className={styles.ViewWrapper}>
-      <div className={`${styles.ViewContents}`}>
-        <Tabs
-          items={[
-            {
-              header: 'Projects'
-            },
-            {
-              header: 'Packages'
-            }
-          ]}
-          value={activeFilters[LockfileEntryFilter.Project] ? 'Projects' : 'Packages'}
-          onChange={togglePackageView}
-        />
-        <Input
-          type="search"
-          placeholder="Filter..."
-          value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
-          onChange={updateFilter(
-            activeFilters[LockfileEntryFilter.Project]
-              ? LockfileEntryFilter.Project
-              : LockfileEntryFilter.Package
-          )}
-        />
-        <ScrollArea>
-          {getEntriesToShow().map((lockfileEntryGroup) => (
-            <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
-          ))}
-        </ScrollArea>
-        {activeFilters[LockfileEntryFilter.Package] ? (
-          <div className={styles.filterSection}>
-            <Text type="h5" bold>
-              Filters
-            </Text>
-            <Checkbox
-              label="Must have side-by-side versions"
-              isChecked={activeFilters[LockfileEntryFilter.SideBySide]}
-              onChecked={changeFilter(
-                LockfileEntryFilter.SideBySide,
-                !activeFilters[LockfileEntryFilter.SideBySide]
-              )}
-            />
-            <Checkbox
-              label="Must have doppelgangers"
-              isChecked={activeFilters[LockfileEntryFilter.Doppelganger]}
-              onChecked={changeFilter(
-                LockfileEntryFilter.Doppelganger,
-                !activeFilters[LockfileEntryFilter.Doppelganger]
-              )}
-            />
-          </div>
-        ) : null}
+  if (!entries) {
+    return ReactNull;
+  } else {
+    return (
+      <div className={styles.ViewWrapper}>
+        <div className={`${styles.ViewContents}`}>
+          <Tabs
+            items={[
+              {
+                header: 'Projects'
+              },
+              {
+                header: 'Packages'
+              }
+            ]}
+            value={activeFilters[LockfileEntryFilter.Project] ? 'Projects' : 'Packages'}
+            onChange={togglePackageView}
+          />
+          <Input
+            type="search"
+            placeholder="Filter..."
+            value={activeFilters[LockfileEntryFilter.Project] ? projectFilter : packageFilter}
+            onChange={updateFilter(
+              activeFilters[LockfileEntryFilter.Project]
+                ? LockfileEntryFilter.Project
+                : LockfileEntryFilter.Package
+            )}
+          />
+          <ScrollArea>
+            {getEntriesToShow().map((lockfileEntryGroup) => (
+              <LockfileEntryLi group={lockfileEntryGroup} key={lockfileEntryGroup.entryName} />
+            ))}
+          </ScrollArea>
+          {activeFilters[LockfileEntryFilter.Package] ? (
+            <div className={styles.filterSection}>
+              <Text type="h5" bold>
+                Filters
+              </Text>
+              <Checkbox
+                label="Must have side-by-side versions"
+                isChecked={activeFilters[LockfileEntryFilter.SideBySide]}
+                onChecked={changeFilter(
+                  LockfileEntryFilter.SideBySide,
+                  !activeFilters[LockfileEntryFilter.SideBySide]
+                )}
+              />
+              <Checkbox
+                label="Must have doppelgangers"
+                isChecked={activeFilters[LockfileEntryFilter.Doppelganger]}
+                onChecked={changeFilter(
+                  LockfileEntryFilter.Doppelganger,
+                  !activeFilters[LockfileEntryFilter.Doppelganger]
+                )}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };

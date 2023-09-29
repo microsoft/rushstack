@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as fetch from 'node-fetch';
+import type * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -13,37 +13,37 @@ import {
   PosixModeBits,
   NewlineKind,
   AlreadyReportedError,
-  FileSystemStats,
+  type FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
-  ITerminalProvider,
+  type ITerminalProvider,
   Path
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
-import { AsyncRecycler } from '../../utilities/AsyncRecycler';
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
+import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { Git } from '../Git';
-import { LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
-import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { PurgeManager } from '../PurgeManager';
-import { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
+import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInstallFlag';
+import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
+import type { PurgeManager } from '../PurgeManager';
+import type { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConstants } from '../RushConstants';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import * as PolicyValidator from '../policy/PolicyValidator';
-import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
-import { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
+import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -94,7 +94,9 @@ export abstract class BaseInstallManager {
 
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
@@ -106,7 +108,9 @@ export abstract class BaseInstallManager {
 
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
@@ -122,6 +126,7 @@ export abstract class BaseInstallManager {
       return;
     }
 
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`));
 
     // This marker file indicates that the last "rush install" completed successfully.
@@ -151,6 +156,7 @@ export abstract class BaseInstallManager {
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
+      // eslint-disable-next-line no-console
       console.log();
       await this.validateNpmSetup();
 
@@ -163,6 +169,7 @@ export abstract class BaseInstallManager {
       }
 
       if (publishedRelease === false) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.')
         );
@@ -196,6 +203,7 @@ export abstract class BaseInstallManager {
       // Always update the state file if running "rush update"
       if (this.options.allowShrinkwrapUpdates) {
         if (this.rushConfiguration.getRepoState(this.options.variant).refreshState(this.rushConfiguration)) {
+          // eslint-disable-next-line no-console
           console.log(
             colors.yellow(
               `${RushConstants.repoStateFilename} has been modified and must be committed to source control.`
@@ -204,6 +212,7 @@ export abstract class BaseInstallManager {
         }
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log('Installation is already up-to-date.');
     }
 
@@ -215,6 +224,7 @@ export abstract class BaseInstallManager {
     // Perform any post-install work the install manager requires
     await this.postInstallAsync();
 
+    // eslint-disable-next-line no-console
     console.log('');
   }
 
@@ -271,6 +281,7 @@ export abstract class BaseInstallManager {
     if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
       if (this.options.allowShrinkwrapUpdates) {
         approvedPackagesChecker.rewriteConfigFiles();
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             'Approved package files have been updated. These updates should be committed to source control'
@@ -299,13 +310,17 @@ export abstract class BaseInstallManager {
           this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
         );
       } catch (ex) {
+        // eslint-disable-next-line no-console
         console.log();
+        // eslint-disable-next-line no-console
         console.log(
           `Unable to load the ${this.rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
         );
 
         if (!this.options.allowShrinkwrapUpdates) {
+          // eslint-disable-next-line no-console
           console.log();
+          // eslint-disable-next-line no-console
           console.log(colors.red('You need to run "rush update" to fix this problem'));
           throw new AlreadyReportedError();
         }
@@ -328,10 +343,14 @@ export abstract class BaseInstallManager {
     });
 
     if (this.options.variant) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(colors.bold(`Using variant '${this.options.variant}' for installation.`));
     } else if (!variantIsUpToDate && !this.options.variant) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(colors.bold('Using the default variant for installation.'));
     }
 
@@ -375,7 +394,9 @@ export abstract class BaseInstallManager {
 
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(
         colors.yellow(
           PrintUtilities.wrapWords(
@@ -385,15 +406,19 @@ export abstract class BaseInstallManager {
       );
 
       for (const shrinkwrapWarning of shrinkwrapWarnings) {
+        // eslint-disable-next-line no-console
         console.log(colors.yellow('  ' + shrinkwrapWarning));
       }
+      // eslint-disable-next-line no-console
       console.log();
     }
 
     // Force update if the shrinkwrap is out of date
     if (!shrinkwrapIsUpToDate) {
       if (!this.options.allowShrinkwrapUpdates) {
+        // eslint-disable-next-line no-console
         console.log();
+        // eslint-disable-next-line no-console
         console.log(
           colors.red(
             `The ${this.rushConfiguration.shrinkwrapFilePhrase} is out of date. You need to run "rush update".`
@@ -419,10 +444,12 @@ export abstract class BaseInstallManager {
       // Ignore the ".sample" file(s) in this folder.
       const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
+        // eslint-disable-next-line no-console
         console.log('\n' + colors.bold('Found files in the "common/git-hooks" folder.'));
 
         if (!git.isHooksPathDefault()) {
           const color: (str: string) => string = this.options.bypassPolicy ? colors.yellow : colors.red;
+          // eslint-disable-next-line no-console
           console.error(
             color(
               [
@@ -440,6 +467,7 @@ export abstract class BaseInstallManager {
             // own the hooks folder
             return;
           }
+          // eslint-disable-next-line no-console
           console.error(
             color(
               [
@@ -508,6 +536,7 @@ ${gitLfsHookHandling}
           );
         }
 
+        // eslint-disable-next-line no-console
         console.log(
           'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + '\n'
         );
@@ -575,6 +604,14 @@ ${gitLfsHookHandling}
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !options.allowShrinkwrapUpdates) {
         args.push('--frozen-lockfile');
+
+        if (
+          options.pnpmFilterArguments.length > 0 &&
+          Number.parseInt(this.rushConfiguration.packageManagerToolVersion, 10) >= 8 // PNPM Major version 8+
+        ) {
+          // On pnpm@8, disable the "dedupe-peer-dependents" feature when doing a filtered CI install so that filters take effect.
+          args.push('--config.dedupe-peer-dependents=false');
+        }
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
         args.push('--prefer-frozen-lockfile');
@@ -822,9 +859,13 @@ ${gitLfsHookHandling}
       });
       const valid: boolean = await setupPackageRegistry.checkOnly();
       if (!valid) {
+        // eslint-disable-next-line no-console
         console.error();
+        // eslint-disable-next-line no-console
         console.error(colors.red('ERROR: NPM credentials are missing or expired'));
+        // eslint-disable-next-line no-console
         console.error();
+        // eslint-disable-next-line no-console
         console.error(
           colors.bold(
             '==> Please run "rush setup" to update your NPM token. ' +

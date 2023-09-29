@@ -58,5 +58,6 @@ if ($root) {
     $root
   );
 } else {
+  // eslint-disable-next-line no-console
   console.error("error can't find root!");
 }

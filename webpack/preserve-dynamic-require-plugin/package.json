@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
-  "version": "0.11.2",
+  "version": "0.11.7",
   "description": "This plugin tells webpack to leave dynamic calls to \"require\" as-is instead of trying to bundle them.",
   "main": "lib/index.js",
   "typings": "dist/webpack-preserve-dynamic-require-plugin.d.ts",
@@ -19,7 +19,6 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "webpack": "~5.82.1"

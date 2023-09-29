@@ -16,11 +16,13 @@ export const RunButton = (): JSX.Element => {
   );
   const args: string[] = useParameterArgs();
   const onClickRunButton: () => void = useCallback(async () => {
+    // eslint-disable-next-line no-console
     console.log('onCLickRun', commandName, formValidateAsync);
     if (!commandName || !formValidateAsync) {
       return;
     }
     const isValid: boolean = await formValidateAsync();
+    // eslint-disable-next-line no-console
     console.log('isValid', isValid);
     if (isValid) {
       sendMessageToExtension({

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * A sensible fallback column width for consoles.
@@ -168,6 +168,8 @@ export class PrintUtilities {
   /**
    * Displays a message in the console wrapped in a box UI.
    *
+   * @param message - The message to display.
+   * @param terminal - The terminal to write the message to.
    * @param boxWidth - The width of the box, defaults to half of the console width.
    */
   public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void {
@@ -175,20 +177,41 @@ export class PrintUtilities {
       const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
       boxWidth = Math.floor(consoleWidth / 2);
     }
+
     const maxLineLength: number = boxWidth - 10;
     const wrappedMessageLines: string[] = PrintUtilities.wrapWordsToLines(message, maxLineLength);
-
-    // ╔═══════════╗
-    // ║  Message  ║
-    // ╚═══════════╝
-    terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗ `);
+    let longestLineLength: number = 0;
+    const trimmedLines: string[] = [];
     for (const line of wrappedMessageLines) {
       const trimmedLine: string = line.trim();
-      const padding: number = boxWidth - trimmedLine.length - 2;
-      const leftPadding: number = Math.floor(padding / 2);
-      const rightPadding: number = padding - leftPadding;
-      terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
+      trimmedLines.push(trimmedLine);
+      longestLineLength = Math.max(longestLineLength, trimmedLine.length);
     }
-    terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
+
+    if (longestLineLength > boxWidth - 2) {
+      // If the longest line is longer than the box, print bars above and below the message
+      // ═════════════
+      //  Message
+      // ═════════════
+      const headerAndFooter: string = ` ${'═'.repeat(boxWidth)}`;
+      terminal.writeLine(headerAndFooter);
+      for (const line of wrappedMessageLines) {
+        terminal.writeLine(` ${line}`);
+      }
+
+      terminal.writeLine(headerAndFooter);
+    } else {
+      // ╔═══════════╗
+      // ║  Message  ║
+      // ╚═══════════╝
+      terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗`);
+      for (const trimmedLine of trimmedLines) {
+        const padding: number = boxWidth - trimmedLine.length - 2;
+        const leftPadding: number = Math.floor(padding / 2);
+        const rightPadding: number = padding - leftPadding;
+        terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║`);
+      }
+      terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝`);
+    }
   }
 }

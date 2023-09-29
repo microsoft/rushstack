@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin-packlets",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "A lightweight alternative to NPM packages for organizing source files within a single project",
   "license": "MIT",
   "repository": {
@@ -30,8 +30,8 @@
     "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "0.59.0",
-    "@rushstack/heft-node-rig": "2.2.23",
+    "@rushstack/heft": "0.62.0",
+    "@rushstack/heft-node-rig": "2.3.2",
     "@types/eslint": "8.2.0",
     "@types/estree": "0.0.50",
     "@types/heft-jest": "1.0.1",

@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManager';
-import { PurgeManager } from './PurgeManager';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import type { PurgeManager } from './PurgeManager';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 import type { BaseInstallManager } from './base/BaseInstallManager';
 import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';

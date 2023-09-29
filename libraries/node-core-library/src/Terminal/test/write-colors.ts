@@ -9,7 +9,7 @@
 
 import { Terminal, ConsoleTerminalProvider } from '../../index';
 import { createColorGrid } from './createColorGrid';
-import { Colors, IColorableSequence } from '../Colors';
+import { Colors, type IColorableSequence } from '../Colors';
 
 const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 function writeColorGrid(colorGridSequences: IColorableSequence[][]): void {

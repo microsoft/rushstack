@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { LastLinkFlagFactory } from '../api/LastLinkFlag';
@@ -30,6 +30,7 @@ export class UnlinkManager {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (!force && useWorkspaces) {
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'Unlinking is not supported when using workspaces. Run "rush purge" to remove ' +
@@ -56,6 +57,7 @@ export class UnlinkManager {
     for (const rushProject of this._rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (FileSystem.exists(localModuleFolder)) {
+        // eslint-disable-next-line no-console
         console.log(`Purging ${localModuleFolder}`);
         Utilities.dangerouslyDeletePath(localModuleFolder);
         didDeleteAnything = true;
@@ -63,6 +65,7 @@ export class UnlinkManager {
 
       const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(rushProject);
       if (FileSystem.exists(projectShrinkwrapFilePath)) {
+        // eslint-disable-next-line no-console
         console.log(`Deleting ${projectShrinkwrapFilePath}`);
         FileSystem.deleteFile(projectShrinkwrapFilePath);
         didDeleteAnything = true;

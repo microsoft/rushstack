@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.s
+// See LICENSE in the project root for license information.
+
+/* eslint-disable @typescript-eslint/no-redeclare */
 
 import { DeclarationReference, Navigation } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import { DeserializerContext } from '../model/DeserializerContext';
+import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import type { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (IApiExportedMixinOptions:interface)}.

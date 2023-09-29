@@ -573,7 +573,7 @@ export class CommandLineConfiguration {
           `In ${RushConstants.commandLineFilename}, there exists a cycle within the ` +
             `set of ${dependency.name} dependencies: ${Array.from(
               phasesInPath,
-              (phase: IPhase) => phase.name
+              (phaseInPath: IPhase) => phaseInPath.name
             ).join(', ')}`
         );
       } else {

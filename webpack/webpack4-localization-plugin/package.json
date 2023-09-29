@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack4-localization-plugin",
-  "version": "0.18.2",
+  "version": "0.18.7",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/webpack4-localization-plugin.d.ts",
@@ -15,7 +15,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "^4.1.2",
+    "@rushstack/set-webpack-public-path-plugin": "^4.1.7",
     "@types/webpack": "^4.39.0",
     "webpack": "^4.31.0",
     "@types/node": "*"
@@ -39,7 +39,6 @@
     "minimatch": "~3.0.3"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
     "@rushstack/set-webpack-public-path-plugin": "workspace:*",

@@ -5,10 +5,10 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
+import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiPropertySignature}.

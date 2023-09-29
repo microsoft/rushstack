@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as ts from 'typescript';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import {
   ApiModel,
   ApiClass,
@@ -15,15 +15,15 @@ import {
   ApiNamespace,
   ApiInterface,
   ApiPropertySignature,
-  ApiItemContainerMixin,
+  type ApiItemContainerMixin,
   ReleaseTag,
   ApiProperty,
   ApiMethodSignature,
-  IApiParameterOptions,
+  type IApiParameterOptions,
   ApiEnum,
   ApiEnumMember,
-  IExcerptTokenRange,
-  IExcerptToken,
+  type IExcerptTokenRange,
+  type IExcerptToken,
   ApiConstructor,
   ApiConstructSignature,
   ApiFunction,
@@ -31,22 +31,22 @@ import {
   ApiVariable,
   ApiTypeAlias,
   ApiCallSignature,
-  IApiTypeParameterOptions,
+  type IApiTypeParameterOptions,
   EnumMemberOrder
 } from '@microsoft/api-extractor-model';
 import { Path } from '@rushstack/node-core-library';
 
-import { Collector } from '../collector/Collector';
-import { ISourceLocation } from '../collector/SourceMapper';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
+import type { Collector } from '../collector/Collector';
+import type { ISourceLocation } from '../collector/SourceMapper';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import { ExcerptBuilder, type IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstEntity } from '../analyzer/AstEntity';
-import { AstModule } from '../analyzer/AstModule';
+import type { AstEntity } from '../analyzer/AstEntity';
+import type { AstModule } from '../analyzer/AstModule';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
 interface IProcessAstEntityContext {

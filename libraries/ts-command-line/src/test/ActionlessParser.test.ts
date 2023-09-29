@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 class TestCommandLine extends CommandLineParser {
   public flag!: CommandLineFlagParameter;

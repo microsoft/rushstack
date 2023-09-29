@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
-import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
-import { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
-import { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
+import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
+import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
 import { ProjectBuildCache } from '../ProjectBuildCache';
 
@@ -28,8 +28,8 @@ describe(ProjectBuildCache.name, () => {
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
-        getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
-          `${options.projectName}/${options.projectStateHash}`,
+        getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
+          `${opts.projectName}/${opts.projectStateHash}`,
         localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
         cloudCacheProvider: {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false

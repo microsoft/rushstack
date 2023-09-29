@@ -4,15 +4,15 @@
 import * as path from 'path';
 
 import {
-  PackageJsonLookup,
+  type PackageJsonLookup,
   FileSystem,
   JsonFile,
-  NewlineKind,
-  INodePackageJson,
-  JsonObject
+  type NewlineKind,
+  type INodePackageJson,
+  type JsonObject
 } from '@rushstack/node-core-library';
 import { Extractor } from '../api/Extractor';
-import { MessageRouter } from '../collector/MessageRouter';
+import type { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
 /**

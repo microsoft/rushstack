@@ -9,7 +9,7 @@ import {
   JsonSchema,
   FileSystem,
   PackageJsonLookup,
-  INodePackageJson,
+  type INodePackageJson,
   PackageName,
   Text,
   InternalError,
@@ -18,7 +18,7 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';

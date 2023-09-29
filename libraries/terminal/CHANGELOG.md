@@ -1,6 +1,35 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Fri, 22 Sep 2023 00:05:50 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2023 20:53:17 GMT and should not be manually modified.
+
+## 0.7.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+### Patches
+
+- Fix an issue where `PrintUtilities.printMessageInBox` would throw if the message contains a word that is longer than the box width. In this case, `printMessageInBox` will print bars above and below the message, and then print the message lines, allowing the console to wrap them.
+
+## 0.7.6
+Wed, 27 Sep 2023 00:21:39 GMT
+
+_Version update only_
+
+## 0.7.5
+Tue, 26 Sep 2023 21:02:31 GMT
+
+_Version update only_
+
+## 0.7.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.7.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
 
 ## 0.7.2
 Fri, 22 Sep 2023 00:05:50 GMT

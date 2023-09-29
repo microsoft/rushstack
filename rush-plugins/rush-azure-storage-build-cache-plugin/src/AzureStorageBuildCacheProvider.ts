@@ -3,16 +3,24 @@
 
 import type { ITerminal } from '@rushstack/node-core-library';
 import {
-  ICloudBuildCacheProvider,
+  type ICloudBuildCacheProvider,
   EnvironmentVariableNames,
   RushConstants,
   EnvironmentConfiguration,
-  ICredentialCacheEntry
+  type ICredentialCacheEntry
 } from '@rushstack/rush-sdk';
-import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient } from '@azure/storage-blob';
+import {
+  type BlobClient,
+  BlobServiceClient,
+  type BlockBlobClient,
+  type ContainerClient
+} from '@azure/storage-blob';
 import { AzureAuthorityHosts } from '@azure/identity';
 
-import { AzureStorageAuthentication, IAzureStorageAuthenticationOptions } from './AzureStorageAuthentication';
+import {
+  AzureStorageAuthentication,
+  type IAzureStorageAuthenticationOptions
+} from './AzureStorageAuthentication';
 
 export interface IAzureStorageBuildCacheProviderOptions extends IAzureStorageAuthenticationOptions {
   blobPrefix?: string;

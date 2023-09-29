@@ -2,6 +2,32 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.4.0",
+      "tag": "@rushstack/eslint-config_v3.4.0",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the \"eslint-config-\" prefix"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.7.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.4",
       "tag": "@rushstack/eslint-config_v3.3.4",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",

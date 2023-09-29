@@ -3,7 +3,7 @@
 
 import {
   DocSection,
-  TSDocConfiguration,
+  type TSDocConfiguration,
   DocPlainText,
   StringBuilder,
   DocParagraph,
@@ -21,7 +21,7 @@ import { DocTable } from '../../nodes/DocTable';
 import { DocTableRow } from '../../nodes/DocTableRow';
 import { DocTableCell } from '../../nodes/DocTableCell';
 import { CustomMarkdownEmitter } from '../CustomMarkdownEmitter';
-import { ApiModel, ApiItem } from '@microsoft/api-extractor-model';
+import { ApiModel, type ApiItem } from '@microsoft/api-extractor-model';
 
 test('render Markdown from TSDoc', () => {
   const configuration: TSDocConfiguration = CustomDocNodes.configuration;

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, IPackageJson } from '@rushstack/node-core-library';
+import { JsonFile, type IPackageJson } from '@rushstack/node-core-library';
 
 /**
  * The type of dependency; used by IPackageDependency.
@@ -202,6 +202,8 @@ export class BasePackage {
     if (!indent) {
       indent = '';
     }
+
+    // eslint-disable-next-line no-console
     console.log(indent + this.nameAndVersion);
     for (const child of this.children) {
       child.printTree(indent + '  ');

@@ -5,7 +5,7 @@ jest.disableAutomock();
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import webpack, { Compiler, Stats } from 'webpack';
+import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';

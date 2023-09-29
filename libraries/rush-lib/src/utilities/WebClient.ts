@@ -4,7 +4,7 @@
 import * as os from 'os';
 import * as process from 'process';
 import * as fetch from 'node-fetch';
-import * as http from 'http';
+import type * as http from 'http';
 import { Import } from '@rushstack/node-core-library';
 
 // ===================================================================================================================

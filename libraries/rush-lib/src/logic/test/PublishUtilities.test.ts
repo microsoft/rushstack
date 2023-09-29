@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IChangeInfo, ChangeType } from '../../api/ChangeManagement';
+import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PublishUtilities, IChangeRequests } from '../PublishUtilities';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { PublishUtilities, type IChangeRequests } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
 
 /* eslint-disable dot-notation */

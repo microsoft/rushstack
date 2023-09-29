@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
-  IPackageManagerOptionsJsonBase,
+  type IPackageManagerOptionsJsonBase,
   PackageManagerOptionsConfigurationBase
 } from '../base/BasePackageManagerOptionsConfiguration';
 

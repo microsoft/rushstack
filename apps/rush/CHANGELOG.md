@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 22 Sep 2023 00:06:12 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Sep 2023 21:02:52 GMT and should not be manually modified.
+
+## 5.107.4
+Tue, 26 Sep 2023 21:02:52 GMT
+
+### Updates
+
+- Update type-only imports to include the type modifier.
+- Make the project watcher status and keyboard commands message more visible.
+
+## 5.107.3
+Fri, 22 Sep 2023 09:01:38 GMT
+
+### Updates
+
+- Fix filtered installs in pnpm@8.
 
 ## 5.107.2
 Fri, 22 Sep 2023 00:06:12 GMT

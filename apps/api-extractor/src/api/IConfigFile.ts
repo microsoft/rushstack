@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EnumMemberOrder } from '@microsoft/api-extractor-model';
-import { ExtractorLogLevel } from './ExtractorLogLevel';
+import type { EnumMemberOrder } from '@microsoft/api-extractor-model';
+import type { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
  * Determines how the TypeScript compiler engine will be invoked by API Extractor.

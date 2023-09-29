@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
-import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
+import { InternalError, type ITerminalProvider } from '@rushstack/node-core-library';
+import { type ILogger, type ILoggerOptions, Logger } from './logging/Logger';
 import { RushLifecycleHooks } from './RushLifeCycle';
 
 import type { IBuildCacheJson } from '../api/BuildCacheConfiguration';

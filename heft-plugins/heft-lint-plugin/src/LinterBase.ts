@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import { createHash, Hash } from 'crypto';
+import { createHash, type Hash } from 'crypto';
 import { type ITerminal, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IScopedLogger } from '@rushstack/heft';
 

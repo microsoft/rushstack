@@ -4,10 +4,13 @@
 import * as path from 'path';
 import * as resolve from 'resolve';
 
-import { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest';
-import { MarkdownDocumenterFeature, MarkdownDocumenterFeatureContext } from './MarkdownDocumenterFeature';
+import type { IApiDocumenterPluginManifest, IFeatureDefinition } from './IApiDocumenterPluginManifest';
+import {
+  MarkdownDocumenterFeature,
+  type MarkdownDocumenterFeatureContext
+} from './MarkdownDocumenterFeature';
 import { PluginFeatureInitialization } from './PluginFeature';
-import { DocumenterConfig } from '../documenters/DocumenterConfig';
+import type { DocumenterConfig } from '../documenters/DocumenterConfig';
 
 interface ILoadedPlugin {
   packageName: string;

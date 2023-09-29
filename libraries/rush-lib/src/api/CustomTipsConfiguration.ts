@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, type ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
 import schemaJson from '../schemas/custom-tips.schema.json';

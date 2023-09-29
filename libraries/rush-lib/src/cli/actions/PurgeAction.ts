@@ -3,10 +3,10 @@
 
 import colors from 'colors/safe';
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { UnlinkManager } from '../../logic/UnlinkManager';
@@ -50,6 +50,7 @@ export class PurgeAction extends BaseRushAction {
 
     purgeManager.deleteAll();
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
         colors.green(

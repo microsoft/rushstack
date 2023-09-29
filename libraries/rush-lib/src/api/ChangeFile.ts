@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 
-import gitInfo from 'git-repo-info';
+import type gitInfo from 'git-repo-info';
 
 import { JsonFile } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from './RushConfiguration';
-import { IChangeFile, IChangeInfo } from './ChangeManagement';
+import type { RushConfiguration } from './RushConfiguration';
+import type { IChangeFile, IChangeInfo } from './ChangeManagement';
 import { Git } from '../logic/Git';
 
 /**
@@ -80,6 +80,7 @@ export class ChangeFile {
     const repoInfo: gitInfo.GitRepoInfo | undefined = git.getGitInfo();
     branch = repoInfo && repoInfo.branch;
     if (!branch) {
+      // eslint-disable-next-line no-console
       console.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 

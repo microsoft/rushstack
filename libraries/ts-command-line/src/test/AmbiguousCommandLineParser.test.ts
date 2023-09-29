@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
 import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 class GenericCommandLine extends CommandLineParser {

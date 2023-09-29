@@ -4,18 +4,21 @@
 import {
   AlreadyReportedError,
   PackageJsonLookup,
-  IPackageJson,
-  ITerminal
+  type IPackageJson,
+  type ITerminal
 } from '@rushstack/node-core-library';
-import { CommandLineParameterProvider, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineParameterProvider,
+  CommandLineStringListParameter
+} from '@rushstack/ts-command-line';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Selection } from '../../logic/Selection';
 import type { ISelectorParser as ISelectorParser } from '../../logic/selectors/ISelectorParser';
 import {
   GitChangedProjectSelectorParser,
-  IGitSelectorParserOptions
+  type IGitSelectorParserOptions
 } from '../../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
@@ -384,7 +387,7 @@ export class SelectionParameterSet {
           `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
             ` Supported prefixes: ${Array.from(
               this._selectorParserByScope.keys(),
-              (scope: string) => `"${scope}:"`
+              (selectorParserScope: string) => `"${selectorParserScope}:"`
             ).join(', ')}`
         );
         throw new AlreadyReportedError();

@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { type IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
+import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
-import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
+import { BumpType, type LockStepVersionPolicy } from '../../api/VersionPolicy';
+import type { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import * as PolicyValidator from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
@@ -124,6 +124,7 @@ export class VersionAction extends BaseRushAction {
 
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
+        // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch, this._targetBranch.value);
       }

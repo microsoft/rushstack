@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { JsonSchema, JsonFile, NewlineKind } from '@rushstack/node-core-library';
-import { IConfigFile } from './IConfigFile';
+import type { IConfigFile } from './IConfigFile';
 import apiDocumenterSchema from '../schemas/api-documenter.schema.json';
 
 /**

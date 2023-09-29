@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Executable } from '@rushstack/node-core-library';
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 
 export interface IRunResult {
   stdout: string[];

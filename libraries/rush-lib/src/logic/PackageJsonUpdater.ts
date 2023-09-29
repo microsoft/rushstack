@@ -4,19 +4,24 @@
 import colors from 'colors/safe';
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
-import { ConsoleTerminalProvider, Terminal, ITerminalProvider, Colors } from '@rushstack/node-core-library';
+import {
+  ConsoleTerminalProvider,
+  Terminal,
+  type ITerminalProvider,
+  Colors
+} from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import type { BaseInstallManager } from './base/BaseInstallManager';
 import type { IInstallManagerOptions } from './base/BaseInstallManagerTypes';
 import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
-import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
+import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 import { RushConstants } from './RushConstants';
 import { InstallHelpers } from './installManager/InstallHelpers';

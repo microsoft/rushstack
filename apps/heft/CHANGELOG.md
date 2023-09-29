@@ -1,6 +1,37 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 22 Sep 2023 00:05:50 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2023 20:53:17 GMT and should not be manually modified.
+
+## 0.62.1
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.62.0
+Wed, 27 Sep 2023 00:21:38 GMT
+
+### Minor changes
+
+- (BREAKING API CHANGE) Remove the deprecated `cancellationToken` property of `IHeftTaskRunHookOptions`. Use `abortSignal` on that object instead.
+
+## 0.61.3
+Tue, 26 Sep 2023 21:02:30 GMT
+
+### Patches
+
+- Fix an issue where `heft clean` would crash with `ERR_ILLEGAL_CONSTRUCTOR`.
+
+## 0.61.2
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.61.1
+Mon, 25 Sep 2023 23:38:27 GMT
+
+_Version update only_
 
 ## 0.61.0
 Fri, 22 Sep 2023 00:05:50 GMT

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { PackageJsonLookup } from '../PackageJsonLookup';
-import { IPackageJson, INodePackageJson } from '../IPackageJson';
+import type { IPackageJson, INodePackageJson } from '../IPackageJson';
 import { FileConstants } from '../Constants';
 
 describe(PackageJsonLookup.name, () => {

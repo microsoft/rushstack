@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
 
 import * as path from 'path';
 import {
@@ -11,10 +11,10 @@ import {
   ConsoleTerminalProvider,
   AlreadyReportedError,
   Colors,
-  IColorableSequence
+  type IColorableSequence
 } from '@rushstack/node-core-library';
-import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
-import { CommandLineAction, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
+import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import * as Diff from 'diff';
 
 const GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY START -->';
@@ -194,6 +194,7 @@ export class ReadmeAction extends CommandLineAction {
         terminal.writeLine(Colors.green('\nSuccess.'));
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log(`The README.md is up to date.`);
     }
   }

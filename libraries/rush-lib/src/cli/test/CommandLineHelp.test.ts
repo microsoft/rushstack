@@ -32,6 +32,7 @@ describe('CommandLineHelp', () => {
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
     parser = new RushCommandLineParser();
+    // eslint-disable-next-line no-console
     parser.execute().catch(console.error);
   });
 

@@ -8,7 +8,7 @@ import { InstallManagerFactory } from '../InstallManagerFactory';
 import { SetupChecks } from '../SetupChecks';
 import { PurgeManager } from '../PurgeManager';
 import { VersionMismatchFinder } from '../versionMismatch/VersionMismatchFinder';
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 
 export interface IRunInstallOptions {
   rushConfiguration: RushConfiguration;

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /**
  * There is no `compiler.version` API available prior to webpack 5,
  * therefore we will have to make some inferences about which major version of webpack we are on.

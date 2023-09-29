@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
-import { PackageJsonEditor, PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { PackageJsonEditor, PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
   public packageName: string;

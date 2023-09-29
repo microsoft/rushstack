@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.107.4",
+      "tag": "@microsoft/rush_v5.107.4",
+      "date": "Tue, 26 Sep 2023 21:02:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          },
+          {
+            "comment": "Make the project watcher status and keyboard commands message more visible."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.3",
+      "tag": "@microsoft/rush_v5.107.3",
+      "date": "Fri, 22 Sep 2023 09:01:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix filtered installs in pnpm@8."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.107.2",
       "tag": "@microsoft/rush_v5.107.2",
       "date": "Fri, 22 Sep 2023 00:06:12 GMT",

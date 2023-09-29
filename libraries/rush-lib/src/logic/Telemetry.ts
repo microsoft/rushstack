@@ -3,11 +3,11 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { FileSystem, FileSystemStats, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, type FileSystemStats, JsonFile } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
-import { RushSession } from '../pluginFramework/RushSession';
+import type { RushSession } from '../pluginFramework/RushSession';
 
 /**
  * @beta

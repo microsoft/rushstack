@@ -4,7 +4,7 @@
 import { EOL } from 'os';
 import { enabled as supportsColor } from 'colors/safe';
 
-import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 
 /**
  * Options to be provided to a {@link ConsoleTerminalProvider}

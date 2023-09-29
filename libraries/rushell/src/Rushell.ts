@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 import { Executable } from '@rushstack/node-core-library';
 import { Parser } from './Parser';
 
 import { Tokenizer } from './Tokenizer';
-import { AstNode, AstScript, AstKind, AstCommand } from './AstNode';
+import { type AstNode, type AstScript, AstKind, type AstCommand } from './AstNode';
 import { ParseError } from './ParseError';
 
 /**

@@ -15,7 +15,7 @@ import type {
   sources,
   Chunk
 } from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook, Tap } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncWaterfallHook, type Tap } from 'tapable';
 
 import {
   CHUNK_MODULE_TOKEN,
@@ -461,6 +461,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
                 (result: IModuleMinificationResult) => {
                   if (isMinificationResultError(result)) {
                     compilation.errors.push(result.error as WebpackError);
+                    // eslint-disable-next-line no-console
                     console.error(result.error);
                   } else {
                     try {

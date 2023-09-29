@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { JsonFile } from './JsonFile';
-import { IPackageJson, INodePackageJson } from './IPackageJson';
+import type { IPackageJson, INodePackageJson } from './IPackageJson';
 import { FileConstants } from './Constants';
 import { FileSystem } from './FileSystem';
 
