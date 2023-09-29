@@ -54,6 +54,7 @@ export class InstallAction extends BaseInstallAction {
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
       variant: this._variant.value,

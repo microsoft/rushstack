@@ -457,6 +457,7 @@ export class RushPnpmCommandLineParser {
       fullUpgrade: false,
       recheckShrinkwrap: true,
       networkConcurrency: undefined,
+      offline: false,
       collectLogFile: false,
       variant: undefined,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,

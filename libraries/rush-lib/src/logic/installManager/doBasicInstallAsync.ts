@@ -37,6 +37,7 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       noLink: false,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      offline: false,
       collectLogFile: false,
       pnpmFilterArguments: [],
       maxInstallAttempts: 1,
