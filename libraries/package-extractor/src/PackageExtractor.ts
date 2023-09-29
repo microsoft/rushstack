@@ -410,7 +410,9 @@ export class PackageExtractor {
     );
 
     if (addditionalFolderToCopy) {
-      // Copy the additional folder directly into the root of the target folder by overriding the
+      // Copy the additional folder directly into the root of the target folder by postfixing the
+      // folder name to the target folder and setting the sourceRootFolder to the root of the
+      // folderToCopy
       const additionalFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
       const targetFolderPath: string = path.join(
         options.targetRootFolder,
