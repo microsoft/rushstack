@@ -409,6 +409,21 @@ export class PackageExtractor {
       }
     );
 
+    if (addditionalFolderToCopy) {
+      // Copy the additional folder directly into the root of the target folder by overriding the
+      const additionalFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
+      const targetFolderPath: string = path.join(
+        options.targetRootFolder,
+        path.basename(additionalFolderPath)
+      );
+      const additionalFolderExtractorOptions: IExtractorOptions = {
+        ...options,
+        sourceRootFolder: additionalFolderPath,
+        targetRootFolder: targetFolderPath
+      };
+      await this._extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
+    }
+
     switch (linkCreation) {
       case 'script': {
         const sourceFilePath: string = path.join(scriptsFolderPath, createLinksScriptFilename);
@@ -442,15 +457,6 @@ export class PackageExtractor {
 
     terminal.writeLine('Creating extractor-metadata.json');
     await this._writeExtractorMetadataAsync(options, state);
-
-    if (addditionalFolderToCopy) {
-      const sourceFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
-      await FileSystem.copyFilesAsync({
-        sourcePath: sourceFolderPath,
-        destinationPath: targetRootFolder,
-        alreadyExistsBehavior: AlreadyExistsBehavior.Error
-      });
-    }
   }
 
   /**
