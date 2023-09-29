@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Ensure the \"folderToCopy\" field is included in generated archives",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}
