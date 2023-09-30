@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.23.8",
+      "tag": "@microsoft/api-documenter_v7.23.8",
+      "date": "Sat, 30 Sep 2023 00:20:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add notes for @alpha items when encountered. Mimics the existing behavior for @beta items."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.23.7",
       "tag": "@microsoft/api-documenter_v7.23.7",
       "date": "Thu, 28 Sep 2023 20:53:17 GMT",
