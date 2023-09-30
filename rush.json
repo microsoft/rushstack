@@ -531,6 +531,18 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-7-11-test",
+      "projectFolder": "build-tests/eslint-7-11-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
