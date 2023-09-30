@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Fix patch compatibility with ESLint 7 for versions matching <7.12.0",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
