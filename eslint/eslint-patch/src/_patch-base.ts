@@ -92,10 +92,10 @@ for (let currentModule = module; ; ) {
 }
 
 if (!eslintFolder) {
-  // Probe for the ESLint >=7.8.0 layout:
+  // Probe for the ESLint >=7.12.0 layout:
   for (let currentModule = module; ; ) {
-    if (!configArrayFactoryPath && currentModule.filename.endsWith('config-array-factory.js')) {
-      // For ESLint >=7.8.0, config-array-factory.js is at this path:
+    if (!configArrayFactoryPath) {
+      // For ESLint >=7.12.0, config-array-factory.js is at this path:
       //   .../@eslint/eslintrc/lib/config-array-factory.js
       try {
         const eslintrcFolder = path.dirname(
@@ -153,15 +153,31 @@ if (!eslintFolder) {
 }
 
 if (!eslintFolder) {
-  // Probe for the <7.8.0 layout:
+  // Probe for the <7.12.0 layout:
   for (let currentModule = module; ; ) {
-    // For ESLint <7.8.0, config-array-factory.js was at this path:
+    // For ESLint <7.12.0, config-array-factory.js was at this path:
     //   .../eslint/lib/cli-engine/config-array-factory.js
     if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
       eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
       configArrayFactoryPath = `${eslintFolder}/lib/cli-engine/config-array-factory`;
       moduleResolverPath = `${eslintFolder}/lib/shared/relative-module-resolver`;
-      namingPath = `${eslintFolder}/lib/shared/naming`;
+
+      // The naming module was moved to @eslint/eslintrc in ESLint 7.8.0, which is also when the @eslint/eslintrc
+      // package was created and added to ESLint, so we need to probe for whether it's in the old or new location.
+      let eslintrcFolder: string | undefined;
+      try {
+        eslintrcFolder = path.dirname(
+          require.resolve('@eslint/eslintrc/package.json', {
+            paths: [currentModule.path]
+          })
+        );
+      } catch (ex: unknown) {
+        if (!isModuleResolutionError(ex)) {
+          throw ex;
+        }
+      }
+
+      namingPath = `${eslintrcFolder ?? eslintFolder}/lib/shared/naming`;
       break;
     }
 
