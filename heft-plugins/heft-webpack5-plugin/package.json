@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-webpack5-plugin",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "Heft plugin for Webpack 5",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.62.2",
+    "@rushstack/heft": "^0.62.3",
     "webpack": "~5.82.1"
   },
   "dependencies": {
