@@ -430,7 +430,7 @@ export class YamlDocumenter {
     }
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha || apiItem.releaseTag === ReleaseTag.Beta) {
         yamlItem.isPreview = true;
       }
     }

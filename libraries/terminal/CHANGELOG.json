@@ -2,6 +2,38 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.7.8",
+      "tag": "@rushstack/terminal_v0.7.8",
+      "date": "Sat, 30 Sep 2023 00:20:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.7",
+      "tag": "@rushstack/terminal_v0.7.7",
+      "date": "Thu, 28 Sep 2023 20:53:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where `PrintUtilities.printMessageInBox` would throw if the message contains a word that is longer than the box width. In this case, `printMessageInBox` will print bars above and below the message, and then print the message lines, allowing the console to wrap them."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.61.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.6",
       "tag": "@rushstack/terminal_v0.7.6",
       "date": "Wed, 27 Sep 2023 00:21:39 GMT",

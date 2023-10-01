@@ -58,8 +58,10 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
 
   /**
    * Function used to schedule the concurrency-limited execution of an operation.
+   *
+   * Will return OperationStatus.Aborted if execution is aborted before the task executes.
    */
-  queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
+  queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
 
   /**
    * A callback to the overarching orchestrator to request that the operation be invoked again.
@@ -287,7 +289,8 @@ export class Operation implements IOperationStates {
         : undefined
     };
 
-    await queueWork(async () => {
+    // eslint-disable-next-line require-atomic-updates
+    state.status = await queueWork(async (): Promise<OperationStatus> => {
       // Redundant variable to satisfy require-atomic-updates
       const innerState: IOperationState = state;
 
@@ -334,6 +337,8 @@ export class Operation implements IOperationStates {
 
       state.stopwatch.stop();
       context.afterExecute(this, state);
+
+      return state.status;
     }, /* priority */ this.criticalPathLength ?? 0);
 
     return state.status;

@@ -177,20 +177,41 @@ export class PrintUtilities {
       const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
       boxWidth = Math.floor(consoleWidth / 2);
     }
+
     const maxLineLength: number = boxWidth - 10;
     const wrappedMessageLines: string[] = PrintUtilities.wrapWordsToLines(message, maxLineLength);
-
-    // ╔═══════════╗
-    // ║  Message  ║
-    // ╚═══════════╝
-    terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗ `);
+    let longestLineLength: number = 0;
+    const trimmedLines: string[] = [];
     for (const line of wrappedMessageLines) {
       const trimmedLine: string = line.trim();
-      const padding: number = boxWidth - trimmedLine.length - 2;
-      const leftPadding: number = Math.floor(padding / 2);
-      const rightPadding: number = padding - leftPadding;
-      terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
+      trimmedLines.push(trimmedLine);
+      longestLineLength = Math.max(longestLineLength, trimmedLine.length);
     }
-    terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
+
+    if (longestLineLength > boxWidth - 2) {
+      // If the longest line is longer than the box, print bars above and below the message
+      // ═════════════
+      //  Message
+      // ═════════════
+      const headerAndFooter: string = ` ${'═'.repeat(boxWidth)}`;
+      terminal.writeLine(headerAndFooter);
+      for (const line of wrappedMessageLines) {
+        terminal.writeLine(` ${line}`);
+      }
+
+      terminal.writeLine(headerAndFooter);
+    } else {
+      // ╔═══════════╗
+      // ║  Message  ║
+      // ╚═══════════╝
+      terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗`);
+      for (const trimmedLine of trimmedLines) {
+        const padding: number = boxWidth - trimmedLine.length - 2;
+        const leftPadding: number = Math.floor(padding / 2);
+        const rightPadding: number = padding - leftPadding;
+        terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║`);
+      }
+      terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝`);
+    }
   }
 }

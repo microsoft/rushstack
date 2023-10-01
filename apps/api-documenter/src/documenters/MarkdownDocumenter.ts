@@ -173,7 +173,9 @@ export class MarkdownDocumenter {
     }
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha) {
+        this._writeAlphaWarning(output);
+      } else if (apiItem.releaseTag === ReleaseTag.Beta) {
         this._writeBetaWarning(output);
       }
     }
@@ -1000,10 +1002,13 @@ export class MarkdownDocumenter {
     const section: DocSection = new DocSection({ configuration });
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha || apiItem.releaseTag === ReleaseTag.Beta) {
         section.appendNodesInParagraph([
           new DocEmphasisSpan({ configuration, bold: true, italic: true }, [
-            new DocPlainText({ configuration, text: '(BETA)' })
+            new DocPlainText({
+              configuration,
+              text: `(${apiItem.releaseTag === ReleaseTag.Alpha ? 'ALPHA' : 'BETA'})`
+            })
           ]),
           new DocPlainText({ configuration, text: ' ' })
         ]);
@@ -1152,10 +1157,22 @@ export class MarkdownDocumenter {
     }
   }
 
+  private _writeAlphaWarning(output: DocSection): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    const betaWarning: string =
+      'This API is provided as an alpha preview for developers and may change' +
+      ' based on feedback that we receive.  Do not use this API in a production environment.';
+    output.appendNode(
+      new DocNoteBox({ configuration }, [
+        new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: betaWarning })])
+      ])
+    );
+  }
+
   private _writeBetaWarning(output: DocSection): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
     const betaWarning: string =
-      'This API is provided as a preview for developers and may change' +
+      'This API is provided as a beta preview for developers and may change' +
       ' based on feedback that we receive.  Do not use this API in a production environment.';
     output.appendNode(
       new DocNoteBox({ configuration }, [
