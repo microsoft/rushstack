@@ -76,7 +76,7 @@ export class ApiItemMetadata {
   public tsdocComment: tsdoc.DocComment | undefined;
 
   // Assigned by DocCommentEnhancer
-  public needsDocumentation: boolean = true;
+  public undocumented: boolean = true;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 

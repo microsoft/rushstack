@@ -53,7 +53,7 @@ export interface IInstallManagerOptions {
   recheckShrinkwrap: boolean;
 
   /**
-   * Do not attempt to access the network. Report an error if the required dependencies 
+   * Do not attempt to access the network. Report an error if the required dependencies
    * cannot be obtained from the local cache.
    */
   offline: boolean;
