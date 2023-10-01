@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "0.2.9",
+      "tag": "@rushstack/heft-lint-plugin_v0.2.9",
+      "date": "Sun, 01 Oct 2023 02:56:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `0.62.2` to `0.62.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.8",
       "tag": "@rushstack/heft-lint-plugin_v0.2.8",
       "date": "Sat, 30 Sep 2023 00:20:51 GMT",

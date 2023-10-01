@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 30 Sep 2023 00:20:51 GMT and should not be manually modified.
+This log was last generated on Sun, 01 Oct 2023 02:56:29 GMT and should not be manually modified.
+
+## 7.38.0
+Sun, 01 Oct 2023 02:56:29 GMT
+
+### Minor changes
+
+- Add a new message "ae-undocumented" to support logging of undocumented API items
 
 ## 7.37.3
 Sat, 30 Sep 2023 00:20:51 GMT
