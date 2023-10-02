@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush purge` fails on Linux and Mac if the `common/temp/rush-recycler` folder does not exist.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

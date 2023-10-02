@@ -40,9 +40,11 @@ export class PurgeManager {
    * Performs the AsyncRecycler.deleteAll() operation.  This should be called before
    * the PurgeManager instance is disposed.
    */
-  public deleteAll(): void {
-    this.commonTempFolderRecycler.deleteAll();
-    this._rushUserFolderRecycler.deleteAll();
+  public async startDeleteAllAsync(): Promise<void> {
+    await Promise.all([
+      this.commonTempFolderRecycler.startDeleteAllAsync(),
+      this._rushUserFolderRecycler.startDeleteAllAsync()
+    ]);
   }
 
   /**
