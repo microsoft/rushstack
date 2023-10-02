@@ -596,53 +596,93 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
       }
 
-      // Run "npm install" in the common folder
-      const installArgs: string[] = ['install'];
-      this.pushConfigurationArgsForSplitWorkspace(installArgs, this.options);
+      const doInstalInternalSplitWorkspaceAsync = async (): Promise<void> => {
+        // Run "npm install" in the common folder
+        const installArgs: string[] = ['install', '--color=always'];
+        this.pushConfigurationArgsForSplitWorkspace(installArgs, this.options);
 
-      console.log(
-        '\n' +
-          colors.bold(
-            `Running "${this.rushConfiguration.packageManager} install" in` +
-              ` ${this.rushConfiguration.commonTempSplitFolder}`
-          ) +
-          '\n'
-      );
-
-      // If any diagnostic options were specified, then show the full command-line
-      if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
         console.log(
           '\n' +
-            colors.green('Invoking package manager: ') +
-            FileSystem.getRealPath(packageManagerFilename) +
-            ' ' +
-            installArgs.join(' ') +
+            colors.bold(
+              `Running "${this.rushConfiguration.packageManager} install" in` +
+                ` ${this.rushConfiguration.commonTempSplitFolder}`
+            ) +
             '\n'
         );
-      }
 
-      Utilities.executeCommandWithRetry(
-        {
-          command: packageManagerFilename,
-          args: installArgs,
-          workingDirectory: this.rushConfiguration.commonTempSplitFolder,
-          environment: packageManagerEnv,
-          suppressOutput: false
-        },
-        this.options.maxInstallAttempts,
-        () => {
-          if (this.rushConfiguration.packageManager === 'pnpm') {
-            console.log(colors.yellow(`Deleting the "node_modules" folder`));
-            this.installRecycler.moveFolder(splitWorkspaceNodeModulesFolder);
+        // If any diagnostic options were specified, then show the full command-line
+        if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+          console.log(
+            '\n' +
+              colors.green('Invoking package manager: ') +
+              FileSystem.getRealPath(packageManagerFilename) +
+              ' ' +
+              installArgs.join(' ') +
+              '\n'
+          );
+        }
 
-            // Leave the pnpm-store as is for the retry. This ensures that packages that have already
-            // been downloaded need not be downloaded again, thereby potentially increasing the chances
-            // of a subsequent successful install.
-
-            Utilities.createFolderWithRetry(splitWorkspaceNodeModulesFolder);
+        // Store the tip IDs that should be printed.
+        // They will be printed all at once *after* the install
+        const tipIDsToBePrinted: Set<CustomTipId> = new Set();
+        const pnpmTips: ICustomTipInfo[] = [];
+        for (const [customTipId, customTip] of Object.entries(PNPM_CUSTOM_TIPS)) {
+          if (
+            this.rushConfiguration.customTipsConfiguration.providedCustomTipsByTipId.has(
+              customTipId as CustomTipId
+            )
+          ) {
+            pnpmTips.push(customTip);
           }
         }
-      );
+
+        const onPnpmStdoutChunk: ((chunk: string) => void) | undefined =
+          pnpmTips.length > 0
+            ? (chunk: string): void => {
+                // Iterate over the supported custom tip metadata and try to match the chunk.
+                for (const { isMatch, tipId } of pnpmTips) {
+                  if (isMatch?.(chunk)) {
+                    tipIDsToBePrinted.add(tipId);
+                  }
+                }
+              }
+            : undefined;
+
+        try {
+          await Utilities.executeCommandAndProcessOutputWithRetryAsync(
+            {
+              command: packageManagerFilename,
+              args: installArgs,
+              workingDirectory: this.rushConfiguration.commonTempSplitFolder,
+              environment: packageManagerEnv,
+              suppressOutput: false
+            },
+            this.options.maxInstallAttempts,
+            onPnpmStdoutChunk,
+            () => {
+              if (this.rushConfiguration.packageManager === 'pnpm') {
+                console.log(colors.yellow(`Deleting the "node_modules" folder`));
+                this.installRecycler.moveFolder(splitWorkspaceNodeModulesFolder);
+
+                // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+                // been downloaded need not be downloaded again, thereby potentially increasing the chances
+                // of a subsequent successful install.
+
+                Utilities.createFolderWithRetry(splitWorkspaceNodeModulesFolder);
+              }
+            }
+          );
+        } finally {
+          if (tipIDsToBePrinted.size > 0) {
+            this._terminal.writeLine();
+            for (const tipID of tipIDsToBePrinted) {
+              this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
+            }
+          }
+        }
+      };
+
+      await doInstalInternalSplitWorkspaceAsync();
     }
 
     // If all attempts fail we just terminate. No special handling needed.
