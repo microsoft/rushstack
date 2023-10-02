@@ -916,15 +916,12 @@ importers:
       '@microsoft/teams-js':
         specifier: 1.3.0-beta.4
         version: 1.3.0-beta.4
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
-      '@types/jest':
-        specifier: 29.2.5
-        version: 29.2.5
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
       api-extractor-lib1-test:
         specifier: workspace:*
         version: link:../api-extractor-lib1-test
@@ -937,12 +934,9 @@ importers:
       colors:
         specifier: ~1.2.1
         version: 1.2.5
-      fs-extra:
-        specifier: ~7.0.1
-        version: 7.0.1
-      typescript:
-        specifier: ~5.0.4
-        version: 5.0.4
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
 
   ../../build-tests/api-extractor-test-01:
     dependencies:
@@ -1752,7 +1746,7 @@ importers:
         version: 29.5.5
       '@types/node':
         specifier: ts4.9
-        version: 20.7.2
+        version: 20.8.0
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -11433,8 +11427,8 @@ packages:
     resolution: {integrity: sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==}
     dev: false
 
-  /@types/node@20.7.2:
-    resolution: {integrity: sha512-RcdC3hOBOauLP+r/kRt27NrByYtDjsXyAuSbR87O6xpsvi763WI+5fbSIvYJrXnt9w4RuxhV6eAXfIs7aaf/FQ==}
+  /@types/node@20.8.0:
+    resolution: {integrity: sha512-LzcWltT83s1bthcvjBmiBvGJiiUe84NWRHkw+ZV6Fr41z2FbIzvc815dk2nQ3RAKMuN2fkenM/z3Xv2QzEpYxQ==}
     dev: true
 
   /@types/normalize-package-data@2.4.1:
