@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import type { SpawnSyncReturns } from 'child_process';
 import {
   AlreadyReportedError,
   Colors,
@@ -18,13 +17,14 @@ import {
   type JsonObject,
   Terminal
 } from '@rushstack/node-core-library';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { PrintUtilities } from '@rushstack/terminal';
 import { RushConstants } from '../logic/RushConstants';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PurgeManager } from '../logic/PurgeManager';
 
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
-import type { SpawnSyncReturns } from 'child_process';
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
@@ -479,7 +479,7 @@ export class RushPnpmCommandLineParser {
     try {
       await installManager.doInstallAsync();
     } finally {
-      purgeManager.deleteAll();
+      await purgeManager.startDeleteAllAsync();
     }
   }
 }

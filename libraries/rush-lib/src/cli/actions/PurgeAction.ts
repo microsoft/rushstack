@@ -48,7 +48,7 @@ export class PurgeAction extends BaseRushAction {
       purgeManager.purgeNormal();
     }
 
-    purgeManager.deleteAll();
+    await purgeManager.startDeleteAllAsync();
 
     // eslint-disable-next-line no-console
     console.log(

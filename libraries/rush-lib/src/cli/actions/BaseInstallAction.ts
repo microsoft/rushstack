@@ -8,6 +8,7 @@ import type {
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -21,7 +22,6 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -184,7 +184,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       installSuccessful = false;
       throw error;
     } finally {
-      purgeManager.deleteAll();
+      await purgeManager.startDeleteAllAsync();
       stopwatch.stop();
 
       this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);

@@ -272,7 +272,7 @@ export class PackageJsonUpdater {
       try {
         await installManager.doInstallAsync();
       } finally {
-        purgeManager.deleteAll();
+        await purgeManager.startDeleteAllAsync();
       }
     }
   }
@@ -324,7 +324,7 @@ export class PackageJsonUpdater {
       try {
         await installManager.doInstallAsync();
       } finally {
-        purgeManager.deleteAll();
+        await purgeManager.startDeleteAllAsync();
       }
     }
   }
