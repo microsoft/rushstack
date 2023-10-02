@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Sep 2023 21:02:52 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Oct 2023 20:23:27 GMT and should not be manually modified.
+
+## 5.108.0
+Mon, 02 Oct 2023 20:23:27 GMT
+
+### Updates
+
+- Fix an issue where `rush purge` fails on Linux and Mac if the `common/temp/rush-recycler` folder does not exist.
+- Add "--offline" parameter for "rush install" and "rush update"
+- Ignore pause/resume watcher actions when the process is not TTY mode
 
 ## 5.107.4
 Tue, 26 Sep 2023 21:02:52 GMT

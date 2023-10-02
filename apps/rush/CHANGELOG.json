@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.108.0",
+      "tag": "@microsoft/rush_v5.108.0",
+      "date": "Mon, 02 Oct 2023 20:23:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush purge` fails on Linux and Mac if the `common/temp/rush-recycler` folder does not exist."
+          },
+          {
+            "comment": "Add \"--offline\" parameter for \"rush install\" and \"rush update\""
+          },
+          {
+            "comment": "Ignore pause/resume watcher actions when the process is not TTY mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.107.4",
       "tag": "@microsoft/rush_v5.107.4",
       "date": "Tue, 26 Sep 2023 21:02:52 GMT",
