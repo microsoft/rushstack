@@ -146,6 +146,7 @@ export async function runAsync({
     outFolderPathsSet.add(outFolderPath);
   }
 
+  const nonMatchingFiles: string[] = [];
   await Async.forEachAsync(
     inFolderPaths,
     async (folderItemPath) => {
@@ -168,20 +169,11 @@ export async function runAsync({
         : undefined;
 
       if (normalizedSourceFileContents !== normalizedOutFileContents) {
+        nonMatchingFiles.push(outFilePath);
         if (!production) {
-          logger.emitWarning(
-            new Error(`The file "${outFilePath}" has been updated and must be committed to Git.`)
-          );
           await FileSystem.writeFileAsync(outFilePath, normalizedSourceFileContents, {
             ensureFolderExists: true
           });
-        } else {
-          logger.emitError(
-            new Error(
-              `The file "${outFilePath}" does not match the expected output. Build this project in non-production ` +
-                'mode and commit the changes.'
-            )
-          );
         }
       }
     },
@@ -189,24 +181,37 @@ export async function runAsync({
   );
 
   if (outFolderPathsSet.size > 0) {
-    if (production) {
-      const outFolderPathsList: string = Array.from(outFolderPathsSet).join(', ');
-      logger.emitError(
-        new Error(
-          `There are extra files (${outFolderPathsList}) in the "etc" folder. Build this project ` +
-            'in non-production mode and commit the changes.'
-        )
-      );
-    } else {
+    nonMatchingFiles.push(...outFolderPathsSet);
+    if (!production) {
       await Async.forEachAsync(
         outFolderPathsSet,
         async (outFolderPath) => {
-          logger.emitWarning(
-            new Error(`The file "${outFolderPath}" has been deleted. Commit this change to Git.`)
-          );
           await FileSystem.deleteFileAsync(`${outFolderPath}/${outFolderPath}`);
         },
         { concurrency: 10 }
+      );
+    }
+  }
+
+  if (nonMatchingFiles.length > 0) {
+    const errorLines: string[] = [];
+    for (const nonMatchingFile of nonMatchingFiles.sort()) {
+      errorLines.push(`  ${nonMatchingFile}`);
+    }
+
+    if (production) {
+      logger.emitError(
+        new Error(
+          'The following file(s) do not match the expected output. Build this project in non-production ' +
+            `mode and commit the changes:\n${errorLines.join('\n')}`
+        )
+      );
+    } else {
+      logger.emitWarning(
+        new Error(
+          `The following file(s) do not match the expected output and must be committed to Git:\n` +
+            errorLines.join('\n')
+        )
       );
     }
   }
