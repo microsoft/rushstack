@@ -101,6 +101,7 @@ export interface IJestPluginOptions {
   detectOpenHandles?: boolean;
   disableCodeCoverage?: boolean;
   disableConfigurationModuleResolution?: boolean;
+  enableNodeEnvManagement?: boolean;
   findRelatedTests?: string[];
   maxWorkers?: string;
   passWithNoTests?: boolean;
@@ -153,6 +154,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private _jestOutputStream: TerminalWritableStream | undefined;
   private _changedFiles: Set<string> = new Set();
   private _requestRun!: () => void;
+  private _nodeEnvSet: boolean = false;
 
   private _resolveFirstRunQueued!: () => void;
   private _firstRunQueuedPromise: Promise<void>;
@@ -228,8 +230,18 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       testPathIgnorePatterns: testPathIgnorePatternsParameter.value || pluginOptions?.testPathIgnorePatterns,
       testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
       testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
-      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
+      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots,
+      enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement || true
     };
+
+    if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test' && combinedOptions.enableNodeEnvManagement) {
+      taskSession.logger.emitWarning(
+        new Error(`NODE_ENV variable is set and it's not "test". NODE_ENV=${process.env.NODE_ENV}`)
+      );
+    } else if (!process.env.NODE_ENV && combinedOptions.enableNodeEnvManagement) {
+      process.env.NODE_ENV = 'test';
+      this._nodeEnvSet = true;
+    }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
       await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
@@ -273,11 +285,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       return;
     }
 
-    // set env variable if not already set
-    if (!process.env.NODE_ENV) {
-      process.env.NODE_ENV = 'test';
-    }
-
     const {
       // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
       // in the debugger to validate that your changes are being applied as expected.
@@ -286,8 +293,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
 
-    // unset the NODE_ENV
-    delete process.env.NODE_ENV;
+    // unset the NODE_ENV only if we have set it
+    if (this._nodeEnvSet) {
+      delete process.env.NODE_ENV;
+    }
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(
@@ -526,8 +535,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         }
       }
 
-      // unset the NODE_ENV only if it's test
-      if (process.env.NODE_ENV === 'test') {
+      // unset the NODE_ENV only if we have set it
+      if (this._nodeEnvSet) {
         delete process.env.NODE_ENV;
       }
 
