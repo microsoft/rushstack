@@ -14,6 +14,7 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 /**
  * @internal
@@ -57,9 +58,16 @@ interface IRushXCommandLineArguments {
 }
 
 class ProcessError extends Error {
-  public exitCode: number = 0;
+  public readonly exitCode: number;
   public constructor(message: string, exitCode: number) {
     super(message);
+
+    // Manually set the prototype, as we can no longer extend built-in classes like Error, Array, Map, etc.
+    // https://github.com/microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    //
+    // Note: the prototype must also be set on any classes which extend this one
+    (this as any).__proto__ = ProcessError.prototype; // eslint-disable-line @typescript-eslint/no-explicit-any
+
     this.exitCode = exitCode;
   }
 }
@@ -75,7 +83,7 @@ export class RushXCommandLine {
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
-      const suppressHooks: boolean = process.env._RUSH_SUPPRESS_HOOKS === '1';
+      const suppressHooks: boolean = process.env[EnvironmentVariableNames.RUSH_SUPPRESS_HOOKS] === '1';
       const attemptHooks = !suppressHooks && !args.help;
       if (attemptHooks) {
         eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
@@ -85,11 +93,10 @@ export class RushXCommandLine {
       // and set it to 0 only on success.
       process.exitCode = 1;
       RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
-      process.exitCode = 0;
-
       if (attemptHooks) {
         eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
       }
+      process.exitCode = 0;
     } catch (error) {
       if (error instanceof ProcessError) {
         process.exitCode = error.exitCode;
@@ -127,7 +134,8 @@ export class RushXCommandLine {
     );
     if (!packageJsonFilePath) {
       throw Error(
-        'Unable to find a package.json file in the current working directory or any of its parents.'
+        'This command should be used inside a project folder. ' +
+          'Unable to find a package.json file in the current working directory or any of its parents.'
       );
     }
 
@@ -226,7 +234,7 @@ export class RushXCommandLine {
           help = true;
         } else if (argValue === '-d' || argValue === '--debug') {
           isDebug = true;
-        } else if (argValue === '-ih' || argValue === '--ignorehooks') {
+        } else if (argValue === '-i' || argValue === '--ignore-hooks') {
           ignoreHooks = true;
         } else if (argValue.startsWith('-')) {
           unknownArgs.push(args[index]);
@@ -261,12 +269,12 @@ export class RushXCommandLine {
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx [-q/--quiet/--debug/--ignorehooks] <command> ...\n');
+    console.log('       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...\n');
 
     console.log('Optional arguments:');
     console.log('  -h, --help            Show this help message and exit.');
     console.log('  -q, --quiet           Hide rushx startup information.');
-    console.log('  -ih, --ignorehooks    Do not run hooks.');
+    console.log('  -i, --ignore-hooks    Do not run hooks.');
     console.log('  -d, --debug           Run in debug mode.\n');
 
     if (projectCommandSet.commandNames.length > 0) {

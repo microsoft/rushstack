@@ -155,6 +155,11 @@ export const EnvironmentVariableNames = {
   RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
 
   /**
+   * Signal rush calls to not call any hooks.  This is automatically set when rush or rushx call themselves
+   */
+  RUSH_SUPPRESS_HOOKS: 'RUSH_SUPPRESS_HOOKS',
+
+  /**
    * Internal variable that explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
    * Will be set upon loading Rush.
    */

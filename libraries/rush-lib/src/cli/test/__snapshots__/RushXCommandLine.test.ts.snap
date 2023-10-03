@@ -46,7 +46,7 @@ Array [
     "usage: rushx [-h]",
   ],
   Array [
-    "       rushx [-q/--quiet/--debug/--ignorehooks] <command> ...
+    "       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...
 ",
   ],
   Array [
@@ -59,7 +59,7 @@ Array [
     "  -q, --quiet           Hide rushx startup information.",
   ],
   Array [
-    "  -ih, --ignorehooks    Do not run hooks.",
+    "  -i, --ignore-hooks    Do not run hooks.",
   ],
   Array [
     "  -d, --debug           Run in debug mode.
@@ -86,7 +86,7 @@ Array [
     "usage: rushx [-h]",
   ],
   Array [
-    "       rushx [-q/--quiet/--debug/--ignorehooks] <command> ...
+    "       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...
 ",
   ],
   Array [
@@ -99,7 +99,7 @@ Array [
     "  -q, --quiet           Hide rushx startup information.",
   ],
   Array [
-    "  -ih, --ignorehooks    Do not run hooks.",
+    "  -i,  --ignore-hooks   Do not run hooks.",
   ],
   Array [
     "  -d, --debug           Run in debug mode.

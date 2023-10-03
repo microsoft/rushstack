@@ -16,6 +16,7 @@ import type * as stream from 'stream';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 export const UNINITIALIZED: UNINITIALIZED = 'UNINITIALIZED';
@@ -504,9 +505,6 @@ export class Utilities {
       }
     });
 
-    // Communicate to downstream calls that they should not try to run hooks
-    environment._RUSH_SUPPRESS_HOOKS = '1';
-
     return spawnFunction(shellCommand, [commandFlags, command], {
       cwd: options.workingDirectory,
       shell: useShell,
@@ -592,6 +590,9 @@ export class Utilities {
         );
       }
     }
+
+    // Communicate to downstream calls that they should not try to run hooks
+    environment[EnvironmentVariableNames.RUSH_SUPPRESS_HOOKS] = '1';
 
     return environment;
   }
