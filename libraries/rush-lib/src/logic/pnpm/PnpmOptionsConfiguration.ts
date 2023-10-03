@@ -107,6 +107,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.resolutionMode}
    */
   resolutionMode?: PnpmResolutionMode;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.autoInstallPeers}
+   */
+  autoInstallPeers?: boolean;
 }
 
 /**
@@ -208,6 +212,14 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is true.  (For now.)
    */
   public readonly useWorkspaces: boolean;
+
+  /**
+   * When true, any missing non-optional peer dependencies are automatically installed.
+   *
+   * @remarks
+   * The default value is same as PNPM default value.  (In PNPM 8.x, this value is true)
+   */
+  public readonly autoInstallPeers: boolean | undefined;
 
   /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
@@ -332,6 +344,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.unsupportedPackageJsonSettings = json.unsupportedPackageJsonSettings;
     this._globalPatchedDependencies = json.globalPatchedDependencies;
     this.resolutionMode = json.resolutionMode;
+    this.autoInstallPeers = json.autoInstallPeers;
   }
 
   /** @internal */

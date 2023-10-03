@@ -651,6 +651,7 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    autoInstallPeers?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
@@ -965,6 +966,7 @@ export class PhasedCommandHooks {
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+    readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;

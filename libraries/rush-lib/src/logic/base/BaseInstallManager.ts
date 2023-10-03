@@ -644,6 +644,27 @@ ${gitLfsHookHandling}
       }
 
       /*
+        If user set auto-install-peers in pnpm-config.json only, use the value in pnpm-config.json
+        If user set auto-install-peers in pnpm-config.json and .npmrc, use the value in pnpm-config.json
+        If user set auto-install-peers in .npmrc only, do nothing, let pnpm handle it
+        If user does not set auto-install-peers in pnpm-config.json and .npmrc, do nothing, let pnpm handle it
+      */
+      const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
+        this.rushConfiguration.commonRushConfigFolder,
+        'auto-install-peers'
+      );
+      const autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
+      if (autoInstallPeers !== undefined) {
+        if (isAutoInstallPeersInNpmrc) {
+          this._terminal.writeWarningLine(
+            `Warning: PNPM's auto-install-peers is specified in both .npmrc and pnpm-config.json. ` +
+              `The value in pnpm-config.json will take precedence.`
+          );
+        }
+        args.push(`--config.auto-install-peers=${autoInstallPeers}`);
+      }
+
+      /*
         If user set resolution-mode in pnpm-config.json only, use the value in pnpm-config.json
         If user set resolution-mode in pnpm-config.json and .npmrc, use the value in pnpm-config.json
         If user set resolution-mode in .npmrc only, do nothing, let pnpm handle it
