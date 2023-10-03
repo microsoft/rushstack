@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adding start and end hooks to rushx",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
