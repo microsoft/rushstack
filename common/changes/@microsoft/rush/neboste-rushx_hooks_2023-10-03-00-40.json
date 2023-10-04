@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adding start and end hooks to rushx",
+      "comment": "Add start `preRushx` and `postRushx` event hooks for monitoring the `rushx` command",
       "type": "none"
     }
   ],
