@@ -674,7 +674,7 @@ export class Utilities {
     }
 
     // Communicate to downstream calls that they should not try to run hooks
-    environment[EnvironmentVariableNames.RUSH_SUPPRESS_HOOKS] = '1';
+    environment[EnvironmentVariableNames._RUSH_SUPPRESS_RUSHX_HOOKS] = '1';
 
     return environment;
   }

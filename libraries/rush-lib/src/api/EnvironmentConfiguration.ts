@@ -185,9 +185,10 @@ export const EnvironmentVariableNames = {
   RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
 
   /**
-   * Signal rush calls to not call any hooks.  This is automatically set when rush or rushx call themselves
+   * Internal variable used by `rushx` when recursively invoking another `rushx` process, to avoid
+   * nesting event hooks.
    */
-  RUSH_SUPPRESS_HOOKS: 'RUSH_SUPPRESS_HOOKS',
+  _RUSH_SUPPRESS_RUSHX_HOOKS: '_RUSH_SUPPRESS_RUSHX_HOOKS',
 
   /**
    * Internal variable that explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
@@ -539,8 +540,8 @@ export class EnvironmentConfiguration {
             // Assigned by Rush itself
             break;
 
-          case EnvironmentVariableNames.RUSH_SUPPRESS_HOOKS:
-            // Read directly by RushXCommandLine
+          case EnvironmentVariableNames._RUSH_SUPPRESS_RUSHX_HOOKS:
+            // Assigned/read internally by RushXCommandLine
             break;
 
           default:
