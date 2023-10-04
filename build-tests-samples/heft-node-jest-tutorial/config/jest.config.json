@@ -1,6 +1,6 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
-  "collectCoverage": true,
+
   "coverageThreshold": {
     "global": {
       "branches": 50,
@@ -8,5 +8,15 @@
       "lines": 50,
       "statements": 50
     }
-  }
+  },
+
+  // These additional properties exist for caching purposes in the rushstack repo
+
+  // Enable code coverage for Jest
+  "collectCoverage": true,
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["cobertura", "html"],
+
+  // Use v8 coverage provider to avoid Babel
+  "coverageProvider": "v8"
 }

@@ -128,9 +128,12 @@ export class CoreConfigFiles {
       });
     }
 
+    const heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> =
+      CoreConfigFiles._heftConfigFileLoader;
+
     let configurationFile: IHeftConfigurationJson;
     try {
-      configurationFile = await CoreConfigFiles._heftConfigFileLoader.loadConfigurationFileForProjectAsync(
+      configurationFile = await heftConfigFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
         projectPath,
         rigConfig
@@ -169,29 +172,50 @@ export class CoreConfigFiles {
     }
 
     // The pluginPackage field was resolved to the root of the package, but we also want to have
-    // the original plugin package name in the config file. Gather all the plugin specifiers so we can
-    // add the original data ourselves.
-    const pluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] = [
-      ...(configurationFile.heftPlugins || [])
-    ];
-    for (const { tasksByName } of Object.values(configurationFile.phasesByName || {})) {
-      for (const { taskPlugin } of Object.values(tasksByName || {})) {
-        if (taskPlugin) {
-          pluginSpecifiers.push(taskPlugin);
+    // the original plugin package name in the config file.
+    function getUpdatedPluginSpecifier(
+      rawSpecifier: IHeftConfigurationJsonPluginSpecifier
+    ): IHeftConfigurationJsonPluginSpecifier {
+      const pluginPackageName: string = heftConfigFileLoader.getPropertyOriginalValue({
+        parentObject: rawSpecifier,
+        propertyName: 'pluginPackage'
+      })!;
+      const newSpecifier: IHeftConfigurationJsonPluginSpecifier = {
+        ...rawSpecifier,
+        pluginPackageRoot: rawSpecifier.pluginPackage,
+        pluginPackage: pluginPackageName
+      };
+      return newSpecifier;
+    }
+
+    const phasesByName: IHeftConfigurationJsonPhases = {};
+
+    const normalizedConfigurationFile: IHeftConfigurationJson = {
+      ...configurationFile,
+      heftPlugins: configurationFile.heftPlugins?.map(getUpdatedPluginSpecifier) ?? [],
+      phasesByName
+    };
+
+    for (const [phaseName, phase] of Object.entries(configurationFile.phasesByName || {})) {
+      const tasksByName: IHeftConfigurationJsonTasks = {};
+      phasesByName[phaseName] = {
+        ...phase,
+        tasksByName
+      };
+
+      for (const [taskName, task] of Object.entries(phase.tasksByName || {})) {
+        if (task.taskPlugin) {
+          tasksByName[taskName] = {
+            ...task,
+            taskPlugin: getUpdatedPluginSpecifier(task.taskPlugin)
+          };
+        } else {
+          tasksByName[taskName] = task;
         }
       }
     }
 
-    for (const pluginSpecifier of pluginSpecifiers) {
-      const pluginPackageName: string = CoreConfigFiles._heftConfigFileLoader.getPropertyOriginalValue({
-        parentObject: pluginSpecifier,
-        propertyName: 'pluginPackage'
-      })!;
-      pluginSpecifier.pluginPackageRoot = pluginSpecifier.pluginPackage;
-      pluginSpecifier.pluginPackage = pluginPackageName;
-    }
-
-    return configurationFile;
+    return normalizedConfigurationFile;
   }
 
   public static async tryLoadNodeServiceConfigurationFileAsync(

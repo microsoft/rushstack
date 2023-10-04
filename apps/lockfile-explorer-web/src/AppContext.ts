@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /**
  * Describes the `window.appContext` object that the Node.js service uses
  * to communicate runtime configuration to the web app.

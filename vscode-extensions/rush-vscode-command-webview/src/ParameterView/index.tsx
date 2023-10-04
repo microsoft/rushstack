@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import { IStackStyles, IStackItemStyles, IStackTokens, Stack } from '@fluentui/react';
+import { type IStackStyles, type IStackItemStyles, type IStackTokens, Stack } from '@fluentui/react';
 import { useScrollableElement } from '../hooks/parametersFormScroll';
 import { ParameterForm } from './ParameterForm';
 import { ParameterNav } from './ParameterNav';

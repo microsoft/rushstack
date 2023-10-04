@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 
 import { ApiDocumentedItem } from '../items/ApiDocumentedItem';
-import { Excerpt } from '../mixins/Excerpt';
-import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import type { Excerpt } from '../mixins/Excerpt';
+import type { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 
 /**
  * Constructor options for {@link Parameter}.

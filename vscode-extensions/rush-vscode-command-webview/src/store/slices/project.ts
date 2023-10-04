@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PayloadAction, Slice, SliceCaseReducers, createSlice } from '@reduxjs/toolkit';
+import { type PayloadAction, type Slice, type SliceCaseReducers, createSlice } from '@reduxjs/toolkit';
 
 export interface IProjectState {
   projectName: string;
@@ -20,10 +20,12 @@ export const projectSlide: Slice<IProjectState, SliceCaseReducers<IProjectState>
   initialState,
   reducers: {
     initializeProjectInfo: (state, action: PayloadAction<IProjectState>) => {
+      // eslint-disable-next-line no-console
       console.log('action payload: ', action.payload);
       Object.assign(state, action.payload);
     },
     onChangeProject: (state, action: PayloadAction<string>) => {
+      // eslint-disable-next-line no-console
       console.log('action payload: ', action.payload);
       Object.assign(state, action.payload);
     }

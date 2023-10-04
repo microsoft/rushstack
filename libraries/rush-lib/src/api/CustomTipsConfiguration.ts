@@ -1,5 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as path from 'path';
-import { FileSystem, ITerminal, InternalError, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, type ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
 
@@ -9,11 +13,6 @@ import schemaJson from '../schemas/custom-tips.schema.json';
  * @beta
  */
 export interface ICustomTipsJson {
-  /**
-   * If specified, this prefix will be prepended to any the tip messages when they are displayed.
-   * The default value is an empty string.
-   */
-  defaultMessagePrefix?: string;
   /**
    *  Specifies the custom tips to be displayed by Rush.
    */
@@ -36,12 +35,6 @@ export interface ICustomTipItemJson {
    * (REQUIRED) The message text to be displayed for this tip.
    */
   message: string;
-
-  /**
-   *  Overrides the "defaultMessagePrefix" for this tip.
-   * Specify an empty string to omit the "defaultMessagePrefix" entirely.
-   */
-  messagePrefix?: string;
 }
 
 /**
@@ -56,11 +49,166 @@ export interface ICustomTipItemJson {
  *
  * @beta
  */
-export type CustomTipId =
-  // The rush.json "ensureConsistentVersions" validation.
-  | 'TIP_RUSH_INCONSISTENT_VERSIONS'
-  // In the future, plugins can contribute other strings.
-  | string;
+export enum CustomTipId {
+  TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
+  TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
+  TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION',
+  TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE = 'TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE',
+  TIP_PNPM_PEER_DEP_ISSUES = 'TIP_PNPM_PEER_DEP_ISSUES',
+  TIP_PNPM_OUTDATED_LOCKFILE = 'TIP_PNPM_OUTDATED_LOCKFILE',
+  TIP_PNPM_TARBALL_INTEGRITY = 'TIP_PNPM_TARBALL_INTEGRITY',
+  TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = 'TIP_PNPM_MISMATCHED_RELEASE_CHANNEL',
+  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION'
+}
+
+/**
+ * The severity of a custom tip.
+ * It determines the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
+ *
+ * @beta
+ */
+export enum CustomTipSeverity {
+  Warning = 'Warning',
+  Error = 'Error',
+  Info = 'Info'
+}
+
+/**
+ * The type of the custom tip.
+ *
+ * @remarks
+ * There might be types like `git` in the future.
+ *
+ * @beta
+ */
+export enum CustomTipType {
+  rush = 'rush',
+  pnpm = 'pnpm'
+}
+
+/**
+ * Metadata for a custom tip.
+ *
+ * @remarks
+ * This differs from the  {@link ICustomTipItemJson} interface in that these are not configurable by the user;
+ * it's the inherent state of a custom tip. For example, the custom tip for `ERR_PNPM_NO_MATCHING_VERSION`
+ * has a inherent severity of `Error`, and a inherent match function that rush maintainer defines.
+ *
+ * @beta
+ */
+export interface ICustomTipInfo {
+  tipId: CustomTipId;
+  /**
+   * The severity of the custom tip. It will determine the printing severity ("Error" = red, "Warning" = yellow, "Info" = normal).
+   *
+   * @remarks
+   *  The severity should be consistent with the original message, unless there are strong reasons not to.
+   */
+  severity: CustomTipSeverity;
+
+  /**
+   * The type of the custom tip.
+   */
+  type: CustomTipType;
+
+  /**
+   * The function to determine how to match this tipId.
+   *
+   * @remarks
+   * This function might need to be updated if the depending package is updated.
+   * For example, if `pnpm` change the error logs for "ERR_PNPM_NO_MATCHING_VERSION", we will need to update the match function accordingly.
+   */
+  isMatch?: (str: string) => boolean;
+}
+
+export const RUSH_CUSTOM_TIPS: Readonly<Record<`TIP_RUSH_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
+    tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.rush
+  }
+};
+
+export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_PNPM_UNEXPECTED_STORE]: {
+    tipId: CustomTipId.TIP_PNPM_UNEXPECTED_STORE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_UNEXPECTED_STORE');
+    }
+  },
+  [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION]: {
+    tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Example message: (do notice the difference between this one and the TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE)
+
+      // Error Message: ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @babel/types@^7.22.5
+      // The latest release of @babel/types is "7.22.4".
+      // Other releases are:
+      // * esm: 7.21.4-esm.4
+
+      return str.includes('No matching version found for') && str.includes('The latest release of');
+    }
+  },
+  [CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE]: {
+    tipId: CustomTipId.TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE');
+    }
+  },
+  [CustomTipId.TIP_PNPM_PEER_DEP_ISSUES]: {
+    tipId: CustomTipId.TIP_PNPM_PEER_DEP_ISSUES,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_PEER_DEP_ISSUES');
+    }
+  },
+  [CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE]: {
+    tipId: CustomTipId.TIP_PNPM_OUTDATED_LOCKFILE,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_OUTDATED_LOCKFILE');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_TARBALL_INTEGRITY]: {
+    tipId: CustomTipId.TIP_PNPM_TARBALL_INTEGRITY,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_TARBALL_INTEGRITY');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL]: {
+    tipId: CustomTipId.TIP_PNPM_MISMATCHED_RELEASE_CHANNEL,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_MISMATCHED_RELEASE_CHANNEL');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_INVALID_NODE_VERSION]: {
+    tipId: CustomTipId.TIP_PNPM_INVALID_NODE_VERSION,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      // Todo: verify this
+      return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
+    }
+  }
+};
 
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
@@ -71,96 +219,135 @@ export type CustomTipId =
 export class CustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private readonly _tipMap: Map<CustomTipId, ICustomTipItemJson>;
-  private readonly _jsonFileName: string;
+  public readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
 
   /**
-   * The JSON settings loaded from `custom-tips.json`.
+   * A registry mapping custom tip IDs to their corresponding metadata.
+   *
+   * @remarks
+   * This registry is used to look up metadata for custom tips based on their IDs. The metadata includes
+   * information such as the severity level, the type of tip, and an optional matching function.
+   *
+   * Each key in the registry corresponds to a `CustomTipIdEnum` value, and each value is an object
+   * implementing the `ICustomTipInfo` interface.
+   *
+   * @example
+   * ```typescript
+   * const tipInfo = CustomTipsConfiguration.customTipRegistry[CustomTipIdEnum.TIP_RUSH_INCONSISTENT_VERSIONS];
+   * console.log(tipInfo.severity);  // Output: CustomTipSeverity.Error
+   * ```
+   *
+   * See {@link CustomTipId} for the list of custom tip IDs.
+   * See {@link ICustomTipInfo} for the structure of the metadata.
    */
-  public readonly configuration: Readonly<ICustomTipsJson>;
+  public static customTipRegistry: Readonly<Record<CustomTipId, ICustomTipInfo>> = {
+    ...RUSH_CUSTOM_TIPS,
+    ...PNPM_CUSTOM_TIPS
+  };
 
-  /**
-   * The list of identifiers that are allowed to be used in the "tipId" field
-   * of the config file.
-   */
-  public static readonly supportedTipIds: ReadonlySet<string> = new Set<string>([
-    'TIP_RUSH_INCONSISTENT_VERSIONS'
-  ]);
+  public constructor(configFilePath: string) {
+    const providedCustomTips: Map<CustomTipId, ICustomTipItemJson> = new Map();
 
-  public constructor(configFilename: string) {
-    this._jsonFileName = configFilename;
-    this._tipMap = new Map();
+    let configuration: ICustomTipsJson | undefined;
+    try {
+      configuration = JsonFile.loadAndValidate(configFilePath, CustomTipsConfiguration._jsonSchema);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
 
-    if (!FileSystem.exists(this._jsonFileName)) {
-      this.configuration = {};
-    } else {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, CustomTipsConfiguration._jsonSchema);
+    const customTips: ICustomTipItemJson[] | undefined = configuration?.customTips;
+    if (customTips) {
+      for (const tipItem of customTips) {
+        if (!(tipItem.tipId in CustomTipId)) {
+          throw new Error(
+            `The ${path.basename(configFilePath)} configuration` +
+              ` references an unknown ID "${tipItem.tipId}"`
+          );
+        }
 
-      const customTips: ICustomTipItemJson[] | undefined = this.configuration?.customTips;
-      if (customTips) {
-        for (const tipItem of customTips) {
-          if (!CustomTipsConfiguration.supportedTipIds.has(tipItem.tipId)) {
-            throw new Error(
-              `The ${path.basename(this._jsonFileName)} configuration` +
-                ` references an unknown ID "${tipItem.tipId}"`
-            );
-          }
-          if (this._tipMap.has(tipItem.tipId)) {
-            throw new Error(
-              `The ${path.basename(this._jsonFileName)} configuration` +
-                ` specifies a duplicate definition for "${tipItem.tipId}"`
-            );
-          }
-          this._tipMap.set(tipItem.tipId, tipItem);
+        if (providedCustomTips.has(tipItem.tipId)) {
+          throw new Error(
+            `The ${path.basename(configFilePath)} configuration` +
+              ` specifies a duplicate definition for "${tipItem.tipId}"`
+          );
+        } else {
+          providedCustomTips.set(tipItem.tipId, tipItem);
         }
       }
     }
-  }
 
-  private _formatTipMessage(tipId: CustomTipId): string | undefined {
-    if (!tipId.startsWith('TIP_')) {
-      throw new InternalError('Identifiers for custom tips must start with the "TIP_" prefix');
-    }
-
-    const customTipItem: ICustomTipItemJson | undefined = this._tipMap.get(tipId);
-    if (!customTipItem) {
-      return undefined;
-    }
-
-    const prefix: string | undefined = customTipItem.messagePrefix ?? this.configuration.defaultMessagePrefix;
-    return `${prefix ?? ''}${customTipItem.message}`;
+    this.providedCustomTipsByTipId = providedCustomTips;
   }
 
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
+   *
+   * @remarks
+   * The severity of the tip is defined in ${@link CustomTipsConfiguration.customTipRegistry}.
+   * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration._showErrorTip}.
+   *
+   * @internal
    */
-  public showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
-    if (message !== undefined) {
-      terminal.writeLine(message);
-    }
+  public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
+    const severityOfOriginalMessage: CustomTipSeverity =
+      CustomTipsConfiguration.customTipRegistry[tipId].severity;
+
+    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
   }
 
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
+   * @internal
    */
-  public showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
-    if (message !== undefined) {
-      terminal.writeWarningLine(message);
-    }
+  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
   /**
    * If custom-tips.json defines a tip for the specified tipId,
    * display the tip on the terminal.
+   * @internal
    */
-  public showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
-    const message: string | undefined = this._formatTipMessage(tipId);
-    if (message !== undefined) {
-      terminal.writeErrorLine(message);
+  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
+  }
+
+  /**
+   * If custom-tips.json defines a tip for the specified tipId,
+   * display the tip on the terminal.
+   * @internal
+   */
+  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
+  }
+
+  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
+    const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
+    if (customTipJsonItem) {
+      let writeFunction: (message: string) => void;
+      switch (severity) {
+        case CustomTipSeverity.Error:
+          writeFunction = terminal.writeErrorLine.bind(terminal);
+          break;
+        case CustomTipSeverity.Warning:
+          writeFunction = terminal.writeWarningLine.bind(terminal);
+          break;
+        default:
+          writeFunction = terminal.writeLine.bind(terminal);
+          break;
+      }
+
+      writeFunction(`| Custom Tip (${tipId})`);
+      writeFunction('|');
+
+      const message: string = customTipJsonItem.message;
+      const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, '| ');
+      writeFunction(wrappedAndIndentedMessage);
+      terminal.writeLine();
     }
   }
 }

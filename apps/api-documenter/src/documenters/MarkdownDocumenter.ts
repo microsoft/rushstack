@@ -7,22 +7,22 @@ import {
   DocSection,
   DocPlainText,
   DocLinkTag,
-  TSDocConfiguration,
+  type TSDocConfiguration,
   StringBuilder,
   DocNodeKind,
   DocParagraph,
   DocCodeSpan,
   DocFencedCode,
   StandardTags,
-  DocBlock,
-  DocComment,
-  DocNodeContainer
+  type DocBlock,
+  type DocComment,
+  type DocNodeContainer
 } from '@microsoft/tsdoc';
 import {
-  ApiModel,
-  ApiItem,
-  ApiEnum,
-  ApiPackage,
+  type ApiModel,
+  type ApiItem,
+  type ApiEnum,
+  type ApiPackage,
   ApiItemKind,
   ApiReleaseTagMixin,
   ApiDocumentedItem,
@@ -31,21 +31,21 @@ import {
   ApiStaticMixin,
   ApiPropertyItem,
   ApiInterface,
-  Excerpt,
+  type Excerpt,
   ApiAbstractMixin,
   ApiParameterListMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
-  ApiNamespace,
+  type ApiNamespace,
   ExcerptTokenKind,
-  IResolveDeclarationReferenceResult,
+  type IResolveDeclarationReferenceResult,
   ApiTypeAlias,
-  ExcerptToken,
+  type ExcerptToken,
   ApiOptionalMixin,
   ApiInitializerMixin,
   ApiProtectedMixin,
   ApiReadonlyMixin,
-  IFindApiItemsResult
+  type IFindApiItemsResult
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -59,10 +59,10 @@ import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { PluginLoader } from '../plugin/PluginLoader';
 import {
-  IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
+  type IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   MarkdownDocumenterFeatureContext
 } from '../plugin/MarkdownDocumenterFeature';
-import { DocumenterConfig } from './DocumenterConfig';
+import type { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
 export interface IMarkdownDocumenterOptions {
@@ -173,7 +173,9 @@ export class MarkdownDocumenter {
     }
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha) {
+        this._writeAlphaWarning(output);
+      } else if (apiItem.releaseTag === ReleaseTag.Beta) {
         this._writeBetaWarning(output);
       }
     }
@@ -1000,10 +1002,13 @@ export class MarkdownDocumenter {
     const section: DocSection = new DocSection({ configuration });
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha || apiItem.releaseTag === ReleaseTag.Beta) {
         section.appendNodesInParagraph([
           new DocEmphasisSpan({ configuration, bold: true, italic: true }, [
-            new DocPlainText({ configuration, text: '(BETA)' })
+            new DocPlainText({
+              configuration,
+              text: `(${apiItem.releaseTag === ReleaseTag.Alpha ? 'ALPHA' : 'BETA'})`
+            })
           ]),
           new DocPlainText({ configuration, text: ' ' })
         ]);
@@ -1152,10 +1157,22 @@ export class MarkdownDocumenter {
     }
   }
 
+  private _writeAlphaWarning(output: DocSection): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    const betaWarning: string =
+      'This API is provided as an alpha preview for developers and may change' +
+      ' based on feedback that we receive.  Do not use this API in a production environment.';
+    output.appendNode(
+      new DocNoteBox({ configuration }, [
+        new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: betaWarning })])
+      ])
+    );
+  }
+
   private _writeBetaWarning(output: DocSection): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
     const betaWarning: string =
-      'This API is provided as a preview for developers and may change' +
+      'This API is provided as a beta preview for developers and may change' +
       ' based on feedback that we receive.  Do not use this API in a production environment.';
     output.appendNode(
       new DocNoteBox({ configuration }, [

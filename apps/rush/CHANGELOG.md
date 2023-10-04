@@ -1,6 +1,102 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 15 Aug 2023 20:09:40 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Oct 2023 20:23:27 GMT and should not be manually modified.
+
+## 5.108.0
+Mon, 02 Oct 2023 20:23:27 GMT
+
+### Updates
+
+- Fix an issue where `rush purge` fails on Linux and Mac if the `common/temp/rush-recycler` folder does not exist.
+- Add "--offline" parameter for "rush install" and "rush update"
+- Ignore pause/resume watcher actions when the process is not TTY mode
+
+## 5.107.4
+Tue, 26 Sep 2023 21:02:52 GMT
+
+### Updates
+
+- Update type-only imports to include the type modifier.
+- Make the project watcher status and keyboard commands message more visible.
+
+## 5.107.3
+Fri, 22 Sep 2023 09:01:38 GMT
+
+### Updates
+
+- Fix filtered installs in pnpm@8.
+
+## 5.107.2
+Fri, 22 Sep 2023 00:06:12 GMT
+
+### Updates
+
+- Fix a bug in which an operation failing incorrectly does not block its consumers.
+- Add `resolutionMode` to `rush init` template for pnpm-config.json
+
+## 5.107.1
+Tue, 19 Sep 2023 21:13:23 GMT
+
+### Updates
+
+- Fix pnpm's install status printing when pnpm custom tips are defined.
+
+## 5.107.0
+Tue, 19 Sep 2023 00:36:50 GMT
+
+### Updates
+
+- Update @types/node from 14 to 18
+- Remove previously removed fields from the `custom-tips.json` schema.
+- (BREAKING API CHANGE) Refactor the `CustomTipsConfiguration` by removing the `configuration` property and adding a `providedCustomTipsByTipId` map property.
+- Fix an issue where pnpm would would not rewrite the current status line on a TTY console, and instead would print a series of separate status lines during installation. Note that this is only fixed when there are no custom PNPM tips provided.
+- Add "Waiting" operation status for operations that have one or more dependencies still pending. Ensure that the `onOperationStatusChanged` hook fires for every status change.
+- Add support for optional build status notifications over a web socket connection to `@rushstack/rush-serve-plugin`.
+- Add pause/resume option to project watcher
+
+## 5.106.0
+Thu, 14 Sep 2023 09:20:11 GMT
+
+### Updates
+
+- (IMPORTANT) Add a new setting `resolutionMode` in pnpm-config.json; be aware that Rush now overrides the default behavior if you are using PNPM 8.0.0 through 8.6.12 (GitHub #4283)
+- Support adding custom tips for pnpm-printed logs
+- (BREAKING CHANGE) Remove the "defaultMessagePrefix" config in custom-tips.json
+- Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`.
+
+## 5.105.0
+Fri, 08 Sep 2023 04:09:06 GMT
+
+### Updates
+
+- Disable build cache writes in watch rebuilds.
+- Fix the instance of "ICreateOperationsContext" passed to the "beforeExecuteOperations" hook in watch mode rebuilds to match the instance passed to the "createOperations" hook.
+- Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases.
+- Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project.
+- Add the "disableBuildCache" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the "disableBuildCache" flag to also disable the legacy skip detection, in the event that the build cache is not configured.
+
+## 5.104.1
+Tue, 05 Sep 2023 18:53:03 GMT
+
+### Updates
+
+- Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)
+
+## 5.104.0
+Fri, 01 Sep 2023 04:54:16 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)
+
+## 5.103.0
+Thu, 31 Aug 2023 23:28:28 GMT
+
+### Updates
+
+- Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`
+- Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile
+- Fix an issue where "undefined" was sometimes printed instead of a blank line
 
 ## 5.102.0
 Tue, 15 Aug 2023 20:09:40 GMT

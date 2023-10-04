@@ -9,7 +9,7 @@ import {
   JsonSchema,
   FileSystem,
   PackageJsonLookup,
-  INodePackageJson,
+  type INodePackageJson,
   PackageName,
   Text,
   InternalError,
@@ -18,12 +18,14 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
+
+import apiExtractorSchema from '../schemas/api-extractor.schema.json';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -187,9 +189,7 @@ export class ExtractorConfig {
   /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
-  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/api-extractor.schema.json')
-  );
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(apiExtractorSchema);
 
   /**
    * The config file name "api-extractor.json".

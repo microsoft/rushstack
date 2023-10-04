@@ -2,21 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import {
-  DocNode,
+  type DocNode,
   DocNodeKind,
-  StringBuilder,
-  DocPlainText,
-  DocHtmlStartTag,
-  DocHtmlEndTag,
-  DocCodeSpan,
-  DocLinkTag,
-  DocParagraph,
-  DocFencedCode,
-  DocSection,
+  type StringBuilder,
+  type DocPlainText,
+  type DocHtmlStartTag,
+  type DocHtmlEndTag,
+  type DocCodeSpan,
+  type DocLinkTag,
+  type DocParagraph,
+  type DocFencedCode,
+  type DocSection,
   DocNodeTransforms,
-  DocEscapedText,
-  DocErrorText,
-  DocBlockTag
+  type DocEscapedText,
+  type DocErrorText,
+  type DocBlockTag
 } from '@microsoft/tsdoc';
 import { InternalError } from '@rushstack/node-core-library';
 

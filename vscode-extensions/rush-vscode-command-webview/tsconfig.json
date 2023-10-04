@@ -1,8 +1,6 @@
 {
-  "extends": "./node_modules/@rushstack/heft-web-rig/profiles/library/tsconfig-base.json",
+  "extends": "./node_modules/local-web-rig/profiles/library/tsconfig-base.json",
   "compilerOptions": {
-    "skipLibCheck": true, // This project imports some projects that target Node
-    "lib": ["es2017", "DOM"],
-    "types": ["webpack-env"]
+    "skipLibCheck": true // This project imports some projects that target Node
   }
 }

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import type { IPackageJson } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 import type { PackageExtractor, IExtractorProjectConfiguration } from '@rushstack/package-extractor';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -187,6 +187,7 @@ export class DeployAction extends BaseRushAction {
       targetRootFolder,
       mainProjectName,
       projectConfigurations,
+      dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
       createArchiveOnly,
       pnpmInstallFolder,

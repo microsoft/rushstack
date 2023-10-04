@@ -4,8 +4,8 @@
 
 ```ts
 
-import { Brand } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/node-core-library';
+import type { Brand } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 
 // @public
@@ -115,6 +115,11 @@ export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
     static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
+    static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
+    static wrapWords(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string;
+    static wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
+    static wrapWordsToLines(text: string, maxLineLength?: number, linePrefix?: string): string[];
+    static wrapWordsToLines(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string[];
 }
 
 // @public

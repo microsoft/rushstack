@@ -6,18 +6,18 @@ import {
   JsonFile,
   JsonSchema,
   FileSystem,
-  JsonObject,
+  type JsonObject,
   AlreadyReportedError,
-  ITerminal
+  type ITerminal
 } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from './RushConfiguration';
+import type { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 import { RushConstants } from '../logic/RushConstants';
-import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
+import type { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
+import { CacheEntryId, type GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
 import type { CloudBuildCacheProviderFactory, RushSession } from '../pluginFramework/RushSession';
 import schemaJson from '../schemas/build-cache.schema.json';
 

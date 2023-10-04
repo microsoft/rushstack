@@ -2,6 +2,35 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.7.1",
+      "tag": "@rushstack/eslint-plugin-security_v0.7.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.7.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@rushstack/eslint-plugin-security_v0.6.0",
       "date": "Mon, 22 May 2023 06:34:32 GMT",

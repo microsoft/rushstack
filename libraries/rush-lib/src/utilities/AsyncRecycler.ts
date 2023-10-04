@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Text, Path, FileSystem } from '@rushstack/node-core-library';
+import { Text, Path, FileSystem, type FolderItem } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -101,9 +101,11 @@ export class AsyncRecycler {
    * NOTE: To avoid spawning multiple instances of the same command, moveFolder()
    * MUST NOT be called again after deleteAll() has started.
    */
-  public deleteAll(): void {
+  public async startDeleteAllAsync(): Promise<void> {
     if (this._deleting) {
-      throw new Error('AsyncRecycler.deleteAll() must not be called more than once');
+      throw new Error(
+        `${AsyncRecycler.name}.${this.startDeleteAllAsync.name}() must not be called more than once`
+      );
     }
 
     this._deleting = true;
@@ -150,9 +152,18 @@ export class AsyncRecycler {
 
       let pathCount: number = 0;
 
+      let folderItemNames: string[] = [];
+      try {
+        folderItemNames = await FileSystem.readFolderItemNamesAsync(this.recyclerFolder);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+      }
+
       // child_process.spawn() doesn't expand wildcards.  To be safe, we will do it manually
       // rather than rely on an unknown shell.
-      for (const filename of FileSystem.readFolderItemNames(this.recyclerFolder)) {
+      for (const filename of folderItemNames) {
         // The "." and ".." are supposed to be excluded, but let's be safe
         if (filename !== '.' && filename !== '..') {
           args.push(path.join(this.recyclerFolder, filename));
@@ -188,7 +199,7 @@ export class AsyncRecycler {
       }
     }
 
-    const children: fs.Dirent[] = FileSystem.readFolderItems(folderPath);
+    const children: FolderItem[] = FileSystem.readFolderItems(folderPath);
     for (const child of children) {
       const absoluteChild: string = `${folderPath}/${child.name}`;
       if (child.isDirectory()) {

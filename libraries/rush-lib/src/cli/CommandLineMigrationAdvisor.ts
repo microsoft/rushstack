@@ -54,6 +54,7 @@ export class CommandLineMigrationAdvisor {
   }
 
   private static _reportDeprecated(message: string): void {
+    // eslint-disable-next-line no-console
     console.error(
       colors.red(
         PrintUtilities.wrapWords(
@@ -61,8 +62,11 @@ export class CommandLineMigrationAdvisor {
         )
       )
     );
+    // eslint-disable-next-line no-console
     console.error(colors.yellow(PrintUtilities.wrapWords(message)));
+    // eslint-disable-next-line no-console
     console.error();
+    // eslint-disable-next-line no-console
     console.error(
       PrintUtilities.wrapWords(
         `For command-line help, type "rush -h".  For migration instructions,` +

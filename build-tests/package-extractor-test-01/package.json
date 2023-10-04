@@ -10,6 +10,7 @@
     "package-extractor-test-02": "workspace:*"
   },
   "devDependencies": {
-    "package-extractor-test-03": "workspace:*"
+    "package-extractor-test-03": "workspace:*",
+    "@types/node": "18.17.15"
   }
 }

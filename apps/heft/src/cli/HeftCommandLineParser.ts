@@ -4,9 +4,9 @@
 import { ArgumentParser } from 'argparse';
 import {
   CommandLineParser,
-  AliasCommandLineAction,
+  type AliasCommandLineAction,
   type CommandLineFlagParameter,
-  CommandLineAction
+  type CommandLineAction
 } from '@rushstack/ts-command-line';
 import {
   Terminal,

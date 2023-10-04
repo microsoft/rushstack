@@ -2,14 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { AlreadyReportedError, ITerminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, type ITerminal } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
+import { CustomTipId } from '../../api/CustomTipsConfiguration';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
@@ -133,13 +134,15 @@ export class VersionMismatchFinder {
         mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
+          // eslint-disable-next-line no-console
           console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
-          rushConfiguration.customTipsConfiguration.showErrorTip(
+          rushConfiguration.customTipsConfiguration._showErrorTip(
             options.terminal,
-            'TIP_RUSH_INCONSISTENT_VERSIONS'
+            CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
           );
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
+            // eslint-disable-next-line no-console
             console.log(
               'For more detailed reporting about these version mismatches, use the "rush check --verbose" command.'
             );
@@ -148,6 +151,7 @@ export class VersionMismatchFinder {
           throw new AlreadyReportedError();
         } else {
           if (options.isRushCheckCommand) {
+            // eslint-disable-next-line no-console
             console.log(colors.green(`Found no mis-matching dependencies!`));
           }
         }
@@ -212,14 +216,17 @@ export class VersionMismatchFinder {
       mismatchedVersions: mismatchDependencies
     };
 
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(output, undefined, 2));
   }
 
   public print(truncateLongPackageNameLists: boolean = false): void {
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     this.getMismatches().forEach((dependency: string) => {
+      // eslint-disable-next-line no-console
       console.log(colors.yellow(dependency));
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
+        // eslint-disable-next-line no-console
         console.log(`  ${version}`);
         const consumersOfMismatch: VersionMismatchFinderEntity[] = this.getConsumersOfMismatch(
           dependency,
@@ -237,13 +244,16 @@ export class VersionMismatchFinder {
 
           numberRemaining--;
 
+          // eslint-disable-next-line no-console
           console.log(`   - ${friendlyName}`);
         }
 
         if (numberRemaining > 0) {
+          // eslint-disable-next-line no-console
           console.log(`   (and ${numberRemaining} others)`);
         }
       });
+      // eslint-disable-next-line no-console
       console.log();
     });
   }

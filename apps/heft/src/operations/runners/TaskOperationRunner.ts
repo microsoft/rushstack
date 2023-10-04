@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'perf_hooks';
+import {
+  type IOperationRunner,
+  type IOperationRunnerContext,
+  OperationStatus
+} from '@rushstack/operation-graph';
 
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
-import { OperationStatus } from '../OperationStatus';
-import { HeftTask } from '../../pluginFramework/HeftTask';
+import type { HeftTask } from '../../pluginFramework/HeftTask';
 import { copyFilesAsync, normalizeCopyOperation } from '../../plugins/CopyFilesPlugin';
 import { deleteFilesAsync } from '../../plugins/DeleteFilesPlugin';
-import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type {
   HeftTaskSession,
   IHeftTaskFileOperations,
@@ -74,7 +76,7 @@ export class TaskOperationRunner implements IOperationRunner {
     context: IOperationRunnerContext,
     taskSession: HeftTaskSession
   ): Promise<OperationStatus> {
-    const { cancellationToken, requestRun } = context;
+    const { abortSignal, requestRun } = context;
     const { hooks, logger } = taskSession;
 
     // Need to clear any errors or warnings from the previous invocation, particularly
@@ -87,8 +89,8 @@ export class TaskOperationRunner implements IOperationRunner {
     const { terminal } = logger;
 
     // Exit the task early if cancellation is requested
-    if (cancellationToken.isCancelled) {
-      return OperationStatus.Cancelled;
+    if (abortSignal.aborted) {
+      return OperationStatus.Aborted;
     }
 
     if (!this._fileOperations && hooks.registerFileOperations.isUsed()) {
@@ -126,7 +128,7 @@ export class TaskOperationRunner implements IOperationRunner {
           async (): Promise<OperationStatus> => {
             // Create the options and provide a utility method to obtain paths to copy
             const runHookOptions: IHeftTaskRunHookOptions = {
-              cancellationToken
+              abortSignal
             };
 
             // Run the plugin run hook
@@ -157,15 +159,15 @@ export class TaskOperationRunner implements IOperationRunner {
               return OperationStatus.Failure;
             }
 
-            if (cancellationToken.isCancelled) {
-              return OperationStatus.Cancelled;
+            if (abortSignal.aborted) {
+              return OperationStatus.Aborted;
             }
 
             return OperationStatus.Success;
           },
           () => `Starting ${shouldRunIncremental ? 'incremental ' : ''}task execution`,
           () => {
-            const finishedWord: string = cancellationToken.isCancelled ? 'Cancelled' : 'Finished';
+            const finishedWord: string = abortSignal.aborted ? 'Aborted' : 'Finished';
             return `${finishedWord} ${shouldRunIncremental ? 'incremental ' : ''}task execution`;
           },
           terminal.writeVerboseLine.bind(terminal)
@@ -199,8 +201,8 @@ export class TaskOperationRunner implements IOperationRunner {
 
     // Even if the entire process has completed, we should mark the operation as cancelled if
     // cancellation has been requested.
-    if (cancellationToken.isCancelled) {
-      return OperationStatus.Cancelled;
+    if (abortSignal.aborted) {
+      return OperationStatus.Aborted;
     }
 
     if (logger.hasErrors) {

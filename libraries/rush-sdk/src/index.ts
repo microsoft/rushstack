@@ -4,8 +4,8 @@
 import * as path from 'path';
 import {
   JsonFile,
-  JsonObject,
-  IPackageJson,
+  type JsonObject,
+  type IPackageJson,
   PackageJsonLookup,
   Executable,
   Terminal,
@@ -15,7 +15,7 @@ import type { SpawnSyncReturns } from 'child_process';
 import {
   RUSH_LIB_NAME,
   RUSH_LIB_PATH_ENV_VAR_NAME,
-  RushLibModuleType,
+  type RushLibModuleType,
   _require,
   requireRushLibUnderFolderPath,
   tryFindRushJsonLocation,
@@ -29,12 +29,11 @@ const terminal: Terminal = new Terminal(
   })
 );
 
-declare const global: NodeJS.Global &
-  typeof globalThis & {
-    ___rush___rushLibModule?: RushLibModuleType;
-    ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
-    ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
-  };
+declare const global: typeof globalThis & {
+  ___rush___rushLibModule?: RushLibModuleType;
+  ___rush___rushLibModuleFromEnvironment?: RushLibModuleType;
+  ___rush___rushLibModuleFromInstallAndRunRush?: RushLibModuleType;
+};
 
 let errorMessage: string = '';
 
@@ -137,7 +136,7 @@ if (sdkContext.rushLibModule === undefined) {
       // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
       terminal.writeVerboseLine(`Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush`);
       sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-    } catch (e) {
+    } catch (e1) {
       let installAndRunRushStderrContent: string = '';
       try {
         const installAndRunRushJSPath: string = path.join(monorepoRoot, 'common/scripts/install-run-rush.js');
@@ -162,7 +161,8 @@ if (sdkContext.rushLibModule === undefined) {
           `Trying to load  ${RUSH_LIB_NAME} installed by install-run-rush a second time`
         );
         sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-      } catch (e) {
+      } catch (e2) {
+        // eslint-disable-next-line no-console
         console.error(`${installAndRunRushStderrContent}`);
         throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
       }
@@ -183,6 +183,7 @@ if (sdkContext.rushLibModule === undefined) {
   // This error indicates that a project is trying to import "@rushstack/rush-sdk", but the Rush engine
   // instance cannot be found.  If you are writing Jest tests for a Rush plugin, add "@microsoft/rush-lib"
   // to the devDependencies for your project.
+  // eslint-disable-next-line no-console
   console.error(`Error: The @rushstack/rush-sdk package was not able to load the Rush engine:
 ${errorMessage}
 `);

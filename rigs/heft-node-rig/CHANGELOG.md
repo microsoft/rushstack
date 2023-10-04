@@ -1,6 +1,58 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Sun, 01 Oct 2023 02:56:30 GMT and should not be manually modified.
+
+## 2.3.5
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 2.3.4
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 2.3.3
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 2.3.2
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 2.3.1
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 2.3.0
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Minor changes
+
+- Add an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the "eslint-config-" prefix. This change also includes the ESLint configurations sourced from "@rushstack/eslint-config"
+
+## 2.2.26
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 2.2.25
+Fri, 22 Sep 2023 00:05:51 GMT
+
+_Version update only_
+
+## 2.2.24
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 2.2.23
+Fri, 15 Sep 2023 00:36:58 GMT
+
+_Version update only_
 
 ## 2.2.22
 Tue, 08 Aug 2023 07:10:40 GMT

@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.100.0",
+  "rushVersion": "5.107.4",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "7.33.5",
+  "pnpmVersion": "8.7.6",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -42,7 +42,8 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0 || >=18.15.0 <19.0.0",
+  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.6.1 <21.0.0",
+  "suppressNodeLtsWarning": true, // TODO: Remove when Node 20 goes LTS
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -530,8 +531,26 @@
       "shouldPublish": false
     },
     {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-7-11-test",
+      "projectFolder": "build-tests/eslint-7-11-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-8-test",
+      "projectFolder": "build-tests/eslint-8-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -628,6 +647,12 @@
       "projectFolder": "eslint/eslint-config",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "local-eslint-config",
+      "projectFolder": "eslint/local-eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
     {
       "packageName": "@rushstack/eslint-patch",
@@ -834,6 +859,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-redis-cobuild-plugin-integration-test",
+      "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "set-webpack-public-path-plugin-webpack4-test",
       "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
       "reviewCategory": "tests",
@@ -965,6 +996,13 @@
       "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/operation-graph",
+      "projectFolder": "libraries/operation-graph",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
@@ -1071,6 +1109,18 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "local-node-rig",
+      "projectFolder": "rigs/local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "local-web-rig",
+      "projectFolder": "rigs/local-web-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "rush-plugins" folder (alphabetical order)
     {
@@ -1096,6 +1146,12 @@
       "projectFolder": "rush-plugins/rush-litewatch-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-redis-cobuild-plugin",
+      "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-serve-plugin",

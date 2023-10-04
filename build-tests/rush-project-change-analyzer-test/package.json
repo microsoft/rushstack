@@ -14,9 +14,8 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "14.18.36",
-    "@rushstack/heft-node-rig": "workspace:*"
+    "@types/node": "18.17.15",
+    "local-node-rig": "workspace:*"
   }
 }

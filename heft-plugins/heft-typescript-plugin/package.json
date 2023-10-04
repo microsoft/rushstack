@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-typescript-plugin",
-  "version": "0.1.21",
+  "version": "0.2.9",
   "description": "Heft plugin for TypeScript",
   "repository": {
     "type": "git",
@@ -14,11 +14,10 @@
   "scripts": {
     "build": "heft test --clean",
     "start": "heft build-watch",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "0.58.2"
+    "@rushstack/heft": "0.62.3"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -28,10 +27,10 @@
     "tapable": "1.1.3"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.2.6",
-    "@types/node": "14.18.36",
+    "@rushstack/heft-node-rig": "2.3.2",
+    "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
     "typescript": "~5.0.4"
   }

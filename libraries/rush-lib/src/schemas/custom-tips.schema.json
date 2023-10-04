@@ -10,11 +10,6 @@
       "type": "string"
     },
 
-    "defaultMessagePrefix": {
-      "description": "If specified, this prefix will be prepended to any the tip messages when they are displayed.",
-      "type": "string"
-    },
-
     "customTips": {
       "type": "array",
       "items": {
@@ -30,10 +25,6 @@
           "message": {
             "type": "string",
             "description": "The message text to be displayed for this tip."
-          },
-          "messagePrefix": {
-            "type": "string",
-            "description": "Overrides the \"defaultMessagePrefix\" for this tip. Specify an empty string to omit the \"defaultMessagePrefix\" entirely."
           }
         }
       }

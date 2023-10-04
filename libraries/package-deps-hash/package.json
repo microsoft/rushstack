@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/package-deps-hash",
-  "version": "4.0.44",
+  "version": "4.1.9",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -16,12 +16,9 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36"
+    "local-node-rig": "workspace:*"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"

@@ -3,7 +3,7 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { PackageJsonLookup, IPackageJson, Text } from '@rushstack/node-core-library';
+import { PackageJsonLookup, type IPackageJson, Text } from '@rushstack/node-core-library';
 import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
@@ -103,6 +103,7 @@ export class RushXCommandLine {
       } else {
         process.exitCode = 1;
       }
+      // eslint-disable-next-line no-console
       console.error(colors.red('Error: ' + (error as Error).message));
     }
   }
@@ -142,6 +143,7 @@ export class RushXCommandLine {
     if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
       // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
       // did not install the project's dependencies, because the project was not registered.
+      // eslint-disable-next-line no-console
       console.log(
         colors.yellow(
           'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
@@ -186,6 +188,7 @@ export class RushXCommandLine {
     }
 
     if (!args.quiet) {
+      // eslint-disable-next-line no-console
       console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
     }
 
@@ -268,16 +271,23 @@ export class RushXCommandLine {
   }
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
+    // eslint-disable-next-line no-console
     console.log('usage: rushx [-h]');
     console.log('       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...\n');
 
+    // eslint-disable-next-line no-console
     console.log('Optional arguments:');
+    // eslint-disable-next-line no-console
     console.log('  -h, --help            Show this help message and exit.');
+    // eslint-disable-next-line no-console
     console.log('  -q, --quiet           Hide rushx startup information.');
+    // eslint-disable-next-line no-console
     console.log('  -i, --ignore-hooks    Do not run hooks.');
+    // eslint-disable-next-line no-console
     console.log('  -d, --debug           Run in debug mode.\n');
 
     if (projectCommandSet.commandNames.length > 0) {
+      // eslint-disable-next-line no-console
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
 
       // Calculate the length of the longest script name, for formatting
@@ -296,6 +306,7 @@ export class RushXCommandLine {
         const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
         const truncateLength: number = Math.max(0, consoleWidth - firstPartLength) - 1;
 
+        // eslint-disable-next-line no-console
         console.log(
           // Example: "  command: "
           '  ' +
@@ -306,6 +317,7 @@ export class RushXCommandLine {
       }
 
       if (projectCommandSet.malformedScriptNames.length > 0) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.yellow(
@@ -316,7 +328,9 @@ export class RushXCommandLine {
         );
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log(colors.yellow('Warning: No commands are defined yet for this project.'));
+      // eslint-disable-next-line no-console
       console.log(
         'You can define a command by adding a "scripts" table to the project\'s package.json file.'
       );

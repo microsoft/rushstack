@@ -1,6 +1,25 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2023 20:53:17 GMT and should not be manually modified.
+
+## 0.14.2
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.14.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.14.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
 
 ## 0.13.3
 Tue, 08 Aug 2023 07:10:40 GMT

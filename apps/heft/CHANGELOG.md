@@ -1,6 +1,72 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+This log was last generated on Sun, 01 Oct 2023 02:56:29 GMT and should not be manually modified.
+
+## 0.62.3
+Sun, 01 Oct 2023 02:56:29 GMT
+
+_Version update only_
+
+## 0.62.2
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.62.1
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.62.0
+Wed, 27 Sep 2023 00:21:38 GMT
+
+### Minor changes
+
+- (BREAKING API CHANGE) Remove the deprecated `cancellationToken` property of `IHeftTaskRunHookOptions`. Use `abortSignal` on that object instead.
+
+## 0.61.3
+Tue, 26 Sep 2023 21:02:30 GMT
+
+### Patches
+
+- Fix an issue where `heft clean` would crash with `ERR_ILLEGAL_CONSTRUCTOR`.
+
+## 0.61.2
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.61.1
+Mon, 25 Sep 2023 23:38:27 GMT
+
+_Version update only_
+
+## 0.61.0
+Fri, 22 Sep 2023 00:05:50 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE): Rename task temp folder from "<phase>.<task>" to "<phase>/<task>" to simplify caching phase outputs.
+
+## 0.60.0
+Tue, 19 Sep 2023 15:21:51 GMT
+
+### Minor changes
+
+- Allow Heft to communicate via IPC with a host process when running in watch mode. The host controls scheduling of incremental re-runs.
+
+## 0.59.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Migrate plugin name collision detection to the InternalHeftSession instance to allow multiple Heft sessions in the same process.
 
 ## 0.58.2
 Tue, 08 Aug 2023 07:10:39 GMT

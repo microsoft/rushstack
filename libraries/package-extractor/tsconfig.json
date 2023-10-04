@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
     // Needed because JSZip is missing a typing, and attempting to re-add the typing conflicts with

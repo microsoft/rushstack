@@ -1,6 +1,91 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Sun, 01 Oct 2023 02:56:30 GMT and should not be manually modified.
+
+## 0.6.10
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.6.9
+Sat, 30 Sep 2023 00:20:51 GMT
+
+### Patches
+
+- Ensure the "folderToCopy" field is included in generated archives
+
+## 0.6.8
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.6.7
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 0.6.6
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 0.6.5
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.6.4
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.6.3
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 0.6.2
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.6.1
+Tue, 19 Sep 2023 00:36:30 GMT
+
+_Version update only_
+
+## 0.6.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.5.3
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 0.5.2
+Wed, 06 Sep 2023 19:00:39 GMT
+
+### Patches
+
+- Fix an issue where subdirectory inclusion patterns (ex. "src/subdir/**/*") would get ignored during extraction
+
+## 0.5.1
+Thu, 24 Aug 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.5.0
+Wed, 23 Aug 2023 00:20:45 GMT
+
+### Minor changes
+
+- Add option field dependenciesConfigurations in PackageExtractor to filter files for third party dependencies
 
 ## 0.4.1
 Tue, 08 Aug 2023 07:10:40 GMT

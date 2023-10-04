@@ -13,7 +13,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-serverless-stack-plugin": "workspace:*",
@@ -24,7 +24,7 @@
     "@serverless-stack/resources": "0.67.0",
     "@types/aws-lambda": "8.10.93",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "aws-cdk-lib": "2.7.0",
     "constructs": "~10.0.98",
     "eslint": "~8.7.0",

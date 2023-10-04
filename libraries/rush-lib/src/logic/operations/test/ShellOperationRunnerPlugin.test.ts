@@ -5,13 +5,15 @@ import path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import { CommandLineConfiguration, IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
-import { Operation } from '../Operation';
-import { ICommandLineJson } from '../../../api/CommandLineJson';
+import { CommandLineConfiguration, type IPhasedCommandConfig } from '../../../api/CommandLineConfiguration';
+import type { Operation } from '../Operation';
+import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
-import { ICreateOperationsContext, PhasedCommandHooks } from '../../../pluginFramework/PhasedCommandHooks';
-import { ShellOperationRunner } from '../ShellOperationRunner';
+import {
+  type ICreateOperationsContext,
+  PhasedCommandHooks
+} from '../../../pluginFramework/PhasedCommandHooks';
 
 interface ISerializedOperation {
   name: string;
@@ -21,7 +23,7 @@ interface ISerializedOperation {
 function serializeOperation(operation: Operation): ISerializedOperation {
   return {
     name: operation.name!,
-    commandToRun: (operation.runner as ShellOperationRunner)['_commandToRun']
+    commandToRun: operation.runner!.getConfigHash()
   };
 }
 

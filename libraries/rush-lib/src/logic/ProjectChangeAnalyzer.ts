@@ -3,23 +3,23 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import ignore, { Ignore } from 'ignore';
+import ignore, { type Ignore } from 'ignore';
 
 import {
   getRepoChanges,
   getRepoRoot,
   getRepoStateAsync,
-  IFileDiffStatus
+  type IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, FileSystem, ITerminal, Async } from '@rushstack/node-core-library';
+import { Path, FileSystem, type ITerminal, Async } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
-import { LookupByPath } from './LookupByPath';
+import type { LookupByPath } from './LookupByPath';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { UNINITIALIZED } from '../utilities/Utilities';
 

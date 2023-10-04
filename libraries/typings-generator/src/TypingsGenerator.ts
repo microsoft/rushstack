@@ -3,7 +3,7 @@
 
 import {
   FileSystem,
-  ITerminal,
+  type ITerminal,
   Terminal,
   ConsoleTerminalProvider,
   Path,

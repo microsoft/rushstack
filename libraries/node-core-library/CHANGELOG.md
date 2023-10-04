@@ -1,6 +1,27 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 08 Aug 2023 07:10:39 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2023 20:53:17 GMT and should not be manually modified.
+
+## 3.61.0
+Thu, 28 Sep 2023 20:53:17 GMT
+
+### Minor changes
+
+- Add Async.getSignal for promise-based signaling. Add MinimumHeap for use as a priority queue.
+
+## 3.60.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 3.60.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
 
 ## 3.59.7
 Tue, 08 Aug 2023 07:10:39 GMT

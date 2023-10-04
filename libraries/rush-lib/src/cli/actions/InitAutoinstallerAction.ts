@@ -3,11 +3,11 @@
 
 import colors from 'colors/safe';
 
-import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { FileSystem, NewlineKind, IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { FileSystem, NewlineKind, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class InitAutoinstallerAction extends BaseRushAction {
@@ -56,6 +56,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
       dependencies: {}
     };
 
+    // eslint-disable-next-line no-console
     console.log(colors.green('Creating package: ') + autoinstaller.packageJsonPath);
 
     JsonFile.save(packageJson, autoinstaller.packageJsonPath, {
@@ -63,6 +64,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
       newlineConversion: NewlineKind.OsDefault
     });
 
+    // eslint-disable-next-line no-console
     console.log('\nFile successfully written. Add your dependencies before committing.');
   }
 }

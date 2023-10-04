@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { minify, MinifyOptions, MinifyOutput, SimpleIdentifierMangler } from 'terser';
+import { minify, type MinifyOptions, type MinifyOutput, type SimpleIdentifierMangler } from 'terser';
 import type { RawSourceMap } from 'source-map';
 
 declare module 'terser' {
@@ -76,6 +76,7 @@ export async function minifySingleFileAsync(
       hash
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     return {
       error: error as Error,

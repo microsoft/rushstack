@@ -1,105 +1,307 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`PrintUtilities printMessageInBox Handles a case where there is a word longer than the boxwidth 1`] = `
+Array [
+  " ══════════════════════════════════════════════════",
+  " Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  " error occurred while pushing commits to",
+  " git remote. Please make sure you have",
+  " installed and enabled git lfs. The",
+  " easiest way to do that is run the",
+  " provided setup script:",
+  " ",
+  "     common/scripts/setup.sh",
+  " ",
+  " ══════════════════════════════════════════════════",
+  "",
+]
+`;
+
 exports[`PrintUtilities printMessageInBox prints a long message wrapped in a box using the console width 1`] = `
 Array [
-  " ╔══════════════════════════════╗ ",
-  " ║    Lorem ipsum dolor sit     ║ ",
-  " ║      amet, consectetuer      ║ ",
-  " ║       adipiscing elit.       ║ ",
-  " ║      Maecenas porttitor      ║ ",
-  " ║     congue massa. Fusce      ║ ",
-  " ║      posuere, magna sed      ║ ",
-  " ║     pulvinar ultricies,      ║ ",
-  " ║         purus lectus         ║ ",
-  " ║    malesuada libero, sit     ║ ",
-  " ║      amet commodo magna      ║ ",
-  " ║       eros quis urna.        ║ ",
-  " ╚══════════════════════════════╝ ",
+  " ╔══════════════════════════════╗",
+  " ║    Lorem ipsum dolor sit     ║",
+  " ║      amet, consectetuer      ║",
+  " ║       adipiscing elit.       ║",
+  " ║      Maecenas porttitor      ║",
+  " ║     congue massa. Fusce      ║",
+  " ║      posuere, magna sed      ║",
+  " ║     pulvinar ultricies,      ║",
+  " ║    purus lectus malesuada    ║",
+  " ║       libero, sit amet       ║",
+  " ║      commodo magna eros      ║",
+  " ║          quis urna.          ║",
+  " ╚══════════════════════════════╝",
   "",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox prints a long message wrapped in a wide box 1`] = `
 Array [
-  " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗ ",
-  " ║                                              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.                                               ║ ",
-  " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝ ",
+  " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗",
+  " ║                                              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.                                               ║",
+  " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝",
   "",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox prints a long message wrapped in narrow box 1`] = `
 Array [
-  " ╔══════════════════╗ ",
-  " ║      Lorem       ║ ",
-  " ║      ipsum       ║ ",
-  " ║    dolor sit     ║ ",
-  " ║      amet,       ║ ",
-  " ║   consectetuer   ║ ",
-  " ║    adipiscing    ║ ",
-  " ║      elit.       ║ ",
-  " ║     Maecenas     ║ ",
-  " ║    porttitor     ║ ",
-  " ║      congue      ║ ",
-  " ║      massa.      ║ ",
-  " ║      Fusce       ║ ",
-  " ║     posuere,     ║ ",
-  " ║    magna sed     ║ ",
-  " ║     pulvinar     ║ ",
-  " ║    ultricies,    ║ ",
-  " ║      purus       ║ ",
-  " ║      lectus      ║ ",
-  " ║    malesuada     ║ ",
-  " ║     libero,      ║ ",
-  " ║     sit amet     ║ ",
-  " ║     commodo      ║ ",
-  " ║      magna       ║ ",
-  " ║    eros quis     ║ ",
-  " ║      urna.       ║ ",
-  " ╚══════════════════╝ ",
+  " ╔══════════════════╗",
+  " ║      Lorem       ║",
+  " ║      ipsum       ║",
+  " ║    dolor sit     ║",
+  " ║      amet,       ║",
+  " ║   consectetuer   ║",
+  " ║ adipiscing elit. ║",
+  " ║     Maecenas     ║",
+  " ║    porttitor     ║",
+  " ║      congue      ║",
+  " ║      massa.      ║",
+  " ║      Fusce       ║",
+  " ║     posuere,     ║",
+  " ║    magna sed     ║",
+  " ║     pulvinar     ║",
+  " ║    ultricies,    ║",
+  " ║      purus       ║",
+  " ║      lectus      ║",
+  " ║    malesuada     ║",
+  " ║     libero,      ║",
+  " ║     sit amet     ║",
+  " ║     commodo      ║",
+  " ║    magna eros    ║",
+  " ║    quis urna.    ║",
+  " ╚══════════════════╝",
   "",
 ]
 `;
 
 exports[`PrintUtilities printMessageInBox respects spaces and newlines in a pre-formatted message 1`] = `
 Array [
-  " ╔════════════════════════════════════════════════╗ ",
-  " ║    An error occurred while pushing commits     ║ ",
-  " ║      to git remote. Please make sure you       ║ ",
-  " ║    have installed and enabled git lfs. The     ║ ",
-  " ║       easiest way to do that is run the        ║ ",
-  " ║             provided setup script:             ║ ",
-  " ║                                                ║ ",
-  " ║            common/scripts/setup.sh             ║ ",
-  " ║                                                ║ ",
-  " ╚════════════════════════════════════════════════╝ ",
+  " ╔════════════════════════════════════════════════╗",
+  " ║    An error occurred while pushing commits     ║",
+  " ║    to git remote. Please make sure you have    ║",
+  " ║       installed and enabled git lfs. The       ║",
+  " ║       easiest way to do that is run the        ║",
+  " ║             provided setup script:             ║",
+  " ║                                                ║",
+  " ║            common/scripts/setup.sh             ║",
+  " ║                                                ║",
+  " ╚════════════════════════════════════════════════╝",
   "",
 ]
 `;
 
-exports[`PrintUtilities wrapWords applies pre-existing indents on both margins 1`] = `
+exports[`PrintUtilities wrapWordsToLines with prefix="| " applies pre-existing indents on both margins 1`] = `
+Array [
+  "| Lorem ipsum dolor sit amet, consectetuer",
+  "| adipiscing elit. Maecenas porttitor congue massa.",
+  "| ",
+  "|     Lorem ipsum dolor sit amet, consectetuer",
+  "|     adipiscing elit. Maecenas porttitor congue massa.",
+  "| ",
+  "| Lorem ipsum dolor sit amet, consectetuer",
+  "| adipiscing elit. Maecenas porttitor congue massa.",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="| " handles a line containing a word longer than the max line length 1`] = `
+Array [
+  "| An error",
+  "| occurrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrred",
+  "| while pushing commits to git remote. Please make",
+  "| sure you have installed and enabled git lfs. The",
+  "| easiest way to do that is run the provided setup script:",
+  "| ",
+  "|     common/scripts/setup.sh",
+  "| ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="| " handles a line starting with a word longer than the max line length 1`] = `
+Array [
+  "| Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "| error occurred while pushing commits to git",
+  "| remote. Please make sure you have installed and",
+  "| enabled git lfs. The easiest way to do that is",
+  "| run the provided setup script:",
+  "| ",
+  "|     common/scripts/setup.sh",
+  "| ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="| " handles a line starting with two words longer than the max line length 1`] = `
+Array [
+  "| Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "| errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrror",
+  "| occurred while pushing commits to git remote.",
+  "| Please make sure you have installed and enabled",
+  "| git lfs. The easiest way to do that is run the",
+  "| provided setup script:",
+  "| ",
+  "|     common/scripts/setup.sh",
+  "| ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="| " handles a line with only a word longer than the max line length 1`] = `
+Array [
+  "| Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="| " respects spaces and newlines in a pre-formatted message 1`] = `
+Array [
+  "| An error occurred while pushing commits to git",
+  "| remote. Please make sure you have installed and",
+  "| enabled git lfs. The easiest way to do that is",
+  "| run the provided setup script:",
+  "| ",
+  "|     common/scripts/setup.sh",
+  "| ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="4" applies pre-existing indents on both margins 1`] = `
+Array [
+  "    Lorem ipsum dolor sit amet, consectetuer",
+  "    adipiscing elit. Maecenas porttitor congue massa.",
+  "    ",
+  "        Lorem ipsum dolor sit amet, consectetuer",
+  "        adipiscing elit. Maecenas porttitor congue massa.",
+  "    ",
+  "    Lorem ipsum dolor sit amet, consectetuer",
+  "    adipiscing elit. Maecenas porttitor congue massa.",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="4" handles a line containing a word longer than the max line length 1`] = `
+Array [
+  "    An error",
+  "    occurrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrred",
+  "    while pushing commits to git remote. Please",
+  "    make sure you have installed and enabled git",
+  "    lfs. The easiest way to do that is run the",
+  "    provided setup script:",
+  "    ",
+  "        common/scripts/setup.sh",
+  "    ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="4" handles a line starting with a word longer than the max line length 1`] = `
+Array [
+  "    Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "    error occurred while pushing commits to git",
+  "    remote. Please make sure you have installed",
+  "    and enabled git lfs. The easiest way to do",
+  "    that is run the provided setup script:",
+  "    ",
+  "        common/scripts/setup.sh",
+  "    ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="4" handles a line starting with two words longer than the max line length 1`] = `
+Array [
+  "    Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "    errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrror",
+  "    occurred while pushing commits to git remote.",
+  "    Please make sure you have installed and",
+  "    enabled git lfs. The easiest way to do that is",
+  "    run the provided setup script:",
+  "    ",
+  "        common/scripts/setup.sh",
+  "    ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="4" handles a line with only a word longer than the max line length 1`] = `
+Array [
+  "    Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="4" respects spaces and newlines in a pre-formatted message 1`] = `
+Array [
+  "    An error occurred while pushing commits to git",
+  "    remote. Please make sure you have installed",
+  "    and enabled git lfs. The easiest way to do",
+  "    that is run the provided setup script:",
+  "    ",
+  "        common/scripts/setup.sh",
+  "    ",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="undefined" applies pre-existing indents on both margins 1`] = `
 Array [
   "Lorem ipsum dolor sit amet, consectetuer",
   "adipiscing elit. Maecenas porttitor congue massa.",
   "",
   "    Lorem ipsum dolor sit amet, consectetuer",
-  "    adipiscing elit. Maecenas porttitor",
-  "    congue massa.",
+  "    adipiscing elit. Maecenas porttitor congue massa.",
   "",
   "Lorem ipsum dolor sit amet, consectetuer",
   "adipiscing elit. Maecenas porttitor congue massa.",
 ]
 `;
 
-exports[`PrintUtilities wrapWords respects spaces and newlines in a pre-formatted message 1`] = `
+exports[`PrintUtilities wrapWordsToLines with prefix="undefined" handles a line containing a word longer than the max line length 1`] = `
 Array [
-  "    An error occurred while pushing commits",
-  "    to git remote. Please make sure you have",
-  "    installed and enabled git lfs. The",
-  "    easiest way to do that is run the",
-  "    provided setup script:",
-  "    ",
-  "        common/scripts/setup.sh",
-  "    ",
+  "An error",
+  "occurrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrred",
+  "while pushing commits to git remote. Please make",
+  "sure you have installed and enabled git lfs. The",
+  "easiest way to do that is run the provided setup script:",
+  "",
+  "    common/scripts/setup.sh",
+  "",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="undefined" handles a line starting with a word longer than the max line length 1`] = `
+Array [
+  "Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "error occurred while pushing commits to git",
+  "remote. Please make sure you have installed and",
+  "enabled git lfs. The easiest way to do that is run",
+  "the provided setup script:",
+  "",
+  "    common/scripts/setup.sh",
+  "",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="undefined" handles a line starting with two words longer than the max line length 1`] = `
+Array [
+  "Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrror",
+  "occurred while pushing commits to git remote.",
+  "Please make sure you have installed and enabled",
+  "git lfs. The easiest way to do that is run the",
+  "provided setup script:",
+  "",
+  "    common/scripts/setup.sh",
+  "",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="undefined" handles a line with only a word longer than the max line length 1`] = `
+Array [
+  "Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+]
+`;
+
+exports[`PrintUtilities wrapWordsToLines with prefix="undefined" respects spaces and newlines in a pre-formatted message 1`] = `
+Array [
+  "An error occurred while pushing commits to git",
+  "remote. Please make sure you have installed and",
+  "enabled git lfs. The easiest way to do that is run",
+  "the provided setup script:",
+  "",
+  "    common/scripts/setup.sh",
+  "",
 ]
 `;

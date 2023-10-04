@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.102.0",
+  "version": "5.108.0",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -34,13 +34,11 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@types/node": "14.18.36",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.0"
   }

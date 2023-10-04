@@ -3,7 +3,8 @@
 
 import * as path from 'path';
 import { JsonSchema, JsonFile, NewlineKind } from '@rushstack/node-core-library';
-import { IConfigFile } from './IConfigFile';
+import type { IConfigFile } from './IConfigFile';
+import apiDocumenterSchema from '../schemas/api-documenter.schema.json';
 
 /**
  * Helper for loading the api-documenter.json file format.  Later when the schema is more mature,
@@ -23,9 +24,7 @@ export class DocumenterConfig {
   /**
    * The JSON Schema for API Documenter config file (api-documenter.schema.json).
    */
-  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '..', 'schemas', 'api-documenter.schema.json')
-  );
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(apiDocumenterSchema);
 
   /**
    * The config file name "api-documenter.json".

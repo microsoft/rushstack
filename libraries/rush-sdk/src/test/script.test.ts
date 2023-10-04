@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
@@ -7,6 +10,8 @@ const mockPackageFolder: string = `${sandboxRepoPath}/mock-package`;
 const mockRushLibPath: string = `${__dirname}/fixture/mock-rush-lib.js`;
 
 const coreLibPath: string = require.resolve('@rushstack/node-core-library');
+const quotedRushSdkPath: string = JSON.stringify(rushSdkPath);
+const loadAndPrintRushSdkModule: string = `console.log(JSON.stringify(Object.keys(require(${quotedRushSdkPath})).sort(), undefined, 2).replace(/"/g, "'"));`;
 
 describe('@rushstack/rush-sdk', () => {
   it('Should load via global (for plugins)', () => {
@@ -16,7 +21,7 @@ describe('@rushstack/rush-sdk', () => {
         '-e',
         `
 global.___rush___rushLibModule = { foo: 1 };
-console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
+${loadAndPrintRushSdkModule}`
       ],
       {
         currentWorkingDirectory: mockPackageFolder,
@@ -39,7 +44,7 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
         '-e',
         `
 require('@microsoft/rush-lib');
-console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
+${loadAndPrintRushSdkModule}`
       ],
       {
         currentWorkingDirectory: mockPackageFolder,
@@ -56,18 +61,14 @@ console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`
   });
 
   it('Should load via process.env._RUSH_LIB_PATH (for child processes)', () => {
-    const result = Executable.spawnSync(
-      'node',
-      ['-e', `console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));`],
-      {
-        currentWorkingDirectory: mockPackageFolder,
-        environment: {
-          ...process.env,
-          RUSH_SDK_DEBUG: '1',
-          _RUSH_LIB_PATH: mockRushLibPath
-        }
+    const result = Executable.spawnSync('node', ['-e', loadAndPrintRushSdkModule], {
+      currentWorkingDirectory: mockPackageFolder,
+      environment: {
+        ...process.env,
+        RUSH_SDK_DEBUG: '1',
+        _RUSH_LIB_PATH: mockRushLibPath
       }
-    );
+    });
     expect(result.stderr.trim()).toMatchSnapshot('stderr');
     expect(result.stdout.trim()).toMatchSnapshot('stdout');
     expect(result.status).toBe(0);
@@ -88,7 +89,7 @@ const mockResolveModule = (options) => {
   return originalResolveModule(options);
 }
 Import.resolveModule = mockResolveModule;
-console.log(Object.keys(require(${JSON.stringify(rushSdkPath)})));
+${loadAndPrintRushSdkModule}
 `
       ],
       {

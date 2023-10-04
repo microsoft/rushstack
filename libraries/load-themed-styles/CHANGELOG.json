@@ -2,6 +2,164 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "2.0.85",
+      "tag": "@microsoft/load-themed-styles_v2.0.85",
+      "date": "Sun, 01 Oct 2023 02:56:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.84",
+      "tag": "@microsoft/load-themed-styles_v2.0.84",
+      "date": "Sat, 30 Sep 2023 00:20:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.83",
+      "tag": "@microsoft/load-themed-styles_v2.0.83",
+      "date": "Thu, 28 Sep 2023 20:53:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.82",
+      "tag": "@microsoft/load-themed-styles_v2.0.82",
+      "date": "Wed, 27 Sep 2023 00:21:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.62.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.81",
+      "tag": "@microsoft/load-themed-styles_v2.0.81",
+      "date": "Tue, 26 Sep 2023 21:02:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.61.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.80",
+      "tag": "@microsoft/load-themed-styles_v2.0.80",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.61.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.79",
+      "tag": "@microsoft/load-themed-styles_v2.0.79",
+      "date": "Mon, 25 Sep 2023 23:38:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.61.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.78",
+      "tag": "@microsoft/load-themed-styles_v2.0.78",
+      "date": "Fri, 22 Sep 2023 00:05:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.61.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.77",
+      "tag": "@microsoft/load-themed-styles_v2.0.77",
+      "date": "Tue, 19 Sep 2023 15:21:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.60.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.76",
+      "tag": "@microsoft/load-themed-styles_v2.0.76",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.59.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.75",
+      "tag": "@microsoft/load-themed-styles_v2.0.75",
+      "date": "Wed, 13 Sep 2023 00:32:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.18.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.74",
+      "tag": "@microsoft/load-themed-styles_v2.0.74",
+      "date": "Fri, 01 Sep 2023 04:53:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use self.setTimeout() instead of setTimeout() to work around a Jest regression"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.73",
       "tag": "@microsoft/load-themed-styles_v2.0.73",
       "date": "Tue, 08 Aug 2023 07:10:39 GMT",

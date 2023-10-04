@@ -4,11 +4,11 @@
 import * as path from 'path';
 import yaml = require('js-yaml');
 import { FileSystem } from '@rushstack/node-core-library';
-import { ApiItem } from '@microsoft/api-extractor-model';
+import type { ApiItem } from '@microsoft/api-extractor-model';
 import {
   MarkdownDocumenterFeature,
-  IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
-  IMarkdownDocumenterFeatureOnFinishedArgs
+  type IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
+  type IMarkdownDocumenterFeatureOnFinishedArgs
 } from '@microsoft/api-documenter';
 
 interface INavigationNode {
@@ -24,6 +24,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
   private _apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
 
   public onInitialized(): void {
+    // eslint-disable-next-line no-console
     console.log('RushStackFeature: onInitialized()');
   }
 

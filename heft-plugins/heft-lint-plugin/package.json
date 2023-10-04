@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-lint-plugin",
-  "version": "0.1.22",
+  "version": "0.2.9",
   "description": "A Heft plugin for using ESLint or TSLint. Intended for use with @rushstack/heft-typescript-plugin",
   "repository": {
     "type": "git",
@@ -12,24 +12,23 @@
   "scripts": {
     "build": "heft test --clean",
     "start": "heft build-watch",
-    "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": "heft run --only test -- --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "0.58.2"
+    "@rushstack/heft": "0.62.3"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "semver": "~7.5.4"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@rushstack/heft-node-rig": "2.2.6",
+    "@rushstack/heft-node-rig": "2.3.2",
     "@types/eslint": "8.2.0",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
     "eslint": "~8.7.0",
     "tslint": "~5.20.1",

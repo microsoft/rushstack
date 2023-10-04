@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { BaseLinkManager } from './base/BaseLinkManager';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { BaseLinkManager } from './base/BaseLinkManager';
 import { NpmLinkManager } from './npm/NpmLinkManager';
 import { PnpmLinkManager } from './pnpm/PnpmLinkManager';
 

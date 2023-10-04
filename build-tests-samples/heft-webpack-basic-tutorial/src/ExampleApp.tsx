@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as React from 'react';
-import { ToggleSwitch, IToggleEventArgs } from './ToggleSwitch';
+import { ToggleSwitch, type IToggleEventArgs } from './ToggleSwitch';
 
 /**
  * This React component renders the application page.
@@ -28,6 +31,7 @@ export class ExampleApp extends React.Component {
   // is bound correctly.  This form does not work with virtual/override inheritance, so use regular methods
   // everywhere else.
   private _onToggle = (sender: ToggleSwitch, args: IToggleEventArgs): void => {
+    // eslint-disable-next-line no-console
     console.log('Toggle switch changed: ' + args.sliderPosition);
   };
 }

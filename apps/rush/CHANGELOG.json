@@ -2,6 +2,195 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.108.0",
+      "tag": "@microsoft/rush_v5.108.0",
+      "date": "Mon, 02 Oct 2023 20:23:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush purge` fails on Linux and Mac if the `common/temp/rush-recycler` folder does not exist."
+          },
+          {
+            "comment": "Add \"--offline\" parameter for \"rush install\" and \"rush update\""
+          },
+          {
+            "comment": "Ignore pause/resume watcher actions when the process is not TTY mode"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.4",
+      "tag": "@microsoft/rush_v5.107.4",
+      "date": "Tue, 26 Sep 2023 21:02:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          },
+          {
+            "comment": "Make the project watcher status and keyboard commands message more visible."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.3",
+      "tag": "@microsoft/rush_v5.107.3",
+      "date": "Fri, 22 Sep 2023 09:01:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix filtered installs in pnpm@8."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.2",
+      "tag": "@microsoft/rush_v5.107.2",
+      "date": "Fri, 22 Sep 2023 00:06:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a bug in which an operation failing incorrectly does not block its consumers."
+          },
+          {
+            "comment": "Add `resolutionMode` to `rush init` template for pnpm-config.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.1",
+      "tag": "@microsoft/rush_v5.107.1",
+      "date": "Tue, 19 Sep 2023 21:13:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix pnpm's install status printing when pnpm custom tips are defined."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.107.0",
+      "tag": "@microsoft/rush_v5.107.0",
+      "date": "Tue, 19 Sep 2023 00:36:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          },
+          {
+            "comment": "Remove previously removed fields from the `custom-tips.json` schema."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Refactor the `CustomTipsConfiguration` by removing the `configuration` property and adding a `providedCustomTipsByTipId` map property."
+          },
+          {
+            "comment": "Fix an issue where pnpm would would not rewrite the current status line on a TTY console, and instead would print a series of separate status lines during installation. Note that this is only fixed when there are no custom PNPM tips provided."
+          },
+          {
+            "comment": "Add \"Waiting\" operation status for operations that have one or more dependencies still pending. Ensure that the `onOperationStatusChanged` hook fires for every status change."
+          },
+          {
+            "comment": "Add support for optional build status notifications over a web socket connection to `@rushstack/rush-serve-plugin`."
+          },
+          {
+            "comment": "Add pause/resume option to project watcher"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.106.0",
+      "tag": "@microsoft/rush_v5.106.0",
+      "date": "Thu, 14 Sep 2023 09:20:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(IMPORTANT) Add a new setting `resolutionMode` in pnpm-config.json; be aware that Rush now overrides the default behavior if you are using PNPM 8.0.0 through 8.6.12 (GitHub #4283)"
+          },
+          {
+            "comment": "Support adding custom tips for pnpm-printed logs"
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"defaultMessagePrefix\" config in custom-tips.json"
+          },
+          {
+            "comment": "Rename the `PnpmStoreOptions` type to `PnpmStoreLocation`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.105.0",
+      "tag": "@microsoft/rush_v5.105.0",
+      "date": "Fri, 08 Sep 2023 04:09:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache writes in watch rebuilds."
+          },
+          {
+            "comment": "Fix the instance of \"ICreateOperationsContext\" passed to the \"beforeExecuteOperations\" hook in watch mode rebuilds to match the instance passed to the \"createOperations\" hook."
+          },
+          {
+            "comment": "Fix an issue where the error message printed when two phases have overlapping output folders did not mention both phases."
+          },
+          {
+            "comment": "Update the phase output folders validation to only check for overlapping folders for phases that actually execute an operation in a given project."
+          },
+          {
+            "comment": "Add the \"disableBuildCache\" option to the schema for phased commands (it is already present for bulk commands). Update the behavior of the \"disableBuildCache\" flag to also disable the legacy skip detection, in the event that the build cache is not configured."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.104.1",
+      "tag": "@microsoft/rush_v5.104.1",
+      "date": "Tue, 05 Sep 2023 18:53:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush init` generated a `cobuild.json` file that reported errors (GitHub #4307)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.104.0",
+      "tag": "@microsoft/rush_v5.104.0",
+      "date": "Fri, 01 Sep 2023 04:54:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Initial release of the cobuild feature, a cheap way to distribute jobs Rush builds across multiple VMs. (GitHub #3485)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.103.0",
+      "tag": "@microsoft/rush_v5.103.0",
+      "date": "Thu, 31 Aug 2023 23:28:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add dependencySettings field to Rush deploy.json configurations. This will allow developers to customize how third party dependencies are processed when running `rush deploy`"
+          },
+          {
+            "comment": "Fix an issue where `rush update-autoinstaller` sometimes did not fully upgrade the lockfile"
+          },
+          {
+            "comment": "Fix an issue where \"undefined\" was sometimes printed instead of a blank line"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.102.0",
       "tag": "@microsoft/rush_v5.102.0",
       "date": "Tue, 15 Aug 2023 20:09:40 GMT",

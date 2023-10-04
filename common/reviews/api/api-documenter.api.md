@@ -4,8 +4,8 @@
 
 ```ts
 
-import { ApiItem } from '@microsoft/api-extractor-model';
-import { ApiModel } from '@microsoft/api-extractor-model';
+import type { ApiItem } from '@microsoft/api-extractor-model';
+import type { ApiModel } from '@microsoft/api-extractor-model';
 
 // @public
 export interface IApiDocumenterPluginManifest {

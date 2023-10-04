@@ -1,6 +1,64 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Tue, 08 Aug 2023 07:10:40 GMT and should not be manually modified.
+This log was last generated on Sun, 01 Oct 2023 02:56:30 GMT and should not be manually modified.
+
+## 0.2.9
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.2.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.2.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.2.6
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 0.2.5
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 0.2.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.2.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.2.2
+Fri, 22 Sep 2023 00:05:51 GMT
+
+_Version update only_
+
+## 0.2.1
+Tue, 19 Sep 2023 15:21:51 GMT
+
+_Version update only_
+
+## 0.2.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Fix bugs related to tracking of the current working directory if the value changes.
 
 ## 0.1.21
 Tue, 08 Aug 2023 07:10:40 GMT

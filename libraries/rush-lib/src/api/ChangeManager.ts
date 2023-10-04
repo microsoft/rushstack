@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfiguration } from './RushConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
+import type { RushConfiguration } from './RushConfiguration';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import { ChangeFile } from './ChangeFile';
-import { IChangeFile } from './ChangeManagement';
+import type { IChangeFile } from './ChangeManagement';
 
 /**
  * A class that helps with programmatically interacting with Rush's change files.

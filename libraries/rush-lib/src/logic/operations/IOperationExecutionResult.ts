@@ -3,14 +3,18 @@
 
 import type { StdioSummarizer } from '@rushstack/terminal';
 import type { OperationStatus } from './OperationStatus';
-import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { Operation } from './Operation';
+import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
  * The `IOperationExecutionResult` interface represents the results of executing an {@link Operation}.
  * @alpha
  */
 export interface IOperationExecutionResult {
+  /**
+   * The operation itself
+   */
+  readonly operation: Operation;
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
@@ -35,6 +39,10 @@ export interface IOperationExecutionResult {
    * The value indicates the duration of the same operation without cache hit.
    */
   readonly nonCachedDurationMs: number | undefined;
+  /**
+   * The id of the runner which actually runs the building process in cobuild mode.
+   */
+  readonly cobuildRunnerId: string | undefined;
 }
 
 /**

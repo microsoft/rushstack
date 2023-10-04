@@ -164,7 +164,7 @@ export async function getFileSelectionSpecifierPathsAsync(
           path.normalize(filePath)
         );
         if (state.changed) {
-          results.set(filePath, dirent);
+          results.set(filePath, dirent as fs.Dirent);
         }
       },
       {
@@ -172,7 +172,7 @@ export async function getFileSelectionSpecifierPathsAsync(
       }
     );
   } else {
-    results = new Map(rawEntries.map((entry) => [entry.path, entry.dirent]));
+    results = new Map(rawEntries.map((entry) => [entry.path, entry.dirent as fs.Dirent]));
   }
 
   return results;

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DocDeclarationReference, DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
-import { ApiItem, ApiItemKind } from '../items/ApiItem';
-import { ApiModel } from './ApiModel';
-import { ApiPackage } from './ApiPackage';
-import { ApiEntryPoint } from './ApiEntryPoint';
+import { type DocDeclarationReference, type DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
+import { type ApiItem, ApiItemKind } from '../items/ApiItem';
+import type { ApiModel } from './ApiModel';
+import type { ApiPackage } from './ApiPackage';
+import type { ApiEntryPoint } from './ApiEntryPoint';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 
@@ -208,7 +208,7 @@ export class ModelReferenceResolver {
 
     const selectedMembers: ApiItem[] = [];
 
-    const selectorOverloadIndex: number = parseInt(memberSelector.selector);
+    const selectorOverloadIndex: number = parseInt(memberSelector.selector, 10);
     for (const foundMember of foundMembers) {
       if (ApiParameterListMixin.isBaseClassOf(foundMember)) {
         if (foundMember.overloadIndex === selectorOverloadIndex) {

@@ -6,9 +6,9 @@
 
 import {
   CommandLineAction,
-  ICommandLineActionOptions,
-  CommandLineStringParameter,
-  CommandLineFlagParameter
+  type ICommandLineActionOptions,
+  type CommandLineStringParameter,
+  type CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
 export abstract class BaseReportAction extends CommandLineAction {

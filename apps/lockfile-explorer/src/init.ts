@@ -7,7 +7,7 @@
 import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import type { IRushConfigurationJson } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 
-import { type IAppState, IRushProjectDetails, ProjectType } from './state';
+import { type IAppState, type IRushProjectDetails, ProjectType } from './state';
 
 export const init = (options: {
   lockfileExplorerProjectRoot: string;

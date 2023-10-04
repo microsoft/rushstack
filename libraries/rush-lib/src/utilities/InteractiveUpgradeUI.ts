@@ -8,7 +8,7 @@
 import inquirer from 'inquirer';
 import colors from 'colors/safe';
 import CliTable from 'cli-table';
-import Separator from 'inquirer/lib/objects/separator';
+import type Separator from 'inquirer/lib/objects/separator';
 import type * as NpmCheck from 'npm-check';
 
 export interface IUIGroup {
@@ -100,7 +100,7 @@ function short(dep: NpmCheck.INpmCheckPackage): string {
   return `${dep.moduleName}@${dep.latest}`;
 }
 
-function choice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
+function getChoice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
   if (!dep.mismatch && !dep.bump && !dep.notInstalled) {
     return false;
   }
@@ -131,7 +131,7 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
   }) as NpmCheck.INpmCheckPackage[];
 
   const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
-    .map(choice)
+    .map(getChoice)
     .filter(Boolean);
 
   const cliTable: CliTable = new CliTable({
@@ -189,6 +189,7 @@ export const upgradeInteractive = async (
   }
 
   if (!choices.length) {
+    // eslint-disable-next-line no-console
     console.log('All dependencies are up to date!');
     return { packages: [] };
   }

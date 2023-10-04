@@ -2,6 +2,35 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.16.1",
+      "tag": "@rushstack/ts-command-line_v4.16.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.16.0",
+      "tag": "@rushstack/ts-command-line_v4.16.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.15.2",
       "tag": "@rushstack/ts-command-line_v4.15.2",
       "date": "Tue, 08 Aug 2023 07:10:40 GMT",

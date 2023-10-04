@@ -3,11 +3,11 @@
 
 import { RushConstants } from '../../logic/RushConstants';
 import {
-  IPhasedCommandConfig,
+  type IPhasedCommandConfig,
   CommandLineConfiguration,
-  IParameterJson,
-  IPhase,
-  Command
+  type IParameterJson,
+  type IPhase,
+  type Command
 } from '../CommandLineConfiguration';
 
 describe(CommandLineConfiguration.name, () => {

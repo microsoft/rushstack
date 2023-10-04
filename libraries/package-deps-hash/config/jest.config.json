@@ -1,5 +1,5 @@
 {
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json",
+  "extends": "local-node-rig/profiles/default/config/jest.config.json",
   // Tests in this package break isolation and so must run serially
   "maxWorkers": 1
 }

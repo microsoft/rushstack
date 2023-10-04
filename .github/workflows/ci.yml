@@ -11,12 +11,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - NodeVersion: 14
+          - NodeVersion: 16
             OS: ubuntu-latest
           - NodeVersion: 18
             OS: ubuntu-latest
-          - NodeVersion: 16
-            OS: windows-latest
+          - NodeVersion: 20
+            OS: ubuntu-latest
           - NodeVersion: 18
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersion }} (${{ matrix.OS }})
@@ -34,12 +34,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.NodeVersion }}
-
-      # Workaround for Node 18 incompatibility with Webpack 4
-      - name: Enable Webpack 4 workaround
-        shell: bash
-        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> "$GITHUB_ENV"
-        if: matrix.NodeVersion == 18
 
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
@@ -67,9 +61,3 @@ jobs:
           # Prevent time-based browserslist update warning
           # See https://github.com/microsoft/rushstack/issues/2981
           BROWSERSLIST_IGNORE_OLD_DATA: 1
-
-      # One of the post run actions apparently uses older Node.js that rejects --openssl-legacy-provider
-      - name: Revert Webpack 4 workaround
-        shell: bash
-        run: echo "NODE_OPTIONS=" >> "$GITHUB_ENV"
-        if: matrix.NodeVersion == 18

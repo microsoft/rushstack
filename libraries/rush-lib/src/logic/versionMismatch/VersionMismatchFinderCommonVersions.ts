@@ -3,7 +3,7 @@
 
 import { RushConstants } from '../RushConstants';
 import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 
 export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEntity {

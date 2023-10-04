@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'perf_hooks';
+import {
+  type IOperationRunner,
+  type IOperationRunnerContext,
+  OperationStatus
+} from '@rushstack/operation-graph';
 
-import { OperationStatus } from '../OperationStatus';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
-import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
 import type { HeftPhaseSession } from '../../pluginFramework/HeftPhaseSession';
-import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';
 import type { InternalHeftSession } from '../../pluginFramework/InternalHeftSession';
 
 export interface IPhaseOperationRunnerOptions {
@@ -51,10 +52,14 @@ export class PhaseOperationRunner implements IOperationRunner {
     const deleteOperations: IDeleteOperation[] = Array.from(phase.cleanFiles);
 
     // Delete all temp folders for tasks by default
-    for (const task of phase.tasks) {
-      const taskSession: HeftTaskSession = phaseSession.getSessionForTask(task);
-      deleteOperations.push({ sourcePath: taskSession.tempFolderPath });
-    }
+    const tempFolderGlobs: string[] = [
+      /* heft@>0.60.0 */ phase.phaseName,
+      /* heft@<=0.60.0 */ `${phase.phaseName}.*`
+    ];
+    deleteOperations.push({
+      sourcePath: internalHeftSession.heftConfiguration.tempFolderPath,
+      includeGlobs: tempFolderGlobs
+    });
 
     // Delete the files if any were specified
     if (deleteOperations.length) {

@@ -7,8 +7,8 @@ import {
   StringBufferTerminalProvider,
   Terminal
 } from '@rushstack/node-core-library';
-import { IgnoreStringFunction } from '../../interfaces';
-import { IParseResxOptions, parseResx } from '../parseResx';
+import type { IgnoreStringFunction } from '../../interfaces';
+import { type IParseResxOptions, parseResx } from '../parseResx';
 
 describe(parseResx.name, () => {
   let terminalProvider: StringBufferTerminalProvider;

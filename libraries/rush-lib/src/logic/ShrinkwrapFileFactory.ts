@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageManagerName } from '../api/packageManager/PackageManager';
-import { PackageManagerOptionsConfigurationBase } from './base/BasePackageManagerOptionsConfiguration';
-import { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
+import type { PackageManagerName } from '../api/packageManager/PackageManager';
+import type { PackageManagerOptionsConfigurationBase } from './base/BasePackageManagerOptionsConfiguration';
+import type { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';

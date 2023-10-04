@@ -3,10 +3,10 @@
 
 import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import { ILocalizationFile, IParseFileOptions } from '../interfaces';
+import type { ILocalizationFile, IParseFileOptions } from '../interfaces';
+import locJsonSchema from '../schemas/locJson.schema.json';
 
-// Use `require` here to allow this package to be bundled with Webpack.
-const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(require('../schemas/locJson.schema.json'));
+const LOC_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(locJsonSchema);
 
 /**
  * @public

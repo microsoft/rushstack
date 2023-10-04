@@ -1,7 +1,8 @@
-import * as fs from 'fs';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type * as fs from 'fs';
 import * as path from 'path';
-import type { ReaddirAsynchronousMethod, ReaddirSynchronousMethod } from '@nodelib/fs.scandir';
-import type { StatAsynchronousMethod, StatSynchronousMethod } from '@nodelib/fs.stat';
 import type { FileSystemAdapter } from 'fast-glob';
 import { Path } from '@rushstack/node-core-library';
 
@@ -35,7 +36,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
   private _directoryMap: Map<string, IVirtualFileSystemEntry> = new Map<string, IVirtualFileSystemEntry>();
 
   /** { @inheritdoc fs.lstat } */
-  public lstat: StatAsynchronousMethod = ((filePath: string, callback: StatCallback) => {
+  public lstat: FileSystemAdapter['lstat'] = ((filePath: string, callback: StatCallback) => {
     process.nextTick(() => {
       let result: fs.Stats;
       try {
@@ -47,10 +48,10 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
       // eslint-disable-next-line @rushstack/no-new-null
       callback(null, result);
     });
-  }) as StatAsynchronousMethod;
+  }) as FileSystemAdapter['lstat'];
 
   /** { @inheritdoc fs.lstatSync } */
-  public lstatSync: StatSynchronousMethod = ((filePath: string) => {
+  public lstatSync: FileSystemAdapter['lstatSync'] = ((filePath: string) => {
     filePath = this._normalizePath(filePath);
     const entry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
     if (!entry) {
@@ -71,20 +72,20 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
       isFIFO: () => false,
       isSocket: () => false
     };
-  }) as StatSynchronousMethod;
+  }) as FileSystemAdapter['lstatSync'];
 
   /** { @inheritdoc fs.stat } */
-  public stat: StatAsynchronousMethod = ((filePath: string, callback: StatCallback) => {
+  public stat: FileSystemAdapter['stat'] = ((filePath: string, callback: StatCallback) => {
     this.lstat(filePath, callback);
-  }) as StatAsynchronousMethod;
+  }) as FileSystemAdapter['stat'];
 
   /** { @inheritdoc fs.statSync } */
-  public statSync: StatSynchronousMethod = ((filePath: string) => {
+  public statSync: FileSystemAdapter['statSync'] = ((filePath: string) => {
     return this.lstatSync(filePath);
-  }) as StatSynchronousMethod;
+  }) as FileSystemAdapter['statSync'];
 
   /** { @inheritdoc fs.readdir } */
-  public readdir: ReaddirAsynchronousMethod = ((
+  public readdir: FileSystemAdapter['readdir'] = ((
     filePath: string,
     optionsOrCallback: IReaddirOptions | ReaddirStringCallback,
     callback?: ReaddirDirentCallback | ReaddirStringCallback
@@ -102,7 +103,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
       let result: fs.Dirent[] | string[];
       try {
         if (options?.withFileTypes) {
-          result = this.readdirSync(filePath, options);
+          result = this.readdirSync(filePath, options) as fs.Dirent[];
         } else {
           result = this.readdirSync(filePath);
         }
@@ -121,10 +122,10 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
         (callback as ReaddirStringCallback)(null, result as string[]);
       }
     });
-  }) as ReaddirAsynchronousMethod;
+  }) as FileSystemAdapter['readdir'];
 
   /** { @inheritdoc fs.readdirSync } */
-  public readdirSync: ReaddirSynchronousMethod = ((filePath: string, options?: IReaddirOptions) => {
+  public readdirSync: FileSystemAdapter['readdirSync'] = ((filePath: string, options?: IReaddirOptions) => {
     filePath = this._normalizePath(filePath);
     const virtualDirectory: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
     if (!virtualDirectory) {
@@ -167,7 +168,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
     } else {
       return result.map((entry: IVirtualFileSystemEntry) => entry.name);
     }
-  }) as ReaddirSynchronousMethod;
+  }) as FileSystemAdapter['readdirSync'];
 
   /**
    * Create a new StaticFileSystemAdapter instance with the provided file paths.

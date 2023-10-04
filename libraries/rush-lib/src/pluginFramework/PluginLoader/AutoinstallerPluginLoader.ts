@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonObject, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, type JsonObject, type JsonSchema } from '@rushstack/node-core-library';
 
-import { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
+import type { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { RushConstants } from '../../logic/RushConstants';
 import {
-  IPluginLoaderOptions,
-  IRushPluginManifest,
-  IRushPluginManifestJson,
+  type IPluginLoaderOptions,
+  type IRushPluginManifest,
+  type IRushPluginManifestJson,
   PluginLoaderBase
 } from './PluginLoaderBase';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';

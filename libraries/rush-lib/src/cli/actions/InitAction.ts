@@ -8,11 +8,11 @@ import {
   NewlineKind,
   InternalError,
   AlreadyReportedError,
-  FileSystemStats
+  type FileSystemStats
 } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 import { Rush } from '../../api/Rush';
@@ -110,9 +110,11 @@ export class InitAction extends BaseConfiglessRushAction {
   // Check whether it's safe to run "rush init" in the current working directory.
   private _validateFolderIsEmpty(initFolder: string): boolean {
     if (this.rushConfiguration !== undefined) {
+      // eslint-disable-next-line no-console
       console.error(
         colors.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
       );
+      // eslint-disable-next-line no-console
       console.log(
         '\nThe "rush init" command must be run in a new folder without an existing Rush configuration.'
       );
@@ -131,12 +133,16 @@ export class InitAction extends BaseConfiglessRushAction {
       // Ignore any loose files in the current folder, e.g. "README.md"
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
+        // eslint-disable-next-line no-console
         console.error(colors.red(`ERROR: Found a subdirectory: "${itemName}"`));
+        // eslint-disable-next-line no-console
         console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
         return false;
       } else {
         if (itemName.toLowerCase() === 'package.json') {
+          // eslint-disable-next-line no-console
           console.error(colors.red(`ERROR: Found a package.json file in this folder`));
+          // eslint-disable-next-line no-console
           console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
           return false;
         }
@@ -156,6 +162,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
       'common/config/rush/build-cache.json',
+      'common/config/rush/cobuild.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/custom-tips.json',
@@ -225,14 +232,17 @@ export class InitAction extends BaseConfiglessRushAction {
 
     if (!this._overwriteParameter.value) {
       if (destinationFileExists) {
+        // eslint-disable-next-line no-console
         console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
         return;
       }
     }
 
     if (destinationFileExists) {
+      // eslint-disable-next-line no-console
       console.log(colors.yellow(`Overwriting: ${destinationPath}`));
     } else {
+      // eslint-disable-next-line no-console
       console.log(`Generating: ${destinationPath}`);
     }
 

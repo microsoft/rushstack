@@ -4,15 +4,15 @@
 import {
   Encoding,
   Text,
-  IFileSystemWriteFileOptions,
-  IFileSystemReadFileOptions,
-  IFileSystemCopyFileOptions,
-  IFileSystemDeleteFileOptions,
-  IFileSystemCreateLinkOptions,
+  type IFileSystemWriteFileOptions,
+  type IFileSystemReadFileOptions,
+  type IFileSystemCopyFileOptions,
+  type IFileSystemDeleteFileOptions,
+  type IFileSystemCreateLinkOptions,
   FileSystem,
-  FileSystemStats,
+  type FileSystemStats,
   Sort,
-  FolderItem
+  type FolderItem
 } from '@rushstack/node-core-library';
 
 export interface IReadFolderFilesAndDirectoriesResult {
@@ -141,13 +141,13 @@ export class TypeScriptCachedFileSystem {
   public getRealPath: (linkPath: string) => string = (linkPath: string) => {
     return this._withCaching(
       linkPath,
-      (linkPath: string) => {
+      (path: string) => {
         try {
-          return FileSystem.getRealPath(linkPath);
+          return FileSystem.getRealPath(path);
         } catch (e) {
           if (FileSystem.isNotExistError(e as Error)) {
             // TypeScript's ts.sys.realpath returns the path it's provided if that path doesn't exist
-            return linkPath;
+            return path;
           } else {
             throw e;
           }

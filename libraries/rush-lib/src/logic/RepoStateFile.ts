@@ -3,9 +3,9 @@
 
 import { FileSystem, JsonFile, JsonSchema, NewlineKind } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
-import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 import schemaJson from '../schemas/repo-state.schema.json';
 
 /**
