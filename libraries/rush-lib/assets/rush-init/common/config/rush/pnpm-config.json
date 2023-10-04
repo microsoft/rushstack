@@ -44,6 +44,15 @@
   /*[LINE "DEMO"]*/ "resolutionMode": "time-based",
 
   /**
+   * When true, any missing non-optional peer dependencies are automatically installed.
+   *
+   * PNPM documentation: https://pnpm.io/npmrc#auto-install-peers
+   *
+   * The default is `false`.
+   */
+  /*[LINE "DEMO"]*/ "autoInstallPeers": false,
+
+  /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
    * which is an invalid state that can cause build failures or incompatible dependency versions.

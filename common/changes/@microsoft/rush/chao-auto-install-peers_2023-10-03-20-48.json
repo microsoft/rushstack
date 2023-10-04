@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush-lib] Add autoInstallPeers in pnpm-config",
+      "comment": "Add a new setting `autoInstallPeers` in pnpm-config.json",
       "type": "none"
     }
   ],

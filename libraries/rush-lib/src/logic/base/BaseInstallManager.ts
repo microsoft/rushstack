@@ -647,13 +647,14 @@ ${gitLfsHookHandling}
         If user set auto-install-peers in pnpm-config.json only, use the value in pnpm-config.json
         If user set auto-install-peers in pnpm-config.json and .npmrc, use the value in pnpm-config.json
         If user set auto-install-peers in .npmrc only, do nothing, let pnpm handle it
-        If user does not set auto-install-peers in pnpm-config.json and .npmrc, do nothing, let pnpm handle it
+        If user does not set auto-install-peers in both pnpm-config.json and .npmrc, rush will default it to "false"
       */
       const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
         this.rushConfiguration.commonRushConfigFolder,
         'auto-install-peers'
       );
-      const autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
+
+      let autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
       if (autoInstallPeers !== undefined) {
         if (isAutoInstallPeersInNpmrc) {
           this._terminal.writeWarningLine(
@@ -661,6 +662,12 @@ ${gitLfsHookHandling}
               `The value in pnpm-config.json will take precedence.`
           );
         }
+      } else if (!isAutoInstallPeersInNpmrc) {
+        // if auto-install-peers isn't specified in either .npmrc or pnpm-config.json,
+        // then rush will default it to "false"
+        autoInstallPeers = false;
+      }
+      if (autoInstallPeers !== undefined) {
         args.push(`--config.auto-install-peers=${autoInstallPeers}`);
       }
 
