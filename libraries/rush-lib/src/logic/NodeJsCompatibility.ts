@@ -49,7 +49,7 @@ export class NodeJsCompatibility {
     // IMPORTANT: If this test fails, the Rush CLI front-end process will terminate with an error.
     // Only increment it when our code base is known to use newer features (e.g. "async"/"await") that
     // have no hope of working with older Node.js.
-    if (semver.satisfies(nodeVersion, '< 8.9.0')) {
+    if (semver.satisfies(nodeVersion, '<14.18.0')) {
       // eslint-disable-next-line no-console
       console.error(
         colors.red(
