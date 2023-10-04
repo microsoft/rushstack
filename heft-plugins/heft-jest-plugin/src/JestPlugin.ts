@@ -538,6 +538,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       // unset the NODE_ENV only if we have set it
       if (this._nodeEnvSet) {
         delete process.env.NODE_ENV;
+        this._nodeEnvSet = false;
       }
 
       if (!logger.hasErrors) {
