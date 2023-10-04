@@ -84,7 +84,7 @@ export class RushXCommandLine {
         : undefined;
 
       const suppressHooks: boolean = process.env[EnvironmentVariableNames.RUSH_SUPPRESS_HOOKS] === '1';
-      const attemptHooks = !suppressHooks && !args.help;
+      const attemptHooks: boolean = !suppressHooks && !args.help;
       if (attemptHooks) {
         eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
       }
@@ -256,6 +256,7 @@ export class RushXCommandLine {
     if (unknownArgs.length > 0) {
       // Future TODO: Instead of just displaying usage info, we could display a
       // specific error about the unknown flag the user tried to pass to rushx.
+      // eslint-disable-next-line no-console
       console.log(colors.red(`Unknown arguments: ${unknownArgs.map((x) => JSON.stringify(x)).join(', ')}`));
       help = true;
     }
@@ -273,6 +274,7 @@ export class RushXCommandLine {
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     // eslint-disable-next-line no-console
     console.log('usage: rushx [-h]');
+    // eslint-disable-next-line no-console
     console.log('       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...\n');
 
     // eslint-disable-next-line no-console
