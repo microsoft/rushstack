@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CustomTipsConfiguration } from '../CustomTipsConfiguration';
+import { JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
 import { RushConfiguration } from '../RushConfiguration';
+
+const LOREM: string =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 
 describe(CustomTipsConfiguration.name, () => {
   it('loads the config file (custom-tips.json)', () => {
@@ -16,4 +20,68 @@ describe(CustomTipsConfiguration.name, () => {
       new CustomTipsConfiguration(`${__dirname}/jsonFiles/custom-tips.error.json`);
     }).toThrowError('TIP_RUSH_INCONSISTENT_VERSIONS');
   });
+
+  function runFormattingTests(testName: string, customTipText: string): void {
+    describe(`formatting (${testName})`, () => {
+      let customTipsConfiguration: CustomTipsConfiguration;
+      let terminalProvider: StringBufferTerminalProvider;
+      let terminal: Terminal;
+
+      const CUSTOM_TIP_FOR_TESTING: CustomTipId = CustomTipId.TIP_PNPM_INVALID_NODE_VERSION;
+
+      beforeEach(() => {
+        terminalProvider = new StringBufferTerminalProvider(true);
+        terminal = new Terminal(terminalProvider);
+
+        const mockCustomTipsJson: ICustomTipsJson = {
+          customTips: [
+            {
+              tipId: CUSTOM_TIP_FOR_TESTING,
+              message: customTipText
+            }
+          ]
+        };
+        jest.spyOn(JsonFile, 'loadAndValidate').mockReturnValue(mockCustomTipsJson);
+        customTipsConfiguration = new CustomTipsConfiguration('');
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+        const outputLines: string[] = [];
+
+        function appendOutputLines(output: string, kind: string): void {
+          outputLines.push(`--- ${kind} ---`);
+          outputLines.push(...output.split('[n]'));
+          outputLines.push('-'.repeat(kind.length + 8));
+        }
+
+        appendOutputLines(terminalProvider.getOutput(), 'normal output');
+        appendOutputLines(terminalProvider.getErrorOutput(), 'error output');
+        appendOutputLines(terminalProvider.getWarningOutput(), 'warning output');
+        appendOutputLines(terminalProvider.getVerbose(), 'verbose output');
+        appendOutputLines(terminalProvider.getDebugOutput(), 'debug output');
+
+        expect(outputLines).toMatchSnapshot();
+      });
+
+      const printFunctions = [
+        CustomTipsConfiguration.prototype._showTip,
+        CustomTipsConfiguration.prototype._showInfoTip,
+        CustomTipsConfiguration.prototype._showWarningTip,
+        CustomTipsConfiguration.prototype._showErrorTip
+      ];
+
+      for (const printFunction of printFunctions) {
+        it(`${printFunction.name} prints an expected message`, () => {
+          printFunction.call(customTipsConfiguration, terminal, CUSTOM_TIP_FOR_TESTING);
+        });
+      }
+    });
+  }
+
+  runFormattingTests('a short message', 'This is a test');
+  runFormattingTests('a long message', LOREM);
+  runFormattingTests('a message with newlines', 'This is a test\nThis is a test');
+  runFormattingTests('a message with an indented line', 'This is a test\n  This is a test');
+  runFormattingTests('a long message with an indented line', `${LOREM}\n  ${LOREM}`);
 });
