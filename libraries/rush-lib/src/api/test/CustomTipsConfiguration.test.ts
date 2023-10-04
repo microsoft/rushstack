@@ -4,6 +4,7 @@
 import { JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
 import { RushConfiguration } from '../RushConfiguration';
+import { PrintUtilities } from '@rushstack/terminal';
 
 const LOREM: string =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
@@ -43,6 +44,8 @@ describe(CustomTipsConfiguration.name, () => {
         };
         jest.spyOn(JsonFile, 'loadAndValidate').mockReturnValue(mockCustomTipsJson);
         customTipsConfiguration = new CustomTipsConfiguration('');
+
+        jest.spyOn(PrintUtilities, 'getConsoleWidth').mockReturnValue(60);
       });
 
       afterEach(() => {
