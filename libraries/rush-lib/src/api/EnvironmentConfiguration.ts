@@ -539,6 +539,10 @@ export class EnvironmentConfiguration {
             // Assigned by Rush itself
             break;
 
+          case EnvironmentVariableNames.RUSH_SUPPRESS_HOOKS:
+            // Read directly by RushXCommandLine
+            break;
+
           default:
             unknownEnvVariables.push(envVarName);
             break;
