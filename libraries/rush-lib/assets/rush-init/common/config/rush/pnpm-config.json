@@ -44,11 +44,21 @@
   /*[LINE "DEMO"]*/ "resolutionMode": "time-based",
 
   /**
-   * When true, any missing non-optional peer dependencies are automatically installed.
-   *
+   * This setting determines whether PNPM will automatically install (non-optional)
+   * missing peer dependencies instead of reporting an error.  Doing so conveniently
+   * avoids the need to specify peer versions in package.json, but in a large monorepo
+   * this often creates worse problems.  The reason is that peer dependency behavior
+   * is inherently complicated, and it is easier to troubleshoot consequences of an explicit
+   * version than an invisible heuristic.  The original NPM RFC discussion pointed out
+   * some other problems with this feature: https://github.com/npm/rfcs/pull/43
+
+   * IMPORTANT: Without Rush, the setting defaults to true for PNPM 8 and newer; however,
+   * as of Rush version 5.109.0 the default is always false unless `autoInstallPeers`
+   * is specified in pnpm-config.json or .npmrc, regardless of your PNPM version.
+
    * PNPM documentation: https://pnpm.io/npmrc#auto-install-peers
-   *
-   * The default is `false`.
+
+   * The default value is false.
    */
   /*[LINE "DEMO"]*/ "autoInstallPeers": false,
 

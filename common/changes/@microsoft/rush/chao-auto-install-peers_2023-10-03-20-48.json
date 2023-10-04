@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a new setting `autoInstallPeers` in pnpm-config.json",
+      "comment": "(IMPORTANT) Add a new setting `autoInstallPeers` in pnpm-config.json; be aware that Rush changes PNPM's default if you are using PNPM 8 or newer",
       "type": "none"
     }
   ],

@@ -168,7 +168,7 @@
     },
 
     "autoInstallPeers": {
-      "description": "This option overrides the auto-install-peers in PNPM. Use it if you want to change the default resolution behavior when installing dependencies. Defaults to \"highest\".\n\nPNPM documentation: https://pnpm.io/npmrc#auto-install-peers.",
+      "description": "This setting determines whether PNPM will automatically install (non-optional) missing peer dependencies instead of reporting an error. With Rush, the default value is always false.\n\nPNPM documentation: https://pnpm.io/npmrc#auto-install-peers",
       "type": "boolean"
     }
   }
