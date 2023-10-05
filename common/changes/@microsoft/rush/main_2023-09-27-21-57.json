@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change the custom tips UI",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
