@@ -83,7 +83,12 @@ export class RushXCommandLine {
       const suppressHooks: boolean = process.env[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] === '1';
       const attemptHooks: boolean = !suppressHooks && !args.help;
       if (attemptHooks) {
-        eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
+        try {
+          eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(colors.red('PreRushx hook error: ' + (error as Error).message));
+        }
       }
       // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
       // promise exception), so we start with the assumption that the exit code is 1
@@ -96,8 +101,15 @@ export class RushXCommandLine {
       };
       RushXCommandLine._launchRushXInternal(options);
       if (attemptHooks) {
-        eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
+        try {
+          eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(colors.red('PostRushx hook error: ' + (error as Error).message));
+        }
       }
+
+      // Getting here means that we are all done with no major errors
       process.exitCode = 0;
     } catch (error) {
       if (error instanceof ProcessError) {
