@@ -188,7 +188,7 @@ export const EnvironmentVariableNames = {
    * Internal variable used by `rushx` when recursively invoking another `rushx` process, to avoid
    * nesting event hooks.
    */
-  _RUSH_SUPPRESS_RUSHX_HOOKS: '_RUSH_SUPPRESS_RUSHX_HOOKS',
+  _RUSH_RECURSIVE_RUSHX_CALL: '_RUSH_RECURSIVE_RUSHX_CALL',
 
   /**
    * Internal variable that explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
@@ -540,7 +540,7 @@ export class EnvironmentConfiguration {
             // Assigned by Rush itself
             break;
 
-          case EnvironmentVariableNames._RUSH_SUPPRESS_RUSHX_HOOKS:
+          case EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL:
             // Assigned/read internally by RushXCommandLine
             break;
 

@@ -80,7 +80,7 @@ export class RushXCommandLine {
         ? new EventHooksManager(rushConfiguration)
         : undefined;
 
-      const suppressHooks: boolean = process.env[EnvironmentVariableNames._RUSH_SUPPRESS_RUSHX_HOOKS] === '1';
+      const suppressHooks: boolean = process.env[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] === '1';
       const attemptHooks: boolean = !suppressHooks && !args.help;
       if (attemptHooks) {
         eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
