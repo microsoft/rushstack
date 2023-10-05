@@ -9,5 +9,5 @@ const rootDir: string | undefined = PackageJsonLookup.instance.tryGetPackageFold
 if (rootDir) {
   // Route to the 'main' field of package.json
   const rushLibIndex: string = require.resolve(rootDir, { paths: [] });
-  process.env[EnvironmentVariableNames.RUSH_LIB_PATH] = rushLibIndex;
+  process.env[EnvironmentVariableNames._RUSH_LIB_PATH] = rushLibIndex;
 }

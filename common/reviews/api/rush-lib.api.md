@@ -265,7 +265,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
     readonly _RUSH_SUPPRESS_RUSHX_HOOKS: "_RUSH_SUPPRESS_RUSHX_HOOKS";
-    readonly RUSH_LIB_PATH: "_RUSH_LIB_PATH";
+    readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
 };
 

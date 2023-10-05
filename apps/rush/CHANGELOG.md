@@ -258,7 +258,7 @@ Fri, 17 Feb 2023 02:14:43 GMT
 
 ### Updates
 
-- Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable.
+- Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the _RUSH_LIB_PATH environment variable.
 
 ## 5.92.0
 Sun, 12 Feb 2023 02:50:42 GMT
@@ -553,7 +553,7 @@ Sat, 06 Aug 2022 05:35:19 GMT
 ### Updates
 
 - Validate that if shouldPublish is set, private is not set
-- "rush install/update" should always set "ignore-compatibility-db=true" and print warning if the rush.json pnpmVersion specifies a version affected by this problem. 
+- "rush install/update" should always set "ignore-compatibility-db=true" and print warning if the rush.json pnpmVersion specifies a version affected by this problem.
 - Reorder some initialization logic so that Rush's change analysis is not counted as part of the build time for the first project
 - (BREAKING API CHANGE) Rename cyclicDependencyProjects to decoupledLocalDependencies
 
@@ -1878,7 +1878,7 @@ Thu, 11 Jul 2019 22:00:50 GMT
 
 ### Updates
 
-- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x 
+- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x
 - Fix an issue where "rush add" erroneously believes ensureConsistentVersions is unset.
 - Fix an issue that arises when "rush add" is run and the package manager isn't installed.
 - Fix an issue where rush add -m doesn't corretly update the common-versions.json file.
@@ -2360,9 +2360,9 @@ Fri, 06 Oct 2017 22:44:31 GMT
 ### Patches
 
 - Enable strickNullChecks
-- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency. 
-- Fix a bug in "rush change" so it handles rename properly. 
-- Add npm tag support in "rush publish". 
+- Fix a bug in "rush version" that devdependency does not get bumped if there is no dependency.
+- Fix a bug in "rush change" so it handles rename properly.
+- Add npm tag support in "rush publish".
 
 ## 3.0.18
 Tue, 26 Sep 2017 13:51:05 GMT
@@ -2617,7 +2617,7 @@ Sun, 22 Jan 2017 02:04:57 GMT
 
 ### Patches
 
-- Update temp_modules when versions are bumped. 
+- Update temp_modules when versions are bumped.
 
 ## 1.4.1
 Tue, 03 Jan 2017 21:52:49 GMT

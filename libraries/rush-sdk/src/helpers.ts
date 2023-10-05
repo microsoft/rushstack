@@ -6,7 +6,7 @@ import { Import, FileSystem } from '@rushstack/node-core-library';
 import type { EnvironmentVariableNames } from '@microsoft/rush-lib';
 
 export const RUSH_LIB_NAME: '@microsoft/rush-lib' = '@microsoft/rush-lib';
-export const RUSH_LIB_PATH_ENV_VAR_NAME: typeof EnvironmentVariableNames.RUSH_LIB_PATH = '_RUSH_LIB_PATH';
+export const RUSH_LIB_PATH_ENV_VAR_NAME: typeof EnvironmentVariableNames._RUSH_LIB_PATH = '_RUSH_LIB_PATH';
 
 export type RushLibModuleType = Record<string, unknown>;
 
