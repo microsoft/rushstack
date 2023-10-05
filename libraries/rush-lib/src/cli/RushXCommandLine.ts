@@ -237,7 +237,7 @@ export class RushXCommandLine {
           help = true;
         } else if (argValue === '-d' || argValue === '--debug') {
           isDebug = true;
-        } else if (argValue === '-i' || argValue === '--ignore-hooks') {
+        } else if (argValue === '--ignore-hooks') {
           ignoreHooks = true;
         } else if (argValue.startsWith('-')) {
           unknownArgs.push(args[index]);
@@ -275,7 +275,7 @@ export class RushXCommandLine {
     // eslint-disable-next-line no-console
     console.log('usage: rushx [-h]');
     // eslint-disable-next-line no-console
-    console.log('       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...\n');
+    console.log('       rushx [-q/--quiet] [-d/--debug] [--ignore-hooks] <command> ...\n');
 
     // eslint-disable-next-line no-console
     console.log('Optional arguments:');
@@ -283,8 +283,6 @@ export class RushXCommandLine {
     console.log('  -h, --help            Show this help message and exit.');
     // eslint-disable-next-line no-console
     console.log('  -q, --quiet           Hide rushx startup information.');
-    // eslint-disable-next-line no-console
-    console.log('  -i, --ignore-hooks    Do not run hooks.');
     // eslint-disable-next-line no-console
     console.log('  -d, --debug           Run in debug mode.\n');
 

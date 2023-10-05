@@ -22,21 +22,6 @@ Array [
 ]
 `;
 
-exports[`RushXCommandLine launchRushX fails if the package does not contain a matching script 2`] = `
-Array [
-  Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
-  ],
-  Array [
-    "[31mError: The command \\"asdf\\" is not defined in the package.json file for this project.[39m",
-  ],
-  Array [
-    "
-Available commands for this project are: \\"build\\", \\"test\\"",
-  ],
-]
-`;
-
 exports[`RushXCommandLine launchRushX prints usage info 1`] = `
 Array [
   Array [
@@ -46,7 +31,7 @@ Array [
     "usage: rushx [-h]",
   ],
   Array [
-    "       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...
+    "       rushx [-q/--quiet] [-d/--debug] [--ignore-hooks] <command> ...
 ",
   ],
   Array [
@@ -57,49 +42,6 @@ Array [
   ],
   Array [
     "  -q, --quiet           Hide rushx startup information.",
-  ],
-  Array [
-    "  -i, --ignore-hooks    Do not run hooks.",
-  ],
-  Array [
-    "  -d, --debug           Run in debug mode.
-",
-  ],
-  Array [
-    "Project commands for [36m@acme/acme[39m:",
-  ],
-  Array [
-    "  [36mbuild: [39m\\"an acme project build command\\"",
-  ],
-  Array [
-    "  [36mtest:  [39m\\"an acme project test command\\"",
-  ],
-]
-`;
-
-exports[`RushXCommandLine launchRushX prints usage info 2`] = `
-Array [
-  Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
-  ],
-  Array [
-    "usage: rushx [-h]",
-  ],
-  Array [
-    "       rushx [-q/--quiet] [-d/--debug] [-i/--ignore-hooks] <command> ...
-",
-  ],
-  Array [
-    "Optional arguments:",
-  ],
-  Array [
-    "  -h, --help            Show this help message and exit.",
-  ],
-  Array [
-    "  -q, --quiet           Hide rushx startup information.",
-  ],
-  Array [
-    "  -i,  --ignore-hooks   Do not run hooks.",
   ],
   Array [
     "  -d, --debug           Run in debug mode.
