@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('/Users/ejorgens/adobe/rushstack/libraries/rush-lib/lib/start.js');
+require('../lib/start.js');
