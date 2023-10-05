@@ -247,6 +247,7 @@ export class CustomTipsConfiguration {
 
   public constructor(configFilePath: string) {
     const providedCustomTips: Map<CustomTipId, ICustomTipItemJson> = new Map();
+    colors.enable();
 
     let configuration: ICustomTipsJson | undefined;
     try {
