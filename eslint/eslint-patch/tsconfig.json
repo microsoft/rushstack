@@ -1,8 +1,10 @@
 {
   "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
-
+  "include": ["src/**/*.js", "src/**/*.ts"],
   "compilerOptions": {
-    "types": ["node"],
-    "allowJs": true
+    "allowJs": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"]
   }
 }

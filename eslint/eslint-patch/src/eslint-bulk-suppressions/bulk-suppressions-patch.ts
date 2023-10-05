@@ -1,13 +1,14 @@
-import { BaseNode } from '@typescript-eslint/types/dist/generated/ast-spec';
+import { TSESTree } from '@typescript-eslint/types';
 import { spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import * as guards from './ast-node-type-guards';
+import * as Guards from './ast-guards';
+
+import { eslintFolder } from '../_patch-base';
 
 interface Suppression {
   file: string;
   scope: string;
-  target: string;
   rule: string;
 }
 
@@ -15,82 +16,71 @@ interface BulkSuppressionsJson {
   suppressions: Suppression[];
 }
 
-function calculateScopeAndTargetForASTNode(node: BaseNode): { scope: string; target: string } | undefined {
-  if (guards.isClassDeclarationWithName(node)) return { scope: node.type, target: node.id.name };
+function getNodeName(node: TSESTree.Node): string | null {
+  if (!Guards.isNodeWithName(node)) return null;
 
-  if (guards.isClassExpressionWithName(node)) return { scope: node.type, target: node.id.name };
+  if (Guards.isClassDeclarationWithName(node)) return node.id.name;
 
-  if (guards.isFunctionDeclarationWithName(node)) return { scope: node.type, target: node.id.name };
+  if (Guards.isFunctionDeclarationWithName(node)) return node.id.name;
 
-  if (guards.isFunctionExpressionWithName(node)) return { scope: node.type, target: node.id.name };
+  if (Guards.isClassExpressionWithName(node)) return node.id.name;
 
-  if (guards.isNormalVariableDeclarator(node))
-    if (guards.isNormalAnonymousExpression(node.init)) return { scope: node.init.type, target: node.id.name };
+  if (Guards.isFunctionExpressionWithName(node)) return node.id.name;
 
-  if (guards.isNormalObjectProperty(node))
-    if (guards.isNormalAnonymousExpression(node.value))
-      return { scope: node.value.type, target: node.key.name };
+  if (Guards.isNormalVariableDeclaratorWithAnonymousExpressionAssigned(node)) return node.id.name;
 
-  if (guards.isNormalClassPropertyDefinition(node))
-    if (guards.isNormalAnonymousExpression(node.value))
-      return { scope: node.value.type, target: node.key.name };
+  if (Guards.isNormalObjectPropertyWithAnonymousExpressionAssigned(node)) return node.key.name;
 
-  // Also handles constructor
-  if (guards.isNormalMethodDefinition(node)) return { scope: node.type, target: node.key.name };
+  if (Guards.isNormalClassPropertyDefinitionWithAnonymousExpressionAssigned(node)) return node.key.name;
 
-  // For Typescript constructs
-  if (guards.isTSTypeAliasDeclaration(node)) return { scope: node.type, target: node.id.name };
+  if (Guards.isNormalAssignmentPatternWithAnonymousExpressionAssigned(node)) return node.left.name;
 
-  if (guards.isTSInterfaceDeclaration(node)) return { scope: node.type, target: node.id.name };
+  if (Guards.isNormalMethodDefinition(node)) return node.key.name;
 
-  if (guards.isTSEnumDeclaration(node)) return { scope: node.type, target: node.id.name };
+  if (Guards.isTSEnumDeclaration(node)) return node.id.name;
 
-  if (guards.isTSModuleDeclaration(node)) {
-    if (guards.isIdentifier(node.id)) return { scope: node.type, target: node.id.name };
+  if (Guards.isTSInterfaceDeclaration(node)) return node.id.name;
 
-    if (guards.isLiteral(node.id)) return { scope: node.type, target: node.id.value };
+  if (Guards.isTSTypeAliasDeclaration(node)) return node.id.name;
 
-    if (guards.isTSQualifiedName(node.id)) return { scope: node.type, target: node.id.right.name };
-  }
-
-  // Unnamed functions and classes that are export defaulted are considered
-  // FunctionDeclaration and ClassDeclaration respectively but node.id is null
-  if (guards.isExportDefaultDeclaration(node))
-    return { target: 'default', scope: `${node.type}.${node.declaration.type}` };
-
-  // We choose not create scope ID parts for JSX constructs, but if we did, this is how it would look like
-  // if (guards.isJSXElement(node)) return node.openingElement.name.name;
-
-  // TODO: handle array and object destructuring
-
-  // TODO: Handle param default values?
-
-  return undefined;
+  return null;
 }
 
-function calculateScopeAndTarget(node: any | (BaseNode & { parent?: BaseNode }) | undefined): {
+// function getScopeAncestry(scope: Scope | null): Scope[] {
+//   if (scope === null || scope.block.type === 'Program') return [];
+
+//   return [...getScopeAncestry(scope.upper), scope];
+// }
+
+// export function serializeNodeScope<TMessageIds extends string, TOptions extends readonly unknown[]>(
+//   context: Readonly<TSESLint.RuleContext<TMessageIds, TOptions>>,
+//   node: TSESTree.Node
+// ): string {
+//   const scopeManager = context.getSourceCode().scopeManager;
+//   if (!scopeManager) throw new Error('scopeManager is null');
+
+//   const scopeAncestry = getScopeAncestry(scopeManager.acquire(node, true));
+
+//   const scopeAncestryNames = scopeAncestry.map((scope) => getNodeName(scope.block)).filter(Boolean);
+
+//   return '.' + scopeAncestryNames.join('.');
+// }
+
+function calculateScope(node: any | (TSESTree.Node & { parent?: TSESTree.Node }) | undefined): {
   scope: string;
-  target: string;
 } {
-  const scopeAndTarget: { target: string; scope: string }[] = [];
+  const scopes = [];
   for (let current = node; current; current = current.parent) {
-    const scopeAndTargetForASTNode = calculateScopeAndTargetForASTNode(current);
-    if (scopeAndTargetForASTNode !== undefined) scopeAndTarget.unshift(scopeAndTargetForASTNode);
+    const scopeForASTNode = getNodeName(current);
+    if (scopeForASTNode !== null) scopes.unshift(scopeForASTNode);
   }
 
-  if (scopeAndTarget.length === 0) return { scope: '.', target: '.' };
+  if (scopes.length === 0) return { scope: '.' };
 
-  return scopeAndTarget.reduce(
-    (acc, { scope, target }) => {
-      return { scope: `${acc.scope}.${scope}`, target: `${acc.target}.${target}` };
-    },
-    { scope: '', target: '' }
-  );
+  return { scope: '.' + scopes.join('.') };
 }
 
 /**
- * Retrieves the root path of a repository. Written by https://github.com/chengcyber
- *
  * @throws Throws an error if the command to retrieve the root path fails.
  * @returns The root path of the monorepo.
  */
@@ -123,8 +113,6 @@ function validateSuppressionsJson(json: BulkSuppressionsJson): json is BulkSuppr
       if (typeof suppression.file !== 'string') return false;
       if (!suppression.hasOwnProperty('scope')) return false;
       if (typeof suppression.scope !== 'string') return false;
-      if (!suppression.hasOwnProperty('target')) return false;
-      if (typeof suppression.target !== 'string') return false;
       if (!suppression.hasOwnProperty('rule')) return false;
       if (typeof suppression.rule !== 'string') return false;
       return true;
@@ -148,7 +136,6 @@ function readSuppressionsJson(eslintrcDirectory: string): BulkSuppressionsJson {
   suppressions: {
       file: string;
       scope: string;
-      target: string;
       rule: string;
   }[];
 }
@@ -163,13 +150,8 @@ Please check file content, or delete file if suppressions are no longer needed.
   return suppressionsJson;
 }
 
-function serializeFileScopeTargetRule(suppression: {
-  file: string;
-  scope: string;
-  target: string;
-  rule: string;
-}): string {
-  return `${suppression.file}|${suppression.scope}|${suppression.target}|${suppression.rule}`;
+function serializeFileScopeRule(suppression: { file: string; scope: string; rule: string }): string {
+  return `${suppression.file}|${suppression.scope}|${suppression.rule}`;
 }
 
 function shouldWriteSuppression(rule: string): boolean {
@@ -193,8 +175,6 @@ function compareSuppressions(a: Suppression, b: Suppression): -1 | 0 | 1 {
   if (a.file > b.file) return 1;
   if (a.scope < b.scope) return -1;
   if (a.scope > b.scope) return 1;
-  if (a.target < b.target) return -1;
-  if (a.target > b.target) return 1;
   if (a.rule < b.rule) return -1;
   if (a.rule > b.rule) return 1;
   return 0;
@@ -204,13 +184,12 @@ function writeSuppression(params: {
   eslintrcDirectory: string;
   file: string;
   scope: string;
-  target: string;
   rule: string;
 }): void {
-  const { eslintrcDirectory, file, scope, target, rule } = params;
+  const { eslintrcDirectory, file, scope, rule } = params;
   const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
 
-  insort(suppressionsJson.suppressions, { file, scope, target, rule }, compareSuppressions);
+  insort(suppressionsJson.suppressions, { file, scope, rule }, compareSuppressions);
 
   const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
@@ -219,14 +198,14 @@ function writeSuppression(params: {
 function readSerializedSuppressionsSet(fileAbsolutePath: string) {
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
-  const serializedSuppressionsSet = new Set(suppressionsJson.suppressions.map(serializeFileScopeTargetRule));
+  const serializedSuppressionsSet = new Set(suppressionsJson.suppressions.map(serializeFileScopeRule));
   return serializedSuppressionsSet;
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
 export function shouldBulkSuppress(params: {
   filename: string;
-  currentNode: BaseNode;
+  currentNode: TSESTree.Node;
   ruleId: string;
 }): boolean {
   // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
@@ -235,77 +214,75 @@ export function shouldBulkSuppress(params: {
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const fileRelativePath = path.relative(eslintrcDirectory, fileAbsolutePath);
-  const { scope, target } = calculateScopeAndTarget(currentNode);
-  const serializedFileScopeTargetRule = serializeFileScopeTargetRule({
+  const { scope } = calculateScope(currentNode);
+  const serializedFileScopeRule = serializeFileScopeRule({
     file: fileRelativePath,
     scope,
-    target,
     rule
   });
 
   if (
     shouldWriteSuppression(rule) &&
-    !readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeTargetRule)
+    !readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeRule)
   )
-    writeSuppression({ eslintrcDirectory, file: fileRelativePath, scope, target, rule: rule });
+    writeSuppression({ eslintrcDirectory, file: fileRelativePath, scope, rule });
 
-  const shouldBulkSuppress: boolean = readSerializedSuppressionsSet(fileAbsolutePath).has(
-    serializedFileScopeTargetRule
-  );
+  const shouldBulkSuppress: boolean =
+    readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeRule);
 
   return shouldBulkSuppress;
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
 export function requireFromPathToLinterJS(importPath: string): any {
-  const eslintLibraryLocation = findEslintLibraryLocation();
-  const pathToLinterFolder = path.join(eslintLibraryLocation, 'lib/linter');
+  if (!eslintFolder) return require(importPath);
+  const pathToLinterFolder = path.join(eslintFolder, 'lib/linter');
   const moduleAbsolutePath = require.resolve(importPath, { paths: [pathToLinterFolder] });
   return require(moduleAbsolutePath);
 }
 
-const isModuleResolutionError = (ex: any) =>
-  typeof ex === 'object' && !!ex && 'code' in ex && ex.code === 'MODULE_NOT_FOUND';
+export function whichPatchToLoad(eslintFolder: string): string | null {
+  const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
+  const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
+  const eslintPackageObject = JSON.parse(eslintPackageJson);
+  const eslintPackageVersion = eslintPackageObject.version;
 
-export function findEslintLibraryLocation() {
-  let eslintFolder;
-
-  for (let currentModule = module; ; ) {
-    try {
-      const eslintCandidateFolder = path.dirname(
-        require.resolve('eslint/package.json', {
-          paths: [currentModule.path]
-        })
-      );
-
-      // Make sure we actually resolved the module in our call path
-      // and not some other spurious dependency.
-      if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') === currentModule.filename) {
-        eslintFolder = eslintCandidateFolder;
-        break;
-      }
-    } catch (ex: unknown) {
-      // Module resolution failures are expected, as we're walking
-      // up our require stack to look for eslint. All other errors
-      // are rethrown.
-      if (!isModuleResolutionError(ex)) {
-        throw ex;
-      }
-    }
-
-    if (!currentModule.parent)
-      throw new Error(
-        "Failed to patch ESLint because the calling module was not recognized. This patch is a prototype and only works with ESLint v8.23.1. If you don't have ESLint v8.23.1 installed, try using npx eslint@8.23.1 followed by the directories you want to lint."
-      );
-
-    currentModule = currentModule.parent;
+  if (eslintPackageVersion === '8.6.0' || eslintPackageVersion === '8.7.0') {
+    return 'linter-patch-for-eslint-v8.6.0-to-v8.7.0.js';
+  }
+  if (
+    eslintPackageVersion === '8.21.0' ||
+    eslintPackageVersion === '8.22.0' ||
+    eslintPackageVersion === '8.23.0' ||
+    eslintPackageVersion === '8.23.1'
+  ) {
+    return 'linter-patch-for-eslint-v8.21.0-to-v8.23.1.js';
   }
 
-  return eslintFolder;
+  return null;
 }
 
-module.exports = {
-  requireFromPathToLinterJS,
-  shouldBulkSuppress,
-  findEslintLibraryLocation
-};
+export function patchClass<T, U extends T>(originalClass: new () => T, patchedClass: new () => U): void {
+  // Get all the property names of the patched class prototype
+  let patchedProperties = Object.getOwnPropertyNames(patchedClass.prototype);
+
+  // Loop through all the properties
+  for (let prop of patchedProperties) {
+    // Override the property in the original class
+    originalClass.prototype[prop] = patchedClass.prototype[prop];
+  }
+
+  // Handle getters and setters
+  let descriptors = Object.getOwnPropertyDescriptors(patchedClass.prototype);
+  for (let prop in descriptors) {
+    let descriptor = descriptors[prop];
+    if (descriptor.get || descriptor.set) {
+      Object.defineProperty(originalClass.prototype, prop, descriptor);
+    }
+  }
+}
+
+// module.exports = {
+//   requireFromPathToLinterJS,
+//   shouldBulkSuppress
+// };

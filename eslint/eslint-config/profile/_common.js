@@ -78,6 +78,8 @@ function buildRules(profile) {
           // The @rushstack rules are documented in the package README:
           // https://www.npmjs.com/package/@rushstack/eslint-plugin
 
+          '@rushstack/is-bulk-suppressed': 'off',
+
           // RATIONALE:         See the @rushstack/eslint-plugin documentation
           '@rushstack/no-new-null': 'warn',
 

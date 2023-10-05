@@ -340,7 +340,7 @@
     },
     {
       "name": "@typescript-eslint/typescript-estree",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@yarnpkg/lockfile",
@@ -440,10 +440,6 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "local-eslint-config",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
@@ -633,6 +629,10 @@
     {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "local-eslint-config",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "local-node-rig",
