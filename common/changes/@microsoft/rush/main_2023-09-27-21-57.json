@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Change the custom tips UI",
+      "comment": "Improve visual formatting of custom tips",
       "type": "none"
     }
   ],
