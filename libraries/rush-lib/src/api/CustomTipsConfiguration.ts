@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { FileSystem, type ITerminal, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
-
+import colors from 'colors/safe';
 import schemaJson from '../schemas/custom-tips.schema.json';
 
 /**
@@ -329,15 +329,19 @@ export class CustomTipsConfiguration {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
     if (customTipJsonItem) {
       let writeFunction: (message: string) => void;
+      let prefix: string;
       switch (severity) {
         case CustomTipSeverity.Error:
           writeFunction = terminal.writeErrorLine.bind(terminal);
+          prefix = colors.red('| ');
           break;
         case CustomTipSeverity.Warning:
           writeFunction = terminal.writeWarningLine.bind(terminal);
+          prefix = colors.yellow('| ');
           break;
         default:
           writeFunction = terminal.writeLine.bind(terminal);
+          prefix = '| ';
           break;
       }
 
@@ -345,7 +349,7 @@ export class CustomTipsConfiguration {
       writeFunction('|');
 
       const message: string = customTipJsonItem.message;
-      const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, '| ');
+      const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, prefix);
       writeFunction(wrappedAndIndentedMessage);
       terminal.writeLine();
     }
