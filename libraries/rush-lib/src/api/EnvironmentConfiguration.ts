@@ -191,6 +191,11 @@ export const EnvironmentVariableNames = {
   _RUSH_RECURSIVE_RUSHX_CALL: '_RUSH_RECURSIVE_RUSHX_CALL',
 
   /**
+   * Original arguments passed to the rush(x) call
+   */
+  _RUSH_ORIGINAL_ARGS: '_RUSH_ORIGINAL_ARGS',
+
+  /**
    * Internal variable that explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
    * Will be set upon loading Rush.
    */
