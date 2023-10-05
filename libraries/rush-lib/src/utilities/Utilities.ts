@@ -675,7 +675,7 @@ export class Utilities {
 
     // Communicate to downstream calls that they should not try to run hooks
     environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] = '1';
-    environment[EnvironmentVariableNames._RUSH_ORIGINAL_ARGS] = JSON.stringify(process.argv);
+    environment[EnvironmentVariableNames.RUSH_INVOKED_ARGS] = JSON.stringify(process.argv);
 
     return environment;
   }

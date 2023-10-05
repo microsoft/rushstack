@@ -191,11 +191,6 @@ export const EnvironmentVariableNames = {
   _RUSH_RECURSIVE_RUSHX_CALL: '_RUSH_RECURSIVE_RUSHX_CALL',
 
   /**
-   * Original arguments passed to the rush(x) call
-   */
-  _RUSH_ORIGINAL_ARGS: '_RUSH_ORIGINAL_ARGS',
-
-  /**
    * Internal variable that explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
    * Will be set upon loading Rush.
    */
@@ -210,7 +205,18 @@ export const EnvironmentVariableNames = {
    * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
    * assign when they execute lifecycle scripts.
    */
-  RUSH_INVOKED_FOLDER: 'RUSH_INVOKED_FOLDER'
+  RUSH_INVOKED_FOLDER: 'RUSH_INVOKED_FOLDER',
+
+  /**
+   * When running a hook script, this environment variable communicates the original arguments
+   * passed to the `rush` or `rushx` command.
+   *
+   * @remarks
+   * Unlike `RUSH_INVOKED_FOLDER`, the `RUSH_INVOKED_ARGS` variable is only available for hook scripts.
+   * Other lifecycle scripts should not make assumptions about Rush's command line syntax
+   * if Rush did not explicitly pass along command-line parameters to their process.
+   */
+  RUSH_INVOKED_ARGS: 'RUSH_INVOKED_ARGS'
 } as const;
 
 /**
@@ -541,6 +547,7 @@ export class EnvironmentConfiguration {
             break;
 
           case EnvironmentVariableNames.RUSH_INVOKED_FOLDER:
+          case EnvironmentVariableNames.RUSH_INVOKED_ARGS:
           case EnvironmentVariableNames._RUSH_LIB_PATH:
             // Assigned by Rush itself
             break;
