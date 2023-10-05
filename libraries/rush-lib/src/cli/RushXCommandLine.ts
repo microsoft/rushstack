@@ -16,13 +16,10 @@ import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
-/**
- * @internal
- */
 export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
-
-  alreadyReportedNodeTooNewError?: boolean;
+  rushConfiguration?: RushConfiguration | undefined;
+  args: IRushXCommandLineArguments;
 }
 
 interface IRushXCommandLineArguments {
@@ -73,7 +70,7 @@ class ProcessError extends Error {
 }
 
 export class RushXCommandLine {
-  public static launchRushX(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
+  public static launchRushX(isManaged: boolean): void {
     try {
       const args: IRushXCommandLineArguments = this._getCommandLineArguments();
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
@@ -92,7 +89,12 @@ export class RushXCommandLine {
       // promise exception), so we start with the assumption that the exit code is 1
       // and set it to 0 only on success.
       process.exitCode = 1;
-      RushXCommandLine._launchRushXInternal(launcherVersion, options, rushConfiguration, args);
+      const options: ILaunchRushXInternalOptions = {
+        isManaged,
+        rushConfiguration,
+        args
+      };
+      RushXCommandLine._launchRushXInternal(options);
       if (attemptHooks) {
         eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
       }
@@ -108,22 +110,15 @@ export class RushXCommandLine {
     }
   }
 
-  /**
-   * @internal
-   */
-  public static _launchRushXInternal(
-    launcherVersion: string,
-    options: ILaunchRushXInternalOptions,
-    rushConfiguration: RushConfiguration | undefined,
-    args: IRushXCommandLineArguments
-  ): void {
+  public static _launchRushXInternal(options: ILaunchRushXInternalOptions): void {
+    const { isManaged, rushConfiguration, args } = options;
     if (!args.quiet) {
-      RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
+      RushStartupBanner.logStreamlinedBanner(Rush.version, isManaged);
     }
     // Are we in a Rush repo?
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
-      alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
+      alreadyReportedNodeTooNewError: false,
       rushConfiguration
     });
 
