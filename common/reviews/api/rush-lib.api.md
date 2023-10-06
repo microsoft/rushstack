@@ -491,7 +491,7 @@ export interface IGlobalCommand extends IRushCommand {
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
-    // @internal
+    // Warning: (ae-incompatible-release-tags) The symbol "builtInPluginConfigurations" is marked as @public, but its signature references "_IBuiltInPluginConfiguration" which is marked as @internal
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
@@ -1028,7 +1028,7 @@ export class RepoStateFile {
 
 // @public
 export class Rush {
-    static launch(launcherVersion: string, arg: ILaunchOptions): void;
+    static launch(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     // (undocumented)

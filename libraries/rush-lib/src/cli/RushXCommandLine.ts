@@ -8,20 +8,13 @@ import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
-import { Rush } from '../api/Rush';
+import { type ILaunchOptions, Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
-
-export interface ILaunchRushXInternalOptions {
-  isManaged: boolean;
-  rushConfiguration?: RushConfiguration | undefined;
-  args: IRushXCommandLineArguments;
-  alreadyReportedNodeTooNewError: boolean;
-}
 
 interface IRushXCommandLineArguments {
   /**
@@ -71,12 +64,9 @@ class ProcessError extends Error {
 }
 
 export class RushXCommandLine {
-  public static launchRushX(
-    isManaged: boolean,
-    alreadyReportedNodeTooNewError: boolean | undefined = undefined
-  ): void {
+  public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     try {
-      const args: IRushXCommandLineArguments = this._getCommandLineArguments();
+      const rushxArguments: IRushXCommandLineArguments = RushXCommandLine._parseCommandLineArguments();
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
         showVerbose: false
       });
@@ -85,10 +75,10 @@ export class RushXCommandLine {
         : undefined;
 
       const suppressHooks: boolean = process.env[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] === '1';
-      const attemptHooks: boolean = !suppressHooks && !args.help;
+      const attemptHooks: boolean = !suppressHooks && !rushxArguments.help;
       if (attemptHooks) {
         try {
-          eventHooksManager?.handle(Event.preRushx, args.isDebug, args.ignoreHooks);
+          eventHooksManager?.handle(Event.preRushx, rushxArguments.isDebug, rushxArguments.ignoreHooks);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(colors.red('PreRushx hook error: ' + (error as Error).message));
@@ -98,16 +88,10 @@ export class RushXCommandLine {
       // promise exception), so we start with the assumption that the exit code is 1
       // and set it to 0 only on success.
       process.exitCode = 1;
-      const options: ILaunchRushXInternalOptions = {
-        isManaged,
-        rushConfiguration,
-        args,
-        alreadyReportedNodeTooNewError: !!alreadyReportedNodeTooNewError
-      };
-      RushXCommandLine._launchRushXInternal(options);
+      RushXCommandLine._launchRushXInternal(rushxArguments, rushConfiguration, options);
       if (attemptHooks) {
         try {
-          eventHooksManager?.handle(Event.postRushx, args.isDebug, args.ignoreHooks);
+          eventHooksManager?.handle(Event.postRushx, rushxArguments.isDebug, rushxArguments.ignoreHooks);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(colors.red('PostRushx hook error: ' + (error as Error).message));
@@ -127,15 +111,18 @@ export class RushXCommandLine {
     }
   }
 
-  private static _launchRushXInternal(options: ILaunchRushXInternalOptions): void {
-    const { isManaged, rushConfiguration, args, alreadyReportedNodeTooNewError } = options;
-    if (!args.quiet) {
-      RushStartupBanner.logStreamlinedBanner(Rush.version, isManaged);
+  private static _launchRushXInternal(
+    rushxArguments: IRushXCommandLineArguments,
+    rushConfiguration: RushConfiguration | undefined,
+    options: ILaunchOptions
+  ): void {
+    if (!rushxArguments.quiet) {
+      RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
     // Are we in a Rush repo?
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
-      alreadyReportedNodeTooNewError,
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
       rushConfiguration
     });
 
@@ -167,15 +154,15 @@ export class RushXCommandLine {
 
     const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
 
-    if (args.help) {
+    if (rushxArguments.help) {
       RushXCommandLine._showUsage(packageJson, projectCommandSet);
       return;
     }
 
-    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
+    const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(rushxArguments.commandName);
 
     if (scriptBody === undefined) {
-      let errorMessage: string = `The command "${args.commandName}" is not defined in the package.json file for this project.`;
+      let errorMessage: string = `The command "${rushxArguments.commandName}" is not defined in the package.json file for this project.`;
 
       if (projectCommandSet.commandNames.length > 0) {
         errorMessage +=
@@ -188,18 +175,20 @@ export class RushXCommandLine {
 
     let commandWithArgs: string = scriptBody;
     let commandWithArgsForDisplay: string = scriptBody;
-    if (args.commandArgs.length > 0) {
+    if (rushxArguments.commandArgs.length > 0) {
       // This approach is based on what NPM 7 now does:
       // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-      const escapedRemainingArgs: string[] = args.commandArgs.map((x) => Utilities.escapeShellParameter(x));
+      const escapedRemainingArgs: string[] = rushxArguments.commandArgs.map((x) =>
+        Utilities.escapeShellParameter(x)
+      );
 
       commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
 
       // Display it nicely without the extra quotes
-      commandWithArgsForDisplay += ' ' + args.commandArgs.join(' ');
+      commandWithArgsForDisplay += ' ' + rushxArguments.commandArgs.join(' ');
     }
 
-    if (!args.quiet) {
+    if (!rushxArguments.quiet) {
       // eslint-disable-next-line no-console
       console.log(`> ${JSON.stringify(commandWithArgsForDisplay)}\n`);
     }
@@ -226,7 +215,7 @@ export class RushXCommandLine {
     }
   }
 
-  private static _getCommandLineArguments(): IRushXCommandLineArguments {
+  private static _parseCommandLineArguments(): IRushXCommandLineArguments {
     // 0 = node.exe
     // 1 = rushx
     const args: string[] = process.argv.slice(2);

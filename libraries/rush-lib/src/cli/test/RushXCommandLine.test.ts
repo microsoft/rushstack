@@ -5,7 +5,7 @@ import { PackageJsonLookup } from '@rushstack/node-core-library';
 import * as colorsPackage from 'colors';
 
 import { Utilities } from '../../utilities/Utilities';
-import { Rush } from '../../api/Rush';
+import { Rush, type ILaunchOptions } from '../../api/Rush';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { NodeJsCompatibility } from '../../logic/NodeJsCompatibility';
@@ -99,7 +99,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', '--help'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX(true);
+      Rush.launchRushX('0.0.0', true as unknown as ILaunchOptions);
 
       expect(executeLifecycleCommandMock).not.toHaveBeenCalled();
       expect(logMock!.mock.calls).toMatchSnapshot();
@@ -109,7 +109,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', 'build'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX(true);
+      Rush.launchRushX('0.0.0', true as unknown as ILaunchOptions);
 
       expect(executeLifecycleCommandMock).toHaveBeenCalledWith('an acme project build command', {
         rushConfiguration,
@@ -127,7 +127,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', '--quiet', 'build'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX(true);
+      Rush.launchRushX('0.0.0', { isManaged: true });
 
       expect(executeLifecycleCommandMock).toHaveBeenCalledWith('an acme project build command', {
         rushConfiguration,
@@ -145,7 +145,7 @@ describe(RushXCommandLine.name, () => {
       process.argv = ['node', 'startx.js', 'asdf'];
       executeLifecycleCommandMock!.mockReturnValue(0);
 
-      RushXCommandLine.launchRushX(true);
+      Rush.launchRushX('0.0.0', { isManaged: true });
 
       expect(executeLifecycleCommandMock).not.toHaveBeenCalled();
       expect(logMock!.mock.calls).toMatchSnapshot();
