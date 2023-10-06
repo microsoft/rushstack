@@ -103,7 +103,7 @@ export class Rush {
     options = Rush._normalizeLaunchOptions(options);
 
     Rush._assignRushInvokedFolder();
-    RushXCommandLine.launchRushX(options.isManaged);
+    RushXCommandLine.launchRushX(options.isManaged, options.alreadyReportedNodeTooNewError);
   }
 
   /**

@@ -20,6 +20,7 @@ export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
   rushConfiguration?: RushConfiguration | undefined;
   args: IRushXCommandLineArguments;
+  alreadyReportedNodeTooNewError: boolean;
 }
 
 interface IRushXCommandLineArguments {
@@ -70,7 +71,10 @@ class ProcessError extends Error {
 }
 
 export class RushXCommandLine {
-  public static launchRushX(isManaged: boolean): void {
+  public static launchRushX(
+    isManaged: boolean,
+    alreadyReportedNodeTooNewError: boolean | undefined = undefined
+  ): void {
     try {
       const args: IRushXCommandLineArguments = this._getCommandLineArguments();
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
@@ -97,7 +101,8 @@ export class RushXCommandLine {
       const options: ILaunchRushXInternalOptions = {
         isManaged,
         rushConfiguration,
-        args
+        args,
+        alreadyReportedNodeTooNewError: !!alreadyReportedNodeTooNewError
       };
       RushXCommandLine._launchRushXInternal(options);
       if (attemptHooks) {
@@ -123,14 +128,14 @@ export class RushXCommandLine {
   }
 
   public static _launchRushXInternal(options: ILaunchRushXInternalOptions): void {
-    const { isManaged, rushConfiguration, args } = options;
+    const { isManaged, rushConfiguration, args, alreadyReportedNodeTooNewError } = options;
     if (!args.quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, isManaged);
     }
     // Are we in a Rush repo?
     NodeJsCompatibility.warnAboutCompatibilityIssues({
       isRushLib: true,
-      alreadyReportedNodeTooNewError: false,
+      alreadyReportedNodeTooNewError,
       rushConfiguration
     });
 
