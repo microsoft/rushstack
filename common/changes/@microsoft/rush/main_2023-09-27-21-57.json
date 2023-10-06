@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve visual formatting of custom tips",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
