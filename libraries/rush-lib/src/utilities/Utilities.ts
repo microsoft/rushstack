@@ -77,6 +77,11 @@ export interface ILifecycleCommandOptions {
   handleOutput: boolean;
 
   /**
+   * an existing environment to copy instead of process.env
+   */
+  initialEnvironment?: IEnvironment;
+
+  /**
    * Options for what should be added to the PATH variable
    */
   environmentPathOptions: IEnvironmentPathOptions;
@@ -675,7 +680,6 @@ export class Utilities {
 
     // Communicate to downstream calls that they should not try to run hooks
     environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] = '1';
-    environment[EnvironmentVariableNames.RUSH_INVOKED_ARGS] = JSON.stringify(process.argv);
 
     return environment;
   }
