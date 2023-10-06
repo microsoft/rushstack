@@ -127,7 +127,7 @@ export class RushXCommandLine {
     }
   }
 
-  public static _launchRushXInternal(options: ILaunchRushXInternalOptions): void {
+  private static _launchRushXInternal(options: ILaunchRushXInternalOptions): void {
     const { isManaged, rushConfiguration, args, alreadyReportedNodeTooNewError } = options;
     if (!args.quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, isManaged);
