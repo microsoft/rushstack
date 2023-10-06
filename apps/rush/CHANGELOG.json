@@ -511,7 +511,7 @@
       "comments": {
         "none": [
           {
-            "comment": "Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable."
+            "comment": "Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the _RUSH_LIB_PATH environment variable."
           }
         ]
       }

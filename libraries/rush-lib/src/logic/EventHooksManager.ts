@@ -4,10 +4,11 @@
 import colors from 'colors/safe';
 
 import type { EventHooks } from '../api/EventHooks';
-import { Utilities } from '../utilities/Utilities';
+import { type IEnvironment, Utilities } from '../utilities/Utilities';
 import { Event } from '../api/EventHooks';
 import { Stopwatch } from '../utilities/Stopwatch';
 import type { RushConfiguration } from '../api/RushConfiguration';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 export class EventHooksManager {
   private _rushConfiguration: RushConfiguration;
@@ -42,11 +43,19 @@ export class EventHooksManager {
         this._rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
       scripts.forEach((script) => {
         try {
+          const environment: IEnvironment = { ...process.env };
+
+          // NOTE: Do NOT expose this variable to other subprocesses besides telemetry hooks.  We do NOT want
+          // child processes to inspect Rush's raw command line and magically change their behavior in a way
+          // that might be confusing to end users, or rely on CLI parameters that the build cache is unaware of.
+          environment[EnvironmentVariableNames.RUSH_INVOKED_ARGS] = JSON.stringify(process.argv);
+
           Utilities.executeLifecycleCommand(script, {
             rushConfiguration: this._rushConfiguration,
             workingDirectory: this._rushConfiguration.rushJsonFolder,
             initCwd: this._commonTempFolder,
             handleOutput: !printEventHooksOutputToConsole,
+            initialEnvironment: environment,
             environmentPathOptions: {
               includeRepoBin: true
             }
@@ -56,7 +65,7 @@ export class EventHooksManager {
           console.error(
             '\n' +
               colors.yellow(
-                `Event hook "${script}" failed. Run "rush" with --debug` +
+                `Event hook "${script}" failed: ${error}\nRun "rush" with --debug` +
                   ` to see detailed error information.`
               )
           );

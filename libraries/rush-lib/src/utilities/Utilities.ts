@@ -5,6 +5,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
+import { PassThrough } from 'stream';
 import {
   JsonFile,
   type IPackageJson,
@@ -15,7 +16,7 @@ import {
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
-import { PassThrough } from 'stream';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -74,6 +75,11 @@ export interface ILifecycleCommandOptions {
    * If true, suppress the process's output, but if there is a nonzero exit code then print stderr
    */
   handleOutput: boolean;
+
+  /**
+   * an existing environment to copy instead of process.env
+   */
+  initialEnvironment?: IEnvironment;
 
   /**
    * Options for what should be added to the PATH variable
@@ -671,6 +677,9 @@ export class Utilities {
         );
       }
     }
+
+    // Communicate to downstream calls that they should not try to run hooks
+    environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] = '1';
 
     return environment;
   }

@@ -264,16 +264,20 @@ export const EnvironmentVariableNames: {
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
-    readonly RUSH_LIB_PATH: "_RUSH_LIB_PATH";
+    readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
+    readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
+    readonly RUSH_INVOKED_ARGS: "RUSH_INVOKED_ARGS";
 };
 
 // @beta
 enum Event_2 {
     postRushBuild = 4,
     postRushInstall = 2,
+    postRushx = 6,
     preRushBuild = 3,
-    preRushInstall = 1
+    preRushInstall = 1,
+    preRushx = 5
 }
 export { Event_2 as Event }
 

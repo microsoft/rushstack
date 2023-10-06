@@ -19,16 +19,6 @@ Array [
   Array [
     "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
   ],
-  Array [
-    "[31mError: The command \\"asdf\\" is not defined in the package.json file for this project.[39m",
-  ],
-  Array [
-    "
-Available commands for this project are: \\"build\\", \\"test\\"",
-  ],
-  Array [
-    "Use [33m\\"rushx --help\\"[39m for more information.",
-  ],
 ]
 `;
 
@@ -41,7 +31,7 @@ Array [
     "usage: rushx [-h]",
   ],
   Array [
-    "       rushx [-q/--quiet] <command> ...
+    "       rushx [-q/--quiet] [-d/--debug] [--ignore-hooks] <command> ...
 ",
   ],
   Array [
@@ -51,7 +41,10 @@ Array [
     "  -h, --help            Show this help message and exit.",
   ],
   Array [
-    "  -q, --quiet           Hide rushx startup information.
+    "  -q, --quiet           Hide rushx startup information.",
+  ],
+  Array [
+    "  -d, --debug           Run in debug mode.
 ",
   ],
   Array [

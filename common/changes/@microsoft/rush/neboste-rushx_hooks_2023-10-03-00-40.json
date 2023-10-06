@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add start `preRushx` and `postRushx` event hooks for monitoring the `rushx` command",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
