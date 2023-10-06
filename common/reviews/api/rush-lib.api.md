@@ -491,7 +491,7 @@ export interface IGlobalCommand extends IRushCommand {
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
-    // Warning: (ae-incompatible-release-tags) The symbol "builtInPluginConfigurations" is marked as @public, but its signature references "_IBuiltInPluginConfiguration" which is marked as @internal
+    // @internal
     builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
     terminalProvider?: ITerminalProvider;
