@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix incorrect capitalization in the \"rush init\" template",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
