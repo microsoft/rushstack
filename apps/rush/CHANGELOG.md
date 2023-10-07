@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Oct 2023 00:58:12 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Oct 2023 01:20:56 GMT and should not be manually modified.
+
+## 5.109.1
+Sat, 07 Oct 2023 01:20:56 GMT
+
+### Updates
+
+- Fix incorrect capitalization in the "rush init" template
 
 ## 5.109.0
 Sat, 07 Oct 2023 00:25:27 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.109.1",
+      "tag": "@microsoft/rush_v5.109.1",
+      "date": "Sat, 07 Oct 2023 01:20:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix incorrect capitalization in the \"rush init\" template"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.109.0",
       "tag": "@microsoft/rush_v5.109.0",
       "date": "Sat, 07 Oct 2023 00:25:27 GMT",
