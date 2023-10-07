@@ -584,6 +584,7 @@ export class Utilities {
 
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
       initCwd: options.initCwd,
+      initialEnvironment: options.initialEnvironment,
       pathOptions: {
         ...options.environmentPathOptions,
         rushJsonFolder: options.rushConfiguration?.rushJsonFolder,
