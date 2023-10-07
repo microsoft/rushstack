@@ -20,6 +20,49 @@
   "useWorkspaces": true,
 
   /**
+   * This setting determines how PNPM chooses version numbers during `rush update`.
+   * For example, suppose `lib-x@3.0.0` depends on `"lib-y": "^1.2.3"` whose latest major
+   * releases are `1.8.9` and `2.3.4`.  The resolution mode `lowest-direct` might choose
+   * `lib-y@1.2.3`, wheres `highest` will choose 1.8.9, and `time-based` will pick the
+   * highest compatible version at the time when `lib-x@3.0.0` itself was published (ensuring
+   * that the version could have been tested by the maintainer of "lib-x").  For local workspace
+   * projects, `time-based` instead works like `lowest-direct`, avoiding upgrades unless
+   * they are explicitly requested. Although `time-based` is the most robust option, it may be
+   * slightly slower with registries such as npmjs.com that have not implemented an optimization.
+   *
+   * IMPORTANT: Be aware that PNPM 8.0.0 initially defaulted to `lowest-direct` instead of
+   * `highest`, but PNPM reverted this decision in 8.6.12 because it caused confusion for users.
+   * Rush version 5.106.0 and newer avoids this confusion by consistently defaulting to
+   * `highest` when `resolutionMode` is not explicitly set in pnpm-config.json or .npmrc,
+   * regardless of your PNPM version.
+   *
+   * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
+   *
+   * Possible values are: `highest`, `time-based`, and `lowest-direct`.
+   * The default is `highest`.
+   */
+  // "resolutionMode": "time-based",
+
+  /**
+   * This setting determines whether PNPM will automatically install (non-optional)
+   * missing peer dependencies instead of reporting an error.  Doing so conveniently
+   * avoids the need to specify peer versions in package.json, but in a large monorepo
+   * this often creates worse problems.  The reason is that peer dependency behavior
+   * is inherently complicated, and it is easier to troubleshoot consequences of an explicit
+   * version than an invisible heuristic.  The original NPM RFC discussion pointed out
+   * some other problems with this feature: https://github.com/npm/rfcs/pull/43
+
+   * IMPORTANT: Without Rush, the setting defaults to true for PNPM 8 and newer; however,
+   * as of Rush version 5.109.0 the default is always false unless `autoInstallPeers`
+   * is specified in pnpm-config.json or .npmrc, regardless of your PNPM version.
+
+   * PNPM documentation: https://pnpm.io/npmrc#auto-install-peers
+
+   * The default value is false.
+   */
+  // "autoInstallPeers": false,
+
+  /**
    * If true, then Rush will add the `--strict-peer-dependencies` command-line parameter when
    * invoking PNPM.  This causes `rush update` to fail if there are unsatisfied peer dependencies,
    * which is an invalid state that can cause build failures or incompatible dependency versions.

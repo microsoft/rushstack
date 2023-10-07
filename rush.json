@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.107.4",
+  "rushVersion": "5.109.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -43,7 +43,6 @@
    * LTS versions: https://nodejs.org/en/download/releases/
    */
   "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.6.1 <21.0.0",
-  "suppressNodeLtsWarning": true, // TODO: Remove when Node 20 goes LTS
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -64,7 +63,7 @@
    * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
    * to disable Rush's warning.
    */
-  // "suppressNodeLtsWarning": false,
+  "suppressNodeLtsWarning": true, // TODO: Remove when Node 20 goes LTS
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -240,26 +239,36 @@
    */
   "eventHooks": {
     /**
-     * The list of shell commands to run before the Rush installation starts
+     * A list of shell commands to run before "rush install" or "rush update" starts installation
      */
     "preRushInstall": [
       // "common/scripts/pre-rush-install.js"
     ],
 
     /**
-     * The list of shell commands to run after the Rush installation finishes
+     * A list of shell commands to run after "rush install" or "rush update" finishes installation
      */
     "postRushInstall": [],
 
     /**
-     * The list of shell commands to run before the Rush build command starts
+     * A list of shell commands to run before "rush build" or "rush rebuild" starts building
      */
     "preRushBuild": [],
 
     /**
-     * The list of shell commands to run after the Rush build command finishes
+     * A list of shell commands to run after "rush build" or "rush rebuild" finishes building
      */
-    "postRushBuild": []
+    "postRushBuild": [],
+
+    /**
+     * A list of shell commands to run before the "rushx" command starts
+     */
+    "preRushx": [],
+
+    /**
+     * A list of shell commands to run after the "rushx" command finishes
+     */
+    "postRushx": []
   },
 
   /**
