@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.109.0",
+      "tag": "@microsoft/rush_v5.109.0",
+      "date": "Sat, 07 Oct 2023 00:25:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(IMPORTANT) Add a new setting `autoInstallPeers` in pnpm-config.json; be aware that Rush changes PNPM's default if you are using PNPM 8 or newer"
+          },
+          {
+            "comment": "Improve visual formatting of custom tips"
+          },
+          {
+            "comment": "Add start `preRushx` and `postRushx` event hooks for monitoring the `rushx` command"
+          },
+          {
+            "comment": "Update the oldest usable Node.js version to 14.18.0, since 14.17.0 fails to load"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.108.0",
       "tag": "@microsoft/rush_v5.108.0",
       "date": "Mon, 02 Oct 2023 20:23:27 GMT",
