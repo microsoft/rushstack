@@ -11,6 +11,9 @@
             "comment": "(IMPORTANT) Add a new setting `autoInstallPeers` in pnpm-config.json; be aware that Rush changes PNPM's default if you are using PNPM 8 or newer"
           },
           {
+            "comment": "(IMPORTANT) After upgrading, if `rush install` fails with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, please run `rush update --recheck`"
+          },
+          {
             "comment": "Improve visual formatting of custom tips"
           },
           {

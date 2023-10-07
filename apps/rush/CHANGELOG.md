@@ -1,6 +1,6 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Oct 2023 00:25:27 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Oct 2023 00:58:12 GMT and should not be manually modified.
 
 ## 5.109.0
 Sat, 07 Oct 2023 00:25:27 GMT
@@ -8,6 +8,7 @@ Sat, 07 Oct 2023 00:25:27 GMT
 ### Updates
 
 - (IMPORTANT) Add a new setting `autoInstallPeers` in pnpm-config.json; be aware that Rush changes PNPM's default if you are using PNPM 8 or newer
+- (IMPORTANT) After upgrading, if `rush install` fails with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, please run `rush update --recheck`
 - Improve visual formatting of custom tips
 - Add start `preRushx` and `postRushx` event hooks for monitoring the `rushx` command
 - Update the oldest usable Node.js version to 14.18.0, since 14.17.0 fails to load
