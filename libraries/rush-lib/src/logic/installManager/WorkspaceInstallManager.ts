@@ -293,7 +293,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.options
     );
     if (colors.enabled) {
-      packageManagerEnv['FORCE_COLOR'] = '1';
+      packageManagerEnv.FORCE_COLOR = '1';
     }
 
     const commonNodeModulesFolder: string = path.join(
