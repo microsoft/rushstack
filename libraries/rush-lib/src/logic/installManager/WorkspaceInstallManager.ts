@@ -598,7 +598,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       const doInstalInternalSplitWorkspaceAsync = async (): Promise<void> => {
         // Run "npm install" in the common folder
-        const installArgs: string[] = ['install', '--color=always'];
+        const installArgs: string[] = ['install'];
         this.pushConfigurationArgsForSplitWorkspace(installArgs, this.options);
 
         console.log(
