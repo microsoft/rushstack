@@ -292,6 +292,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       this.options
     );
+    if (colors.enabled) {
+      packageManagerEnv['FORCE_COLOR'] = '1';
+    }
 
     const commonNodeModulesFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -318,7 +321,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Run "npm install" in the common folder
       // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
       // Without this argument, certain text that should be colored (such as red) will appear white.
-      const installArgs: string[] = ['install', '--color=always'];
+      const installArgs: string[] = ['install'];
       this.pushConfigurationArgs(installArgs, options);
 
       // eslint-disable-next-line no-console
