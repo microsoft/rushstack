@@ -8,16 +8,16 @@ import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushsta
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
+import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
+import { type PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { RepoStateFile } from '../RepoStateFile';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { RepoStateFile } from '../RepoStateFile';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
@@ -37,6 +37,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   public async doInstallAsync(): Promise<void> {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
+      // eslint-disable-next-line no-console
       console.log(
         colors.red(
           'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
@@ -69,6 +70,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder));
 
     const shrinkwrapWarnings: string[] = [];
@@ -81,7 +83,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     } else {
       if (!shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+        // eslint-disable-next-line no-console
         console.log();
+        // eslint-disable-next-line no-console
         console.log(
           colors.red(
             'The shrinkwrap file has not been updated to support workspaces. Run "rush update --full" to update ' +
@@ -112,7 +116,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // so individual shrinkwrap for each split workspace project
       } else {
         if (!splitWorkspaceShrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+          // eslint-disable-next-line no-console
           console.log();
+          // eslint-disable-next-line no-console
           console.log(
             colors.red(
               'The shrinkwrap file has not been updated to support workspaces. Run "rush update --full" to update ' +
@@ -223,7 +229,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               dependencySpecifier.versionSpecifier
             )
           ) {
+            // eslint-disable-next-line no-console
             console.log();
+            // eslint-disable-next-line no-console
             console.log(
               colors.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists ` +
@@ -235,7 +243,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
 
           if (!this.options.allowShrinkwrapUpdates) {
+            // eslint-disable-next-line no-console
             console.log();
+            // eslint-disable-next-line no-console
             console.log(
               colors.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
@@ -265,6 +275,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
       if (packageJson.saveIfModified()) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
             `"${rushProject.packageName}" depends on one or more workspace packages which did not use "workspace:" ` +
@@ -439,6 +450,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       this.options
     );
+    if (colors.enabled) {
+      packageManagerEnv.FORCE_COLOR = '1';
+    }
 
     const commonNodeModulesFolder: string = path.join(
       this.rushConfiguration.commonTempFolder,
@@ -452,6 +466,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
+        // eslint-disable-next-line no-console
         console.log('Deleting files from ' + commonNodeModulesFolder);
 
         this.installRecycler.moveFolder(commonNodeModulesFolder);
@@ -464,9 +479,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Run "npm install" in the common folder
       // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
       // Without this argument, certain text that should be colored (such as red) will appear white.
-      const installArgs: string[] = ['install', '--color=always'];
+      const installArgs: string[] = ['install'];
       this.pushConfigurationArgs(installArgs, options);
 
+      // eslint-disable-next-line no-console
       console.log(
         '\n' +
           colors.bold(
@@ -483,6 +499,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.options.networkConcurrency ||
         this.options.onlyShrinkwrap
       ) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.green('Invoking package manager: ') +
@@ -588,6 +605,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           // YES: Delete "node_modules"
 
           // Explain to the user why we are hosing their node_modules folder
+          // eslint-disable-next-line no-console
           console.log('Deleting files from ' + splitWorkspaceNodeModulesFolder);
 
           this.installRecycler.moveFolder(splitWorkspaceNodeModulesFolder);
@@ -601,6 +619,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         const installArgs: string[] = ['install'];
         this.pushConfigurationArgsForSplitWorkspace(installArgs, this.options);
 
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.bold(
@@ -612,6 +631,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
         // If any diagnostic options were specified, then show the full command-line
         if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+          // eslint-disable-next-line no-console
           console.log(
             '\n' +
               colors.green('Invoking package manager: ') +
@@ -661,6 +681,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             onPnpmStdoutChunk,
             () => {
               if (this.rushConfiguration.packageManager === 'pnpm') {
+                // eslint-disable-next-line no-console
                 console.log(colors.yellow(`Deleting the "node_modules" folder`));
                 this.installRecycler.moveFolder(splitWorkspaceNodeModulesFolder);
 
@@ -706,6 +727,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       FileSystem.ensureFolder(nodeModulesFolder);
     }
 
+    // eslint-disable-next-line no-console
     console.log('');
   }
 
@@ -731,7 +753,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.rushConfiguration.getFilteredProjects({
           splitWorkspace: false
         }),
-        async (project) => {
+        async (project: RushConfigurationProject) => {
           await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
         },
         { concurrency: 10 }
@@ -746,7 +768,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this.rushConfiguration.getFilteredProjects({
           splitWorkspace: false
         }),
-        async (project) => {
+        async (project: RushConfigurationProject) => {
           await BaseProjectShrinkwrapFile.saveEmptyProjectShrinkwrapFileAsync(project);
         },
         { concurrency: 10 }
@@ -760,20 +782,23 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
-      const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
-        this.rushConfiguration.packageManager,
-        this.rushConfiguration.pnpmOptions,
-        this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename
-      );
+      const tempSplitWorkspaceShrinkwrapFile: BaseShrinkwrapFile | undefined =
+        ShrinkwrapFileFactory.getShrinkwrapFile(
+          this.rushConfiguration.packageManager,
+          this.rushConfiguration.pnpmOptions,
+          this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename
+        );
 
-      if (tempShrinkwrapFile) {
+      if (tempSplitWorkspaceShrinkwrapFile) {
         // Write or delete all project shrinkwraps related to the install
         await Async.forEachAsync(
           this.rushConfiguration.getFilteredProjects({
             splitWorkspace: true
           }),
-          async (project) => {
-            await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
+          async (project: RushConfigurationProject) => {
+            await tempSplitWorkspaceShrinkwrapFile
+              .getProjectShrinkwrap(project)
+              ?.updateProjectShrinkwrapAsync();
           },
           { concurrency: 10 }
         );
@@ -787,7 +812,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           this.rushConfiguration.getFilteredProjects({
             splitWorkspace: true
           }),
-          async (project) => {
+          async (project: RushConfigurationProject) => {
             await PnpmProjectShrinkwrapFile.generateIndividualProjectShrinkwrapAsync(project);
           },
           { concurrency: 10 }
@@ -817,6 +842,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       const rebuildArgs: string[] = ['rebuild', '--pending'];
       this.pushRebuildArgs(rebuildArgs, this.options.pnpmFilterArguments);
 
+      // eslint-disable-next-line no-console
       console.log(
         '\n' +
           colors.bold(
@@ -828,6 +854,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // If any diagnostic options were specified, then show the full command-line
       if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.green('Invoking package manager: ') +
@@ -854,9 +881,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
-        const rebuildArgs: string[] = ['rebuild', '--pending'];
-        this.pushRebuildArgs(rebuildArgs, this.options.splitWorkspacePnpmFilterArguments);
+        const splitWorkspaceRebuildArgs: string[] = ['rebuild', '--pending'];
+        this.pushRebuildArgs(splitWorkspaceRebuildArgs, this.options.splitWorkspacePnpmFilterArguments);
 
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.bold(
@@ -868,12 +896,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
         // If any diagnostic options were specified, then show the full command-line
         if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+          // eslint-disable-next-line no-console
           console.log(
             '\n' +
               colors.green('Invoking package manager: ') +
               FileSystem.getRealPath(packageManagerFilename) +
               ' ' +
-              rebuildArgs.join(' ') +
+              splitWorkspaceRebuildArgs.join(' ') +
               '\n'
           );
         }
@@ -881,7 +910,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         try {
           Utilities.executeCommand({
             command: packageManagerFilename,
-            args: rebuildArgs,
+            args: splitWorkspaceRebuildArgs,
             workingDirectory: this.rushConfiguration.commonTempSplitFolder,
             environment: packageManagerEnv,
             suppressOutput: false
