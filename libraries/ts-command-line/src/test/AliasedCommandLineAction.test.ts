@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
 import { AliasCommandLineAction } from '../providers/AliasCommandLineAction';
 import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 class TestAliasAction extends AliasCommandLineAction {
   public done: boolean = false;

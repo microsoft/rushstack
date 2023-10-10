@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { ConsoleTerminalProvider, Sort, Terminal } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
@@ -174,11 +174,13 @@ export class ListAction extends BaseRushAction {
     const output: IJsonOutput = {
       projects
     };
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(output, undefined, 2));
   }
 
   private _printList(selection: Set<RushConfigurationProject>): void {
     for (const project of selection) {
+      // eslint-disable-next-line no-console
       console.log(project.packageName);
     }
   }
@@ -267,6 +269,7 @@ export class ListAction extends BaseRushAction {
       table.push(packageRow);
     }
 
+    // eslint-disable-next-line no-console
     console.log(table.toString());
   }
 }

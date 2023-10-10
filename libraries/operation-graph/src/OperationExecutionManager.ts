@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/node-core-library';
+import { Async, type ITerminal } from '@rushstack/node-core-library';
 
 import type { IOperationState } from './IOperationRunner';
 import type { IExecuteOperationContext, Operation } from './Operation';
 import { OperationGroupRecord } from './OperationGroupRecord';
 import { OperationStatus } from './OperationStatus';
 import { calculateCriticalPathLengths } from './calculateCriticalPath';
+import { WorkQueue } from './WorkQueue';
 
 /**
  * Options for the current run.
@@ -92,6 +93,10 @@ export class OperationExecutionManager {
 
     const { abortSignal, parallelism, terminal, requestRun } = executionOptions;
 
+    if (abortSignal.aborted) {
+      return OperationStatus.Aborted;
+    }
+
     const startedGroups: Set<OperationGroupRecord> = new Set();
     const finishedGroups: Set<OperationGroupRecord> = new Set();
 
@@ -107,16 +112,18 @@ export class OperationExecutionManager {
 
     terminal.writeVerboseLine(`Executing a maximum of ${maxParallelism} simultaneous tasks...`);
 
+    const workQueueAbortController: AbortController = new AbortController();
+    abortSignal.addEventListener('abort', () => workQueueAbortController.abort(), { once: true });
+    const workQueue: WorkQueue = new WorkQueue(workQueueAbortController.signal);
+
     const executionContext: IExecuteOperationContext = {
       terminal,
       abortSignal,
 
       requestRun,
 
-      queueWork: <T>(workFn: () => Promise<T>, priority: number): Promise<T> => {
-        // TODO: Update to throttle parallelism
-        // Can just be a standard priority queue from async
-        return workFn();
+      queueWork: (workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus> => {
+        return workQueue.pushAsync(workFn, priority);
       },
 
       beforeExecute: (operation: Operation): void => {
@@ -167,7 +174,19 @@ export class OperationExecutionManager {
       }
     };
 
+    const workQueuePromise: Promise<void> = Async.forEachAsync(
+      workQueue,
+      (workFn: () => Promise<void>) => workFn(),
+      {
+        concurrency: maxParallelism
+      }
+    );
+
     await Promise.all(this._operations.map((record: Operation) => record._executeAsync(executionContext)));
+
+    // Terminate queue execution.
+    workQueueAbortController.abort();
+    await workQueuePromise;
 
     const finalStatus: OperationStatus =
       this._trackedOperationCount === 0

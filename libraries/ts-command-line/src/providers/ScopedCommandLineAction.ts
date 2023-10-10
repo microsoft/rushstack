@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { CommandLineAction, ICommandLineActionOptions } from './CommandLineAction';
-import { CommandLineParser, ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction';
+import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
 import type { CommandLineParameter } from '../parameters/BaseClasses';
 import type { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
@@ -157,7 +157,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     const scopedArgs: string[] = [];
     if (this.remainder.values.length) {
       if (this.remainder.values[0] !== '--') {
-        // Immitate argparse behavior and log out usage text before throwing.
+        // Imitate argparse behavior and log out usage text before throwing.
+        // eslint-disable-next-line no-console
         console.log(this.renderUsageText());
         throw new CommandLineParserExitError(
           // argparse sets exit code 2 for invalid arguments

@@ -5,7 +5,7 @@
 ```ts
 
 import type { AsyncSeriesWaterfallHook } from 'tapable';
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import { getIdentifier } from '@rushstack/module-minifier';
 import { ILocalMinifierOptions } from '@rushstack/module-minifier';
 import { IMinifierConnection } from '@rushstack/module-minifier';
@@ -20,7 +20,7 @@ import { IWorkerPoolMinifierOptions } from '@rushstack/module-minifier';
 import { LocalMinifier } from '@rushstack/module-minifier';
 import { MessagePortMinifier } from '@rushstack/module-minifier';
 import { NoopMinifier } from '@rushstack/module-minifier';
-import { Plugin } from 'webpack';
+import type { Plugin } from 'webpack';
 import type { ReplaceSource } from 'webpack-sources';
 import { Source } from 'webpack-sources';
 import type { SyncWaterfallHook } from 'tapable';

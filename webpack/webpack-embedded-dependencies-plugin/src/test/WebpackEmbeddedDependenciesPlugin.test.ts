@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import path from 'path';
-import { createFsFromVolume, IFs, Volume } from 'memfs';
+import { createFsFromVolume, type IFs, Volume } from 'memfs';
 import EmbeddedDependenciesWebpackPlugin from '../EmbeddedDependenciesWebpackPlugin';
 
 import { LICENSE_FILES_REGEXP, COPYRIGHT_REGEX } from '../regexpUtils';

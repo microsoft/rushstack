@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as React from 'react';
-import { IconButton as FIconButton, IButtonProps } from '@fluentui/react';
+import { IconButton as FIconButton, type IButtonProps } from '@fluentui/react';
 
 const iconButtonStyles: IButtonProps['styles'] = {
   root: {

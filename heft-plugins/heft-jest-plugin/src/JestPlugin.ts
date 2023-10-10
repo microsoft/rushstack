@@ -324,6 +324,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         readConfigs: IReadConfigs;
       } = require(jestConfigPath);
       const { readConfigs: originalReadConfigs } = jestConfigModule;
+      // eslint-disable-next-line func-style
       const readConfigs: typeof originalReadConfigs = async function wrappedReadConfigs(
         this: void,
         argv: Config.Argv,
@@ -338,7 +339,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         });
 
         return {
-          // There are other propeties on this object
+          // There are other properties on this object
           ...result,
           globalConfig: extendedGlobalConfig
         };
@@ -357,6 +358,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       } = require(watchModulePath);
       const { default: originalWatch } = watchModule;
 
+      // eslint-disable-next-line func-style
       const watch: IJestWatch = function patchedWatch(
         this: void,
         initialGlobalConfig: Config.GlobalConfig,
@@ -406,6 +408,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         default: (params: IRunJestParams) => Promise<void>;
       } = require(runJestModulePath);
       const { default: originalRunJest } = runJestModule;
+      // eslint-disable-next-line func-style
       const runJest: typeof originalRunJest = function patchedRunJest(
         this: void,
         params: IRunJestParams

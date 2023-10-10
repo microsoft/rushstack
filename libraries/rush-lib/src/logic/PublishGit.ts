@@ -3,8 +3,8 @@
 
 import { PublishUtilities } from './PublishUtilities';
 import { Utilities } from '../utilities/Utilities';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Git } from './Git';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { Git } from './Git';
 
 const DUMMY_BRANCH_NAME: string = '-branch-name-';
 

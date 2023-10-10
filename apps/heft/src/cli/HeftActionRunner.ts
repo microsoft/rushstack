@@ -76,6 +76,35 @@ export function initializeHeft(
   terminal.writeVerboseLine('');
 }
 
+let _cliAbortSignal: AbortSignal | undefined;
+export function ensureCliAbortSignal(terminal: ITerminal): AbortSignal {
+  if (!_cliAbortSignal) {
+    // Set up the ability to terminate the build via Ctrl+C and have it exit gracefully if pressed once,
+    // less gracefully if pressed a second time.
+    const cliAbortController: AbortController = new AbortController();
+    _cliAbortSignal = cliAbortController.signal;
+    const cli: ReadlineInterface = createInterface(process.stdin, undefined, undefined, true);
+    let forceTerminate: boolean = false;
+    cli.on('SIGINT', () => {
+      cli.close();
+
+      if (forceTerminate) {
+        terminal.writeErrorLine(`Forcibly terminating.`);
+        process.exit(1);
+      } else {
+        terminal.writeLine(
+          Colors.yellow(Colors.bold(`Canceling... Press Ctrl+C again to forcibly terminate.`))
+        );
+      }
+
+      forceTerminate = true;
+      cliAbortController.abort();
+    });
+  }
+
+  return _cliAbortSignal;
+}
+
 export async function runWithLoggingAsync(
   fn: () => Promise<OperationStatus>,
   action: IHeftAction,
@@ -272,7 +301,7 @@ export class HeftActionRunner {
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(operations);
 
-    const cliAbortSignal: AbortSignal = this._createCliAbortSignal();
+    const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 
     try {
       await _startLifecycleAsync(this._internalHeftSession);
@@ -298,33 +327,6 @@ export class HeftActionRunner {
       // aborted runs.
       await _finishLifecycleAsync(this._internalHeftSession);
     }
-  }
-
-  private _createCliAbortSignal(): AbortSignal {
-    // Set up the ability to terminate the build via Ctrl+C and have it exit gracefully if pressed once,
-    // less gracefully if pressed a second time.
-    const cliAbortController: AbortController = new AbortController();
-    const cliAbortSignal: AbortSignal = cliAbortController.signal;
-    const cli: ReadlineInterface = createInterface(process.stdin, undefined, undefined, true);
-    const terminal: ITerminal = this._terminal;
-    let forceTerminate: boolean = false;
-    cli.on('SIGINT', () => {
-      cli.close();
-
-      if (forceTerminate) {
-        terminal.writeErrorLine(`Forcibly terminating.`);
-        process.exit(1);
-      } else {
-        terminal.writeLine(
-          Colors.yellow(Colors.bold(`Canceling build... Press Ctrl+C again to forcibly terminate.`))
-        );
-      }
-
-      forceTerminate = true;
-      cliAbortController.abort();
-    });
-
-    return cliAbortSignal;
   }
 
   private _createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {

@@ -5,7 +5,7 @@ import { AlreadyReportedError, Async, type ITerminal, Path } from '@rushstack/no
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
-import { RushConfigurationProject } from './RushConfigurationProject';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import type { IPhase } from './CommandLineConfiguration';
 import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
@@ -427,7 +427,7 @@ export class RushProjectConfiguration {
         project.projectFolder,
         rigConfig
       );
-    } catch (e) {
+    } catch (e1) {
       // Detect if the project is using the old rush-project.json schema
       let oldRushProjectJson: IOldRushProjectJson | undefined;
       try {
@@ -437,7 +437,7 @@ export class RushProjectConfiguration {
             project.projectFolder,
             rigConfig
           );
-      } catch (e) {
+      } catch (e2) {
         // Ignore
       }
 
@@ -452,7 +452,7 @@ export class RushProjectConfiguration {
             'Quick link: https://rushjs.io/link/upgrading'
         );
       } else {
-        throw e;
+        throw e1;
       }
     }
   }

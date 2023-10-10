@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, Text, NewlineKind } from '@rushstack/node-core-library';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import { type ITerminal, Text, type NewlineKind } from '@rushstack/node-core-library';
+import { XmlDocument, type XmlElement } from 'xmldoc';
 
 import type { ILocalizedString, ILocalizationFile, IParseFileOptions } from '../interfaces';
 

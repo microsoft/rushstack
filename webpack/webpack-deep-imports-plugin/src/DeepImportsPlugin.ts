@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DllPlugin, type Compiler, WebpackError, Chunk, NormalModule } from 'webpack';
+import { DllPlugin, type Compiler, WebpackError, type Chunk, type NormalModule } from 'webpack';
 import path from 'path';
 import { Async, FileSystem, LegacyAdapters, Path } from '@rushstack/node-core-library';
 

@@ -30,7 +30,6 @@
     "tslib": "~2.3.1"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "local-web-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",

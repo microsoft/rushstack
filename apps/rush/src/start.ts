@@ -26,7 +26,7 @@ import {
   ConsoleTerminalProvider,
   Text,
   PackageJsonLookup,
-  ITerminalProvider
+  type ITerminalProvider
 } from '@rushstack/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';

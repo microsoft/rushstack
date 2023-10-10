@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import {
-  IColorableSequence,
+  type IColorableSequence,
   ColorValue,
   Colors,
   eolSequence,
   TextAttribute,
   ConsoleColorCodes
 } from './Colors';
-import { ITerminal } from './ITerminal';
+import type { ITerminal } from './ITerminal';
 
 /**
  * This class facilitates writing to a console.

@@ -3,7 +3,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { JsonFile, JsonObject } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { RushTaskProvider } from './TaskProvider';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
@@ -60,7 +60,7 @@ class RushProjectScript extends vscode.TreeItem {
     this.scriptValue = scriptValue;
 
     // this.tooltip = '';
-    this.description = 'test descriptiosn';
+    this.description = 'test description';
   }
 }
 
@@ -76,8 +76,8 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
 
   public constructor(context: vscode.ExtensionContext) {
     const rushWorkspace: RushWorkspace = RushWorkspace.getCurrentInstance();
-    RushWorkspace.onDidChangeWorkspace((rushWorkspace: RushWorkspace) => {
-      this._rushConfiguration = rushWorkspace.rushConfiguration;
+    RushWorkspace.onDidChangeWorkspace((newWorkspace: RushWorkspace) => {
+      this._rushConfiguration = newWorkspace.rushConfiguration;
       this.refresh();
     });
     this._rushConfiguration = rushWorkspace.rushConfiguration;
@@ -117,6 +117,7 @@ export class RushProjectsProvider implements vscode.TreeDataProvider<RushProject
 
   public async revealProjectDetailAsync(element: RushProject): Promise<void> {
     const { rushConfigurationProject } = element;
+    // eslint-disable-next-line no-console
     console.log('Explorer clicked: ', rushConfigurationProject.packageName);
     RushCommandWebViewPanel.getInstance().postMessage({
       command: 'updateProject',

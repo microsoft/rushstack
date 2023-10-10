@@ -6,11 +6,16 @@ import * as semver from 'semver';
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import { IChangeRequests, PublishUtilities } from './PublishUtilities';
-import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
-import { IChangelog, IChangeLogEntry, IChangeLogComment, IChangeLogEntryComments } from '../api/Changelog';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { RushConfiguration } from '../api/RushConfiguration';
+import { type IChangeRequests, PublishUtilities } from './PublishUtilities';
+import { type IChangeInfo, ChangeType } from '../api/ChangeManagement';
+import type {
+  IChangelog,
+  IChangeLogEntry,
+  IChangeLogComment,
+  IChangeLogEntryComments
+} from '../api/Changelog';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import schemaJson from '../schemas/changelog.schema.json';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
@@ -67,6 +72,7 @@ export class ChangelogGenerator {
       const markdownJSONPath: string = path.resolve(project.projectFolder, CHANGELOG_JSON);
 
       if (FileSystem.exists(markdownPath)) {
+        // eslint-disable-next-line no-console
         console.log('Found: ' + markdownPath);
         if (!FileSystem.exists(markdownJSONPath)) {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
@@ -146,6 +152,7 @@ export class ChangelogGenerator {
 
       const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
 
+      // eslint-disable-next-line no-console
       console.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ` +
           `Changelog update for "${change.packageName}@${change.newVersion}".`

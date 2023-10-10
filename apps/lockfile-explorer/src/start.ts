@@ -16,15 +16,17 @@ import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 function startApp(debugMode: boolean): void {
   const lockfileExplorerProjectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
-  const packageJson: IPackageJson = JsonFile.load(`${lockfileExplorerProjectRoot}/package.json`);
-  const appVersion: string = packageJson.version;
+  const lockfileExplorerPackageJson: IPackageJson = JsonFile.load(
+    `${lockfileExplorerProjectRoot}/package.json`
+  );
+  const appVersion: string = lockfileExplorerPackageJson.version;
 
   console.log(
     colors.bold(`\nRush Lockfile Explorer ${appVersion}`) + colors.cyan(' - https://lfx.rushstack.io/\n')
   );
 
   updateNotifier({
-    pkg: packageJson,
+    pkg: lockfileExplorerPackageJson,
     // Normally update-notifier waits a day or so before it starts displaying upgrade notices.
     // In debug mode, show the notice right away.
     updateCheckInterval: debugMode ? 0 : undefined

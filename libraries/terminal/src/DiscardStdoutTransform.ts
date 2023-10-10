@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
+import { TerminalTransform, type ITerminalTransformOptions } from './TerminalTransform';
 
 /**
  * Constructor options for {@link DiscardStdoutTransform}

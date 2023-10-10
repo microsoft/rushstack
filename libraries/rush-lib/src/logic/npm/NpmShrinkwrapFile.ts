@@ -5,8 +5,8 @@ import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-librar
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;

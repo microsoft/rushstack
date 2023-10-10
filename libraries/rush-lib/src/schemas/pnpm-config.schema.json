@@ -165,6 +165,11 @@
       "description": "This option overrides the resolution-mode in PNPM. Use it if you want to change the default resolution behavior when installing dependencies. Defaults to \"highest\".\n\nPNPM documentation: https://pnpm.io/npmrc#resolution-mode.",
       "type": "string",
       "enum": ["highest", "time-based", "lowest-direct"]
+    },
+
+    "autoInstallPeers": {
+      "description": "This setting determines whether PNPM will automatically install (non-optional) missing peer dependencies instead of reporting an error. With Rush, the default value is always false.\n\nPNPM documentation: https://pnpm.io/npmrc#auto-install-peers",
+      "type": "boolean"
     }
   }
 }

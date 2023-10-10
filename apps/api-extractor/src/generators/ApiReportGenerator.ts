@@ -8,18 +8,19 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span } from '../analyzer/Span';
-import { CollectorEntity } from '../collector/CollectorEntity';
+import type { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { ExtractorMessage } from '../api/ExtractorMessage';
+import type { ExtractorMessage } from '../api/ExtractorMessage';
 import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstEntity } from '../analyzer/AstEntity';
-import { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { AstEntity } from '../analyzer/AstEntity';
+import type { AstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
@@ -522,8 +523,14 @@ export class ApiReportGenerator {
         }
       }
 
-      if (apiItemMetadata.needsDocumentation) {
+      if (apiItemMetadata.undocumented) {
         footerParts.push('(undocumented)');
+
+        collector.messageRouter.addAnalyzerIssue(
+          ExtractorMessageId.Undocumented,
+          `Missing documentation for "${astDeclaration.astSymbol.localName}".`,
+          astDeclaration
+        );
       }
 
       if (footerParts.length > 0) {

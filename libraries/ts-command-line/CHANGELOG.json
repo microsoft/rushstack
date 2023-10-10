@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.16.1",
+      "tag": "@rushstack/ts-command-line_v4.16.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.16.0",
       "tag": "@rushstack/ts-command-line_v4.16.0",
       "date": "Fri, 15 Sep 2023 00:36:58 GMT",

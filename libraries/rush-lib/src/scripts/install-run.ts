@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
+
+/* eslint-disable no-console */
 
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
@@ -204,9 +206,9 @@ function _resolvePackageVersion(
         : [parsedVersionOutput];
       let latestVersion: string | undefined = versions[0];
       for (let i: number = 1; i < versions.length; i++) {
-        const version: string = versions[i];
-        if (_compareVersionStrings(version, latestVersion) > 0) {
-          latestVersion = version;
+        const latestVersionCandidate: string = versions[i];
+        if (_compareVersionStrings(latestVersionCandidate, latestVersion) > 0) {
+          latestVersion = latestVersionCandidate;
         }
       }
 

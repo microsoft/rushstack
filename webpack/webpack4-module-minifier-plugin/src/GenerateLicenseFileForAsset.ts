@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as webpack from 'webpack';
+import type * as webpack from 'webpack';
 import { ConcatSource } from 'webpack-sources';
 import type {
   IAssetInfo,

@@ -4,9 +4,9 @@
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LookupByPath } from '../LookupByPath';
 import { UNINITIALIZED } from '../../utilities/Utilities';

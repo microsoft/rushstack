@@ -278,16 +278,20 @@ export const EnvironmentVariableNames: {
     readonly RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: "RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED";
     readonly RUSH_GIT_BINARY_PATH: "RUSH_GIT_BINARY_PATH";
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
-    readonly RUSH_LIB_PATH: "_RUSH_LIB_PATH";
+    readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
+    readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
+    readonly RUSH_INVOKED_ARGS: "RUSH_INVOKED_ARGS";
 };
 
 // @beta
 enum Event_2 {
     postRushBuild = 4,
     postRushInstall = 2,
+    postRushx = 6,
     preRushBuild = 3,
-    preRushInstall = 1
+    preRushInstall = 1,
+    preRushx = 5
 }
 export { Event_2 as Event }
 
@@ -681,6 +685,7 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    autoInstallPeers?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
@@ -992,6 +997,7 @@ export class PhasedCommandHooks {
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+    readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
@@ -1049,7 +1055,7 @@ export class RepoStateFile {
 
 // @public
 export class Rush {
-    static launch(launcherVersion: string, arg: ILaunchOptions): void;
+    static launch(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     // (undocumented)

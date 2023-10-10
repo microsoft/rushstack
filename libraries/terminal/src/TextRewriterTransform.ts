@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { NewlineKind } from '@rushstack/node-core-library';
+import type { NewlineKind } from '@rushstack/node-core-library';
 
-import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
-import { TextRewriter, TextRewriterState } from './TextRewriter';
+import { type ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
+import { TerminalTransform, type ITerminalTransformOptions } from './TerminalTransform';
+import type { TextRewriter, TextRewriterState } from './TextRewriter';
 import { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
 import { NormalizeNewlinesTextRewriter } from './NormalizeNewlinesTextRewriter';
 

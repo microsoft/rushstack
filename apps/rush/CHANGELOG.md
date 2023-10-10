@@ -1,6 +1,56 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 19 Sep 2023 21:13:23 GMT and should not be manually modified.
+This log was last generated on Sat, 07 Oct 2023 01:20:56 GMT and should not be manually modified.
+
+## 5.109.1
+Sat, 07 Oct 2023 01:20:56 GMT
+
+### Updates
+
+- Fix incorrect capitalization in the "rush init" template
+
+## 5.109.0
+Sat, 07 Oct 2023 00:25:27 GMT
+
+### Updates
+
+- (IMPORTANT) Add a new setting `autoInstallPeers` in pnpm-config.json; be aware that Rush changes PNPM's default if you are using PNPM 8 or newer
+- (IMPORTANT) After upgrading, if `rush install` fails with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, please run `rush update --recheck`
+- Improve visual formatting of custom tips
+- Add start `preRushx` and `postRushx` event hooks for monitoring the `rushx` command
+- Update the oldest usable Node.js version to 14.18.0, since 14.17.0 fails to load
+
+## 5.108.0
+Mon, 02 Oct 2023 20:23:27 GMT
+
+### Updates
+
+- Fix an issue where `rush purge` fails on Linux and Mac if the `common/temp/rush-recycler` folder does not exist.
+- Add "--offline" parameter for "rush install" and "rush update"
+- Ignore pause/resume watcher actions when the process is not TTY mode
+
+## 5.107.4
+Tue, 26 Sep 2023 21:02:52 GMT
+
+### Updates
+
+- Update type-only imports to include the type modifier.
+- Make the project watcher status and keyboard commands message more visible.
+
+## 5.107.3
+Fri, 22 Sep 2023 09:01:38 GMT
+
+### Updates
+
+- Fix filtered installs in pnpm@8.
+
+## 5.107.2
+Fri, 22 Sep 2023 00:06:12 GMT
+
+### Updates
+
+- Fix a bug in which an operation failing incorrectly does not block its consumers.
+- Add `resolutionMode` to `rush init` template for pnpm-config.json
 
 ## 5.107.1
 Tue, 19 Sep 2023 21:13:23 GMT
@@ -226,7 +276,7 @@ Fri, 17 Feb 2023 02:14:43 GMT
 
 ### Updates
 
-- Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the RUSH_LIB_PATH environment variable.
+- Add code path to @rushstack/rush-sdk for inheriting @microsoft/rush-lib location from a parent process via the _RUSH_LIB_PATH environment variable.
 
 ## 5.92.0
 Sun, 12 Feb 2023 02:50:42 GMT

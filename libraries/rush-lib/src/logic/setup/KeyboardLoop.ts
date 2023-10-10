@@ -53,6 +53,7 @@ export class KeyboardLoop {
       const shell: string = process.env.SHELL ?? '';
       if (shell.toUpperCase().endsWith('BASH.EXE')) {
         // Git Bash has a known problem where the Node.js TTY is lost when invoked via an NPM binary script.
+        // eslint-disable-next-line no-console
         console.error(
           colors.red(
             'ERROR: It appears that Rush was invoked from Git Bash shell, which does not support the\n' +
@@ -69,6 +70,7 @@ export class KeyboardLoop {
       }
     }
 
+    // eslint-disable-next-line no-console
     console.error(
       colors.red(
         'ERROR: Rush was invoked by a command whose STDIN does not support the TTY mode for\n' +

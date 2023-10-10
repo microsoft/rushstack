@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DocComment, DocInlineTag } from '@microsoft/tsdoc';
-import { ApiModel, ApiItem, ApiItemKind, ApiDocumentedItem } from '@microsoft/api-extractor-model';
+import { type DocComment, DocInlineTag } from '@microsoft/tsdoc';
+import { type ApiModel, type ApiItem, ApiItemKind, ApiDocumentedItem } from '@microsoft/api-extractor-model';
 
-import { IConfigTableOfContents } from './IConfigFile';
-import { IYamlTocItem, IYamlTocFile } from '../yaml/IYamlTocFile';
+import type { IConfigTableOfContents } from './IConfigFile';
+import type { IYamlTocItem, IYamlTocFile } from '../yaml/IYamlTocFile';
 import { YamlDocumenter } from './YamlDocumenter';
-import { DocumenterConfig } from './DocumenterConfig';
+import type { DocumenterConfig } from './DocumenterConfig';
 
 /**
  * EXPERIMENTAL - This documenter is a prototype of a new config file driven mode of operation for

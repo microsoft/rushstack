@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import MyStack from './MyStack';
-import * as sst from '@serverless-stack/resources';
+import type * as sst from '@serverless-stack/resources';
 
 export default function main(app: sst.App): void {
   // Set default runtime for all functions

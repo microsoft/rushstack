@@ -18,8 +18,6 @@ export type { IRigPackageResolver } from './configuration/RigPackageResolver';
 
 export type { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
 
-export { CancellationToken } from './pluginFramework/CancellationToken';
-
 export type { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
 
 export type {

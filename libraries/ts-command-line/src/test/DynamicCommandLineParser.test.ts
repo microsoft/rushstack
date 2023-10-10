@@ -3,7 +3,7 @@
 
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 
 describe(DynamicCommandLineParser.name, () => {
   it('parses an action', async () => {

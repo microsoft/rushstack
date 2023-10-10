@@ -22,10 +22,10 @@ import {
   type IWebpackConfiguration,
   type IWebpackPluginAccessor,
   PLUGIN_NAME,
-  IWebpackPluginAccessorHooks
+  type IWebpackPluginAccessorHooks
 } from './shared';
 import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
-import { DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
 
 export interface IWebpackPluginOptions {
   devConfigurationPath?: string | undefined;

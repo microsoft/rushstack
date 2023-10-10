@@ -33,8 +33,13 @@ async function rushRush(args: string[]): Promise<void> {
     alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
     builtInPluginConfigurations: options.builtInPluginConfigurations
   });
+  // eslint-disable-next-line no-console
   console.log(`Executing: rush ${args.join(' ')}`);
-  await parser.execute(args).catch(console.error); // CommandLineParser.execute() should never reject the promise
+  await parser
+    .execute(args)
+    // eslint-disable-next-line no-console
+    .catch(console.error); // CommandLineParser.execute() should never reject the promise
 }
 
+// eslint-disable-next-line no-console
 rushRush(process.argv.slice(2)).catch(console.error);

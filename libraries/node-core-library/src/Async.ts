@@ -189,14 +189,26 @@ export class Async {
       }
     }
   }
+
+  /**
+   * Returns a Signal, a.k.a. a "deferred promise".
+   */
+  public static getSignal(): [Promise<void>, () => void, (err: Error) => void] {
+    return getSignal();
+  }
 }
 
-function getSignal(): [Promise<void>, () => void] {
+/**
+ * Returns an unwrapped promise.
+ */
+function getSignal(): [Promise<void>, () => void, (err: Error) => void] {
   let resolver: () => void;
-  const promise: Promise<void> = new Promise<void>((resolve) => {
+  let rejecter: (err: Error) => void;
+  const promise: Promise<void> = new Promise<void>((resolve, reject) => {
     resolver = resolve;
+    rejecter = reject;
   });
-  return [promise, resolver!];
+  return [promise, resolver!, rejecter!];
 }
 
 /**

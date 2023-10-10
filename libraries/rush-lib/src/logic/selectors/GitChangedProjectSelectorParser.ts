@@ -3,8 +3,8 @@
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
-import { IGetChangedProjectsOptions, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
+import { type IGetChangedProjectsOptions, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
 export interface IGitSelectorParserOptions {
   /**

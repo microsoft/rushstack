@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { Operation } from '../Operation';
-import { IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
+import { type IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
 import { MockOperationRunner } from './MockOperationRunner';
 import {
   AsyncOperationQueue,
-  IOperationIteratorResult,
-  IOperationSortFunction,
+  type IOperationIteratorResult,
+  type IOperationSortFunction,
   UNASSIGNED_OPERATION
 } from '../AsyncOperationQueue';
 import { OperationStatus } from '../OperationStatus';

@@ -5,14 +5,14 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiAbstractMixin, IApiAbstractMixinOptions } from '../mixins/ApiAbstractMixin';
-import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
-import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
+import { ApiAbstractMixin, type IApiAbstractMixinOptions } from '../mixins/ApiAbstractMixin';
+import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
+import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
+import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
+import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiProperty}.

@@ -3,11 +3,11 @@
 
 import { StdioSummarizer } from '@rushstack/terminal';
 import { InternalError } from '@rushstack/node-core-library';
-import { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
+import type { CollatedWriter, StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
-import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
-import { Operation } from './Operation';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';

@@ -137,5 +137,17 @@ describe(PrintUtilities.name, () => {
       PrintUtilities.printMessageInBox(userMessage, terminal, 50);
       validateOutput(50);
     });
+
+    it('Handles a case where there is a word longer than the boxwidth', () => {
+      const userMessage: string = [
+        'Annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn error occurred while pushing commits to git remote. Please make sure you have installed and enabled git lfs. The easiest way to do that is run the provided setup script:',
+        '',
+        '    common/scripts/setup.sh',
+        ''
+      ].join('\n');
+
+      PrintUtilities.printMessageInBox(userMessage, terminal, 50);
+      validateOutput(50);
+    });
   });
 });

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk, TerminalWritable } from '@rushstack/terminal';
+import { type ITerminalChunk, TerminalWritable } from '@rushstack/terminal';
 
-import { StreamCollator } from './StreamCollator';
+import type { StreamCollator } from './StreamCollator';
 import { CollatedTerminal } from './CollatedTerminal';
 
 /**

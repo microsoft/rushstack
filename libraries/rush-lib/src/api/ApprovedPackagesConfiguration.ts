@@ -112,6 +112,7 @@ export class ApprovedPackagesConfiguration {
     this.loadFromFile();
 
     if (!approvedPackagesPolicyEnabled) {
+      // eslint-disable-next-line no-console
       console.log(
         `Warning: Ignoring "${path.basename(this._jsonFilename)}" because the` +
           ` "approvedPackagesPolicy" setting was not specified in rush.json`

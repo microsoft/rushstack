@@ -4,10 +4,10 @@
 import * as path from 'path';
 import type { Config } from '@jest/types';
 import type { IHeftTaskSession, HeftConfiguration, CommandLineParameter } from '@rushstack/heft';
-import { ConfigurationFile } from '@rushstack/heft-config-file';
+import type { ConfigurationFile } from '@rushstack/heft-config-file';
 import { Import, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
-import { default as JestPlugin, IHeftJestConfiguration } from '../JestPlugin';
+import { default as JestPlugin, type IHeftJestConfiguration } from '../JestPlugin';
 
 interface IPartialHeftPluginJson {
   taskPlugins?: {

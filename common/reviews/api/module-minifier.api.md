@@ -6,7 +6,7 @@
 
 /// <reference types="node" />
 
-import { MessagePort as MessagePort_2 } from 'worker_threads';
+import type { MessagePort as MessagePort_2 } from 'worker_threads';
 import { MinifyOptions } from 'terser';
 import type { RawSourceMap } from 'source-map';
 

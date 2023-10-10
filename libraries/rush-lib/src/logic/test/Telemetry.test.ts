@@ -3,7 +3,7 @@
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { Telemetry, ITelemetryData, ITelemetryMachineInfo } from '../Telemetry';
+import { Telemetry, type ITelemetryData, type ITelemetryMachineInfo } from '../Telemetry';
 import { RushSession } from '../../pluginFramework/RushSession';
 import { ConsoleTerminalProvider, JsonFile } from '@rushstack/node-core-library';
 

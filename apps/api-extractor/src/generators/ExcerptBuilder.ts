@@ -2,12 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { ExcerptTokenKind, IExcerptToken, IExcerptTokenRange } from '@microsoft/api-extractor-model';
+import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+import {
+  ExcerptTokenKind,
+  type IExcerptToken,
+  type IExcerptTokenRange
+} from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';
-import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
 
 /**
  * Used to provide ExcerptBuilder with a list of nodes whose token range we want to capture.

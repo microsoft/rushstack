@@ -5,13 +5,13 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
+import { ApiDeclaredItem, type IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
+import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
 
 /**
  * Constructor options for {@link ApiEnumMember}.

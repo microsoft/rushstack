@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 import type { SpawnSyncReturns } from 'child_process';
-import { JsonFile, JsonObject, Executable } from '@rushstack/node-core-library';
+import { JsonFile, type JsonObject, Executable } from '@rushstack/node-core-library';
 
 import {
   tryFindRushJsonLocation,
   RUSH_LIB_NAME,
-  RushLibModuleType,
+  type RushLibModuleType,
   requireRushLibUnderFolderPath,
   sdkContext
 } from './helpers';
@@ -193,7 +193,7 @@ export class RushSdkLoader {
           });
         }
         sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
-      } catch (e) {
+      } catch (e1) {
         let installAndRunRushStderrContent: string = '';
         try {
           const installAndRunRushJSPath: string = path.join(
@@ -248,7 +248,8 @@ export class RushSdkLoader {
           sdkContext.rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
 
           progressPercent = 100;
-        } catch (e) {
+        } catch (e2) {
+          // eslint-disable-next-line no-console
           console.error(`${installAndRunRushStderrContent}`);
           throw new Error(`The ${RUSH_LIB_NAME} package failed to load`);
         }

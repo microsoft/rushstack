@@ -8,10 +8,10 @@ import { InternalError, JsonFile } from '@rushstack/node-core-library';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import {
   PnpmShrinkwrapFile,
-  IPnpmShrinkwrapDependencyYaml,
-  IPnpmVersionSpecifier
+  type IPnpmShrinkwrapDependencyYaml,
+  type IPnpmVersionSpecifier
 } from './PnpmShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
+import type { DependencySpecifier } from '../DependencySpecifier';
 import { RushConstants } from '../RushConstants';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -197,16 +197,18 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     projectShrinkwrapMap.set(specifier, integrity);
 
     // Add the dependencies of the dependency
-    for (const [name, version] of Object.entries(shrinkwrapEntry.dependencies || {})) {
-      this._addDependencyRecursive(projectShrinkwrapMap, name, version, shrinkwrapEntry);
+    for (const [dependencyName, dependencyVersion] of Object.entries(shrinkwrapEntry.dependencies || {})) {
+      this._addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
     }
 
     // Add the optional dependencies of the dependency, and don't blow up if they don't exist
-    for (const [name, version] of Object.entries(shrinkwrapEntry.optionalDependencies || {})) {
+    for (const [dependencyName, dependencyVersion] of Object.entries(
+      shrinkwrapEntry.optionalDependencies || {}
+    )) {
       this._addDependencyRecursive(
         projectShrinkwrapMap,
-        name,
-        version,
+        dependencyName,
+        dependencyVersion,
         shrinkwrapEntry,
         /* throwIfShrinkwrapEntryMissing */ false
       );

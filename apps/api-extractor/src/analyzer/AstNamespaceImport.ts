@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
+import type * as ts from 'typescript';
 
-import { AstModule, AstModuleExportInfo } from './AstModule';
+import type { AstModule, AstModuleExportInfo } from './AstModule';
 import { AstSyntheticEntity } from './AstEntity';
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 
 export interface IAstNamespaceImportOptions {
   readonly astModule: AstModule;

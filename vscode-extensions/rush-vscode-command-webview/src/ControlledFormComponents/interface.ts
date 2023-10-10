@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Control, RegisterOptions, UseFormSetValue, FieldValues } from 'react-hook-form';
+import type { Control, RegisterOptions, UseFormSetValue, FieldValues } from 'react-hook-form';
 
 export interface IHookFormProps<V extends any = any, FV extends FieldValues = FieldValues> {
   control: Control<FV>;

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import webpack, { Compiler, Plugin } from 'webpack';
-import { ReplaceSource } from 'webpack-sources';
-import { Tapable, TapOptions } from 'tapable';
+import webpack, { type Compiler, type Plugin } from 'webpack';
+import type { ReplaceSource } from 'webpack-sources';
+import type { Tapable, TapOptions } from 'tapable';
 
 const { Template } = webpack;
 
 import { STAGE_AFTER } from './Constants';
-import {
+import type {
   IExtendedModule,
   IModuleMinifierPluginHooks,
   IPostProcessFragmentContext

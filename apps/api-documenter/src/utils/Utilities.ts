@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiParameterListMixin, ApiItem } from '@microsoft/api-extractor-model';
+import { ApiParameterListMixin, type ApiItem } from '@microsoft/api-extractor-model';
 
 export class Utilities {
   private static readonly _badFilenameCharsRegExp: RegExp = /[^a-z0-9_\-\.]/gi;

@@ -34,6 +34,7 @@ export class AnsiEscape {
 // @beta
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static getSignal(): [Promise<void>, () => void, (err: Error) => void];
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
@@ -220,7 +221,7 @@ export type FileLocationStyle = 'Unix' | 'VisualStudio';
 export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
-    static changePosixModeBits(path: string, mode: PosixModeBits): void;
+    static changePosixModeBits(path: string, modeBits: PosixModeBits): void;
     static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
@@ -794,6 +795,15 @@ export class MapExtensions {
     static toObject<TValue>(map: Map<string, TValue>): {
         [key: string]: TValue;
     };
+}
+
+// @beta
+export class MinimumHeap<T> {
+    constructor(comparator: (a: T, b: T) => number);
+    peek(): T | undefined;
+    poll(): T | undefined;
+    push(item: T): void;
+    get size(): number;
 }
 
 // @public

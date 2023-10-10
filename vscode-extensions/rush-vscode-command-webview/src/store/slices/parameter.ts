@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SliceCaseReducers, createSlice, Slice, PayloadAction } from '@reduxjs/toolkit';
+import { type SliceCaseReducers, createSlice, type Slice, type PayloadAction } from '@reduxjs/toolkit';
 import type { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import type { FieldValues } from 'react-hook-form';
 
@@ -53,9 +53,9 @@ export const parameterSlice: Slice<IParameterState, SliceCaseReducers<IParameter
 );
 
 function patchStateByFormValues(state: IParameterState, fieldValues: FieldValues): void {
-  for (const [key, value] of Object.entries(fieldValues)) {
-    if (typeof value === 'string') {
-      switch (value) {
+  for (const [key, fieldValue] of Object.entries(fieldValues)) {
+    if (typeof fieldValue === 'string') {
+      switch (fieldValue) {
         case '': {
           state.argsKV[key] = undefined;
           break;
@@ -69,12 +69,12 @@ function patchStateByFormValues(state: IParameterState, fieldValues: FieldValues
           break;
         }
         default: {
-          state.argsKV[key] = value;
+          state.argsKV[key] = fieldValue;
           break;
         }
       }
-    } else if (Array.isArray(value)) {
-      const filteredValue: string[] = value
+    } else if (Array.isArray(fieldValue)) {
+      const filteredValue: string[] = fieldValue
         .map(({ value }: { value: string | number }) => String(value))
         .filter(Boolean);
       if (filteredValue.length) {
@@ -83,7 +83,7 @@ function patchStateByFormValues(state: IParameterState, fieldValues: FieldValues
         state.argsKV[key] = [];
       }
     } else {
-      state.argsKV[key] = value;
+      state.argsKV[key] = fieldValue;
     }
   }
 }
