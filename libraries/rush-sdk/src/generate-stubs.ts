@@ -55,6 +55,7 @@ export async function runAsync(): Promise<void> {
   });
 
   const stubsTargetPath: string = path.resolve(__dirname, '../lib');
+  // eslint-disable-next-line no-console
   console.log('generate-stubs: Generating stub files under: ' + stubsTargetPath);
   generateLibFilesRecursively({
     parentSourcePath: path.join(rushLibFolder, 'lib'),
@@ -62,5 +63,6 @@ export async function runAsync(): Promise<void> {
     parentSrcImportPathWithSlash: '',
     libShimIndexPath: path.join(__dirname, '../lib-shim/index')
   });
+  // eslint-disable-next-line no-console
   console.log('generate-stubs: Completed successfully.');
 }

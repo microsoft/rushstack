@@ -59,6 +59,7 @@ export {
 } from './JsonSchema';
 export { LockFile } from './LockFile';
 export { MapExtensions } from './MapExtensions';
+export { MinimumHeap } from './MinimumHeap';
 export { PosixModeBits } from './PosixModeBits';
 export { ProtectableMap, IProtectableMapParameters } from './ProtectableMap';
 export { IPackageJsonLookupParameters, PackageJsonLookup } from './PackageJsonLookup';

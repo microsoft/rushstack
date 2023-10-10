@@ -15,9 +15,9 @@ export function run(): Promise<void> {
   const testsRoot: string = path.resolve(__dirname, '..');
 
   return new Promise((resolve, reject) => {
-    glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
-      if (err) {
-        return reject(err);
+    glob('**/**.test.js', { cwd: testsRoot }, (err1, files) => {
+      if (err1) {
+        return reject(err1);
       }
 
       // Add files to the test suite
@@ -32,9 +32,10 @@ export function run(): Promise<void> {
             resolve();
           }
         });
-      } catch (err) {
-        console.error(err);
-        reject(err);
+      } catch (err2) {
+        // eslint-disable-next-line no-console
+        console.error(err2);
+        reject(err2);
       }
     });
   });

@@ -4,7 +4,7 @@
 import type { IgnoreStringFunction, ILocalizationFile, IParseFileOptions } from './interfaces';
 import { parseLocJson } from './parsers/parseLocJson';
 import { parseResJson } from './parsers/parseResJson';
-import { IParseResxOptionsBase, parseResx } from './parsers/parseResx';
+import { type IParseResxOptionsBase, parseResx } from './parsers/parseResx';
 
 /**
  * @public

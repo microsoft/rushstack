@@ -15,8 +15,8 @@ import type {
 } from '../parameters/CommandLineDefinition';
 import type { ICommandLineParserOptions } from './CommandLineParser';
 import {
-  CommandLineParameter,
-  CommandLineParameterWithArgument,
+  type CommandLineParameter,
+  type CommandLineParameterWithArgument,
   CommandLineParameterKind
 } from '../parameters/BaseClasses';
 import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';

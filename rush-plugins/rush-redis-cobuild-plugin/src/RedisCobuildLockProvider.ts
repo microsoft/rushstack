@@ -3,7 +3,7 @@
 
 import { createClient } from '@redis/client';
 
-import {
+import type {
   ICobuildLockProvider,
   ICobuildContext,
   ICobuildCompletedState,

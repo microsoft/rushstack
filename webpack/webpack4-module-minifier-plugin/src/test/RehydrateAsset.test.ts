@@ -1,7 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { RawSource } from 'webpack-sources';
 import { rehydrateAsset } from '../RehydrateAsset';
 import { CHUNK_MODULES_TOKEN } from '../Constants';
-import { IAssetInfo, IModuleMap } from '../ModuleMinifierPlugin.types';
+import type { IAssetInfo, IModuleMap } from '../ModuleMinifierPlugin.types';
 
 const modules: IModuleMap = new Map();
 modules.set('a', {

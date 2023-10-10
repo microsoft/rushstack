@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AnsiEscape } from '@rushstack/node-core-library';
-import { TextRewriter, TextRewriterState } from './TextRewriter';
+import { TextRewriter, type TextRewriterState } from './TextRewriter';
 
 enum State {
   // Buffer is empty, and we're looking for the ESC character

@@ -3,16 +3,16 @@
 
 import { InternalError } from '@rushstack/node-core-library';
 import {
-  CommandLineParameter,
-  CommandLineParameterProvider,
+  type CommandLineParameter,
+  type CommandLineParameterProvider,
   CommandLineParameterKind,
-  CommandLineChoiceParameter,
-  CommandLineChoiceListParameter,
-  CommandLineFlagParameter,
-  CommandLineIntegerParameter,
-  CommandLineIntegerListParameter,
-  CommandLineStringParameter,
-  CommandLineStringListParameter
+  type CommandLineChoiceParameter,
+  type CommandLineChoiceListParameter,
+  type CommandLineFlagParameter,
+  type CommandLineIntegerParameter,
+  type CommandLineIntegerListParameter,
+  type CommandLineStringParameter,
+  type CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
 
 import type {

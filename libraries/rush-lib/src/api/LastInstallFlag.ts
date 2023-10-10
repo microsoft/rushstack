@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, IPackageJson, JsonObject, Path } from '@rushstack/node-core-library';
-
+import { type IPackageJson, JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
 import { BaseFlag } from './base/BaseFlag';
-import { PackageManagerName } from './packageManager/PackageManager';
-import { RushConfiguration } from './RushConfiguration';
+
+import type { PackageManagerName } from './packageManager/PackageManager';
+import type { RushConfiguration } from './RushConfiguration';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Selection } from '../logic/Selection';
 

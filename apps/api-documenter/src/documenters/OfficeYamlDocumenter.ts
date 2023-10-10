@@ -5,11 +5,11 @@ import colors from 'colors';
 import * as path from 'path';
 import yaml = require('js-yaml');
 
-import { ApiModel } from '@microsoft/api-extractor-model';
+import type { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@rushstack/node-core-library';
 
-import { IYamlTocItem } from '../yaml/IYamlTocFile';
-import { IYamlItem } from '../yaml/IYamlApiFile';
+import type { IYamlTocItem } from '../yaml/IYamlTocFile';
+import type { IYamlItem } from '../yaml/IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
 
 interface ISnippetsFile {

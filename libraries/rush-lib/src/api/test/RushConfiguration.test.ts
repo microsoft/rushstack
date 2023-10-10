@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import { JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
-import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
+import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { DependencyType } from '../PackageJsonEditor';

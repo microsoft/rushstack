@@ -4,7 +4,7 @@
 import path from 'path';
 
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { Async, ITerminal } from '@rushstack/node-core-library';
+import { Async, type ITerminal } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import type { RushConfigurationProject } from '@rushstack/rush-sdk';
 import rushProjectServeSchema from './schemas/rush-project-serve.schema.json';

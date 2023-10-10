@@ -1,6 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { cpus } from 'os';
 import { resolve } from 'path';
-import { Worker } from 'worker_threads';
+import type { Worker } from 'worker_threads';
 
 import type { Configuration } from 'webpack';
 
@@ -121,6 +124,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
       }
 
       ++processed;
+      // eslint-disable-next-line no-console
       console.log(
         `${processed}/${configCount} complete (${formatTime(process.hrtime.bigint() - startTime)})`
       );

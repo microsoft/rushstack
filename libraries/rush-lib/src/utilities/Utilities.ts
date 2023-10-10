@@ -5,19 +5,21 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
+import { PassThrough } from 'stream';
 import {
   JsonFile,
-  IPackageJson,
+  type IPackageJson,
   FileSystem,
   FileConstants,
-  FileSystemStats
+  type FileSystemStats
 } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
-import { PassThrough } from 'stream';
+import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UNINITIALIZED: UNINITIALIZED = 'UNINITIALIZED';
 
 export interface IEnvironment {
@@ -73,6 +75,11 @@ export interface ILifecycleCommandOptions {
    * If true, suppress the process's output, but if there is a nonzero exit code then print stderr
    */
   handleOutput: boolean;
+
+  /**
+   * an existing environment to copy instead of process.env
+   */
+  initialEnvironment?: IEnvironment;
 
   /**
    * Options for what should be added to the PATH variable
@@ -186,6 +193,7 @@ export class Utilities {
       const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
       // This logging statement isn't meaningful to the end-user. `fnName` should be updated
       // to something like `operationDescription`
+      // eslint-disable-next-line no-console
       console.log(`${fnName}() stalled for ${totalSeconds} seconds`);
     }
 
@@ -371,12 +379,16 @@ export class Utilities {
       try {
         Utilities.executeCommand(options);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('\nThe command failed:');
+        // eslint-disable-next-line no-console
         console.log(` ${options.command} ` + options.args.join(' '));
+        // eslint-disable-next-line no-console
         console.log(`ERROR: ${(error as Error).toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
+          // eslint-disable-next-line no-console
           console.log(`Trying again (attempt #${attemptNumber})...\n`);
           if (retryCallback) {
             retryCallback();
@@ -384,6 +396,7 @@ export class Utilities {
 
           continue;
         } else {
+          // eslint-disable-next-line no-console
           console.error(`Giving up after ${attemptNumber} attempts\n`);
           throw error;
         }
@@ -415,12 +428,16 @@ export class Utilities {
       try {
         await Utilities.executeCommandAndInspectOutputAsync(options, onStdoutStreamChunk);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('\nThe command failed:');
+        // eslint-disable-next-line no-console
         console.log(` ${options.command} ` + options.args.join(' '));
+        // eslint-disable-next-line no-console
         console.log(`ERROR: ${(error as Error).toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
+          // eslint-disable-next-line no-console
           console.log(`Trying again (attempt #${attemptNumber})...\n`);
           if (retryCallback) {
             retryCallback();
@@ -428,6 +445,7 @@ export class Utilities {
 
           continue;
         } else {
+          // eslint-disable-next-line no-console
           console.error(`Giving up after ${attemptNumber} attempts\n`);
           throw error;
         }
@@ -487,6 +505,7 @@ export class Utilities {
   public static installPackageInDirectory(options: IInstallPackageInDirectoryOptions): void {
     const directory: string = path.resolve(options.directory);
     if (FileSystem.exists(directory)) {
+      // eslint-disable-next-line no-console
       console.log('Deleting old files from ' + directory);
     }
 
@@ -507,6 +526,7 @@ export class Utilities {
       Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
     }
 
+    // eslint-disable-next-line no-console
     console.log('\nRunning "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
@@ -528,12 +548,15 @@ export class Utilities {
    */
   public static syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
+      // eslint-disable-next-line no-console
       console.log(`Copying "${sourcePath}"`);
+      // eslint-disable-next-line no-console
       console.log(`  --> "${destinationPath}"`);
       FileSystem.copyFile({ sourcePath, destinationPath });
     } else {
       if (FileSystem.exists(destinationPath)) {
         // If the source file doesn't exist and there is one in the target, delete the one in the target
+        // eslint-disable-next-line no-console
         console.log(`Deleting ${destinationPath}`);
         FileSystem.deleteFile(destinationPath);
       }
@@ -577,6 +600,7 @@ export class Utilities {
 
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
       initCwd: options.initCwd,
+      initialEnvironment: options.initialEnvironment,
       pathOptions: {
         ...options.environmentPathOptions,
         rushJsonFolder: options.rushConfiguration?.rushJsonFolder,
@@ -670,6 +694,9 @@ export class Utilities {
         );
       }
     }
+
+    // Communicate to downstream calls that they should not try to run hooks
+    environment[EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL] = '1';
 
     return environment;
   }

@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
 /// <reference lib="dom" />
 
 import * as path from 'path';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
-import { CompileResult, Syntax, Exception, compileStringAsync } from 'sass-embedded';
+import { type CompileResult, type Syntax, type Exception, compileStringAsync } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
 import { FileSystem, Sort } from '@rushstack/node-core-library';
-import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
+import { type IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
  * @public
@@ -336,8 +337,8 @@ function buildExtensionClassifier(sassConfiguration: ISassConfiguration): IExten
   };
 }
 
-function determineSyntaxFromFilePath(path: string): Syntax {
-  switch (path.substring(path.lastIndexOf('.'))) {
+function determineSyntaxFromFilePath(filePath: string): Syntax {
+  switch (filePath.substring(filePath.lastIndexOf('.'))) {
     case '.sass':
       return 'indented';
     case '.scss':

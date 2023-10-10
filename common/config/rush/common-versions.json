@@ -61,9 +61,9 @@
    */
   "allowedAlternativeVersions": {
     /**
-     * Used by build-tests/eslint-7-test
+     * Used by build-tests/eslint-7-7-test, build-tests/eslint-7-11-test, and build-tests/eslint-7-test
      */
-    "eslint": ["~7.30.0"],
+    "eslint": ["7.7.0", "7.11.0", "~7.30.0"],
     /**
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):

@@ -10,23 +10,23 @@ import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import { AstEntity } from '../analyzer/AstEntity';
-import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
+import type { AstEntity } from '../analyzer/AstEntity';
+import type { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
-import { DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
-import { ApiItemMetadata, IApiItemMetadataOptions } from './ApiItemMetadata';
+import { type DeclarationMetadata, InternalDeclarationMetadata } from './DeclarationMetadata';
+import { ApiItemMetadata, type IApiItemMetadataOptions } from './ApiItemMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
-import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeScriptInternals';
-import { MessageRouter } from './MessageRouter';
+import { TypeScriptInternals, type IGlobalVariableAnalyzer } from '../analyzer/TypeScriptInternals';
+import type { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstImport } from '../analyzer/AstImport';
-import { SourceMapper } from './SourceMapper';
+import type { SourceMapper } from './SourceMapper';
 
 /**
  * Options for Collector constructor.

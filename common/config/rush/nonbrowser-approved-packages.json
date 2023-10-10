@@ -443,11 +443,35 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "local-eslint-config",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "eslint-plugin-deprecation",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-header",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-import",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-jsdoc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "eslint-plugin-promise",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "eslint-plugin-react",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "eslint-plugin-react-hooks",
       "allowedCategories": [ "libraries" ]
     },
     {

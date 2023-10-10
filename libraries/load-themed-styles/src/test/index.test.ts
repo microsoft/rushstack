@@ -7,7 +7,7 @@ import {
   splitStyles,
   loadStyles,
   configureLoadStyles,
-  IThemingInstruction
+  type IThemingInstruction
 } from './../index';
 
 describe('detokenize', () => {

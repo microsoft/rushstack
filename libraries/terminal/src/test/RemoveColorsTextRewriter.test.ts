@@ -4,7 +4,7 @@
 import colors from 'colors';
 
 import { RemoveColorsTextRewriter } from '../RemoveColorsTextRewriter';
-import { TextRewriterState } from '../TextRewriter';
+import type { TextRewriterState } from '../TextRewriter';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
 function testCase(inputs: string[]): void {

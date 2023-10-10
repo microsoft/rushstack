@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve color logic when invoking package managers' install ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

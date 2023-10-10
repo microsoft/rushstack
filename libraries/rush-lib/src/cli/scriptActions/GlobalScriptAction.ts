@@ -5,10 +5,16 @@ import * as path from 'path';
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  type IPackageJson,
+  JsonFile,
+  AlreadyReportedError,
+  Text
+} from '@rushstack/node-core-library';
 
 import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle';
-import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
+import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Autoinstaller } from '../../logic/Autoinstaller';
@@ -179,6 +185,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     }
 
     if (exitCode > 0) {
+      // eslint-disable-next-line no-console
       console.log('\n' + colors.red(`The script failed with exit code ${exitCode}`));
       throw new AlreadyReportedError();
     }

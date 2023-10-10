@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Import, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, Import, InternalError, type ITerminal } from '@rushstack/node-core-library';
 
-import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { BuiltInPluginLoader, IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
-import { IRushPlugin } from './IRushPlugin';
+import type { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
+import type { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
-import { RushSession } from './RushSession';
-import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
+import type { RushSession } from './RushSession';
+import type { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
 import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 

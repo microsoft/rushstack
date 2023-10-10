@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonObject } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
 import { isMatch, merge } from '../../utilities/objectUtilities';
 
 /**

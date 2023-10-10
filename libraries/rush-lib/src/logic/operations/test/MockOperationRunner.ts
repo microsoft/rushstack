@@ -4,7 +4,7 @@
 import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { OperationStatus } from '../OperationStatus';
-import { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 
 export class MockOperationRunner implements IOperationRunner {
   private readonly _action: ((terminal: CollatedTerminal) => Promise<OperationStatus>) | undefined;

@@ -1,9 +1,9 @@
 {
   "dtsRollup": {
     "enabled": true,
-    "untrimmedFilePath": "<projectFolder>/etc/functionOverload/rollup.d.ts",
-    "alphaTrimmedFilePath": "<projectFolder>/etc/functionOverload/alpha-rollup.d.ts",
-    "betaTrimmedFilePath": "<projectFolder>/etc/functionOverload/beta-rollup.d.ts",
-    "publicTrimmedFilePath": "<projectFolder>/etc/functionOverload/public-rollup.d.ts"
+    "untrimmedFilePath": "<projectFolder>/temp/etc/functionOverload/rollup.d.ts",
+    "alphaTrimmedFilePath": "<projectFolder>/temp/etc/functionOverload/alpha-rollup.d.ts",
+    "betaTrimmedFilePath": "<projectFolder>/temp/etc/functionOverload/beta-rollup.d.ts",
+    "publicTrimmedFilePath": "<projectFolder>/temp/etc/functionOverload/public-rollup.d.ts"
   }
 }

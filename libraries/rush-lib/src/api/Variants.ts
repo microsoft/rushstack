@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
+import type { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
 
 /**
  * Namespace for utilities relating to the Variants feature.

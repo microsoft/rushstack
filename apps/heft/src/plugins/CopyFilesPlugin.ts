@@ -3,7 +3,7 @@
 
 import type * as fs from 'fs';
 import * as path from 'path';
-import { AlreadyExistsBehavior, FileSystem, Async, ITerminal } from '@rushstack/node-core-library';
+import { AlreadyExistsBehavior, FileSystem, Async, type ITerminal } from '@rushstack/node-core-library';
 
 import { Constants } from '../utilities/Constants';
 import {
@@ -14,7 +14,7 @@ import {
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
-import { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
+import type { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one

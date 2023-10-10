@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { OperationExecutionRecord } from './OperationExecutionRecord';
+import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import { OperationStatus } from './OperationStatus';
 
 /**
@@ -76,14 +76,17 @@ export class AsyncOperationQueue
     this._completedOperations.add(record);
 
     // Apply status changes to direct dependents
-    for (const item of record.consumers) {
-      // Remove this operation from the dependencies, to unblock the scheduler
-      if (
-        item.dependencies.delete(record) &&
-        item.dependencies.size === 0 &&
-        item.status === OperationStatus.Waiting
-      ) {
-        item.status = OperationStatus.Ready;
+    if (record.status !== OperationStatus.Failure && record.status !== OperationStatus.Blocked) {
+      // Only do so if the operation did not fail or get blocked
+      for (const item of record.consumers) {
+        // Remove this operation from the dependencies, to unblock the scheduler
+        if (
+          item.dependencies.delete(record) &&
+          item.dependencies.size === 0 &&
+          item.status === OperationStatus.Waiting
+        ) {
+          item.status = OperationStatus.Ready;
+        }
       }
     }
 

@@ -9,7 +9,7 @@ import {
   PackageJsonLookup,
   Import,
   FileSystem,
-  ITerminal
+  type ITerminal
 } from '@rushstack/node-core-library';
 import type { IRigConfig } from '@rushstack/rig-package';
 

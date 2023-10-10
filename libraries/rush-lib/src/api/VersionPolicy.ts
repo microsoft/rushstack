@@ -2,19 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, Enum } from '@rushstack/node-core-library';
+import { type IPackageJson, Enum } from '@rushstack/node-core-library';
 
 import {
-  IVersionPolicyJson,
-  ILockStepVersionJson,
-  IIndividualVersionJson,
+  type IVersionPolicyJson,
+  type ILockStepVersionJson,
+  type IIndividualVersionJson,
   VersionFormatForCommit,
   VersionFormatForPublish,
-  IVersionPolicyDependencyJson
+  type IVersionPolicyDependencyJson
 } from './VersionPolicyConfiguration';
-import { PackageJsonEditor } from './PackageJsonEditor';
-import { RushConfiguration } from './RushConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
+import type { PackageJsonEditor } from './PackageJsonEditor';
+import type { RushConfiguration } from './RushConfiguration';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import { cloneDeep } from '../utilities/objectUtilities';
 
 /**

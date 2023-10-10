@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, ITerminal } from '@rushstack/node-core-library';
+import { InternalError, type ITerminal } from '@rushstack/node-core-library';
 
 import { Stopwatch } from './Stopwatch';
 import type {
@@ -58,8 +58,10 @@ export interface IExecuteOperationContext extends Omit<IOperationRunnerContext, 
 
   /**
    * Function used to schedule the concurrency-limited execution of an operation.
+   *
+   * Will return OperationStatus.Aborted if execution is aborted before the task executes.
    */
-  queueWork<T>(workFn: () => Promise<T>, priority: number): Promise<T>;
+  queueWork(workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus>;
 
   /**
    * A callback to the overarching orchestrator to request that the operation be invoked again.
@@ -256,6 +258,7 @@ export class Operation implements IOperationStates {
       requestRun: requestRun
         ? () => {
             switch (this.state?.status) {
+              case OperationStatus.Waiting:
               case OperationStatus.Ready:
               case OperationStatus.Executing:
                 // If current status has not yet resolved to a fixed value,
@@ -278,13 +281,16 @@ export class Operation implements IOperationStates {
                 // to capture here.
                 return requestRun(this.name);
               default:
-                throw new InternalError(`Unexpected status: ${this.state?.status}`);
+                // This line is here to enforce exhaustiveness
+                const currentStatus: undefined = this.state?.status;
+                throw new InternalError(`Unexpected status: ${currentStatus}`);
             }
           }
         : undefined
     };
 
-    await queueWork(async () => {
+    // eslint-disable-next-line require-atomic-updates
+    state.status = await queueWork(async (): Promise<OperationStatus> => {
       // Redundant variable to satisfy require-atomic-updates
       const innerState: IOperationState = state;
 
@@ -331,6 +337,8 @@ export class Operation implements IOperationStates {
 
       state.stopwatch.stop();
       context.afterExecute(this, state);
+
+      return state.status;
     }, /* priority */ this.criticalPathLength ?? 0);
 
     return state.status;

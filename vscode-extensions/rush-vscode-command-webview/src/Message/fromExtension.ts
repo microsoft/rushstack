@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { store } from '../store';
-import { IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
+import { type IProjectState, initializeProjectInfo, onChangeProject } from '../store/slices/project';
 
 export type IFromExtensionMessage = IFromExtensionMessageInitialize;
 
@@ -15,6 +15,7 @@ export const fromExtensionListener: (event: MessageEvent<IFromExtensionMessage>)
   event: MessageEvent<IFromExtensionMessage>
 ) => {
   const message: IFromExtensionMessage = event.data;
+  // eslint-disable-next-line no-console
   console.log('message: ', message);
   switch (message.command) {
     case 'initialize': {

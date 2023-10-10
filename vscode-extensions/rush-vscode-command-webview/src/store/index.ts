@@ -3,9 +3,9 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import type { EnhancedStore } from '@reduxjs/toolkit';
-import parameterReducer, { IParameterState } from './slices/parameter';
-import uiReducer, { IUIState } from './slices/ui';
-import projectReducer, { IProjectState } from './slices/project';
+import parameterReducer, { type IParameterState } from './slices/parameter';
+import uiReducer, { type IUIState } from './slices/ui';
+import projectReducer, { type IProjectState } from './slices/project';
 
 export interface IRootState {
   parameter: IParameterState;
@@ -34,6 +34,7 @@ export const store: EnhancedStore<IRootState> = configureStore({
 });
 
 store.subscribe(() => {
+  // eslint-disable-next-line no-console
   console.log('store changes', store.getState());
 });
 
