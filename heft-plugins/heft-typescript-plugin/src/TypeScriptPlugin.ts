@@ -17,7 +17,7 @@ import type {
   IHeftTaskFileOperations
 } from '@rushstack/heft';
 
-import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
+import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
 

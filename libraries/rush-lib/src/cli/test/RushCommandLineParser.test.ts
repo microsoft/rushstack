@@ -22,7 +22,7 @@ import { FileSystem, JsonFile, Path, PackageJsonLookup } from '@rushstack/node-c
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
-import { ITelemetryData } from '../../logic/Telemetry';
+import type { ITelemetryData } from '../../logic/Telemetry';
 
 /**
  * See `__mocks__/child_process.js`.

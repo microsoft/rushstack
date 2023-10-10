@@ -1,6 +1,48 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 19 Sep 2023 15:21:51 GMT and should not be manually modified.
+This log was last generated on Sun, 01 Oct 2023 02:56:29 GMT and should not be manually modified.
+
+## 2.0.85
+Sun, 01 Oct 2023 02:56:29 GMT
+
+_Version update only_
+
+## 2.0.84
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 2.0.83
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 2.0.82
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 2.0.81
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 2.0.80
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 2.0.79
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 2.0.78
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
 
 ## 2.0.77
 Tue, 19 Sep 2023 15:21:51 GMT

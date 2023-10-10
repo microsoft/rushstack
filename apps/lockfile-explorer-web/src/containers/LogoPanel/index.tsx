@@ -13,16 +13,28 @@ export const LogoPanel = (): JSX.Element => {
     <div className={styles.LogoPanel}>
       <div className={styles.Icon}>
         <a href="https://lfx.rushstack.io/" target="_blank" rel="noreferrer">
-          <img className={styles.Image} src={require('./lockfile-explorer-icon.svg')} />
+          <img
+            className={styles.Image}
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            src={require('./lockfile-explorer-icon.svg')}
+          />
         </a>
       </div>
       <div>
         <a href="https://lfx.rushstack.io/" target="_blank" rel="noreferrer">
           <div className={styles.Title1}>
-            <img className={styles.Image} src={require('./lockfile-explorer-title-1.svg')} />
+            <img
+              className={styles.Image}
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              src={require('./lockfile-explorer-title-1.svg')}
+            />
           </div>
           <div className={styles.Title2}>
-            <img className={styles.Image} src={require('./lockfile-explorer-title-2.svg')} />
+            <img
+              className={styles.Image}
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              src={require('./lockfile-explorer-title-2.svg')}
+            />
           </div>
           <div className={styles.Detail}>{appPackageVersion}</div>
         </a>

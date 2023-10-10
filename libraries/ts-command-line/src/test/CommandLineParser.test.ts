@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
 
 class TestAction extends CommandLineAction {

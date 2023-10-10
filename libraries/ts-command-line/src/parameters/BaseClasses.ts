@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { IBaseCommandLineDefinition, IBaseCommandLineDefinitionWithArgument } from './CommandLineDefinition';
+import type {
+  IBaseCommandLineDefinition,
+  IBaseCommandLineDefinitionWithArgument
+} from './CommandLineDefinition';
 
 /**
  * Identifies the kind of a CommandLineParameter.

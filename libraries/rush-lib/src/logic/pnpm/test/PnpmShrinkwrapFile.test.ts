@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
+import { type DependencySpecifier, DependencySpecifierType } from '../../DependencySpecifier';
 import { PnpmShrinkwrapFile, parsePnpmDependencyKey } from '../PnpmShrinkwrapFile';
 import { RushConfiguration } from '../../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 
 const DEPENDENCY_NAME: string = 'dependency_name';
 const SCOPED_DEPENDENCY_NAME: string = '@scope/dependency_name';

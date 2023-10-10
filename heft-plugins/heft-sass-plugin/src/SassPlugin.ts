@@ -13,7 +13,7 @@ import type {
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
-import { ISassConfiguration, SassProcessor } from './SassProcessor';
+import { type ISassConfiguration, SassProcessor } from './SassProcessor';
 import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
 
 export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}

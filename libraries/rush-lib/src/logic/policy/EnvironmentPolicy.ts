@@ -38,6 +38,7 @@ export async function validateAsync(
         errorMessage += ` To ignore, use the "${RushConstants.bypassPolicyFlagLongName}" flag.`;
       }
 
+      // eslint-disable-next-line no-console
       console.error(errorMessage);
       throw new AlreadyReportedError();
     }

@@ -5,22 +5,22 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
-import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
-import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { IApiAbstractMixinOptions, ApiAbstractMixin } from '../mixins/ApiAbstractMixin';
+import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
+import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
+import { type IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
+import { type IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { type IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
+import { ApiReturnTypeMixin, type IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { type IApiAbstractMixinOptions, ApiAbstractMixin } from '../mixins/ApiAbstractMixin';
 import {
   ApiTypeParameterListMixin,
-  IApiTypeParameterListMixinOptions
+  type IApiTypeParameterListMixinOptions
 } from '../mixins/ApiTypeParameterListMixin';
-import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
+import { ApiOptionalMixin, type IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.

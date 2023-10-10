@@ -4,12 +4,12 @@
 import * as ts from 'typescript';
 
 import { InternalError } from '@rushstack/node-core-library';
-import { CollectorEntity } from '../collector/CollectorEntity';
+import type { CollectorEntity } from '../collector/CollectorEntity';
 import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { Collector } from '../collector/Collector';
-import { Span } from '../analyzer/Span';
-import { IndentedWriter } from './IndentedWriter';
+import type { Collector } from '../collector/Collector';
+import type { Span } from '../analyzer/Span';
+import type { IndentedWriter } from './IndentedWriter';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 
 /**

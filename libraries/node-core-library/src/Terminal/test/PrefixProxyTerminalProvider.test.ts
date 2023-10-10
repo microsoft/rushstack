@@ -4,7 +4,7 @@
 import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { PrefixProxyTerminalProvider } from '../PrefixProxyTerminalProvider';
-import { ITerminalProvider } from '../ITerminalProvider';
+import type { ITerminalProvider } from '../ITerminalProvider';
 
 function runTestsForTerminalProvider(
   getTerminalProvider: (terminalProvider: ITerminalProvider) => PrefixProxyTerminalProvider

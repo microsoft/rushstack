@@ -5,8 +5,13 @@ import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 import * as redisAPI from '@redis/client';
 import type { RedisClientType } from '@redis/client';
 
-import { ICobuildCompletedState, ICobuildContext, OperationStatus, RushSession } from '@rushstack/rush-sdk';
-import { IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from '../RedisCobuildLockProvider';
+import {
+  type ICobuildCompletedState,
+  type ICobuildContext,
+  OperationStatus,
+  RushSession
+} from '@rushstack/rush-sdk';
+import { type IRedisCobuildLockProviderOptions, RedisCobuildLockProvider } from '../RedisCobuildLockProvider';
 
 const rushSession: RushSession = new RushSession({
   terminalProvider: new ConsoleTerminalProvider(),

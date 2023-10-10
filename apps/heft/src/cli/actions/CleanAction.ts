@@ -18,7 +18,7 @@ import type { HeftTaskSession } from '../../pluginFramework/HeftTaskSession';
 import { Constants } from '../../utilities/Constants';
 import { definePhaseScopingParameters, expandPhases } from './RunAction';
 import { deleteFilesAsync, type IDeleteOperation } from '../../plugins/DeleteFilesPlugin';
-import { initializeHeft, runWithLoggingAsync } from '../HeftActionRunner';
+import { ensureCliAbortSignal, initializeHeft, runWithLoggingAsync } from '../HeftActionRunner';
 
 export class CleanAction extends CommandLineAction implements IHeftAction {
   public readonly watch: boolean = false;
@@ -78,7 +78,7 @@ export class CleanAction extends CommandLineAction implements IHeftAction {
 
   protected async onExecute(): Promise<void> {
     const { heftConfiguration } = this._internalHeftSession;
-    const abortSignal: AbortSignal = new AbortSignal();
+    const abortSignal: AbortSignal = ensureCliAbortSignal(this._terminal);
 
     initializeHeft(heftConfiguration, this._terminal, this._verboseFlag.value);
     await runWithLoggingAsync(

@@ -9,3 +9,5 @@ module.exports = {
   ],
   parserOptions: { tsconfigRootDir: __dirname }
 };
+
+// TODO : Add copyright rule

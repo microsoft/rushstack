@@ -44,7 +44,7 @@ function _trimNpmrcFile(sourceNpmrcPath: string): string {
     //remove spaces before or after key and value
     line = line
       .split('=')
-      .map((line) => line.trim())
+      .map((lineToTrim) => lineToTrim.trim())
       .join('=');
 
     // Ignore comment lines
@@ -122,7 +122,9 @@ export function syncNpmrc(
   useNpmrcPublish?: boolean,
   sourceNpmrcFilename?: string,
   logger: ILogger = {
+    // eslint-disable-next-line no-console
     info: console.log,
+    // eslint-disable-next-line no-console
     error: console.error
   }
 ): string | undefined {

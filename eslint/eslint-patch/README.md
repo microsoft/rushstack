@@ -55,7 +55,25 @@ This patch works by modifying the ESLint engine so that its module resolver will
 the referencing config file, rather than the project folder.  The patch is compatible with ESLint 6, 7, and 8.
 It also works with any editor extensions that load ESLint as a library.
 
-For an even leaner setup, `@your-company/eslint-config` can provide the patch as its own dependency.  See
+There is a second patch in this package that removes the restriction on eslint configuration package names.
+Similarly to the first, this patch is applied by adding a `require()` call to the top of the **.eslintrc.js**,
+for example:
+
+**.eslintrc.js**
+```ts
+require("@rushstack/eslint-patch/modern-module-resolution");
+require("@rushstack/eslint-patch/custom-config-package-names"); // <-- Add this line
+
+// Add your "extends" boilerplate here, for example:
+module.exports = {
+  extends: [
+    '@your-company/build-rig/profile/default/includes/eslint/node' // Notice the package name does not start with "eslint-config-"
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
+};
+```
+
+For an even leaner setup, `@your-company/eslint-config` can provide the patches as its own dependency.  See
 [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) for a real world example
 and recommended approach.
 

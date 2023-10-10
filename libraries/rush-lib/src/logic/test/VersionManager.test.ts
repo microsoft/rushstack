@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
 
 import { BumpType } from '../../api/VersionPolicy';
-import { ChangeFile } from '../../api/ChangeFile';
-import { ChangeType, IChangeInfo } from '../../api/ChangeManagement';
+import type { ChangeFile } from '../../api/ChangeFile';
+import { ChangeType, type IChangeInfo } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
 

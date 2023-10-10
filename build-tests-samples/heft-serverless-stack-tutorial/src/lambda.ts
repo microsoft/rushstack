@@ -1,4 +1,7 @@
-import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   return {

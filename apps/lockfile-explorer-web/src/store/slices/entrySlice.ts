@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
-import { LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
-import { RootState } from '../index';
+import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
+import { type LockfileEntry, LockfileEntryFilter } from '../../parsing/LockfileEntry';
+import type { RootState } from '../index';
 import {
   getBookmarksFromStorage,
   removeBookmarkFromLocalStorage,

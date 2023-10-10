@@ -11,6 +11,7 @@ export class RushStartupBanner {
     const nodeVersion: string = this._formatNodeVersion();
     const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
         colors.bold(`Rush Multi-Project Build Tool${versionSuffix}`) +
@@ -23,6 +24,7 @@ export class RushStartupBanner {
     const nodeVersion: string = this._formatNodeVersion();
     const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
 
+    // eslint-disable-next-line no-console
     console.log(colors.bold(`Rush Multi-Project Build Tool${versionSuffix}`) + ` - Node.js ${nodeVersion}`);
   }
 

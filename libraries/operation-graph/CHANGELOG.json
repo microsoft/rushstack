@@ -2,6 +2,52 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/operation-graph_v0.2.0",
+      "date": "Thu, 28 Sep 2023 20:53:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enforce task concurrency limits and respect priority for sequencing."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.61.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/operation-graph_v0.1.2",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.60.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/operation-graph_v0.1.1",
+      "date": "Mon, 25 Sep 2023 23:38:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add OperationStatus.Waiting to possible states in watcher loop, add exhaustiveness check."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/operation-graph_v0.1.0",
       "date": "Tue, 19 Sep 2023 15:21:51 GMT",

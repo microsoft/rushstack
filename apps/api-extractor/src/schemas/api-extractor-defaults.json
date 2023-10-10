@@ -69,6 +69,9 @@
         "logLevel": "warning",
         "addToApiReportFile": true
       },
+      "ae-undocumented": {
+        "logLevel": "none"
+      },
       "ae-unresolved-inheritdoc-reference": {
         "logLevel": "warning",
         "addToApiReportFile": true

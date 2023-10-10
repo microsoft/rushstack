@@ -33,6 +33,7 @@ export interface ILoadThemedStylesLoaderOptions {
  * @public
  */
 
+// eslint-disable-next-line func-style
 export const pitch: PitchLoaderDefinitionFunction<ILoadThemedStylesLoaderOptions> = function (
   this: LoaderContext<ILoadThemedStylesLoaderOptions>,
   remainingRequest: string

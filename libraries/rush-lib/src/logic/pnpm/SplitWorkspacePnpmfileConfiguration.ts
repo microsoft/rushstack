@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Import, IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, Import, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import * as splitWorkspaceGlobalPnpmfile from './SplitWorkspaceGlobalPnpmfileShim';
 import { splitWorkspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 

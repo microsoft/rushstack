@@ -1,6 +1,7 @@
-import webpack = require('webpack');
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
+import webpack = require('webpack');
 
 import { LoadThemedStylesLoader } from './../LoadThemedStylesLoader';
 import LoadThemedStylesMock = require('./testData/LoadThemedStylesMock');

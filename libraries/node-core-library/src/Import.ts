@@ -8,7 +8,7 @@ import nodeModule = require('module');
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { FileSystem } from './FileSystem';
-import { IPackageJson } from './IPackageJson';
+import type { IPackageJson } from './IPackageJson';
 import { PackageName } from './PackageName';
 
 type RealpathFnType = Parameters<typeof Resolve.default>[1]['realpath'];

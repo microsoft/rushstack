@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 import colors from 'colors/safe';
-import { IPhase } from '../../api/CommandLineConfiguration';
-import {
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { IExecutionResult } from './IOperationExecutionResult';
+import type { IExecutionResult } from './IOperationExecutionResult';
 import { OperationStatus } from './OperationStatus';
-import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 
 const PLUGIN_NAME: 'ConsoleTimelinePlugin' = 'ConsoleTimelinePlugin';
 

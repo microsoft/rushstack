@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tsdoc from '@microsoft/tsdoc';
-import { ReleaseTag } from '@microsoft/api-extractor-model';
+import type * as tsdoc from '@microsoft/tsdoc';
+import type { ReleaseTag } from '@microsoft/api-extractor-model';
 import { VisitorState } from './VisitorState';
 
 /**
@@ -76,7 +76,7 @@ export class ApiItemMetadata {
   public tsdocComment: tsdoc.DocComment | undefined;
 
   // Assigned by DocCommentEnhancer
-  public needsDocumentation: boolean = true;
+  public undocumented: boolean = true;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 

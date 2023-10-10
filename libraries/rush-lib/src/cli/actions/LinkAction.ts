@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 
-import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
+import type { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
 export class LinkAction extends BaseRushAction {

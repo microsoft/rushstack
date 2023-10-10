@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CobuildLock, ICobuildLockOptions } from '../CobuildLock';
+import { CobuildLock, type ICobuildLockOptions } from '../CobuildLock';
 
 import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
 import type { ProjectBuildCache } from '../../buildCache/ProjectBuildCache';

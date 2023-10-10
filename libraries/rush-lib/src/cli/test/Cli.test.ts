@@ -48,8 +48,6 @@ describe('CLI', () => {
       `${__dirname}/repo/rushx-not-in-rush-project`
     );
 
-    console.log(output);
-
     expect(output).toEqual(
       expect.stringMatching(
         'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'

@@ -62,6 +62,7 @@ export class PublishUtilities {
       versionPolicyChanges: new Map<string, IVersionPolicyChangeInfo>()
     };
 
+    // eslint-disable-next-line no-console
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
     const files: string[] = await changeFiles.getFilesAsync();
@@ -132,6 +133,7 @@ export class PublishUtilities {
         });
 
         if (projectHasChanged) {
+          // eslint-disable-next-line no-console
           console.log(
             `\n* APPLYING: update ${project.packageName} to version ${versionPolicyChange.newVersion}`
           );
@@ -270,6 +272,7 @@ export class PublishUtilities {
       commandArgs = Text.replaceAll(commandArgs, secretSubstring, '<<SECRET>>');
     }
 
+    // eslint-disable-next-line no-console
     console.log(
       `\n* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandArgs} ${relativeDirectory}`
     );
@@ -409,11 +412,13 @@ export class PublishUtilities {
       : PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
+      // eslint-disable-next-line no-console
       console.log(
         `\n* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
           `for ${change.packageName} to ${newVersion}`
       );
     } else {
+      // eslint-disable-next-line no-console
       console.log(
         `\n* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update for ${change.packageName} at ${newVersion}`
       );
@@ -456,6 +461,7 @@ export class PublishUtilities {
 
     change.changes!.forEach((subChange) => {
       if (subChange.comment) {
+        // eslint-disable-next-line no-console
         console.log(` - [${ChangeType[subChange.changeType!]}] ${subChange.comment}`);
       }
     });
@@ -578,6 +584,7 @@ export class PublishUtilities {
     const project: RushConfigurationProject | undefined = allPackages.get(packageName);
 
     if (!project) {
+      // eslint-disable-next-line no-console
       console.log(
         `The package ${packageName} was requested for publishing but does not exist. Skip this change.`
       );

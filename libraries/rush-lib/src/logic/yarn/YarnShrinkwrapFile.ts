@@ -2,12 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { FileSystem, IParsedPackageNameOrError, InternalError, Import } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  type IParsedPackageNameOrError,
+  InternalError,
+  Import
+} from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
-import { DependencySpecifier } from '../DependencySpecifier';
+import type { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 
 /**
  * @yarnpkg/lockfile doesn't have types

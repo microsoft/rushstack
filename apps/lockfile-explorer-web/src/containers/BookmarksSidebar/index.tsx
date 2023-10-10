@@ -5,7 +5,7 @@ import React, { useCallback } from 'react';
 import appStyles from '../../App.scss';
 import styles from './styles.scss';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { LockfileEntry } from '../../parsing/LockfileEntry';
+import type { LockfileEntry } from '../../parsing/LockfileEntry';
 import { clearStackAndPush, removeBookmark } from '../../store/slices/entrySlice';
 import { Button, ScrollArea, Text } from '@rushstack/rush-themed-ui';
 
@@ -17,13 +17,13 @@ export const BookmarksSidebar = (): JSX.Element => {
     (entry: LockfileEntry) => () => {
       dispatch(clearStackAndPush(entry));
     },
-    []
+    [dispatch]
   );
   const deleteEntry = useCallback(
     (entry: LockfileEntry) => () => {
       dispatch(removeBookmark(entry));
     },
-    []
+    [dispatch]
   );
 
   return (

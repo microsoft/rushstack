@@ -1,5 +1,8 @@
-import { ISpecChange } from '../parsing/compareSpec';
-import { LockfileEntry } from '../parsing/LockfileEntry';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { ISpecChange } from '../parsing/compareSpec';
+import type { LockfileEntry } from '../parsing/LockfileEntry';
 
 export const isEntryModified = (
   entry: LockfileEntry | undefined,

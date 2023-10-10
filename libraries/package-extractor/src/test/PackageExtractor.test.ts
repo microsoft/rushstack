@@ -392,4 +392,38 @@ describe(PackageExtractor.name, () => {
       )
     ).toBe(true);
   });
+
+  it('should include folderToCopy', async () => {
+    const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-09');
+
+    await expect(
+      packageExtractor.extractAsync({
+        mainProjectName: project1PackageName,
+        sourceRootFolder: repoRoot,
+        targetRootFolder: targetFolder,
+        overwriteExisting: true,
+        projectConfigurations: [
+          {
+            projectName: project1PackageName,
+            projectFolder: project1Path
+          }
+        ],
+        folderToCopy: project2Path,
+        terminal,
+        createArchiveOnly: false,
+        includeNpmIgnoreFiles: true,
+        linkCreation: 'default',
+        includeDevDependencies: true
+      })
+    ).resolves.not.toThrow();
+
+    // Validate project 1 files
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(true);
+    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(true);
+
+    // Validate project 2 files
+    const project2FolderName: string = path.basename(project2Path);
+    expect(FileSystem.exists(path.join(targetFolder, project2FolderName, 'package.json'))).toBe(true);
+    expect(FileSystem.exists(path.join(targetFolder, project2FolderName, 'src', 'index.js'))).toBe(true);
+  });
 });

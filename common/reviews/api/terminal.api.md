@@ -4,8 +4,8 @@
 
 ```ts
 
-import { Brand } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/node-core-library';
+import type { Brand } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 
 // @public

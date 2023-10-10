@@ -1,29 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IApiItemJson, IApiItemOptions, ApiItem, ApiItemKind } from '../items/ApiItem';
-import { ApiClass, IApiClassOptions, IApiClassJson } from './ApiClass';
-import { ApiEntryPoint, IApiEntryPointOptions } from './ApiEntryPoint';
-import { ApiMethod, IApiMethodOptions } from './ApiMethod';
+import { type IApiItemJson, type IApiItemOptions, type ApiItem, ApiItemKind } from '../items/ApiItem';
+import { ApiClass, type IApiClassOptions, type IApiClassJson } from './ApiClass';
+import { ApiEntryPoint, type IApiEntryPointOptions } from './ApiEntryPoint';
+import { ApiMethod, type IApiMethodOptions } from './ApiMethod';
 import { ApiModel } from './ApiModel';
-import { ApiNamespace, IApiNamespaceOptions } from './ApiNamespace';
-import { ApiPackage, IApiPackageOptions, IApiPackageJson } from './ApiPackage';
-import { ApiInterface, IApiInterfaceOptions, IApiInterfaceJson } from './ApiInterface';
-import { ApiPropertySignature, IApiPropertySignatureOptions } from './ApiPropertySignature';
-import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSignature';
-import { ApiProperty, IApiPropertyOptions } from './ApiProperty';
-import { ApiEnumMember, IApiEnumMemberOptions } from './ApiEnumMember';
-import { ApiEnum, IApiEnumOptions } from './ApiEnum';
-import { IApiPropertyItemJson } from '../items/ApiPropertyItem';
-import { ApiConstructor, IApiConstructorOptions } from './ApiConstructor';
-import { ApiConstructSignature, IApiConstructSignatureOptions } from './ApiConstructSignature';
-import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
-import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
-import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
-import { ApiTypeAlias, IApiTypeAliasOptions, IApiTypeAliasJson } from './ApiTypeAlias';
-import { ApiVariable, IApiVariableOptions, IApiVariableJson } from './ApiVariable';
-import { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
-import { DeserializerContext } from './DeserializerContext';
+import { ApiNamespace, type IApiNamespaceOptions } from './ApiNamespace';
+import { ApiPackage, type IApiPackageOptions, type IApiPackageJson } from './ApiPackage';
+import { ApiInterface, type IApiInterfaceOptions, type IApiInterfaceJson } from './ApiInterface';
+import { ApiPropertySignature, type IApiPropertySignatureOptions } from './ApiPropertySignature';
+import { ApiMethodSignature, type IApiMethodSignatureOptions } from './ApiMethodSignature';
+import { ApiProperty, type IApiPropertyOptions } from './ApiProperty';
+import { ApiEnumMember, type IApiEnumMemberOptions } from './ApiEnumMember';
+import { ApiEnum, type IApiEnumOptions } from './ApiEnum';
+import type { IApiPropertyItemJson } from '../items/ApiPropertyItem';
+import { ApiConstructor, type IApiConstructorOptions } from './ApiConstructor';
+import { ApiConstructSignature, type IApiConstructSignatureOptions } from './ApiConstructSignature';
+import { ApiFunction, type IApiFunctionOptions } from './ApiFunction';
+import { ApiCallSignature, type IApiCallSignatureOptions } from './ApiCallSignature';
+import { ApiIndexSignature, type IApiIndexSignatureOptions } from './ApiIndexSignature';
+import { ApiTypeAlias, type IApiTypeAliasOptions, type IApiTypeAliasJson } from './ApiTypeAlias';
+import { ApiVariable, type IApiVariableOptions, type IApiVariableJson } from './ApiVariable';
+import type { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
+import type { DeserializerContext } from './DeserializerContext';
 
 export class Deserializer {
   public static deserialize(context: DeserializerContext, jsonObject: IApiItemJson): ApiItem {

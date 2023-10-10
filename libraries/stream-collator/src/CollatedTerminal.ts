@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk, TerminalChunkKind, TerminalWritable } from '@rushstack/terminal';
+import { type ITerminalChunk, TerminalChunkKind, type TerminalWritable } from '@rushstack/terminal';
 
 /**
  * This API was introduced as a temporary measure.

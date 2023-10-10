@@ -21,21 +21,21 @@ export const SelectedEntryPreview = (): JSX.Element => {
 
   const entryStack = useAppSelector((state) => state.entry.selectedEntryStack);
   const entryForwardStack = useAppSelector((state) => state.entry.selectedEntryForwardStack);
-  const useDispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
   const bookmark = useCallback(() => {
-    if (selectedEntry) useDispatch(addBookmark(selectedEntry));
-  }, [selectedEntry]);
+    if (selectedEntry) dispatch(addBookmark(selectedEntry));
+  }, [dispatch, selectedEntry]);
   const deleteEntry = useCallback(() => {
-    if (selectedEntry) useDispatch(removeBookmark(selectedEntry));
-  }, [selectedEntry]);
+    if (selectedEntry) dispatch(removeBookmark(selectedEntry));
+  }, [dispatch, selectedEntry]);
 
   const pop = useCallback(() => {
-    useDispatch(popStack());
-  }, []);
+    dispatch(popStack());
+  }, [dispatch]);
   const forward = useCallback(() => {
-    useDispatch(forwardStack());
-  }, []);
+    dispatch(forwardStack());
+  }, [dispatch]);
 
   const renderButtonRow = (): JSX.Element => {
     return (

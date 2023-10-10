@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { terminal } from '../logic/logger';
 import { RushWorkspace } from '../logic/RushWorkspace';
 
-import { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
+import type { CommandLineAction } from '@rushstack/rush-vscode-command-webview';
 
 interface IRushCommandParams {
   label: string;
@@ -39,8 +39,8 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   public constructor(context: vscode.ExtensionContext) {
     this._context = context;
     const rushWorkspace: RushWorkspace = RushWorkspace.getCurrentInstance();
-    RushWorkspace.onDidChangeWorkspace((rushWorkspace: RushWorkspace) => {
-      this._commandLineActions = rushWorkspace.commandLineActions;
+    RushWorkspace.onDidChangeWorkspace((newWorkspace: RushWorkspace) => {
+      this._commandLineActions = newWorkspace.commandLineActions;
       this.refresh();
     });
     this._commandLineActions = rushWorkspace.commandLineActions;
@@ -114,7 +114,9 @@ export class RushCommandsProvider implements vscode.TreeDataProvider<RushCommand
   }
 
   public getChildren(element?: vscode.TreeItem): Thenable<RushCommand[]> {
+    // eslint-disable-next-line no-console
     console.log('children: ', this._commandLineActions);
+    // eslint-disable-next-line no-console
     console.log('element: ', element);
     if (!this._commandLineActions) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises

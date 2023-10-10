@@ -1,25 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.s
+// See LICENSE in the project root for license information.
+
+/* eslint-disable @typescript-eslint/no-redeclare */
 
 import {
   ApiItem,
   apiItem_onParentChanged,
-  IApiItemJson,
-  IApiItemOptions,
-  IApiItemConstructor,
+  type IApiItemJson,
+  type IApiItemOptions,
+  type IApiItemConstructor,
   ApiItemKind
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
-import { DeserializerContext } from '../model/DeserializerContext';
-import { ApiModel } from '../model/ApiModel';
-import { ApiClass } from '../model/ApiClass';
-import { ApiInterface } from '../model/ApiInterface';
-import { ExcerptToken, ExcerptTokenKind } from './Excerpt';
-import { IFindApiItemsResult, IFindApiItemsMessage, FindApiItemsMessageId } from './IFindApiItemsResult';
+import type { DeserializerContext } from '../model/DeserializerContext';
+import type { ApiModel } from '../model/ApiModel';
+import type { ApiClass } from '../model/ApiClass';
+import type { ApiInterface } from '../model/ApiInterface';
+import { type ExcerptToken, ExcerptTokenKind } from './Excerpt';
+import {
+  type IFindApiItemsResult,
+  type IFindApiItemsMessage,
+  FindApiItemsMessageId
+} from './IFindApiItemsResult';
 import { InternalError } from '@rushstack/node-core-library';
-import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { HeritageType } from '../model/HeritageType';
-import { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
+import type { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
+import type { HeritageType } from '../model/HeritageType';
+import type { IResolveDeclarationReferenceResult } from '../model/ModelReferenceResolver';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.

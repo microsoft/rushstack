@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfigurationProject } from '../RushConfigurationProject';
+import type { RushConfigurationProject } from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { PackageJsonEditor } from '../PackageJsonEditor';
 import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
-import { VersionMismatchFinderEntity } from '../../logic/versionMismatch/VersionMismatchFinderEntity';
+import type { VersionMismatchFinderEntity } from '../../logic/versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from '../../logic/versionMismatch/VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions';
 

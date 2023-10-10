@@ -8,8 +8,9 @@ import type {
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
-import { BaseRushAction, IBaseRushActionOptions } from './BaseRushAction';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
@@ -20,8 +21,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
-import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import { ConsoleTerminalProvider, ITerminal, Terminal } from '@rushstack/node-core-library';
+import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -36,6 +36,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _debugPackageManagerParameter: CommandLineFlagParameter;
   protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
+  protected readonly _offlineParameter: CommandLineFlagParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -88,6 +89,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
+    this._offlineParameter = this.defineFlagParameter({
+      parameterLongName: '--offline',
+      description:
+        `Enables installation to be performed without internet access. PNPM will instead report an error` +
+        ` if the necessary NPM packages cannot be obtained from the local cache.` +
+        ` For details, see the documentation for PNPM's "--offline" parameter.`
+    });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
@@ -117,8 +125,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
     if (this._purgeParameter.value!) {
+      // eslint-disable-next-line no-console
       console.log('The --purge flag was specified, so performing "rush purge"');
       purgeManager.purgeNormal();
+      // eslint-disable-next-line no-console
       console.log('');
     }
 
@@ -156,6 +166,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       await installManager.doInstallAsync();
 
       if (warnAboutScriptUpdate) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
             colors.yellow(
@@ -165,6 +176,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         );
       }
 
+      // eslint-disable-next-line no-console
       console.log(
         '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
       );
@@ -172,7 +184,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       installSuccessful = false;
       throw error;
     } finally {
-      purgeManager.deleteAll();
+      await purgeManager.startDeleteAllAsync();
       stopwatch.stop();
 
       this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);

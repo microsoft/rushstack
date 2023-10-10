@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { Label } from '@fluentui/react';
-import { AnyAction, Dispatch } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch } from '@reduxjs/toolkit';
 import * as React from 'react';
-import { CSSProperties, useEffect } from 'react';
+import { type CSSProperties, useEffect } from 'react';
 
 import { useAppDispatch } from '../store/hooks';
-import { ICommandLineParameter, useFilteredParameters } from '../store/slices/parameter';
+import { type ICommandLineParameter, useFilteredParameters } from '../store/slices/parameter';
 import {
   setUserSelectedParameterName,
   useCurrentParameterName,

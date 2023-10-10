@@ -12,7 +12,7 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { Operation } from './Operation';
+import type { Operation } from './Operation';
 
 const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -112,8 +112,8 @@ function getScriptToRun(
   if (!rawCommand) {
     return '';
   } else {
-    const shellCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
-    return process.platform === 'win32' ? convertSlashesForWindows(shellCommand) : shellCommand;
+    const fullCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
+    return process.platform === 'win32' ? convertSlashesForWindows(fullCommand) : fullCommand;
   }
 }
 

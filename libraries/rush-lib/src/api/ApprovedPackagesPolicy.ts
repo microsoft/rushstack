@@ -5,7 +5,11 @@ import * as path from 'path';
 
 import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { RushConfiguration, IRushConfigurationJson, IApprovedPackagesPolicyJson } from './RushConfiguration';
+import type {
+  RushConfiguration,
+  IRushConfigurationJson,
+  IApprovedPackagesPolicyJson
+} from './RushConfiguration';
 
 /**
  * This is a helper object for RushConfiguration.

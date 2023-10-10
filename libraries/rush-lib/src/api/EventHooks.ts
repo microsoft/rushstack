@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IEventHooksJson } from './RushConfiguration';
+import type { IEventHooksJson } from './RushConfiguration';
 import { Enum } from '@rushstack/node-core-library';
 
 /**
@@ -24,7 +24,15 @@ export enum Event {
   /**
    * Post Rush build event
    */
-  postRushBuild = 4
+  postRushBuild = 4,
+  /**
+   * Start of rushx execution event
+   */
+  preRushx = 5,
+  /**
+   * End of rushx execution event
+   */
+  postRushx = 6
 }
 
 /**

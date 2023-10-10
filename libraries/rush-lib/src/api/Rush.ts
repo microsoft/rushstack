@@ -5,8 +5,8 @@ import * as path from 'path';
 
 import {
   InternalError,
-  IPackageJson,
-  ITerminalProvider,
+  type IPackageJson,
+  type ITerminalProvider,
   PackageJsonLookup
 } from '@rushstack/node-core-library';
 
@@ -17,7 +17,7 @@ import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
-import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 
 /**
@@ -40,16 +40,23 @@ export interface ILaunchOptions {
   alreadyReportedNodeTooNewError?: boolean;
 
   /**
-   * Used to specify Rush plugins that are dependencies of the "\@microsoft/rush" package.
+   * Pass along the terminal provider from the CLI version selector.
    *
+   * @privateRemarks
+   * We should remove this.  The version selector package can be very old.  It's unwise for
+   * `rush-lib` to rely on a potentially ancient `ITerminalProvider` implementation.
+   */
+  terminalProvider?: ITerminalProvider;
+
+  /**
+   * Used only by `@microsoft/rush/lib/start-dev.js` during development.
+   * Specifies Rush devDependencies of the `@microsoft/rush` to be manually loaded.
+   *
+   * @remarks
+   * Marked as `@internal` because `IBuiltInPluginConfiguration` is internal.
    * @internal
    */
   builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
-
-  /**
-   * Used to specify terminal how to write a message
-   */
-  terminalProvider?: ITerminalProvider;
 }
 
 /**
@@ -72,8 +79,8 @@ export class Rush {
    *
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
-  public static launch(launcherVersion: string, arg: ILaunchOptions): void {
-    const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
+  public static launch(launcherVersion: string, options: ILaunchOptions): void {
+    options = Rush._normalizeLaunchOptions(options);
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
@@ -90,6 +97,7 @@ export class Rush {
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
       builtInPluginConfigurations: options.builtInPluginConfigurations
     });
+    // eslint-disable-next-line no-console
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
@@ -100,9 +108,8 @@ export class Rush {
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
-
     Rush._assignRushInvokedFolder();
-    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
+    RushXCommandLine.launchRushX(launcherVersion, options);
   }
 
   /**

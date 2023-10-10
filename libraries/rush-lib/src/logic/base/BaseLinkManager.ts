@@ -6,15 +6,15 @@ import * as path from 'path';
 
 import {
   FileSystem,
-  FileSystemStats,
-  IFileSystemCreateLinkOptions,
+  type FileSystemStats,
+  type IFileSystemCreateLinkOptions,
   InternalError
 } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { BasePackage } from './BasePackage';
+import type { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
@@ -95,6 +95,7 @@ export abstract class BaseLinkManager {
 
     // The root-level folder is the project itself, so we simply delete its node_modules
     // to start clean
+    // eslint-disable-next-line no-console
     console.log('Purging ' + localModuleFolder);
     Utilities.dangerouslyDeletePath(localModuleFolder);
 
@@ -189,6 +190,7 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -198,7 +200,9 @@ export abstract class BaseLinkManager {
     LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
 
     stopwatch.stop();
+    // eslint-disable-next-line no-console
     console.log('\n' + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    // eslint-disable-next-line no-console
     console.log('\nNext you should probably run "rush build" or "rush rebuild"');
   }
 
