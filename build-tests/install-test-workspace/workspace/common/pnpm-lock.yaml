@@ -11,8 +11,8 @@ importers:
   rush-lib-test:
     dependencies:
       '@microsoft/rush-lib':
-        specifier: file:microsoft-rush-lib-5.107.4.tgz
-        version: file:../temp/tarballs/microsoft-rush-lib-5.107.4.tgz(@types/node@18.17.15)
+        specifier: file:microsoft-rush-lib-5.109.1.tgz
+        version: file:../temp/tarballs/microsoft-rush-lib-5.109.1.tgz(@types/node@18.17.15)
       colors:
         specifier: ^1.4.0
         version: 1.4.0
@@ -30,15 +30,15 @@ importers:
   rush-sdk-test:
     dependencies:
       '@rushstack/rush-sdk':
-        specifier: file:rushstack-rush-sdk-5.107.4.tgz
-        version: file:../temp/tarballs/rushstack-rush-sdk-5.107.4.tgz(@types/node@18.17.15)
+        specifier: file:rushstack-rush-sdk-5.109.1.tgz
+        version: file:../temp/tarballs/rushstack-rush-sdk-5.109.1.tgz(@types/node@18.17.15)
       colors:
         specifier: ^1.4.0
         version: 1.4.0
     devDependencies:
       '@microsoft/rush-lib':
-        specifier: file:microsoft-rush-lib-5.107.4.tgz
-        version: file:../temp/tarballs/microsoft-rush-lib-5.107.4.tgz(@types/node@18.17.15)
+        specifier: file:microsoft-rush-lib-5.109.1.tgz
+        version: file:../temp/tarballs/microsoft-rush-lib-5.109.1.tgz(@types/node@18.17.15)
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
@@ -1232,7 +1232,6 @@ packages:
 
   /debuglog@1.0.1:
     resolution: {integrity: sha512-syBZ+rnAK3EgMsH2aYEOLUW7mZSY9Gb+0wUMCFsZvcmiz+HigA0LOcq/HoQqVuGG+EKykunc7QG2bzrponfaSw==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   /decamelize-keys@1.1.1:
     resolution: {integrity: sha512-WiPxgEirIV0/eIOMcnFBA3/IJZAZqKnwAwWyvvdi4lsr1WCN22nhdf/3db3DoZcUjTV2SqfzIwNyp6y2xs3nmg==}
@@ -3923,11 +3922,11 @@ packages:
     optionalDependencies:
       commander: 2.20.3
 
-  file:../temp/tarballs/microsoft-rush-lib-5.107.4.tgz(@types/node@18.17.15):
-    resolution: {tarball: file:../temp/tarballs/microsoft-rush-lib-5.107.4.tgz}
-    id: file:../temp/tarballs/microsoft-rush-lib-5.107.4.tgz
+  file:../temp/tarballs/microsoft-rush-lib-5.109.1.tgz(@types/node@18.17.15):
+    resolution: {tarball: file:../temp/tarballs/microsoft-rush-lib-5.109.1.tgz}
+    id: file:../temp/tarballs/microsoft-rush-lib-5.109.1.tgz
     name: '@microsoft/rush-lib'
-    version: 5.107.4
+    version: 5.109.1
     engines: {node: '>=5.6.0'}
     dependencies:
       '@pnpm/dependency-path': 2.1.2
@@ -3955,6 +3954,7 @@ packages:
       inquirer: 7.3.3
       js-yaml: 3.13.1
       node-fetch: 2.6.7
+      normalize-path: 3.0.0
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
       read-package-tree: 5.1.6
@@ -4264,11 +4264,11 @@ packages:
       resolve: 1.22.1
       strip-json-comments: 3.1.1
 
-  file:../temp/tarballs/rushstack-rush-sdk-5.107.4.tgz(@types/node@18.17.15):
-    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.107.4.tgz}
-    id: file:../temp/tarballs/rushstack-rush-sdk-5.107.4.tgz
+  file:../temp/tarballs/rushstack-rush-sdk-5.109.1.tgz(@types/node@18.17.15):
+    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.109.1.tgz}
+    id: file:../temp/tarballs/rushstack-rush-sdk-5.109.1.tgz
     name: '@rushstack/rush-sdk'
-    version: 5.107.4
+    version: 5.109.1
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.61.0.tgz(@types/node@18.17.15)
       '@types/node-fetch': 2.6.2
