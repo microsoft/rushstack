@@ -328,7 +328,10 @@ export class CustomTipsConfiguration {
   private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
     if (customTipJsonItem) {
-      let writeFunction: (message: string) => void;
+      let writeFunction:
+        | typeof terminal.writeErrorLine
+        | typeof terminal.writeWarningLine
+        | typeof terminal.writeLine;
       let prefix: string;
       switch (severity) {
         case CustomTipSeverity.Error:
@@ -350,7 +353,7 @@ export class CustomTipsConfiguration {
 
       const message: string = customTipJsonItem.message;
       const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, prefix);
-      writeFunction(wrappedAndIndentedMessage);
+      writeFunction(...wrappedAndIndentedMessage, { doNotOverrideSgrCodes: true });
       terminal.writeLine();
     }
   }

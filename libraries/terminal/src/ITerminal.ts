@@ -6,6 +6,22 @@ import type { ITerminalProvider } from './ITerminalProvider';
 /**
  * @beta
  */
+export interface IWriteOptions {
+  /**
+   * If set to true, SGR parameters will not be replaced by the terminal
+   * standard (i.e. - red for errors, yellow for warnings).
+   */
+  doNotOverrideSgrCodes?: boolean;
+}
+
+/**
+ * @beta
+ */
+export type WriteParameters = string[] | [...string[], IWriteOptions];
+
+/**
+ * @beta
+ */
 export interface ITerminal {
   /**
    * Subscribe a new terminal provider.
@@ -20,12 +36,12 @@ export interface ITerminal {
   /**
    * Write a generic message to the terminal
    */
-  write(...messageParts: string[]): void;
+  write(...messageParts: WriteParameters): void;
 
   /**
    * Write a generic message to the terminal, followed by a newline
    */
-  writeLine(...messageParts: string[]): void;
+  writeLine(...messageParts: WriteParameters): void;
 
   /**
    * Write a warning message to the console with yellow text.
@@ -33,7 +49,7 @@ export interface ITerminal {
    * @remarks
    * The yellow color takes precedence over any other foreground colors set.
    */
-  writeWarning(...messageParts: string[]): void;
+  writeWarning(...messageParts: WriteParameters): void;
 
   /**
    * Write a warning message to the console with yellow text, followed by a newline.
@@ -41,7 +57,7 @@ export interface ITerminal {
    * @remarks
    * The yellow color takes precedence over any other foreground colors set.
    */
-  writeWarningLine(...messageParts: string[]): void;
+  writeWarningLine(...messageParts: WriteParameters): void;
 
   /**
    * Write an error message to the console with red text.
@@ -49,7 +65,7 @@ export interface ITerminal {
    * @remarks
    * The red color takes precedence over any other foreground colors set.
    */
-  writeError(...messageParts: string[]): void;
+  writeError(...messageParts: WriteParameters): void;
 
   /**
    * Write an error message to the console with red text, followed by a newline.
@@ -57,25 +73,25 @@ export interface ITerminal {
    * @remarks
    * The red color takes precedence over any other foreground colors set.
    */
-  writeErrorLine(...messageParts: string[]): void;
+  writeErrorLine(...messageParts: WriteParameters): void;
 
   /**
    * Write a verbose-level message.
    */
-  writeVerbose(...messageParts: string[]): void;
+  writeVerbose(...messageParts: WriteParameters): void;
 
   /**
    * Write a verbose-level message followed by a newline.
    */
-  writeVerboseLine(...messageParts: string[]): void;
+  writeVerboseLine(...messageParts: WriteParameters): void;
 
   /**
    * Write a debug-level message.
    */
-  writeDebug(...messageParts: string[]): void;
+  writeDebug(...messageParts: WriteParameters): void;
 
   /**
    * Write a debug-level message followed by a newline.
    */
-  writeDebugLine(...messageParts: string[]): void;
+  writeDebugLine(...messageParts: WriteParameters): void;
 }

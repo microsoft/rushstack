@@ -168,16 +168,16 @@ export interface IStringBufferOutputOptions {
 export interface ITerminal {
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: string[]): void;
-    writeDebug(...messageParts: string[]): void;
-    writeDebugLine(...messageParts: string[]): void;
-    writeError(...messageParts: string[]): void;
-    writeErrorLine(...messageParts: string[]): void;
-    writeLine(...messageParts: string[]): void;
-    writeVerbose(...messageParts: string[]): void;
-    writeVerboseLine(...messageParts: string[]): void;
-    writeWarning(...messageParts: string[]): void;
-    writeWarningLine(...messageParts: string[]): void;
+    write(...messageParts: WriteParameters): void;
+    writeDebug(...messageParts: WriteParameters): void;
+    writeDebugLine(...messageParts: WriteParameters): void;
+    writeError(...messageParts: WriteParameters): void;
+    writeErrorLine(...messageParts: WriteParameters): void;
+    writeLine(...messageParts: WriteParameters): void;
+    writeVerbose(...messageParts: WriteParameters): void;
+    writeVerboseLine(...messageParts: WriteParameters): void;
+    writeWarning(...messageParts: WriteParameters): void;
+    writeWarningLine(...messageParts: WriteParameters): void;
 }
 
 // @public
@@ -217,6 +217,11 @@ export interface ITextRewriterTransformOptions extends ITerminalTransformOptions
     normalizeNewlines?: NewlineKind;
     removeColors?: boolean;
     textRewriters?: TextRewriter[];
+}
+
+// @beta (undocumented)
+export interface IWriteOptions {
+    doNotOverrideSgrCodes?: boolean;
 }
 
 // @beta
@@ -337,16 +342,16 @@ export class Terminal implements ITerminal {
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: string[]): void;
-    writeDebug(...messageParts: string[]): void;
-    writeDebugLine(...messageParts: string[]): void;
-    writeError(...messageParts: string[]): void;
-    writeErrorLine(...messageParts: string[]): void;
-    writeLine(...messageParts: string[]): void;
-    writeVerbose(...messageParts: string[]): void;
-    writeVerboseLine(...messageParts: string[]): void;
-    writeWarning(...messageParts: string[]): void;
-    writeWarningLine(...messageParts: string[]): void;
+    write(...messageParts: WriteParameters): void;
+    writeDebug(...messageParts: WriteParameters): void;
+    writeDebugLine(...messageParts: WriteParameters): void;
+    writeError(...messageParts: WriteParameters): void;
+    writeErrorLine(...messageParts: WriteParameters): void;
+    writeLine(...messageParts: WriteParameters): void;
+    writeVerbose(...messageParts: WriteParameters): void;
+    writeVerboseLine(...messageParts: WriteParameters): void;
+    writeWarning(...messageParts: WriteParameters): void;
+    writeWarningLine(...messageParts: WriteParameters): void;
 }
 
 // @public
@@ -423,5 +428,8 @@ export class TextRewriterTransform extends TerminalTransform {
     // (undocumented)
     readonly textRewriters: ReadonlyArray<TextRewriter>;
 }
+
+// @beta (undocumented)
+export type WriteParameters = string[] | [...string[], IWriteOptions];
 
 ```

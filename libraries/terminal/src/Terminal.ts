@@ -3,7 +3,7 @@
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { Colorize, ConsoleColorCodes } from './Colorize';
-import type { ITerminal } from './ITerminal';
+import type { ITerminal, IWriteOptions, WriteParameters } from './ITerminal';
 import { AnsiEscape } from './AnsiEscape';
 
 /**
@@ -73,23 +73,31 @@ export class Terminal implements ITerminal {
   /**
    * {@inheritdoc ITerminal.write}
    */
-  public write(...messageParts: string[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log, false);
+  public write(...messageParts: WriteParameters): void {
+    const { parts } = this._normalizeWriteParameters(messageParts);
+    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.log, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeLine}
    */
-  public writeLine(...messageParts: string[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log, true);
+  public writeLine(...messageParts: WriteParameters): void {
+    const { parts } = this._normalizeWriteParameters(messageParts);
+    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.log, true);
   }
 
   /**
    * {@inheritdoc ITerminal.writeWarning}
    */
-  public writeWarning(...messageParts: string[]): void {
+  public writeWarning(...messageParts: WriteParameters): void {
+    const {
+      parts,
+      options: { doNotOverrideSgrCodes }
+    } = this._normalizeWriteParameters(messageParts);
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
+      doNotOverrideSgrCodes
+        ? parts
+        : parts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.warning,
       false
     );
@@ -98,9 +106,15 @@ export class Terminal implements ITerminal {
   /**
    * {@inheritdoc ITerminal.writeWarningLine}
    */
-  public writeWarningLine(...messageParts: string[]): void {
+  public writeWarningLine(...messageParts: WriteParameters): void {
+    const {
+      parts,
+      options: { doNotOverrideSgrCodes }
+    } = this._normalizeWriteParameters(messageParts);
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
+      doNotOverrideSgrCodes
+        ? parts
+        : parts.map((part): string => Colorize.yellow(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.warning,
       true
     );
@@ -109,9 +123,13 @@ export class Terminal implements ITerminal {
   /**
    * {@inheritdoc ITerminal.writeError}
    */
-  public writeError(...messageParts: string[]): void {
+  public writeError(...messageParts: WriteParameters): void {
+    const {
+      parts,
+      options: { doNotOverrideSgrCodes }
+    } = this._normalizeWriteParameters(messageParts);
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
+      doNotOverrideSgrCodes ? parts : parts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.error,
       false
     );
@@ -120,9 +138,13 @@ export class Terminal implements ITerminal {
   /**
    * {@inheritdoc ITerminal.writeErrorLine}
    */
-  public writeErrorLine(...messageParts: string[]): void {
+  public writeErrorLine(...messageParts: WriteParameters): void {
+    const {
+      parts,
+      options: { doNotOverrideSgrCodes }
+    } = this._normalizeWriteParameters(messageParts);
     this._writeSegmentsToProviders(
-      messageParts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
+      doNotOverrideSgrCodes ? parts : parts.map((part): string => Colorize.red(AnsiEscape.removeCodes(part))),
       TerminalProviderSeverity.error,
       true
     );
@@ -131,29 +153,33 @@ export class Terminal implements ITerminal {
   /**
    * {@inheritdoc ITerminal.writeVerbose}
    */
-  public writeVerbose(...messageParts: string[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose, false);
+  public writeVerbose(...messageParts: WriteParameters): void {
+    const { parts } = this._normalizeWriteParameters(messageParts);
+    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.verbose, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeVerboseLine}
    */
-  public writeVerboseLine(...messageParts: string[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose, true);
+  public writeVerboseLine(...messageParts: WriteParameters): void {
+    const { parts } = this._normalizeWriteParameters(messageParts);
+    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.verbose, true);
   }
 
   /**
    * {@inheritdoc ITerminal.writeDebug}
    */
-  public writeDebug(...messageParts: string[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug, false);
+  public writeDebug(...messageParts: WriteParameters): void {
+    const { parts } = this._normalizeWriteParameters(messageParts);
+    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.debug, false);
   }
 
   /**
    * {@inheritdoc ITerminal.writeDebugLine}
    */
-  public writeDebugLine(...messageParts: string[]): void {
-    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug, true);
+  public writeDebugLine(...messageParts: WriteParameters): void {
+    const { parts } = this._normalizeWriteParameters(messageParts);
+    this._writeSegmentsToProviders(parts, TerminalProviderSeverity.debug, true);
   }
 
   private _writeSegmentsToProviders(
@@ -388,5 +414,21 @@ export class Terminal implements ITerminal {
     }
 
     return resultSegments.join('');
+  }
+
+  private _normalizeWriteParameters(parameters: WriteParameters): {
+    parts: string[];
+    options: IWriteOptions;
+  } {
+    if (parameters.length === 0) {
+      return { parts: [], options: {} };
+    } else {
+      const lastParameter: string | IWriteOptions = parameters[parameters.length - 1];
+      if (typeof lastParameter === 'string') {
+        return { parts: parameters as string[], options: {} };
+      } else {
+        return { parts: parameters.slice(0, -1) as string[], options: lastParameter };
+      }
+    }
   }
 }
