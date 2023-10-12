@@ -26,7 +26,7 @@ export class CallbackWritable extends TerminalWritable {
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
-// @beta
+// @public
 export class Colorize {
     // (undocumented)
     static black(text: string): string;

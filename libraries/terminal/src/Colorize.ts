@@ -3,7 +3,7 @@
 
 import { AnsiEscape } from './AnsiEscape';
 
-export enum ConsoleColorCodes {
+export enum SgrParameter {
   BlackForeground = 30,
   RedForeground = 31,
   GreenForeground = 32,
@@ -47,196 +47,182 @@ export enum ConsoleColorCodes {
 
 /**
  * The static functions on this class are used to produce colored text
- * for use with the node-core-library terminal.
+ * for use with a terminal that supports ANSI escape codes.
  *
  * @example
+ * ```ts
  * terminal.writeLine(Colorize.green('Green Text!'), ' ', Colorize.blue('Blue Text!'));
+ *```
  *
- * @beta
+ * @public
  */
 export class Colorize {
   public static black(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.BlackForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.BlackForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static red(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.RedForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.RedForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static green(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.GreenForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.GreenForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static yellow(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.YellowForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.YellowForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static blue(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.BlueForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.BlueForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static magenta(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.MagentaForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.MagentaForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static cyan(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.CyanForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.CyanForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static white(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.WhiteForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.WhiteForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static gray(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.GrayForeground,
-      ConsoleColorCodes.DefaultForeground,
+      SgrParameter.GrayForeground,
+      SgrParameter.DefaultForeground,
       text
     );
   }
 
   public static blackBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.BlackBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.BlackBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static redBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.RedBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.RedBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static greenBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.GreenBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.GreenBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static yellowBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.YellowBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.YellowBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static blueBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.BlueBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.BlueBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static magentaBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.MagentaBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.MagentaBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static cyanBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.CyanBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.CyanBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static whiteBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.WhiteBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.WhiteBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static grayBackground(text: string): string {
     return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.GrayBackground,
-      ConsoleColorCodes.DefaultBackground,
+      SgrParameter.GrayBackground,
+      SgrParameter.DefaultBackground,
       text
     );
   }
 
   public static bold(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.Bold,
-      ConsoleColorCodes.NormalColorOrIntensity,
-      text
-    );
+    return Colorize._wrapTextInAnsiEscapeCodes(SgrParameter.Bold, SgrParameter.NormalColorOrIntensity, text);
   }
 
   public static dim(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.Dim,
-      ConsoleColorCodes.NormalColorOrIntensity,
-      text
-    );
+    return Colorize._wrapTextInAnsiEscapeCodes(SgrParameter.Dim, SgrParameter.NormalColorOrIntensity, text);
   }
 
   public static underline(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.Underline,
-      ConsoleColorCodes.UnderlineOff,
-      text
-    );
+    return Colorize._wrapTextInAnsiEscapeCodes(SgrParameter.Underline, SgrParameter.UnderlineOff, text);
   }
 
   public static blink(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Blink, ConsoleColorCodes.BlinkOff, text);
+    return Colorize._wrapTextInAnsiEscapeCodes(SgrParameter.Blink, SgrParameter.BlinkOff, text);
   }
 
   public static invertColor(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(
-      ConsoleColorCodes.InvertColor,
-      ConsoleColorCodes.InvertColorOff,
-      text
-    );
+    return Colorize._wrapTextInAnsiEscapeCodes(SgrParameter.InvertColor, SgrParameter.InvertColorOff, text);
   }
 
   public static hidden(text: string): string {
-    return Colorize._wrapTextInAnsiEscapeCodes(ConsoleColorCodes.Hidden, ConsoleColorCodes.HiddenOff, text);
+    return Colorize._wrapTextInAnsiEscapeCodes(SgrParameter.Hidden, SgrParameter.HiddenOff, text);
   }
 
   private static _wrapTextInAnsiEscapeCodes(startCode: number, endCode: number, text: string): string {

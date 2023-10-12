@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleColorCodes } from './Colorize';
+import { SgrParameter } from './Colorize';
 
 /**
  * Options for {@link AnsiEscape.formatForTests}.
@@ -84,69 +84,69 @@ export class AnsiEscape {
   // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
   private static _tryGetSgrFriendlyName(sgiParameter: number): string | undefined {
     switch (sgiParameter) {
-      case ConsoleColorCodes.BlackForeground:
+      case SgrParameter.BlackForeground:
         return 'black';
-      case ConsoleColorCodes.RedForeground:
+      case SgrParameter.RedForeground:
         return 'red';
-      case ConsoleColorCodes.GreenForeground:
+      case SgrParameter.GreenForeground:
         return 'green';
-      case ConsoleColorCodes.YellowForeground:
+      case SgrParameter.YellowForeground:
         return 'yellow';
-      case ConsoleColorCodes.BlueForeground:
+      case SgrParameter.BlueForeground:
         return 'blue';
-      case ConsoleColorCodes.MagentaForeground:
+      case SgrParameter.MagentaForeground:
         return 'magenta';
-      case ConsoleColorCodes.CyanForeground:
+      case SgrParameter.CyanForeground:
         return 'cyan';
-      case ConsoleColorCodes.WhiteForeground:
+      case SgrParameter.WhiteForeground:
         return 'white';
-      case ConsoleColorCodes.GrayForeground:
+      case SgrParameter.GrayForeground:
         return 'gray';
-      case ConsoleColorCodes.DefaultForeground:
+      case SgrParameter.DefaultForeground:
         return 'default';
 
-      case ConsoleColorCodes.BlackBackground:
+      case SgrParameter.BlackBackground:
         return 'black-bg';
-      case ConsoleColorCodes.RedBackground:
+      case SgrParameter.RedBackground:
         return 'red-bg';
-      case ConsoleColorCodes.GreenBackground:
+      case SgrParameter.GreenBackground:
         return 'green-bg';
-      case ConsoleColorCodes.YellowBackground:
+      case SgrParameter.YellowBackground:
         return 'yellow-bg';
-      case ConsoleColorCodes.BlueBackground:
+      case SgrParameter.BlueBackground:
         return 'blue-bg';
-      case ConsoleColorCodes.MagentaBackground:
+      case SgrParameter.MagentaBackground:
         return 'magenta-bg';
-      case ConsoleColorCodes.CyanBackground:
+      case SgrParameter.CyanBackground:
         return 'cyan-bg';
-      case ConsoleColorCodes.WhiteBackground:
+      case SgrParameter.WhiteBackground:
         return 'white-bg';
-      case ConsoleColorCodes.GrayBackground:
+      case SgrParameter.GrayBackground:
         return 'gray-bg';
-      case ConsoleColorCodes.DefaultBackground:
+      case SgrParameter.DefaultBackground:
         return 'default-bg';
 
-      case ConsoleColorCodes.Bold:
+      case SgrParameter.Bold:
         return 'bold';
-      case ConsoleColorCodes.Dim:
+      case SgrParameter.Dim:
         return 'dim';
-      case ConsoleColorCodes.NormalColorOrIntensity:
+      case SgrParameter.NormalColorOrIntensity:
         return 'normal';
-      case ConsoleColorCodes.Underline:
+      case SgrParameter.Underline:
         return 'underline';
-      case ConsoleColorCodes.UnderlineOff:
+      case SgrParameter.UnderlineOff:
         return 'underline-off';
-      case ConsoleColorCodes.Blink:
+      case SgrParameter.Blink:
         return 'blink';
-      case ConsoleColorCodes.BlinkOff:
+      case SgrParameter.BlinkOff:
         return 'blink-off';
-      case ConsoleColorCodes.InvertColor:
+      case SgrParameter.InvertColor:
         return 'invert';
-      case ConsoleColorCodes.InvertColorOff:
+      case SgrParameter.InvertColorOff:
         return 'invert-off';
-      case ConsoleColorCodes.Hidden:
+      case SgrParameter.Hidden:
         return 'hidden';
-      case ConsoleColorCodes.HiddenOff:
+      case SgrParameter.HiddenOff:
         return 'hidden-off';
       default:
         return undefined;
