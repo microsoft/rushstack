@@ -39,7 +39,7 @@ export interface IHttpBuildCacheProviderOptions {
   cacheKeyPrefix?: string;
   isCacheWriteAllowed: boolean;
   pluginName: string;
-  rushProjectRoot: string;
+  rushRepoRoot: string;
 }
 
 const MAX_HTTP_CACHE_ATTEMPTS: number = 3;
@@ -47,7 +47,6 @@ const DEFAULT_MIN_HTTP_RETRY_DELAY_MS = 2500;
 
 export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _pluginName: string;
-  private readonly _rushSession: RushSession;
   private readonly _rushProjectRoot: string;
   private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
@@ -65,8 +64,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
   public constructor(options: IHttpBuildCacheProviderOptions, rushSession: RushSession) {
     this._pluginName = options.pluginName;
-    this._rushSession = rushSession;
-    this._rushProjectRoot = options.rushProjectRoot;
+    this._rushProjectRoot = options.rushRepoRoot;
 
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
@@ -156,7 +154,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     const cmd: string = `${this._tokenHandler.exec} ${(this._tokenHandler.args || []).join(' ')}`;
     terminal.writeVerboseLine(`Running '${cmd}' to get credentials`);
-    const result = Executable.spawnSync(this._tokenHandler.exec, this._tokenHandler.args || []);
+    const result = Executable.spawnSync(this._tokenHandler.exec, this._tokenHandler.args || [], {
+      currentWorkingDirectory: this._rushProjectRoot
+    });
 
     terminal.writeErrorLine(result.stderr);
 
