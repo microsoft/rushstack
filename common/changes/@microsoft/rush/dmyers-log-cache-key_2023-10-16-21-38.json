@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Log cache key when successfully caching builds in cloud storage",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
