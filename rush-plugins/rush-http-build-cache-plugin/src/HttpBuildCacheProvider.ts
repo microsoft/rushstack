@@ -39,7 +39,7 @@ export interface IHttpBuildCacheProviderOptions {
   cacheKeyPrefix?: string;
   isCacheWriteAllowed: boolean;
   pluginName: string;
-  rushRepoRoot: string;
+  rushJsonFolder: string;
 }
 
 const MAX_HTTP_CACHE_ATTEMPTS: number = 3;
@@ -64,7 +64,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
   public constructor(options: IHttpBuildCacheProviderOptions, rushSession: RushSession) {
     this._pluginName = options.pluginName;
-    this._rushProjectRoot = options.rushRepoRoot;
+    this._rushProjectRoot = options.rushJsonFolder;
 
     this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;

@@ -20,7 +20,7 @@ const EXAMPLE_OPTIONS: IHttpBuildCacheProviderOptions = {
   uploadMethod: 'POST',
   isCacheWriteAllowed: false,
   pluginName: 'example-plugin',
-  rushRepoRoot: '/repo',
+  rushJsonFolder: '/repo',
   minHttpRetryDelayMs: 1
 };
 
