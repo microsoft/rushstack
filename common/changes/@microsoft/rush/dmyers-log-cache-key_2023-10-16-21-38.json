@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Log cache key in `--verbose` mode when the cache is successfully read from or written to.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

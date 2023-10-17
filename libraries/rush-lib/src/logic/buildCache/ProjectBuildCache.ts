@@ -131,6 +131,7 @@ export class ProjectBuildCache {
     }
 
     terminal.writeLine('Build cache hit.');
+    terminal.writeVerboseLine(`Cache key: ${cacheId}`);
 
     const projectFolderPath: string = this._project.projectFolder;
 
@@ -274,6 +275,7 @@ export class ProjectBuildCache {
     const success: boolean = updateCloudCacheSuccess && !!localCacheEntryPath;
     if (success) {
       terminal.writeLine('Successfully set cache entry.');
+      terminal.writeVerboseLine(`Cache key: ${cacheId}`);
     } else if (!localCacheEntryPath && updateCloudCacheSuccess) {
       terminal.writeWarningLine('Unable to set local cache entry.');
     } else if (localCacheEntryPath && !updateCloudCacheSuccess) {
