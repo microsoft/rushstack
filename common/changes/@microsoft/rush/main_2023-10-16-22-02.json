@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where running `rush update-cloud-credentials --interactive` in a repo configured to use the `http` build cache with a tokenHandler script provided would run the script in the console's CWD instead of in the repo root. If the tokenHandler script refered to a script in the repo (for example `node common/scripts/cache-auth.js`) and the user's CWD was inside a project folder, the script would not be found.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
