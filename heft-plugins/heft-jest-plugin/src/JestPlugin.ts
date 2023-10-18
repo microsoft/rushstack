@@ -506,8 +506,9 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     if (pendingTestRuns.size > 0) {
       // set env variable if not already set
-      if (!process.env.NODE_ENV) {
+      if (!process.env.NODE_ENV && combinedOptions.enableNodeEnvManagement) {
         process.env.NODE_ENV = 'test';
+        this._nodeEnvSet = true;
       }
 
       this._executing = true;
