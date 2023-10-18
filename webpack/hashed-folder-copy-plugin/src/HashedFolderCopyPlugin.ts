@@ -4,28 +4,21 @@
 import * as path from 'path';
 import glob from 'fast-glob';
 import crypto from 'crypto';
-import type * as webpack from 'webpack';
-import { FileSystem, Import } from '@rushstack/node-core-library';
-import type * as EnhancedResolve from 'enhanced-resolve';
-import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
-// Workaround for https://github.com/pnpm/pnpm/issues/4301
-import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { CallExpression, Expression, UnaryExpression } from 'estree';
+import webpack from 'webpack';
+
+type BasicEvaluatedExpressionHook = ReturnType<
+  typeof webpack.javascript.JavascriptParser.prototype.hooks.evaluateTypeof.for
+>;
+type BasicEvaluatedExpression = ReturnType<BasicEvaluatedExpressionHook['call']>;
 
 interface IParserHelpers {
-  evaluateToString: (type: string) => () => void;
-  toConstantDependency: (parser: webpack.compilation.normalModuleFactory.Parser, type: string) => () => void;
+  evaluateToString: (type: string) => (exp: UnaryExpression) => BasicEvaluatedExpression;
+  toConstantDependency: (parser: webpack.Parser, type: string) => (exp: Expression) => true;
 }
 
-const ParserHelpers: IParserHelpers = require('webpack/lib/ParserHelpers');
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-interface ConstDependency {
-  loc: unknown;
-}
-
-interface IConstDependencyType {
-  new (expression: string, range: unknown, requireWebpackRequire: boolean): ConstDependency;
-}
+const ParserHelpers: IParserHelpers = require('webpack/lib/javascript/JavascriptParserHelpers');
 
 const PLUGIN_NAME: string = 'hashed-folder-copy-plugin';
 
@@ -41,103 +34,31 @@ interface IAcornNode<TExpression> {
   value: TExpression;
 }
 
-interface IExpression {
-  arguments: IAcornNode<unknown>[];
-  range: unknown;
-  loc: unknown;
-}
-
-interface IExtendedModule extends webpack.Module {
-  context: string;
-  buildInfo: {
-    fileDependencies: Set<string>;
-    assets: { [assetPath: string]: IAsset };
-  };
-  addDependency(dependency: ConstDependency): void;
-}
-
-interface IExtendedParser extends webpack.compilation.normalModuleFactory.Parser {
-  state: {
-    current: IExtendedModule;
-    compilation: webpack.compilation.Compilation;
-  };
-}
-
-interface IAsset {
-  size(): number;
-  source(): Buffer;
-}
-
-interface IResolver {
-  resolveSync: typeof EnhancedResolve.sync;
-  resolveAsync: typeof EnhancedResolve.default;
-}
-
 interface ICollectAssetsOptions {
-  module: IExtendedModule;
-  compilation: webpack.compilation.Compilation;
+  module: webpack.Module;
+  compilation: webpack.Compilation;
   requireFolderOptions: IRequireFolderOptions;
-  resolver: IResolver;
+  resolver: ResolverWithOptions;
 }
 
-interface IExtendedNormalModuleFactory extends webpack.compilation.NormalModuleFactory {
-  getResolver(type: 'normal', options: { useSyncFileSystemCalls: boolean }): IResolver;
-}
-
-const WEBPACK_CONST_DEPENDENCY_MODULE_PATH: string = 'webpack/lib/dependencies/ConstDependency';
+type NormalModuleFactory = Parameters<typeof webpack.Compiler.prototype.hooks.normalModuleFactory.call>[0];
+type ResolverWithOptions = ReturnType<NormalModuleFactory['getResolver']>;
 
 /**
  * @public
  */
-export class HashedFolderCopyPlugin implements webpack.Plugin {
-  private readonly _ConstDependency: IConstDependencyType;
-
-  public constructor() {
-    // Try to resolve webpack relative to that module that loaded this plugin.
-    // Dependency templates are looked up by their constructor instance, so this
-    // must be able to resolve the same `ConstDependency` module that the
-    // project is using for compilation.
-    let constDependencyModulePath: string | undefined;
-    const parentModulePath: string | undefined = module.parent?.parent?.path;
-    if (parentModulePath) {
-      try {
-        constDependencyModulePath = Import.resolveModule({
-          modulePath: WEBPACK_CONST_DEPENDENCY_MODULE_PATH,
-          baseFolderPath: parentModulePath
-        });
-      } catch (e) {
-        // Ignore
-      }
-    }
-
-    // Failing that, resolve relative to this module.
-    this._ConstDependency = require(constDependencyModulePath || WEBPACK_CONST_DEPENDENCY_MODULE_PATH);
-  }
-
+export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
   public apply(compiler: webpack.Compiler): void {
-    // Casting here because VersionDetection refers to webpack 5 typings
-    let needToWarnAboutWebpack5: boolean = VersionDetection.isWebpack5(
-      compiler as unknown as Webpack5.Compiler
-    );
-
     compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
-      const normalResolver: IResolver = (normalModuleFactory as IExtendedNormalModuleFactory).getResolver(
-        'normal',
-        { useSyncFileSystemCalls: true }
-      );
-      const handler: (parser: webpack.compilation.normalModuleFactory.Parser) => void = (
-        baseParser: webpack.compilation.normalModuleFactory.Parser
+      const normalResolver: ResolverWithOptions = normalModuleFactory.getResolver('normal', {
+        useSyncFileSystemCalls: true
+      });
+      const handler: (parser: webpack.javascript.JavascriptParser) => void = (
+        parser: webpack.javascript.JavascriptParser
       ) => {
-        const parser: IExtendedParser = baseParser as IExtendedParser;
-        parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, (expression: IExpression) => {
-          const compilation: webpack.compilation.Compilation = parser.state.compilation;
-          if (needToWarnAboutWebpack5) {
-            compilation.warnings.push(
-              `HashedFolderCopyPlugin is not fully supported supported in webpack 5. ` +
-                `Unexpected behavior is likely to occur.`
-            );
-            needToWarnAboutWebpack5 = false; // Only warn once
-          }
+        parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, (baseExpression: Expression) => {
+          const expression: CallExpression = baseExpression as CallExpression;
+          const compilation: webpack.Compilation = parser.state.compilation;
 
           let errorMessage: string | undefined;
           let requireFolderOptions: IRequireFolderOptions | undefined = undefined;
@@ -177,11 +98,11 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
             }
           }
 
-          const currentModule: IExtendedModule = parser.state.current;
+          const currentModule: webpack.NormalModule = parser.state.current;
           let dependencyText: string;
           if (!requireFolderOptions) {
             dependencyText = this._renderError(errorMessage!);
-            compilation.errors.push(new Error(errorMessage));
+            compilation.errors.push(new webpack.WebpackError(errorMessage));
           } else {
             dependencyText = this._collectAssets({
               module: currentModule,
@@ -191,13 +112,16 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
             });
           }
 
-          const errorDependency: ConstDependency = new this._ConstDependency(
+          const dependency: webpack.dependencies.ConstDependency = new webpack.dependencies.ConstDependency(
             `/* ${EXPRESSION_NAME} */ ${dependencyText}`,
-            expression.range,
-            false
+            expression.range!,
+            [webpack.RuntimeGlobals.publicPath]
           );
-          errorDependency.loc = expression.loc;
-          currentModule.addDependency(errorDependency);
+          if (expression.loc) {
+            dependency.loc = expression.loc;
+          }
+
+          currentModule.addDependency(dependency);
         });
 
         parser.hooks.evaluateTypeof
@@ -218,7 +142,7 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
     const { module, compilation, requireFolderOptions, resolver } = options;
 
     // Map of asset names (to be prepended by the outputFolder) to asset objects
-    const assetsToAdd: Map<string, IAsset> = new Map<string, IAsset>();
+    const assetsToAdd: Map<string, Buffer> = new Map<string, Buffer>();
 
     for (const source of requireFolderOptions.sources) {
       const { globsBase, globPatterns } = source;
@@ -226,7 +150,13 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
       let resolvedGlobsBase: string;
       if (globsBase.startsWith('.')) {
         // Does this look like a relative path?
-        resolvedGlobsBase = path.resolve(module.context, globsBase);
+        if (!module.context) {
+          const errorMessage: string = `Unable to resolve relative path "${globsBase}" because the module has no context`;
+          compilation.errors.push(new webpack.WebpackError(errorMessage));
+          return this._renderError(errorMessage);
+        } else {
+          resolvedGlobsBase = path.resolve(module.context, globsBase);
+        }
       } else if (path.isAbsolute(globsBase)) {
         // This is an absolute path
         resolvedGlobsBase = globsBase;
@@ -250,35 +180,47 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
           pathInsidePackage = globsBase.slice(slashAfterPackageNameIndex + 1);
         }
 
-        let packagePath: string;
+        let packagePath: string | undefined;
         try {
-          const resolveResult: string = resolver.resolveSync(
-            {},
-            module.context,
-            `${packageName}/package.json`
-          );
-          packagePath = path.dirname(resolveResult);
+          if (!module.context) {
+            const errorMessage: string = `Unable to resolve package "${packageName}" because the module has no context`;
+            compilation.errors.push(new webpack.WebpackError(errorMessage));
+            return this._renderError(errorMessage);
+          } else {
+            const resolveResult: string | false = resolver.resolveSync(
+              {},
+              module.context,
+              `${packageName}/package.json`
+            );
+            if (resolveResult) {
+              packagePath = path.dirname(resolveResult);
+            }
+          }
         } catch (e) {
-          const errorMessage: string = `Unable to resolve package "${packageName}"`;
-          compilation.errors.push(new Error(errorMessage));
-          return this._renderError(errorMessage);
+          // Ignore - return an error below
         }
 
-        resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
+        if (packagePath) {
+          resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
+        } else {
+          const errorMessage: string = `Unable to resolve package "${packageName}"`;
+          compilation.errors.push(new webpack.WebpackError(errorMessage));
+          return this._renderError(errorMessage);
+        }
       }
 
       const globResults: string[] = glob.sync(globPatterns, { cwd: resolvedGlobsBase, onlyFiles: true });
       for (const globResult of globResults) {
         if (assetsToAdd.has(globResult)) {
           const errorMessage: string = `Two files resolve to the same output path "${globResult}"`;
-          compilation.errors.push(new Error(errorMessage));
+          compilation.errors.push(new webpack.WebpackError(errorMessage));
           return this._renderError(errorMessage);
         }
 
         const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
 
         const assetContents: Buffer = FileSystem.readFileToBuffer(globResultFullPath);
-        assetsToAdd.set(globResult, { size: () => assetContents.byteLength, source: () => assetContents });
+        assetsToAdd.set(globResult, assetContents);
         module.buildInfo.fileDependencies.add(globResultFullPath);
       }
     }
@@ -293,7 +235,7 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
     // Sort the paths to maximize hash stability
     for (const assetPath of Array.from(assetsToAdd.keys()).sort()) {
       hash.update(assetPath);
-      hash.update(assetsToAdd.get(assetPath)!.source());
+      hash.update(assetsToAdd.get(assetPath)!);
     }
 
     const hashTokenRegex: RegExp = /\[hash:?(\d+)?\]/g;
@@ -316,15 +258,16 @@ export class HashedFolderCopyPlugin implements webpack.Plugin {
       const fullAssetPath: string = path.posix.join(pathPrefix, assetPath);
       if (existingAssetNames.has(fullAssetPath)) {
         const errorMessage: string = `An asset with path "${fullAssetPath}" already exists`;
-        compilation.errors.push(new Error(errorMessage));
+        compilation.errors.push(new webpack.WebpackError(errorMessage));
         return this._renderError(errorMessage);
       }
 
-      compilation.assets[fullAssetPath] = asset;
-      module.buildInfo.assets[fullAssetPath] = asset;
+      const assetSource: webpack.sources.RawSource = new webpack.sources.RawSource(asset);
+      compilation.assets[fullAssetPath] = assetSource;
+      module.buildInfo.assets[fullAssetPath] = assetSource;
     }
 
-    return `__webpack_require__.p + ${JSON.stringify(pathPrefix)}`;
+    return `${webpack.RuntimeGlobals.publicPath} + ${JSON.stringify(pathPrefix)}`;
   }
 
   private _renderError(errorMessage: string): string {
