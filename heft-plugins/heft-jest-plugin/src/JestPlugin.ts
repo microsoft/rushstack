@@ -212,7 +212,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const testTimeoutParameter: CommandLineIntegerParameter =
       parameters.getIntegerParameter('--test-timeout-ms');
 
-    const combinedOptions: IJestPluginOptions = {
+    const options: IJestPluginOptions = {
       ...pluginOptions,
       configurationPath: configParameter.value || pluginOptions?.configurationPath,
       debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
@@ -234,17 +234,17 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
 
-    if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test' && combinedOptions.enableNodeEnvManagement) {
+    if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test' && options.enableNodeEnvManagement) {
       taskSession.logger.emitWarning(
         new Error(`NODE_ENV variable is set and it's not "test". NODE_ENV=${process.env.NODE_ENV}`)
       );
-    } else if (!process.env.NODE_ENV && combinedOptions.enableNodeEnvManagement) {
+    } else if (!process.env.NODE_ENV && options.enableNodeEnvManagement) {
       process.env.NODE_ENV = 'test';
       this._nodeEnvSet = true;
     }
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
+      await this._runJestAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
@@ -253,7 +253,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         await this._runJestWatchAsync(
           taskSession,
           heftConfiguration,
-          combinedOptions,
+          options,
           runIncrementalOptions.requestRun
         );
       }
@@ -506,7 +506,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     if (pendingTestRuns.size > 0) {
       // set env variable if not already set
-      if (!process.env.NODE_ENV && combinedOptions.enableNodeEnvManagement) {
+      if (!process.env.NODE_ENV && options.enableNodeEnvManagement) {
         process.env.NODE_ENV = 'test';
         this._nodeEnvSet = true;
       }
