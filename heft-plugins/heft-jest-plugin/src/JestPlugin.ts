@@ -231,7 +231,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
       testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
       updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots,
-      enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement || true
+      enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
 
     if (process.env.NODE_ENV && process.env.NODE_ENV !== 'test' && combinedOptions.enableNodeEnvManagement) {
