@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Allow legacy skip behavior if build cache is configured but disabled. When running in verbose mode, log the type of incremental logic in use.",
+      "comment": "Allow the output preservation incremental strategy if the build cache is configured but disabled. When running in verbose mode, log the incremental strategy that is being used.",
       "type": "none"
     }
   ],
