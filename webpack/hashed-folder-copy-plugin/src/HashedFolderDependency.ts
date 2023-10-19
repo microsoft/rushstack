@@ -163,17 +163,19 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
               resolver = compilation.resolverFactory.get('normal', parentModule.resolveOptions);
             }
 
-            const resolveResult: string | false = resolver.resolveSync(
-              {},
-              context,
-              `${packageName}/package.json`
-            );
-            if (resolveResult) {
-              packagePath = path.dirname(resolveResult);
-            }
+            // The `resolver.resolve` type is too complex for LegacyAdapters.convertCallbackToPromise
+            packagePath = await new Promise((resolve, reject) => {
+              resolver!.resolve({}, context, `${packageName}/package.json`, {}, (err, result) => {
+                if (result) {
+                  resolve(path.dirname(result));
+                } else {
+                  reject(err);
+                }
+              });
+            });
           }
         } catch (e) {
-          // Ignore - return an error below
+          compilation.errors.push(e);
         }
 
         if (packagePath) {
