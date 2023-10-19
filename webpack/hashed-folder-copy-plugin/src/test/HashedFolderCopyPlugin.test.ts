@@ -1,12 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { promisify } from 'util';
-import webpack, { type Stats } from 'webpack';
-import { Volume } from 'memfs/lib/volume';
-import { Async, FileSystem, type FolderItem } from '@rushstack/node-core-library';
+import path from 'path';
 
-import { HashedFolderCopyPlugin } from '../HashedFolderCopyPlugin';
+// eslint-disable-next-line @rushstack/hoist-jest-mock
+jest.mock(
+  'fast-glob/out/providers/provider',
+  () => {
+    const { default: provider } = jest.requireActual('fast-glob/out/providers/provider');
+    provider.prototype._getRootDirectory = function (task: { base: string }) {
+      // fast-glob calls `path.resolve` which doesn't work correctly with the MemFS volume while running on Windows
+      return path.posix.resolve(this._settings.cwd, task.base);
+    };
+    return { default: provider };
+  },
+  {}
+);
+
+import type { FileSystem, FolderItem } from '@rushstack/node-core-library';
+import type { Volume } from 'memfs/lib/volume';
 
 jest.setTimeout(1e9);
 
@@ -15,14 +27,18 @@ interface IFilePaths {
   itemAbsolutePath: string;
 }
 
-async function* enumerateFilesAsync(absolutePath: string, relativePath: string): AsyncIterable<IFilePaths> {
-  const folderItems: FolderItem[] = await FileSystem.readFolderItemsAsync(absolutePath);
+async function* enumerateFilesAsync(
+  fileSystem: typeof FileSystem,
+  absolutePath: string,
+  relativePath: string
+): AsyncIterable<IFilePaths> {
+  const folderItems: FolderItem[] = await fileSystem.readFolderItemsAsync(absolutePath);
   for (const item of folderItems) {
     const name: string = item.name;
     const itemRelativePath: string = `${relativePath}/${name}`;
     const itemAbsolutePath: string = `${absolutePath}/${name}`;
     if (item.isDirectory()) {
-      yield* enumerateFilesAsync(itemAbsolutePath, itemRelativePath);
+      yield* enumerateFilesAsync(fileSystem, itemAbsolutePath, itemRelativePath);
     } else if (item.isFile()) {
       yield { itemRelativePath, itemAbsolutePath };
     } else {
@@ -36,7 +52,9 @@ async function readFolderAsync(
   relativePath: string,
   outputObject: Record<string, string>
 ): Promise<void> {
-  const files: AsyncIterable<IFilePaths> = enumerateFilesAsync(absolutePath, relativePath);
+  const { Async, FileSystem } = await import('@rushstack/node-core-library');
+
+  const files: AsyncIterable<IFilePaths> = enumerateFilesAsync(FileSystem, absolutePath, relativePath);
   await Async.forEachAsync(
     files,
     async ({ itemRelativePath, itemAbsolutePath }) => {
@@ -46,11 +64,16 @@ async function readFolderAsync(
     { concurrency: 50 }
   );
 }
+import { promisify } from 'util';
+import webpack, { type Stats } from 'webpack';
 
 async function runTestAsync(inputFolderPath: string): Promise<void> {
+  const { Volume } = await import('memfs/lib/volume');
+  const { HashedFolderCopyPlugin } = await import('../HashedFolderCopyPlugin');
+
   const memoryFileSystem: Volume = new Volume();
   const folderContents: Record<string, string> = {};
-  await readFolderAsync(inputFolderPath, '/', folderContents);
+  await readFolderAsync(inputFolderPath, '', folderContents);
   memoryFileSystem.fromJSON(folderContents, '/src');
 
   const compiler: webpack.Compiler = webpack({
@@ -85,7 +108,7 @@ async function runTestAsync(inputFolderPath: string): Promise<void> {
   expect(results).toMatchSnapshot('Content');
 }
 
-describe(HashedFolderCopyPlugin.name, () => {
+describe('HashedFolderCopyPlugin', () => {
   it('Handles the null case', async () => {
     await runTestAsync(`${__dirname}/scenarios/nullCase`);
   });

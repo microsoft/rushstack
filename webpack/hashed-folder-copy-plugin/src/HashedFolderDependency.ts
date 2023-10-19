@@ -121,7 +121,7 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
           compilation.errors.push(new webpack.WebpackError(errorMessage));
           return renderError(errorMessage);
         } else {
-          resolvedGlobsBase = path.resolve(context, globsBase);
+          resolvedGlobsBase = path.posix.resolve(context, globsBase);
         }
       } else if (path.isAbsolute(globsBase)) {
         // This is an absolute path
@@ -171,7 +171,7 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
         }
 
         if (packagePath) {
-          resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
+          resolvedGlobsBase = path.posix.join(packagePath, pathInsidePackage);
         } else {
           const errorMessage: string = `Unable to resolve package "${packageName}"`;
           compilation.errors.push(new webpack.WebpackError(errorMessage));
@@ -193,7 +193,7 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
           return renderError(errorMessage);
         }
 
-        const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
+        const globResultFullPath: string = path.posix.resolve(resolvedGlobsBase, globResult);
 
         let assetContents: string | Buffer | undefined;
         try {
