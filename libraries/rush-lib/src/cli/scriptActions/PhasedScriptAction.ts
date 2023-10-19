@@ -351,7 +351,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         customParametersByName.set(configParameter.longName, parserParameter);
       }
 
-      if (buildCacheConfiguration) {
+      if (buildCacheConfiguration?.buildCacheEnabled) {
+        terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
         new CacheableOperationPlugin({
           allowWarningsInSuccessfulBuild:
             !!this.rushConfiguration.experimentsConfiguration.configuration
@@ -361,12 +362,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           terminal
         }).apply(this.hooks);
       } else if (!this._disableBuildCache) {
+        terminal.writeVerboseLine(`Incremental strategy: output preservation`);
         // Explicitly disabling the build cache also disables legacy skip detection.
         new LegacySkipPlugin({
           terminal,
           changedProjectsOnly,
           isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
         }).apply(this.hooks);
+      } else {
+        terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
       }
 
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
