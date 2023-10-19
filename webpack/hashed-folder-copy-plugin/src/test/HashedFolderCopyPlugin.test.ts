@@ -117,4 +117,8 @@ describe('HashedFolderCopyPlugin', () => {
   it('Handles globbing a local folder', async () => {
     await runTestAsync(`${__dirname}/scenarios/localFolder`);
   });
+
+  it('Handles globbing a package reference', async () => {
+    await runTestAsync(`${__dirname}/scenarios/packageReference`);
+  });
 });
