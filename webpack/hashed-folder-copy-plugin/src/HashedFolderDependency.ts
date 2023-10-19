@@ -105,10 +105,10 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
     // Map of asset names (to be prepended by the outputFolder) to asset contents
     const assetsToAdd: Map<string, string | Buffer> = new Map();
 
-    const module: webpack.NormalModule = compilation.moduleGraph.getParentModule(
+    const parentModule: webpack.NormalModule = compilation.moduleGraph.getParentModule(
       this
     ) as webpack.NormalModule;
-    const context: string | null = module.context;
+    const context: string | null = parentModule.context;
     let resolver: ResolverWithOptions | undefined;
     for (const source of this.requireFolderOptions.sources) {
       const { globsBase, globPatterns } = source;
@@ -154,7 +154,7 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
             return renderError(errorMessage);
           } else {
             if (!resolver) {
-              resolver = compilation.resolverFactory.get('normal', module.resolveOptions);
+              resolver = compilation.resolverFactory.get('normal', parentModule.resolveOptions);
             }
 
             const resolveResult: string | false = resolver.resolveSync(
@@ -179,6 +179,8 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
         }
       }
 
+      // TODO: Add resolvedGlobsBase to `parentModule.buildInfo.contextDependencies`
+      // At this point in the compilation, that property has been set to undefined, so we need to do this earlier
       const globResults: string[] = await glob(globPatterns, {
         cwd: resolvedGlobsBase,
         onlyFiles: true,
@@ -236,8 +238,8 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
     );
     pathPrefix = path.posix.join(pathPrefix, '/'); // Ensure trailing slash
 
-    if (!module.buildInfo.assets) {
-      module.buildInfo.assets = {};
+    if (!parentModule.buildInfo.assets) {
+      parentModule.buildInfo.assets = {};
     }
     const existingAssetNames: Set<string> = new Set<string>(Object.keys(compilation.assets));
     for (const [assetPath, asset] of assetsToAdd.entries()) {
@@ -250,7 +252,7 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
 
       const assetSource: webpack.sources.RawSource = new webpack.sources.RawSource(asset);
       compilation.emitAsset(fullAssetPath, assetSource);
-      module.buildInfo.assets[fullAssetPath] = assetSource;
+      parentModule.buildInfo.assets[fullAssetPath] = assetSource;
     }
 
     return `${webpack.RuntimeGlobals.publicPath} + ${JSON.stringify(pathPrefix)}`;
