@@ -4,6 +4,8 @@
 import { Async } from '@rushstack/node-core-library';
 import type { CallExpression, Expression, UnaryExpression } from 'estree';
 import webpack from 'webpack';
+import type glob from 'fast-glob';
+
 import { HashedFolderDependency, HashedFolderDependencyTemplate } from './HashedFolderDependency';
 
 type BasicEvaluatedExpressionHook = ReturnType<
@@ -49,10 +51,23 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
       compilation.hooks.finishModules.tapPromise(PLUGIN_NAME, async () => {
+        const inputFileSystem: webpack.Compiler['inputFileSystem'] = compiler.inputFileSystem;
+        const notImplementedFunction: () => never = () => {
+          throw new Error('Not implemented');
+        };
+        const globFs: glob.FileSystemAdapter = {
+          lstat: inputFileSystem.lstat?.bind(inputFileSystem) ?? notImplementedFunction,
+          stat: inputFileSystem.stat?.bind(inputFileSystem) ?? notImplementedFunction,
+          lstatSync: notImplementedFunction,
+          statSync: notImplementedFunction,
+          readdir: inputFileSystem.readdir?.bind(inputFileSystem) ?? notImplementedFunction,
+          readdirSync: notImplementedFunction
+        } as unknown as glob.FileSystemAdapter; // The Webpack typings are wrong on `readdir`
+
         await Async.forEachAsync(
           hashedFolderDependencies,
           async (hashedFolderDependency) => {
-            await hashedFolderDependency.processAssetsAsync(compilation);
+            await hashedFolderDependency.processAssetsAsync(compilation, globFs);
           },
           { concurrency: 10 }
         );

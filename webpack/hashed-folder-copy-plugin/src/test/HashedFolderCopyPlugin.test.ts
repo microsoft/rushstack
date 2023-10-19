@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
-
-// eslint-disable-next-line @rushstack/hoist-jest-mock
 jest.mock(
   'fast-glob/out/providers/provider',
   () => {
+    const path: typeof import('path') = require('path');
     const { default: provider } = jest.requireActual('fast-glob/out/providers/provider');
     provider.prototype._getRootDirectory = function (task: { base: string }) {
       // fast-glob calls `path.resolve` which doesn't work correctly with the MemFS volume while running on Windows
@@ -17,8 +15,9 @@ jest.mock(
   {}
 );
 
-import type { FileSystem, FolderItem } from '@rushstack/node-core-library';
+import type { default as webpack, Stats } from 'webpack';
 import type { Volume } from 'memfs/lib/volume';
+import type { FileSystem, FolderItem } from '@rushstack/node-core-library';
 
 jest.setTimeout(1e9);
 
@@ -64,12 +63,14 @@ async function readFolderAsync(
     { concurrency: 50 }
   );
 }
-import { promisify } from 'util';
-import webpack, { type Stats } from 'webpack';
 
 async function runTestAsync(inputFolderPath: string): Promise<void> {
-  const { Volume } = await import('memfs/lib/volume');
-  const { HashedFolderCopyPlugin } = await import('../HashedFolderCopyPlugin');
+  const [{ Volume }, { default: webpack }, { promisify }, { HashedFolderCopyPlugin }] = await Promise.all([
+    import('memfs/lib/volume'),
+    import('webpack'),
+    import('util'),
+    import('../HashedFolderCopyPlugin')
+  ]);
 
   const memoryFileSystem: Volume = new Volume();
   const folderContents: Record<string, string> = {};

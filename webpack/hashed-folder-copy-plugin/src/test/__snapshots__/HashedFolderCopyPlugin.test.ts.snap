@@ -2,6 +2,9 @@
 
 exports[`HashedFolderCopyPlugin Handles globbing a local folder: Content 1`] = `
 Object {
+  "/release/assets_4fd2c6dcfaa15c28895f9aea474338da/a.txt": "AAA",
+  "/release/assets_4fd2c6dcfaa15c28895f9aea474338da/b.txt": "BBB",
+  "/release/assets_4fd2c6dcfaa15c28895f9aea474338da/subfolder/c.txt": "CCC",
   "/release/main.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
 /******/ 	// The require scope
@@ -49,7 +52,7 @@ var __webpack_exports__ = {};
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 // eslint-disable-next-line no-console
-const path = __webpack_require__.p + \\"assets_d41d8cd98f00b204e9800998ecf8427e/\\";
+const path = __webpack_require__.p + \\"assets_4fd2c6dcfaa15c28895f9aea474338da/\\";
 // eslint-disable-next-line no-console
 console.log(path);
 //# sourceMappingURL=entry.js.map

@@ -95,13 +95,19 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
     super.deserialize(context);
   }
 
-  public async processAssetsAsync(compilation: webpack.Compilation): Promise<void> {
+  public async processAssetsAsync(
+    compilation: webpack.Compilation,
+    globFs: glob.FileSystemAdapter
+  ): Promise<void> {
     if (!this.expression) {
-      this.expression = await this._collectAssetsAndGetExpressionAsync(compilation);
+      this.expression = await this._collectAssetsAndGetExpressionAsync(compilation, globFs);
     }
   }
 
-  private async _collectAssetsAndGetExpressionAsync(compilation: webpack.Compilation): Promise<string> {
+  private async _collectAssetsAndGetExpressionAsync(
+    compilation: webpack.Compilation,
+    globFs: glob.FileSystemAdapter
+  ): Promise<string> {
     // Map of asset names (to be prepended by the outputFolder) to asset contents
     const assetsToAdd: Map<string, string | Buffer> = new Map();
 
@@ -184,7 +190,7 @@ export class HashedFolderDependency extends webpack.dependencies.NullDependency 
       const globResults: string[] = await glob(globPatterns, {
         cwd: resolvedGlobsBase,
         onlyFiles: true,
-        fs: compilation.inputFileSystem as unknown as glob.FileSystemAdapter // These types are not exactly the same, but they're close enough
+        fs: globFs
       });
       for (const globResult of globResults) {
         if (assetsToAdd.has(globResult)) {
