@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import glob from 'fast-glob';
-import crypto from 'crypto';
-import { FileSystem } from '@rushstack/node-core-library';
+import { Async } from '@rushstack/node-core-library';
 import type { CallExpression, Expression, UnaryExpression } from 'estree';
 import webpack from 'webpack';
+import { HashedFolderDependency, HashedFolderDependencyTemplate } from './HashedFolderDependency';
 
 type BasicEvaluatedExpressionHook = ReturnType<
   typeof webpack.javascript.JavascriptParser.prototype.hooks.evaluateTypeof.for
@@ -34,25 +32,34 @@ interface IAcornNode<TExpression> {
   value: TExpression;
 }
 
-interface ICollectAssetsOptions {
-  module: webpack.Module;
-  compilation: webpack.Compilation;
-  requireFolderOptions: IRequireFolderOptions;
-  resolver: ResolverWithOptions;
+export function renderError(errorMessage: string): string {
+  return `(function () { throw new Error(${JSON.stringify(errorMessage)}); })()`;
 }
-
-type NormalModuleFactory = Parameters<typeof webpack.Compiler.prototype.hooks.normalModuleFactory.call>[0];
-type ResolverWithOptions = ReturnType<NormalModuleFactory['getResolver']>;
 
 /**
  * @public
  */
 export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
   public apply(compiler: webpack.Compiler): void {
-    compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
-      const normalResolver: ResolverWithOptions = normalModuleFactory.getResolver('normal', {
-        useSyncFileSystemCalls: true
+    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
+      compilation.dependencyTemplates.set(HashedFolderDependency, new HashedFolderDependencyTemplate());
+    });
+
+    const hashedFolderDependencies: HashedFolderDependency[] = [];
+
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
+      compilation.hooks.finishModules.tapPromise(PLUGIN_NAME, async () => {
+        await Async.forEachAsync(
+          hashedFolderDependencies,
+          async (hashedFolderDependency) => {
+            await hashedFolderDependency.processAssetsAsync(compilation);
+          },
+          { concurrency: 10 }
+        );
       });
+    });
+
+    compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
       const handler: (parser: webpack.javascript.JavascriptParser) => void = (
         parser: webpack.javascript.JavascriptParser
       ) => {
@@ -99,26 +106,23 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
           }
 
           const currentModule: webpack.NormalModule = parser.state.current;
-          let dependencyText: string;
+          let dependency: webpack.dependencies.NullDependency;
           if (!requireFolderOptions) {
-            dependencyText = this._renderError(errorMessage!);
+            const errorText: string = renderError(errorMessage!);
+            dependency = new webpack.dependencies.ConstDependency(errorText, expression.range!);
+            if (expression.loc) {
+              dependency.loc = expression.loc;
+            }
+
             compilation.errors.push(new webpack.WebpackError(errorMessage));
           } else {
-            dependencyText = this._collectAssets({
-              module: currentModule,
-              compilation,
+            const hashedFolderDependency: HashedFolderDependency = new HashedFolderDependency(
               requireFolderOptions,
-              resolver: normalResolver
-            });
-          }
-
-          const dependency: webpack.dependencies.ConstDependency = new webpack.dependencies.ConstDependency(
-            `/* ${EXPRESSION_NAME} */ ${dependencyText}`,
-            expression.range!,
-            [webpack.RuntimeGlobals.publicPath]
-          );
-          if (expression.loc) {
-            dependency.loc = expression.loc;
+              expression.range!,
+              expression.loc
+            );
+            hashedFolderDependencies.push(hashedFolderDependency);
+            dependency = hashedFolderDependency;
           }
 
           currentModule.addDependency(dependency);
@@ -136,142 +140,6 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
       normalModuleFactory.hooks.parser.for('javascript/auto').tap(PLUGIN_NAME, handler);
       normalModuleFactory.hooks.parser.for('javascript/dynamic').tap(PLUGIN_NAME, handler);
     });
-  }
-
-  private _collectAssets(options: ICollectAssetsOptions): string {
-    const { module, compilation, requireFolderOptions, resolver } = options;
-
-    // Map of asset names (to be prepended by the outputFolder) to asset objects
-    const assetsToAdd: Map<string, Buffer> = new Map<string, Buffer>();
-
-    for (const source of requireFolderOptions.sources) {
-      const { globsBase, globPatterns } = source;
-
-      let resolvedGlobsBase: string;
-      if (globsBase.startsWith('.')) {
-        // Does this look like a relative path?
-        if (!module.context) {
-          const errorMessage: string = `Unable to resolve relative path "${globsBase}" because the module has no context`;
-          compilation.errors.push(new webpack.WebpackError(errorMessage));
-          return this._renderError(errorMessage);
-        } else {
-          resolvedGlobsBase = path.resolve(module.context, globsBase);
-        }
-      } else if (path.isAbsolute(globsBase)) {
-        // This is an absolute path
-        resolvedGlobsBase = globsBase;
-      } else {
-        // This looks like a NodeJS module path
-        let slashAfterPackageNameIndex: number;
-        if (globsBase.startsWith('@')) {
-          // The package name has a scope
-          slashAfterPackageNameIndex = globsBase.indexOf('/', globsBase.indexOf('/') + 1);
-        } else {
-          slashAfterPackageNameIndex = globsBase.indexOf('/');
-        }
-
-        let packageName: string;
-        let pathInsidePackage: string;
-        if (slashAfterPackageNameIndex === -1) {
-          packageName = globsBase;
-          pathInsidePackage = '';
-        } else {
-          packageName = globsBase.slice(0, slashAfterPackageNameIndex);
-          pathInsidePackage = globsBase.slice(slashAfterPackageNameIndex + 1);
-        }
-
-        let packagePath: string | undefined;
-        try {
-          if (!module.context) {
-            const errorMessage: string = `Unable to resolve package "${packageName}" because the module has no context`;
-            compilation.errors.push(new webpack.WebpackError(errorMessage));
-            return this._renderError(errorMessage);
-          } else {
-            const resolveResult: string | false = resolver.resolveSync(
-              {},
-              module.context,
-              `${packageName}/package.json`
-            );
-            if (resolveResult) {
-              packagePath = path.dirname(resolveResult);
-            }
-          }
-        } catch (e) {
-          // Ignore - return an error below
-        }
-
-        if (packagePath) {
-          resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
-        } else {
-          const errorMessage: string = `Unable to resolve package "${packageName}"`;
-          compilation.errors.push(new webpack.WebpackError(errorMessage));
-          return this._renderError(errorMessage);
-        }
-      }
-
-      const globResults: string[] = glob.sync(globPatterns, { cwd: resolvedGlobsBase, onlyFiles: true });
-      for (const globResult of globResults) {
-        if (assetsToAdd.has(globResult)) {
-          const errorMessage: string = `Two files resolve to the same output path "${globResult}"`;
-          compilation.errors.push(new webpack.WebpackError(errorMessage));
-          return this._renderError(errorMessage);
-        }
-
-        const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
-
-        const assetContents: Buffer = FileSystem.readFileToBuffer(globResultFullPath);
-        assetsToAdd.set(globResult, assetContents);
-        module.buildInfo.fileDependencies.add(globResultFullPath);
-      }
-    }
-
-    const hash: crypto.Hash = crypto.createHash('md5');
-    // If the webpack config specified a salt, apply it here
-    const hashSalt: string | undefined = compilation.outputOptions?.hashSalt;
-    if (hashSalt) {
-      hash.update(hashSalt);
-    }
-
-    // Sort the paths to maximize hash stability
-    for (const assetPath of Array.from(assetsToAdd.keys()).sort()) {
-      hash.update(assetPath);
-      hash.update(assetsToAdd.get(assetPath)!);
-    }
-
-    const hashTokenRegex: RegExp = /\[hash:?(\d+)?\]/g;
-    const hashDigest: string = hash.digest('hex');
-    let pathPrefix: string = requireFolderOptions.outputFolder.replace(hashTokenRegex, (match, length) => {
-      const hashLength: number | undefined = length ? Number.parseInt(length, 10) : undefined;
-      if (hashLength) {
-        return hashDigest.slice(0, hashLength);
-      } else {
-        return hashDigest;
-      }
-    });
-    pathPrefix = path.posix.join(pathPrefix, '/'); // Ensure trailing slash
-
-    if (!module.buildInfo.assets) {
-      module.buildInfo.assets = {};
-    }
-    const existingAssetNames: Set<string> = new Set<string>(Object.keys(compilation.assets));
-    for (const [assetPath, asset] of assetsToAdd.entries()) {
-      const fullAssetPath: string = path.posix.join(pathPrefix, assetPath);
-      if (existingAssetNames.has(fullAssetPath)) {
-        const errorMessage: string = `An asset with path "${fullAssetPath}" already exists`;
-        compilation.errors.push(new webpack.WebpackError(errorMessage));
-        return this._renderError(errorMessage);
-      }
-
-      const assetSource: webpack.sources.RawSource = new webpack.sources.RawSource(asset);
-      compilation.assets[fullAssetPath] = assetSource;
-      module.buildInfo.assets[fullAssetPath] = assetSource;
-    }
-
-    return `${webpack.RuntimeGlobals.publicPath} + ${JSON.stringify(pathPrefix)}`;
-  }
-
-  private _renderError(errorMessage: string): string {
-    return `(function () { throw new Error(${JSON.stringify(errorMessage)}); })()`;
   }
 
   private _evaluateAcornNode(node: IAcornNode<unknown>): unknown {
