@@ -50,12 +50,12 @@ module.exports = {
       const folderItems = await FileSystem.readFolderItemsAsync(
         relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath
       );
-      for (const folderItem of folderItems) {
+      await Promise.all(folderItems.map(async (folderItem) => {
         const itemName = folderItem.name;
         const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
         if (folderItem.isDirectory()) {
-          await searchAsync(relativeItemPath);
+          return searchAsync(relativeItemPath);
         } else if (folderItem.isFile() && itemName.endsWith(JS_FILE_EXTENSION)) {
           const jsInPath = `${jsInFolderPath}/${relativeItemPath}`;
           const jsFileText = await FileSystem.readFileAsync(jsInPath);
@@ -73,10 +73,10 @@ module.exports = {
             terminal.writeVerboseLine(`Copying ${inDtsPath} to ${outDtsPath}`);
             // We know this is a file, don't need the redundant checks in FileSystem.copyFileAsync
             const buffer = await FileSystem.readFileToBufferAsync(inDtsPath);
-            await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
+            return FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
           }
         }
-      }
+      }));
     }
 
     await searchAsync(undefined);
