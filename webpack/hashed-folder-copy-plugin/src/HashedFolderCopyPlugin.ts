@@ -17,6 +17,7 @@ interface IParserHelpers {
   toConstantDependency: (parser: webpack.Parser, type: string) => (exp: Expression) => true;
 }
 
+// TODO: Use the compiler's webpack exports instead of requiring from webpack
 const ParserHelpers: IParserHelpers = require('webpack/lib/javascript/JavascriptParserHelpers');
 
 const PLUGIN_NAME: 'hashed-folder-copy-plugin' = 'hashed-folder-copy-plugin';

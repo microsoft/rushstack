@@ -55,6 +55,8 @@ var __webpack_exports__ = {};
 const path = __webpack_require__.p + \\"assets_1a20fc5e5390d91fee246bf5dbf1300e/\\";
 // eslint-disable-next-line no-console
 console.log(path);
+// eslint-disable-next-line no-console
+console.log(\\"function\\");
 //# sourceMappingURL=entry.js.map
 /******/ })()
 ;",

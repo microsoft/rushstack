@@ -14,3 +14,5 @@ const path: string = requireFolder({
 
 // eslint-disable-next-line no-console
 console.log(path);
+// eslint-disable-next-line no-console
+console.log(typeof requireFolder);
