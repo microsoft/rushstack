@@ -3,6 +3,11 @@
 
 import type webpack from 'webpack';
 
+type BasicEvaluatedExpressionHook = ReturnType<
+  typeof webpack.javascript.JavascriptParser.prototype.hooks.evaluateTypeof.for
+>;
+export type BasicEvaluatedExpression = ReturnType<BasicEvaluatedExpressionHook['call']>;
+
 export type Range = number | [number, number];
 export type DependencyTemplateContext = Parameters<
   typeof webpack.dependencies.NullDependency.Template.prototype.apply

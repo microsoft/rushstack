@@ -4,7 +4,7 @@
 
 ```ts
 
-import webpack from 'webpack';
+import type webpack from 'webpack';
 
 // @public (undocumented)
 export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {

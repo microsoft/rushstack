@@ -3,15 +3,14 @@
 
 import { Async } from '@rushstack/node-core-library';
 import type { CallExpression, Expression, UnaryExpression } from 'estree';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import type glob from 'fast-glob';
 
-import { HashedFolderDependency, HashedFolderDependencyTemplate } from './HashedFolderDependency';
-
-type BasicEvaluatedExpressionHook = ReturnType<
-  typeof webpack.javascript.JavascriptParser.prototype.hooks.evaluateTypeof.for
->;
-type BasicEvaluatedExpression = ReturnType<BasicEvaluatedExpressionHook['call']>;
+import {
+  type IHashedFolderDependency,
+  getHashedFolderDependencyForWebpackInstance
+} from './HashedFolderDependency';
+import type { BasicEvaluatedExpression } from './webpackTypes';
 
 interface IParserHelpers {
   evaluateToString: (type: string) => (exp: UnaryExpression) => BasicEvaluatedExpression;
@@ -20,9 +19,9 @@ interface IParserHelpers {
 
 const ParserHelpers: IParserHelpers = require('webpack/lib/javascript/JavascriptParserHelpers');
 
-const PLUGIN_NAME: string = 'hashed-folder-copy-plugin';
+const PLUGIN_NAME: 'hashed-folder-copy-plugin' = 'hashed-folder-copy-plugin';
 
-const EXPRESSION_NAME: string = 'requireFolder';
+const EXPRESSION_NAME: 'requireFolder' = 'requireFolder';
 
 interface IAcornNode<TExpression> {
   computed: boolean | undefined;
@@ -43,11 +42,15 @@ export function renderError(errorMessage: string): string {
  */
 export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
   public apply(compiler: webpack.Compiler): void {
+    const webpack: typeof import('webpack') = compiler.webpack;
+    const { HashedFolderDependency, HashedFolderDependencyTemplate } =
+      getHashedFolderDependencyForWebpackInstance(webpack);
+
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
       compilation.dependencyTemplates.set(HashedFolderDependency, new HashedFolderDependencyTemplate());
     });
 
-    const hashedFolderDependencies: HashedFolderDependency[] = [];
+    const hashedFolderDependencies: IHashedFolderDependency[] = [];
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
       compilation.hooks.finishModules.tapPromise(PLUGIN_NAME, async () => {
@@ -131,7 +134,7 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
 
             compilation.errors.push(new webpack.WebpackError(errorMessage));
           } else {
-            const hashedFolderDependency: HashedFolderDependency = new HashedFolderDependency(
+            const hashedFolderDependency: IHashedFolderDependency = new HashedFolderDependency(
               requireFolderOptions,
               expression.range!,
               expression.loc
