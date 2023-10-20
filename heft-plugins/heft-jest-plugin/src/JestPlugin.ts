@@ -576,6 +576,18 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       jestConfig.displayName = heftConfiguration.projectPackageJson.name;
     }
 
+    let silent: boolean | undefined;
+    if (taskSession.parameters.verbose || taskSession.parameters.debug) {
+      // If Heft's "--verbose" or "--debug" parameters were used, then we're debugging Jest problems,
+      // so we always want to see "console.log()" even if jest.config.json asked to suppress it.
+      // If someone really dislikes that, we could expose "--silent" in the Heft CLI,
+      // but it is a confusing combination.
+      silent = false;
+    } else {
+      // If "silent" is specified via IJestPluginOptions, that takes precedence over jest.config.json
+      options.silent ?? jestConfig.silent ?? false;
+    }
+
     const jestArgv: Config.Argv = {
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: taskSession.parameters.debug,
@@ -590,8 +602,23 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       listTests: false,
       rootDir: buildFolderPath,
 
-      silent: options.silent || false,
+      // What these fields mean for Jest:
+      //
+      // If "silent" is true:
+      // - Jest discards all console.log() output and there is no way to retrieve it
+      //
+      // If "silent" is false and "verbose" is false:
+      // - Jest uses BufferedConsole which doesn't show console.log() until after the test run completes,
+      //   which is annoying in the debugger.  The output is formatted nicely using HeftJestReporter.
+      //
+      // If "silent" is false and "verbose" is true:
+      // - Jest uses CustomConsole which logs immediately, but shows ugly call stacks with each log.
+      //
+      // If "verbose" is true (regardless of "silent"):
+      // - Jest reports include detailed results for every test, even if all tests passed within a test suite.
+      silent,
       verbose: taskSession.parameters.verbose || taskSession.parameters.debug,
+
       testNamePattern: options.testNamePattern,
       testPathIgnorePatterns: options.testPathIgnorePatterns ? [options.testPathIgnorePatterns] : undefined,
       testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
