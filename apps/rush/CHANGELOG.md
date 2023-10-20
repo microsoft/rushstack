@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 07 Oct 2023 01:20:56 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Oct 2023 01:54:21 GMT and should not be manually modified.
+
+## 5.109.2
+Fri, 20 Oct 2023 01:54:21 GMT
+
+### Updates
+
+- Allow the output preservation incremental strategy if the build cache is configured but disabled. When running in verbose mode, log the incremental strategy that is being used.
+- Log the cache key in `--verbose` mode when the cache is successfully read from or written to.
+- Fix an issue where console colors were sometimes not enabled correctly during `rush install`
+- Fix an issue where running `rush update-cloud-credentials --interactive` sometimes used the wrong working directory when invoked in a repo configured to use the `http` build cache provider (GitHub #4396)
 
 ## 5.109.1
 Sat, 07 Oct 2023 01:20:56 GMT
