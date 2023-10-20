@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Improve color logic when invoking package managers' install ",
+      "comment": "Fix an issue where console colors were sometimes not enabled correctly during \"rush instal\"",
       "type": "none"
     }
   ],
