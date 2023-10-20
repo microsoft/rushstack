@@ -591,6 +591,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       rootDir: buildFolderPath,
 
       silent: options.silent || false,
+      verbose: (taskSession.parameters.verbose || taskSession.parameters.debug) && !options.silent,
       testNamePattern: options.testNamePattern,
       testPathIgnorePatterns: options.testPathIgnorePatterns ? [options.testPathIgnorePatterns] : undefined,
       testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
