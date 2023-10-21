@@ -7,7 +7,8 @@ import { CommandLineParser } from '../providers/CommandLineParser';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
-  private _flag!: CommandLineFlagParameter;
+  private _flag: CommandLineFlagParameter;
+  private _anotherFlag: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -15,18 +16,21 @@ class TestAction extends CommandLineAction {
       summary: 'does the job',
       documentation: 'a longer description'
     });
+
+    this._flag = this.defineFlagParameter({
+      parameterLongName: '--flag',
+      description: 'The flag'
+    });
+
+    this._anotherFlag = this.defineFlagParameter({
+      parameterLongName: '--another-flag',
+      description: 'Another flag'
+    });
   }
 
   protected async onExecute(): Promise<void> {
     expect(this._flag.value).toEqual(true);
     this.done = true;
-  }
-
-  protected onDefineParameters(): void {
-    this._flag = this.defineFlagParameter({
-      parameterLongName: '--flag',
-      description: 'The flag'
-    });
   }
 }
 
@@ -57,5 +61,14 @@ describe(CommandLineParser.name, () => {
 
     const action: TestAction = commandLineParser.selectedAction as TestAction;
     expect(action.done).toBe(true);
+  });
+
+  it('throws an error if an abbreviated parameter is provided', async () => {
+    const commandLineParser: TestCommandLine = new TestCommandLine();
+    commandLineParser._registerDefinedParameters();
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--flag', '--another'])
+    ).rejects.toThrowError(/unrecognized arguments: --another/);
   });
 });

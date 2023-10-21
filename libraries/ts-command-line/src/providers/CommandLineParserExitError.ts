@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
+import type { IExtendedArgumentParserOptions } from '../types/Argparse';
 
 export class CommandLineParserExitError extends Error {
   public readonly exitCode: number;
@@ -20,6 +21,13 @@ export class CommandLineParserExitError extends Error {
 }
 
 export class CustomArgumentParser extends argparse.ArgumentParser {
+  public constructor(options: IExtendedArgumentParserOptions = {}) {
+    // The original default when unspecified is true and we don't want argparse
+    // to do any fuzzy matching, so set the default when unspecified to false
+    options.allow_abbrev = !!options.allow_abbrev;
+    super(options);
+  }
+
   public exit(status: number, message: string): void {
     // override
     throw new CommandLineParserExitError(status, message);
