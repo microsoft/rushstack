@@ -85,9 +85,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       epilog: colors.bold(
         toolEpilog ?? `For detailed help about a specific command, use: ${toolFilename} <command> -h`
       ),
-      // The original default when unspecified is 'true' and we don't want argparse
-      // to do any fuzzy matching, so set the default when unspecified to false
-      allow_abbrev: allowAbbreviations ?? false
+      allow_abbrev: allowAbbreviations
     });
 
     this.onDefineParameters?.();

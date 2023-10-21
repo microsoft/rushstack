@@ -22,6 +22,9 @@ export class CommandLineParserExitError extends Error {
 
 export class CustomArgumentParser extends argparse.ArgumentParser {
   public constructor(options: IExtendedArgumentParserOptions) {
+    // The original default when unspecified is 'true' and we don't want argparse
+    // to do any fuzzy matching, so set the default when unspecified to false
+    options.allow_abbrev = options.allow_abbrev ?? false;
     super(options);
   }
 
