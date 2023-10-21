@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Prevent the usage of abbreviated parameters by default, and add \"allowAbbreviations\" option when creating a new CommandLineParser.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}

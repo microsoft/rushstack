@@ -35,6 +35,13 @@ export interface ICommandLineParserOptions {
    * Set to true to auto-define a tab completion action. False by default.
    */
   enableTabCompletionAction?: boolean;
+
+  /**
+   * Set to true to allow abbreviations for command-line parameters.  For example, if
+   * "--flag-xyz" is a valid parameter, then "--flag" would be treated as a valid abbreviation.
+   * False by default.
+   */
+  allowAbbreviations?: boolean;
 }
 
 /**
@@ -70,14 +77,17 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     this._actions = [];
     this._actionsByName = new Map<string, CommandLineAction>();
 
+    const { toolFilename, toolDescription, toolEpilog, allowAbbreviations } = options;
     this._argumentParser = new CustomArgumentParser({
       add_help: true,
-      prog: this._options.toolFilename,
-      description: this._options.toolDescription,
+      prog: toolFilename,
+      description: toolDescription,
       epilog: colors.bold(
-        this._options.toolEpilog ??
-          `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
-      )
+        toolEpilog ?? `For detailed help about a specific command, use: ${toolFilename} <command> -h`
+      ),
+      // The original default when unspecified is 'true' and we don't want argparse
+      // to do any fuzzy matching, so set the default when unspecified to false
+      allow_abbrev: allowAbbreviations ?? false
     });
 
     this.onDefineParameters?.();
