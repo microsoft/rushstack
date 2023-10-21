@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { SelectionParameterSet } from '../../cli/parsing/SelectionParameterSet';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -92,4 +95,30 @@ export interface IInstallManagerOptions {
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
   beforeInstallAsync?: () => Promise<void>;
+
+  /**
+   * Whether to specify "--ignore-scripts" command-line parameter, which ignores
+   * install lifecycle scripts in package.json and its dependencies
+   */
+  ignoreScripts: boolean;
+
+  /**
+   * Whether to install for projects in split workspace
+   */
+  includeSplitWorkspace: boolean;
+
+  /**
+   * Filters to be passed to PNPM during installation for split workspace.
+   */
+  splitWorkspacePnpmFilterArguments: string[];
+
+  /**
+   * Selected projects during partial install.
+   */
+  selectedProjects?: Set<RushConfigurationProject>;
+
+  /**
+   * Selection parameters for partial install.
+   */
+  selectionParameters?: SelectionParameterSet;
 }

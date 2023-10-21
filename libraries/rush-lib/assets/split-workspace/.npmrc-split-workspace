@@ -1,0 +1,3 @@
+# Rush uses the global-pnpmfile setting to manage cross-workspace
+# dependencies. Do NOT change this setting.
+global-pnpmfile=${_RUSH_COMMON_TEMP_SPLIT_FOLDER}/global-pnpmfile.cjs

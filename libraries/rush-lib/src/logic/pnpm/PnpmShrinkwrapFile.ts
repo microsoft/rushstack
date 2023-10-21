@@ -10,6 +10,7 @@ import {
   AlreadyReportedError,
   Import,
   Path,
+  MapExtensions,
   type IPackageJson,
   InternalError
 } from '@rushstack/node-core-library';
@@ -24,9 +25,12 @@ import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import { DependencyType, type PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+import { SplitWorkspacePnpmfileConfiguration } from './SplitWorkspacePnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
 import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
 import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+
+import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -114,6 +118,10 @@ export interface IPnpmShrinkwrapYaml {
   lockfileVersion?: string | number;
   /** The list of resolved version numbers for direct dependencies */
   dependencies: Record<string, string>;
+  /** The list of resolved version numbers for dev dependencies */
+  devDependencies: Record<string, string>;
+  /** The list of resolved version numbers for optional dependencies */
+  optionalDependencies: Record<string, string>;
   /** The list of importers for local workspace projects */
   importers: Record<string, IPnpmShrinkwrapImporterYaml>;
   /** The description of the solved graph */
@@ -240,6 +248,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly isWorkspaceCompatible: boolean;
   public readonly registry: string;
   public readonly dependencies: ReadonlyMap<string, IPnpmVersionSpecifier>;
+  public readonly devDependencies: ReadonlyMap<string, IPnpmVersionSpecifier>;
+  public readonly optionalDependencies: ReadonlyMap<string, IPnpmVersionSpecifier>;
   public readonly importers: ReadonlyMap<string, IPnpmShrinkwrapImporterYaml>;
   public readonly specifiers: ReadonlyMap<string, string>;
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
@@ -248,6 +258,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private readonly _integrities: Map<string, Map<string, string>>;
   private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
+  private _splitWorkspaceGlobalPnpmfileConfiguration: SplitWorkspacePnpmfileConfiguration | undefined;
+  private _individualPackageName: string | undefined;
+  private _individualShrinkwrapImporter: IPnpmShrinkwrapImporterYaml | undefined;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
     super();
@@ -268,6 +281,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     this.registry = shrinkwrapJson.registry || '';
     this.dependencies = new Map(Object.entries(shrinkwrapJson.dependencies || {}));
+    this.devDependencies = new Map(Object.entries(shrinkwrapJson.devDependencies || {}));
+    this.optionalDependencies = new Map(Object.entries(shrinkwrapJson.optionalDependencies || {}));
     this.importers = new Map(Object.entries(shrinkwrapJson.importers || {}));
     this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
     this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
@@ -294,6 +309,21 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
     const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
     return new PnpmShrinkwrapFile(parsedData);
+  }
+
+  public setIndividualPackage(
+    packageName: string,
+    splitWorkspaceGlobalPnpmfileConfiguration?: SplitWorkspacePnpmfileConfiguration
+  ): void {
+    this._individualPackageName = packageName;
+
+    if (splitWorkspaceGlobalPnpmfileConfiguration) {
+      this._splitWorkspaceGlobalPnpmfileConfiguration = splitWorkspaceGlobalPnpmfileConfiguration;
+    }
+  }
+
+  public get isIndividual(): boolean {
+    return this._individualPackageName !== undefined;
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
@@ -665,6 +695,44 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return integrityMap;
   }
 
+  public getIntegrityForIndividualProject(): Map<string, string> {
+    const packageName: string | undefined = this._individualPackageName;
+    if (undefined === packageName) {
+      throw new Error(`Can not generate integrities for shared shrinkwrap file`);
+    }
+    let integrityMap: Map<string, string> | undefined = this._integrities.get(packageName);
+    if (!integrityMap) {
+      integrityMap = new Map<string, string>();
+      this._integrities.set(packageName, integrityMap);
+      const shrinkwrapHash: string = this.getShrinkwrapHash();
+      const selfIntegrity: string = `${packageName}:${shrinkwrapHash}:`;
+      integrityMap.set(packageName, selfIntegrity);
+
+      const { dependencies, devDependencies, optionalDependencies } = this._getIndividualShrinkwrapImporter();
+
+      const externalFilter: (name: string, version: IPnpmVersionSpecifier) => boolean = (
+        name: string,
+        versionSpecifier: IPnpmVersionSpecifier
+      ): boolean => {
+        const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
+        return !version.includes('link:');
+      };
+
+      if (dependencies) {
+        this._addIntegrities(integrityMap, dependencies, false, externalFilter);
+      }
+
+      if (devDependencies) {
+        this._addIntegrities(integrityMap, devDependencies, false, externalFilter);
+      }
+
+      if (optionalDependencies) {
+        this._addIntegrities(integrityMap, optionalDependencies, true, externalFilter);
+      }
+    }
+    return integrityMap;
+  }
+
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
@@ -691,10 +759,123 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
-    const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
+    const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
       this._pnpmfileConfiguration.transform(packageJson),
       project.packageJsonEditor.filePath
     );
+
+    return this._isProjectModified(transformedPackageJsonEditor, importer);
+  }
+
+  public isSplitWorkspaceProjectModified(project: RushConfigurationProject): boolean {
+    const importerKey: string = this.getImporterKeyByPath(
+      project.rushConfiguration.commonTempSplitFolder,
+      project.projectFolder
+    );
+
+    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
+    if (!importer) {
+      return true;
+    }
+
+    if (!this._splitWorkspaceGlobalPnpmfileConfiguration) {
+      this._splitWorkspaceGlobalPnpmfileConfiguration = new SplitWorkspacePnpmfileConfiguration(
+        project.rushConfiguration
+      );
+    }
+
+    const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
+
+    // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
+    // found versions much simpler.
+    const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
+      this._splitWorkspaceGlobalPnpmfileConfiguration.transform(packageJson),
+      project.packageJsonEditor.filePath
+    );
+
+    return this._isProjectModified(transformedPackageJsonEditor, importer);
+  }
+
+  public isSplitWorkspaceIndividualProjectModified(project: RushConfigurationProject): boolean {
+    if (!this.isIndividual) {
+      throw new Error(`Can not calculate modified for shared workspace shrinkwrap file`);
+    }
+
+    if (!this._splitWorkspaceGlobalPnpmfileConfiguration) {
+      this._splitWorkspaceGlobalPnpmfileConfiguration = new SplitWorkspacePnpmfileConfiguration(
+        project.rushConfiguration
+      );
+    }
+
+    const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
+
+    let transformedPackageJson: IPackageJson = packageJson;
+
+    // .pnpmfile.cjs under project folder
+    const individualPnpmfilePath: string = path.join(project.projectFolder, RushConstants.pnpmfileV6Filename);
+    let individualPnpmfile: IPnpmfile | undefined;
+    if (FileSystem.exists(individualPnpmfilePath)) {
+      try {
+        individualPnpmfile = require(individualPnpmfilePath);
+      } catch (err) {
+        if (err instanceof SyntaxError) {
+          // eslint-disable-next-line no-console
+          console.error(
+            colors.red(
+              `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${individualPnpmfilePath}\n`
+            )
+          );
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(
+            colors.red(
+              `Error during pnpmfile execution. pnpmfile: "${individualPnpmfilePath}". Error: "${err.message}".` +
+                '\n'
+            )
+          );
+        }
+      }
+    }
+
+    transformedPackageJson =
+      this._splitWorkspaceGlobalPnpmfileConfiguration.transform(transformedPackageJson);
+    if (individualPnpmfile) {
+      const individualContext: IPnpmfileContext = {
+        log: (message: string) => {
+          // eslint-disable-next-line no-console
+          console.log(message);
+        }
+      };
+      try {
+        transformedPackageJson =
+          individualPnpmfile.hooks?.readPackage?.(transformedPackageJson, individualContext) ||
+          transformedPackageJson;
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          colors.red(
+            `Error during readPackage hook execution. pnpmfile: "${individualPnpmfilePath}". Error: "${err.message}".` +
+              '\n'
+          )
+        );
+      }
+    }
+
+    // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
+    // found versions much simpler.
+    const transformedPackageJsonEditor: PackageJsonEditor = PackageJsonEditor.fromObject(
+      transformedPackageJson,
+      project.packageJsonEditor.filePath
+    );
+
+    return this._isProjectModified(transformedPackageJsonEditor, this._getIndividualShrinkwrapImporter());
+  }
+
+  private _isProjectModified(
+    packageJsonEditor: PackageJsonEditor,
+    importer: IPnpmShrinkwrapImporterYaml
+  ): boolean {
+    const { dependencyList, devDependencyList } = packageJsonEditor;
 
     const allDependencies: PackageJsonDependency[] = [...dependencyList, ...devDependencyList];
 
@@ -844,6 +1025,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       ) {
         return true;
       }
+
+      // TODO: overrides?
     }
 
     return false;
@@ -991,5 +1174,29 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
+  }
+
+  private _getIndividualShrinkwrapImporter(): IPnpmShrinkwrapImporterYaml {
+    if (!this._individualShrinkwrapImporter) {
+      const dependencies: Record<string, string> = MapExtensions.toObject(
+        this.dependencies as Map<string, string>
+      );
+      const devDependencies: Record<string, string> = MapExtensions.toObject(
+        this.devDependencies as Map<string, string>
+      );
+      const optionalDependencies: Record<string, string> = MapExtensions.toObject(
+        this.optionalDependencies as Map<string, string>
+      );
+      const specifiers: Record<string, string> = MapExtensions.toObject(
+        this.specifiers as Map<string, string>
+      );
+      this._individualShrinkwrapImporter = {
+        dependencies,
+        devDependencies,
+        optionalDependencies,
+        specifiers
+      };
+    }
+    return this._individualShrinkwrapImporter;
   }
 }

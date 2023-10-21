@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Supports deferredInstallationScripts behind a experimental flag, which makes faster retires for install lifecycle scripts",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

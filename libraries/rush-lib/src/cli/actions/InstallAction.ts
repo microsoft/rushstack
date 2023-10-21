@@ -10,7 +10,14 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  private readonly _checkOnlyParameter: CommandLineFlagParameter;
+  private readonly _checkOnlyParameter!: CommandLineFlagParameter;
+  private _ignoreScriptsParameter!: CommandLineFlagParameter;
+  /**
+   * Whether split workspace projects are included in install
+   *
+   * This parameter only supported when there is split workspace project
+   */
+  private _includeSplitWorkspaceParameter?: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -38,22 +45,75 @@ export class InstallAction extends BaseInstallAction {
       enableFiltering: false
     });
 
+    if (this.rushConfiguration?.hasSplitWorkspaceProject) {
+      this._includeSplitWorkspaceParameter = this.defineFlagParameter({
+        parameterLongName: '--include-split-workspace',
+        description:
+          'Normally "rush install" only install projects in normal rush workspace.' +
+          ' When you want to install for split workspace projects, you can run' +
+          ' "rush install --include-split-workspace", which installs entire split workspace projects.' +
+          ' Or, you can specify selection parameters to do partial install for split workspace projects, ' +
+          ' such as "rush install --to <split_workspace_package_name>".'
+      });
+    }
+
     this._checkOnlyParameter = this.defineFlagParameter({
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
+    });
+
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description:
+        'Do not execute any install lifecycle scripts specified in package.json files and its' +
+        ' dependencies when "rush install". Running with this flag leaves your installation in a uncompleted' +
+        ' state, you need to run without this flag again to complete a full installation. Meanwhile, it makes' +
+        ' your installing faster. Later, you can run "rush install" to run all ignored scripts. Moreover, you' +
+        ' can partial install such as "rush install --to <package>" to run ignored scripts of the dependencies' +
+        ' of the selected projects.'
     });
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+
+    const {
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      selectedProjects,
+      hasSelectSplitWorkspaceProject
+    } = await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal);
+
+    // Warn when fully install without selecting any split workspace project
+    if (
+      this._includeSplitWorkspaceParameter &&
+      !this._includeSplitWorkspaceParameter.value &&
+      !this._selectionParameters?.isSelectionSpecified
+    ) {
+      terminal.writeWarningLine(
+        'Run "rush install" without any selection parameter will not install for split workspace' +
+          ' projects, please run the command again with specifying --include-split-workspace' +
+          ' if you really want to install for split workspace projects.'
+      );
+      terminal.writeLine();
+    }
+
+    let includeSplitWorkspace: boolean = this._includeSplitWorkspaceParameter?.value ?? false;
+    // turn on includeSplitWorkspace when selecting any split workspace project
+    if (selectedProjects && hasSelectSplitWorkspaceProject) {
+      includeSplitWorkspace = true;
+    }
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
+      ignoreScripts: this._ignoreScriptsParameter.value!,
       bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      includeSplitWorkspace,
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
@@ -62,7 +122,10 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      selectedProjects,
+      selectionParameters: this._selectionParameters,
       checkOnly: this._checkOnlyParameter.value,
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)

@@ -57,6 +57,7 @@
     "tapable": "2.2.1",
     "tar": "~6.1.11",
     "true-case-path": "~2.2.1",
+    "normalize-path": "~3.0.0",
     "uuid": "~8.3.2"
   },
   "devDependencies": {
@@ -75,6 +76,7 @@
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "6.1.1",
+    "@types/normalize-path": "~3.0.0",
     "@types/uuid": "~8.3.4",
     "@types/webpack-env": "1.18.0",
     "webpack": "~5.82.1"

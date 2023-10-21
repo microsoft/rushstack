@@ -3,7 +3,7 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Async } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
@@ -26,7 +26,7 @@ export class UnlinkManager {
    *
    * Returns true if anything was deleted.
    */
-  public unlink(force: boolean = false): boolean {
+  public async unlinkAsync(force: boolean = false): Promise<boolean> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (!force && useWorkspaces) {
@@ -41,7 +41,7 @@ export class UnlinkManager {
     }
 
     LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).clear();
-    return this._deleteProjectFiles();
+    return await this._deleteProjectFilesAsync();
   }
 
   /**
@@ -51,26 +51,33 @@ export class UnlinkManager {
    *
    * Returns true if anything was deleted
    * */
-  private _deleteProjectFiles(): boolean {
+  private async _deleteProjectFilesAsync(): Promise<boolean> {
     let didDeleteAnything: boolean = false;
 
-    for (const rushProject of this._rushConfiguration.projects) {
-      const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
-      if (FileSystem.exists(localModuleFolder)) {
-        // eslint-disable-next-line no-console
-        console.log(`Purging ${localModuleFolder}`);
-        Utilities.dangerouslyDeletePath(localModuleFolder);
-        didDeleteAnything = true;
-      }
+    await Async.forEachAsync(
+      this._rushConfiguration.projects,
+      async (rushProject) => {
+        const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
+        if (FileSystem.exists(localModuleFolder)) {
+          // eslint-disable-next-line no-console
+          console.log(`Purging ${localModuleFolder}`);
+          await Utilities.dangerouslyDeletePathAsync(localModuleFolder);
+          didDeleteAnything = true;
+        }
 
-      const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(rushProject);
-      if (FileSystem.exists(projectShrinkwrapFilePath)) {
-        // eslint-disable-next-line no-console
-        console.log(`Deleting ${projectShrinkwrapFilePath}`);
-        FileSystem.deleteFile(projectShrinkwrapFilePath);
-        didDeleteAnything = true;
+        const projectShrinkwrapFilePath: string =
+          BaseProjectShrinkwrapFile.getFilePathForProject(rushProject);
+        if (FileSystem.exists(projectShrinkwrapFilePath)) {
+          // eslint-disable-next-line no-console
+          console.log(`Deleting ${projectShrinkwrapFilePath}`);
+          await FileSystem.deleteFileAsync(projectShrinkwrapFilePath);
+          didDeleteAnything = true;
+        }
+      },
+      {
+        concurrency: 10
       }
-    }
+    );
 
     return didDeleteAnything;
   }

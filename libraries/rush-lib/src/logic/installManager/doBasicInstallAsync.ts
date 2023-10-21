@@ -33,14 +33,17 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
     {
       debug: isDebug,
       allowShrinkwrapUpdates: false,
+      ignoreScripts: false,
       checkOnly: false,
       bypassPolicy: false,
       noLink: false,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      includeSplitWorkspace: false,
       offline: false,
       collectLogFile: false,
       pnpmFilterArguments: [],
+      splitWorkspacePnpmFilterArguments: [],
       maxInstallAttempts: 1,
       networkConcurrency: undefined
     }

@@ -120,6 +120,7 @@ export function syncNpmrc(
   sourceNpmrcFolder: string,
   targetNpmrcFolder: string,
   useNpmrcPublish?: boolean,
+  sourceNpmrcFilename?: string,
   logger: ILogger = {
     // eslint-disable-next-line no-console
     info: console.log,
@@ -127,10 +128,14 @@ export function syncNpmrc(
     error: console.error
   }
 ): string | undefined {
-  const sourceNpmrcPath: string = path.join(
-    sourceNpmrcFolder,
-    !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
-  );
+  let resolvedSourceNpmrcFilename: string = '.npmrc';
+  if (useNpmrcPublish) {
+    resolvedSourceNpmrcFilename = '.npmrc-publish';
+  }
+  if (sourceNpmrcFilename) {
+    resolvedSourceNpmrcFilename = sourceNpmrcFilename;
+  }
+  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, resolvedSourceNpmrcFilename);
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {

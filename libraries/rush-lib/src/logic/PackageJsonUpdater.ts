@@ -250,6 +250,8 @@ export class PackageJsonUpdater {
       const installManagerOptions: IInstallManagerOptions = {
         debug: debugInstall,
         allowShrinkwrapUpdates: true,
+        includeSplitWorkspace: false,
+        ignoreScripts: false,
         bypassPolicy: false,
         noLink: false,
         fullUpgrade: false,
@@ -260,6 +262,7 @@ export class PackageJsonUpdater {
         variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
+        splitWorkspacePnpmFilterArguments: [],
         checkOnly: false
       };
 
@@ -287,9 +290,17 @@ export class PackageJsonUpdater {
       throw new Error('only accept "rush add" or "rush remove"');
     }
     const { skipUpdate, debugInstall, variant } = options;
+    const selectedProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    const splitWorkspacePackageNames: Set<string> = new Set<string>();
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
         this._terminal.writeLine(Colors.green('Wrote'), project.filePath);
+        if (project instanceof VersionMismatchFinderProject) {
+          selectedProjects.add(project.project);
+          if (project.project.splitWorkspace) {
+            splitWorkspacePackageNames.add(project.packageName);
+          }
+        }
       }
     }
 
@@ -299,19 +310,31 @@ export class PackageJsonUpdater {
       this._terminal.writeLine();
 
       const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+
+      const includeSplitWorkspace: boolean = splitWorkspacePackageNames.size !== 0;
+      const splitWorkspacePnpmFilterArguments: string[] = [];
+      for (const splitWorkspacePackageName of splitWorkspacePackageNames) {
+        splitWorkspacePnpmFilterArguments.push('--filter');
+        splitWorkspacePnpmFilterArguments.push(splitWorkspacePackageName);
+      }
+
       const installManagerOptions: IInstallManagerOptions = {
         debug: debugInstall,
         allowShrinkwrapUpdates: true,
+        ignoreScripts: false,
         bypassPolicy: false,
         noLink: false,
         fullUpgrade: false,
         recheckShrinkwrap: false,
+        includeSplitWorkspace,
         networkConcurrency: undefined,
         offline: false,
         collectLogFile: false,
         variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
+        splitWorkspacePnpmFilterArguments,
+        selectedProjects,
         checkOnly: false
       };
 
@@ -378,11 +401,13 @@ export class PackageJsonUpdater {
       this._terminal.writeLine();
 
       const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(packageName);
+      const isAddToSingleSplitWorkspaceProject: boolean = projects.length === 1 && projects[0].splitWorkspace;
       if (
         existingSpecifiedVersions &&
         !existingSpecifiedVersions.has(version) &&
         this._rushConfiguration.ensureConsistentVersions &&
-        !updateOtherPackages
+        !updateOtherPackages &&
+        !isAddToSingleSplitWorkspaceProject
       ) {
         // There are existing versions, and the version we're going to use is not one of them, and this repo
         // requires consistent versions, and we aren't going to update other packages, so we can't proceed.

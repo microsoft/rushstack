@@ -552,7 +552,7 @@
     },
     {
       "name": "heft-webpack5-plugin",
-      "allowedCategories": []
+      "allowedCategories": [ ]
     },
     {
       "name": "html-webpack-plugin",
@@ -673,6 +673,10 @@
     {
       "name": "node-sass",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "normalize-path",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "npm-check",

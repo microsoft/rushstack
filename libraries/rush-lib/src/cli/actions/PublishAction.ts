@@ -214,6 +214,9 @@ export class PublishAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     await PolicyValidator.validatePolicyAsync(this.rushConfiguration, { bypassPolicy: false });
 
+    // FIXME: How to publish for packages in split workspace?
+    // Or, maybe we can not publish packages in split workspace (?)
+
     // Example: "common\temp\publish-home"
     this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 

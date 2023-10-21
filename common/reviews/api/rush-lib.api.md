@@ -58,6 +58,20 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
+// @internal
+export class _BaseFlag<T extends object = JsonObject> {
+    constructor(folderPath: string, state?: Partial<T>);
+    clear(): void;
+    create(): void;
+    protected get flagName(): string;
+    protected _isModified: boolean;
+    isValid(): boolean;
+    mergeFromObject(data: JsonObject): void;
+    readonly path: string;
+    saveIfModified(): void;
+    protected _state: T;
+}
+
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -449,6 +463,7 @@ export interface IExecutionResult {
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
+    deferredInstallationScripts?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
@@ -486,6 +501,21 @@ export interface IGetChangedProjectsOptions {
 
 // @beta
 export interface IGlobalCommand extends IRushCommand {
+}
+
+// @internal
+export interface _ILastInstallFlagJson {
+    // (undocumented)
+    [key: string]: unknown;
+    ignoreScripts?: true;
+    node: string;
+    packageJson?: IPackageJson;
+    packageManager: PackageManagerName;
+    packageManagerVersion: string;
+    rushJsonFolder: string;
+    selectedProjectNames?: string[];
+    storePath?: string;
+    workspaces?: true;
 }
 
 // @public
@@ -779,16 +809,13 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
+export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;
-    clear(): void;
-    create(): void;
     protected get flagName(): string;
+    // @override
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
-    readonly path: string;
 }
 
 // @public
@@ -1050,6 +1077,7 @@ export class RushConfiguration {
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;
     readonly commonTempFolder: string;
+    readonly commonTempSplitFolder: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
@@ -1066,8 +1094,13 @@ export class RushConfiguration {
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
+    getCommittedSplitWorkspaceShrinkwrapFilename(): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectsFilter" needs to be exported by the entry point index.d.ts
+    //
+    // @beta
+    getFilteredProjects(filter: IRushConfigurationProjectsFilter): RushConfigurationProject[];
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
@@ -1081,6 +1114,7 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
+    get hasSplitWorkspaceProject(): boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -1121,11 +1155,13 @@ export class RushConfiguration {
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
+    readonly splitWorkspaceShrinkwrapFilename: string;
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
     readonly tempShrinkwrapPreinstallFilename: string;
+    readonly tempSplitWorkspaceShrinkwrapFilename: string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // (undocumented)
@@ -1168,6 +1204,8 @@ export class RushConfigurationProject {
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;
     readonly skipRushCheck: boolean;
+    // @beta
+    readonly splitWorkspace: boolean;
     // @beta
     readonly tags: ReadonlySet<string>;
     readonly tempProjectName: string;
@@ -1223,6 +1261,7 @@ export class RushConstants {
     static readonly rushTempFolderName: string;
     static readonly rushTempNpmScope: string;
     static readonly rushTempProjectsFolderName: string;
+    static readonly rushTempSplitFolderName: string;
     static readonly rushUserConfigurationFolderName: string;
     static readonly rushVariantsFolderName: string;
     static readonly rushWebSiteUrl: string;

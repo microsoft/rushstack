@@ -307,6 +307,10 @@
               "type": "string",
               "pattern": "^[a-z0-9.@]+([-/][a-z0-9.@]+)*$"
             }
+          },
+          "splitWorkspace": {
+            "description": "If true, then this project will be split out into a separate workspace folder. The default value is false.",
+            "type": "boolean"
           }
         },
         "additionalProperties": false,

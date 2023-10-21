@@ -53,6 +53,13 @@ export class RushConstants {
   public static readonly rushTempFolderName: string = 'temp';
 
   /**
+   * The folder name ("temp-split") under the common folder, or under the .rush folder in each project's directory where
+   * temporary files will be stored.
+   * Example: `C:\MyRepo\common\temp-split`
+   */
+  public static readonly rushTempSplitFolderName: string = 'temp-split';
+
+  /**
    * The folder name ("projects") where temporary projects will be stored.
    * Example: `C:\MyRepo\common\temp\projects`
    */

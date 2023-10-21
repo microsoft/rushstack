@@ -12,9 +12,19 @@ import { type ILaunchOptions, Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { RushStartupBanner } from './RushStartupBanner';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+
+/**
+ * @internal
+ */
+export interface ILaunchRushXInternalOptions {
+  isManaged: boolean;
+
+  alreadyReportedNodeTooNewError?: boolean;
+}
 
 interface IRushXCommandLineArguments {
   /**
@@ -139,6 +149,12 @@ export class RushXCommandLine {
       );
     }
 
+    let rushProject: RushConfigurationProject | undefined;
+
+    if (rushConfiguration) {
+      rushProject = rushConfiguration.tryGetProjectForPath(process.cwd());
+    }
+
     if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
       // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
       // did not install the project's dependencies, because the project was not registered.
@@ -195,12 +211,23 @@ export class RushXCommandLine {
 
     const packageFolder: string = path.dirname(packageJsonFilePath);
 
+    // If there is a rush.json then use its .npmrc from the temp folder.
+    // Otherwise look for npmrc in the project folder.
+    let initCwd: string = packageFolder;
+    if (rushProject?.splitWorkspace) {
+      if (rushConfiguration?.commonTempSplitFolder) {
+        initCwd = rushConfiguration.commonTempFolder;
+      }
+    } else if (rushConfiguration?.commonTempFolder) {
+      initCwd = rushConfiguration?.commonTempFolder;
+    }
+
     const exitCode: number = Utilities.executeLifecycleCommand(commandWithArgs, {
       rushConfiguration,
       workingDirectory: packageFolder,
       // If there is a rush.json then use its .npmrc from the temp folder.
       // Otherwise look for npmrc in the project folder.
-      initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
+      initCwd,
       handleOutput: false,
       environmentPathOptions: {
         includeProjectBin: true

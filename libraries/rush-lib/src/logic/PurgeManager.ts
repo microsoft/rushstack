@@ -18,6 +18,7 @@ export class PurgeManager {
   private _rushUserFolderRecycler: AsyncRecycler;
 
   public readonly commonTempFolderRecycler: AsyncRecycler;
+  public readonly commonTempSplitFolderRecycler: AsyncRecycler;
 
   public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
     this._rushConfiguration = rushConfiguration;
@@ -28,6 +29,12 @@ export class PurgeManager {
       RushConstants.rushRecyclerFolderName
     );
     this.commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
+
+    const commonSplitAsyncRecyclerPath: string = path.join(
+      this._rushConfiguration.commonTempSplitFolder,
+      RushConstants.rushRecyclerFolderName
+    );
+    this.commonTempSplitFolderRecycler = new AsyncRecycler(commonSplitAsyncRecyclerPath);
 
     const rushUserAsyncRecyclerPath: string = path.join(
       this._rushGlobalFolder.path,
@@ -43,6 +50,7 @@ export class PurgeManager {
   public async startDeleteAllAsync(): Promise<void> {
     await Promise.all([
       this.commonTempFolderRecycler.startDeleteAllAsync(),
+      this.commonTempSplitFolderRecycler.startDeleteAllAsync(),
       this._rushUserFolderRecycler.startDeleteAllAsync()
     ]);
   }
@@ -58,6 +66,11 @@ export class PurgeManager {
     this.commonTempFolderRecycler.moveAllItemsInFolder(
       this._rushConfiguration.commonTempFolder,
       this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
+    );
+
+    this.commonTempSplitFolderRecycler.moveAllItemsInFolder(
+      this._rushConfiguration.commonTempSplitFolder,
+      this._getMembersToExclude(this._rushConfiguration.commonTempSplitFolder, true)
     );
   }
 

@@ -22,6 +22,7 @@ import {
 } from '../../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
+import { SplitWorkspaceProjectSelectorParser } from '../../logic/selectors/SplitWorkspaceProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 
 /**
@@ -44,6 +45,8 @@ export class SelectionParameterSet {
   private readonly _toVersionPolicy: CommandLineStringListParameter;
 
   private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
+  private readonly _selectors: CommandLineStringListParameter[] = [];
+  private _isSelectionSpecified: boolean | undefined;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -62,6 +65,7 @@ export class SelectionParameterSet {
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('split', new SplitWorkspaceProjectSelectorParser(rushConfiguration));
 
     this._selectorParserByScope = selectorParsers;
 
@@ -184,6 +188,29 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
+
+    this._selectors = [
+      this._onlyProject,
+      this._fromProject,
+      this._toProject,
+      this._toExceptProject,
+      this._impactedByProject,
+      this._impactedByExceptProject
+    ];
+  }
+
+  /**
+   * Check if any of the selection parameters have a value specified on the command line
+   *
+   * Returns true if specifying any selection parameters, otherwise false.
+   */
+  public get isSelectionSpecified(): boolean {
+    if (undefined === this._isSelectionSpecified) {
+      this._isSelectionSpecified = this._selectors.some(
+        (param: CommandLineStringListParameter) => param.values.length > 0
+      );
+    }
+    return this._isSelectionSpecified;
   }
 
   /**
@@ -200,22 +227,8 @@ export class SelectionParameterSet {
       (this._toProject.values as string[]).push(`version-policy:${value}`);
     }
 
-    const selectors: CommandLineStringListParameter[] = [
-      this._onlyProject,
-      this._fromProject,
-      this._toProject,
-      this._toExceptProject,
-      this._impactedByProject,
-      this._impactedByExceptProject
-    ];
-
-    // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = selectors.some(
-      (param: CommandLineStringListParameter) => param.values.length > 0
-    );
-
     // If no selection parameters are specified, return everything
-    if (!isSelectionSpecified) {
+    if (!this.isSelectionSpecified) {
       return new Set(this._rushConfiguration.projects);
     }
 
@@ -233,7 +246,7 @@ export class SelectionParameterSet {
       // --impacted-by-except
       impactedByExceptProjects
     ] = await Promise.all(
-      selectors.map((param: CommandLineStringListParameter) => {
+      this._selectors.map((param: CommandLineStringListParameter) => {
         return this._evaluateProjectParameterAsync(param, terminal);
       })
     );
@@ -262,59 +275,118 @@ export class SelectionParameterSet {
   }
 
   /**
-   * Represents the selection as `--filter` parameters to pnpm.
+   * Represents the selection as `--filter` parameters to pnpm, and selected projects when partial install
    *
    * @remarks
    * This is a separate from the selection to allow the filters to be represented more concisely.
    *
-   * @see https://pnpm.js.org/en/filtering
+   * @see https://pnpm.io/filtering
    */
-  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
-    const args: string[] = [];
+  public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<{
+    pnpmFilterArguments: string[];
+    splitWorkspacePnpmFilterArguments: string[];
+    selectedProjects: Set<RushConfigurationProject> | undefined;
+    hasSelectSplitWorkspaceProject: boolean;
+  }> {
+    const pnpmFilterArguments: string[] = [];
+    const splitWorkspacePnpmFilterArguments: string[] = [];
+    let hasSelectSplitWorkspaceProject: boolean = false;
 
-    // Include exactly these projects (--only)
-    for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
-      args.push('--filter', project.packageName);
+    if (this._rushConfiguration.hasSplitWorkspaceProject) {
+      // when there are split workspace projects, the selected projects are computed inside Rush.js.
+      const selection: Set<RushConfigurationProject> = await this.getSelectedProjectsAsync(terminal);
+
+      const selectedRushProjects: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+      const selectedSplitWorkspaceProjects: Set<RushConfigurationProject> =
+        new Set<RushConfigurationProject>();
+
+      for (const project of selection) {
+        if (!project.splitWorkspace) {
+          selectedRushProjects.add(project);
+        } else {
+          hasSelectSplitWorkspaceProject = true;
+          selectedSplitWorkspaceProjects.add(project);
+        }
+      }
+
+      // It is no need to push pnpm filter args if projects are fully selected.
+      if (
+        this._rushConfiguration.getFilteredProjects({
+          splitWorkspace: false
+        }).length !== selectedRushProjects.size
+      ) {
+        for (const selectedProject of selectedRushProjects.values()) {
+          pnpmFilterArguments.push('--filter', `${selectedProject.packageName}`);
+        }
+      }
+
+      if (
+        this._rushConfiguration.getFilteredProjects({
+          splitWorkspace: true
+        }).length !== selectedSplitWorkspaceProjects.size
+      ) {
+        for (const selectedProject of selectedSplitWorkspaceProjects.values()) {
+          splitWorkspacePnpmFilterArguments.push('--filter', `${selectedProject.packageName}`);
+        }
+      }
+    } else {
+      // when there are no split workspace projects, replies on pnpm filtering with ellipsis
+
+      // Include exactly these projects (--only)
+      for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
+        pnpmFilterArguments.push('--filter', project.packageName);
+      }
+
+      // Include all projects that depend on these projects, and all dependencies thereof
+      const fromProjects: Set<RushConfigurationProject> = Selection.union(
+        // --from
+        await this._evaluateProjectParameterAsync(this._fromProject, terminal)
+      );
+
+      // All specified projects and all projects that they depend on
+      for (const project of Selection.union(
+        // --to
+        await this._evaluateProjectParameterAsync(this._toProject, terminal),
+        // --from / --from-version-policy
+        Selection.expandAllConsumers(fromProjects)
+      )) {
+        pnpmFilterArguments.push('--filter', `${project.packageName}...`);
+      }
+
+      // --to-except
+      // All projects that the project directly or indirectly declares as a dependency
+      for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
+        pnpmFilterArguments.push('--filter', `${project.packageName}^...`);
+      }
+
+      // --impacted-by
+      // The project and all projects directly or indirectly declare it as a dependency
+      for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
+        pnpmFilterArguments.push('--filter', `...${project.packageName}`);
+      }
+
+      // --impacted-by-except
+      // All projects that directly or indirectly declare the specified project as a dependency
+      for (const project of await this._evaluateProjectParameterAsync(
+        this._impactedByExceptProject,
+        terminal
+      )) {
+        pnpmFilterArguments.push('--filter', `...^${project.packageName}`);
+      }
     }
 
-    // Include all projects that depend on these projects, and all dependencies thereof
-    const fromProjects: Set<RushConfigurationProject> = Selection.union(
-      // --from
-      await this._evaluateProjectParameterAsync(this._fromProject, terminal)
-    );
-
-    // All specified projects and all projects that they depend on
-    for (const project of Selection.union(
-      // --to
-      await this._evaluateProjectParameterAsync(this._toProject, terminal),
-      // --from / --from-version-policy
-      Selection.expandAllConsumers(fromProjects)
-    )) {
-      args.push('--filter', `${project.packageName}...`);
+    // Undefined when full install
+    let selectedProjects: Set<RushConfigurationProject> | undefined;
+    if (this.isSelectionSpecified) {
+      selectedProjects = await this.getSelectedProjectsAsync(terminal);
     }
 
-    // --to-except
-    // All projects that the project directly or indirectly declares as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
-      args.push('--filter', `${project.packageName}^...`);
-    }
-
-    // --impacted-by
-    // The project and all projects directly or indirectly declare it as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
-      args.push('--filter', `...${project.packageName}`);
-    }
-
-    // --impacted-by-except
-    // All projects that directly or indirectly declare the specified project as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(
-      this._impactedByExceptProject,
-      terminal
-    )) {
-      args.push('--filter', `...^${project.packageName}`);
-    }
-
-    return args;
+    return {
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      selectedProjects,
+      hasSelectSplitWorkspaceProject
+    };
   }
 
   /**
@@ -403,5 +475,15 @@ export class SelectionParameterSet {
     }
 
     return selection;
+  }
+
+  public toArguments(): string[] {
+    const args: string[] = [];
+    for (const selector of this._selectors) {
+      for (const value of selector.values) {
+        args.push(selector.longName, value);
+      }
+    }
+    return args;
   }
 }

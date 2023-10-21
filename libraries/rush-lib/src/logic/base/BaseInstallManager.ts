@@ -13,6 +13,7 @@ import {
   PosixModeBits,
   NewlineKind,
   AlreadyReportedError,
+  InternalError,
   type FileSystemStats,
   ConsoleTerminalProvider,
   Terminal,
@@ -41,6 +42,8 @@ import * as PolicyValidator from '../policy/PolicyValidator';
 import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
+import { SplitWorkspacePnpmfileConfiguration } from '../pnpm/SplitWorkspacePnpmfileConfiguration';
+
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
@@ -59,8 +62,18 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  */
 export abstract class BaseInstallManager {
   private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _commonTempInstallFlag: LastInstallFlag;
+  private readonly _commonTempSplitInstallFlag: LastInstallFlag | undefined;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
+  /**
+   * If deferredInstallationScripts, installation will be divided into two stages:
+   * Stage 1: rush implicitly adds "--ignore-scripts" for "pnpm install"
+   * Stage 2: run "pnpm rebuild --pending"
+   *
+   * Note: This feature only works when using pnpm and turn on "useWorkspaces" in rush.json
+   */
+  private _deferredInstallationScripts: boolean = false;
 
   private readonly _terminalProvider: ITerminalProvider;
   protected readonly _terminal: Terminal;
@@ -83,14 +96,44 @@ export abstract class BaseInstallManager {
 
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
 
+    // FIXME: This line does not respect clean install after npmrc changes feature.
+    this._commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
+
+    if (options.includeSplitWorkspace && rushConfiguration.hasSplitWorkspaceProject) {
+      this._commonTempSplitInstallFlag = LastInstallFlagFactory.getCommonTempSplitFlag(rushConfiguration);
+    }
+
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
   }
 
+  protected get commonTempInstallFlag(): LastInstallFlag {
+    return this._commonTempInstallFlag;
+  }
+
+  protected get commonTempSplitInstallFlag(): LastInstallFlag | undefined {
+    return this._commonTempSplitInstallFlag;
+  }
+
+  protected get deferredInstallationScripts(): boolean {
+    return this._deferredInstallationScripts;
+  }
+
   public async doInstallAsync(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
+    const isFilteredInstall: boolean =
+      this.options.pnpmFilterArguments.length + this.options.splitWorkspacePnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+
+    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
+      // Only works for pnpm and useWorkspaces=true
+      this._deferredInstallationScripts = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
+    }
+
+    if (isFilteredInstall && !this.options.selectedProjects) {
+      // This should never even happen
+      throw new InternalError(`Missing selectedProjects when filtered install`);
+    }
 
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
@@ -108,19 +151,24 @@ export abstract class BaseInstallManager {
 
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-            'without specifying these arguments.'
-        )
-      );
-      throw new AlreadyReportedError();
+      // Allow partial update when there are split workspace projects.
+      if (!this.rushConfiguration.hasSplitWorkspaceProject) {
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          colors.red(
+            'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
+              'without specifying these arguments.'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
+    // FIXME: bring back npmrcHash check
 
     if (this.options.checkOnly) {
       return;
@@ -129,30 +177,64 @@ export abstract class BaseInstallManager {
     // eslint-disable-next-line no-console
     console.log('\n' + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`));
 
+    if (this.options.selectedProjects) {
+      if (this.rushConfiguration.hasSplitWorkspaceProject) {
+        this._commonTempInstallFlag.mergeFromObject({
+          selectedProjectNames: Array.from(this.options.selectedProjects)
+            .filter((project) => !project.splitWorkspace)
+            .map((project) => project.packageName)
+        });
+        this._commonTempSplitInstallFlag?.mergeFromObject({
+          selectedProjectNames: Array.from(this.options.selectedProjects)
+            .filter((project) => project.splitWorkspace)
+            .map((project) => project.packageName)
+        });
+      } else {
+        this._commonTempInstallFlag.mergeFromObject({
+          selectedProjectNames: Array.from(this.options.selectedProjects).map(
+            (project) => project.packageName
+          )
+        });
+      }
+    }
+    if (this._deferredInstallationScripts || this.options.ignoreScripts) {
+      this._commonTempInstallFlag.mergeFromObject({
+        ignoreScripts: true
+      });
+      this._commonTempSplitInstallFlag?.mergeFromObject({
+        ignoreScripts: true
+      });
+    }
+
     // This marker file indicates that the last "rush install" completed successfully.
-    // Always perform a clean install if filter flags were provided. Additionally, if
+    // perform a clean install if selected projects are not matched. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
     // need to perform a clean install.  Otherwise, we can do an incremental install.
-    const commonTempInstallFlag: LastInstallFlag = LastInstallFlagFactory.getCommonTempFlag(
-      this.rushConfiguration,
-      { npmrcHash: npmrcHash || '<NO NPMRC>' }
-    );
     const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
       .configuration.cleanInstallAfterNpmrcChanges
       ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
       : undefined;
     const cleanInstall: boolean =
-      isFilteredInstall ||
-      !commonTempInstallFlag.checkValidAndReportStoreIssues({
+      !this._commonTempInstallFlag.checkValidAndReportStoreIssues({
         rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
         statePropertiesToIgnore: optionsToIgnore
-      });
+      }) ||
+      (this.options.includeSplitWorkspace &&
+        !!this._commonTempSplitInstallFlag &&
+        !this._commonTempSplitInstallFlag.checkValidAndReportStoreIssues({
+          rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
+          statePropertiesToIgnore: optionsToIgnore
+        }));
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
       // Based on timestamps, can we skip this install entirely?
-      const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
-      return this.canSkipInstall(outputStats.mtime);
+      const outputStats: FileSystemStats = FileSystem.getStatistics(this._commonTempInstallFlag.path);
+
+      const splitOutputStatus: FileSystemStats | undefined =
+        this._commonTempSplitInstallFlag && FileSystem.getStatistics(this._commonTempSplitInstallFlag.path);
+
+      return this.canSkipInstall(outputStats.mtime, splitOutputStatus?.mtime);
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
@@ -176,7 +258,8 @@ export abstract class BaseInstallManager {
       }
 
       // Delete the successful install file to indicate the install transaction has started
-      commonTempInstallFlag.clear();
+      this._commonTempInstallFlag.clear();
+      this._commonTempSplitInstallFlag?.clear();
 
       // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
       // this ensures that a full "rush link" is required next time
@@ -196,6 +279,13 @@ export abstract class BaseInstallManager {
           this.rushConfiguration.tempShrinkwrapFilename,
           this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
         );
+        if (this.options.includeSplitWorkspace) {
+          // Copy (or delete) common\temp-split\pnpm-lock.yaml --> common\config\rush\split-workspace-pnpm-lock.yaml
+          Utilities.syncFile(
+            this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename,
+            this.rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename()
+          );
+        }
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
       }
@@ -211,14 +301,13 @@ export abstract class BaseInstallManager {
           );
         }
       }
+
+      // Create the marker file to indicate a successful install
+      this._commonTempInstallFlag.create();
+      this._commonTempSplitInstallFlag?.create();
     } else {
       // eslint-disable-next-line no-console
       console.log('Installation is already up-to-date.');
-    }
-
-    // Create the marker file to indicate a successful install if it's not a filtered install
-    if (!isFilteredInstall) {
-      commonTempInstallFlag.create();
     }
 
     // Perform any post-install work the install manager requires
@@ -229,14 +318,15 @@ export abstract class BaseInstallManager {
   }
 
   protected abstract prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
+    splitWorkspaceShrinkwrapFile?: BaseShrinkwrapFile
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
   protected abstract installAsync(cleanInstall: boolean): Promise<void>;
 
   protected abstract postInstallAsync(): Promise<void>;
 
-  protected canSkipInstall(lastModifiedDate: Date): boolean {
+  protected canSkipInstall(lastModifiedDate: Date, splitWorkspaceLastModifiedDate?: Date): boolean {
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 
@@ -260,6 +350,14 @@ export abstract class BaseInstallManager {
       if (FileSystem.exists(pnpmFileFilename)) {
         potentiallyChangedFiles.push(pnpmFileFilename);
       }
+    }
+
+    if (splitWorkspaceLastModifiedDate) {
+      // Assume other potentially changed files are tested by lastModifiedDate
+      const splitWorkspacePotentiallyChangedFiles: string[] = [
+        path.join(this.rushConfiguration.commonTempSplitFolder)
+      ];
+      Utilities.isFileTimestampCurrent(splitWorkspaceLastModifiedDate, splitWorkspacePotentiallyChangedFiles);
     }
 
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
@@ -300,6 +398,7 @@ export abstract class BaseInstallManager {
     );
 
     let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
+    let splitWorkspaceShrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!this.options.fullUpgrade) {
@@ -326,6 +425,34 @@ export abstract class BaseInstallManager {
         }
 
         shrinkwrapFile = undefined;
+      }
+      if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
+        try {
+          splitWorkspaceShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+            this.rushConfiguration.packageManager,
+            this.rushConfiguration.packageManagerOptions,
+            this.rushConfiguration.splitWorkspaceShrinkwrapFilename
+          );
+        } catch (ex) {
+          // eslint-disable-next-line no-console
+          console.log();
+          // eslint-disable-next-line no-console
+          console.log(
+            `Unable to load the ${this.rushConfiguration.splitWorkspaceShrinkwrapFilename}: ${
+              (ex as Error).message
+            }`
+          );
+
+          if (!this.options.allowShrinkwrapUpdates) {
+            // eslint-disable-next-line no-console
+            console.log();
+            // eslint-disable-next-line no-console
+            console.log(colors.red('You need to run "rush update" to fix this problem'));
+            throw new AlreadyReportedError();
+          }
+
+          splitWorkspaceShrinkwrapFile = undefined;
+        }
       }
     }
 
@@ -361,7 +488,40 @@ export abstract class BaseInstallManager {
       this.rushConfiguration.commonRushConfigFolder,
       this.rushConfiguration.commonTempFolder
     );
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
+      const commonRushConfigSplitWorkspaceNpmrcPath: string = path.join(
+        this.rushConfiguration.commonRushConfigFolder,
+        '.npmrc-split-workspace'
+      );
+      if (!FileSystem.exists(commonRushConfigSplitWorkspaceNpmrcPath)) {
+        const splitWorkspaceNpmrcTemplatePath: string = path.join(
+          __dirname,
+          '../../../assets/split-workspace/.npmrc-split-workspace'
+        );
+        FileSystem.copyFile({
+          sourcePath: splitWorkspaceNpmrcTemplatePath,
+          destinationPath: commonRushConfigSplitWorkspaceNpmrcPath
+        });
+      }
+      /**
+       * _RUSH_COMMON_TEMP_SPLIT_FOLDER is used in .npmrc for splitWorkspace.
+       * When shared-workspace-lockfiles=false, .npmrc gets resolved with a different CWD for each project folder.
+       * With this environment variable, .npmrc can resolve the same global pnpmfile path for all projects.
+       */
+      process.env['_RUSH_COMMON_TEMP_SPLIT_FOLDER'] = this.rushConfiguration.commonTempSplitFolder;
+      Utilities.syncNpmrc(
+        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.commonTempSplitFolder,
+        false,
+        '.npmrc-split-workspace'
+      );
+    }
     this._syncNpmrcAlreadyCalled = true;
+
+    // Delete commonTempSplitFolder if no split workspace projects to avoid confusion
+    if (!this.rushConfiguration.hasSplitWorkspaceProject) {
+      FileSystem.deleteFolder(this.rushConfiguration.commonTempSplitFolder);
+    }
 
     const npmrcHash: string | undefined = npmrcText
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
@@ -383,14 +543,23 @@ export abstract class BaseInstallManager {
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(this.rushConfiguration, this.options);
+
+      if (this.options.includeSplitWorkspace) {
+        await SplitWorkspacePnpmfileConfiguration.writeCommonTempSplitGlobalPnpmfileAsync(
+          this.rushConfiguration
+        );
+      }
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
-    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
+    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(
+      shrinkwrapFile,
+      splitWorkspaceShrinkwrapFile
+    );
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
-    this._syncTempShrinkwrap(shrinkwrapFile);
+    this._syncTempShrinkwrap(shrinkwrapFile, splitWorkspaceShrinkwrapFile);
 
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
@@ -416,12 +585,19 @@ export abstract class BaseInstallManager {
     // Force update if the shrinkwrap is out of date
     if (!shrinkwrapIsUpToDate) {
       if (!this.options.allowShrinkwrapUpdates) {
+        const selectionArguments: string[] = this.options.selectionParameters?.toArguments() || [];
+        if (selectionArguments.length !== 0) {
+          // prepend an empty string to the array to ensure the space is added
+          selectionArguments.unshift('');
+        }
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console
         console.log(
           colors.red(
-            `The ${this.rushConfiguration.shrinkwrapFilePhrase} is out of date. You need to run "rush update".`
+            `The ${
+              this.rushConfiguration.shrinkwrapFilePhrase
+            } is out of date. You need to run "rush update${selectionArguments.join(' ')}".`
           )
         );
         throw new AlreadyReportedError();
@@ -643,6 +819,10 @@ ${gitLfsHookHandling}
         args.push('--strict-peer-dependencies');
       }
 
+      if (this._deferredInstallationScripts || this.options.ignoreScripts) {
+        args.push('--ignore-scripts');
+      }
+
       /*
         If user set auto-install-peers in pnpm-config.json only, use the value in pnpm-config.json
         If user set auto-install-peers in pnpm-config.json and .npmrc, use the value in pnpm-config.json
@@ -840,7 +1020,10 @@ ${gitLfsHookHandling}
     return true;
   }
 
-  private _syncTempShrinkwrap(shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
+  private _syncTempShrinkwrap(
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
+    splitWorkspaceShrinkwrapFile?: BaseShrinkwrapFile
+  ): void {
     if (shrinkwrapFile) {
       Utilities.syncFile(
         this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
@@ -870,6 +1053,38 @@ ${gitLfsHookHandling}
             pnpmPackageManager.internalShrinkwrapRelativePath
           )
         );
+      }
+    }
+
+    if (this.options.includeSplitWorkspace && this.rushConfiguration.hasSplitWorkspaceProject) {
+      if (splitWorkspaceShrinkwrapFile) {
+        Utilities.syncFile(
+          this.rushConfiguration.getCommittedSplitWorkspaceShrinkwrapFilename(),
+          this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename
+        );
+      } else {
+        // Otherwise delete the temporary file
+        FileSystem.deleteFile(this.rushConfiguration.tempSplitWorkspaceShrinkwrapFilename);
+
+        if (this.rushConfiguration.packageManager === 'pnpm') {
+          // Workaround for https://github.com/pnpm/pnpm/issues/1890
+          //
+          // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
+          // a new lockfile can be generated. But because of the above bug "pnpm install" would
+          // respect "common/temp/node_modules/.pnpm-lock.yaml" and thus would not generate a
+          // new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
+          // ensures that a new lockfile will be generated with "rush update --full".
+
+          const pnpmPackageManager: PnpmPackageManager = this.rushConfiguration
+            .packageManagerWrapper as PnpmPackageManager;
+
+          FileSystem.deleteFile(
+            path.join(
+              this.rushConfiguration.commonTempSplitFolder,
+              pnpmPackageManager.internalShrinkwrapRelativePath
+            )
+          );
+        }
       }
     }
   }

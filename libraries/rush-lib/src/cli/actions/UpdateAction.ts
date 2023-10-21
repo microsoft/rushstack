@@ -5,11 +5,20 @@ import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
-  private readonly _fullParameter: CommandLineFlagParameter;
-  private readonly _recheckParameter: CommandLineFlagParameter;
+  private readonly _fullParameter!: CommandLineFlagParameter;
+  private readonly _recheckParameter!: CommandLineFlagParameter;
+  private _ignoreScriptsParameter!: CommandLineFlagParameter;
+  /**
+   * Whether split workspace projects are included in update
+   *
+   * This parameter only supported when there is split workspace project
+   */
+  private _includeSplitWorkspaceParameter?: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -31,6 +40,27 @@ export class UpdateAction extends BaseInstallAction {
       parser
     });
 
+    if (this.rushConfiguration?.hasSplitWorkspaceProject) {
+      // Partial update is supported only when there is split workspace project
+      this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+        // Include lockfile processing since this expands the selection, and we need to select
+        // at least the same projects selected with the same query to "rush build"
+        includeExternalDependencies: true,
+        // Disable filtering because rush-project.json is riggable and therefore may not be available
+        enableFiltering: false
+      });
+
+      this._includeSplitWorkspaceParameter = this.defineFlagParameter({
+        parameterLongName: '--include-split-workspace',
+        description:
+          'Normally "rush update" only updates projects in normal rush workspace.' +
+          ' When you want to update for split workspace projects, you can run' +
+          ' "rush update --include-split-workspace", which updates entire split workspace projects.' +
+          ' Or, you can specify selection parameters to do partial update for split workspace projects, ' +
+          ' such as "rush update --to <split_workspace_package_name>".'
+      });
+    }
+
     this._fullParameter = this.defineFlagParameter({
       parameterLongName: '--full',
       description:
@@ -50,6 +80,16 @@ export class UpdateAction extends BaseInstallAction {
         " to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush's fixups." +
         ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description:
+        'Do not execute any install lifecycle scripts specified in package.json files and its' +
+        ' dependencies when "rush update". Running with this flag leaves your installation in a uncompleted' +
+        ' state, you need to run this command without this flag again or run "rush install" to complete a ' +
+        ' full installation. Meanwhile, it makes faster retries on running install lifecycle scripts. You' +
+        ' can partial install such as "rush install --to <package>" to run the ignored scripts of the' +
+        ' dependencies of the selected projects.'
+    });
   }
 
   protected async runAsync(): Promise<void> {
@@ -63,14 +103,60 @@ export class UpdateAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+
+    /**
+     * Partial update should only affects on split workspace project, and
+     * not affects on normal rush workspace projects.
+     */
+    const pnpmFilterArguments: string[] = [];
+    const {
+      splitWorkspacePnpmFilterArguments = [],
+      selectedProjects,
+      hasSelectSplitWorkspaceProject = false
+    } = (await this._selectionParameters?.getPnpmFilterArgumentsAsync(terminal)) || {};
+
+    if (this._selectionParameters?.isSelectionSpecified && !hasSelectSplitWorkspaceProject) {
+      // Warn when there is no split workspace project selected
+      if (splitWorkspacePnpmFilterArguments.length === 0) {
+        terminal.writeWarningLine(
+          'Project filtering arguments are using without selecting any split workspace' +
+            ' projects. Better run "rush update" without specifying selection parameters.'
+        );
+        terminal.writeLine();
+      }
+    }
+
+    // Warn when fully update without selecting any split workspace project
+    if (
+      this._includeSplitWorkspaceParameter &&
+      !this._includeSplitWorkspaceParameter.value &&
+      !this._selectionParameters?.isSelectionSpecified
+    ) {
+      terminal.writeWarningLine(
+        'Run "rush update" without any selection parameter will not update for split workspace' +
+          ' projects, please run the command again with specifying --include-split-workspace' +
+          ' if you really want to update for split workspace projects.'
+      );
+      terminal.writeLine();
+    }
+
+    let includeSplitWorkspace: boolean = this._includeSplitWorkspaceParameter?.value ?? false;
+    // turn on includeSplitWorkspace when selecting any split workspace project
+    if (selectedProjects && hasSelectSplitWorkspaceProject) {
+      includeSplitWorkspace = true;
+    }
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
+      ignoreScripts: this._ignoreScriptsParameter.value,
       bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
       recheckShrinkwrap: this._recheckParameter.value!,
+      includeSplitWorkspace,
       offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
@@ -78,7 +164,10 @@ export class UpdateAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      pnpmFilterArguments: [],
+      pnpmFilterArguments,
+      splitWorkspacePnpmFilterArguments,
+      selectedProjects,
+      selectionParameters: this._selectionParameters,
       checkOnly: false,
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)

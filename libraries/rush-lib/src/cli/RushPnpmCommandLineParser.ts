@@ -462,7 +462,10 @@ export class RushPnpmCommandLineParser {
       variant: undefined,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
-      checkOnly: false
+      checkOnly: false,
+      includeSplitWorkspace: false,
+      ignoreScripts: false,
+      splitWorkspacePnpmFilterArguments: []
     };
 
     const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(
