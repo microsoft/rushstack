@@ -234,11 +234,11 @@ export class HeftCommandLineParser extends CommandLineParser {
     }
 
     // This is a rough parsing of the --debug parameter
-    const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
-    parser.addArgument(this._debugFlag.longName, { dest: 'debug', action: 'storeTrue' });
-    parser.addArgument(this._unmanagedFlag.longName, { dest: 'unmanaged', action: 'storeTrue' });
+    const parser: ArgumentParser = new ArgumentParser({ add_help: false });
+    parser.add_argument(this._debugFlag.longName, { dest: 'debug', action: 'store_true' });
+    parser.add_argument(this._unmanagedFlag.longName, { dest: 'unmanaged', action: 'store_true' });
 
-    const [result]: IPreInitializationArgumentValues[] = parser.parseKnownArgs(args);
+    const [result]: IPreInitializationArgumentValues[] = parser.parse_known_args(args);
     return result;
   }
 

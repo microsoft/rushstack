@@ -4,12 +4,11 @@ exports[`Ambiguous CommandLineParser can execute the non-ambiguous scoped long n
 "usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
                           [--scope1:arg ARG] [--scope2:arg ARG]
                           [--non-conflicting-arg ARG]
-                          
 
 a longer description
 
-Optional arguments:
-  -h, --help            Show this help message and exit.
+optional arguments:
+  -h, --help            show this help message and exit
   --short1 ARG          The argument
   --short2 ARG          The argument
   --scope1:arg ARG      The argument

@@ -146,7 +146,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     // key for this parameter is constant.
     if (this.targetAction.remainder) {
       this.defineCommandLineRemainder(this.targetAction.remainder);
-      this._parameterKeyMap.set(argparse.Const.REMAINDER, argparse.Const.REMAINDER);
+      this._parameterKeyMap.set(argparse.REMAINDER, argparse.REMAINDER);
     }
 
     // Finally, register the parameters with the parser.

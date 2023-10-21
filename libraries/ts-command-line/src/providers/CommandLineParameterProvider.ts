@@ -28,6 +28,7 @@ import { CommandLineStringParameter } from '../parameters/CommandLineStringParam
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
+import type { IExtendedArgumentGroup } from '../types/Argparse';
 
 /**
  * The result containing the parsed paramter long name and scope. Returned when calling
@@ -78,7 +79,7 @@ export abstract class CommandLineParameterProvider {
   private readonly _parametersByShortName: Map<string, CommandLineParameter[]>;
   private readonly _parameterGroupsByName: Map<
     string | typeof SCOPING_PARAMETER_GROUP,
-    argparse.ArgumentGroup
+    IExtendedArgumentGroup
   >;
   private readonly _ambiguousParameterNamesByParserKey: Map<string, string>;
   private _parametersRegistered: boolean;
@@ -339,7 +340,7 @@ export abstract class CommandLineParameterProvider {
    */
   public renderHelpText(): string {
     this._registerDefinedParameters();
-    return this._getArgumentParser().formatHelp();
+    return this._getArgumentParser().format_help();
   }
 
   /**
@@ -347,7 +348,7 @@ export abstract class CommandLineParameterProvider {
    */
   public renderUsageText(): string {
     this._registerDefinedParameters();
-    return this._getArgumentParser().formatUsage();
+    return this._getArgumentParser().format_usage();
   }
 
   /**
@@ -456,11 +457,11 @@ export abstract class CommandLineParameterProvider {
     if (this._remainder) {
       const argparseOptions: argparse.ArgumentOptions = {
         help: this._remainder.description,
-        nargs: argparse.Const.REMAINDER,
+        nargs: argparse.REMAINDER,
         metavar: '"..."'
       };
 
-      this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
+      this._getArgumentParser().add_argument(argparse.REMAINDER, argparseOptions);
     }
   }
 
@@ -569,7 +570,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     if (this.remainder) {
-      this.remainder._setValue(data[argparse.Const.REMAINDER]);
+      this.remainder._setValue(data[argparse.REMAINDER]);
     }
 
     this._parametersProcessed = true;
@@ -611,21 +612,6 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void {
-    const names: string[] = [];
-    if (parameter.shortName) {
-      names.push(parameter.shortName);
-    }
-
-    // Use the original long name unless otherwise requested
-    if (!useScopedLongName) {
-      names.push(parameter.longName);
-    }
-
-    // Add the scoped long name if it exists
-    if (parameter.scopedLongName) {
-      names.push(parameter.scopedLongName);
-    }
-
     let finalDescription: string = parameter.description;
 
     const supplementaryNotes: string[] = [];
@@ -644,9 +630,16 @@ export abstract class CommandLineParameterProvider {
     const argparseOptions: argparse.ArgumentOptions = {
       help: finalDescription,
       dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
       required: parameter.required
     };
+
+    // Only set the metavar if the argument name was provided. Declaring the metavar as
+    // undefined will cause argparse to throw an error for flag properties.
+    const parameterWithArgument: CommandLineParameterWithArgument =
+      parameter as CommandLineParameterWithArgument;
+    if (parameterWithArgument.argumentName) {
+      argparseOptions.metavar = parameterWithArgument.argumentName;
+    }
 
     switch (parameter.kind) {
       case CommandLineParameterKind.Choice: {
@@ -661,7 +654,7 @@ export abstract class CommandLineParameterProvider {
         break;
       }
       case CommandLineParameterKind.Flag:
-        argparseOptions.action = 'storeTrue';
+        argparseOptions.action = 'store_true';
         break;
       case CommandLineParameterKind.Integer:
         argparseOptions.type = 'int';
@@ -677,7 +670,7 @@ export abstract class CommandLineParameterProvider {
         break;
     }
 
-    let argumentGroup: argparse.ArgumentGroup | undefined;
+    let argumentGroup: IExtendedArgumentGroup | undefined;
     if (parameter.parameterGroup) {
       argumentGroup = this._parameterGroupsByName.get(parameter.parameterGroup);
       if (!argumentGroup) {
@@ -690,21 +683,50 @@ export abstract class CommandLineParameterProvider {
           throw new Error('Unexpected parameter group: ' + parameter.parameterGroup);
         }
 
-        argumentGroup = this._getArgumentParser().addArgumentGroup({
+        argumentGroup = this._getArgumentParser().add_argument_group({
           title: `Optional ${parameterGroupName} arguments`
-        });
+        }) as IExtendedArgumentGroup;
         this._parameterGroupsByName.set(parameter.parameterGroup, argumentGroup);
       }
     } else {
-      argumentGroup = this._getArgumentParser();
+      argumentGroup = this._getArgumentParser() as IExtendedArgumentGroup;
     }
 
-    argumentGroup.addArgument(names, { ...argparseOptions });
+    const names: string[] = [];
+    if (parameter.shortName) {
+      names.push(parameter.shortName);
+    }
 
-    if (parameter.undocumentedSynonyms?.length) {
-      argumentGroup.addArgument(parameter.undocumentedSynonyms, {
+    // Use the original long name unless otherwise requested
+    if (!useScopedLongName) {
+      names.push(parameter.longName);
+    }
+
+    // Add the scoped long name if it exists
+    if (parameter.scopedLongName) {
+      names.push(parameter.scopedLongName);
+    }
+
+    switch (names.length) {
+      case 1:
+        argumentGroup.add_argument(names[0], { ...argparseOptions });
+        break;
+      case 2:
+        argumentGroup.add_argument(names[0], names[1], { ...argparseOptions });
+        break;
+      case 3:
+        argumentGroup.add_argument(names[0], names[1], names[2], { ...argparseOptions });
+        break;
+      default:
+        // Should never happen, but guard against it just in case. Using a normal error instead
+        // of an InternalError since this package intentionally avoids using node-core-library.
+        throw new Error(`Unexpected number of parameter names provided: ${names.length}`);
+    }
+
+    for (const undocumentedSynonym of parameter.undocumentedSynonyms || []) {
+      argumentGroup.add_argument(undocumentedSynonym, {
         ...argparseOptions,
-        help: argparse.Const.SUPPRESS
+        help: argparse.SUPPRESS
       });
     }
   }
@@ -713,13 +735,13 @@ export abstract class CommandLineParameterProvider {
     const parserKey: string = this._generateKey();
     this._ambiguousParameterNamesByParserKey.set(parserKey, name);
 
-    this._getArgumentParser().addArgument(name, {
+    this._getArgumentParser().add_argument(name, {
       dest: parserKey,
       // We don't know if this argument takes parameters or not, so we need to accept any number of args
       nargs: '*',
       // Ensure that the argument is not shown in the help text, since these parameters are only included
       // to inform the user that ambiguous parameters are present
-      help: argparse.Const.SUPPRESS
+      help: argparse.SUPPRESS
     });
   }
 

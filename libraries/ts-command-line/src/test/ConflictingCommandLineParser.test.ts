@@ -178,6 +178,6 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
-    ).rejects.toThrowError(/argument "\-\-scope:arg": Conflicting option string\(s\): \-\-scope:arg/);
+    ).rejects.toThrowError(/argument --scope:arg: conflicting option string: --scope:arg/);
   });
 });

@@ -3,12 +3,11 @@
 exports[`Conflicting CommandLineParser executes an action 1`] = `
 "usage: example do:the-job [-h] [--scope1:arg ARG] [--scope2:arg ARG]
                           [--non-conflicting-arg ARG]
-                          
 
 a longer description
 
-Optional arguments:
-  -h, --help            Show this help message and exit.
+optional arguments:
+  -h, --help            show this help message and exit
   --scope1:arg ARG      The argument
   --scope2:arg ARG      The argument
   --non-conflicting-arg ARG, --scope3:non-conflicting-arg ARG

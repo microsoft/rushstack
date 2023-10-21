@@ -50,8 +50,6 @@ exports[`CommandLineParameter choice list raises an error if env var value is js
 
 exports[`CommandLineParameter choice list raises an error if env var value is not a valid choice 1`] = `"Invalid value \\"oblong\\" for the environment variable ENV_COLOR.  Valid choices are: \\"purple\\", \\"yellow\\", \\"pizza\\""`;
 
-exports[`CommandLineParameter choice list raises an error if env var value is not valid json 1`] = `"The [u environment variable value looks like a JSON array but failed to parse: Unexpected token u in JSON at position 1"`;
-
 exports[`CommandLineParameter parses an input with ALL parameters 1`] = `
 Object {
   "argumentName": undefined,
@@ -550,55 +548,54 @@ exports[`CommandLineParameter prints the action help 1`] = `
                           [--string-with-default TEXT]
                           [--string-with-undocumented-synonym TEXT]
                           [-l LIST_ITEM]
-                          
 
 a longer description
 
-Optional arguments:
-  -h, --help            Show this help message and exit.
+optional arguments:
+  -h, --help            show this help message and exit
   -c {one,two,three,default}, --choice {one,two,three,default}
-                        A choice. This parameter may alternatively be 
+                        A choice. This parameter may alternatively be
                         specified via the ENV_CHOICE environment variable.
   --choice-with-default {one,two,three,default}
-                        A choice with a default. This description ends with a 
-                        \\"quoted word\\". This parameter may alternatively be 
-                        specified via the ENV_CHOICE2 environment variable. 
+                        A choice with a default. This description ends with a
+                        \\"quoted word\\". This parameter may alternatively be
+                        specified via the ENV_CHOICE2 environment variable.
                         The default value is \\"default\\".
   -C {red,green,blue}, --choice-list {red,green,blue}
-                        This parameter may be specified multiple times to 
-                        make a list of choices. This parameter may 
-                        alternatively be specified via the ENV_CHOICE_LIST 
-                        environment variable.
-  -f, --flag            A flag. This parameter may alternatively be specified 
+                        This parameter may be specified multiple times to make
+                        a list of choices. This parameter may alternatively be
+                        specified via the ENV_CHOICE_LIST environment
+                        variable.
+  -f, --flag            A flag. This parameter may alternatively be specified
                         via the ENV_FLAG environment variable.
   -i NUMBER, --integer NUMBER
-                        An integer. This parameter may alternatively be 
+                        An integer. This parameter may alternatively be
                         specified via the ENV_INTEGER environment variable.
   --integer-with-default NUMBER
-                        An integer with a default. This parameter may 
-                        alternatively be specified via the ENV_INTEGER2 
+                        An integer with a default. This parameter may
+                        alternatively be specified via the ENV_INTEGER2
                         environment variable. The default value is 123.
   --integer-required NUMBER
                         An integer
   -I LIST_ITEM, --integer-list LIST_ITEM
-                        This parameter may be specified multiple times to 
-                        make a list of integers. This parameter may 
-                        alternatively be specified via the ENV_INTEGER_LIST 
-                        environment variable.
+                        This parameter may be specified multiple times to make
+                        a list of integers. This parameter may alternatively
+                        be specified via the ENV_INTEGER_LIST environment
+                        variable.
   -s TEXT, --string TEXT
-                        A string. This parameter may alternatively be 
+                        A string. This parameter may alternatively be
                         specified via the ENV_STRING environment variable.
   --string-with-default TEXT
-                        A string with a default. This parameter may 
-                        alternatively be specified via the ENV_STRING2 
+                        A string with a default. This parameter may
+                        alternatively be specified via the ENV_STRING2
                         environment variable. The default value is \\"123\\".
   --string-with-undocumented-synonym TEXT
                         A string with an undocumented synonym
   -l LIST_ITEM, --string-list LIST_ITEM
-                        This parameter may be specified multiple times to 
-                        make a list of strings. This parameter may 
-                        alternatively be specified via the ENV_STRING_LIST 
-                        environment variable.
+                        This parameter may be specified multiple times to make
+                        a list of strings. This parameter may alternatively be
+                        specified via the ENV_STRING_LIST environment
+                        variable.
 "
 `;
 
@@ -607,12 +604,12 @@ exports[`CommandLineParameter prints the global help 1`] = `
 
 An example project
 
-Positional arguments:
+positional arguments:
   <command>
     do:the-job       does the job
 
-Optional arguments:
-  -h, --help         Show this help message and exit.
+optional arguments:
+  -h, --help         show this help message and exit
   -g, --global-flag  A flag that affects all actions
 
 For detailed help about a specific command, use: example <command> -h

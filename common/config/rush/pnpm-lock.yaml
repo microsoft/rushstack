@@ -135,8 +135,8 @@ importers:
         specifier: 1.0.6
         version: 1.0.6
       argparse:
-        specifier: ~1.0.9
-        version: 1.0.10
+        specifier: ~2.0.1
+        version: 2.0.1
       chokidar:
         specifier: ~3.4.0
         version: 3.4.3
@@ -169,8 +169,8 @@ importers:
         specifier: 2.3.2
         version: 2.3.2(@rushstack/heft@0.62.0)(@types/node@18.17.15)
       '@types/argparse':
-        specifier: 1.0.38
-        version: 1.0.38
+        specifier: 2.0.12
+        version: 2.0.12
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -1743,10 +1743,10 @@ importers:
         version: link:../../heft-plugins/heft-typescript-plugin
       '@types/jest':
         specifier: ts4.9
-        version: 29.5.5
+        version: 29.5.6
       '@types/node':
         specifier: ts4.9
-        version: 20.8.3
+        version: 20.8.7
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -3375,11 +3375,11 @@ importers:
   ../../libraries/ts-command-line:
     dependencies:
       '@types/argparse':
-        specifier: 1.0.38
-        version: 1.0.38
+        specifier: 2.0.12
+        version: 2.0.12
       argparse:
-        specifier: ~1.0.9
-        version: 1.0.10
+        specifier: ~2.0.1
+        version: 2.0.1
       colors:
         specifier: ~1.2.1
         version: 1.2.5
@@ -11046,6 +11046,10 @@ packages:
 
   /@types/argparse@1.0.38:
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
+    dev: true
+
+  /@types/argparse@2.0.12:
+    resolution: {integrity: sha512-Qt/6lHaSI+idkJKKTixUTm6q1yjm7EE6ZpsKLkJIHQl7NLAX7lMZRFGAEU8kxaWur3N6L2UE7/U7QR46Isi3vg==}
 
   /@types/aws-lambda@8.10.93:
     resolution: {integrity: sha512-Vsyi9ogDAY3REZDjYnXMRJJa62SDvxHXxJI5nGDQdZW058dDE+av/anynN2rLKbCKXDRNw3D/sQmqxVflZFi4A==}
@@ -11283,8 +11287,8 @@ packages:
       expect: 29.6.2
       pretty-format: 29.6.2
 
-  /@types/jest@29.5.5:
-    resolution: {integrity: sha512-ebylz2hnsWR9mYvmBFbXJXr+33UPc4+ZdxyDXh5w0FlPBTfCVN3wPL+kuOiQt3xvrK419v7XWeAs+AeOksafXg==}
+  /@types/jest@29.5.6:
+    resolution: {integrity: sha512-/t9NnzkOpXb4Nfvg17ieHE6EeSjDS2SGSpNYfoLbUAeL/EOueU/RSdOWFpfQTXBEM7BguYW1XQ0EbM+6RlIh6w==}
     dependencies:
       expect: 29.6.2
       pretty-format: 29.6.2
@@ -11396,8 +11400,10 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.8.3:
-    resolution: {integrity: sha512-jxiZQFpb+NlH5kjW49vXxvxTjeeqlbsnTAdBTKpzEdPs9itay7MscYXz3Fo9VYFEsfQ6LJFitHad3faerLAjCw==}
+  /@types/node@20.8.7:
+    resolution: {integrity: sha512-21TKHHh3eUHIi2MloeptJWALuCu5H7HQTdTrWIFReA8ad+aggoX+lRes3ex7/FtpC+sVUpFMQ+QTfYr74mruiQ==}
+    dependencies:
+      undici-types: 5.25.3
     dev: true
 
   /@types/normalize-package-data@2.4.1:
@@ -24872,6 +24878,10 @@ packages:
 
   /underscore@1.13.6:
     resolution: {integrity: sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==}
+    dev: true
+
+  /undici-types@5.25.3:
+    resolution: {integrity: sha512-Ga1jfYwRn7+cP9v8auvEXN1rX3sWqlayd4HP7OKk4mZWylEmu3KzXDUGrQUN6Ol7qo1gPvB2e5gX6udnyEPgdA==}
     dev: true
 
   /unfetch@4.2.0:

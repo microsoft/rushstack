@@ -5,13 +5,13 @@ exports[`CommandLineParser prints the action help 1`] = `
 
 a longer description
 
-Positional arguments:
-  \\"...\\"          Scoped parameters. Must be prefixed with \\"--\\", ex. \\"-- 
-                 --scopedParameter foo --scopedFlag\\". For more information on 
+positional arguments:
+  \\"...\\"          Scoped parameters. Must be prefixed with \\"--\\", ex. \\"--
+                 --scopedParameter foo --scopedFlag\\". For more information on
                  available scoped parameters, use \\"-- --help\\".
 
-Optional arguments:
-  -h, --help     Show this help message and exit.
+optional arguments:
+  -h, --help     show this help message and exit
   --verbose      A flag parameter.
 
 Optional scoping arguments:
@@ -24,11 +24,11 @@ exports[`CommandLineParser prints the scoped action help 1`] = `
 
 a longer description
 
-Optional arguments:
-  -h, --help           Show this help message and exit.
+optional arguments:
+  -h, --help           show this help message and exit
   --scoped-foo SCOPED  The scoped argument.
 
-For more information on available unscoped parameters, use \\"example 
+For more information on available unscoped parameters, use \\"example
 scoped-action --help\\"
 "
 `;
@@ -59,6 +59,6 @@ Object {
 exports[`CommandLineParser throws on missing positional arg divider with unknown positional args 1`] = `"example scoped-action: error: Unrecognized arguments: bar."`;
 
 exports[`CommandLineParser throws on unknown scoped arg 1`] = `
-"example scoped-action --scope foo --: error: Unrecognized arguments: --scoped-bar baz.
+"example scoped-action --scope foo --: error: unrecognized arguments: --scoped-bar baz
 "
 `;
