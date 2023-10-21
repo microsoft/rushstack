@@ -340,6 +340,7 @@ export interface _ICommandLineParserData {
 
 // @public
 export interface ICommandLineParserOptions {
+    allowAbbreviations?: boolean;
     enableTabCompletionAction?: boolean;
     toolDescription: string;
     toolEpilog?: string;
