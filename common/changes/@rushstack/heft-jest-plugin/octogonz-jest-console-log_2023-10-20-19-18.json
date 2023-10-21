@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Use Jest verbose logging when `heft --debug test` or `heft test --verbose` is specified",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
