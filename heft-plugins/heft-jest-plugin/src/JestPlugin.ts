@@ -585,7 +585,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       silent = false;
     } else {
       // If "silent" is specified via IJestPluginOptions, that takes precedence over jest.config.json
-      options.silent ?? jestConfig.silent ?? false;
+      silent = options.silent ?? jestConfig.silent ?? false;
     }
 
     const jestArgv: Config.Argv = {
