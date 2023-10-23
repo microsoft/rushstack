@@ -75,7 +75,7 @@ export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
   /** @internal */
-  public readonly _ambiguousParameterParserKeys: Map<string, string>;
+  public readonly _ambiguousParameterParserKeysByName: Map<string, string>;
   /** @internal */
   protected readonly _registeredParameterNames: Set<string> = new Set();
   /** @internal */
@@ -98,7 +98,7 @@ export abstract class CommandLineParameterProvider {
     this._parametersByLongName = new Map();
     this._parametersByShortName = new Map();
     this._parameterGroupsByName = new Map();
-    this._ambiguousParameterParserKeys = new Map();
+    this._ambiguousParameterParserKeysByName = new Map();
     this._parametersRegistered = false;
     this._parametersProcessed = false;
   }
@@ -457,7 +457,7 @@ export abstract class CommandLineParameterProvider {
 
     // We also need to loop through the defined ambiguous parameters and register them. These will be reported
     // as errors if the user attempts to use them.
-    for (const [ambiguousParameterName, parserKey] of this._ambiguousParameterParserKeys) {
+    for (const [ambiguousParameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
       this._registerAmbiguousParameter(ambiguousParameterName, parserKey);
     }
 
@@ -498,7 +498,7 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Search for any ambiguous parameters and throw an error if any are found
-    for (const [parameterName, parserKey] of this._ambiguousParameterParserKeys) {
+    for (const [parameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
       if (data[parserKey]) {
         // Write out the usage text to make it easier for the user to find the correct parameter name
         const errorPrefix: string = `${this.renderUsageText()}\n${parserOptions.toolFilename} ${
@@ -638,10 +638,10 @@ export abstract class CommandLineParameterProvider {
 
     // Generate and set the parser key at definition time. Only generate a new parser key
     // if the ambiguous paramter hasn't been defined yet.
-    let existingParserKey: string | undefined = this._ambiguousParameterParserKeys.get(name);
+    let existingParserKey: string | undefined = this._ambiguousParameterParserKeysByName.get(name);
     if (!existingParserKey) {
       existingParserKey = this._generateKey();
-      this._ambiguousParameterParserKeys.set(name, existingParserKey);
+      this._ambiguousParameterParserKeysByName.set(name, existingParserKey);
     }
     return existingParserKey;
   }

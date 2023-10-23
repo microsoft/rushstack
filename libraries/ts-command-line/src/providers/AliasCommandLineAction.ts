@@ -148,7 +148,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     }
 
     // Also re-use the target action ambiguous parameters for this action
-    for (const [ambiguousParameterName, parserKey] of this.targetAction._ambiguousParameterParserKeys) {
+    for (const [ambiguousParameterName, parserKey] of this.targetAction._ambiguousParameterParserKeysByName) {
       const aliasParserKey: string = this._defineAmbiguousParameter(ambiguousParameterName);
       this._parameterKeyMap.set(aliasParserKey, parserKey);
     }
