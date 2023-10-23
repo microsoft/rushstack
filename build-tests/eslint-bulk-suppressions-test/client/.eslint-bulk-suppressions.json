@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scope": ".",
+      "rule": "prefer-const"
+    },
+    {
+      "file": "src/index.ts",
+      "scope": ".exampleFunction",
+      "rule": "@typescript-eslint/ban-types"
+    }
+  ]
+}

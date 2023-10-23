@@ -1146,6 +1146,10 @@ function runRules(
     }
   });
 
+  // --- BEGIN MONKEY PATCH ---
+  bulkSuppressionsPatch.BulkSuppressionsCleanUp({ filename });
+  // --- END MONKEY PATCH ---
+
   return lintingProblems;
 }
 

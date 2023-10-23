@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scope": ".exampleObject2.exampleObjectMethod",
+      "rule": "@typescript-eslint/no-inferrable-types"
+    },
+    {
+      "file": "src/index.ts",
+      "scope": ".exampleObject2.exampleObjectProperty",
+      "rule": "@typescript-eslint/no-empty-function"
+    }
+  ]
+}

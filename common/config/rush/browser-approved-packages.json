@@ -71,6 +71,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "commander",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },

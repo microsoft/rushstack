@@ -46,38 +46,16 @@ function getNodeName(node: TSESTree.Node): string | null {
   return null;
 }
 
-// function getScopeAncestry(scope: Scope | null): Scope[] {
-//   if (scope === null || scope.block.type === 'Program') return [];
-
-//   return [...getScopeAncestry(scope.upper), scope];
-// }
-
-// export function serializeNodeScope<TMessageIds extends string, TOptions extends readonly unknown[]>(
-//   context: Readonly<TSESLint.RuleContext<TMessageIds, TOptions>>,
-//   node: TSESTree.Node
-// ): string {
-//   const scopeManager = context.getSourceCode().scopeManager;
-//   if (!scopeManager) throw new Error('scopeManager is null');
-
-//   const scopeAncestry = getScopeAncestry(scopeManager.acquire(node, true));
-
-//   const scopeAncestryNames = scopeAncestry.map((scope) => getNodeName(scope.block)).filter(Boolean);
-
-//   return '.' + scopeAncestryNames.join('.');
-// }
-
-function calculateScope(node: any | (TSESTree.Node & { parent?: TSESTree.Node }) | undefined): {
-  scope: string;
-} {
+function calculateScope(node: any | (TSESTree.Node & { parent?: TSESTree.Node }) | undefined): string {
   const scopes = [];
   for (let current = node; current; current = current.parent) {
     const scopeForASTNode = getNodeName(current);
     if (scopeForASTNode !== null) scopes.unshift(scopeForASTNode);
   }
 
-  if (scopes.length === 0) return { scope: '.' };
+  if (scopes.length === 0) return '.';
 
-  return { scope: '.' + scopes.join('.') };
+  return '.' + scopes.join('.');
 }
 
 /**
@@ -100,29 +78,47 @@ function findEslintrcDirectory(fileAbsolutePath: string): string {
 }
 
 function validateSuppressionsJson(json: BulkSuppressionsJson): json is BulkSuppressionsJson {
-  if (typeof json !== 'object') return false;
-  if (json === null) return false;
-  if (!json.hasOwnProperty('suppressions')) return false;
-  if (!Array.isArray(json.suppressions)) return false;
+  if (typeof json !== 'object') throw new Error(`Invalid JSON object: ${JSON.stringify(json, null, 2)}`);
+  if (json === null) throw new Error('JSON object is null.');
+  if (!json.hasOwnProperty('suppressions')) throw new Error('Missing "suppressions" property.');
+  if (!Array.isArray(json.suppressions)) throw new Error('"suppressions" property is not an array.');
 
   if (
     !json.suppressions.every((suppression) => {
-      if (typeof suppression !== 'object') return false;
-      if (suppression === null) return false;
-      if (!suppression.hasOwnProperty('file')) return false;
-      if (typeof suppression.file !== 'string') return false;
-      if (!suppression.hasOwnProperty('scope')) return false;
-      if (typeof suppression.scope !== 'string') return false;
-      if (!suppression.hasOwnProperty('rule')) return false;
-      if (typeof suppression.rule !== 'string') return false;
+      if (typeof suppression !== 'object')
+        throw new Error(`Invalid suppression: ${JSON.stringify(suppression, null, 2)}`);
+      if (suppression === null)
+        throw new Error(`Suppression is null: ${JSON.stringify(suppression, null, 2)}`);
+      if (!suppression.hasOwnProperty('file'))
+        throw new Error(`Missing "file" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
+      if (typeof suppression.file !== 'string')
+        throw new Error(
+          `"file" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
+        );
+      if (!suppression.hasOwnProperty('scope'))
+        throw new Error(`Missing "scope" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
+      if (typeof suppression.scope !== 'string')
+        throw new Error(
+          `"scope" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
+        );
+      if (!suppression.hasOwnProperty('rule'))
+        throw new Error(`Missing "rule" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
+      if (typeof suppression.rule !== 'string')
+        throw new Error(
+          `"rule" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
+        );
       return true;
     })
-  )
-    return false;
+  ) {
+    throw new Error(
+      `Invalid suppression in "suppressions" array: ${JSON.stringify(json.suppressions, null, 2)}`
+    );
+  }
   return true;
 }
 
-function readSuppressionsJson(eslintrcDirectory: string): BulkSuppressionsJson {
+function readSuppressionsJson(fileAbsolutePath: string): BulkSuppressionsJson {
+  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
   let suppressionsJson = { suppressions: [] };
   try {
@@ -130,7 +126,8 @@ function readSuppressionsJson(eslintrcDirectory: string): BulkSuppressionsJson {
     suppressionsJson = JSON.parse(fileContent);
 
     if (!validateSuppressionsJson(suppressionsJson)) {
-      console.log(
+      console.log('invalid data', suppressionsJson);
+      console.warn(
         `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
 {
   suppressions: {
@@ -144,24 +141,34 @@ Please check file content, or delete file if suppressions are no longer needed.
       );
       suppressionsJson = { suppressions: [] };
     }
-  } catch (err) {
-    // Do nothing and let JSON5 log the error. suppressionsJson will stay as the initialized value.
+  } catch {
+    // Do nothing and let JSON.parse() log the error. suppressionsJson will stay as the initialized value.
   }
   return suppressionsJson;
 }
 
-function serializeFileScopeRule(suppression: { file: string; scope: string; rule: string }): string {
-  return `${suppression.file}|${suppression.scope}|${suppression.rule}`;
-}
-
-function shouldWriteSuppression(rule: string): boolean {
+function shouldWriteSuppression(fileAbsolutePath: string, suppression: Suppression): boolean {
   if (process.env.ESLINT_BULK_SUPPRESS_RULES === undefined) return false;
+
+  if (isSuppressed(fileAbsolutePath, suppression)) return false;
 
   const rulesToSuppress = process.env.ESLINT_BULK_SUPPRESS_RULES.split(',');
 
   if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
 
-  return rulesToSuppress.includes(rule);
+  return rulesToSuppress.includes(suppression.rule);
+}
+
+function isSuppressed(fileAbsolutePath: string, suppression: Suppression): boolean {
+  const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
+  return (
+    suppressionsJson.suppressions.find(
+      (element) =>
+        element.file === suppression.file &&
+        element.scope === suppression.scope &&
+        element.rule === suppression.rule
+    ) !== undefined
+  );
 }
 
 function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number): void {
@@ -180,26 +187,32 @@ function compareSuppressions(a: Suppression, b: Suppression): -1 | 0 | 1 {
   return 0;
 }
 
-function writeSuppression(params: {
-  eslintrcDirectory: string;
-  file: string;
-  scope: string;
-  rule: string;
-}): void {
-  const { eslintrcDirectory, file, scope, rule } = params;
-  const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
+function writeSuppressionToFile(
+  fileAbsolutePath: string,
+  suppression: {
+    file: string;
+    scope: string;
+    rule: string;
+  }
+): void {
+  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
+  const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
 
-  insort(suppressionsJson.suppressions, { file, scope, rule }, compareSuppressions);
+  insort(suppressionsJson.suppressions, suppression, compareSuppressions);
 
   const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
 }
 
-function readSerializedSuppressionsSet(fileAbsolutePath: string) {
-  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
-  const suppressionsJson = readSuppressionsJson(eslintrcDirectory);
-  const serializedSuppressionsSet = new Set(suppressionsJson.suppressions.map(serializeFileScopeRule));
-  return serializedSuppressionsSet;
+const usedSuppressions = new Set<string>();
+
+function serializeSuppression(fileAbsolutePath: string, suppression: Suppression): string {
+  return `${fileAbsolutePath}|${suppression.file}|${suppression.scope}|${suppression.rule}`;
+}
+
+function deserializeSuppression(serializedSuppression: string): Suppression {
+  const [file, scope, rule] = serializedSuppression.split('|');
+  return { file, scope, rule };
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
@@ -214,23 +227,40 @@ export function shouldBulkSuppress(params: {
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const fileRelativePath = path.relative(eslintrcDirectory, fileAbsolutePath);
-  const { scope } = calculateScope(currentNode);
-  const serializedFileScopeRule = serializeFileScopeRule({
-    file: fileRelativePath,
-    scope,
-    rule
-  });
+  const scope = calculateScope(currentNode);
+  const suppression = { file: fileRelativePath, scope, rule };
 
-  if (
-    shouldWriteSuppression(rule) &&
-    !readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeRule)
-  )
-    writeSuppression({ eslintrcDirectory, file: fileRelativePath, scope, rule });
+  if (shouldWriteSuppression(fileAbsolutePath, suppression)) {
+    writeSuppressionToFile(fileAbsolutePath, suppression);
+  }
 
-  const shouldBulkSuppress: boolean =
-    readSerializedSuppressionsSet(fileAbsolutePath).has(serializedFileScopeRule);
+  const shouldBulkSuppress = isSuppressed(fileAbsolutePath, suppression);
+
+  if (shouldBulkSuppress) {
+    usedSuppressions.add(serializeSuppression(fileAbsolutePath, suppression));
+  }
 
   return shouldBulkSuppress;
+}
+
+export function BulkSuppressionsCleanUp(params: { filename: string }): void {
+  if (process.env.CLEANUP_ESLINT_BULK_SUPPRESSIONS !== 'true') return;
+
+  console.log(usedSuppressions);
+  const { filename: fileAbsolutePath } = params;
+  const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
+  const newSuppressionsJson = {
+    suppressions: suppressionsJson.suppressions.filter((suppression) => {
+      // console.log(
+      //   serializeSuppression(fileAbsolutePath, suppression),
+      //   usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression))
+      // );
+      return usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression));
+    })
+  };
+  const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
+  const suppressionsPath = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
+  fs.writeFileSync(suppressionsPath, JSON.stringify(newSuppressionsJson, null, 2));
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
@@ -281,8 +311,3 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
     }
   }
 }
-
-// module.exports = {
-//   requireFromPathToLinterJS,
-//   shouldBulkSuppress
-// };

@@ -19,6 +19,6 @@
     "target": "es5",
     "lib": ["es5"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["client/**/*.ts", "client/**/*.tsx", "server/**/*.ts", "server/**/*.tsx"],
   "exclude": ["node_modules", "lib"]
 }

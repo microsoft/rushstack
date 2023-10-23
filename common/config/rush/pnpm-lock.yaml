@@ -2183,6 +2183,25 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  ../../eslint/eslint-bulk:
+    dependencies:
+      commander:
+        specifier: ~11.1.0
+        version: 11.1.0
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@rushstack/heft-node-rig':
+        specifier: workspace:*
+        version: link:../../rigs/heft-node-rig
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+
   ../../eslint/eslint-config:
     dependencies:
       '@rushstack/eslint-patch':
@@ -14032,8 +14051,8 @@ packages:
     resolution: {integrity: sha512-GHuDRO12Sypu2cV70d1dkA2EUmXHgntrzbpvOB+Qy+49ypNfGgFQIC2fhhXbnyrJRynDCAARsT7Ou0M6hirpfw==}
     dev: true
 
-  /commander@11.0.0:
-    resolution: {integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==}
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
     dev: false
 
@@ -21833,7 +21852,7 @@ packages:
   /pseudolocale@1.1.0:
     resolution: {integrity: sha512-OZ8I/hwYEJ3beN3IEcNnt8EpcqblH0/x23hulKBXjs+WhTTEle+ijCHCkh2bd+cIIeCuCwSCbBe93IthGG6hLw==}
     dependencies:
-      commander: 11.0.0
+      commander: 11.1.0
     dev: false
 
   /psl@1.9.0:

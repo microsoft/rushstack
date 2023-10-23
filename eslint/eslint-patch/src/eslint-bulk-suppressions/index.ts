@@ -5,6 +5,7 @@ import { eslintFolder } from '../_patch-base';
 import { patchClass, whichPatchToLoad } from './bulk-suppressions-patch';
 
 if (!eslintFolder) process.exit();
+
 const patchForSpecificESLintVersion = whichPatchToLoad(eslintFolder);
 if (!patchForSpecificESLintVersion) process.exit();
 const { Linter: LinterPatch } = require(`./${patchForSpecificESLintVersion}`);

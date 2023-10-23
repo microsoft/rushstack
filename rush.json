@@ -682,6 +682,12 @@
 
     // "eslint" folder (alphabetical order)
     {
+      "packageName": "@rushstack/eslint-bulk",
+      "projectFolder": "eslint/eslint-bulk",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/eslint-config",
       "projectFolder": "eslint/eslint-config",
       "reviewCategory": "libraries",

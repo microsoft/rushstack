@@ -6,7 +6,8 @@
   "scripts": {
     "eslint": "eslint .",
     "eslint-bulk-suppress-all": "ESLINT_BULK_SUPPRESS_RULES=* eslint .",
-    "eslint-without-bulk-suppressions": "USE_ESLINT_BULK_SUPPRESSIONS=false eslint ."
+    "eslint-without-bulk-suppressions": "USE_ESLINT_BULK_SUPPRESSIONS=false eslint .",
+    "debug": "CLEANUP_ESLINT_BULK_SUPPRESSIONS=true eslint /Users/bytedance/rushstack/build-tests/eslint-bulk-suppressions-test/server"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
