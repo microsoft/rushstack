@@ -53,112 +53,114 @@ export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
 
     const hashedFolderDependencies: IHashedFolderDependency[] = [];
 
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
-      compilation.hooks.finishModules.tapPromise(PLUGIN_NAME, async () => {
-        const inputFileSystem: webpack.Compiler['inputFileSystem'] = compiler.inputFileSystem;
-        const notImplementedFunction: () => never = () => {
-          throw new Error('Not implemented');
-        };
-        const globFs: glob.FileSystemAdapter = {
-          lstat: inputFileSystem.lstat?.bind(inputFileSystem) ?? notImplementedFunction,
-          stat: inputFileSystem.stat?.bind(inputFileSystem) ?? notImplementedFunction,
-          lstatSync: notImplementedFunction,
-          statSync: notImplementedFunction,
-          readdir: inputFileSystem.readdir?.bind(inputFileSystem) ?? notImplementedFunction,
-          readdirSync: notImplementedFunction
-        } as unknown as glob.FileSystemAdapter; // The Webpack typings are wrong on `readdir`
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation: webpack.Compilation, { normalModuleFactory }) => {
+        compilation.hooks.finishModules.tapPromise(PLUGIN_NAME, async () => {
+          const inputFileSystem: webpack.Compiler['inputFileSystem'] = compiler.inputFileSystem;
+          const notImplementedFunction: () => never = () => {
+            throw new Error('Not implemented');
+          };
+          const globFs: glob.FileSystemAdapter = {
+            lstat: inputFileSystem.lstat?.bind(inputFileSystem) ?? notImplementedFunction,
+            stat: inputFileSystem.stat?.bind(inputFileSystem) ?? notImplementedFunction,
+            lstatSync: notImplementedFunction,
+            statSync: notImplementedFunction,
+            readdir: inputFileSystem.readdir?.bind(inputFileSystem) ?? notImplementedFunction,
+            readdirSync: notImplementedFunction
+          } as unknown as glob.FileSystemAdapter; // The Webpack typings are wrong on `readdir`
 
-        await Async.forEachAsync(
-          hashedFolderDependencies,
-          async (hashedFolderDependency) => {
-            await hashedFolderDependency.processAssetsAsync(compilation, globFs);
-          },
-          { concurrency: 10 }
-        );
-      });
-    });
+          await Async.forEachAsync(
+            hashedFolderDependencies,
+            async (hashedFolderDependency) => {
+              await hashedFolderDependency.processAssetsAsync(compilation, globFs);
+            },
+            { concurrency: 10 }
+          );
+        });
 
-    compiler.hooks.normalModuleFactory.tap(PLUGIN_NAME, (normalModuleFactory) => {
-      const handler: (parser: webpack.javascript.JavascriptParser) => void = (
-        parser: webpack.javascript.JavascriptParser
-      ) => {
-        parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, (baseExpression: Expression) => {
-          const expression: CallExpression = baseExpression as CallExpression;
-          const compilation: webpack.Compilation = parser.state.compilation;
+        const handler: (parser: webpack.javascript.JavascriptParser) => void = (
+          parser: webpack.javascript.JavascriptParser
+        ) => {
+          parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, (baseExpression: Expression) => {
+            const expression: CallExpression = baseExpression as CallExpression;
 
-          let errorMessage: string | undefined;
-          let requireFolderOptions: IRequireFolderOptions | undefined = undefined;
-          if (expression.arguments.length !== 1) {
-            errorMessage = `Exactly one argument is required to be passed to "${EXPRESSION_NAME}"`;
-          } else {
-            const argument: IAcornNode<IRequireFolderOptions> = expression
-              .arguments[0] as IAcornNode<IRequireFolderOptions>;
-            try {
-              requireFolderOptions = this._evaluateAcornNode(argument) as IRequireFolderOptions;
-            } catch (e) {
-              errorMessage = (e as Error).message;
-            }
+            let errorMessage: string | undefined;
+            let requireFolderOptions: IRequireFolderOptions | undefined = undefined;
+            if (expression.arguments.length !== 1) {
+              errorMessage = `Exactly one argument is required to be passed to "${EXPRESSION_NAME}"`;
+            } else {
+              const argument: IAcornNode<IRequireFolderOptions> = expression
+                .arguments[0] as IAcornNode<IRequireFolderOptions>;
+              try {
+                requireFolderOptions = this._evaluateAcornNode(argument) as IRequireFolderOptions;
+              } catch (e) {
+                errorMessage = (e as Error).message;
+              }
 
-            if (requireFolderOptions) {
-              if (
-                !requireFolderOptions.outputFolder ||
-                typeof requireFolderOptions.outputFolder !== 'string'
-              ) {
-                errorMessage = 'The options object must have a "outputFolder" property that is a string';
-              } else if (!requireFolderOptions.sources || !Array.isArray(requireFolderOptions.sources)) {
-                errorMessage = 'The options object must have a "sources" property that is an array';
-              } else {
-                for (const source of requireFolderOptions.sources) {
-                  if (!source.globsBase || typeof source.globsBase !== 'string') {
-                    errorMessage = 'Each "sources" element must have a string "globsBase" property';
-                  } else if (
-                    !source.globPatterns ||
-                    !Array.isArray(source.globPatterns) ||
-                    source.globPatterns.some((globPattern) => !globPattern || typeof globPattern !== 'string')
-                  ) {
-                    errorMessage =
-                      'Each "sources" element must have a "globPatterns" property that is an array of glob strings';
+              if (requireFolderOptions) {
+                if (
+                  !requireFolderOptions.outputFolder ||
+                  typeof requireFolderOptions.outputFolder !== 'string'
+                ) {
+                  errorMessage = 'The options object must have a "outputFolder" property that is a string';
+                } else if (!requireFolderOptions.sources || !Array.isArray(requireFolderOptions.sources)) {
+                  errorMessage = 'The options object must have a "sources" property that is an array';
+                } else {
+                  for (const source of requireFolderOptions.sources) {
+                    if (!source.globsBase || typeof source.globsBase !== 'string') {
+                      errorMessage = 'Each "sources" element must have a string "globsBase" property';
+                    } else if (
+                      !source.globPatterns ||
+                      !Array.isArray(source.globPatterns) ||
+                      source.globPatterns.some(
+                        (globPattern) => !globPattern || typeof globPattern !== 'string'
+                      )
+                    ) {
+                      errorMessage =
+                        'Each "sources" element must have a "globPatterns" property that is an array of glob strings';
+                    }
                   }
                 }
               }
             }
-          }
 
-          const currentModule: webpack.NormalModule = parser.state.current;
-          let dependency: webpack.dependencies.NullDependency;
-          if (!requireFolderOptions) {
-            const errorText: string = renderError(errorMessage!);
-            dependency = new webpack.dependencies.ConstDependency(errorText, expression.range!);
-            if (expression.loc) {
-              dependency.loc = expression.loc;
+            const currentModule: webpack.NormalModule = parser.state.current;
+            let dependency: webpack.dependencies.NullDependency;
+            if (!requireFolderOptions) {
+              const errorText: string = renderError(errorMessage!);
+              dependency = new webpack.dependencies.ConstDependency(errorText, expression.range!);
+              if (expression.loc) {
+                dependency.loc = expression.loc;
+              }
+
+              compilation.errors.push(new webpack.WebpackError(errorMessage));
+            } else {
+              const hashedFolderDependency: IHashedFolderDependency = new HashedFolderDependency(
+                requireFolderOptions,
+                expression.range!,
+                expression.loc
+              );
+              hashedFolderDependencies.push(hashedFolderDependency);
+              dependency = hashedFolderDependency;
             }
 
-            compilation.errors.push(new webpack.WebpackError(errorMessage));
-          } else {
-            const hashedFolderDependency: IHashedFolderDependency = new HashedFolderDependency(
-              requireFolderOptions,
-              expression.range!,
-              expression.loc
-            );
-            hashedFolderDependencies.push(hashedFolderDependency);
-            dependency = hashedFolderDependency;
-          }
+            currentModule.addDependency(dependency);
+          });
 
-          currentModule.addDependency(dependency);
-        });
+          parser.hooks.evaluateTypeof
+            .for(EXPRESSION_NAME)
+            .tap(PLUGIN_NAME, ParserHelpers.evaluateToString('function'));
 
-        parser.hooks.evaluateTypeof
-          .for(EXPRESSION_NAME)
-          .tap(PLUGIN_NAME, ParserHelpers.evaluateToString('function'));
+          parser.hooks.typeof
+            .for(EXPRESSION_NAME)
+            .tap(PLUGIN_NAME, ParserHelpers.toConstantDependency(parser, JSON.stringify('function')));
+        };
 
-        parser.hooks.typeof
-          .for(EXPRESSION_NAME)
-          .tap(PLUGIN_NAME, ParserHelpers.toConstantDependency(parser, JSON.stringify('function')));
-      };
-
-      normalModuleFactory.hooks.parser.for('javascript/auto').tap(PLUGIN_NAME, handler);
-      normalModuleFactory.hooks.parser.for('javascript/dynamic').tap(PLUGIN_NAME, handler);
-    });
+        normalModuleFactory.hooks.parser.for('javascript/auto').tap(PLUGIN_NAME, handler);
+        normalModuleFactory.hooks.parser.for('javascript/dynamic').tap(PLUGIN_NAME, handler);
+      }
+    );
   }
 
   private _evaluateAcornNode(node: IAcornNode<unknown>): unknown {
