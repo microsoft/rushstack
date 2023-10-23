@@ -85,8 +85,13 @@ export class AliasCommandLineAction extends CommandLineAction {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
+  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
     /* override */
+    // First, we need to make sure that the target action is registered, since we need to re-use
+    // its parameters, and some of these only get defined during registration. This will no-op if
+    // the target action is already registered.
+    this.targetAction._registerDefinedParameters(existingParameterNames);
+
     // All parameters are going to be defined by the target action. Re-use the target action parameters
     // for this action.
     for (const parameter of this.targetAction.parameters) {
@@ -142,6 +147,12 @@ export class AliasCommandLineAction extends CommandLineAction {
       this._parameterKeyMap.set(aliasParameter._parserKey!, parameter._parserKey!);
     }
 
+    // Also re-use the target action ambiguous parameters for this action
+    for (const [ambiguousParameterName, parserKey] of this.targetAction._ambiguousParameterParserKeys) {
+      const aliasParserKey: string = this._defineAmbiguousParameter(ambiguousParameterName);
+      this._parameterKeyMap.set(aliasParserKey, parserKey);
+    }
+
     // We also need to register the remainder parameter if the target action has one. The parser
     // key for this parameter is constant.
     if (this.targetAction.remainder) {
@@ -150,7 +161,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     }
 
     // Finally, register the parameters with the parser.
-    super._registerDefinedParameters();
+    super._registerDefinedParameters(existingParameterNames);
   }
 
   /**

@@ -49,14 +49,27 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  * Use "heft --unmanaged" to bypass this feature.
  */
 function tryStartLocalHeft(): boolean {
-  if (process.argv.indexOf(Constants.unmanagedParameterLongName) >= 0) {
+  const toolArgs: Set<string> = new Set();
+  // Skip the first two arguments, which are the path to the Node executable and the path to the Heft
+  // entrypoint. The remaining arguments are the tool arguments. Grab them until we reach a non-"--"-prefixed
+  // argument. We can do this simple parsing because the Heft tool only has simple optional flags.
+  for (let i: number = 2; i < process.argv.length; ++i) {
+    const arg: string = process.argv[i];
+    if (!arg.startsWith('--')) {
+      break;
+    }
+
+    toolArgs.add(arg);
+  }
+
+  if (toolArgs.has(Constants.unmanagedParameterLongName)) {
     console.log(
       `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
         'was specified.'
     );
     console.log();
     return false;
-  } else if (process.argv.indexOf(Constants.debugParameterLongName) >= 0) {
+  } else if (toolArgs.has(Constants.debugParameterLongName)) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
       'Searching for a locally installed version of Heft. Use the ' +

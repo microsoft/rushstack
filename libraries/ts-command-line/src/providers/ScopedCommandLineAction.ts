@@ -14,6 +14,7 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
   readonly onDefineScopedParameters: (commandLineParameterProvider: CommandLineParameterProvider) => void;
   readonly aliasAction?: string;
   readonly aliasDocumentation?: string;
+  readonly existingParameterNames?: Set<string>;
 }
 
 /**
@@ -58,6 +59,17 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     this._internalOptions.onDefineScopedParameters(this);
   }
 
+  public _registerDefinedParameters(): void {
+    if (!this._parametersRegistered) {
+      // Manually register our ambiguous parameters from the parent tool and action
+      for (const existingParameterName of this._internalOptions.existingParameterNames || []) {
+        this._defineAmbiguousParameter(existingParameterName);
+      }
+    }
+
+    super._registerDefinedParameters();
+  }
+
   protected async onExecute(): Promise<void> {
     // override
     // Only set if we made it this far, which may not be the case if an error occurred or
@@ -92,6 +104,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   private _scopingParameters: CommandLineParameter[];
   private _unscopedParserOptions: ICommandLineParserOptions | undefined;
   private _scopedCommandLineParser: InternalScopedCommandLineParser | undefined;
+  private _existingParameterNames: Set<string> = new Set();
 
   /**
    * The required group name to apply to all scoping parameters. At least one parameter
@@ -135,6 +148,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       aliasAction: data.aliasAction,
       aliasDocumentation: data.aliasDocumentation,
       unscopedActionParameters: this.parameters,
+      existingParameterNames: this._existingParameterNames,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });
   }
@@ -157,15 +171,12 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     const scopedArgs: string[] = [];
     if (this.remainder.values.length) {
       if (this.remainder.values[0] !== '--') {
-        // Imitate argparse behavior and log out usage text before throwing.
-        // eslint-disable-next-line no-console
-        console.log(this.renderUsageText());
         throw new CommandLineParserExitError(
           // argparse sets exit code 2 for invalid arguments
           2,
           // model the message off of the built-in "unrecognized arguments" message
-          `${this._unscopedParserOptions.toolFilename} ${this.actionName}: error: Unrecognized ` +
-            `arguments: ${this.remainder.values[0]}.`
+          `${this.renderUsageText()}\n${this._unscopedParserOptions.toolFilename} ${this.actionName}: ` +
+            `error: Unrecognized arguments: ${this.remainder.values[0]}.\n`
         );
       }
       for (const scopedArg of this.remainder.values.slice(1)) {
@@ -183,6 +194,19 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     return;
+  }
+
+  /** @internal */
+  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
+    super._registerDefinedParameters(existingParameterNames);
+
+    for (const registeredParameterName of this._registeredParameterNames) {
+      this._existingParameterNames.add(registeredParameterName);
+    }
+
+    for (const existingParameterName of existingParameterNames || []) {
+      this._existingParameterNames.add(existingParameterName);
+    }
   }
 
   /**

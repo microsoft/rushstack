@@ -28,6 +28,7 @@ import { CommandLineStringParameter } from '../parameters/CommandLineStringParam
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
  * The result containing the parsed paramter long name and scope. Returned when calling
@@ -73,6 +74,13 @@ const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
 export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
+  /** @internal */
+  public readonly _ambiguousParameterParserKeys: Map<string, string>;
+  /** @internal */
+  protected readonly _registeredParameterNames: Set<string> = new Set();
+  /** @internal */
+  protected _parametersRegistered: boolean;
+
   private readonly _parameters: CommandLineParameter[];
   private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
   private readonly _parametersByShortName: Map<string, CommandLineParameter[]>;
@@ -80,8 +88,6 @@ export abstract class CommandLineParameterProvider {
     string | typeof SCOPING_PARAMETER_GROUP,
     argparse.ArgumentGroup
   >;
-  private readonly _ambiguousParameterNamesByParserKey: Map<string, string>;
-  private _parametersRegistered: boolean;
   private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
@@ -92,7 +98,7 @@ export abstract class CommandLineParameterProvider {
     this._parametersByLongName = new Map();
     this._parametersByShortName = new Map();
     this._parameterGroupsByName = new Map();
-    this._ambiguousParameterNamesByParserKey = new Map();
+    this._ambiguousParameterParserKeys = new Map();
     this._parametersRegistered = false;
     this._parametersProcessed = false;
   }
@@ -405,15 +411,18 @@ export abstract class CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
+  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
     if (this._parametersRegistered) {
       // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
       // so we can already ensure that all parameters were registered.
       return;
     }
-    this._parametersRegistered = true;
 
-    const ambiguousParameterNames: Set<string> = new Set();
+    // Register the existing parameters as ambiguous parameters first. These are generally provided by the
+    // parent action. Register these first so that we can report matching parameters as errors.
+    for (const existingParameterName of existingParameterNames || []) {
+      this._defineAmbiguousParameter(existingParameterName);
+    }
 
     // First, loop through all parameters with short names. If there are any duplicates, disable the short names
     // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
@@ -421,7 +430,7 @@ export abstract class CommandLineParameterProvider {
     for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
       if (shortNameParameters.length > 1) {
         for (const parameter of shortNameParameters) {
-          ambiguousParameterNames.add(shortName);
+          this._defineAmbiguousParameter(shortName);
           parameter._disableShortName();
         }
       }
@@ -440,16 +449,16 @@ export abstract class CommandLineParameterProvider {
                 'Parameters with the same long name must define a scope.'
             );
           }
-          ambiguousParameterNames.add(parameter.longName);
+          this._defineAmbiguousParameter(parameter.longName);
         }
         this._registerParameter(parameter, useScopedLongName);
       }
     }
 
-    // Register silent parameters for the ambiguous short names and long names to ensure that users are made
-    // aware that the provided argument is ambiguous.
-    for (const ambiguousParameterName of ambiguousParameterNames) {
-      this._registerAmbiguousParameter(ambiguousParameterName);
+    // We also need to loop through the defined ambiguous parameters and register them. These will be reported
+    // as errors if the user attempts to use them.
+    for (const [ambiguousParameterName, parserKey] of this._ambiguousParameterParserKeys) {
+      this._registerAmbiguousParameter(ambiguousParameterName, parserKey);
     }
 
     // Need to add the remainder parameter last
@@ -462,6 +471,8 @@ export abstract class CommandLineParameterProvider {
 
       this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
     }
+
+    this._parametersRegistered = true;
   }
 
   /**
@@ -487,8 +498,14 @@ export abstract class CommandLineParameterProvider {
     }
 
     // Search for any ambiguous parameters and throw an error if any are found
-    for (const [parserKey, parameterName] of this._ambiguousParameterNamesByParserKey) {
+    for (const [parameterName, parserKey] of this._ambiguousParameterParserKeys) {
       if (data[parserKey]) {
+        // Write out the usage text to make it easier for the user to find the correct parameter name
+        const errorPrefix: string = `${this.renderUsageText()}\n${parserOptions.toolFilename} ${
+          data.aliasAction || data.action
+        }: error: `;
+        const errorPostfix: string = '\n';
+
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
         // the non-ambiguous name is different for each.
         const duplicateShortNameParameters: CommandLineParameter[] | undefined =
@@ -525,9 +542,10 @@ export abstract class CommandLineParameterProvider {
           // short name, ex.
           // Error: The short parameter name "-p" is ambiguous. It could refer to any of the following
           // parameters: "--param1", "--param2"
-          throw new Error(
-            `The short parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
-              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
+          throw new CommandLineParserExitError(
+            1,
+            `${errorPrefix}The short parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
+              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"${errorPostfix}`
           );
         }
 
@@ -551,14 +569,17 @@ export abstract class CommandLineParameterProvider {
           // ambiguous long name, ex.
           // Error: The parameter name "--param" is ambiguous. It could refer to any of the following
           // parameters: "--scope1:param", "--scope2:param"
-          throw new Error(
-            `The parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
-              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
+          throw new CommandLineParserExitError(
+            1,
+            `${errorPrefix}The parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
+              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"${errorPostfix}`
           );
         }
 
-        // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
-        throw new Error(`The parameter name "${parameterName}" is ambiguous.`);
+        throw new CommandLineParserExitError(
+          1,
+          `${errorPrefix}The parameter name "${parameterName}" is ambiguous.${errorPostfix}`
+        );
       }
     }
 
@@ -607,6 +628,22 @@ export abstract class CommandLineParameterProvider {
       }
       shortNameParameters.push(parameter);
     }
+  }
+
+  /** @internal */
+  protected _defineAmbiguousParameter(name: string): string {
+    if (this._parametersRegistered) {
+      throw new Error('Parameters have already been registered for this provider');
+    }
+
+    // Generate and set the parser key at definition time. Only generate a new parser key
+    // if the ambiguous paramter hasn't been defined yet.
+    let existingParserKey: string | undefined = this._ambiguousParameterParserKeys.get(name);
+    if (!existingParserKey) {
+      existingParserKey = this._generateKey();
+      this._ambiguousParameterParserKeys.set(name, existingParserKey);
+    }
+    return existingParserKey;
   }
 
   /** @internal */
@@ -707,12 +744,14 @@ export abstract class CommandLineParameterProvider {
         help: argparse.Const.SUPPRESS
       });
     }
+
+    // Register the parameter names so that we can detect ambiguous parameters
+    for (const name of [...names, ...(parameter.undocumentedSynonyms || [])]) {
+      this._registeredParameterNames.add(name);
+    }
   }
 
-  private _registerAmbiguousParameter(name: string): void {
-    const parserKey: string = this._generateKey();
-    this._ambiguousParameterNamesByParserKey.set(parserKey, name);
-
+  protected _registerAmbiguousParameter(name: string, parserKey: string): void {
     this._getArgumentParser().addArgument(name, {
       dest: parserKey,
       // We don't know if this argument takes parameters or not, so we need to accept any number of args
