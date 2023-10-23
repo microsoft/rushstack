@@ -14,7 +14,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // @internal (undocumented)
-    _registerDefinedParameters(existingParameterNames: Set<string>): void;
+    _registerDefinedParameters(existingParameterNames?: Set<string>): void;
     readonly targetAction: CommandLineAction;
 }
 
