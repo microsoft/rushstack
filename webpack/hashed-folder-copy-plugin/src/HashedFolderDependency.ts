@@ -198,10 +198,12 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
               // The `resolver.resolve` type is too complex for LegacyAdapters.convertCallbackToPromise
               packagePath = await new Promise((resolve, reject) => {
                 resolver!.resolve({}, context, `${packageName}/package.json`, {}, (err, result) => {
-                  if (result) {
+                  if (err) {
+                    reject(err);
+                  } else if (result) {
                     resolve(path.dirname(result));
                   } else {
-                    reject(err);
+                    reject(new Error(`Unable to resolve package "${packageName}"`));
                   }
                 });
               });
