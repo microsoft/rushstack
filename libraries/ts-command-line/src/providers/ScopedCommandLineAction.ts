@@ -200,7 +200,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
     super._registerDefinedParameters(existingParameterNames);
 
-    for (const registeredParameterName of this._registeredParameterNames) {
+    for (const registeredParameterName of this._registeredParameterParserKeysByName.keys()) {
       this._existingParameterNames.add(registeredParameterName);
     }
 

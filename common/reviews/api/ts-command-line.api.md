@@ -121,8 +121,6 @@ export abstract class CommandLineParameter {
     constructor(definition: IBaseCommandLineDefinition);
     abstract appendToArgList(argList: string[]): void;
     readonly description: string;
-    // @internal
-    _disableShortName(): void;
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -159,7 +157,7 @@ export abstract class CommandLineParameterProvider {
     // @internal
     constructor();
     // @internal (undocumented)
-    readonly _ambiguousParameterParserKeys: Map<string, string>;
+    readonly _ambiguousParameterParserKeysByName: Map<string, string>;
     // @internal (undocumented)
     protected _defineAmbiguousParameter(name: string): string;
     defineChoiceListParameter(definition: ICommandLineChoiceListDefinition): CommandLineChoiceListParameter;
@@ -195,9 +193,9 @@ export abstract class CommandLineParameterProvider {
     // @internal (undocumented)
     _registerDefinedParameters(existingParameterNames?: Set<string>): void;
     // @internal (undocumented)
-    protected readonly _registeredParameterNames: Set<string>;
+    protected readonly _registeredParameterParserKeysByName: Map<string, string>;
     // @internal (undocumented)
-    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void;
+    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean, ignoreShortName: boolean): void;
     get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
     renderUsageText(): string;

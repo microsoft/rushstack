@@ -265,7 +265,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   public _registerDefinedParameters(): void {
     super._registerDefinedParameters();
     for (const action of this._actions) {
-      action._registerDefinedParameters(this._registeredParameterNames);
+      action._registerDefinedParameters(new Set(this._registeredParameterParserKeysByName.keys()));
     }
   }
 

@@ -296,16 +296,16 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
-  it('fails when an action declares a flag that was declared in the tool', async () => {
+  it('fails when providing a flag to an action that was also declared in the tool', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AbbreviationAction);
     commandLineParser.defineFlagParameter({
       parameterLongName: '--abbreviation-flag',
       description: 'A flag used to test abbreviation logic'
     });
 
-    expect(commandLineParser._registerDefinedParameters.bind(commandLineParser)).toThrowError(
-      /Conflicting option string\(s\): --abbreviation-flag/
-    );
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation-flag'])
+    ).rejects.toThrowError(/The parameter name "--abbreviation-flag" is ambiguous/);
   });
 
   it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the action', async () => {
@@ -404,7 +404,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
-  it('fails when an action declares a flag that was declared in the tool', async () => {
+  it('fails when providing a flag to an action that was also declared in the tool', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AbbreviationAction);
     commandLineParser.addAction(
       (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
@@ -414,9 +414,9 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
       description: 'A flag used to test abbreviation logic'
     });
 
-    expect(commandLineParser._registerDefinedParameters.bind(commandLineParser)).toThrowError(
-      /Conflicting option string\(s\): --abbreviation-flag/
-    );
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation-flag'])
+    ).rejects.toThrowError(/The parameter name "--abbreviation-flag" is ambiguous/);
   });
 
   it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the action', async () => {
