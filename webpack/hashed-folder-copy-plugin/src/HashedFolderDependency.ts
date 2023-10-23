@@ -140,7 +140,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
       compilation: webpack.Compilation,
       globFs: glob.FileSystemAdapter
     ): Promise<string> {
-      // Map of asset names (to be prepended by the outputFolder) to asset contents
+      // Map of context-relative asset names to asset contents
       const assetsToAdd: Map<string, string | Buffer> = new Map();
 
       const parentModule: webpack.NormalModule = compilation.moduleGraph.getParentModule(
@@ -221,7 +221,10 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
           }
         }
 
-        // TODO: Add resolvedGlobsBase to `parentModule.buildInfo.contextDependencies`
+        const boundReadFile: typeof compilation.inputFileSystem.readFile =
+          compilation.inputFileSystem.readFile.bind(compilation.inputFileSystem);
+
+        // TODO: Add all folders that get read to `parentModule.buildInfo.contextDependencies`
         // At this point in the compilation, that property has been set to undefined, so we need to do this earlier
         const globResults: string[] = await glob(globPatterns, {
           cwd: resolvedGlobsBase,
@@ -240,7 +243,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
           let assetContents: string | Buffer | undefined;
           try {
             assetContents = (await LegacyAdapters.convertCallbackToPromise(
-              compilation.inputFileSystem.readFile.bind(compilation.inputFileSystem),
+              boundReadFile,
               globResultFullPath
             )) as string | Buffer;
           } catch (e) {
@@ -284,7 +287,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
         parentModule.buildInfo.assets = {};
       }
       const existingAssetNames: Set<string> = new Set<string>(Object.keys(compilation.assets));
-      for (const [assetPath, asset] of assetsToAdd.entries()) {
+      for (const [assetPath, asset] of assetsToAdd) {
         const fullAssetPath: string = path.posix.join(pathPrefix, assetPath);
         if (existingAssetNames.has(fullAssetPath)) {
           const errorMessage: string = `An asset with path "${fullAssetPath}" already exists`;
