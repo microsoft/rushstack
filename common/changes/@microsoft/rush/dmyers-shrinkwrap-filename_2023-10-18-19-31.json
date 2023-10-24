@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Use configured shrinkwrapFilename when printing out the Shrinkwrap phrase",
+      "comment": "Include the filename of the shrinkwrap file in logging messages for all package managers, not just Yarn.",
       "type": "none"
     }
   ],
