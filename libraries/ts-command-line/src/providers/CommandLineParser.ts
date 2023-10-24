@@ -243,7 +243,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this.selectedAction?._processParsedData(this._options, data);
-      return this.onExecute();
+      await this.onExecute();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
@@ -262,10 +262,15 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
-    super._registerDefinedParameters();
+  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
+    super._registerDefinedParameters(existingParameterNames);
+
+    const registeredParameterNames: Set<string> = new Set([
+      ...(existingParameterNames || []),
+      ...this._registeredParameterParserKeysByName.keys()
+    ]);
     for (const action of this._actions) {
-      action._registerDefinedParameters(new Set(this._registeredParameterParserKeysByName.keys()));
+      action._registerDefinedParameters(registeredParameterNames);
     }
   }
 

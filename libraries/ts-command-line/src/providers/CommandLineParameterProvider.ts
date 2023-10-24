@@ -510,9 +510,10 @@ export abstract class CommandLineParameterProvider {
     for (const [parameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
       if (data[parserKey]) {
         // Write out the usage text to make it easier for the user to find the correct parameter name
-        const errorPrefix: string = `${this.renderUsageText()}\n${parserOptions.toolFilename} ${
-          data.aliasAction || data.action
-        }: error: `;
+        const errorPrefix: string =
+          `${this.renderUsageText()}\n${parserOptions.toolFilename}` +
+          // Handle aliases, actions, and actionless parameter providers
+          `${data.aliasAction || data.action ? ' ' : ''}${data.aliasAction || data.action || ''}: error: `;
         const errorPostfix: string = '\n';
 
         // When the parser key matches the actually registered parameter, we know that this is an ambiguous
@@ -657,8 +658,9 @@ export abstract class CommandLineParameterProvider {
 
     // Only generate a new parser key if the ambiguous parameter hasn't been defined yet,
     // either as an existing parameter or as another ambiguous parameter
-    let existingParserKey: string | undefined = this._registeredParameterParserKeysByName.get(name);
-    this._ambiguousParameterParserKeysByName.get(name);
+    let existingParserKey: string | undefined =
+      this._registeredParameterParserKeysByName.get(name) ||
+      this._ambiguousParameterParserKeysByName.get(name);
     if (!existingParserKey) {
       existingParserKey = this._generateKey();
     }

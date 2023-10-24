@@ -221,7 +221,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     // @internal (undocumented)
-    _registerDefinedParameters(): void;
+    _registerDefinedParameters(existingParameterNames?: Set<string>): void;
     selectedAction: CommandLineAction | undefined;
     tryGetAction(actionName: string): CommandLineAction | undefined;
 }

@@ -60,14 +60,7 @@ class InternalScopedCommandLineParser extends CommandLineParser {
   }
 
   public _registerDefinedParameters(): void {
-    if (!this._parametersRegistered) {
-      // Manually register our ambiguous parameters from the parent tool and action
-      for (const existingParameterName of this._internalOptions.existingParameterNames || []) {
-        this._defineAmbiguousParameter(existingParameterName);
-      }
-    }
-
-    super._registerDefinedParameters();
+    super._registerDefinedParameters(this._internalOptions.existingParameterNames);
   }
 
   protected async onExecute(): Promise<void> {
