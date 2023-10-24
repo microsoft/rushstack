@@ -509,20 +509,10 @@ export abstract class CommandLineParameterProvider {
     // Search for any ambiguous parameters and throw an error if any are found
     for (const [parameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
       if (data[parserKey]) {
-        // Write out the usage text to make it easier for the user to find the correct parameter name
-        const errorPrefix: string =
-          `${this.renderUsageText()}\n${parserOptions.toolFilename}` +
-          // Handle aliases, actions, and actionless parameter providers
-          `${data.aliasAction || data.action ? ' ' : ''}${data.aliasAction || data.action || ''}: error: `;
-        const errorPostfix: string = '\n';
-
         // When the parser key matches the actually registered parameter, we know that this is an ambiguous
         // parameter sourced from the parent action or tool
         if (this._registeredParameterParserKeysByName.get(parameterName) === parserKey) {
-          throw new CommandLineParserExitError(
-            1,
-            `${errorPrefix}The parameter name "${parameterName}" is ambiguous.${errorPostfix}`
-          );
+          this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
         }
 
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
@@ -559,12 +549,12 @@ export abstract class CommandLineParameterProvider {
 
           // Throw an error including the non-ambiguous long names for the parameters that have the ambiguous
           // short name, ex.
-          // Error: The short parameter name "-p" is ambiguous. It could refer to any of the following
-          // parameters: "--param1", "--param2"
-          throw new CommandLineParserExitError(
+          // Error: Ambiguous option "-p" could match "--param1", "--param2"
+          this._throwParserExitError(
+            parserOptions,
+            data,
             1,
-            `${errorPrefix}The short parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
-              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"${errorPostfix}`
+            `Ambiguous option: "${parameterName}" could match ${nonAmbiguousLongNames.join(', ')}.`
           );
         }
 
@@ -586,20 +576,17 @@ export abstract class CommandLineParameterProvider {
 
           // Throw an error including the non-ambiguous scoped long names for the parameters that have the
           // ambiguous long name, ex.
-          // Error: The parameter name "--param" is ambiguous. It could refer to any of the following
-          // parameters: "--scope1:param", "--scope2:param"
-          throw new CommandLineParserExitError(
+          // Error: Ambiguous option: "--param" could match --scope1:param, --scope2:param
+          this._throwParserExitError(
+            parserOptions,
+            data,
             1,
-            `${errorPrefix}The parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
-              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"${errorPostfix}`
+            `Ambiguous option: "${parameterName}" could match ${nonAmbiguousLongNames.join(', ')}.`
           );
         }
 
         // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
-        throw new CommandLineParserExitError(
-          1,
-          `${errorPrefix}The parameter name "${parameterName}" is ambiguous.${errorPostfix}`
-        );
+        this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
       }
     }
 
@@ -831,5 +818,23 @@ export abstract class CommandLineParameterProvider {
     }
 
     return parameter as T;
+  }
+
+  private _throwParserExitError(
+    parserOptions: ICommandLineParserOptions,
+    data: ICommandLineParserData,
+    errorCode: number,
+    message: string
+  ): never {
+    // Write out the usage text to make it easier for the user to find the correct parameter name
+    const targetActionName: string = data.aliasAction || data.action || '';
+    const errorPrefix: string =
+      `Error: ${parserOptions.toolFilename}` +
+      // Handle aliases, actions, and actionless parameter providers
+      `${targetActionName ? ' ' : ''}${targetActionName}: error: `;
+
+    // eslint-disable-next-line no-console
+    console.log(this.renderUsageText());
+    throw new CommandLineParserExitError(errorCode, `${errorPrefix}${message.trimStart().trimEnd()}\n`);
   }
 }
