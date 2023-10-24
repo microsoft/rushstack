@@ -29,16 +29,16 @@ extends:
               - checkout: self
                 persistCredentials: true
 
-              - template: templates/install-node.yaml
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
-              - template: templates/build.yaml
+              - template: /common/config/azure-pipelines/templates/build.yaml@self
 
-              - template: templates/bump-versions.yaml
+              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
                 parameters:
                   VersionPolicyName: noRush
                   BranchName: $(SourceBranch)
 
-              - template: templates/bump-versions.yaml
+              - template: /common/config/azure-pipelines/templates/bump-versions.yaml@self
                 parameters:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
@@ -46,14 +46,14 @@ extends:
               - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
                 displayName: 'Prepublish workaround for rush-lib'
 
-              - template: templates/publish.yaml
+              - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
                   VersionPolicyName: noRush
                   BranchName: $(SourceBranch)
 
-              - template: templates/publish.yaml
+              - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
                   VersionPolicyName: rush
                   BranchName: $(SourceBranch)
 
-              - template: templates/record-published-versions.yaml
+              - template: /common/config/azure-pipelines/templates/record-published-versions.yaml@self

@@ -22,9 +22,9 @@ extends:
               - checkout: self
                 persistCredentials: true
 
-              - template: templates/install-node.yaml
+              - template: /common/config/azure-pipelines/templates/install-node.yaml@self
 
-              - template: templates/build.yaml
+              - template: /common/config/azure-pipelines/templates/build.yaml@self
                 parameters:
                   BuildParameters: >
                     --to rushstack
