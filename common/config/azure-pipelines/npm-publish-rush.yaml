@@ -1,41 +1,59 @@
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
   - name: FORCE_COLOR
     value: 1
   - name: SourceBranch
     value: $[ replace(replace(resources.repositories.self.ref, 'refs/heads/', ''), 'refs/pull/', 'refs/remotes/pull/') ]
 
-steps:
-  - checkout: self
-    persistCredentials: true
+resources:
+  repositories:
+    - repository: 1esPipelines
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
 
-  - template: templates/install-node.yaml
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    pool:
+      os: linux
+    stages:
+      - stage:
+        jobs:
+          - job:
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  targetPath: $(Build.ArtifactStagingDirectory)/published-versions
+                  artifactName: published-versions
+            steps:
+              - checkout: self
+                persistCredentials: true
 
-  - template: templates/build.yaml
+              - template: templates/install-node.yaml
 
-  - template: templates/bump-versions.yaml
-    parameters:
-      VersionPolicyName: noRush
-      BranchName: $(SourceBranch)
+              - template: templates/build.yaml
 
-  - template: templates/bump-versions.yaml
-    parameters:
-      VersionPolicyName: rush
-      BranchName: $(SourceBranch)
+              - template: templates/bump-versions.yaml
+                parameters:
+                  VersionPolicyName: noRush
+                  BranchName: $(SourceBranch)
 
-  - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
-    displayName: 'Prepublish workaround for rush-lib'
+              - template: templates/bump-versions.yaml
+                parameters:
+                  VersionPolicyName: rush
+                  BranchName: $(SourceBranch)
 
-  - template: templates/publish.yaml
-    parameters:
-      VersionPolicyName: noRush
-      BranchName: $(SourceBranch)
+              - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
+                displayName: 'Prepublish workaround for rush-lib'
 
-  - template: templates/publish.yaml
-    parameters:
-      VersionPolicyName: rush
-      BranchName: $(SourceBranch)
+              - template: templates/publish.yaml
+                parameters:
+                  VersionPolicyName: noRush
+                  BranchName: $(SourceBranch)
 
-  - template: templates/record-published-versions.yaml
+              - template: templates/publish.yaml
+                parameters:
+                  VersionPolicyName: rush
+                  BranchName: $(SourceBranch)
+
+              - template: templates/record-published-versions.yaml
