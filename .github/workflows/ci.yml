@@ -15,7 +15,7 @@ jobs:
             OS: ubuntu-latest
           - NodeVersion: 18
             OS: ubuntu-latest
-          - NodeVersion: 20
+          - NodeVersion: 20.9
             OS: ubuntu-latest
           - NodeVersion: 18
             OS: windows-latest
