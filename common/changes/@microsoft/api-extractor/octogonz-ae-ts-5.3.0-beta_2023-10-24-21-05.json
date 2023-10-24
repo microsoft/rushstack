@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Update API Extractor to support TypeScript 5.3.0-beta",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
