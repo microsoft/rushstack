@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HashedFolderCopyPlugin Handles globbing a local folder: Content 1`] = `
+Object {
+  "/release/assets_1a20fc5e5390d91fee246bf5dbf1300e/a.txt": "local-folder-AAA",
+  "/release/assets_1a20fc5e5390d91fee246bf5dbf1300e/b.txt": "local-folder-BBB",
+  "/release/assets_1a20fc5e5390d91fee246bf5dbf1300e/subfolder/c.txt": "local-folder-CCC",
+  "/release/main.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+/******/ 	// The require scope
+/******/ 	var __webpack_require__ = {};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + \\"\\";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript)
+/******/ 				scriptUrl = document.currentScript.src;
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName(\\"script\\");
+/******/ 				if(scripts.length) {
+/******/ 					var i = scripts.length - 1;
+/******/ 					while (i > -1 && !scriptUrl) scriptUrl = scripts[i--].src;
+/******/ 				}
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string (\\"\\") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error(\\"Automatic publicPath is not supported in this browser\\");
+/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, \\"\\").replace(/\\\\?.*$/, \\"\\").replace(/\\\\/[^\\\\/]+$/, \\"/\\");
+/******/ 		__webpack_require__.p = scriptUrl;
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+// eslint-disable-next-line no-console
+const path = __webpack_require__.p + \\"assets_1a20fc5e5390d91fee246bf5dbf1300e/\\";
+// eslint-disable-next-line no-console
+console.log(path);
+// eslint-disable-next-line no-console
+console.log(\\"function\\");
+//# sourceMappingURL=entry.js.map
+/******/ })()
+;",
+}
+`;
+
+exports[`HashedFolderCopyPlugin Handles globbing a local folder: Errors 1`] = `Array []`;
+
+exports[`HashedFolderCopyPlugin Handles globbing a local folder: Warnings 1`] = `Array []`;
+
+exports[`HashedFolderCopyPlugin Handles globbing a package reference: Content 1`] = `
+Object {
+  "/release/assets_084b4ae6ce51eb9a614a9d1981afc6b7/a.txt": "unscoped-package-AAA",
+  "/release/assets_084b4ae6ce51eb9a614a9d1981afc6b7/b.txt": "unscoped-package-BBB",
+  "/release/assets_084b4ae6ce51eb9a614a9d1981afc6b7/subfolder/c.txt": "unscoped-package-CCC",
+  "/release/assets_f2eede62be13dd0052e19c66d82f6cdb/a.txt": "scoped-package-AAA",
+  "/release/assets_f2eede62be13dd0052e19c66d82f6cdb/b.txt": "scoped-package-BBB",
+  "/release/assets_f2eede62be13dd0052e19c66d82f6cdb/subfolder/c.txt": "scoped-package-CCC",
+  "/release/main.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+/******/ 	// The require scope
+/******/ 	var __webpack_require__ = {};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + \\"\\";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript)
+/******/ 				scriptUrl = document.currentScript.src;
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName(\\"script\\");
+/******/ 				if(scripts.length) {
+/******/ 					var i = scripts.length - 1;
+/******/ 					while (i > -1 && !scriptUrl) scriptUrl = scripts[i--].src;
+/******/ 				}
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string (\\"\\") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error(\\"Automatic publicPath is not supported in this browser\\");
+/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, \\"\\").replace(/\\\\?.*$/, \\"\\").replace(/\\\\/[^\\\\/]+$/, \\"/\\");
+/******/ 		__webpack_require__.p = scriptUrl;
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+const scopedPackagePath = __webpack_require__.p + \\"assets_f2eede62be13dd0052e19c66d82f6cdb/\\";
+const unscopedPackagePath = __webpack_require__.p + \\"assets_084b4ae6ce51eb9a614a9d1981afc6b7/\\";
+// eslint-disable-next-line no-console
+console.log(scopedPackagePath);
+// eslint-disable-next-line no-console
+console.log(unscopedPackagePath);
+//# sourceMappingURL=entry.js.map
+/******/ })()
+;",
+}
+`;
+
+exports[`HashedFolderCopyPlugin Handles globbing a package reference: Errors 1`] = `Array []`;
+
+exports[`HashedFolderCopyPlugin Handles globbing a package reference: Warnings 1`] = `Array []`;
+
+exports[`HashedFolderCopyPlugin Handles the null case: Content 1`] = `
+Object {
+  "/release/main.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+var __webpack_exports__ = {};
+
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+// eslint-disable-next-line no-console
+console.log('test');
+//# sourceMappingURL=entry.js.map
+/******/ })()
+;",
+}
+`;
+
+exports[`HashedFolderCopyPlugin Handles the null case: Errors 1`] = `Array []`;
+
+exports[`HashedFolderCopyPlugin Handles the null case: Warnings 1`] = `Array []`;

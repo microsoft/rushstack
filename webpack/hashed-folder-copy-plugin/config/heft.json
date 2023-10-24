@@ -23,6 +23,21 @@
               ]
             }
           }
+        },
+        "copy-test-assets": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "./src/test/scenarios/",
+                  "includeGlobs": ["**/*"],
+                  "destinationFolders": ["lib/test/scenarios"]
+                }
+              ]
+            }
+          }
         }
       }
     }
