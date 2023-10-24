@@ -1,6 +1,13 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Sun, 01 Oct 2023 02:56:30 GMT and should not be manually modified.
+This log was last generated on Tue, 24 Oct 2023 04:04:22 GMT and should not be manually modified.
+
+## 1.0.0
+Tue, 24 Oct 2023 04:04:22 GMT
+
+### Breaking changes
+
+- Add support for Webpack 5 and drop support for Webpack 4.
 
 ## 0.3.9
 Sun, 01 Oct 2023 02:56:30 GMT
