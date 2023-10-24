@@ -85,7 +85,7 @@ describe(RedisCobuildLockProvider.name, () => {
 
   it('expands options with environment variables', () => {
     const expectedOptions = {
-      password: 'redis123'
+      password: 'redis123' // [SuppressMessage("Microsoft.Security", "CS001:SecretInline", Justification="Password used in unit test.")]
     };
     const actualOptions = RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables(
       {

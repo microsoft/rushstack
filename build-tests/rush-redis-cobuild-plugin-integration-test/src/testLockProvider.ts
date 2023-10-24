@@ -10,7 +10,7 @@ import { OperationStatus, type ICobuildContext, RushSession } from '@microsoft/r
 
 const options: IRedisCobuildLockProviderOptions = {
   url: 'redis://localhost:6379',
-  password: 'redis123'
+  password: 'redis123' // [SuppressMessage("Microsoft.Security", "CS001:SecretInline", Justification="Password used in unit test.")]
 };
 
 const rushSession: RushSession = new RushSession({
