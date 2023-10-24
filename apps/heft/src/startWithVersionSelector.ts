@@ -8,6 +8,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
+import { getToolParametersFromArgs } from './utilities/CliUtilities';
 import { Constants } from './utilities/Constants';
 
 const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
@@ -49,27 +50,15 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  * Use "heft --unmanaged" to bypass this feature.
  */
 function tryStartLocalHeft(): boolean {
-  const toolArgs: Set<string> = new Set();
-  // Skip the first two arguments, which are the path to the Node executable and the path to the Heft
-  // entrypoint. The remaining arguments are the tool arguments. Grab them until we reach a non-"--"-prefixed
-  // argument. We can do this simple parsing because the Heft tool only has simple optional flags.
-  for (let i: number = 2; i < process.argv.length; ++i) {
-    const arg: string = process.argv[i];
-    if (!arg.startsWith('--')) {
-      break;
-    }
-
-    toolArgs.add(arg);
-  }
-
-  if (toolArgs.has(Constants.unmanagedParameterLongName)) {
+  const toolParameters: Set<string> = getToolParametersFromArgs();
+  if (toolParameters.has(Constants.unmanagedParameterLongName)) {
     console.log(
       `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
         'was specified.'
     );
     console.log();
     return false;
-  } else if (toolArgs.has(Constants.debugParameterLongName)) {
+  } else if (toolParameters.has(Constants.debugParameterLongName)) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
       'Searching for a locally installed version of Heft. Use the ' +
