@@ -14,11 +14,7 @@ extends:
   parameters:
     pool:
       name: Azure-Pipelines-1ESPT-ExDShared
-      os: linux
-    sdl:
-      sourceAnalysisPool:
-        name: Azure-Pipelines-1ESPT-ExDShared
-        os: windows
+      os: windows
     stages:
       - stage:
         jobs:
