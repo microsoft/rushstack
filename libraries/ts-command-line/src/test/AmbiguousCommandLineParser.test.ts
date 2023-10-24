@@ -305,7 +305,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation-flag'])
-    ).rejects.toThrowError(/The parameter name "--abbreviation-flag" is ambiguous/);
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation-flag"/);
   });
 
   it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the action', async () => {
@@ -317,7 +317,7 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation'])
-    ).rejects.toThrowError(/The parameter name "--abbreviation" is ambiguous/);
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
   it('fails when providing an ambiguous abbreviation between flags on the tool and the action', async () => {
@@ -416,7 +416,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation-flag'])
-    ).rejects.toThrowError(/The parameter name "--abbreviation-flag" is ambiguous/);
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation-flag"/);
   });
 
   it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the action', async () => {
@@ -431,7 +431,7 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation'])
-    ).rejects.toThrowError(/The parameter name "--abbreviation" is ambiguous/);
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
   it('fails when providing an ambiguous abbreviation between flags on the tool and the action', async () => {
@@ -543,7 +543,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbreviation'])
-    ).rejects.toThrowError(/The parameter name "--abbreviation" is ambiguous/);
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
   it('fails when providing an exact match to an ambiguous abbreviation between flags on the scoped action and the unscoped action', async () => {
@@ -558,7 +558,7 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
 
     await expect(
       commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbreviation'])
-    ).rejects.toThrowError(/The parameter name "--abbreviation" is ambiguous/);
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
   });
 
   it('fails when providing an ambiguous abbreviation between flags on the tool and the scoped action', async () => {

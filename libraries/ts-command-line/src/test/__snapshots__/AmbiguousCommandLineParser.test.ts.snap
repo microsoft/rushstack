@@ -30,22 +30,12 @@ Object {
 `;
 
 exports[`Ambiguous CommandLineParser fails to execute when an ambiguous long name is provided 1`] = `
-"usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
-                          [--scope1:arg ARG] [--scope2:arg ARG]
-                          [--non-conflicting-arg ARG]
-                          
-
-example do:the-job: error: The parameter name \\"--arg\\" is ambiguous. It could refer to any of the following parameters: \\"--scope1:arg\\", \\"--scope2:arg\\"
+"Error: example do:the-job: error: Ambiguous option: \\"--arg\\" could match --scope1:arg, --scope2:arg.
 "
 `;
 
 exports[`Ambiguous CommandLineParser fails to execute when an ambiguous short name is provided 1`] = `
-"usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
-                          [--scope1:arg ARG] [--scope2:arg ARG]
-                          [--non-conflicting-arg ARG]
-                          
-
-example do:the-job: error: The short parameter name \\"-s\\" is ambiguous. It could refer to any of the following parameters: \\"--short1\\", \\"--short2\\"
+"Error: example do:the-job: error: Ambiguous option: \\"-s\\" could match --short1, --short2.
 "
 `;
 
@@ -79,54 +69,26 @@ Object {
 `;
 
 exports[`Ambiguous aliased CommandLineParser fails to execute when an ambiguous long name is provided 1`] = `
-"usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
-                          [--scope1:arg ARG] [--scope2:arg ARG]
-                          [--non-conflicting-arg ARG]
-                          
-
-example do:the-job-alias: error: The parameter name \\"--arg\\" is ambiguous. It could refer to any of the following parameters: \\"--scope1:arg\\", \\"--scope2:arg\\"
+"Error: example do:the-job-alias: error: Ambiguous option: \\"--arg\\" could match --scope1:arg, --scope2:arg.
 "
 `;
 
 exports[`Ambiguous aliased CommandLineParser fails to execute when an ambiguous short name is provided 1`] = `
-"usage: example do:the-job [-h] [--short1 ARG] [--short2 ARG]
-                          [--scope1:arg ARG] [--scope2:arg ARG]
-                          [--non-conflicting-arg ARG]
-                          
-
-example do:the-job-alias: error: The short parameter name \\"-s\\" is ambiguous. It could refer to any of the following parameters: \\"--short1\\", \\"--short2\\"
+"Error: example do:the-job-alias: error: Ambiguous option: \\"-s\\" could match --short1, --short2.
 "
 `;
 
 exports[`Ambiguous scoping CommandLineParser fails to execute when an ambiguous long name is provided to a scoping action 1`] = `
-"usage: example scoped-action --scoping -- [-h] [--short1 ARG] [--short2 ARG]
-                                          [--scope1:arg ARG]
-                                          [--scope2:arg ARG]
-                                          [--non-conflicting-arg ARG]
-                                          
-
-example scoped-action --scoping -- undefined: error: The parameter name \\"--arg\\" is ambiguous. It could refer to any of the following parameters: \\"--scope1:arg\\", \\"--scope2:arg\\"
+"Error: example scoped-action --scoping --: error: Ambiguous option: \\"--arg\\" could match --scope1:arg, --scope2:arg.
 "
 `;
 
 exports[`Ambiguous scoping CommandLineParser fails to execute when an ambiguous short name is provided to a scoping action 1`] = `
-"usage: example scoped-action --scoping -- [-h] [--short1 ARG] [--short2 ARG]
-                                          [--scope1:arg ARG]
-                                          [--scope2:arg ARG]
-                                          [--non-conflicting-arg ARG]
-                                          
-
-example scoped-action --scoping -- undefined: error: The short parameter name \\"-s\\" is ambiguous. It could refer to any of the following parameters: \\"--short1\\", \\"--short2\\"
+"Error: example scoped-action --scoping --: error: Ambiguous option: \\"-s\\" could match --short1, --short2.
 "
 `;
 
 exports[`Ambiguous scoping CommandLineParser fails to execute when an ambiguous short name is provided to a scoping action with a matching ambiguous long name 1`] = `
-"usage: example scoped-action --scoping -- [-h] [--short1 ARG] [--short2 ARG]
-                                          [--scope1:arg ARG]
-                                          [--scope2:arg ARG]
-                                          [--non-conflicting-arg ARG]
-                                          
-
-example scoped-action --scoping -- undefined: error: The short parameter name \\"-a\\" is ambiguous. It could refer to any of the following parameters: \\"--scope1:arg\\", \\"--scope2:arg\\", \\"--non-conflicting-arg\\"
+"Error: example scoped-action --scoping --: error: Ambiguous option: \\"-a\\" could match --scope1:arg, --scope2:arg, --non-conflicting-arg.
 "
 `;
