@@ -4,11 +4,10 @@
 
 ```ts
 
-import type * as webpack from 'webpack';
+import type webpack from 'webpack';
 
 // @public (undocumented)
-export class HashedFolderCopyPlugin implements webpack.Plugin {
-    constructor();
+export class HashedFolderCopyPlugin implements webpack.WebpackPluginInstance {
     // (undocumented)
     apply(compiler: webpack.Compiler): void;
 }

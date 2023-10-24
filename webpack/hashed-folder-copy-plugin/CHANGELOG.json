@@ -2,6 +2,18 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.0",
+      "date": "Tue, 24 Oct 2023 04:04:22 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Add support for Webpack 5 and drop support for Webpack 4."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.9",
       "tag": "@rushstack/hashed-folder-copy-plugin_v0.3.9",
       "date": "Sun, 01 Oct 2023 02:56:30 GMT",

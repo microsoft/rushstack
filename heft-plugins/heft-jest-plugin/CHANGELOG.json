@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.0",
+      "date": "Mon, 23 Oct 2023 15:18:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use Jest verbose logging when `heft --debug test` or `heft test --verbose` is specified"
+          },
+          {
+            "comment": "Fix an issue where `silent: true` was ignored when specified in `jest.config.json`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.9",
       "tag": "@rushstack/heft-jest-plugin_v0.9.9",
       "date": "Sun, 01 Oct 2023 02:56:30 GMT",

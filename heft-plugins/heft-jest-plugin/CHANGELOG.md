@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Sun, 01 Oct 2023 02:56:30 GMT and should not be manually modified.
+This log was last generated on Mon, 23 Oct 2023 15:18:38 GMT and should not be manually modified.
+
+## 0.10.0
+Mon, 23 Oct 2023 15:18:38 GMT
+
+### Minor changes
+
+- Use Jest verbose logging when `heft --debug test` or `heft test --verbose` is specified
+- Fix an issue where `silent: true` was ignored when specified in `jest.config.json`
 
 ## 0.9.9
 Sun, 01 Oct 2023 02:56:30 GMT
