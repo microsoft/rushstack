@@ -86,8 +86,8 @@ importers:
         specifier: ~0.6.1
         version: 0.6.1
       typescript:
-        specifier: ~5.0.4
-        version: 5.0.4
+        specifier: 5.3.0-beta
+        version: 5.3.0-beta
     devDependencies:
       '@rushstack/heft':
         specifier: 0.62.0
@@ -1707,7 +1707,7 @@ importers:
         version: 29.5.6
       '@types/node':
         specifier: ts4.9
-        version: 20.8.7
+        version: 20.8.8
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -11341,8 +11341,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.8.7:
-    resolution: {integrity: sha512-21TKHHh3eUHIi2MloeptJWALuCu5H7HQTdTrWIFReA8ad+aggoX+lRes3ex7/FtpC+sVUpFMQ+QTfYr74mruiQ==}
+  /@types/node@20.8.8:
+    resolution: {integrity: sha512-YRsdVxq6OaLfmR9Hy816IMp33xOBjfyOgUd77ehqg96CFywxAPbDbXvAsuN2KVg2HOT8Eh6uAfU+l4WffwPVrQ==}
     dependencies:
       undici-types: 5.25.3
     dev: true
@@ -24774,6 +24774,12 @@ packages:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
     engines: {node: '>=12.20'}
     hasBin: true
+
+  /typescript@5.3.0-beta:
+    resolution: {integrity: sha512-SiTeC1C8wAS6v2SD05iyfojeuIkUZIbb8suZz0d4BR+RErwpG+05iolat+VjM9hqXSrjb3xutEBzh4X3NJ7Jgw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: false
 
   /uc.micro@1.0.6:
     resolution: {integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==}
