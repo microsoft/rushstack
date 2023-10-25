@@ -78,8 +78,6 @@ export abstract class CommandLineParameterProvider {
   public readonly _ambiguousParameterParserKeysByName: Map<string, string>;
   /** @internal */
   protected readonly _registeredParameterParserKeysByName: Map<string, string>;
-  /** @internal */
-  protected _parametersRegistered: boolean;
 
   private readonly _parameters: CommandLineParameter[];
   private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
@@ -88,7 +86,8 @@ export abstract class CommandLineParameterProvider {
     string | typeof SCOPING_PARAMETER_GROUP,
     argparse.ArgumentGroup
   >;
-  private _parametersProcessed: boolean;
+  private _parametersHaveBeenRegistered: boolean;
+  private _parametersHaveBeenProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
   /** @internal */
@@ -100,8 +99,8 @@ export abstract class CommandLineParameterProvider {
     this._parameterGroupsByName = new Map();
     this._ambiguousParameterParserKeysByName = new Map();
     this._registeredParameterParserKeysByName = new Map();
-    this._parametersRegistered = false;
-    this._parametersProcessed = false;
+    this._parametersHaveBeenRegistered = false;
+    this._parametersHaveBeenProcessed = false;
   }
 
   /**
@@ -115,7 +114,7 @@ export abstract class CommandLineParameterProvider {
    * Informs the caller if the argparse data has been processed into parameters.
    */
   public get parametersProcessed(): boolean {
-    return this._parametersProcessed;
+    return this._parametersHaveBeenProcessed;
   }
 
   /**
@@ -413,7 +412,7 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
-    if (this._parametersRegistered) {
+    if (this._parametersHaveBeenRegistered) {
       // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
       // so we can already ensure that all parameters were registered.
       return;
@@ -481,7 +480,7 @@ export abstract class CommandLineParameterProvider {
       this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
     }
 
-    this._parametersRegistered = true;
+    this._parametersHaveBeenRegistered = true;
   }
 
   /**
@@ -498,11 +497,11 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    if (!this._parametersRegistered) {
+    if (!this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have not been registered');
     }
 
-    if (this._parametersProcessed) {
+    if (this._parametersHaveBeenProcessed) {
       throw new Error('Command Line Parser Data was already processed');
     }
 
@@ -600,12 +599,12 @@ export abstract class CommandLineParameterProvider {
       this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
 
-    this._parametersProcessed = true;
+    this._parametersHaveBeenProcessed = true;
   }
 
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
-    if (this._parametersRegistered) {
+    if (this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have already been registered for this provider');
     }
 
@@ -639,7 +638,7 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _defineAmbiguousParameter(name: string): string {
-    if (this._parametersRegistered) {
+    if (this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have already been registered for this provider');
     }
 
