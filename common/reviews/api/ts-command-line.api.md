@@ -183,8 +183,6 @@ export abstract class CommandLineParameterProvider {
     protected onDefineParameters?(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
-    // @internal (undocumented)
-    protected _parametersRegistered: boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
     // @internal (undocumented)
     protected _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
