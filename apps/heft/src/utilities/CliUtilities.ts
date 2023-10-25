@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Parse the arguments to the tool being executed and return the tool arguments.
+ * Parse the arguments to the tool being executed and return the tool argument names.
  *
  * @param argv - The arguments to parse. Defaults to `process.argv`.
  */
-export function getToolParametersFromArgs(argv: string[] = process.argv): Set<string> {
+export function getToolParameterNamesFromArgs(argv: string[] = process.argv): Set<string> {
   const toolParameters: Set<string> = new Set();
   // Skip the first two arguments, which are the path to the Node executable and the path to the Heft
   // entrypoint. The remaining arguments are the tool arguments. Grab them until we reach a non-"-"-prefixed

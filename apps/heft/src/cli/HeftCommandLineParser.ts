@@ -24,7 +24,7 @@ import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
 import { AliasAction } from './actions/AliasAction';
-import { getToolParametersFromArgs } from '../utilities/CliUtilities';
+import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
 import { Constants } from '../utilities/Constants';
 
 /**
@@ -233,7 +233,7 @@ export class HeftCommandLineParser extends CommandLineParser {
       throw new InternalError('onDefineParameters() has not yet been called.');
     }
 
-    const toolParameters: Set<string> = getToolParametersFromArgs(args);
+    const toolParameters: Set<string> = getToolParameterNamesFromArgs(args);
     return {
       debug: toolParameters.has(this._debugFlag.longName),
       unmanaged: toolParameters.has(this._unmanagedFlag.longName)

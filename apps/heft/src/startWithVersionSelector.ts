@@ -8,7 +8,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
-import { getToolParametersFromArgs } from './utilities/CliUtilities';
+import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
 import { Constants } from './utilities/Constants';
 
 const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
@@ -50,7 +50,7 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  * Use "heft --unmanaged" to bypass this feature.
  */
 function tryStartLocalHeft(): boolean {
-  const toolParameters: Set<string> = getToolParametersFromArgs();
+  const toolParameters: Set<string> = getToolParameterNamesFromArgs();
   if (toolParameters.has(Constants.unmanagedParameterLongName)) {
     console.log(
       `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
