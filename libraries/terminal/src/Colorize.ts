@@ -49,8 +49,15 @@ export enum SgrParameter {
  * The static functions on this class are used to produce colored text
  * for use with a terminal that supports ANSI escape codes.
  *
+ * Note that this API always generates color codes, regardless of whether
+ * the process's stdout is a TTY. The reason is that, in a complex program, the
+ * code that is generating strings often does not know were those strings will end
+ * up. In some cases, the same log message may get printed both to a shell
+ * that supports color AND to a log file that does not.
+ *
  * @example
  * ```ts
+ * console.log(Colorize.red('Red Text!'))
  * terminal.writeLine(Colorize.green('Green Text!'), ' ', Colorize.blue('Blue Text!'));
  *```
  *
