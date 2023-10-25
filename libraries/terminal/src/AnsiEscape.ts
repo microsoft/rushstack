@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SgrParameter } from './Colorize';
+import { SgrParameterAttribute } from './Colorize';
 
 /**
  * Options for {@link AnsiEscape.formatForTests}.
@@ -84,69 +84,69 @@ export class AnsiEscape {
   // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
   private static _tryGetSgrFriendlyName(sgiParameter: number): string | undefined {
     switch (sgiParameter) {
-      case SgrParameter.BlackForeground:
+      case SgrParameterAttribute.BlackForeground:
         return 'black';
-      case SgrParameter.RedForeground:
+      case SgrParameterAttribute.RedForeground:
         return 'red';
-      case SgrParameter.GreenForeground:
+      case SgrParameterAttribute.GreenForeground:
         return 'green';
-      case SgrParameter.YellowForeground:
+      case SgrParameterAttribute.YellowForeground:
         return 'yellow';
-      case SgrParameter.BlueForeground:
+      case SgrParameterAttribute.BlueForeground:
         return 'blue';
-      case SgrParameter.MagentaForeground:
+      case SgrParameterAttribute.MagentaForeground:
         return 'magenta';
-      case SgrParameter.CyanForeground:
+      case SgrParameterAttribute.CyanForeground:
         return 'cyan';
-      case SgrParameter.WhiteForeground:
+      case SgrParameterAttribute.WhiteForeground:
         return 'white';
-      case SgrParameter.GrayForeground:
+      case SgrParameterAttribute.GrayForeground:
         return 'gray';
-      case SgrParameter.DefaultForeground:
+      case SgrParameterAttribute.DefaultForeground:
         return 'default';
 
-      case SgrParameter.BlackBackground:
+      case SgrParameterAttribute.BlackBackground:
         return 'black-bg';
-      case SgrParameter.RedBackground:
+      case SgrParameterAttribute.RedBackground:
         return 'red-bg';
-      case SgrParameter.GreenBackground:
+      case SgrParameterAttribute.GreenBackground:
         return 'green-bg';
-      case SgrParameter.YellowBackground:
+      case SgrParameterAttribute.YellowBackground:
         return 'yellow-bg';
-      case SgrParameter.BlueBackground:
+      case SgrParameterAttribute.BlueBackground:
         return 'blue-bg';
-      case SgrParameter.MagentaBackground:
+      case SgrParameterAttribute.MagentaBackground:
         return 'magenta-bg';
-      case SgrParameter.CyanBackground:
+      case SgrParameterAttribute.CyanBackground:
         return 'cyan-bg';
-      case SgrParameter.WhiteBackground:
+      case SgrParameterAttribute.WhiteBackground:
         return 'white-bg';
-      case SgrParameter.GrayBackground:
+      case SgrParameterAttribute.GrayBackground:
         return 'gray-bg';
-      case SgrParameter.DefaultBackground:
+      case SgrParameterAttribute.DefaultBackground:
         return 'default-bg';
 
-      case SgrParameter.Bold:
+      case SgrParameterAttribute.Bold:
         return 'bold';
-      case SgrParameter.Dim:
+      case SgrParameterAttribute.Dim:
         return 'dim';
-      case SgrParameter.NormalColorOrIntensity:
+      case SgrParameterAttribute.NormalColorOrIntensity:
         return 'normal';
-      case SgrParameter.Underline:
+      case SgrParameterAttribute.Underline:
         return 'underline';
-      case SgrParameter.UnderlineOff:
+      case SgrParameterAttribute.UnderlineOff:
         return 'underline-off';
-      case SgrParameter.Blink:
+      case SgrParameterAttribute.Blink:
         return 'blink';
-      case SgrParameter.BlinkOff:
+      case SgrParameterAttribute.BlinkOff:
         return 'blink-off';
-      case SgrParameter.InvertColor:
+      case SgrParameterAttribute.InvertColor:
         return 'invert';
-      case SgrParameter.InvertColorOff:
+      case SgrParameterAttribute.InvertColorOff:
         return 'invert-off';
-      case SgrParameter.Hidden:
+      case SgrParameterAttribute.Hidden:
         return 'hidden';
-      case SgrParameter.HiddenOff:
+      case SgrParameterAttribute.HiddenOff:
         return 'hidden-off';
       default:
         return undefined;

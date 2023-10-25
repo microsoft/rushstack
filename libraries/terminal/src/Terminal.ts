@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import { Colorize, SgrParameter } from './Colorize';
+import { Colorize, SgrParameterAttribute } from './Colorize';
 import type { ITerminal, IWriteOptions, WriteParameters } from './ITerminal';
 import { AnsiEscape } from './AnsiEscape';
 
@@ -248,111 +248,111 @@ export class Terminal implements ITerminal {
     const endColorCodes: number[] = [];
     switch (segment.foregroundColor) {
       case ColorValue.Black: {
-        startColorCodes.push(SgrParameter.BlackForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.BlackForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Red: {
-        startColorCodes.push(SgrParameter.RedForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.RedForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Green: {
-        startColorCodes.push(SgrParameter.GreenForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.GreenForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Yellow: {
-        startColorCodes.push(SgrParameter.YellowForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.YellowForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Blue: {
-        startColorCodes.push(SgrParameter.BlueForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.BlueForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Magenta: {
-        startColorCodes.push(SgrParameter.MagentaForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.MagentaForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Cyan: {
-        startColorCodes.push(SgrParameter.CyanForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.CyanForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.White: {
-        startColorCodes.push(SgrParameter.WhiteForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.WhiteForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
 
       case ColorValue.Gray: {
-        startColorCodes.push(SgrParameter.GrayForeground);
-        endColorCodes.push(SgrParameter.DefaultForeground);
+        startColorCodes.push(SgrParameterAttribute.GrayForeground);
+        endColorCodes.push(SgrParameterAttribute.DefaultForeground);
         break;
       }
     }
 
     switch (segment.backgroundColor) {
       case ColorValue.Black: {
-        startColorCodes.push(SgrParameter.BlackBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.BlackBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Red: {
-        startColorCodes.push(SgrParameter.RedBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.RedBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Green: {
-        startColorCodes.push(SgrParameter.GreenBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.GreenBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Yellow: {
-        startColorCodes.push(SgrParameter.YellowBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.YellowBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Blue: {
-        startColorCodes.push(SgrParameter.BlueBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.BlueBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Magenta: {
-        startColorCodes.push(SgrParameter.MagentaBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.MagentaBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Cyan: {
-        startColorCodes.push(SgrParameter.CyanBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.CyanBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.White: {
-        startColorCodes.push(SgrParameter.WhiteBackground);
-        endColorCodes.push(SgrParameter.DefaultBackground);
+        startColorCodes.push(SgrParameterAttribute.WhiteBackground);
+        endColorCodes.push(SgrParameterAttribute.DefaultBackground);
         break;
       }
 
       case ColorValue.Gray: {
-        startColorCodes.push(SgrParameter.GrayBackground);
+        startColorCodes.push(SgrParameterAttribute.GrayBackground);
         endColorCodes.push(49);
         break;
       }
@@ -362,38 +362,38 @@ export class Terminal implements ITerminal {
       for (const textAttribute of segment.textAttributes) {
         switch (textAttribute) {
           case TextAttribute.Bold: {
-            startColorCodes.push(SgrParameter.Bold);
-            endColorCodes.push(SgrParameter.NormalColorOrIntensity);
+            startColorCodes.push(SgrParameterAttribute.Bold);
+            endColorCodes.push(SgrParameterAttribute.NormalColorOrIntensity);
             break;
           }
 
           case TextAttribute.Dim: {
-            startColorCodes.push(SgrParameter.Dim);
-            endColorCodes.push(SgrParameter.NormalColorOrIntensity);
+            startColorCodes.push(SgrParameterAttribute.Dim);
+            endColorCodes.push(SgrParameterAttribute.NormalColorOrIntensity);
             break;
           }
 
           case TextAttribute.Underline: {
-            startColorCodes.push(SgrParameter.Underline);
-            endColorCodes.push(SgrParameter.UnderlineOff);
+            startColorCodes.push(SgrParameterAttribute.Underline);
+            endColorCodes.push(SgrParameterAttribute.UnderlineOff);
             break;
           }
 
           case TextAttribute.Blink: {
-            startColorCodes.push(SgrParameter.Blink);
-            endColorCodes.push(SgrParameter.BlinkOff);
+            startColorCodes.push(SgrParameterAttribute.Blink);
+            endColorCodes.push(SgrParameterAttribute.BlinkOff);
             break;
           }
 
           case TextAttribute.InvertColor: {
-            startColorCodes.push(SgrParameter.InvertColor);
-            endColorCodes.push(SgrParameter.InvertColorOff);
+            startColorCodes.push(SgrParameterAttribute.InvertColor);
+            endColorCodes.push(SgrParameterAttribute.InvertColorOff);
             break;
           }
 
           case TextAttribute.Hidden: {
-            startColorCodes.push(SgrParameter.Hidden);
-            endColorCodes.push(SgrParameter.HiddenOff);
+            startColorCodes.push(SgrParameterAttribute.Hidden);
+            endColorCodes.push(SgrParameterAttribute.HiddenOff);
             break;
           }
         }
