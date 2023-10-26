@@ -1138,6 +1138,39 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  ../../build-tests/eslint-bulk-suppressions-test:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      '@typescript-eslint/eslint-plugin':
+        specifier: ~5.59.2
+        version: 5.59.11(@typescript-eslint/parser@5.59.11)(eslint@8.7.0)(typescript@5.0.4)
+      '@typescript-eslint/parser':
+        specifier: ~5.59.2
+        version: 5.59.11(eslint@8.7.0)(typescript@5.0.4)
+      '@typescript-eslint/scope-manager':
+        specifier: ~5.59.2
+        version: 5.59.11(typescript@5.0.4)
+      '@typescript-eslint/typescript-estree':
+        specifier: ~5.59.2
+        version: 5.59.11(typescript@5.0.4)
+      '@typescript-eslint/utils':
+        specifier: ~5.59.2
+        version: 5.59.11(eslint@8.7.0)(typescript@5.0.4)
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
+
   ../../build-tests/hashed-folder-copy-plugin-webpack5-test:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin':
@@ -2293,15 +2326,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ~5.59.2
         version: 5.59.11(eslint@8.7.0)(typescript@5.0.4)
-      '@typescript-eslint/scope-manager':
-        specifier: ~5.59.2
-        version: 5.59.11(typescript@5.0.4)
       '@typescript-eslint/typescript-estree':
         specifier: ~5.59.2
         version: 5.59.11(typescript@5.0.4)
-      '@typescript-eslint/utils':
-        specifier: ~5.59.2
-        version: 5.59.11(eslint@8.7.0)(typescript@5.0.4)
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
