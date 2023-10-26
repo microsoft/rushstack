@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-bulk",
+      "comment": "eslint-bulk-suppressions",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-bulk"
+}
