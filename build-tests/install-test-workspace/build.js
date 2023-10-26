@@ -139,11 +139,7 @@ const pnpmInstallArgs = [
   '--recursive',
   '--link-workspace-packages=false',
   // PNPM gets confused by the rewriting performed by our .pnpmfile.cjs afterAllResolved hook
-  '--frozen-lockfile=false',
-
-  // Workaround for this issue:
-  // https://github.com/pnpm/pnpm/issues/6778#issuecomment-1762418094
-  '--config.confirmModulesPurge=false'
+  '--frozen-lockfile=false'
 ];
 
 console.log('\nInstalling:');
@@ -152,7 +148,7 @@ console.log('  pnpm ' + pnpmInstallArgs.join(' '));
 checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, pnpmInstallArgs, {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
-    stdio: ['ignore', 'inherit', 'inherit']
+    stdio: 'inherit'
   }),
   'pnpm install'
 );
@@ -191,7 +187,7 @@ console.log('\nBuilding projects...\n');
 checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['run', '--recursive', 'build'], {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
-    stdio: ['ignore', 'inherit', 'inherit']
+    stdio: 'inherit'
   }),
   'pnpm run'
 );

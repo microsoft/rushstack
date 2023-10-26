@@ -8,7 +8,6 @@ import { noNewNullRule } from './no-new-null';
 import { noNullRule } from './no-null';
 import { noUntypedUnderscoreRule } from './no-untyped-underscore';
 import { typedefVar } from './typedef-var';
-import { isBulkSuppressedRule } from './is-bulk-suppressed';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
@@ -16,9 +15,6 @@ interface IPlugin {
 
 const plugin: IPlugin = {
   rules: {
-    // Full name: "@rushstack/is-bulk-suppressed",
-    'is-bulk-suppressed': isBulkSuppressedRule,
-
     // Full name: "@rushstack/hoist-jest-mock"
     'hoist-jest-mock': hoistJestMock,
 

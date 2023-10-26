@@ -8,7 +8,7 @@ import { eslintFolder } from '../_patch-base';
 
 interface Suppression {
   file: string;
-  scope: string;
+  scopeId: string;
   rule: string;
 }
 
@@ -46,16 +46,16 @@ function getNodeName(node: TSESTree.Node): string | null {
   return null;
 }
 
-function calculateScope(node: any | (TSESTree.Node & { parent?: TSESTree.Node }) | undefined): string {
-  const scopes = [];
+function calculateScopeId(node: any | (TSESTree.Node & { parent?: TSESTree.Node }) | undefined): string {
+  const scopeIds: string[] = [];
   for (let current = node; current; current = current.parent) {
-    const scopeForASTNode = getNodeName(current);
-    if (scopeForASTNode !== null) scopes.unshift(scopeForASTNode);
+    const scopeIdForASTNode = getNodeName(current);
+    if (scopeIdForASTNode !== null) scopeIds.unshift(scopeIdForASTNode);
   }
 
-  if (scopes.length === 0) return '.';
+  if (scopeIds.length === 0) return '.';
 
-  return '.' + scopes.join('.');
+  return '.' + scopeIds.join('.');
 }
 
 /**
@@ -95,11 +95,11 @@ function validateSuppressionsJson(json: BulkSuppressionsJson): json is BulkSuppr
         throw new Error(
           `"file" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
         );
-      if (!suppression.hasOwnProperty('scope'))
-        throw new Error(`Missing "scope" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.scope !== 'string')
+      if (!suppression.hasOwnProperty('scopeId'))
+        throw new Error(`Missing "scopeId" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
+      if (typeof suppression.scopeId !== 'string')
         throw new Error(
-          `"scope" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
+          `"scopeId" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
         );
       if (!suppression.hasOwnProperty('rule'))
         throw new Error(`Missing "rule" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
@@ -126,13 +126,12 @@ function readSuppressionsJson(fileAbsolutePath: string): BulkSuppressionsJson {
     suppressionsJson = JSON.parse(fileContent);
 
     if (!validateSuppressionsJson(suppressionsJson)) {
-      console.log('invalid data', suppressionsJson);
       console.warn(
         `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
 {
   suppressions: {
       file: string;
-      scope: string;
+      scopeId: string;
       rule: string;
   }[];
 }
@@ -165,7 +164,7 @@ function isSuppressed(fileAbsolutePath: string, suppression: Suppression): boole
     suppressionsJson.suppressions.find(
       (element) =>
         element.file === suppression.file &&
-        element.scope === suppression.scope &&
+        element.scopeId === suppression.scopeId &&
         element.rule === suppression.rule
     ) !== undefined
   );
@@ -180,8 +179,8 @@ function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number)
 function compareSuppressions(a: Suppression, b: Suppression): -1 | 0 | 1 {
   if (a.file < b.file) return -1;
   if (a.file > b.file) return 1;
-  if (a.scope < b.scope) return -1;
-  if (a.scope > b.scope) return 1;
+  if (a.scopeId < b.scopeId) return -1;
+  if (a.scopeId > b.scopeId) return 1;
   if (a.rule < b.rule) return -1;
   if (a.rule > b.rule) return 1;
   return 0;
@@ -191,7 +190,7 @@ function writeSuppressionToFile(
   fileAbsolutePath: string,
   suppression: {
     file: string;
-    scope: string;
+    scopeId: string;
     rule: string;
   }
 ): void {
@@ -207,12 +206,12 @@ function writeSuppressionToFile(
 const usedSuppressions = new Set<string>();
 
 function serializeSuppression(fileAbsolutePath: string, suppression: Suppression): string {
-  return `${fileAbsolutePath}|${suppression.file}|${suppression.scope}|${suppression.rule}`;
+  return `${fileAbsolutePath}|${suppression.file}|${suppression.scopeId}|${suppression.rule}`;
 }
 
 function deserializeSuppression(serializedSuppression: string): Suppression {
-  const [file, scope, rule] = serializedSuppression.split('|');
-  return { file, scope, rule };
+  const [file, scopeId, rule] = serializedSuppression.split('|');
+  return { file, scopeId, rule };
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
@@ -227,8 +226,8 @@ export function shouldBulkSuppress(params: {
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
   const fileRelativePath = path.relative(eslintrcDirectory, fileAbsolutePath);
-  const scope = calculateScope(currentNode);
-  const suppression = { file: fileRelativePath, scope, rule };
+  const scopeId = calculateScopeId(currentNode);
+  const suppression = { file: fileRelativePath, scopeId, rule };
 
   if (shouldWriteSuppression(fileAbsolutePath, suppression)) {
     writeSuppressionToFile(fileAbsolutePath, suppression);
@@ -246,15 +245,10 @@ export function shouldBulkSuppress(params: {
 export function BulkSuppressionsCleanUp(params: { filename: string }): void {
   if (process.env.CLEANUP_ESLINT_BULK_SUPPRESSIONS !== 'true') return;
 
-  console.log(usedSuppressions);
   const { filename: fileAbsolutePath } = params;
   const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
   const newSuppressionsJson = {
     suppressions: suppressionsJson.suppressions.filter((suppression) => {
-      // console.log(
-      //   serializeSuppression(fileAbsolutePath, suppression),
-      //   usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression))
-      // );
       return usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression));
     })
   };
