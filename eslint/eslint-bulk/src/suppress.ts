@@ -7,6 +7,9 @@ import { whichEslint } from './utils/which-eslint';
 export function makeSuppressCommand(): Command {
   const suppress = new Command('suppress');
   suppress
+    .description(
+      'Generate a new .eslint-bulk-suppressions.json file or add suppression entries to an existing file. The "files" glob pattern argument follows the same rules as the "eslint" command.'
+    )
     .argument('<files...>')
     .option('-R, --rule <rules...>')
     .option('-A, --all')
