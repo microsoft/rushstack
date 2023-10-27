@@ -73,7 +73,7 @@ module.exports = {
             terminal.writeVerboseLine(`Copying ${inDtsPath} to ${outDtsPath}`);
             // We know this is a file, don't need the redundant checks in FileSystem.copyFileAsync
             const buffer = await FileSystem.readFileToBufferAsync(inDtsPath);
-            return FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
+            await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
           }
         }
       });
