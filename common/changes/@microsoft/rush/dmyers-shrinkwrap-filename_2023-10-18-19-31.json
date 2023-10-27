@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Include the filename of the shrinkwrap file in logging messages for all package managers, not just Yarn.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

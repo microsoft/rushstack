@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Mon, 23 Oct 2023 15:18:38 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Oct 2023 00:27:48 GMT and should not be manually modified.
+
+## 0.10.1
+Thu, 26 Oct 2023 00:27:48 GMT
+
+### Patches
+
+- Add an option (`enableNodeEnvManagement`) to ensure that the NODE_ENV environment variable is set to `"test"` during test execution.
 
 ## 0.10.0
 Mon, 23 Oct 2023 15:18:38 GMT

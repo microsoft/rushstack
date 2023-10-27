@@ -1153,13 +1153,7 @@ export class RushConfiguration {
    * package manager.
    */
   public get shrinkwrapFilePhrase(): string {
-    if (this.packageManager === 'yarn') {
-      // Eventually we'd like to be consistent with Yarn's terminology of calling this a "lock file",
-      // but a lot of Rush documentation uses "shrinkwrap" file and would all need to be updated.
-      return 'shrinkwrap file (yarn.lock)';
-    } else {
-      return 'shrinkwrap file';
-    }
+    return `shrinkwrap file (${this.shrinkwrapFilename})`;
   }
 
   /**

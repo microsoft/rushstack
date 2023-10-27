@@ -101,6 +101,7 @@ export interface IJestPluginOptions {
   detectOpenHandles?: boolean;
   disableCodeCoverage?: boolean;
   disableConfigurationModuleResolution?: boolean;
+  enableNodeEnvManagement?: boolean;
   findRelatedTests?: string[];
   maxWorkers?: string;
   passWithNoTests?: boolean;
@@ -153,6 +154,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private _jestOutputStream: TerminalWritableStream | undefined;
   private _changedFiles: Set<string> = new Set();
   private _requestRun!: () => void;
+  private _nodeEnvSet: boolean | undefined;
 
   private _resolveFirstRunQueued!: () => void;
   private _firstRunQueuedPromise: Promise<void>;
@@ -210,7 +212,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const testTimeoutParameter: CommandLineIntegerParameter =
       parameters.getIntegerParameter('--test-timeout-ms');
 
-    const combinedOptions: IJestPluginOptions = {
+    const options: IJestPluginOptions = {
       ...pluginOptions,
       configurationPath: configParameter.value || pluginOptions?.configurationPath,
       debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
@@ -228,11 +230,12 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       testPathIgnorePatterns: testPathIgnorePatternsParameter.value || pluginOptions?.testPathIgnorePatterns,
       testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
       testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
-      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
+      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots,
+      enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
+      await this._runJestAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
@@ -241,7 +244,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         await this._runJestWatchAsync(
           taskSession,
           heftConfiguration,
-          combinedOptions,
+          options,
           runIncrementalOptions.requestRun
         );
       }
@@ -258,6 +261,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   ): Promise<void> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
+
+    this._setNodeEnvIfRequested(options, logger);
 
     const { getVersion, runCLI } = await import(`@jest/core`);
     terminal.writeLine(`Using Jest version ${getVersion()}`);
@@ -280,6 +285,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       globalConfig,
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
+
+    this._resetNodeEnv();
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(
@@ -491,6 +498,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     await Promise.resolve();
 
     if (pendingTestRuns.size > 0) {
+      this._setNodeEnvIfRequested(options, logger);
+
       this._executing = true;
       for (const pendingTestRun of pendingTestRuns) {
         pendingTestRuns.delete(pendingTestRun);
@@ -515,6 +524,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           terminal.writeLine(`No tests were executed.`);
         }
       }
+
+      this._resetNodeEnv();
 
       if (!logger.hasErrors) {
         // If we ran tests and they succeeded, consider the files to no longer be changed.
@@ -788,6 +799,29 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
 
     return JestPlugin._jestConfigurationFileLoader;
+  }
+
+  private _setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
+    if (options.enableNodeEnvManagement) {
+      if (process.env.NODE_ENV) {
+        if (process.env.NODE_ENV !== 'test') {
+          // In the future, we may consider just setting this and not warning
+          logger.emitWarning(
+            new Error(`NODE_ENV variable is set and it's not "test". NODE_ENV=${process.env.NODE_ENV}`)
+          );
+        }
+      } else {
+        process.env.NODE_ENV = 'test';
+        this._nodeEnvSet = true;
+      }
+    }
+  }
+
+  private _resetNodeEnv(): void {
+    // unset the NODE_ENV only if we have set it
+    if (this._nodeEnvSet) {
+      delete process.env.NODE_ENV;
+    }
   }
 
   private static _extractHeftJestReporters(

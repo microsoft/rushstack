@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.10.1",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.1",
+      "date": "Thu, 26 Oct 2023 00:27:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add an option (`enableNodeEnvManagement`) to ensure that the NODE_ENV environment variable is set to `\"test\"` during test execution."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@rushstack/heft-jest-plugin_v0.10.0",
       "date": "Mon, 23 Oct 2023 15:18:38 GMT",
