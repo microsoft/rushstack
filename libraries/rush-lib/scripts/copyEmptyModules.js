@@ -55,7 +55,7 @@ module.exports = {
         const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
         if (folderItem.isDirectory()) {
-          return searchAsync(relativeItemPath);
+          await searchAsync(relativeItemPath);
         } else if (folderItem.isFile() && itemName.endsWith(JS_FILE_EXTENSION)) {
           const jsInPath = `${jsInFolderPath}/${relativeItemPath}`;
           const jsFileText = await FileSystem.readFileAsync(jsInPath);
