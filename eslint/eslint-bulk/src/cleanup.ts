@@ -8,9 +8,12 @@ export function makeCleanupCommand(): Command {
   const cleanup = new Command('cleanup');
   cleanup
     .description(
-      'Delete unused suppression entries for the given file in the corresponding .eslint-bulk-suppressions.json file. The "files" glob pattern argument follows the same rules as the "eslint" command.'
+      'Delete unused suppression entries for the given file in the corresponding .eslint-bulk-suppressions.json file.'
     )
-    .argument('<files...>')
+    .argument(
+      '<files...>',
+      'The "files" glob pattern argument follows the same rules as the "eslint" command.'
+    )
     .action((files: string[]) => {
       const eslintCLI = whichEslint();
 

@@ -18,47 +18,47 @@ export function exampleFunction() {
 }
 
 // scope: '.ArrowFunctionExpression',
-// export const x = () => {},
-//   // scopeId: '.y'
-//   y = () => {},
-//   // scopeId: '.z'
-//   z = () => {};
+export const x = () => {},
+  // scopeId: '.y'
+  y = () => {},
+  // scopeId: '.z'
+  z = () => {};
 
-// /* Class scope code samples */
-// export class ExampleClass {
-//   // scopeId: '.ExampleClass'
-//   exampleClassProperty: String = exampleString + '4';
+/* Class scope code samples */
+export class ExampleClass {
+  // scopeId: '.ExampleClass'
+  exampleClassProperty: String = exampleString + '4';
 
-//   exampleMethod() {
-//     // scopeId: '.exampleClass.exampleMethod'
-//     var exampleVar;
-//     return exampleVar;
-//   }
-// }
+  exampleMethod() {
+    // scopeId: '.exampleClass.exampleMethod'
+    var exampleVar;
+    return exampleVar;
+  }
+}
 
-// /* Variable and anonymous constructs code samples */
-// export const exampleArrowFunction = () => {
-//   const exampleBoolean = true;
-//   if (exampleBoolean) {
-//   }
+/* Variable and anonymous constructs code samples */
+export const exampleArrowFunction = () => {
+  const exampleBoolean = true;
+  if (exampleBoolean) {
+  }
 
-//   exampleObject['exampleString'];
-// };
+  exampleObject['exampleString'];
+};
 
-// export const exampleAnonymousClass = class {
-//   exampleClassProperty = 'x' + 'y';
+export const exampleAnonymousClass = class {
+  exampleClassProperty = 'x' + 'y';
 
-//   // scopeId: '.exampleAnonymousClass.constructor'
-//   constructor() {}
+  // scopeId: '.exampleAnonymousClass.constructor'
+  constructor() {}
 
-//   set exampleSetGet(val: string) {
-//     // scopeId: '.exampleAnonymousClass.exampleSetGet'
-//     let exampleVariable: Number = 1;
-//     this.exampleClassProperty = val + exampleVariable;
-//   }
+  set exampleSetGet(val: string) {
+    // scopeId: '.exampleAnonymousClass.exampleSetGet'
+    let exampleVariable: Number = 1;
+    this.exampleClassProperty = val + exampleVariable;
+  }
 
-//   get exampleSetGet() {
-//     // scopeId: '.exampleAnonymousClass.exampleSetGet'
-//     return this.exampleClassProperty as String as string;
-//   }
-// };
+  get exampleSetGet() {
+    // scopeId: '.exampleAnonymousClass.exampleSetGet'
+    return this.exampleClassProperty as String as string;
+  }
+};

@@ -8,11 +8,14 @@ export function makeSuppressCommand(): Command {
   const suppress = new Command('suppress');
   suppress
     .description(
-      'Generate a new .eslint-bulk-suppressions.json file or add suppression entries to an existing file. The "files" glob pattern argument follows the same rules as the "eslint" command.'
+      'Generate a new .eslint-bulk-suppressions.json file or add suppression entries to an existing file.'
     )
-    .argument('<files...>')
-    .option('-R, --rule <rules...>')
-    .option('-A, --all')
+    .argument(
+      '<files...>',
+      'The "files" glob pattern argument follows the same rules as the "eslint" command.'
+    )
+    .option('-R, --rule <rules...>', 'The full name of the ESlint rules you want to suppress.')
+    .option('-A, --all', 'Suppress all rules instead of specific rule(s).')
     .action((files: string[], options: { all: boolean; rule: string[] }) => {
       if (!(options.all || options.rule)) {
         throw new Error('Please specify at least one rule to suppress');

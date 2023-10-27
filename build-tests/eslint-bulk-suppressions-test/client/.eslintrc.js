@@ -9,9 +9,8 @@ require('local-node-rig/profiles/default/includes/eslint/patch/eslint-bulk-suppr
 
 module.exports = {
   extends: [
-    'plugin:@typescript-eslint/recommended'
-    // 'local-node-rig/profiles/default/includes/eslint/profile/node-trusted-tool',
-    // 'local-node-rig/profiles/default/includes/eslint/mixins/friendly-locals'
+    'local-node-rig/profiles/default/includes/eslint/profile/node-trusted-tool',
+    'local-node-rig/profiles/default/includes/eslint/mixins/friendly-locals'
   ],
   ignorePatterns: ['.eslintrc.js'],
 
