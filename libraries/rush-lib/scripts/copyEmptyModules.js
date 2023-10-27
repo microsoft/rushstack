@@ -46,6 +46,7 @@ module.exports = {
     const jsInFolderPath = `${buildFolderPath}/lib-esnext`;
     const dtsInFolderPath = `${buildFolderPath}/lib-commonjs`;
     const outFolderPath = `${buildFolderPath}/lib`;
+    const emptyModuleBuffer = Buffer.from('module.exports = {};', 'utf8');
     const folderPathQueue = new AsyncQueue([undefined]);
 
     await Async.forEachAsync(
@@ -66,7 +67,7 @@ module.exports = {
             if (strippedJsFileText === 'export {};') {
               const outJsPath = `${outFolderPath}/${relativeItemPath}`;
               terminal.writeVerboseLine(`Writing stub to ${outJsPath}`);
-              await FileSystem.writeFileAsync(outJsPath, 'module.exports = {};', {
+              await FileSystem.writeFileAsync(outJsPath, emptyModuleBuffer, {
                 ensureFolderExists: true
               });
 
