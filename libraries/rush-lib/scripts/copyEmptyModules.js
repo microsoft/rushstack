@@ -46,18 +46,19 @@ module.exports = {
     const jsInFolderPath = `${buildFolderPath}/lib-esnext`;
     const dtsInFolderPath = `${buildFolderPath}/lib-commonjs`;
     const outFolderPath = `${buildFolderPath}/lib`;
-    const folderPathQueue = new AsyncQueue([jsInFolderPath]);
+    const folderPathQueue = new AsyncQueue([undefined]);
 
     await Async.forEachAsync(
       folderPathQueue,
-      async ([folderPath, callback]) => {
+      async ([relativeFolderPath, callback]) => {
+        const folderPath = relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath;
         const folderItems = await FileSystem.readFolderItemsAsync(folderPath);
         for (const folderItem of folderItems) {
           const itemName = folderItem.name;
-          const relativeItemPath = `${folderPath}/${itemName}`;
+          const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
           if (folderItem.isDirectory()) {
-            folderPathQueue.add(relativeItemPath);
+            folderPathQueue.push(relativeItemPath);
           } else if (folderItem.isFile() && itemName.endsWith(JS_FILE_EXTENSION)) {
             const jsInPath = `${jsInFolderPath}/${relativeItemPath}`;
             const jsFileText = await FileSystem.readFileAsync(jsInPath);
