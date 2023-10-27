@@ -1,6 +1,6 @@
 'use strict';
 
-const { FileSystem, Async } = require('@rushstack/node-core-library');
+const { FileSystem } = require('@rushstack/node-core-library');
 
 const JS_FILE_EXTENSION = '.js';
 const DTS_FILE_EXTENSION = '.d.ts';
@@ -50,7 +50,7 @@ module.exports = {
       const folderItems = await FileSystem.readFolderItemsAsync(
         relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath
       );
-      await Async.forEachAsync(folderItems, async (folderItem) => {
+      for (const folderItem of folderItems) {
         const itemName = folderItem.name;
         const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
@@ -76,7 +76,7 @@ module.exports = {
             await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
           }
         }
-      });
+      }
     }
 
     await searchAsync(undefined);
