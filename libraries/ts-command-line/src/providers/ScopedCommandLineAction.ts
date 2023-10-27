@@ -6,7 +6,11 @@ import { CommandLineAction, type ICommandLineActionOptions } from './CommandLine
 import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
 import type { CommandLineParameter } from '../parameters/BaseClasses';
-import type { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import type {
+  CommandLineParameterProvider,
+  ICommandLineParserData,
+  IRegisterDefinedParametersState
+} from './CommandLineParameterProvider';
 
 interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOptions {
   readonly actionOptions: ICommandLineActionOptions;
@@ -14,7 +18,7 @@ interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOpti
   readonly onDefineScopedParameters: (commandLineParameterProvider: CommandLineParameterProvider) => void;
   readonly aliasAction?: string;
   readonly aliasDocumentation?: string;
-  readonly existingParameterNames?: Set<string>;
+  readonly registerDefinedParametersState: IRegisterDefinedParametersState;
 }
 
 /**
@@ -59,8 +63,10 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     this._internalOptions.onDefineScopedParameters(this);
   }
 
-  public _registerDefinedParameters(): void {
-    super._registerDefinedParameters(this._internalOptions.existingParameterNames);
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    // Since we are in a separate parser, we need to register the parameters using the state
+    // from the parent parser.
+    super._registerDefinedParameters(this._internalOptions.registerDefinedParametersState);
   }
 
   protected async onExecute(): Promise<void> {
@@ -97,7 +103,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   private _scopingParameters: CommandLineParameter[];
   private _unscopedParserOptions: ICommandLineParserOptions | undefined;
   private _scopedCommandLineParser: InternalScopedCommandLineParser | undefined;
-  private _existingParameterNames: Set<string> = new Set();
+  private _subparserState: IRegisterDefinedParametersState | undefined;
 
   /**
    * The required group name to apply to all scoping parameters. At least one parameter
@@ -131,6 +137,12 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     // override
     super._processParsedData(parserOptions, data);
 
+    // This should never happen because the super method should throw if parameters haven't been registered,
+    // but guard against this just in-case.
+    if (this._subparserState === undefined) {
+      throw new Error('Parameters have not been registered');
+    }
+
     this._unscopedParserOptions = parserOptions;
 
     // Generate the scoped parser using the parent parser information. We can only create this after we
@@ -141,7 +153,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       aliasAction: data.aliasAction,
       aliasDocumentation: data.aliasDocumentation,
       unscopedActionParameters: this.parameters,
-      existingParameterNames: this._existingParameterNames,
+      registerDefinedParametersState: this._subparserState,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });
   }
@@ -190,16 +202,19 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /** @internal */
-  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
-    super._registerDefinedParameters(existingParameterNames);
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    super._registerDefinedParameters(state);
 
-    for (const registeredParameterName of this._registeredParameterParserKeysByName.keys()) {
-      this._existingParameterNames.add(registeredParameterName);
-    }
+    const { parentParameterNames } = state;
+    const updatedParentParameterNames: Set<string> = new Set([
+      ...parentParameterNames,
+      ...this._registeredParameterParserKeysByName.keys()
+    ]);
 
-    for (const existingParameterName of existingParameterNames || []) {
-      this._existingParameterNames.add(existingParameterName);
-    }
+    this._subparserState = {
+      ...state,
+      parentParameterNames: updatedParentParameterNames
+    };
   }
 
   /**

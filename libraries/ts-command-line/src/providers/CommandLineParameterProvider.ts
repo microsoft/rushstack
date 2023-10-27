@@ -50,6 +50,19 @@ export interface IScopedLongNameParseResult {
 }
 
 /**
+ * An object containing the state of the
+ *
+ * @public
+ */
+export interface IRegisterDefinedParametersState {
+  /**
+   * A set of all defined parameter names registered by parent {@link CommandLineParameterProvider}
+   * objects.
+   */
+  parentParameterNames: Set<string>;
+}
+
+/**
  * This is the argparse result data object
  * @internal
  */
@@ -344,7 +357,10 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    this._registerDefinedParameters();
+    const initialState: IRegisterDefinedParametersState = {
+      parentParameterNames: new Set()
+    };
+    this._registerDefinedParameters(initialState);
     return this._getArgumentParser().formatHelp();
   }
 
@@ -352,7 +368,10 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line usage text.
    */
   public renderUsageText(): string {
-    this._registerDefinedParameters();
+    const initialState: IRegisterDefinedParametersState = {
+      parentParameterNames: new Set()
+    };
+    this._registerDefinedParameters(initialState);
     return this._getArgumentParser().formatUsage();
   }
 
@@ -411,7 +430,7 @@ export abstract class CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
     if (this._parametersHaveBeenRegistered) {
       // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
       // so we can already ensure that all parameters were registered.
@@ -454,8 +473,9 @@ export abstract class CommandLineParameterProvider {
 
     // Register the existing parameters as ambiguous parameters. These are generally provided by the
     // parent action.
-    for (const existingParameterName of existingParameterNames || []) {
-      this._defineAmbiguousParameter(existingParameterName);
+    const { parentParameterNames } = state;
+    for (const parentParameterName of parentParameterNames) {
+      this._defineAmbiguousParameter(parentParameterName);
     }
 
     // We also need to loop through the defined ambiguous parameters and register them. These will be reported

@@ -5,7 +5,7 @@ import * as argparse from 'argparse';
 
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineParameterKind, type CommandLineParameter } from '../parameters/BaseClasses';
-import type { ICommandLineParserData } from './CommandLineParameterProvider';
+import type { ICommandLineParserData, IRegisterDefinedParametersState } from './CommandLineParameterProvider';
 import type { ICommandLineParserOptions } from './CommandLineParser';
 import type { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
 import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
@@ -85,7 +85,7 @@ export class AliasCommandLineAction extends CommandLineAction {
   }
 
   /** @internal */
-  public _registerDefinedParameters(existingParameterNames?: Set<string>): void {
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
     /* override */
     // All parameters are going to be defined by the target action. Re-use the target action parameters
     // for this action.
@@ -153,8 +153,8 @@ export class AliasCommandLineAction extends CommandLineAction {
     // Finally, register the parameters with the parser. We need to make sure that the target action
     // is registered, since we need to re-use its parameters, and ambiguous parameters are discovered
     // during registration. This will no-op if the target action is already registered.
-    this.targetAction._registerDefinedParameters(existingParameterNames);
-    super._registerDefinedParameters(existingParameterNames);
+    this.targetAction._registerDefinedParameters(state);
+    super._registerDefinedParameters(state);
 
     // We need to re-map the ambiguous parameters after they are defined by calling
     // super._registerDefinedParameters()
