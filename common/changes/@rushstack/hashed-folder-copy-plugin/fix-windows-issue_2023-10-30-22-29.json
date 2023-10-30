@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Fix an issue where globbing assets from a NPM package would fail on Windows.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}
