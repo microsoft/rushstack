@@ -43,7 +43,8 @@ export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 export {
   CommandLineParameterProvider,
   IScopedLongNameParseResult,
-  ICommandLineParserData as _ICommandLineParserData
+  ICommandLineParserData as _ICommandLineParserData,
+  IRegisterDefinedParametersState as _IRegisterDefinedParametersState
 } from './providers/CommandLineParameterProvider';
 
 export { ICommandLineParserOptions, CommandLineParser } from './providers/CommandLineParser';

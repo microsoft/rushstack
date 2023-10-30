@@ -52,7 +52,7 @@ export interface IScopedLongNameParseResult {
 /**
  * An object containing the state of the
  *
- * @public
+ * @internal
  */
 export interface IRegisterDefinedParametersState {
   /**
