@@ -48,7 +48,7 @@ class TestCommandLine extends CommandLineParser {
 describe(CommandLineParser.name, () => {
   it('executes an action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    commandLineParser._registerDefinedParameters();
+    commandLineParser._registerDefinedParameters({ parentParameterNames: new Set() });
 
     await commandLineParser.execute(['do:the-job', '--flag']);
 

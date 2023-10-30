@@ -28,6 +28,7 @@ import { CommandLineStringParameter } from '../parameters/CommandLineStringParam
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
  * The result containing the parsed paramter long name and scope. Returned when calling
@@ -46,6 +47,19 @@ export interface IScopedLongNameParseResult {
    * e.g. "--my-scope:my-parameter" -\> "my-scope"
    */
   scope: string | undefined;
+}
+
+/**
+ * An object containing the state of the
+ *
+ * @internal
+ */
+export interface IRegisterDefinedParametersState {
+  /**
+   * A set of all defined parameter names registered by parent {@link CommandLineParameterProvider}
+   * objects.
+   */
+  parentParameterNames: Set<string>;
 }
 
 /**
@@ -73,6 +87,11 @@ const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
 export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
+  /** @internal */
+  public readonly _ambiguousParameterParserKeysByName: Map<string, string>;
+  /** @internal */
+  protected readonly _registeredParameterParserKeysByName: Map<string, string>;
+
   private readonly _parameters: CommandLineParameter[];
   private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
   private readonly _parametersByShortName: Map<string, CommandLineParameter[]>;
@@ -80,9 +99,8 @@ export abstract class CommandLineParameterProvider {
     string | typeof SCOPING_PARAMETER_GROUP,
     argparse.ArgumentGroup
   >;
-  private readonly _ambiguousParameterNamesByParserKey: Map<string, string>;
-  private _parametersRegistered: boolean;
-  private _parametersProcessed: boolean;
+  private _parametersHaveBeenRegistered: boolean;
+  private _parametersHaveBeenProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
   /** @internal */
@@ -92,9 +110,10 @@ export abstract class CommandLineParameterProvider {
     this._parametersByLongName = new Map();
     this._parametersByShortName = new Map();
     this._parameterGroupsByName = new Map();
-    this._ambiguousParameterNamesByParserKey = new Map();
-    this._parametersRegistered = false;
-    this._parametersProcessed = false;
+    this._ambiguousParameterParserKeysByName = new Map();
+    this._registeredParameterParserKeysByName = new Map();
+    this._parametersHaveBeenRegistered = false;
+    this._parametersHaveBeenProcessed = false;
   }
 
   /**
@@ -108,7 +127,7 @@ export abstract class CommandLineParameterProvider {
    * Informs the caller if the argparse data has been processed into parameters.
    */
   public get parametersProcessed(): boolean {
-    return this._parametersProcessed;
+    return this._parametersHaveBeenProcessed;
   }
 
   /**
@@ -338,7 +357,10 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    this._registerDefinedParameters();
+    const initialState: IRegisterDefinedParametersState = {
+      parentParameterNames: new Set()
+    };
+    this._registerDefinedParameters(initialState);
     return this._getArgumentParser().formatHelp();
   }
 
@@ -346,7 +368,10 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line usage text.
    */
   public renderUsageText(): string {
-    this._registerDefinedParameters();
+    const initialState: IRegisterDefinedParametersState = {
+      parentParameterNames: new Set()
+    };
+    this._registerDefinedParameters(initialState);
     return this._getArgumentParser().formatUsage();
   }
 
@@ -405,24 +430,22 @@ export abstract class CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
-    if (this._parametersRegistered) {
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    if (this._parametersHaveBeenRegistered) {
       // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
       // so we can already ensure that all parameters were registered.
       return;
     }
-    this._parametersRegistered = true;
-
-    const ambiguousParameterNames: Set<string> = new Set();
 
     // First, loop through all parameters with short names. If there are any duplicates, disable the short names
     // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
     // be reported as errors if the user attempts to use them.
+    const parametersWithDuplicateShortNames: Set<CommandLineParameter> = new Set();
     for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
       if (shortNameParameters.length > 1) {
         for (const parameter of shortNameParameters) {
-          ambiguousParameterNames.add(shortName);
-          parameter._disableShortName();
+          this._defineAmbiguousParameter(shortName);
+          parametersWithDuplicateShortNames.add(parameter);
         }
       }
     }
@@ -440,16 +463,30 @@ export abstract class CommandLineParameterProvider {
                 'Parameters with the same long name must define a scope.'
             );
           }
-          ambiguousParameterNames.add(parameter.longName);
+          this._defineAmbiguousParameter(parameter.longName);
         }
-        this._registerParameter(parameter, useScopedLongName);
+
+        const ignoreShortName: boolean = parametersWithDuplicateShortNames.has(parameter);
+        this._registerParameter(parameter, useScopedLongName, ignoreShortName);
       }
     }
 
-    // Register silent parameters for the ambiguous short names and long names to ensure that users are made
-    // aware that the provided argument is ambiguous.
-    for (const ambiguousParameterName of ambiguousParameterNames) {
-      this._registerAmbiguousParameter(ambiguousParameterName);
+    // Register the existing parameters as ambiguous parameters. These are generally provided by the
+    // parent action.
+    const { parentParameterNames } = state;
+    for (const parentParameterName of parentParameterNames) {
+      this._defineAmbiguousParameter(parentParameterName);
+    }
+
+    // We also need to loop through the defined ambiguous parameters and register them. These will be reported
+    // as errors if the user attempts to use them.
+    for (const [ambiguousParameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
+      // Only register the ambiguous parameter if it hasn't already been registered. We will still handle these
+      // already-registered parameters as ambiguous, but by avoiding registering again, we will defer errors
+      // until the user actually attempts to use the parameter.
+      if (!this._registeredParameterParserKeysByName.has(ambiguousParameterName)) {
+        this._registerAmbiguousParameter(ambiguousParameterName, parserKey);
+      }
     }
 
     // Need to add the remainder parameter last
@@ -462,6 +499,8 @@ export abstract class CommandLineParameterProvider {
 
       this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
     }
+
+    this._parametersHaveBeenRegistered = true;
   }
 
   /**
@@ -478,17 +517,23 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    if (!this._parametersRegistered) {
+    if (!this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have not been registered');
     }
 
-    if (this._parametersProcessed) {
+    if (this._parametersHaveBeenProcessed) {
       throw new Error('Command Line Parser Data was already processed');
     }
 
     // Search for any ambiguous parameters and throw an error if any are found
-    for (const [parserKey, parameterName] of this._ambiguousParameterNamesByParserKey) {
+    for (const [parameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
       if (data[parserKey]) {
+        // When the parser key matches the actually registered parameter, we know that this is an ambiguous
+        // parameter sourced from the parent action or tool
+        if (this._registeredParameterParserKeysByName.get(parameterName) === parserKey) {
+          this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
+        }
+
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
         // the non-ambiguous name is different for each.
         const duplicateShortNameParameters: CommandLineParameter[] | undefined =
@@ -523,11 +568,12 @@ export abstract class CommandLineParameterProvider {
 
           // Throw an error including the non-ambiguous long names for the parameters that have the ambiguous
           // short name, ex.
-          // Error: The short parameter name "-p" is ambiguous. It could refer to any of the following
-          // parameters: "--param1", "--param2"
-          throw new Error(
-            `The short parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
-              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
+          // Error: Ambiguous option "-p" could match "--param1", "--param2"
+          this._throwParserExitError(
+            parserOptions,
+            data,
+            1,
+            `Ambiguous option: "${parameterName}" could match ${nonAmbiguousLongNames.join(', ')}.`
           );
         }
 
@@ -549,16 +595,17 @@ export abstract class CommandLineParameterProvider {
 
           // Throw an error including the non-ambiguous scoped long names for the parameters that have the
           // ambiguous long name, ex.
-          // Error: The parameter name "--param" is ambiguous. It could refer to any of the following
-          // parameters: "--scope1:param", "--scope2:param"
-          throw new Error(
-            `The parameter name "${parameterName}" is ambiguous. It could refer to any of ` +
-              `the following parameters: "${nonAmbiguousLongNames.join('", "')}"`
+          // Error: Ambiguous option: "--param" could match --scope1:param, --scope2:param
+          this._throwParserExitError(
+            parserOptions,
+            data,
+            1,
+            `Ambiguous option: "${parameterName}" could match ${nonAmbiguousLongNames.join(', ')}.`
           );
         }
 
         // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
-        throw new Error(`The parameter name "${parameterName}" is ambiguous.`);
+        this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
       }
     }
 
@@ -572,12 +619,12 @@ export abstract class CommandLineParameterProvider {
       this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
 
-    this._parametersProcessed = true;
+    this._parametersHaveBeenProcessed = true;
   }
 
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
-    if (this._parametersRegistered) {
+    if (this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have already been registered for this provider');
     }
 
@@ -610,9 +657,32 @@ export abstract class CommandLineParameterProvider {
   }
 
   /** @internal */
-  protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void {
+  protected _defineAmbiguousParameter(name: string): string {
+    if (this._parametersHaveBeenRegistered) {
+      throw new Error('Parameters have already been registered for this provider');
+    }
+
+    // Only generate a new parser key if the ambiguous parameter hasn't been defined yet,
+    // either as an existing parameter or as another ambiguous parameter
+    let existingParserKey: string | undefined =
+      this._registeredParameterParserKeysByName.get(name) ||
+      this._ambiguousParameterParserKeysByName.get(name);
+    if (!existingParserKey) {
+      existingParserKey = this._generateKey();
+    }
+
+    this._ambiguousParameterParserKeysByName.set(name, existingParserKey);
+    return existingParserKey;
+  }
+
+  /** @internal */
+  protected _registerParameter(
+    parameter: CommandLineParameter,
+    useScopedLongName: boolean,
+    ignoreShortName: boolean
+  ): void {
     const names: string[] = [];
-    if (parameter.shortName) {
+    if (parameter.shortName && !ignoreShortName) {
       names.push(parameter.shortName);
     }
 
@@ -707,12 +777,14 @@ export abstract class CommandLineParameterProvider {
         help: argparse.Const.SUPPRESS
       });
     }
+
+    // Register the parameter names so that we can detect ambiguous parameters
+    for (const name of [...names, ...(parameter.undocumentedSynonyms || [])]) {
+      this._registeredParameterParserKeysByName.set(name, parameter._parserKey!);
+    }
   }
 
-  private _registerAmbiguousParameter(name: string): void {
-    const parserKey: string = this._generateKey();
-    this._ambiguousParameterNamesByParserKey.set(parserKey, name);
-
+  protected _registerAmbiguousParameter(name: string, parserKey: string): void {
     this._getArgumentParser().addArgument(name, {
       dest: parserKey,
       // We don't know if this argument takes parameters or not, so we need to accept any number of args
@@ -765,5 +837,23 @@ export abstract class CommandLineParameterProvider {
     }
 
     return parameter as T;
+  }
+
+  private _throwParserExitError(
+    parserOptions: ICommandLineParserOptions,
+    data: ICommandLineParserData,
+    errorCode: number,
+    message: string
+  ): never {
+    // Write out the usage text to make it easier for the user to find the correct parameter name
+    const targetActionName: string = data.aliasAction || data.action || '';
+    const errorPrefix: string =
+      `Error: ${parserOptions.toolFilename}` +
+      // Handle aliases, actions, and actionless parameter providers
+      `${targetActionName ? ' ' : ''}${targetActionName}: error: `;
+
+    // eslint-disable-next-line no-console
+    console.log(this.renderUsageText());
+    throw new CommandLineParserExitError(errorCode, `${errorPrefix}${message.trimStart().trimEnd()}\n`);
   }
 }

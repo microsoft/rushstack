@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ArgumentParser } from 'argparse';
 import {
   CommandLineParser,
   type AliasCommandLineAction,
@@ -20,12 +19,13 @@ import { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import { Constants } from '../utilities/Constants';
 import { CleanAction } from './actions/CleanAction';
 import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
 import { AliasAction } from './actions/AliasAction';
+import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
+import { Constants } from '../utilities/Constants';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -233,13 +233,11 @@ export class HeftCommandLineParser extends CommandLineParser {
       throw new InternalError('onDefineParameters() has not yet been called.');
     }
 
-    // This is a rough parsing of the --debug parameter
-    const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
-    parser.addArgument(this._debugFlag.longName, { dest: 'debug', action: 'storeTrue' });
-    parser.addArgument(this._unmanagedFlag.longName, { dest: 'unmanaged', action: 'storeTrue' });
-
-    const [result]: IPreInitializationArgumentValues[] = parser.parseKnownArgs(args);
-    return result;
+    const toolParameters: Set<string> = getToolParameterNamesFromArgs(args);
+    return {
+      debug: toolParameters.has(this._debugFlag.longName),
+      unmanaged: toolParameters.has(this._unmanagedFlag.longName)
+    };
   }
 
   private async _reportErrorAndSetExitCode(error: Error): Promise<void> {

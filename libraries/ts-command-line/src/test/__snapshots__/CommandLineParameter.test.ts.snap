@@ -50,8 +50,6 @@ exports[`CommandLineParameter choice list raises an error if env var value is js
 
 exports[`CommandLineParameter choice list raises an error if env var value is not a valid choice 1`] = `"Invalid value \\"oblong\\" for the environment variable ENV_COLOR.  Valid choices are: \\"purple\\", \\"yellow\\", \\"pizza\\""`;
 
-exports[`CommandLineParameter choice list raises an error if env var value is not valid json 1`] = `"The [u environment variable value looks like a JSON array but failed to parse: Unexpected token u in JSON at position 1"`;
-
 exports[`CommandLineParameter parses an input with ALL parameters 1`] = `
 Object {
   "argumentName": undefined,

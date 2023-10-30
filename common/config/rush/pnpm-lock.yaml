@@ -134,9 +134,6 @@ importers:
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
-      argparse:
-        specifier: ~1.0.9
-        version: 1.0.10
       chokidar:
         specifier: ~3.4.0
         version: 3.4.3
@@ -168,9 +165,6 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.3.2
         version: 2.3.2(@rushstack/heft@0.62.0)(@types/node@18.17.15)
-      '@types/argparse':
-        specifier: 1.0.38
-        version: 1.0.38
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1

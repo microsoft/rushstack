@@ -14,7 +14,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // @internal (undocumented)
-    _registerDefinedParameters(): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     readonly targetAction: CommandLineAction;
 }
 
@@ -121,8 +121,6 @@ export abstract class CommandLineParameter {
     constructor(definition: IBaseCommandLineDefinition);
     abstract appendToArgList(argList: string[]): void;
     readonly description: string;
-    // @internal
-    _disableShortName(): void;
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
@@ -158,6 +156,10 @@ export enum CommandLineParameterKind {
 export abstract class CommandLineParameterProvider {
     // @internal
     constructor();
+    // @internal (undocumented)
+    readonly _ambiguousParameterParserKeysByName: Map<string, string>;
+    // @internal (undocumented)
+    protected _defineAmbiguousParameter(name: string): string;
     defineChoiceListParameter(definition: ICommandLineChoiceListDefinition): CommandLineChoiceListParameter;
     defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
     defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
@@ -184,10 +186,14 @@ export abstract class CommandLineParameterProvider {
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
     // @internal (undocumented)
     protected _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // (undocumented)
+    protected _registerAmbiguousParameter(name: string, parserKey: string): void;
     // @internal (undocumented)
-    _registerDefinedParameters(): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     // @internal (undocumented)
-    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void;
+    protected readonly _registeredParameterParserKeysByName: Map<string, string>;
+    // @internal (undocumented)
+    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean, ignoreShortName: boolean): void;
     get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
     renderUsageText(): string;
@@ -213,7 +219,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     // @internal (undocumented)
-    _registerDefinedParameters(): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     selectedAction: CommandLineAction | undefined;
     tryGetAction(actionName: string): CommandLineAction | undefined;
 }
@@ -360,6 +366,11 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
+// @internal
+export interface _IRegisterDefinedParametersState {
+    parentParameterNames: Set<string>;
+}
+
 // @public
 export interface IScopedLongNameParseResult {
     longName: string;
@@ -382,6 +393,8 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // @internal (undocumented)
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     static readonly ScopingParameterGroup: typeof SCOPING_PARAMETER_GROUP;
 }
 
