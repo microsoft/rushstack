@@ -2,6 +2,23 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "1.0.1",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.1",
+      "date": "Mon, 30 Oct 2023 23:36:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where globbing assets from a NPM package would fail on Windows."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.0",
       "date": "Tue, 24 Oct 2023 04:04:22 GMT",

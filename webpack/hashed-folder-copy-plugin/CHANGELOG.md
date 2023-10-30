@@ -1,6 +1,13 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Tue, 24 Oct 2023 04:04:22 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Oct 2023 23:36:37 GMT and should not be manually modified.
+
+## 1.0.1
+Mon, 30 Oct 2023 23:36:37 GMT
+
+### Patches
+
+- Fix an issue where globbing assets from a NPM package would fail on Windows.
 
 ## 1.0.0
 Tue, 24 Oct 2023 04:04:22 GMT
