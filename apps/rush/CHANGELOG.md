@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 20 Oct 2023 01:54:21 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Oct 2023 23:37:07 GMT and should not be manually modified.
+
+## 5.110.0
+Mon, 30 Oct 2023 23:37:07 GMT
+
+### Updates
+
+- Include the filename of the shrinkwrap file in logging messages for all package managers, not just Yarn.
+- performance improvements by running asynchronous code concurrently using Promise.all
 
 ## 5.109.2
 Fri, 20 Oct 2023 01:54:21 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.110.0",
+      "tag": "@microsoft/rush_v5.110.0",
+      "date": "Mon, 30 Oct 2023 23:37:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include the filename of the shrinkwrap file in logging messages for all package managers, not just Yarn."
+          },
+          {
+            "comment": "performance improvements by running asynchronous code concurrently using Promise.all"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.109.2",
       "tag": "@microsoft/rush_v5.109.2",
       "date": "Fri, 20 Oct 2023 01:54:21 GMT",
