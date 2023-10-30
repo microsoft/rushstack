@@ -13,10 +13,8 @@ export class AliasCommandLineAction extends CommandLineAction {
     protected onExecute(): Promise<void>;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
-    // Warning: (ae-forgotten-export) The symbol "IRegisterDefinedParametersState" needs to be exported by the entry point index.d.ts
-    //
     // @internal (undocumented)
-    _registerDefinedParameters(state: IRegisterDefinedParametersState): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     readonly targetAction: CommandLineAction;
 }
 
@@ -191,7 +189,7 @@ export abstract class CommandLineParameterProvider {
     // (undocumented)
     protected _registerAmbiguousParameter(name: string, parserKey: string): void;
     // @internal (undocumented)
-    _registerDefinedParameters(state: IRegisterDefinedParametersState): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     // @internal (undocumented)
     protected readonly _registeredParameterParserKeysByName: Map<string, string>;
     // @internal (undocumented)
@@ -221,7 +219,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     // @internal (undocumented)
-    _registerDefinedParameters(state: IRegisterDefinedParametersState): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     selectedAction: CommandLineAction | undefined;
     tryGetAction(actionName: string): CommandLineAction | undefined;
 }
@@ -368,6 +366,11 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
+// @internal
+export interface _IRegisterDefinedParametersState {
+    parentParameterNames: Set<string>;
+}
+
 // @public
 export interface IScopedLongNameParseResult {
     longName: string;
@@ -391,7 +394,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // @internal (undocumented)
-    _registerDefinedParameters(state: IRegisterDefinedParametersState): void;
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     static readonly ScopingParameterGroup: typeof SCOPING_PARAMETER_GROUP;
 }
 

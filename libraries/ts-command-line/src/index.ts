@@ -7,12 +7,15 @@
  * @packageDocumentation
  */
 
-export { CommandLineAction, ICommandLineActionOptions } from './providers/CommandLineAction';
+export { CommandLineAction, type ICommandLineActionOptions } from './providers/CommandLineAction';
 export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
 export { ScopedCommandLineAction } from './providers/ScopedCommandLineAction';
-export { AliasCommandLineAction, IAliasCommandLineActionOptions } from './providers/AliasCommandLineAction';
-
 export {
+  AliasCommandLineAction,
+  type IAliasCommandLineActionOptions
+} from './providers/AliasCommandLineAction';
+
+export type {
   IBaseCommandLineDefinition,
   IBaseCommandLineDefinitionWithArgument,
   ICommandLineFlagDefinition,
@@ -42,12 +45,12 @@ export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 
 export {
   CommandLineParameterProvider,
-  IScopedLongNameParseResult,
-  ICommandLineParserData as _ICommandLineParserData,
-  IRegisterDefinedParametersState as _IRegisterDefinedParametersState
+  type IScopedLongNameParseResult,
+  type ICommandLineParserData as _ICommandLineParserData,
+  type IRegisterDefinedParametersState as _IRegisterDefinedParametersState
 } from './providers/CommandLineParameterProvider';
 
-export { ICommandLineParserOptions, CommandLineParser } from './providers/CommandLineParser';
+export { CommandLineParser, type ICommandLineParserOptions } from './providers/CommandLineParser';
 export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser';
 
 export { CommandLineConstants } from './Constants';
