@@ -104,7 +104,7 @@
     },
     {
       "name": "@rushstack/eslint-plugin",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/eslint-plugin-packlets",
@@ -328,7 +328,7 @@
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@typescript-eslint/experimental-utils",
@@ -340,7 +340,7 @@
     },
     {
       "name": "@typescript-eslint/typescript-estree",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@yarnpkg/lockfile",

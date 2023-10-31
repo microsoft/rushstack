@@ -1138,18 +1138,6 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
-  ../../build-tests/eslint-bulk-suppressions-test:
-    devDependencies:
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      eslint:
-        specifier: ~8.7.0
-        version: 8.7.0
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
-
   ../../build-tests/hashed-folder-copy-plugin-webpack5-test:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin':
@@ -2268,12 +2256,6 @@ importers:
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
-      '@typescript-eslint/types':
-        specifier: ~6.5.0
-        version: 6.5.0(typescript@5.0.4)
-      typescript:
-        specifier: ~5.0.4
-        version: 5.0.4
 
   ../../eslint/eslint-plugin:
     dependencies:
@@ -11817,15 +11799,6 @@ packages:
       typescript: '*'
     dependencies:
       typescript: 5.0.4
-
-  /@typescript-eslint/types@6.5.0(typescript@5.0.4):
-    resolution: {integrity: sha512-eqLLOEF5/lU8jW3Bw+8auf4lZSbbljHR2saKnYqON12G/WsJrGeeDHWuQePoEf9ro22+JkbPfWQwKEC5WwLQ3w==}
-    engines: {node: ^16.0.0 || >=18.0.0}
-    peerDependencies:
-      typescript: '*'
-    dependencies:
-      typescript: 5.0.4
-    dev: true
 
   /@typescript-eslint/types@6.7.3(typescript@5.0.4):
     resolution: {integrity: sha512-4g+de6roB2NFcfkZb439tigpAMnvEIg3rIjWQ+EM7IBaYt/CdJt6em9BJ4h4UpdgaBWdmx2iWsafHTrqmgIPNw==}

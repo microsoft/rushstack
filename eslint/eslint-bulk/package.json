@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-bulk",
-  "version": "1.5.1",
+  "version": "0.0.0",
   "description": "A set of helper CLIs to use with the rushstack ESLint toolchain",
   "main": "lib/index.js",
   "license": "MIT",
