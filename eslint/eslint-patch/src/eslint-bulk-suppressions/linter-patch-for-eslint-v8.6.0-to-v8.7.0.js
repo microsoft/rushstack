@@ -1147,7 +1147,7 @@ function runRules(
   });
 
   // --- BEGIN MONKEY PATCH ---
-  bulkSuppressionsPatch.BulkSuppressionsCleanUp({ filename });
+  bulkSuppressionsPatch.onFinish({ filename });
   // --- END MONKEY PATCH ---
 
   return lintingProblems;

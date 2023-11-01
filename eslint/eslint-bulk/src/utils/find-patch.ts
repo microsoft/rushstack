@@ -16,11 +16,12 @@ export function findPatch(): string {
 
     if (match) {
       const filePath = match[1].trim();
+      console.log(filePath);
       return filePath;
     }
 
     throw new Error(
-      '@rushstack/eslint-bulk: Error finding patch path. Are you sure the eslint-bulk is installed in the package(s) that you are trying to lint?'
+      '@rushstack/eslint-bulk: Error finding patch path. Are you sure the eslint-bulk is installed in the package that you are trying to lint?'
     );
   } catch (e: unknown) {
     throw new Error('@rushstack/eslint-bulk: Error finding patch path: ' + (e as Error).message);

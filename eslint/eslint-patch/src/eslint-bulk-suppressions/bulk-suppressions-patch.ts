@@ -242,9 +242,13 @@ export function shouldBulkSuppress(params: {
   return shouldBulkSuppress;
 }
 
-export function BulkSuppressionsCleanUp(params: { filename: string }): void {
-  if (process.env.ESLINT_BULK_CLEAN !== 'true') return;
+export function onFinish(params: { filename: string }): void {
+  if (process.env.ESLINT_BULK_CLEAN === 'true') {
+    BulkSuppressionsCleanUp(params);
+  }
+}
 
+export function BulkSuppressionsCleanUp(params: { filename: string }): void {
   const { filename: fileAbsolutePath } = params;
   const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
   const newSuppressionsJson = {
@@ -304,4 +308,15 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
       Object.defineProperty(originalClass.prototype, prop, descriptor);
     }
   }
+}
+
+export function findAndConsoleLogPatchPath(): void {
+  if (process.env.ESLINT_BULK_FIND !== 'true') {
+    return;
+  }
+
+  const startDelimiter = 'ESLINT_BULK_STDOUT_START';
+  const endDelimiter = 'ESLINT_BULK_STDOUT_END';
+
+  console.log(`${startDelimiter}${__dirname}${endDelimiter}`);
 }

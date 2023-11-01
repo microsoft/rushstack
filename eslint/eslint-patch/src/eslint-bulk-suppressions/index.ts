@@ -4,7 +4,16 @@ import { eslintFolder } from '../_patch-base';
 // import { Linter as LinterPatch } from './linter-patch-for-eslint-v8.7.0';
 import { patchClass, whichPatchToLoad } from './bulk-suppressions-patch';
 
-if (!eslintFolder) process.exit();
+if (!eslintFolder) {
+  console.error(
+    '@rushstack/eslint-patch/eslint-bulk-suppressions: Could not find ESLint installation to patch.'
+  );
+  process.exit(1);
+}
+if (process.env.ESLINT_BULK_FIND === 'true') {
+  findAndConsoleLogPatchPath();
+  process.exit(0);
+}
 
 const patchForSpecificESLintVersion = whichPatchToLoad(eslintFolder);
 if (!patchForSpecificESLintVersion) process.exit();
