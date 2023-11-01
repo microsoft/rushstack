@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.38.2",
+      "tag": "@microsoft/api-extractor_v7.38.2",
+      "date": "Wed, 01 Nov 2023 23:11:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix line endings in published package."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.38.1",
       "tag": "@microsoft/api-extractor_v7.38.1",
       "date": "Mon, 30 Oct 2023 23:36:38 GMT",

@@ -2,6 +2,26 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.63.1",
+      "tag": "@rushstack/heft_v0.63.1",
+      "date": "Wed, 01 Nov 2023 23:11:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix line endings in published package."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.38.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.63.0",
       "tag": "@rushstack/heft_v0.63.0",
       "date": "Mon, 30 Oct 2023 23:36:37 GMT",
