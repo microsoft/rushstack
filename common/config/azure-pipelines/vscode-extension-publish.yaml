@@ -19,6 +19,9 @@ extends:
       - stage:
         jobs:
           - job:
+            pool:
+              name: publish-rushstack
+              os: linux
             steps:
               - checkout: self
                 persistCredentials: true
