@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.4.11",
+      "tag": "@rushstack/heft-storybook-plugin_v0.4.11",
+      "date": "Wed, 01 Nov 2023 23:11:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix line endings in published package."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.0` to `^0.63.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.10",
       "tag": "@rushstack/heft-storybook-plugin_v0.4.10",
       "date": "Mon, 30 Oct 2023 23:36:37 GMT",

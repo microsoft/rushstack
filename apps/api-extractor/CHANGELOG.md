@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 30 Oct 2023 23:36:38 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Nov 2023 23:11:35 GMT and should not be manually modified.
+
+## 7.38.2
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
 
 ## 7.38.1
 Mon, 30 Oct 2023 23:36:38 GMT
