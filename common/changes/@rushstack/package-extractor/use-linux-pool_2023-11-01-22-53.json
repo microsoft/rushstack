@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix line endings in published package.",
+      "type": "patch",
+      "packageName": "@rushstack/package-extractor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor",
+  "email": "iclanton@users.noreply.github.com"
+}

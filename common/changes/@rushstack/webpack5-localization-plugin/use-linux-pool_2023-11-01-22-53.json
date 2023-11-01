@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix line endings in published package.",
+      "type": "patch",
+      "packageName": "@rushstack/webpack5-localization-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
