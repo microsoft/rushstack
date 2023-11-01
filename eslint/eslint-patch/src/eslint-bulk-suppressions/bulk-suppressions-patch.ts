@@ -147,11 +147,11 @@ Please check file content, or delete file if suppressions are no longer needed.
 }
 
 function shouldWriteSuppression(fileAbsolutePath: string, suppression: Suppression): boolean {
-  if (process.env.ESLINT_BULK_SUPPRESS_RULES === undefined) return false;
+  if (process.env.ESLINT_BULK_SUPPRESS === undefined) return false;
 
   if (isSuppressed(fileAbsolutePath, suppression)) return false;
 
-  const rulesToSuppress = process.env.ESLINT_BULK_SUPPRESS_RULES.split(',');
+  const rulesToSuppress = process.env.ESLINT_BULK_SUPPRESS.split(',');
 
   if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
 
@@ -221,7 +221,7 @@ export function shouldBulkSuppress(params: {
   ruleId: string;
 }): boolean {
   // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
-  if (process.env.USE_ESLINT_BULK_SUPPRESSIONS === 'false') return false;
+  if (process.env.ESLINT_BULK_ENABLE === 'false') return false;
 
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory = findEslintrcDirectory(fileAbsolutePath);
@@ -243,7 +243,7 @@ export function shouldBulkSuppress(params: {
 }
 
 export function BulkSuppressionsCleanUp(params: { filename: string }): void {
-  if (process.env.CLEANUP_ESLINT_BULK_SUPPRESSIONS !== 'true') return;
+  if (process.env.ESLINT_BULK_CLEAN !== 'true') return;
 
   const { filename: fileAbsolutePath } = params;
   const suppressionsJson = readSuppressionsJson(fileAbsolutePath);

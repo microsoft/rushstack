@@ -1,12 +1,19 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
-import { makeSuppressCommand } from './suppress';
-import { makeCleanupCommand } from './cleanup';
+import { isCorrectCwd } from './utils/is-correct-cwd';
+import { suppress } from './suppress';
 
-const program = new Command();
+if (!isCorrectCwd) {
+  console.error(
+    '@rushstack/eslint-bulk: Please call this command from the directory that contains package.json'
+  );
+  process.exit(1);
+}
 
-program.addCommand(makeSuppressCommand());
+const subcommand = process.argv[2];
 
-program.addCommand(makeCleanupCommand());
-
-program.parse(process.argv);
+if (subcommand === 'suppress') {
+  suppress();
+} else {
+  console.error('@rushstack/eslint-bulk: Unknown subcommand: ' + subcommand);
+  process.exit(1);
+}

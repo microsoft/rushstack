@@ -8,8 +8,6 @@ export function findPatch(): string {
     const env = { ...process.env, ESLINT_BULK_FIND: 'true' };
     const stdout = execSync('echo "" | eslint --stdin --no-eslintrc', { env, stdio: 'pipe' });
 
-    console.log('stdout HERE:', stdout);
-
     const startDelimiter = 'ESLINT_BULK_STDOUT_START';
     const endDelimiter = 'ESLINT_BULK_STDOUT_END';
 
@@ -22,9 +20,9 @@ export function findPatch(): string {
     }
 
     throw new Error(
-      'Error finding patch path. Are you sure the eslint-bulk is installed in the package(s) that you are trying to lint?'
+      '@rushstack/eslint-bulk: Error finding patch path. Are you sure the eslint-bulk is installed in the package(s) that you are trying to lint?'
     );
   } catch (e: unknown) {
-    throw new Error('Error finding patch path: ' + (e as Error).message);
+    throw new Error('@rushstack/eslint-bulk: Error finding patch path: ' + (e as Error).message);
   }
 }

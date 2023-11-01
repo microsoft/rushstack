@@ -22,8 +22,18 @@
     },
     {
       "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
       "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor",
       "rule": "@typescript-eslint/explicit-member-accessibility"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject",
+      "rule": "@typescript-eslint/typedef"
     },
     {
       "file": "src/index.ts",
@@ -49,26 +59,6 @@
       "file": "src/index.ts",
       "scopeId": ".ExampleObjectType",
       "rule": "@typescript-eslint/consistent-type-definitions"
-    },
-    {
-      "file": "src/index.ts",
-      "scope": ".exampleObject2.exampleObjectMethod",
-      "rule": "@typescript-eslint/no-inferrable-types"
-    },
-    {
-      "file": "src/index.ts",
-      "scope": ".exampleObject2.exampleObjectProperty",
-      "rule": "@typescript-eslint/no-empty-function"
-    },
-    {
-      "file": "src/index.ts",
-      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2",
-      "rule": "@typescript-eslint/typedef"
-    },
-    {
-      "file": "src/index.ts",
-      "scopeId": ".AbsurdClass.absurdClassMethod.AbsurdClass2.constructor.absurdObject",
-      "rule": "@typescript-eslint/typedef"
     },
     {
       "file": "src/index.ts",

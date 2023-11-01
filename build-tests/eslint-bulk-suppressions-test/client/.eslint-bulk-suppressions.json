@@ -134,16 +134,6 @@
       "file": "src/index.ts",
       "scopeId": ".z",
       "rule": "@typescript-eslint/explicit-function-return-type"
-    },
-    {
-      "file": "src/index.ts",
-      "scope": ".",
-      "rule": "prefer-const"
-    },
-    {
-      "file": "src/index.ts",
-      "scope": ".exampleFunction",
-      "rule": "@typescript-eslint/ban-types"
     }
   ]
 }
