@@ -18,7 +18,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/jest": "29.2.5",
     "@types/webpack-env": "1.18.0",
-    "eslint": "~8.7.0",
+    "eslint": "~8.48.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~5.0.4"

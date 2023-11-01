@@ -30,6 +30,6 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
-    "eslint": "~8.7.0"
+    "eslint": "~8.48.0"
   }
 }

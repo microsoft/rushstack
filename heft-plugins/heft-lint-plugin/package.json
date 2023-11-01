@@ -30,7 +30,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
-    "eslint": "~8.7.0",
+    "eslint": "~8.48.0",
     "tslint": "~5.20.1",
     "typescript": "~5.0.4"
   }

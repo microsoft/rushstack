@@ -15,6 +15,6 @@
     "@rushstack/heft-typescript-plugin": "*",
     "typescript": "~5.0.4",
     "tslint": "~5.20.1",
-    "eslint": "~8.7.0"
+    "eslint": "~8.48.0"
   }
 }
