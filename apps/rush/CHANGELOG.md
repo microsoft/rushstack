@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 30 Oct 2023 23:37:07 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Nov 2023 23:29:47 GMT and should not be manually modified.
+
+## 5.110.1
+Wed, 01 Nov 2023 23:29:47 GMT
+
+### Updates
+
+- Fix line endings in published package.
 
 ## 5.110.0
 Mon, 30 Oct 2023 23:37:07 GMT
