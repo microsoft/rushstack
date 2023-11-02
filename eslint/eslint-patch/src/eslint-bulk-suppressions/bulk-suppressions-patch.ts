@@ -318,5 +318,5 @@ export function findAndConsoleLogPatchPath(): void {
   const startDelimiter = 'ESLINT_BULK_STDOUT_START';
   const endDelimiter = 'ESLINT_BULK_STDOUT_END';
 
-  console.log(`${startDelimiter}${__dirname}${endDelimiter}`);
+  console.log(`${startDelimiter}${path.join(__dirname, 'cli')}${endDelimiter}`);
 }

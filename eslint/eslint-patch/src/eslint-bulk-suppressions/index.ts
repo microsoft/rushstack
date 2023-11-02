@@ -2,7 +2,9 @@ import path from 'path';
 import { eslintFolder } from '../_patch-base';
 // @ts-ignore
 // import { Linter as LinterPatch } from './linter-patch-for-eslint-v8.7.0';
-import { patchClass, whichPatchToLoad } from './bulk-suppressions-patch';
+import { findAndConsoleLogPatchPath, patchClass, whichPatchToLoad } from './bulk-suppressions-patch';
+
+console.log('HELLO THERE');
 
 if (!eslintFolder) {
   console.error(
