@@ -2202,10 +2202,6 @@ importers:
         version: 5.0.4
 
   ../../eslint/eslint-bulk:
-    dependencies:
-      commander:
-        specifier: ~11.1.0
-        version: 11.1.0
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -2216,9 +2212,6 @@ importers:
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
-      eslint:
-        specifier: ~8.7.0
-        version: 8.7.0
 
   ../../eslint/eslint-config:
     dependencies:

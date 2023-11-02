@@ -9,7 +9,7 @@ environment variables to interface with the patch.
 ## eslint-bulk suppress
 
 Use this command to automatically generate bulk suppressions for the given files and given rules.
-Supply the files as the main argument. The "files" argument is a glob pattern thatfollows the same
+Supply the files as the main argument. The "files" argument is a glob pattern that follows the same
 rules as the "eslint" command.
 
 ```bash

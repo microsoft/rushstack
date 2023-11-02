@@ -2,6 +2,12 @@
 import { clean } from './clean';
 import { suppress } from './suppress';
 import { isCorrectCwd } from './utils/is-correct-cwd';
+import { printHelp } from './utils/print-help';
+
+if (process.argv.includes('-h') || process.argv.includes('-H') || process.argv.includes('--help')) {
+  printHelp();
+  process.exit(0);
+}
 
 if (!isCorrectCwd(process.cwd())) {
   throw new Error(
@@ -9,6 +15,7 @@ if (!isCorrectCwd(process.cwd())) {
   );
 }
 const subcommand = process.argv[2];
+
 if (subcommand === 'suppress') {
   suppress();
 } else if (subcommand === 'clean') {

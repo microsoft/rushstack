@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
-function findPatchPath(): string {
+function findPatchPath() {
   let eslintrcPath;
   if (fs.existsSync(path.join(process.cwd(), '.eslintrc.js'))) {
     eslintrcPath = '.eslintrc.js';
@@ -18,11 +18,11 @@ function findPatchPath(): string {
 
   const env = { ...process.env, ESLINT_BULK_FIND: 'true' };
 
-  let stdout: Buffer;
+  let stdout;
   try {
     stdout = execSync(`echo "" | eslint --stdin --config ${eslintrcPath}`, { env, stdio: 'pipe' });
   } catch (e) {
-    console.error('@rushstack/eslint-bulk: Error finding patch path: ' + (e as Error).message);
+    console.error('@rushstack/eslint-bulk: Error finding patch path: ' + e.message);
     process.exit(1);
   }
 
@@ -49,6 +49,6 @@ try {
   const command = `node ${patchPath} ${args}`;
   execSync(command, { stdio: 'inherit' });
 } catch (e) {
-  console.error(`@rushstack/eslint-bulk: Error running patch at ${patchPath}:\n` + (e as Error).message);
+  console.error(`@rushstack/eslint-bulk: Error running patch at ${patchPath}:\n` + e.message);
   process.exit(1);
 }

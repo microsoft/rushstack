@@ -1,36 +1,7 @@
 #!/usr/bin/env node
 import { ExecException, exec } from 'child_process';
-import { whichEslint } from './utils/which-eslint';
-import { wrapWordsToLines } from './utils/wrap-words-to-lines';
-
-function printSuppressHelp() {
-  const help = `Usage: eslint-bulk suppress [options] <files...>
-
-This command is a thin wrapper around ESLint that communicates with @rushstack/eslint-patch to either generate a new .eslint-bulk-suppressions.json file or add suppression entries to the existing file. Specify the files and rules you want to suppress.
-
-Argument:
-  <files...>
-    Glob patterns for files to suppress, same as eslint files argument. Should be relative to the project root.
-
-Options:
-  -h, -H, --help
-    Display this help message.
-
-  -R, --rule
-    The full name of the ESLint rule you want to bulk-suppress. Specify multiple rules with --rule rule1 --rule rule2.
-
-  -A, --all
-    Bulk-suppress all rules in the specified file patterns.
-    
-  --unsafe-eslint-version
-    Use if you don't have a supported version of ESLint installed in your local package. This option will search around the file system for other local or global ESLint installations, or use npx to run ESLint from remote.
-  `;
-
-  const wrapped = wrapWordsToLines(help);
-  for (const line of wrapped) {
-    console.log(line);
-  }
-}
+import { getEslintCli } from './utils/get-eslint-cli';
+import { printSuppressHelp } from './utils/print-help';
 
 export function suppress() {
   const args = process.argv.slice(3);
@@ -44,7 +15,6 @@ export function suppress() {
   const parsedArgs = args.reduce<{
     rules: string[];
     all: boolean;
-    unsafeEslintVersion: boolean;
     files: string[];
   }>(
     (acc, arg, index, arr) => {
@@ -52,8 +22,6 @@ export function suppress() {
         acc.rules.push(arr[index + 1]);
       } else if (arg === '--all') {
         acc.all = true;
-      } else if (arg === '--unsafe-eslint-version') {
-        acc.unsafeEslintVersion = true;
       } else if (arg.startsWith('--')) {
         throw new Error(`@rushstack/eslint-bulk: Unknown option: ${arg}`);
       } else {
@@ -61,7 +29,7 @@ export function suppress() {
       }
       return acc;
     },
-    { rules: [], all: false, unsafeEslintVersion: false, files: [] }
+    { rules: [], all: false, files: [] }
   );
 
   if (parsedArgs.files.length === 0) {
@@ -76,7 +44,7 @@ export function suppress() {
     );
   }
 
-  const eslintCLI = whichEslint(process.cwd(), parsedArgs.unsafeEslintVersion);
+  const eslintCLI = getEslintCli(process.cwd());
 
   // Find the index of the last argument that starts with '--'
   const lastOptionIndex = args
