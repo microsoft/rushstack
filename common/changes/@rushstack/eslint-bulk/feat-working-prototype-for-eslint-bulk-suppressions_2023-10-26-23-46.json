@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-bulk",
-      "comment": "eslint-bulk-suppressions",
+      "comment": "Initial release of `@rushstack/eslint-bulk` package",
       "type": "minor"
     }
   ],

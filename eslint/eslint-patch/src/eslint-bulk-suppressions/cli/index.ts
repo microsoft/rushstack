@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { clean } from './clean';
 import { suppress } from './suppress';
 import { isCorrectCwd } from './utils/is-correct-cwd';

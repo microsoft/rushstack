@@ -4,7 +4,6 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "sourceMap": true,

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import type { TSESTree } from '@typescript-eslint/types';
 
 /** https://twitter.com/branmcconnell/status/1623077891423731712 */
