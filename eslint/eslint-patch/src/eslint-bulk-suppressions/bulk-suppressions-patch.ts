@@ -266,32 +266,34 @@ export function BulkSuppressionsCleanUp(params: { filename: string }): void {
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
 export function requireFromPathToLinterJS(importPath: string): any {
-  if (!eslintFolder) return require(importPath);
-  const pathToLinterFolder = path.join(eslintFolder, 'lib/linter');
+  if (!eslintFolder) {
+    return require(importPath);
+  }
+  const pathToLinterFolder = path.join(eslintFolder, 'lib', 'linter');
   const moduleAbsolutePath = require.resolve(importPath, { paths: [pathToLinterFolder] });
   return require(moduleAbsolutePath);
 }
 
-export function whichPatchToLoad(eslintFolder: string): string | null {
-  const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
-  const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
-  const eslintPackageObject = JSON.parse(eslintPackageJson);
-  const eslintPackageVersion = eslintPackageObject.version;
+// export function whichPatchToLoad(eslintFolder: string): string | null {
+//   const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
+//   const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
+//   const eslintPackageObject = JSON.parse(eslintPackageJson);
+//   const eslintPackageVersion = eslintPackageObject.version;
 
-  if (eslintPackageVersion === '8.6.0' || eslintPackageVersion === '8.7.0') {
-    return 'linter-patch-for-eslint-v8.6.0-to-v8.7.0.js';
-  }
-  if (
-    eslintPackageVersion === '8.21.0' ||
-    eslintPackageVersion === '8.22.0' ||
-    eslintPackageVersion === '8.23.0' ||
-    eslintPackageVersion === '8.23.1'
-  ) {
-    return 'linter-patch-for-eslint-v8.21.0-to-v8.23.1.js';
-  }
+//   if (eslintPackageVersion === '8.6.0' || eslintPackageVersion === '8.7.0') {
+//     return 'linter-patch-for-eslint-v8.6.0-to-v8.7.0.js';
+//   }
+//   if (
+//     eslintPackageVersion === '8.21.0' ||
+//     eslintPackageVersion === '8.22.0' ||
+//     eslintPackageVersion === '8.23.0' ||
+//     eslintPackageVersion === '8.23.1'
+//   ) {
+//     return 'linter-patch-for-eslint-v8.21.0-to-v8.23.1.js';
+//   }
 
-  return null;
-}
+//   return null;
+// }
 
 export function patchClass<T, U extends T>(originalClass: new () => T, patchedClass: new () => U): void {
   // Get all the property names of the patched class prototype
@@ -311,15 +313,4 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
       Object.defineProperty(originalClass.prototype, prop, descriptor);
     }
   }
-}
-
-export function findAndConsoleLogPatchPath(): void {
-  if (process.env.ESLINT_BULK_FIND !== 'true') {
-    return;
-  }
-
-  const startDelimiter = 'ESLINT_BULK_STDOUT_START';
-  const endDelimiter = 'ESLINT_BULK_STDOUT_END';
-
-  console.log(`${startDelimiter}${path.join(__dirname, 'cli')}${endDelimiter}`);
 }

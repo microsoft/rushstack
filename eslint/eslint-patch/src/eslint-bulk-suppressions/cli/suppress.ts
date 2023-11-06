@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
@@ -22,8 +20,10 @@ export function suppress() {
     files: string[];
   }>(
     (acc, arg, index, arr) => {
-      if (arg === '--rule' && arr[index + 1]) {
-        acc.rules.push(arr[index + 1]);
+      if (arg === '--rule') {
+        // continue because next arg should be the rule
+      } else if (index > 0 && arr[index - 1] === '--rule' && arr[index + 1]) {
+        acc.rules.push(arg);
       } else if (arg === '--all') {
         acc.all = true;
       } else if (arg.startsWith('--')) {

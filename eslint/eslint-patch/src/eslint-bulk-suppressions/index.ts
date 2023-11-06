@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'path';
 import { eslintFolder } from '../_patch-base';
-// @ts-ignore
-// import { Linter as LinterPatch } from './linter-patch-for-eslint-v8.7.0';
-import { findAndConsoleLogPatchPath, patchClass, whichPatchToLoad } from './bulk-suppressions-patch';
-
-console.log('HELLO THERE');
+import {
+  findAndConsoleLogPatchPathCli,
+  getPathToLinterJS,
+  getPathToGeneratedPatch,
+  getNameOfGeneratedPatchFile
+} from './path-utils';
+import { patchClass } from './bulk-suppressions-patch';
+import { generatePatchedFileIfDoesntExist } from './generate-patched-file';
 
 if (!eslintFolder) {
   console.error(
@@ -15,16 +17,19 @@ if (!eslintFolder) {
   );
   process.exit(1);
 }
+
 if (process.env.ESLINT_BULK_FIND === 'true') {
-  findAndConsoleLogPatchPath();
+  findAndConsoleLogPatchPathCli(__dirname);
   process.exit(0);
 }
 
-const patchForSpecificESLintVersion = whichPatchToLoad(eslintFolder);
-if (!patchForSpecificESLintVersion) process.exit();
-const { Linter: LinterPatch } = require(`./${patchForSpecificESLintVersion}`);
+const pathToLinterJS = getPathToLinterJS();
+const nameOfGeneratedPatchFile = getNameOfGeneratedPatchFile();
 
-const pathToLinterJs = path.join(eslintFolder, 'lib/linter/linter.js');
-const { Linter } = require(pathToLinterJs);
+const pathToGeneratedPatch = getPathToGeneratedPatch(__dirname, nameOfGeneratedPatchFile);
+generatePatchedFileIfDoesntExist(pathToLinterJS, pathToGeneratedPatch);
+const { Linter: LinterPatch } = require(pathToGeneratedPatch);
+
+const { Linter } = require(pathToLinterJS);
 
 patchClass(Linter, LinterPatch);
