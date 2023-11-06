@@ -274,27 +274,6 @@ export function requireFromPathToLinterJS(importPath: string): any {
   return require(moduleAbsolutePath);
 }
 
-// export function whichPatchToLoad(eslintFolder: string): string | null {
-//   const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
-//   const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
-//   const eslintPackageObject = JSON.parse(eslintPackageJson);
-//   const eslintPackageVersion = eslintPackageObject.version;
-
-//   if (eslintPackageVersion === '8.6.0' || eslintPackageVersion === '8.7.0') {
-//     return 'linter-patch-for-eslint-v8.6.0-to-v8.7.0.js';
-//   }
-//   if (
-//     eslintPackageVersion === '8.21.0' ||
-//     eslintPackageVersion === '8.22.0' ||
-//     eslintPackageVersion === '8.23.0' ||
-//     eslintPackageVersion === '8.23.1'
-//   ) {
-//     return 'linter-patch-for-eslint-v8.21.0-to-v8.23.1.js';
-//   }
-
-//   return null;
-// }
-
 export function patchClass<T, U extends T>(originalClass: new () => T, patchedClass: new () => U): void {
   // Get all the property names of the patched class prototype
   let patchedProperties = Object.getOwnPropertyNames(patchedClass.prototype);

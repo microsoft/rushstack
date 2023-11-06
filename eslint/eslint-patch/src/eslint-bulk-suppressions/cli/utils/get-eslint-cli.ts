@@ -3,7 +3,7 @@
 
 import path from 'path';
 
-const SUPPORTED_VERSIONS = ['8.6.0', '8.7.0', '8.21.0', '8.22.0', '8.23.0', '8.23.1'];
+const TESTED_VERSIONS = ['8.6.0', '8.7.0', '8.21.0', '8.22.0', '8.23.0', '8.23.1'];
 
 export function getEslintCli(packagePath: string): string {
   // Try to find a local ESLint installation, the one that should be listed as a dev dependency in package.json
@@ -15,11 +15,9 @@ export function getEslintCli(packagePath: string): string {
     const localEslintVersion = eslintPackageJson.version;
     const eslintExecutable = path.join(localEslintPath, 'bin', 'eslint.js');
 
-    if (!SUPPORTED_VERSIONS.includes(localEslintVersion)) {
-      throw new Error(
-        `@rushstack/eslint-bulk: Unable to find a supported local ESLint installation. Supported versions are ${SUPPORTED_VERSIONS.join(
-          ', '
-        )}`
+    if (!TESTED_VERSIONS.includes(localEslintVersion)) {
+      console.warn(
+        '@rushstack/eslint-bulk: Be careful, the installed ESLint version has not been tested with eslint-bulk.'
       );
     }
     return `node ${eslintExecutable}`;
