@@ -82,21 +82,33 @@ and recommended approach.
 
 A tool that allows bulk suppression of ESLint warnings/errors in a large, old codebase when introducing new ESLint rules.
 
-
 ## What it does
 
-This tool is designed to address the issue of introducing new ESLint rules to a large, old codebase, which often results in hundreds to tens of thousands of retroactive issues being reported by ESLint. This can clutter the ESLint output, making it difficult to read and potentially causing developers to overlook new ESLint issues. It also makes it impractical to use merge request pipelines that block ESLint warnings/errors.
+This tool is designed to address the issue of introducing new ESLint rules to a large, old codebase, which often
+results in hundreds to tens of thousands of retroactive issues being reported by ESLint. This can clutter the
+ESLint output, making it difficult to read and potentially causing developers to overlook new ESLint issues. It
+also makes it impractical to use merge request pipelines that block ESLint warnings/errors.
 
-The tool provides a mechanism for recording all retroactively introduced ESLint warnings/errors in a "bulk suppressions" file, hiding them from the ESLint output. This allows developers to still get most of the benefits of ESLint, as any new code written will be annotated by ESLint and can be fixed in bite-sized portions. It also allows the use of merge request pipelines to block newly written error-prone code without blocking legacy code that has been battle-tested.
+The tool provides a mechanism for recording all retroactively introduced ESLint warnings/errors in a
+"bulk suppressions" file, hiding them from the ESLint output. This allows developers to still get most of the
+benefits of ESLint, as any new code written will be annotated by ESLint and can be fixed in bite-sized portions.
+It also allows the use of merge request pipelines to block newly written error-prone code without blocking legacy
+code that has been battle-tested.
 
 ## Why it's a patch
-The bulk suppressions feature is implemented as a monkey-patch, inspired by the modern-module-resolution implementation. We prefer it as a patch because it allows users to opt-in to using the tool at their own discretion. Similar to modern-module-resolution, the use case is much more pronounced in large codebases where ESLint warnings/errors can appear at magnitudes of thousands rather than tens. Besides reducing bundle size, this also allows us to gauge interest in this tool. If there's a lot of interest, we can submit an ESLint RFC.
+The bulk suppressions feature is implemented as a monkey-patch, inspired by the modern-module-resolution
+implementation. We prefer it as a patch because it allows users to opt-in to using the tool at their own discretion.
+Similar to modern-module-resolution, the use case is much more pronounced in large codebases where ESLint
+warnings/errors can appear at magnitudes of thousands rather than tens. Besides reducing bundle size, this also
+allows us to gauge interest in this tool.
 
-This approach inevitably results in forwards compatibility issues with versions of ESLint. The patch has some logic to determine which version of ESLint you're using and uses the corresponding patch file.
+This approach inevitably results in forwards compatibility issues with versions of ESLint. The patch has
+some logic to determine which version of ESLint you're using and uses the corresponding patch file.
 
 ## How to use it
 
-To use the tool, you need to add a `require()` call to the top of the **.eslintrc.js** file for each project that you want to use the tool with, for example:
+To use the tool, you need to add a `require()` call to the top of the **.eslintrc.js** file for each project
+that you want to use the tool with, for example:
 
 **.eslintrc.js**
 ```js
@@ -111,22 +123,33 @@ module.exports = {
 };
 ```
 
-You can then use the tool to generate a new **.eslint-bulk-suppressions.json** file (or append to an existing file) that tracks the specified rules for your project by prepending your eslint command with `ESLINT_BULK_SUPPRESS_RULES={rule_name1},{rulename2},{rulename3}`, for example:
-
+We also highly recommend globally installing the companion CLI tool to your local system with
 ```bash
-ESLINT_BULK_SUPPRESS_RULES={rule_name1},{rulename2},{rulename3} eslint path/to/directory
+npm i -g @rushstack/eslint-bulk
 ```
 
-You can also use a wildcard character (`*`) to suppress all rules:
+The **eslint-bulk** package is a set of command line tools to use with the ESLint bulk suppressions
+patch. The commands are optional as they are just a thin wrapper over eslint shipped with the correct
+environment variables to interface with the patch.
+
+## eslint-bulk suppress
+
+Use this command to automatically either generate a new .eslint-bulk-suppressions.json file next to
+the corresponding .eslintrc.js file for the given files and given rules. Supply the files as the main
+argument. The "files" argument is a glob pattern that follows the same rules as the "eslint" command.
 
 ```bash
-ESLINT_BULK_SUPPRESS_RULES=* eslint path/to/directory
+eslint-bulk suppress path/to/file1 path/to/file2 path/to/directory --rule rule1 --rule rule2
 ```
 
-To temporarily turn off the bulk suppressions functionality, prepend your eslint command with `USE_ESLINT_BULK_SUPPRESSIONS=false`, for example:
+## eslint-bulk cleanup
+
+Use this command to automatically delete unused suppression entries for the given files in the
+corresponding .eslint-bulk-suppressions.json file(s). Supply the files as the main argument. The
+"files" argument is a glob pattern thatfollows the same rules as the "eslint" command.
 
 ```bash
-USE_ESLINT_BULK_SUPPRESSIONS=false rushx eslint
+eslint-bulk cleanup path/to/file1 path/to/file2 path/to/directory
 ```
 
 # Links

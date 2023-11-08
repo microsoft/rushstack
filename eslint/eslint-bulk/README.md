@@ -20,7 +20,7 @@ rules as the "eslint" command.
 
 Use this command to automatically delete unused suppression entries for the given files in the
 corresponding .eslint-bulk-suppressions.json file(s). Supply the files as the main argument. The
-"files" argument is a glob pattern thatfollows the same rules as the "eslint" command.
+"files" argument is a glob pattern that follows the same rules as the "eslint" command.
 
 ```bash
   eslint-bulk cleanup path/to/file1 path/to/file2 path/to/directory
