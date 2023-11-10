@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.38.3",
+      "tag": "@microsoft/api-extractor_v7.38.3",
+      "date": "Fri, 10 Nov 2023 18:02:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where \"ae-undocumented\" was incorrectly reported for private members"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.38.2",
       "tag": "@microsoft/api-extractor_v7.38.2",
       "date": "Wed, 01 Nov 2023 23:11:35 GMT",
