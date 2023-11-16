@@ -55,7 +55,7 @@ export interface ILegacySkipPluginOptions {
   terminal: ITerminal;
   changedProjectsOnly: boolean;
   isIncrementalBuildAllowed: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
+  allowWarningsInSuccessfulBuild?: boolean;
 }
 
 /**
