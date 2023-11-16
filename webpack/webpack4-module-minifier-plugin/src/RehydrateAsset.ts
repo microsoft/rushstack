@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CachedSource, ConcatSource, ReplaceSource, Source } from 'webpack-sources';
+import { CachedSource, ConcatSource, ReplaceSource, type Source } from 'webpack-sources';
 
 import { CHUNK_MODULES_TOKEN } from './Constants';
-import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
+import type { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
 
 /**
  * Rehydrates an asset with minified modules.
@@ -46,7 +46,8 @@ export function rehydrateAsset(
   const validIdRegex: RegExp = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
   const source: ConcatSource = new ConcatSource(banner, prefix);
-  let charOffset: number = source.size();
+  // Source.size() is in bytes, we want characters
+  let charOffset: number = source.source().length;
 
   const firstModuleId: string | number = modules[0];
   const lastModuleId: string | number = modules[modules.length - 1];
@@ -108,7 +109,9 @@ export function rehydrateAsset(
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
       const moduleCode: Source | string = item ? item.source : emptyFunction;
-      const charLength: number = typeof moduleCode === 'string' ? moduleCode.length : moduleCode.size();
+      // Source.size() is in bytes, we want characters
+      const charLength: number =
+        typeof moduleCode === 'string' ? moduleCode.length : moduleCode.source().toString().length;
 
       if (emitRenderInfo) {
         asset.renderInfo.set(id, {
@@ -141,7 +144,9 @@ export function rehydrateAsset(
 
       const item: IModuleInfo | undefined = moduleMap.get(id);
       const moduleCode: Source | string = item ? item.source : emptyFunction;
-      const charLength: number = typeof moduleCode === 'string' ? moduleCode.length : moduleCode.size();
+      // Source.size() is in bytes, we want characters
+      const charLength: number =
+        typeof moduleCode === 'string' ? moduleCode.length : moduleCode.source().toString().length;
 
       if (useConcat && delta + 1 > fillerArrayThreshold) {
         if (concatInserted) {
@@ -201,6 +206,7 @@ function handleExternals(source: Source, asset: IAssetInfo): Source {
       const mapped: string | undefined = externalNames.get(id);
 
       if (mapped === undefined) {
+        // eslint-disable-next-line no-console
         console.error(`Missing minified external for ${id} in ${asset.fileName}!`);
       } else {
         replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);

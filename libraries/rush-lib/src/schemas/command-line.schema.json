@@ -93,7 +93,7 @@
             },
             "disableBuildCache": {
               "title": "Disable build cache.",
-              "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders.",
+              "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders. If the build cache is not configured, this also disables the legacy skip detection logic.",
               "type": "boolean"
             }
           }
@@ -193,6 +193,11 @@
               "items": {
                 "type": "string"
               }
+            },
+            "disableBuildCache": {
+              "title": "Disable build cache.",
+              "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders. If the build cache is not configured, this also disables the legacy skip detection logic.",
+              "type": "boolean"
             },
             "watchOptions": {
               "title": "Watch Options",

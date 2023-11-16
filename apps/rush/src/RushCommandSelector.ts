@@ -3,7 +3,7 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import * as rushLib from '@microsoft/rush-lib';
+import type * as rushLib from '@microsoft/rush-lib';
 
 type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
 

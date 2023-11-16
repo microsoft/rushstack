@@ -6,11 +6,11 @@
 
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { INodePackageJson } from '@rushstack/node-core-library';
+import { IRigConfig } from '@rushstack/rig-package';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 
@@ -144,6 +144,7 @@ export const enum ExtractorMessageId {
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
     SetterWithDocs = "ae-setter-with-docs",
+    Undocumented = "ae-undocumented",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link",
@@ -241,7 +242,7 @@ export interface IConfigTsdocMetadata {
 // @public
 export interface IExtractorConfigLoadForFolderOptions {
     packageJsonLookup?: PackageJsonLookup;
-    rigConfig?: RigConfig;
+    rigConfig?: IRigConfig;
     startingFolder: string;
 }
 

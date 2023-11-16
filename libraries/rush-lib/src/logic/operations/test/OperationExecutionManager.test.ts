@@ -10,7 +10,10 @@ import { Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
-import { OperationExecutionManager, IOperationExecutionManagerOptions } from '../OperationExecutionManager';
+import {
+  OperationExecutionManager,
+  type IOperationExecutionManagerOptions
+} from '../OperationExecutionManager';
 import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
 import { _printTimeline } from '../ConsoleTimelinePlugin';
 import { OperationStatus } from '../OperationStatus';
@@ -26,7 +29,6 @@ Utilities.getTimeInMs = mockGetTimeInMs;
 
 let mockTimeInMs: number = 0;
 mockGetTimeInMs.mockImplementation(() => {
-  console.log('CALLED mockGetTimeInMs');
   mockTimeInMs += 100;
   return mockTimeInMs;
 });
@@ -124,6 +126,42 @@ describe(OperationExecutionManager.name, () => {
     });
   });
 
+  describe('Blocking', () => {
+    it('Failed operations block', async () => {
+      const failingOperation = new Operation({
+        runner: new MockOperationRunner('fail', async () => {
+          return OperationStatus.Failure;
+        })
+      });
+
+      const blockedRunFn: jest.Mock = jest.fn();
+
+      const blockedOperation = new Operation({
+        runner: new MockOperationRunner('blocked', blockedRunFn)
+      });
+
+      blockedOperation.addDependency(failingOperation);
+
+      const manager: OperationExecutionManager = new OperationExecutionManager(
+        new Set([failingOperation, blockedOperation]),
+        {
+          quietMode: false,
+          debugMode: false,
+          parallelism: 1,
+          changedProjectsOnly: false,
+          destination: mockWritable
+        }
+      );
+
+      const result = await manager.executeAsync();
+      expect(result.status).toEqual(OperationStatus.Failure);
+      expect(blockedRunFn).not.toHaveBeenCalled();
+      expect(result.operationResults.size).toEqual(2);
+      expect(result.operationResults.get(failingOperation)?.status).toEqual(OperationStatus.Failure);
+      expect(result.operationResults.get(blockedOperation)?.status).toEqual(OperationStatus.Blocked);
+    });
+  });
+
   describe('Warning logging', () => {
     describe('Fail on warning', () => {
       beforeEach(() => {
@@ -212,7 +250,7 @@ describe(OperationExecutionManager.name, () => {
         );
 
         const result: IExecutionResult = await executionManager.executeAsync();
-        _printTimeline(mockTerminal, result);
+        _printTimeline({ terminal: mockTerminal, result, cobuildConfiguration: undefined });
         _printOperationStatus(mockTerminal, result);
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');

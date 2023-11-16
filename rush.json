@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.100.0",
+  "rushVersion": "5.109.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "7.26.1",
+  "pnpmVersion": "8.7.6",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
+  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.9.0 <21.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -63,7 +63,7 @@
    * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
    * to disable Rush's warning.
    */
-  // "suppressNodeLtsWarning": false,
+  "suppressNodeLtsWarning": false,
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -139,7 +139,8 @@
      */
     "reviewCategories": [
       "libraries", // library projects that ship
-      "tests" // non-shipping test projects
+      "tests", // non-shipping test projects
+      "vscode-extensions" // vscode extensions
     ],
 
     /**
@@ -238,26 +239,36 @@
    */
   "eventHooks": {
     /**
-     * The list of shell commands to run before the Rush installation starts
+     * A list of shell commands to run before "rush install" or "rush update" starts installation
      */
     "preRushInstall": [
       // "common/scripts/pre-rush-install.js"
     ],
 
     /**
-     * The list of shell commands to run after the Rush installation finishes
+     * A list of shell commands to run after "rush install" or "rush update" finishes installation
      */
     "postRushInstall": [],
 
     /**
-     * The list of shell commands to run before the Rush build command starts
+     * A list of shell commands to run before "rush build" or "rush rebuild" starts building
      */
     "preRushBuild": [],
 
     /**
-     * The list of shell commands to run after the Rush build command finishes
+     * A list of shell commands to run after "rush build" or "rush rebuild" finishes building
      */
-    "postRushBuild": []
+    "postRushBuild": [],
+
+    /**
+     * A list of shell commands to run before the "rushx" command starts
+     */
+    "preRushx": [],
+
+    /**
+     * A list of shell commands to run after the "rushx" command finishes
+     */
+    "postRushx": []
   },
 
   /**
@@ -472,31 +483,36 @@
       "packageName": "api-documenter-test",
       "projectFolder": "build-tests/api-documenter-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-documenter-scenarios",
       "projectFolder": "build-tests/api-documenter-scenarios",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib1-test",
       "projectFolder": "build-tests/api-extractor-lib1-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib2-test",
       "projectFolder": "build-tests/api-extractor-lib2-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib3-test",
       "projectFolder": "build-tests/api-extractor-lib3-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib4-test",
@@ -514,35 +530,82 @@
       "packageName": "api-extractor-scenarios",
       "projectFolder": "build-tests/api-extractor-scenarios",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-01",
       "projectFolder": "build-tests/api-extractor-test-01",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-02",
       "projectFolder": "build-tests/api-extractor-test-02",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-03",
       "projectFolder": "build-tests/api-extractor-test-03",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-04",
       "projectFolder": "build-tests/api-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
+      "packageName": "eslint-7-7-test",
+      "projectFolder": "build-tests/eslint-7-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-7-11-test",
+      "projectFolder": "build-tests/eslint-7-11-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
       "packageName": "eslint-7-test",
       "projectFolder": "build-tests/eslint-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-8-test",
+      "projectFolder": "build-tests/eslint-8-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-01",
+      "projectFolder": "build-tests/package-extractor-test-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-02",
+      "projectFolder": "build-tests/package-extractor-test-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-03",
+      "projectFolder": "build-tests/package-extractor-test-03",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "package-extractor-test-04",
+      "projectFolder": "build-tests/package-extractor-test-04",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -615,6 +678,12 @@
       "projectFolder": "eslint/eslint-config",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "local-eslint-config",
+      "projectFolder": "eslint/local-eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
     {
       "packageName": "@rushstack/eslint-patch",
@@ -767,12 +836,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "hashed-folder-copy-plugin-webpack4-test",
-      "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack4-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "hashed-folder-copy-plugin-webpack5-test",
       "projectFolder": "build-tests/hashed-folder-copy-plugin-webpack5-test",
       "reviewCategory": "tests",
@@ -817,6 +880,12 @@
     {
       "packageName": "rush-project-change-analyzer-test",
       "projectFolder": "build-tests/rush-project-change-analyzer-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-redis-cobuild-plugin-integration-test",
+      "projectFolder": "build-tests/rush-redis-cobuild-plugin-integration-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -952,6 +1021,13 @@
       "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/operation-graph",
+      "projectFolder": "libraries/operation-graph",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
@@ -1058,6 +1134,18 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "local-node-rig",
+      "projectFolder": "rigs/local-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "local-web-rig",
+      "projectFolder": "rigs/local-web-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "rush-plugins" folder (alphabetical order)
     {
@@ -1085,10 +1173,28 @@
       "shouldPublish": false
     },
     {
+      "packageName": "@rushstack/rush-redis-cobuild-plugin",
+      "projectFolder": "rush-plugins/rush-redis-cobuild-plugin",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@rushstack/rush-serve-plugin",
       "projectFolder": "rush-plugins/rush-serve-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
+    },
+
+    // "vscode-extensions" folder (alphabetical order)
+    {
+      "packageName": "rushstack",
+      "projectFolder": "vscode-extensions/rush-vscode-extension",
+      "reviewCategory": "vscode-extensions"
+    },
+    {
+      "packageName": "@rushstack/rush-vscode-command-webview",
+      "projectFolder": "vscode-extensions/rush-vscode-command-webview",
+      "reviewCategory": "vscode-extensions"
     },
 
     // "webpack" folder (alphabetical order)

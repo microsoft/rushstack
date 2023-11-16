@@ -3,14 +3,20 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { FileConstants, FileSystem, IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
+import {
+  FileConstants,
+  FileSystem,
+  type IPackageJson,
+  JsonFile,
+  LockFile
+} from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
-import { PackageManagerName } from '../../api/packageManager/PackageManager';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { PackageManagerName } from '../../api/packageManager/PackageManager';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
-import { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
+import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { merge } from '../../utilities/objectUtilities';
 
@@ -131,6 +137,7 @@ export class InstallHelpers {
       };
     } else {
       logIfConsoleOutputIsNotRestricted = (message?: string) => {
+        // eslint-disable-next-line no-console
         console.log(message);
       };
     }
@@ -236,27 +243,37 @@ export class InstallHelpers {
       // eslint-disable-next-line guard-for-in
       for (const envVar in environmentVariables) {
         let setEnvironmentVariable: boolean = true;
+        // eslint-disable-next-line no-console
         console.log(`\nProcessing definition for environment variable: ${envVar}`);
 
         if (baseEnv.hasOwnProperty(envVar)) {
           setEnvironmentVariable = false;
+          // eslint-disable-next-line no-console
           console.log(`Environment variable already defined:`);
+          // eslint-disable-next-line no-console
           console.log(`  Name: ${envVar}`);
+          // eslint-disable-next-line no-console
           console.log(`  Existing value: ${baseEnv[envVar]}`);
+          // eslint-disable-next-line no-console
           console.log(`  Value set in rush.json: ${environmentVariables[envVar].value}`);
 
           if (environmentVariables[envVar].override) {
             setEnvironmentVariable = true;
+            // eslint-disable-next-line no-console
             console.log(`Overriding the environment variable with the value set in rush.json.`);
           } else {
+            // eslint-disable-next-line no-console
             console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
           }
         }
 
         if (setEnvironmentVariable) {
           if (options.debug) {
+            // eslint-disable-next-line no-console
             console.log(`Setting environment variable for package manager.`);
+            // eslint-disable-next-line no-console
             console.log(`  Name: ${envVar}`);
+            // eslint-disable-next-line no-console
             console.log(`  Value: ${environmentVariables[envVar].value}`);
           }
           packageManagerEnv[envVar] = environmentVariables[envVar].value;

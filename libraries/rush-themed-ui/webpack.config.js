@@ -1,6 +1,6 @@
 'use strict';
 
-const createWebpackConfig = require('@rushstack/heft-web-rig/profiles/library/webpack-base.config');
+const createWebpackConfig = require('local-web-rig/profiles/library/webpack-base.config');
 
 module.exports = function createConfig(env, argv) {
   return createWebpackConfig({

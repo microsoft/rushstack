@@ -2,8 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminal, Colors, InternalError, Text, IColorableSequence } from '@rushstack/node-core-library';
 import {
+  type ITerminal,
+  Colors,
+  InternalError,
+  Text,
+  type IColorableSequence
+} from '@rushstack/node-core-library';
+import type {
   Reporter,
   Test,
   TestResult,
@@ -63,9 +69,15 @@ export default class HeftJestReporter implements Reporter {
     // (ex. jest-junit) only use perfStats:
     // https://github.com/jest-community/jest-junit/blob/12da1a20217a9b6f30858013175319c1256f5b15/utils/buildJsonResults.js#L112
     const duration: string = perfStats ? `${((perfStats.end - perfStats.start) / 1000).toFixed(3)}s` : '?';
+
+    // calculate memoryUsage to MB reference -> https://jestjs.io/docs/cli#--logheapusage
+    const memUsage: string = testResult.memoryUsage
+      ? `, ${Math.floor(testResult.memoryUsage / 1000000)}MB heap size`
+      : '';
+
     const message: string =
       ` ${this._getTestPath(test.path)} ` +
-      `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed)`;
+      `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed${memUsage})`;
 
     if (numFailingTests > 0) {
       this._terminal.writeLine(Colors.redBackground(Colors.black('FAIL')), message);

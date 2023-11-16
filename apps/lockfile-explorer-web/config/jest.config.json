@@ -1,5 +1,5 @@
 {
-  "extends": "@rushstack/heft-web-rig/profiles/app/config/jest.config.json",
+  "extends": "local-web-rig/profiles/app/config/jest.config.json",
 
   // Load the initappcontext.js stub when running tests
   "setupFiles": ["../lib-commonjs/stub/initappcontext.js"]

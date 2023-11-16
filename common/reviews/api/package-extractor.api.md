@@ -8,6 +8,14 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 
 // @public
+export interface IExtractorDependencyConfiguration {
+    dependencyName: string;
+    dependencyVersionRange: string;
+    patternsToExclude?: string[];
+    patternsToInclude?: string[];
+}
+
+// @public
 export interface IExtractorMetadataJson {
     links: ILinkInfo[];
     mainProjectName: string;
@@ -18,6 +26,7 @@ export interface IExtractorMetadataJson {
 export interface IExtractorOptions {
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
+    dependencyConfigurations?: IExtractorDependencyConfiguration[];
     folderToCopy?: string;
     includeDevDependencies?: boolean;
     includeNpmIgnoreFiles?: boolean;
@@ -59,6 +68,8 @@ export interface IProjectInfoJson {
 // @public
 export class PackageExtractor {
     extractAsync(options: IExtractorOptions): Promise<void>;
+    // @beta
+    static getPackageIncludedFilesAsync(packageRootPath: string): Promise<string[]>;
 }
 
 // (No @packageDocumentation comment for this package)

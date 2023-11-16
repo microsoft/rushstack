@@ -37,6 +37,11 @@
           "description": "Find and run the tests that cover a source file that was passed in as an argument.  This corresponds to the \"--findRelatedTests\" parameter in Jest's documentation. This parameter is not compatible with watch mode."
         },
         {
+          "longName": "--log-heap-usage",
+          "parameterKind": "flag",
+          "description": "Logs the heap usage after every test. Useful to debug memory leaks. Use together with --expose-gc in node."
+        },
+        {
           "longName": "--max-workers",
           "parameterKind": "string",
           "argumentName": "COUNT_OR_PERCENTAGE",

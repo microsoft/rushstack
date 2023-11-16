@@ -1,6 +1,149 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Thu, 15 Jun 2023 00:21:02 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+
+## 0.10.4
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.10.3
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.10.2
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
+
+## 0.10.1
+Thu, 26 Oct 2023 00:27:48 GMT
+
+### Patches
+
+- Add an option (`enableNodeEnvManagement`) to ensure that the NODE_ENV environment variable is set to `"test"` during test execution.
+
+## 0.10.0
+Mon, 23 Oct 2023 15:18:38 GMT
+
+### Minor changes
+
+- Use Jest verbose logging when `heft --debug test` or `heft test --verbose` is specified
+- Fix an issue where `silent: true` was ignored when specified in `jest.config.json`
+
+## 0.9.9
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.9.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.9.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.9.6
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 0.9.5
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 0.9.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.9.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.9.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 0.9.1
+Tue, 19 Sep 2023 15:21:51 GMT
+
+_Version update only_
+
+## 0.9.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Add a `--log-heap-usage` flag that includes memory usage analysis in each test run.
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Wait for first test run to be scheduled in initial invocation in watch mode.
+
+## 0.8.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.8.0
+Mon, 31 Jul 2023 15:19:05 GMT
+
+### Minor changes
+
+- Make `jest-environment-jsdom` and `jest-environment-node` optional peerDependencies.
+
+## 0.7.18
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.7.17
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.7.16
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.7.15
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.7.14
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.7.13
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.7.12
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.7.11
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
 
 ## 0.7.10
 Thu, 15 Jun 2023 00:21:02 GMT

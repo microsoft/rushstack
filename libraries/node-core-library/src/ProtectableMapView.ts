@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ProtectableMap, IProtectableMapParameters } from './ProtectableMap';
+import type { ProtectableMap, IProtectableMapParameters } from './ProtectableMap';
 
 /**
  * The internal wrapper used by ProtectableMap.  It extends the real `Map<K, V>` base class,

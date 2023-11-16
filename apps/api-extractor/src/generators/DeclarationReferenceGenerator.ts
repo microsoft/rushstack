@@ -10,11 +10,11 @@ import {
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { INodePackageJson, InternalError } from '@rushstack/node-core-library';
+import { type INodePackageJson, InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
-import { Collector } from '../collector/Collector';
-import { CollectorEntity } from '../collector/CollectorEntity';
+import type { Collector } from '../collector/Collector';
+import type { CollectorEntity } from '../collector/CollectorEntity';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 export class DeclarationReferenceGenerator {

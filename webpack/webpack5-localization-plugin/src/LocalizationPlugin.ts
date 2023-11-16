@@ -16,7 +16,7 @@ import type {
   WebpackPluginInstance
 } from 'webpack';
 
-import { getPseudolocalizer, ILocalizationFile, parseResJson } from '@rushstack/localization-utilities';
+import { getPseudolocalizer, type ILocalizationFile, parseResJson } from '@rushstack/localization-utilities';
 
 import * as Constants from './utilities/Constants';
 import type {

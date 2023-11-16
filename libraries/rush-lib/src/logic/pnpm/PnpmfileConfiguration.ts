@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Import, IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
+import { FileSystem, Import, type IPackageJson, JsonFile, MapExtensions } from '@rushstack/node-core-library';
 
-import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import * as pnpmfile from './PnpmfileShim';
 import { pnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 

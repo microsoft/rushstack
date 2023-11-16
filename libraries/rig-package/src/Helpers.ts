@@ -22,9 +22,9 @@ export class Helpers {
     });
   }
 
-  public static async fsExistsAsync(path: fs.PathLike): Promise<boolean> {
+  public static async fsExistsAsync(filesystemPath: fs.PathLike): Promise<boolean> {
     return await new Promise((resolve: (result: boolean) => void) => {
-      fs.exists(path, (exists: boolean) => {
+      fs.exists(filesystemPath, (exists: boolean) => {
         resolve(exists);
       });
     });

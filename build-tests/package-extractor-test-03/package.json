@@ -1,0 +1,12 @@
+{
+  "name": "package-extractor-test-03",
+  "description": "This project is used by tests in the @rushstack/package-extractor package.",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "_phase:build": ""
+  },
+  "devDependencies": {
+    "@types/node": "ts3.9"
+  }
+}

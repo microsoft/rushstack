@@ -3,8 +3,8 @@
 
 import * as colors from 'colors';
 
-import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineParser } from '../providers/CommandLineParser';
+import type { CommandLineAction } from '../providers/CommandLineAction';
+import type { CommandLineParser } from '../providers/CommandLineParser';
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
@@ -37,7 +37,7 @@ function createParser(): DynamicCommandLineParser {
     description: 'The action remainder'
   });
 
-  commandLineParser._registerDefinedParameters();
+  commandLineParser._registerDefinedParameters({ parentParameterNames: new Set() });
 
   return commandLineParser;
 }

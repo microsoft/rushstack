@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DocNode, DocNodeContainer, IDocNodeContainerParameters } from '@microsoft/tsdoc';
+import { type DocNode, DocNodeContainer, type IDocNodeContainerParameters } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 
 /**

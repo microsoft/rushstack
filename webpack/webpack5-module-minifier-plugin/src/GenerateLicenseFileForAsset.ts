@@ -11,9 +11,9 @@ function getAllComments(modules: Iterable<Module>): Set<string> {
   const allComments: Set<string> = new Set();
 
   for (const webpackModule of modules) {
-    const modules: Iterable<Module> = (webpackModule.context === null &&
+    const submodules: Iterable<Module> = (webpackModule.context === null &&
       (webpackModule as { _modules?: Iterable<Module> })._modules) || [webpackModule];
-    for (const submodule of modules) {
+    for (const submodule of submodules) {
       const subModuleComments: Iterable<Comment> | undefined = (
         submodule.factoryMeta as {
           comments?: Iterable<Comment>;

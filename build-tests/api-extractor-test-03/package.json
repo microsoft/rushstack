@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/jest": "29.2.5",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "api-extractor-test-02": "workspace:*",
     "fs-extra": "~7.0.1",
     "typescript": "~5.0.4"

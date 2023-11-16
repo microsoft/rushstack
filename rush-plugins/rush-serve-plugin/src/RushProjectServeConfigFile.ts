@@ -4,9 +4,10 @@
 import path from 'path';
 
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { Async, ITerminal } from '@rushstack/node-core-library';
+import { Async, type ITerminal } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import type { RushConfigurationProject } from '@rushstack/rush-sdk';
+import rushProjectServeSchema from './schemas/rush-project-serve.schema.json';
 
 export interface IRushProjectServeJson {
   routing: IRoutingRuleJson[];
@@ -40,10 +41,9 @@ export class RushServeConfiguration {
   private readonly _loader: ConfigurationFile<IRushProjectServeJson>;
 
   public constructor() {
-    const jsonSchemaPath: string = `${__dirname}/schemas/rush-project-serve.schema.json`;
     this._loader = new ConfigurationFile<IRushProjectServeJson>({
       projectRelativeFilePath: 'config/rush-project-serve.json',
-      jsonSchemaPath,
+      jsonSchemaObject: rushProjectServeSchema,
       propertyInheritance: {
         routing: {
           inheritanceType: InheritanceType.append

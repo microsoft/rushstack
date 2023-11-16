@@ -107,7 +107,7 @@ export class HeftTask {
 
   public async ensureInitializedAsync(): Promise<void> {
     if (!this._taskPluginDefinition) {
-      this._taskPluginDefinition = await this._loadTaskPluginDefintionAsync();
+      this._taskPluginDefinition = await this._loadTaskPluginDefinitionAsync();
       this.pluginDefinition.validateOptions(this.pluginOptions);
     }
   }
@@ -120,7 +120,7 @@ export class HeftTask {
     return this._taskPlugin;
   }
 
-  private async _loadTaskPluginDefintionAsync(): Promise<HeftTaskPluginDefinition> {
+  private async _loadTaskPluginDefinitionAsync(): Promise<HeftTaskPluginDefinition> {
     // taskPlugin.pluginPackage should already be resolved to the package root.
     // See CoreConfigFiles.heftConfigFileLoader
     const pluginSpecifier: IHeftConfigurationJsonPluginSpecifier = this._taskSpecifier.taskPlugin;

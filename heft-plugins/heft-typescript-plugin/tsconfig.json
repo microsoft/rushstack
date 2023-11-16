@@ -3,6 +3,7 @@
 
   "compilerOptions": {
     "types": ["node"],
-    "lib": ["ES2019"]
+    "lib": ["ES2019"],
+    "resolveJsonModule": true
   }
 }

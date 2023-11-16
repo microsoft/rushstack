@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, FileWriter, InternalError } from '@rushstack/node-core-library';
-import { TerminalChunkKind, TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
-import { CollatedTerminal } from '@rushstack/stream-collator';
+import { TerminalChunkKind, TerminalWritable, type ITerminalChunk } from '@rushstack/terminal';
+import type { CollatedTerminal } from '@rushstack/stream-collator';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConstants } from '../RushConstants';
 
@@ -30,57 +30,20 @@ export class ProjectLogWritable extends TerminalWritable {
     this._project = project;
     this._terminal = terminal;
 
-    function getLogFilePaths(
-      projectFolder: string,
-      logFilenameIdentifier: string,
-      logFolder?: string
-    ): {
-      logPath: string;
-      errorLogPath: string;
-      relativeLogPath: string;
-      relativeErrorLogPath: string;
-    } {
-      const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
-      const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
-      const logFilename: string = `${logFileBaseName}.log`;
-      const errorLogFilename: string = `${logFileBaseName}.error.log`;
-
-      const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
-      const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
-
-      const logPath: string = `${projectFolder}/${relativeLogPath}`;
-      const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
-
-      return {
-        logPath,
-        errorLogPath,
-        relativeLogPath,
-        relativeErrorLogPath
-      };
-    }
-
-    const projectFolder: string = this._project.projectFolder;
     // Delete the legacy logs
-    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = getLogFilePaths(
-      projectFolder,
-      'build'
-    );
+    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = ProjectLogWritable.getLogFilePaths({
+      project,
+      logFilenameIdentifier: 'build',
+      isLegacyLog: true
+    });
     FileSystem.deleteFile(legacyLogPath);
     FileSystem.deleteFile(legacyErrorLogPath);
 
-    // If the phased commands experiment is enabled, put logs under `rush-logs`
-    let logFolder: string | undefined;
-    if (project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
-      const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
-      FileSystem.ensureFolder(logPathPrefix);
-      logFolder = RushConstants.rushLogsFolderName;
-    }
-
-    const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } = getLogFilePaths(
-      projectFolder,
-      logFilenameIdentifier,
-      logFolder
-    );
+    const { logPath, errorLogPath, relativeLogPath, relativeErrorLogPath } =
+      ProjectLogWritable.getLogFilePaths({
+        project,
+        logFilenameIdentifier
+      });
     this.logPath = logPath;
     this.errorLogPath = errorLogPath;
     this.relativeLogPath = relativeLogPath;
@@ -95,6 +58,58 @@ export class ProjectLogWritable extends TerminalWritable {
     }
 
     this._logWriter = FileWriter.open(this.logPath);
+  }
+
+  public static getLogFilePaths({
+    project,
+    logFilenameIdentifier,
+    isLegacyLog = false
+  }: {
+    project: RushConfigurationProject;
+    logFilenameIdentifier: string;
+    isLegacyLog?: boolean;
+  }): {
+    logPath: string;
+    errorLogPath: string;
+    relativeLogPath: string;
+    relativeErrorLogPath: string;
+  } {
+    const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
+    const logFileBaseName: string = `${unscopedProjectName}.${logFilenameIdentifier}`;
+    const logFilename: string = `${logFileBaseName}.log`;
+    const errorLogFilename: string = `${logFileBaseName}.error.log`;
+
+    const { projectFolder } = project;
+
+    // If the phased commands experiment is enabled, put logs under `rush-logs`
+    let logFolder: string | undefined;
+    if (!isLegacyLog && project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
+      const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
+      FileSystem.ensureFolder(logPathPrefix);
+      logFolder = RushConstants.rushLogsFolderName;
+    }
+
+    const relativeLogPath: string = logFolder ? `${logFolder}/${logFilename}` : logFilename;
+    const relativeErrorLogPath: string = logFolder ? `${logFolder}/${errorLogFilename}` : errorLogFilename;
+
+    const logPath: string = `${projectFolder}/${relativeLogPath}`;
+    const errorLogPath: string = `${projectFolder}/${relativeErrorLogPath}`;
+
+    return {
+      logPath,
+      errorLogPath,
+      relativeLogPath,
+      relativeErrorLogPath
+    };
+  }
+
+  // Override writeChunk function to throw custom error
+  public writeChunk(chunk: ITerminalChunk): void {
+    if (!this._logWriter) {
+      throw new InternalError(`Log writer was closed for ${this.logPath}`);
+    }
+    // Stderr can always get written to a error log writer
+    super.writeChunk(chunk);
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {

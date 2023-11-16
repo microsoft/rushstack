@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
-import { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
+import type { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
 
 class GenericCommandLine extends CommandLineParser {
   public constructor(action: new () => CommandLineAction) {

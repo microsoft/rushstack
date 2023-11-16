@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
 
 class TestAction extends CommandLineAction {
@@ -48,7 +48,7 @@ class TestCommandLine extends CommandLineParser {
 describe(CommandLineParser.name, () => {
   it('executes an action', async () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    commandLineParser._registerDefinedParameters();
+    commandLineParser._registerDefinedParameters({ parentParameterNames: new Set() });
 
     await commandLineParser.execute(['do:the-job', '--flag']);
 

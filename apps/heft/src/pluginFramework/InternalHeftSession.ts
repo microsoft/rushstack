@@ -15,6 +15,7 @@ import {
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import type { LoggingManager } from './logging/LoggingManager';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { HeftTask } from './HeftTask';
 import type { HeftParameterManager } from './HeftParameterManager';
 import type { IHeftParsedCommandLine } from './HeftTaskSession';
@@ -27,7 +28,7 @@ export interface IInternalHeftSessionOptions {
   debug: boolean;
 }
 
-function* getAllTasks(phases: Iterable<HeftPhase>): Iterable<HeftTask> {
+function* getAllTasks(phases: Iterable<HeftPhase>): IterableIterator<HeftTask> {
   for (const phase of phases) {
     yield* phase.tasks;
   }
@@ -85,6 +86,33 @@ export class InternalHeftSession {
       },
       { concurrency: Constants.maxParallelism }
     );
+
+    function* getAllPluginDefinitions(): IterableIterator<HeftPluginDefinitionBase> {
+      yield* internalHeftSession.lifecycle.pluginDefinitions;
+      for (const task of getAllTasks(internalHeftSession.phases)) {
+        yield task.pluginDefinition;
+      }
+    }
+
+    const loadedPluginPathsByName: Map<string, Set<string>> = new Map();
+    for (const { pluginName, entryPoint } of getAllPluginDefinitions()) {
+      let existingPluginPaths: Set<string> | undefined = loadedPluginPathsByName.get(pluginName);
+      if (!existingPluginPaths) {
+        existingPluginPaths = new Set();
+        loadedPluginPathsByName.set(pluginName, existingPluginPaths);
+      }
+
+      existingPluginPaths.add(entryPoint);
+    }
+
+    for (const [pluginName, pluginPaths] of loadedPluginPathsByName) {
+      if (pluginPaths.size > 1) {
+        throw new Error(
+          `Multiple plugins named ${JSON.stringify(pluginName)} were loaded from different paths: ` +
+            `${Array.from(pluginPaths, (x) => JSON.stringify(x)).join(', ')}. Plugins must have unique names.`
+        );
+      }
+    }
 
     return internalHeftSession;
   }

@@ -1,8 +1,11 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import path from 'path';
 import webpack from 'webpack';
 import type { Compiler, Stats } from 'webpack';
 import { createFsFromVolume, Volume } from 'memfs';
-import { ILoadThemedStylesLoaderOptions } from '../..';
+import type { ILoadThemedStylesLoaderOptions } from '../..';
 
 // webpack5-loader-load-themed-styles/lib/LoadThemedStylesLoader.js
 const LOADER_PATH: string = path.resolve(__dirname, '../../index.js');

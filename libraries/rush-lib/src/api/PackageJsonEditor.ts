@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+import { InternalError, type IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
 import { cloneDeep } from '../utilities/objectUtilities';
 
 /**

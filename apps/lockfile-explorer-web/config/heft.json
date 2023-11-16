@@ -8,7 +8,7 @@
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
    * settings to be shared across multiple projects.
    */
-  "extends": "@rushstack/heft-web-rig/profiles/app/config/heft.json",
+  "extends": "local-web-rig/profiles/app/config/heft.json",
 
   "phasesByName": {
     "build": {

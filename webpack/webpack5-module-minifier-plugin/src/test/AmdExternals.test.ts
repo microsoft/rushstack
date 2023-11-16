@@ -1,10 +1,13 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 jest.disableAutomock();
 import { promisify } from 'util';
 
-import webpack, { Stats } from 'webpack';
+import webpack, { type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { IModuleMinifier, LocalMinifier } from '@rushstack/module-minifier';
+import { type IModuleMinifier, LocalMinifier } from '@rushstack/module-minifier';
 
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
 import { MockMinifier } from './MockMinifier';
@@ -18,7 +21,7 @@ async function amdExternalsTest(minifier: IModuleMinifier): Promise<void> {
     {
       '/package.json': '{}',
       '/entry.js': `// A comment\nconsole.log("Do stuff");import(/* webpackChunkName: 'async' */ './async.js').then(mod => mod.foo());`,
-      '/async.js': `// @license MIT\nimport bar from 'bar';\nimport baz from 'baz';\nexport function foo() { bar.a(); baz.b(); }`
+      '/async.js': `// @license MIT\nimport bar from 'bar';\nimport baz from 'baz';\nexport function foo() { bar.a(); baz.b(); }console.log("Test character lengths: \ufeff\uffef")`
     },
     '/src'
   );

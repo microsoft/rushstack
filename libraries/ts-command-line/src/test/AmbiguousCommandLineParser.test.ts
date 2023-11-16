@@ -1,22 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
+import { CommandLineAction } from '../providers/CommandLineAction';
+import { AliasCommandLineAction } from '../providers/AliasCommandLineAction';
 import { ScopedCommandLineAction } from '../providers/ScopedCommandLineAction';
-import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
+import type { CommandLineParameterProvider } from '../providers/CommandLineParameterProvider';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 
 class GenericCommandLine extends CommandLineParser {
-  public constructor(actionType: new () => CommandLineAction) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public constructor(actionType: new (...args: any[]) => CommandLineAction, ...args: any[]) {
     super({
       toolFilename: 'example',
       toolDescription: 'An example project'
     });
 
-    this.addAction(new actionType());
+    this.addAction(new actionType(...args));
   }
 }
 
@@ -74,6 +76,38 @@ class AmbiguousAction extends CommandLineAction {
     expect(this._scope2Arg.value).toEqual('scope2value');
     expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
     this.done = true;
+  }
+}
+
+class AbbreviationAction extends CommandLineAction {
+  public done: boolean = false;
+  public abbreviationFlag: CommandLineFlagParameter;
+
+  public constructor() {
+    super({
+      actionName: 'do:the-job',
+      summary: 'does the job',
+      documentation: 'a longer description'
+    });
+
+    this.abbreviationFlag = this.defineFlagParameter({
+      parameterLongName: '--abbreviation-flag',
+      description: 'The argument'
+    });
+  }
+
+  protected async onExecute(): Promise<void> {
+    this.done = true;
+  }
+}
+
+class AliasAction extends AliasCommandLineAction {
+  public constructor(targetActionClass: new () => CommandLineAction) {
+    super({
+      toolFilename: 'example',
+      aliasName: 'do:the-job-alias',
+      targetAction: new targetActionClass()
+    });
   }
 }
 
@@ -165,6 +199,60 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
   }
 }
 
+interface IAbbreviationScopedActionOptions {
+  includeUnscopedAbbreviationFlag: boolean;
+  includeScopedAbbreviationFlag: boolean;
+}
+
+class AbbreviationScopedAction extends ScopedCommandLineAction {
+  public done: boolean = false;
+  public unscopedAbbreviationFlag: CommandLineFlagParameter | undefined;
+  public scopedAbbreviationFlag: CommandLineFlagParameter | undefined;
+
+  private _scopingArg: CommandLineFlagParameter | undefined;
+  private _includeScopedAbbreviationFlag: boolean;
+
+  public constructor(options: IAbbreviationScopedActionOptions) {
+    super({
+      actionName: 'scoped-action',
+      summary: 'does the scoped action',
+      documentation: 'a longer description'
+    });
+
+    if (options?.includeUnscopedAbbreviationFlag) {
+      this.unscopedAbbreviationFlag = this.defineFlagParameter({
+        parameterLongName: '--abbreviation',
+        description: 'A flag used to test abbreviation logic'
+      });
+    }
+
+    this._includeScopedAbbreviationFlag = !!options?.includeScopedAbbreviationFlag;
+  }
+
+  protected async onExecute(): Promise<void> {
+    expect(this._scopingArg?.value).toEqual(true);
+    this.done = true;
+  }
+
+  protected onDefineUnscopedParameters(): void {
+    // At least one scoping parameter is required to be defined on a scoped action
+    this._scopingArg = this.defineFlagParameter({
+      parameterLongName: '--scoping',
+      description: 'The scoping parameter',
+      parameterGroup: SCOPING_PARAMETER_GROUP
+    });
+  }
+
+  protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
+    if (this._includeScopedAbbreviationFlag) {
+      this.scopedAbbreviationFlag = scopedParameterProvider.defineFlagParameter({
+        parameterLongName: '--abbreviation-flag',
+        description: 'A flag used to test abbreviation logic'
+      });
+    }
+  }
+}
+
 describe(`Ambiguous ${CommandLineParser.name}`, () => {
   it('fails to execute when an ambiguous short name is provided', async () => {
     const commandLineParser: GenericCommandLine = new GenericCommandLine(AmbiguousAction);
@@ -206,6 +294,181 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     await expect(
       commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'test'])
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails when providing a flag to an action that was also declared in the tool', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AbbreviationAction);
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation-flag',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation-flag'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation-flag"/);
+  });
+
+  it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the action', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AbbreviationAction);
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
+  });
+
+  it('fails when providing an ambiguous abbreviation between flags on the tool and the action', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AbbreviationAction);
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbrev'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
+  });
+
+  it('allows unambiguous abbreviation between flags on the tool and the action', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AbbreviationAction);
+    const toolAbbreviationFlag: CommandLineFlagParameter = commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await commandLineParser.executeWithoutErrorHandling(['do:the-job', '--abbreviation-f']);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');
+
+    const action: AbbreviationAction = commandLineParser.selectedAction as AbbreviationAction;
+    expect(action.done).toBe(true);
+    expect(action.abbreviationFlag.value).toBe(true);
+    expect(toolAbbreviationFlag.value).toBe(false);
+  });
+});
+
+describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
+  it('fails to execute when an ambiguous short name is provided', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AmbiguousAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '-s'])
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('can execute the non-ambiguous scoped long names', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AmbiguousAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+
+    await commandLineParser.execute([
+      'do:the-job-alias',
+      '--short1',
+      'short1value',
+      '--short2',
+      'short2value',
+      '--scope1:arg',
+      'scope1value',
+      '--scope2:arg',
+      'scope2value',
+      '--non-conflicting-arg',
+      'nonconflictingvalue'
+    ]);
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job-alias');
+
+    const action: AmbiguousAction = (commandLineParser.selectedAction as AliasAction)
+      .targetAction as AmbiguousAction;
+    expect(action.done).toBe(true);
+
+    expect(action.renderHelpText()).toMatchSnapshot();
+    expect(action.getParameterStringMap()).toMatchSnapshot();
+  });
+
+  it('fails to execute when an ambiguous long name is provided', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AmbiguousAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--arg', 'test'])
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails when providing a flag to an action that was also declared in the tool', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AbbreviationAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation-flag',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation-flag'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation-flag"/);
+  });
+
+  it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the action', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AbbreviationAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
+  });
+
+  it('fails when providing an ambiguous abbreviation between flags on the tool and the action', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AbbreviationAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbrev'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
+  });
+
+  it('allows unambiguous abbreviation between flags on the tool and the action', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, AbbreviationAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+    const toolAbbreviationFlag: CommandLineFlagParameter = commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await commandLineParser.executeWithoutErrorHandling(['do:the-job-alias', '--abbreviation-f']);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job-alias');
+
+    const action: AbbreviationAction = (commandLineParser.selectedAction as AliasAction)
+      .targetAction as AbbreviationAction;
+    expect(action.done).toBe(true);
+    expect(action.abbreviationFlag.value).toBe(true);
+    expect(toolAbbreviationFlag.value).toBe(false);
   });
 });
 
@@ -262,5 +525,131 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     await expect(
       commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--arg', 'test'])
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails when providing an exact match to an ambiguous abbreviation between flags on the tool and the scoped action', async () => {
+    const actionOptions: IAbbreviationScopedActionOptions = {
+      includeUnscopedAbbreviationFlag: false,
+      includeScopedAbbreviationFlag: true
+    };
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AbbreviationScopedAction,
+      actionOptions
+    );
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbreviation'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
+  });
+
+  it('fails when providing an exact match to an ambiguous abbreviation between flags on the scoped action and the unscoped action', async () => {
+    const actionOptions: IAbbreviationScopedActionOptions = {
+      includeUnscopedAbbreviationFlag: true,
+      includeScopedAbbreviationFlag: true
+    };
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AbbreviationScopedAction,
+      actionOptions
+    );
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbreviation'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbreviation"/);
+  });
+
+  it('fails when providing an ambiguous abbreviation between flags on the tool and the scoped action', async () => {
+    const actionOptions: IAbbreviationScopedActionOptions = {
+      includeUnscopedAbbreviationFlag: false,
+      includeScopedAbbreviationFlag: true
+    };
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AbbreviationScopedAction,
+      actionOptions
+    );
+    commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbrev'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
+  });
+
+  it('fails when providing an ambiguous abbreviation between flags on the unscoped action and the scoped action', async () => {
+    const actionOptions: IAbbreviationScopedActionOptions = {
+      includeUnscopedAbbreviationFlag: true,
+      includeScopedAbbreviationFlag: true
+    };
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AbbreviationScopedAction,
+      actionOptions
+    );
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['scoped-action', '--scoping', '--', '--abbrev'])
+    ).rejects.toThrowError(/Ambiguous option: "--abbrev" could match --abbreviation-flag, --abbreviation/);
+  });
+
+  it('allows unambiguous abbreviation between flags on the tool and the scoped action', async () => {
+    const actionOptions: IAbbreviationScopedActionOptions = {
+      includeUnscopedAbbreviationFlag: false,
+      includeScopedAbbreviationFlag: true
+    };
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AbbreviationScopedAction,
+      actionOptions
+    );
+    const toolAbbreviationFlag: CommandLineFlagParameter = commandLineParser.defineFlagParameter({
+      parameterLongName: '--abbreviation',
+      description: 'A flag used to test abbreviation logic'
+    });
+    const targetAction: AbbreviationScopedAction = commandLineParser.getAction(
+      'scoped-action'
+    ) as AbbreviationScopedAction;
+
+    await commandLineParser.executeWithoutErrorHandling([
+      'scoped-action',
+      '--scoping',
+      '--',
+      '--abbreviation-f'
+    ]);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('scoped-action');
+    expect(targetAction.done).toBe(true);
+    expect(targetAction.scopedAbbreviationFlag?.value).toBe(true);
+    expect(toolAbbreviationFlag.value).toBe(false);
+  });
+
+  it('allows unambiguous abbreviation between flags on the unscoped action and the scoped action', async () => {
+    const actionOptions: IAbbreviationScopedActionOptions = {
+      includeUnscopedAbbreviationFlag: true,
+      includeScopedAbbreviationFlag: true
+    };
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(
+      AbbreviationScopedAction,
+      actionOptions
+    );
+    const targetAction: AbbreviationScopedAction = commandLineParser.getAction(
+      'scoped-action'
+    ) as AbbreviationScopedAction;
+
+    await commandLineParser.executeWithoutErrorHandling([
+      'scoped-action',
+      '--scoping',
+      '--',
+      '--abbreviation-f'
+    ]);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('scoped-action');
+    expect(targetAction.done).toBe(true);
+    expect(targetAction.scopedAbbreviationFlag?.value).toBe(true);
+    expect(targetAction.unscopedAbbreviationFlag?.value).toBe(false);
   });
 });

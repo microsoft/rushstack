@@ -72,7 +72,114 @@ export interface ILoadForProjectFolderOptions {
  *
  * @public
  */
-export class RigConfig {
+export interface IRigConfig {
+  /**
+   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder},
+   * which maybe an absolute or relative path.
+   *
+   * @remarks
+   * Example: `.`
+   */
+  readonly projectFolderOriginalPath: string;
+
+  /**
+   * The absolute path for the project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
+   *
+   * @remarks
+   * Example: `/path/to/your-project`
+   */
+  readonly projectFolderPath: string;
+
+  /**
+   * Returns `true` if `config/rig.json` was found, or `false` otherwise.
+   */
+  readonly rigFound: boolean;
+
+  /**
+   * The full path to the `rig.json` file that was found, or `""` if none was found.
+   *
+   * @remarks
+   * Example: `/path/to/your-project/config/rig.json`
+   */
+  readonly filePath: string;
+
+  /**
+   * The `"rigPackageName"` field from `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
+   *
+   * Example: `example-rig`
+   */
+  readonly rigPackageName: string;
+
+  /**
+   * The `"rigProfile"` value that was loaded from `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
+   * If the `rig.json` file exists, but the `"rigProfile"` is not specified, then the profile
+   * name will be `"default"`.
+   *
+   * Example: `example-profile`
+   */
+  readonly rigProfile: string;
+
+  /**
+   * The relative path to the rig profile specified by `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * Example: `profiles/example-profile`
+   */
+  readonly relativeProfileFolderPath: string;
+
+  /**
+   * Performs Node.js module resolution to locate the rig package folder, then returns the absolute path
+   * of the rig profile folder specified by `rig.json`.
+   *
+   * @remarks
+   * If no `rig.json` file was found, then this method throws an error.  The first time this method
+   * is called, the result is cached and will be returned by all subsequent calls.
+   *
+   * Example: `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   */
+  getResolvedProfileFolder(): string;
+
+  /**
+   * An async variant of {@link IRigConfig.getResolvedProfileFolder}
+   */
+  getResolvedProfileFolderAsync(): Promise<string>;
+
+  /**
+   * This lookup first checks for the specified relative path under `projectFolderPath`; if it does
+   * not exist there, then it checks in the resolved rig profile folder.  If the file is found,
+   * its absolute path is returned. Otherwise, `undefined` is returned.
+   *
+   * @remarks
+   * For example, suppose the rig profile is:
+   *
+   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   *
+   * And suppose `configFileRelativePath` is `folder/file.json`. Then the following locations will be checked:
+   *
+   * `/path/to/your-project/folder/file.json`
+   *
+   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile/folder/file.json`
+   */
+  tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
+
+  /**
+   * An async variant of {@link IRigConfig.tryResolveConfigFilePath}
+   */
+  tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
+}
+
+/**
+ * {@inheritdoc IRigConfig}
+ *
+ * @public
+ */
+export class RigConfig implements IRigConfig {
   // For syntax details, see PackageNameParser from @rushstack/node-core-library
   private static readonly _packageNameRegExp: RegExp = /^(@[A-Za-z0-9\-_\.]+\/)?[A-Za-z0-9\-_\.]+$/;
 
@@ -99,62 +206,37 @@ export class RigConfig {
   private static readonly _configCache: Map<string, RigConfig> = new Map();
 
   /**
-   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder},
-   * which maybe an absolute or relative path.
-   *
-   * @remarks
-   * Example: `.`
+   * {@inheritdoc IRigConfig.projectFolderOriginalPath}
    */
   public readonly projectFolderOriginalPath: string;
 
   /**
-   * The absolute path for the project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
-   *
-   * @remarks
-   * Example: `/path/to/your-project`
+   * {@inheritdoc IRigConfig.projectFolderPath}
    */
   public readonly projectFolderPath: string;
 
   /**
-   * Returns `true` if `config/rig.json` was found, or `false` otherwise.
+   * {@inheritdoc IRigConfig.rigFound}
    */
   public readonly rigFound: boolean;
 
   /**
-   * The full path to the `rig.json` file that was found, or `""` if none was found.
-   *
-   * @remarks
-   * Example: `/path/to/your-project/config/rig.json`
+   * {@inheritdoc IRigConfig.filePath}
    */
   public readonly filePath: string;
 
   /**
-   * The `"rigPackageName"` field from `rig.json`, or `""` if the file was not found.
-   *
-   * @remarks
-   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
-   *
-   * Example: `example-rig`
+   * {@inheritdoc IRigConfig.rigPackageName}
    */
   public readonly rigPackageName: string;
 
   /**
-   * The `"rigProfile"` value that was loaded from `rig.json`, or `""` if the file was not found.
-   *
-   * @remarks
-   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
-   * If the `rig.json` file exists, but the `"rigProfile"` is not specified, then the profile
-   * name will be `"default"`.
-   *
-   * Example: `example-profile`
+   * {@inheritdoc IRigConfig.rigProfile}
    */
   public readonly rigProfile: string;
 
   /**
-   * The relative path to the rig profile specified by `rig.json`, or `""` if the file was not found.
-   *
-   * @remarks
-   * Example: `profiles/example-profile`
+   * {@inheritdoc IRigConfig.relativeProfileFolderPath}
    */
   public readonly relativeProfileFolderPath: string;
 
@@ -316,14 +398,7 @@ export class RigConfig {
   }
 
   /**
-   * Performs Node.js module resolution to locate the rig package folder, then returns the absolute path
-   * of the rig profile folder specified by `rig.json`.
-   *
-   * @remarks
-   * If no `rig.json` file was found, then this method throws an error.  The first time this method
-   * is called, the result is cached and will be returned by all subsequent calls.
-   *
-   * Example: `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   * {@inheritdoc IRigConfig.getResolvedProfileFolder}
    */
   public getResolvedProfileFolder(): string {
     if (this._resolvedRigPackageFolder === undefined) {
@@ -356,7 +431,7 @@ export class RigConfig {
   }
 
   /**
-   * An async variant of {@link RigConfig.getResolvedProfileFolder}
+   * {@inheritdoc IRigConfig.getResolvedProfileFolderAsync}
    */
   public async getResolvedProfileFolderAsync(): Promise<string> {
     if (this._resolvedRigPackageFolder === undefined) {
@@ -389,20 +464,7 @@ export class RigConfig {
   }
 
   /**
-   * This lookup first checks for the specified relative path under `projectFolderPath`; if it does
-   * not exist there, then it checks in the resolved rig profile folder.  If the file is found,
-   * its absolute path is returned. Otherwise, `undefined` is returned.
-   *
-   * @remarks
-   * For example, suppose the rig profile is:
-   *
-   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
-   *
-   * And suppose `configFileRelativePath` is `folder/file.json`. Then the following locations will be checked:
-   *
-   * `/path/to/your-project/folder/file.json`
-   *
-   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile/folder/file.json`
+   * {@inheritdoc IRigConfig.tryResolveConfigFilePath}
    */
   public tryResolveConfigFilePath(configFileRelativePath: string): string | undefined {
     if (!Helpers.isDownwardRelative(configFileRelativePath)) {
@@ -423,7 +485,7 @@ export class RigConfig {
   }
 
   /**
-   * An async variant of {@link RigConfig.tryResolveConfigFilePath}
+   * {@inheritdoc IRigConfig.tryResolveConfigFilePathAsync}
    */
   public async tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined> {
     if (!Helpers.isDownwardRelative(configFileRelativePath)) {

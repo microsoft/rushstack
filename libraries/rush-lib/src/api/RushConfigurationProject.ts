@@ -3,10 +3,10 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
+import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import type { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageNameParsers } from './PackageNameParsers';

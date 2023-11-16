@@ -2,6 +2,229 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.38.3",
+      "tag": "@microsoft/api-extractor_v7.38.3",
+      "date": "Fri, 10 Nov 2023 18:02:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where \"ae-undocumented\" was incorrectly reported for private members"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.38.2",
+      "tag": "@microsoft/api-extractor_v7.38.2",
+      "date": "Wed, 01 Nov 2023 23:11:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix line endings in published package."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.38.1",
+      "tag": "@microsoft/api-extractor_v7.38.1",
+      "date": "Mon, 30 Oct 2023 23:36:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.38.0",
+      "tag": "@microsoft/api-extractor_v7.38.0",
+      "date": "Sun, 01 Oct 2023 02:56:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new message \"ae-undocumented\" to support logging of undocumented API items"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.37.3",
+      "tag": "@microsoft/api-extractor_v7.37.3",
+      "date": "Sat, 30 Sep 2023 00:20:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Don't strip out @alpha items when generating API reports."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.37.2",
+      "tag": "@microsoft/api-extractor_v7.37.2",
+      "date": "Thu, 28 Sep 2023 20:53:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.61.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.37.1",
+      "tag": "@microsoft/api-extractor_v7.37.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.60.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.16.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.37.0",
+      "tag": "@microsoft/api-extractor_v7.37.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.60.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.16.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.36.4",
+      "tag": "@microsoft/api-extractor_v7.36.4",
+      "date": "Tue, 08 Aug 2023 07:10:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.27.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.15.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.36.3",
+      "tag": "@microsoft/api-extractor_v7.36.3",
+      "date": "Wed, 19 Jul 2023 00:20:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated semver dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.27.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.36.2",
+      "tag": "@microsoft/api-extractor_v7.36.2",
+      "date": "Wed, 12 Jul 2023 15:20:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add api-extractor support for .d.mts and .d.cts files"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.36.1",
+      "tag": "@microsoft/api-extractor_v7.36.1",
+      "date": "Thu, 06 Jul 2023 00:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.27.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.59.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.36.0",
+      "tag": "@microsoft/api-extractor_v7.36.0",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use the `IRigConfig` interface in the `IExtractorConfigLoadForFolderOptions` object insteacd of the `RigConfig` class."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.35.4",
       "tag": "@microsoft/api-extractor_v7.35.4",
       "date": "Thu, 15 Jun 2023 00:21:01 GMT",

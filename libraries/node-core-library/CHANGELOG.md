@@ -1,6 +1,46 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Sep 2023 20:53:17 GMT and should not be manually modified.
+
+## 3.61.0
+Thu, 28 Sep 2023 20:53:17 GMT
+
+### Minor changes
+
+- Add Async.getSignal for promise-based signaling. Add MinimumHeap for use as a priority queue.
+
+## 3.60.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 3.60.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 3.59.7
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 3.59.6
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 3.59.5
+Thu, 06 Jul 2023 00:16:19 GMT
+
+### Patches
+
+- Fix Import.resolveModule* and Import.resolvePackage* methods to return real-paths when resolving self-referencing specs
 
 ## 3.59.4
 Thu, 15 Jun 2023 00:21:01 GMT

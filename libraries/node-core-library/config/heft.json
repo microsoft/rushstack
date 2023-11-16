@@ -22,7 +22,7 @@
                 {
                   "sourcePath": "src",
                   "destinationFolders": ["lib"],
-                  "includeGlobs": ["**/*.lock"]
+                  "fileExtensions": [".lock"]
                 }
               ]
             }

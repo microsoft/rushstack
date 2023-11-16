@@ -3,8 +3,12 @@
 
   "operationSettings": [
     {
-      "operationName": "build",
+      "operationName": "_phase:build",
       "outputFolderNames": ["dist", "lib", "lib-esnext", "lib-umd"]
+    },
+    {
+      "operationName": "_phase:test",
+      "outputFolderNames": ["coverage"]
     }
   ]
 }

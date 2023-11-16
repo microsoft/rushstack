@@ -2,6 +2,7 @@
 
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 function generateConfiguration(mode, outputFolderName) {
   return {
@@ -21,7 +22,15 @@ function generateConfiguration(mode, outputFolderName) {
         }
       }),
       new HtmlWebpackPlugin()
-    ]
+    ],
+    optimization: {
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new WorkerPoolMinifier(),
+          useSourceMap: true
+        })
+      ]
+    }
   };
 }
 

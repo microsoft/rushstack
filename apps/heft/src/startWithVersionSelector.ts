@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-console */
+
 // NOTE: Since startWithVersionSelector.ts is loaded in the same process as start.ts, any dependencies that
 // we import here may become side-by-side versions.  We want to minimize any dependencies.
 import * as path from 'path';
 import * as fs from 'fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
+import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
 import { Constants } from './utilities/Constants';
 
 const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
@@ -47,14 +50,15 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  * Use "heft --unmanaged" to bypass this feature.
  */
 function tryStartLocalHeft(): boolean {
-  if (process.argv.indexOf(Constants.unmanagedParameterLongName) >= 0) {
+  const toolParameters: Set<string> = getToolParameterNamesFromArgs();
+  if (toolParameters.has(Constants.unmanagedParameterLongName)) {
     console.log(
       `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
         'was specified.'
     );
     console.log();
     return false;
-  } else if (process.argv.indexOf(Constants.debugParameterLongName) >= 0) {
+  } else if (toolParameters.has(Constants.debugParameterLongName)) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
       'Searching for a locally installed version of Heft. Use the ' +

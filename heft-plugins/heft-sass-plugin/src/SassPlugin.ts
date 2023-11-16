@@ -13,12 +13,12 @@ import type {
 } from '@rushstack/heft';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 
-import { ISassConfiguration, SassProcessor } from './SassProcessor';
+import { type ISassConfiguration, SassProcessor } from './SassProcessor';
+import sassConfigSchema from './schemas/heft-sass-plugin.schema.json';
 
 export interface ISassConfigurationJson extends Partial<ISassConfiguration> {}
 
 const PLUGIN_NAME: 'sass-plugin' = 'sass-plugin';
-const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema.json`;
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export default class SassPlugin implements IHeftPlugin {
@@ -122,9 +122,9 @@ export default class SassPlugin implements IHeftPlugin {
   ): Promise<ISassConfiguration> {
     if (!this._sassConfiguration) {
       if (!SassPlugin._sassConfigurationLoader) {
-        SassPlugin._sassConfigurationLoader = new ConfigurationFile<ISassConfigurationJson>({
+        SassPlugin._sassConfigurationLoader = new ConfigurationFile({
           projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
-          jsonSchemaPath: PLUGIN_SCHEMA_PATH
+          jsonSchemaObject: sassConfigSchema
         });
       }
 

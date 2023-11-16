@@ -1,8 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { ReaddirAsynchronousMethod, ReaddirSynchronousMethod } from '@nodelib/fs.scandir';
-import type { StatAsynchronousMethod, StatSynchronousMethod } from '@nodelib/fs.stat';
 import type { FileSystemAdapter } from 'fast-glob';
 import Watchpack from 'watchpack';
 
@@ -71,7 +72,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   private _times: Map<string, ITimeEntry> | undefined;
 
   /** { @inheritdoc fs.readdirSync } */
-  public readdirSync: ReaddirSynchronousMethod = ((filePath: string, options?: IReaddirOptions) => {
+  public readdirSync: FileSystemAdapter['readdirSync'] = ((filePath: string, options?: IReaddirOptions) => {
     filePath = path.normalize(filePath);
 
     try {
@@ -88,10 +89,10 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
       this._missing.set(filePath, Date.now());
       throw err;
     }
-  }) as ReaddirSynchronousMethod;
+  }) as FileSystemAdapter['readdirSync'];
 
   /** { @inheritdoc fs.readdir } */
-  public readdir: ReaddirAsynchronousMethod = (
+  public readdir: FileSystemAdapter['readdir'] = (
     filePath: string,
     optionsOrCallback: IReaddirOptions | ReaddirStringCallback,
     callback?: ReaddirDirentCallback | ReaddirStringCallback
@@ -127,7 +128,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.lstat } */
-  public lstat: StatAsynchronousMethod = (filePath: string, callback: StatCallback): void => {
+  public lstat: FileSystemAdapter['lstat'] = (filePath: string, callback: StatCallback): void => {
     filePath = path.normalize(filePath);
     fs.lstat(filePath, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
       if (err) {
@@ -140,7 +141,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.lstatSync } */
-  public lstatSync: StatSynchronousMethod = (filePath: string): fs.Stats => {
+  public lstatSync: FileSystemAdapter['lstatSync'] = (filePath: string): fs.Stats => {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.lstatSync(filePath);
@@ -153,7 +154,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.stat } */
-  public stat: StatAsynchronousMethod = (filePath: string, callback: StatCallback): void => {
+  public stat: FileSystemAdapter['stat'] = (filePath: string, callback: StatCallback): void => {
     filePath = path.normalize(filePath);
     fs.stat(filePath, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
       if (err) {
@@ -166,7 +167,7 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   };
 
   /** { @inheritdoc fs.statSync } */
-  public statSync: StatSynchronousMethod = (filePath: string) => {
+  public statSync: FileSystemAdapter['statSync'] = (filePath: string) => {
     filePath = path.normalize(filePath);
     try {
       const stats: fs.Stats = fs.statSync(filePath);

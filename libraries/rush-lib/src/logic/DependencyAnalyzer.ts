@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
-import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IDependencyAnalysis {
   /**

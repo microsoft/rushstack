@@ -19,13 +19,8 @@
 
   "phasesByName": {
     "build": {
-      "cleanFiles": [
-        { "sourcePath": "dist" },
-        { "sourcePath": "lib" },
-        { "sourcePath": "lib-amd" },
-        { "sourcePath": "lib-commonjs" },
-        { "sourcePath": "lib-es6" }
-      ],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6"] }],
+
       "tasksByName": {
         "sass-typings": {
           "taskPlugin": {

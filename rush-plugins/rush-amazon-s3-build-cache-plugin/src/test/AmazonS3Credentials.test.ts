@@ -79,11 +79,15 @@ describe('Amazon S3 Credentials', () => {
 
     it('returns undefined if access key and secret are not both present', () => {
       process.env[AWS_ACCESS_KEY_ID] = AWS_ACCESS_KEY_ID;
-      expect(() => fromAmazonEnv()).toThrowErrorMatchingInlineSnapshot(`"The \\"AWS_ACCESS_KEY_ID\\" env variable is set, but the \\"AWS_SECRET_ACCESS_KEY\\" env variable is not set. Both or neither must be provided."`);
+      expect(() => fromAmazonEnv()).toThrowErrorMatchingInlineSnapshot(
+        `"The \\"AWS_ACCESS_KEY_ID\\" env variable is set, but the \\"AWS_SECRET_ACCESS_KEY\\" env variable is not set. Both or neither must be provided."`
+      );
 
       delete process.env[AWS_ACCESS_KEY_ID];
       process.env[AWS_SECRET_ACCESS_KEY] = AWS_SECRET_ACCESS_KEY;
-      expect(() => fromAmazonEnv()).toThrowErrorMatchingInlineSnapshot(`"The \\"AWS_SECRET_ACCESS_KEY\\" env variable is set, but the \\"AWS_ACCESS_KEY_ID\\" env variable is not set. Both or neither must be provided."`);
+      expect(() => fromAmazonEnv()).toThrowErrorMatchingInlineSnapshot(
+        `"The \\"AWS_SECRET_ACCESS_KEY\\" env variable is set, but the \\"AWS_ACCESS_KEY_ID\\" env variable is not set. Both or neither must be provided."`
+      );
     });
   });
 

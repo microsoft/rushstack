@@ -5,7 +5,7 @@ import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { TerminalWritable } from '../TerminalWritable';
 import { TerminalProviderSeverity } from '../ITerminalProvider';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 let terminal: Terminal;
 let provider: StringBufferTerminalProvider;

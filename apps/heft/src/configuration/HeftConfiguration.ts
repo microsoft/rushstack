@@ -11,7 +11,7 @@ import {
   type ITerminal
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
-import { RigConfig } from '@rushstack/rig-package';
+import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
 import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver';
@@ -39,7 +39,7 @@ export class HeftConfiguration {
   private _projectConfigFolderPath: string | undefined;
   private _cacheFolderPath: string | undefined;
   private _tempFolderPath: string | undefined;
-  private _rigConfig: RigConfig | undefined;
+  private _rigConfig: IRigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
   private _rigPackageResolver!: RigPackageResolver;
@@ -80,7 +80,7 @@ export class HeftConfiguration {
   /**
    * The rig.json configuration for this project, if present.
    */
-  public get rigConfig(): RigConfig {
+  public get rigConfig(): IRigConfig {
     if (!this._rigConfig) {
       throw new InternalError(
         'The rigConfig cannot be accessed until HeftConfiguration.checkForRigAsync() has been called'

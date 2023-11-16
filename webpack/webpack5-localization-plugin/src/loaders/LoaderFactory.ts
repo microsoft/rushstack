@@ -5,7 +5,7 @@ import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 
 import type { ILocalizationFile } from '@rushstack/localization-utilities';
 
-import { getPluginInstance, LocalizationPlugin } from '../LocalizationPlugin';
+import { getPluginInstance, type LocalizationPlugin } from '../LocalizationPlugin';
 
 export interface IBaseLocLoaderOptions {
   // Nothing
@@ -14,6 +14,7 @@ export interface IBaseLocLoaderOptions {
 export function createLoader<T extends IBaseLocLoaderOptions>(
   parseFile: (content: string, filePath: string, context: LoaderContext<T>) => ILocalizationFile
 ): LoaderDefinitionFunction<T> {
+  // eslint-disable-next-line func-style
   const loader: LoaderDefinitionFunction<T> = async function (
     this: LoaderContext<T>,
     content: string

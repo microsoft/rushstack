@@ -4,11 +4,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+  "extends": "local-node-rig/profiles/default/config/heft.json",
 
   // TODO: Add comments
   "phasesByName": {
     "build": {
+      "cleanFiles": [{ "includeGlobs": ["lib-esnext"] }],
+
       "tasksByName": {
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],
@@ -28,7 +30,12 @@
                 {
                   "sourcePath": "src/cli/test",
                   "destinationFolders": ["lib-commonjs/cli/test"],
-                  "includeGlobs": ["**/*.js"]
+                  "fileExtensions": [".js"]
+                },
+                {
+                  "sourcePath": "src/logic/pnpm/test",
+                  "destinationFolders": ["lib-commonjs/logic/pnpm/test"],
+                  "fileExtensions": [".yaml"]
                 }
               ]
             }

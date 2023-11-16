@@ -15,6 +15,7 @@ jest.mock('terser/package.json', () => {
 describe('LocalMinifier', () => {
   it('Includes terserOptions in config hash', async () => {
     const { LocalMinifier } = await import('../LocalMinifier');
+    // eslint-disable-next-line @typescript-eslint/no-redeclare
     type LocalMinifier = typeof LocalMinifier.prototype;
 
     const minifier1: LocalMinifier = new LocalMinifier({
@@ -40,6 +41,7 @@ describe('LocalMinifier', () => {
 
   it('Includes terser package version in config hash', async () => {
     const { LocalMinifier } = await import('../LocalMinifier');
+    // eslint-disable-next-line @typescript-eslint/no-redeclare
     type LocalMinifier = typeof LocalMinifier.prototype;
 
     terserVersion = '5.9.1';

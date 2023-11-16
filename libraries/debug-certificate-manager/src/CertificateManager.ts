@@ -4,9 +4,9 @@
 import type { pki } from 'node-forge';
 import * as path from 'path';
 import { EOL } from 'os';
-import { FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, type ITerminal } from '@rushstack/node-core-library';
 
-import { runSudoAsync, IRunResult, runAsync } from './runCommand';
+import { runSudoAsync, type IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
@@ -700,7 +700,8 @@ export class CertificateManager {
       ]);
 
       if (repairStoreResult.code !== 0) {
-        terminal.writeErrorLine(`CertUtil Error: ${repairStoreResult.stderr.join('')}`);
+        terminal.writeVerboseLine(`CertUtil Error: ${repairStoreResult.stderr.join('')}`);
+        terminal.writeVerboseLine(`CertUtil: ${repairStoreResult.stdout.join('')}`);
         return false;
       } else {
         terminal.writeVerboseLine('Successfully set certificate name.');
@@ -743,7 +744,7 @@ export class CertificateManager {
       subjectAltNames = generatedCertificate.subjectAltNames;
 
       // Try to set the friendly name, and warn if we can't
-      if (!this._trySetFriendlyNameAsync(tempCertificatePath, terminal)) {
+      if (!(await this._trySetFriendlyNameAsync(tempCertificatePath, terminal))) {
         terminal.writeWarningLine("Unable to set the certificate's friendly name.");
       }
     } else {

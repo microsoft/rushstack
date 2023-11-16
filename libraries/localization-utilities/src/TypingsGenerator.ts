@@ -3,10 +3,10 @@
 
 import {
   StringValuesTypingsGenerator,
-  IStringValueTyping,
-  ITypingsGeneratorBaseOptions
+  type IStringValueTyping,
+  type ITypingsGeneratorBaseOptions
 } from '@rushstack/typings-generator';
-import { NewlineKind } from '@rushstack/node-core-library';
+import type { NewlineKind } from '@rushstack/node-core-library';
 
 import type { IgnoreStringFunction, ILocalizationFile } from './interfaces';
 import { parseLocFile } from './LocFileParser';

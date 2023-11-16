@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { IPhase } from '../../api/CommandLineConfiguration';
-import { IOperationRunner } from './IOperationRunner';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IPhase } from '../../api/CommandLineConfiguration';
+import type { IOperationRunner } from './IOperationRunner';
 
 /**
  * Options for constructing a new Operation.

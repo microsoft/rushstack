@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as argparse from 'argparse';
+import type * as argparse from 'argparse';
 import colors from 'colors';
 
 import type { CommandLineAction } from './CommandLineAction';
 import type { AliasCommandLineAction } from './AliasCommandLineAction';
-import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
+import {
+  CommandLineParameterProvider,
+  type IRegisterDefinedParametersState,
+  type ICommandLineParserData
+} from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
 
@@ -157,6 +161,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // executeWithoutErrorHandling() handles the successful cases,
         // so here we can assume err has a nonzero exit code
         if (err.message) {
+          // eslint-disable-next-line no-console
           console.error(err.message);
         }
         if (!process.exitCode) {
@@ -170,7 +175,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           message = 'Error: ' + message;
         }
 
+        // eslint-disable-next-line no-console
         console.error();
+        // eslint-disable-next-line no-console
         console.error(colors.red(message));
 
         if (!process.exitCode) {
@@ -199,7 +206,10 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       this._validateDefinitions();
 
       // Register the parameters before we print help or parse the CLI
-      this._registerDefinedParameters();
+      const initialState: IRegisterDefinedParametersState = {
+        parentParameterNames: new Set()
+      };
+      this._registerDefinedParameters(initialState);
 
       if (!args) {
         // 0=node.exe, 1=script name
@@ -240,12 +250,13 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this.selectedAction?._processParsedData(this._options, data);
-      return this.onExecute();
+      await this.onExecute();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
           // non-error exit modeled using exception handling
           if (err.message) {
+            // eslint-disable-next-line no-console
             console.log(err.message);
           }
 
@@ -258,10 +269,21 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
-    super._registerDefinedParameters();
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    super._registerDefinedParameters(state);
+
+    const { parentParameterNames } = state;
+    const updatedParentParameterNames: Set<string> = new Set([
+      ...parentParameterNames,
+      ...this._registeredParameterParserKeysByName.keys()
+    ]);
+
+    const parentState: IRegisterDefinedParametersState = {
+      ...state,
+      parentParameterNames: updatedParentParameterNames
+    };
     for (const action of this._actions) {
-      action._registerDefinedParameters();
+      action._registerDefinedParameters(parentState);
     }
   }
 

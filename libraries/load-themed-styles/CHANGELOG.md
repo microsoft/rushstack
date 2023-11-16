@@ -1,6 +1,167 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+
+## 2.0.88
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 2.0.87
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 2.0.86
+Mon, 30 Oct 2023 23:36:37 GMT
+
+_Version update only_
+
+## 2.0.85
+Sun, 01 Oct 2023 02:56:29 GMT
+
+_Version update only_
+
+## 2.0.84
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 2.0.83
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 2.0.82
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 2.0.81
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 2.0.80
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 2.0.79
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 2.0.78
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 2.0.77
+Tue, 19 Sep 2023 15:21:51 GMT
+
+_Version update only_
+
+## 2.0.76
+Fri, 15 Sep 2023 00:36:58 GMT
+
+_Version update only_
+
+## 2.0.75
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 2.0.74
+Fri, 01 Sep 2023 04:53:58 GMT
+
+### Patches
+
+- Use self.setTimeout() instead of setTimeout() to work around a Jest regression
+
+## 2.0.73
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 2.0.72
+Sat, 05 Aug 2023 00:20:19 GMT
+
+_Version update only_
+
+## 2.0.71
+Fri, 04 Aug 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.70
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 2.0.69
+Sat, 29 Jul 2023 00:22:50 GMT
+
+_Version update only_
+
+## 2.0.68
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 2.0.67
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 2.0.66
+Mon, 17 Jul 2023 15:20:25 GMT
+
+_Version update only_
+
+## 2.0.65
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 2.0.64
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.63
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 2.0.62
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 2.0.61
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 2.0.60
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 2.0.59
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 2.0.58
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
 
 ## 2.0.57
 Thu, 15 Jun 2023 00:21:01 GMT

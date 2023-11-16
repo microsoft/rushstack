@@ -20,17 +20,11 @@ export class Constants {
 
   public static onlyParameterLongName: string = '--only';
 
-  public static onlyParameterShortName: string = '-o';
-
   public static productionParameterLongName: string = '--production';
 
   public static toParameterLongName: string = '--to';
 
-  public static toParameterShortName: string = '-t';
-
   public static toExceptParameterLongName: string = '--to-except';
-
-  public static toExceptParameterShortName: string = '-T';
 
   public static unmanagedParameterLongName: string = '--unmanaged';
 

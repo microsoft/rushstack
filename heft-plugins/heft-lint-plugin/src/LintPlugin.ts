@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
 import { FileSystem } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
@@ -63,9 +64,16 @@ export default class LintPlugin implements IHeftTaskPlugin {
       );
     }
 
+    let warningPrinted: boolean = false;
+
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (options: IHeftTaskRunHookOptions) => {
       // Run the linters to completion. Linters emit errors and warnings to the logger.
       if (taskSession.parameters.watch) {
+        if (warningPrinted) {
+          return;
+        }
+        warningPrinted = true;
+
         // Warn since don't run the linters when in watch mode.
         taskSession.logger.terminal.writeWarningLine("Linting isn't currently supported in watch mode.");
       } else {

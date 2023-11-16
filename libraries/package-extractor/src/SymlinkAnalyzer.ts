@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, FileSystemStats, Sort } from '@rushstack/node-core-library';
+import { FileSystem, type FileSystemStats, Sort } from '@rushstack/node-core-library';
 
 import * as path from 'path';
 
@@ -65,6 +65,12 @@ export interface ISymlinkAnalyzerOptions {
   requiredSourceParentPath?: string;
 }
 
+export interface IAnalyzePathOptions {
+  inputPath: string;
+  preserveLinks?: boolean;
+  shouldIgnoreExternalLink?: (path: string) => boolean;
+}
+
 export class SymlinkAnalyzer {
   private readonly _requiredSourceParentPath: string | undefined;
 
@@ -78,7 +84,15 @@ export class SymlinkAnalyzer {
     this._requiredSourceParentPath = options.requiredSourceParentPath;
   }
 
-  public async analyzePathAsync(inputPath: string, preserveLinks: boolean = false): Promise<PathNode> {
+  public async analyzePathAsync(
+    options: IAnalyzePathOptions & { shouldIgnoreExternalLink: (path: string) => boolean }
+  ): Promise<PathNode | undefined>;
+  public async analyzePathAsync(
+    options: IAnalyzePathOptions & { shouldIgnoreExternalLink?: never }
+  ): Promise<PathNode>;
+  public async analyzePathAsync(options: IAnalyzePathOptions): Promise<PathNode | undefined> {
+    const { inputPath, preserveLinks = false, shouldIgnoreExternalLink } = options;
+
     // First, try to short-circuit the analysis if we've already analyzed this path
     const resolvedPath: string = path.resolve(inputPath);
     const existingNode: PathNode | undefined = this._nodesByPath.get(resolvedPath);
@@ -114,6 +128,11 @@ export class SymlinkAnalyzer {
               resolvedLinkTargetPath
             );
             if (relativeLinkTargetPath.startsWith('..')) {
+              // Symlinks that link outside of the source folder may be ignored. Check to see if we
+              // can ignore this one and if so, return undefined.
+              if (shouldIgnoreExternalLink?.(currentPath)) {
+                return undefined;
+              }
               throw new Error(
                 `Symlink targets not under folder "${this._requiredSourceParentPath}": ` +
                   `${currentPath} -> ${resolvedLinkTargetPath}`
@@ -147,7 +166,10 @@ export class SymlinkAnalyzer {
 
       if (!preserveLinks) {
         while (currentNode?.kind === 'link') {
-          const targetNode: PathNode = await this.analyzePathAsync(currentNode.linkTarget, true);
+          const targetNode: PathNode = await this.analyzePathAsync({
+            inputPath: currentNode.linkTarget,
+            preserveLinks: true
+          });
 
           // Have we created an ILinkInfo for this link yet?
           if (!this._linkInfosByPath.has(currentNode.nodePath)) {

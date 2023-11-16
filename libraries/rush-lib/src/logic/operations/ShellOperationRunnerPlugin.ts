@@ -12,7 +12,7 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { Operation } from './Operation';
+import type { Operation } from './Operation';
 
 const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -29,13 +29,7 @@ function createShellOperations(
   operations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const {
-    buildCacheConfiguration,
-    isIncrementalBuildAllowed,
-    phaseSelection: selectedPhases,
-    projectChangeAnalyzer,
-    rushConfiguration
-  } = context;
+  const { phaseSelection: selectedPhases, projectChangeAnalyzer, rushConfiguration } = context;
 
   const customParametersByPhase: Map<IPhase, string[]> = new Map();
 
@@ -77,17 +71,16 @@ function createShellOperations(
       const displayName: string = getDisplayName(phase, project);
 
       if (commandToRun) {
-        operation.runner = new ShellOperationRunner({
-          buildCacheConfiguration,
+        const shellOperationRunner: ShellOperationRunner = new ShellOperationRunner({
           commandToRun: commandToRun || '',
           displayName,
-          isIncrementalBuildAllowed,
           phase,
           projectChangeAnalyzer,
           rushConfiguration,
           rushProject: project,
           selectedPhases
         });
+        operation.runner = shellOperationRunner;
       } else {
         // Empty build script indicates a no-op, so use a no-op runner
         operation.runner = new NullOperationRunner({
@@ -119,8 +112,8 @@ function getScriptToRun(
   if (!rawCommand) {
     return '';
   } else {
-    const shellCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
-    return process.platform === 'win32' ? convertSlashesForWindows(shellCommand) : shellCommand;
+    const fullCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
+    return process.platform === 'win32' ? convertSlashesForWindows(fullCommand) : fullCommand;
   }
 }
 

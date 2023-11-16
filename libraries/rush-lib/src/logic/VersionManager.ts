@@ -3,14 +3,14 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
+import { type IPackageJson, JsonFile, FileConstants } from '@rushstack/node-core-library';
 
-import { VersionPolicy, BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
+import { type VersionPolicy, type BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 import { ChangeFile } from '../api/ChangeFile';
-import { ChangeType, IChangeInfo } from '../api/ChangeManagement';
+import { ChangeType, type IChangeInfo } from '../api/ChangeManagement';
 import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
 import { DependencySpecifier } from './DependencySpecifier';
@@ -285,6 +285,7 @@ export class VersionManager {
       if (dependencies[updatedDependentProjectName]) {
         if (rushProject.decoupledLocalDependencies.has(updatedDependentProjectName)) {
           // Skip if cyclic
+          // eslint-disable-next-line no-console
           console.log(`Found cyclic ${rushProject.packageName} ${updatedDependentProjectName}`);
           return;
         }

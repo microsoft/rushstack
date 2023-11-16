@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineParameter } from '@rushstack/ts-command-line';
-import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
-import { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
+import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import { BaseRushAction, type IBaseRushActionOptions } from '../actions/BaseRushAction';
+import type { Command, CommandLineConfiguration, IParameterJson } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 import type { ParameterJson } from '../../api/CommandLineJson';
 

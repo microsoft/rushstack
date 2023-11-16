@@ -2,14 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
 
 export class CheckAction extends BaseRushAction {
+  private readonly _terminal: ITerminal;
   private readonly _variant: CommandLineStringParameter;
   private readonly _jsonFlag: CommandLineFlagParameter;
   private readonly _verboseFlag: CommandLineFlagParameter;
@@ -27,6 +29,7 @@ export class CheckAction extends BaseRushAction {
       parser
     });
 
+    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
@@ -44,6 +47,7 @@ export class CheckAction extends BaseRushAction {
     const variant: string | undefined = this.rushConfiguration.currentInstalledVariant;
 
     if (!this._variant.value && variant) {
+      // eslint-disable-next-line no-console
       console.log(
         colors.yellow(
           `Variant '${variant}' has been installed, but 'rush check' is currently checking the default variant. ` +
@@ -52,7 +56,7 @@ export class CheckAction extends BaseRushAction {
       );
     }
 
-    VersionMismatchFinder.rushCheck(this.rushConfiguration, {
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
       variant: this._variant.value,
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value

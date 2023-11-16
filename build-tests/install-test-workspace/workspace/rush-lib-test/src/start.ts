@@ -14,5 +14,7 @@ console.log('Calling an internal API...');
 
 // Use a path-based import to access an internal API (do so at your own risk!)
 import { VersionMismatchFinder } from '@microsoft/rush-lib/lib/logic/versionMismatch/VersionMismatchFinder';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
-VersionMismatchFinder.ensureConsistentVersions(config);
+const terminal = new Terminal(new ConsoleTerminalProvider());
+VersionMismatchFinder.ensureConsistentVersions(config, terminal);

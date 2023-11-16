@@ -221,7 +221,12 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
 
       // Passing a negative PID terminates the entire group instead of just the one process.
       // This works because we set detached=true for child_process.spawn()
-      process.kill(-this._activeChildProcess.pid, 'SIGTERM');
+
+      const pid: number | undefined = this._activeChildProcess.pid;
+      if (pid !== undefined) {
+        // If pid was undefined, the process failed to spawn
+        process.kill(-pid, 'SIGTERM');
+      }
 
       this._clearTimeout();
       this._timeout = setTimeout(() => {
@@ -289,7 +294,10 @@ export default class NodeServicePlugin implements IHeftTaskPlugin {
     });
     SubprocessTerminator.killProcessTreeOnExit(childProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
-    const childPid: number = childProcess.pid;
+    const childPid: number | undefined = childProcess.pid;
+    if (childPid === undefined) {
+      throw new InternalError(`Failed to spawn child process`);
+    }
     this._logger.terminal.writeVerboseLine(`Started service process #${childPid}`);
 
     // Create a promise that resolves when the child process exits

@@ -9,7 +9,7 @@ import {
   type INodePackageJson,
   type IPackageJson
 } from '@rushstack/node-core-library';
-import type { RigConfig } from '@rushstack/rig-package';
+import type { IRigConfig } from '@rushstack/rig-package';
 
 /**
  * Rig resolves requested tools from the project's Heft rig.
@@ -29,7 +29,7 @@ export interface IRigPackageResolver {
 export interface IRigPackageResolverOptions {
   buildFolder: string;
   projectPackageJson: IPackageJson;
-  rigConfig: RigConfig;
+  rigConfig: IRigConfig;
 }
 
 /**
@@ -38,7 +38,7 @@ export interface IRigPackageResolverOptions {
 export class RigPackageResolver implements IRigPackageResolver {
   private readonly _buildFolder: string;
   private readonly _projectPackageJson: IPackageJson;
-  private readonly _rigConfig: RigConfig;
+  private readonly _rigConfig: IRigConfig;
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
   private readonly _resolverCache: Map<string, Promise<string>> = new Map();
 
@@ -100,7 +100,7 @@ export class RigPackageResolver implements IRigPackageResolver {
     }
 
     // See if the project rig has a regular dependency on the package
-    const rigConfiguration: RigConfig = this._rigConfig;
+    const rigConfiguration: IRigConfig = this._rigConfig;
     if (rigConfiguration.rigFound) {
       const rigFolder: string = rigConfiguration.getResolvedProfileFolder();
       const rigPackageJsonPath: string | undefined =

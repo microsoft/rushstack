@@ -3,13 +3,13 @@
 exports[`ModuleMinifierPlugin Handles AMD externals (mock): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-// Begin Asset Hash=1ae78808fac7117a5df587de32cb0a5dee132b58e7e47a7b63a98988b705dd2d
+// Begin Asset Hash=9cea223c5b52c3d2d453434504be210b33d1d8257f6a701509abfe7888323dcb
 \\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[931],{
 
 /***/ 417:
 
-// Begin Module Hash=28dcea527403bc33391ab136fc2a6cb6b86954eee7151ce9026985cfd93e297a
+// Begin Module Hash=094ab5223af3c15d458c0cef66f228ac5ef757e87c865e83b0c812f6e36777ae
 
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -24,7 +24,7 @@ __webpack_require__.r(__webpack_exports__);
 // @license MIT
 
 
-function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IMPORTED_MODULE_1___default().b(); }
+function foo() { bar__WEBPACK_IMPORTED_MODULE_0___default().a(); baz__WEBPACK_IMPORTED_MODULE_1___default().b(); }console.log(\\"Test character lengths: ﻿￯\\")
 
 /***/ })
 
@@ -344,7 +344,7 @@ Object {
     "async.js" => Object {
       "positionByModuleId": Map {
         417 => Object {
-          "charLength": 965,
+          "charLength": 1006,
           "charOffset": 240,
         },
       },
@@ -352,7 +352,7 @@ Object {
   },
   "byModule": Map {
     417 => Map {
-      931 => 965,
+      931 => 1010,
     },
   },
 }
@@ -363,7 +363,7 @@ exports[`ModuleMinifierPlugin Handles AMD externals (mock): Warnings 1`] = `Arra
 exports[`ModuleMinifierPlugin Handles AMD externals (terser): Content 1`] = `
 Object {
   "/release/async.js": "/*! For license information please see async.js.LICENSE.txt */
-\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[931],{417:((e,t,n)=>{n.r(t),n.d(t,{foo:()=>s});var a=n(791),i=n.n(a),r=n(506),o=n.n(r);function s(){i().a(),o().b()}})
+\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[931],{417:((e,t,n)=>{n.r(t),n.d(t,{foo:()=>s});var a=n(791),i=n.n(a),r=n(506),o=n.n(r);function s(){i().a(),o().b()}console.log(\\"Test character lengths: \\\\ufeff￯\\")})
 }]);",
   "/release/async.js.LICENSE.txt": "// @license MIT
 ",
@@ -382,7 +382,7 @@ Object {
     "async.js" => Object {
       "positionByModuleId": Map {
         417 => Object {
-          "charLength": 108,
+          "charLength": 154,
           "charOffset": 135,
         },
       },
@@ -390,7 +390,7 @@ Object {
   },
   "byModule": Map {
     417 => Map {
-      931 => 108,
+      931 => 156,
     },
   },
 }

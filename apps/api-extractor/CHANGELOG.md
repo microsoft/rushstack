@@ -1,6 +1,89 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 15 Jun 2023 00:21:01 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+
+## 7.38.3
+Fri, 10 Nov 2023 18:02:04 GMT
+
+### Patches
+
+- Fix an issue where "ae-undocumented" was incorrectly reported for private members
+
+## 7.38.2
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 7.38.1
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
+
+## 7.38.0
+Sun, 01 Oct 2023 02:56:29 GMT
+
+### Minor changes
+
+- Add a new message "ae-undocumented" to support logging of undocumented API items
+
+## 7.37.3
+Sat, 30 Sep 2023 00:20:51 GMT
+
+### Patches
+
+- Don't strip out @alpha items when generating API reports.
+
+## 7.37.2
+Thu, 28 Sep 2023 20:53:16 GMT
+
+_Version update only_
+
+## 7.37.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 7.37.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 7.36.4
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 7.36.3
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 7.36.2
+Wed, 12 Jul 2023 15:20:39 GMT
+
+### Patches
+
+- Add api-extractor support for .d.mts and .d.cts files
+
+## 7.36.1
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 7.36.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+- Use the `IRigConfig` interface in the `IExtractorConfigLoadForFolderOptions` object insteacd of the `RigConfig` class.
 
 ## 7.35.4
 Thu, 15 Jun 2023 00:21:01 GMT

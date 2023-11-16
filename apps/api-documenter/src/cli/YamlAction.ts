@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter, CommandLineChoiceParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter, CommandLineChoiceParameter } from '@rushstack/ts-command-line';
 
-import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
+import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 
 import { YamlDocumenter } from '../documenters/YamlDocumenter';

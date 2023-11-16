@@ -27,6 +27,7 @@ export class Npm {
           }
         });
       } else {
+        // eslint-disable-next-line no-console
         console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
         const packageVersions: string = Utilities.executeCommandAndCaptureOutput(
@@ -45,13 +46,16 @@ export class Npm {
             }
           );
         } else {
+          // eslint-disable-next-line no-console
           console.log(`No version is found for ${packageName}`);
         }
       }
     } catch (error) {
       if ((error as Error).message.indexOf('npm ERR! 404') >= 0) {
+        // eslint-disable-next-line no-console
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {
+        // eslint-disable-next-line no-console
         console.log(`Failed to get NPM information about ${packageName}.`);
         throw error;
       }

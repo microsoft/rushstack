@@ -1,6 +1,144 @@
 # Change Log - @rushstack/trace-import
 
-This log was last generated on Thu, 15 Jun 2023 00:21:02 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+
+## 0.3.12
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.3.11
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.3.10
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
+
+## 0.3.9
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.3.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.3.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.3.6
+Wed, 27 Sep 2023 00:21:39 GMT
+
+_Version update only_
+
+## 0.3.5
+Tue, 26 Sep 2023 21:02:31 GMT
+
+_Version update only_
+
+## 0.3.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.3.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.3.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 0.3.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.3.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.2.27
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.2.26
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.2.25
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.2.24
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.2.23
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 0.2.22
+Fri, 14 Jul 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.2.21
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.2.20
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.2.19
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.2.18
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.2.17
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.2.16
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.2.15
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
 
 ## 0.2.14
 Thu, 15 Jun 2023 00:21:02 GMT

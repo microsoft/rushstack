@@ -64,7 +64,7 @@ export class RushHttpBuildCachePlugin implements IRushPlugin {
 
         const options: IHttpBuildCacheProviderOptions = {
           pluginName: this.pluginName,
-          rushProjectRoot: rushConfig.rushJsonFolder,
+          rushJsonFolder: rushConfig.rushJsonFolder,
           url: url,
           uploadMethod: uploadMethod,
           headers: headers,

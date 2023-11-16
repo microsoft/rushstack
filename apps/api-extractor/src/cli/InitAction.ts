@@ -6,7 +6,7 @@ import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
-import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
+import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class InitAction extends CommandLineAction {

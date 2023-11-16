@@ -40,12 +40,23 @@ export interface IInstallManagerOptions {
   fullUpgrade: boolean;
 
   /**
+   * If set, only update the shrinkwrap file; do not create node_modules.
+   */
+  onlyShrinkwrap?: boolean;
+
+  /**
    * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
    * Normally Rush uses heuristics to determine when "pnpm install" can be skipped,
    * but sometimes the heuristics can be inaccurate due to external influences
    * (pnpmfile.js script logic, registry changes, etc).
    */
   recheckShrinkwrap: boolean;
+
+  /**
+   * Do not attempt to access the network. Report an error if the required dependencies
+   * cannot be obtained from the local cache.
+   */
+  offline: boolean;
 
   /**
    * The value of the "--network-concurrency" command-line parameter, which

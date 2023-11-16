@@ -5,9 +5,9 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import builtinPackageNames from 'builtin-modules';
 
-import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 export interface IJsonOutput {
@@ -101,15 +101,13 @@ export class ScanAction extends BaseConfiglessRushAction {
 
     // Example: "my-package/lad/dee/dah" --> "my-package"
     // Example: "@ms/my-package" --> "@ms/my-package"
-    const packageRegExp: RegExp = /^((@[a-z\-0-9!_]+\/)?[a-z\-0-9!_]+)\/?/;
+    // Example: "lodash.get" --> "lodash.get"
+    const packageRegExp: RegExp = /^((@[a-z\-0-9!_]+\/)?[a-z\-0-9!_][a-z\-0-9!_.]*)\/?/;
 
     const requireMatches: Set<string> = new Set<string>();
 
-    const { default: glob } = await import('glob');
-    const scanResults: string[] = await LegacyAdapters.convertCallbackToPromise(
-      glob,
-      '{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}'
-    );
+    const { default: glob } = await import('fast-glob');
+    const scanResults: string[] = await glob(['./*.{ts,js,tsx,jsx}', './{src,lib}/**/*.{ts,js,tsx,jsx}']);
     for (const filename of scanResults) {
       try {
         const contents: string = FileSystem.readFile(filename);
@@ -124,6 +122,7 @@ export class ScanAction extends BaseConfiglessRushAction {
           }
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log(colors.bold('Skipping file due to error: ' + filename));
       }
     }
@@ -168,6 +167,7 @@ export class ScanAction extends BaseConfiglessRushAction {
         }
       }
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(`JSON.parse ${packageJsonFilename} error`);
     }
 
@@ -199,25 +199,31 @@ export class ScanAction extends BaseConfiglessRushAction {
     };
 
     if (this._jsonFlag.value) {
+      // eslint-disable-next-line no-console
       console.log(JSON.stringify(output, undefined, 2));
     } else if (this._allFlag.value) {
       if (detectedPackageNames.length !== 0) {
+        // eslint-disable-next-line no-console
         console.log('Dependencies that seem to be imported by this project:');
         for (const packageName of detectedPackageNames) {
+          // eslint-disable-next-line no-console
           console.log('  ' + packageName);
         }
       } else {
+        // eslint-disable-next-line no-console
         console.log('This project does not seem to import any NPM packages.');
       }
     } else {
       let wroteAnything: boolean = false;
 
       if (missingDependencies.length > 0) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow('Possible phantom dependencies') +
             " - these seem to be imported but aren't listed in package.json:"
         );
         for (const packageName of missingDependencies) {
+          // eslint-disable-next-line no-console
           console.log('  ' + packageName);
         }
         wroteAnything = true;
@@ -225,19 +231,23 @@ export class ScanAction extends BaseConfiglessRushAction {
 
       if (unusedDependencies.length > 0) {
         if (wroteAnything) {
+          // eslint-disable-next-line no-console
           console.log('');
         }
+        // eslint-disable-next-line no-console
         console.log(
           colors.yellow('Possible unused dependencies') +
             " - these are listed in package.json but don't seem to be imported:"
         );
         for (const packageName of unusedDependencies) {
+          // eslint-disable-next-line no-console
           console.log('  ' + packageName);
         }
         wroteAnything = true;
       }
 
       if (!wroteAnything) {
+        // eslint-disable-next-line no-console
         console.log(
           colors.green('Everything looks good.') + '  No missing or unused dependencies were found.'
         );

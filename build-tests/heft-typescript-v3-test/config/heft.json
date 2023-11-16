@@ -4,13 +4,8 @@
   // TODO: Add comments
   "phasesByName": {
     "build": {
-      "cleanFiles": [
-        { "sourcePath": "dist" },
-        { "sourcePath": "lib" },
-        { "sourcePath": "lib-esnext" },
-        { "sourcePath": "lib-umd" },
-        { "sourcePath": "temp" }
-      ],
+      "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-esnext", "lib-umd", "temp"] }],
+
       "tasksByName": {
         "typescript": {
           "taskPlugin": {

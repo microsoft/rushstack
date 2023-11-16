@@ -42,6 +42,7 @@ import {
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';
 import { TerminalWritableStream } from './TerminalWritableStream';
+import anythingSchema from './schemas/anything.schema.json';
 
 const jestPluginSymbol: unique symbol = Symbol('heft-jest-plugin');
 interface IWithJestPlugin {
@@ -100,6 +101,7 @@ export interface IJestPluginOptions {
   detectOpenHandles?: boolean;
   disableCodeCoverage?: boolean;
   disableConfigurationModuleResolution?: boolean;
+  enableNodeEnvManagement?: boolean;
   findRelatedTests?: string[];
   maxWorkers?: string;
   passWithNoTests?: boolean;
@@ -109,6 +111,7 @@ export interface IJestPluginOptions {
   testPathPattern?: string;
   testTimeout?: number;
   updateSnapshots?: boolean;
+  logHeapUsage?: boolean;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -151,6 +154,16 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   private _jestOutputStream: TerminalWritableStream | undefined;
   private _changedFiles: Set<string> = new Set();
   private _requestRun!: () => void;
+  private _nodeEnvSet: boolean | undefined;
+
+  private _resolveFirstRunQueued!: () => void;
+  private _firstRunQueuedPromise: Promise<void>;
+
+  public constructor() {
+    this._firstRunQueuedPromise = new Promise((resolve) => {
+      this._resolveFirstRunQueued = resolve;
+    });
+  }
 
   public static getJestPlugin(object: object): JestPlugin | undefined {
     return (object as IWithJestPlugin)[jestPluginSymbol];
@@ -178,6 +191,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const silentParameter: CommandLineFlagParameter = parameters.getFlagParameter('--silent');
     const updateSnapshotsParameter: CommandLineFlagParameter =
       parameters.getFlagParameter('--update-snapshots');
+    const logHeapUsageParameter: CommandLineFlagParameter = parameters.getFlagParameter('--log-heap-usage');
 
     // Strings
     const configParameter: CommandLineStringParameter = parameters.getStringParameter('--config');
@@ -198,12 +212,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const testTimeoutParameter: CommandLineIntegerParameter =
       parameters.getIntegerParameter('--test-timeout-ms');
 
-    const combinedOptions: IJestPluginOptions = {
+    const options: IJestPluginOptions = {
       ...pluginOptions,
       configurationPath: configParameter.value || pluginOptions?.configurationPath,
       debugHeftReporter: debugHeftReporterParameter.value || pluginOptions?.debugHeftReporter,
       detectOpenHandles: detectOpenHandlesParameter.value || pluginOptions?.detectOpenHandles,
       disableCodeCoverage: disableCodeCoverageParameter.value || pluginOptions?.disableCodeCoverage,
+      logHeapUsage: logHeapUsageParameter.value || pluginOptions?.logHeapUsage,
       findRelatedTests: findRelatedTestsParameter.values.length
         ? Array.from(findRelatedTestsParameter.values)
         : pluginOptions?.findRelatedTests,
@@ -215,11 +230,12 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       testPathIgnorePatterns: testPathIgnorePatternsParameter.value || pluginOptions?.testPathIgnorePatterns,
       testPathPattern: testPathPatternParameter.value || pluginOptions?.testPathPattern,
       testTimeout: testTimeoutParameter.value ?? pluginOptions?.testTimeout,
-      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots
+      updateSnapshots: updateSnapshotsParameter.value || pluginOptions?.updateSnapshots,
+      enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, combinedOptions);
+      await this._runJestAsync(taskSession, heftConfiguration, options);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
@@ -228,7 +244,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         await this._runJestWatchAsync(
           taskSession,
           heftConfiguration,
-          combinedOptions,
+          options,
           runIncrementalOptions.requestRun
         );
       }
@@ -245,6 +261,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
   ): Promise<void> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
+
+    this._setNodeEnvIfRequested(options, logger);
 
     const { getVersion, runCLI } = await import(`@jest/core`);
     terminal.writeLine(`Using Jest version ${getVersion()}`);
@@ -267,6 +285,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       globalConfig,
       results: jestResults
     } = await runCLI(jestArgv, [buildFolderPath]);
+
+    this._resetNodeEnv();
 
     if (jestResults.numFailedTests > 0) {
       logger.emitError(
@@ -311,6 +331,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         readConfigs: IReadConfigs;
       } = require(jestConfigPath);
       const { readConfigs: originalReadConfigs } = jestConfigModule;
+      // eslint-disable-next-line func-style
       const readConfigs: typeof originalReadConfigs = async function wrappedReadConfigs(
         this: void,
         argv: Config.Argv,
@@ -325,7 +346,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         });
 
         return {
-          // There are other propeties on this object
+          // There are other properties on this object
           ...result,
           globalConfig: extendedGlobalConfig
         };
@@ -344,6 +365,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       } = require(watchModulePath);
       const { default: originalWatch } = watchModule;
 
+      // eslint-disable-next-line func-style
       const watch: IJestWatch = function patchedWatch(
         this: void,
         initialGlobalConfig: Config.GlobalConfig,
@@ -393,6 +415,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
         default: (params: IRunJestParams) => Promise<void>;
       } = require(runJestModulePath);
       const { default: originalRunJest } = runJestModule;
+      // eslint-disable-next-line func-style
       const runJest: typeof originalRunJest = function patchedRunJest(
         this: void,
         params: IRunJestParams
@@ -441,6 +464,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
             return result;
           });
+          host._resolveFirstRunQueued();
         });
       };
 
@@ -468,7 +492,14 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       this._jestPromise = runCLI(jestArgv, [buildFolderPath]);
     }
 
+    // Wait for the initial run to be queued.
+    await this._firstRunQueuedPromise;
+    // Explicitly wait an async tick for any file watchers
+    await Promise.resolve();
+
     if (pendingTestRuns.size > 0) {
+      this._setNodeEnvIfRequested(options, logger);
+
       this._executing = true;
       for (const pendingTestRun of pendingTestRuns) {
         pendingTestRuns.delete(pendingTestRun);
@@ -493,6 +524,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
           terminal.writeLine(`No tests were executed.`);
         }
       }
+
+      this._resetNodeEnv();
 
       if (!logger.hasErrors) {
         // If we ran tests and they succeeded, consider the files to no longer be changed.
@@ -554,11 +587,24 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       jestConfig.displayName = heftConfiguration.projectPackageJson.name;
     }
 
+    let silent: boolean | undefined;
+    if (taskSession.parameters.verbose || taskSession.parameters.debug) {
+      // If Heft's "--verbose" or "--debug" parameters were used, then we're debugging Jest problems,
+      // so we always want to see "console.log()" even if jest.config.json asked to suppress it.
+      // If someone really dislikes that, we could expose "--silent" in the Heft CLI,
+      // but it is a confusing combination.
+      silent = false;
+    } else {
+      // If "silent" is specified via IJestPluginOptions, that takes precedence over jest.config.json
+      silent = options.silent ?? jestConfig.silent ?? false;
+    }
+
     const jestArgv: Config.Argv = {
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: taskSession.parameters.debug,
       debug: taskSession.parameters.debug,
       detectOpenHandles: options.detectOpenHandles || false,
+      logHeapUsage: options.logHeapUsage || false,
 
       // Use the temp folder. Cache is unreliable, so we want it cleared on every --clean run
       cacheDirectory: taskSession.tempFolderPath,
@@ -567,7 +613,23 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       listTests: false,
       rootDir: buildFolderPath,
 
-      silent: options.silent || false,
+      // What these fields mean for Jest:
+      //
+      // If "silent" is true:
+      // - Jest discards all console.log() output and there is no way to retrieve it
+      //
+      // If "silent" is false and "verbose" is false:
+      // - Jest uses BufferedConsole which doesn't show console.log() until after the test run completes,
+      //   which is annoying in the debugger.  The output is formatted nicely using HeftJestReporter.
+      //
+      // If "silent" is false and "verbose" is true:
+      // - Jest uses CustomConsole which logs immediately, but shows ugly call stacks with each log.
+      //
+      // If "verbose" is true (regardless of "silent"):
+      // - Jest reports include detailed results for every test, even if all tests passed within a test suite.
+      silent,
+      verbose: taskSession.parameters.verbose || taskSession.parameters.debug,
+
       testNamePattern: options.testNamePattern,
       testPathIgnorePatterns: options.testPathIgnorePatterns ? [options.testPathIgnorePatterns] : undefined,
       testPathPattern: options.testPathPattern ? [options.testPathPattern] : undefined,
@@ -623,9 +685,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     projectRelativeFilePath: string
   ): ConfigurationFile<IHeftJestConfiguration> {
     if (!JestPlugin._jestConfigurationFileLoader) {
-      // Bypass Jest configuration validation
-      const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
-
       // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
       const shallowObjectInheritanceFunc: <T extends Record<string, unknown> | undefined>(
         currentObject: T,
@@ -671,7 +730,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       JestPlugin._jestConfigurationFileLoader = new ConfigurationFile<IHeftJestConfiguration>({
         projectRelativeFilePath: projectRelativeFilePath,
-        jsonSchemaPath: schemaPath,
+        // Bypass Jest configuration validation
+        jsonSchemaObject: anythingSchema,
         propertyInheritance: {
           moduleNameMapper: {
             inheritanceType: InheritanceType.custom,
@@ -739,6 +799,29 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
 
     return JestPlugin._jestConfigurationFileLoader;
+  }
+
+  private _setNodeEnvIfRequested(options: IJestPluginOptions, logger: IScopedLogger): void {
+    if (options.enableNodeEnvManagement) {
+      if (process.env.NODE_ENV) {
+        if (process.env.NODE_ENV !== 'test') {
+          // In the future, we may consider just setting this and not warning
+          logger.emitWarning(
+            new Error(`NODE_ENV variable is set and it's not "test". NODE_ENV=${process.env.NODE_ENV}`)
+          );
+        }
+      } else {
+        process.env.NODE_ENV = 'test';
+        this._nodeEnvSet = true;
+      }
+    }
+  }
+
+  private _resetNodeEnv(): void {
+    // unset the NODE_ENV only if we have set it
+    if (this._nodeEnvSet) {
+      delete process.env.NODE_ENV;
+    }
   }
 
   private static _extractHeftJestReporters(

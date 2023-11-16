@@ -3,10 +3,10 @@
 
 import * as path from 'path';
 
-import { FileSystem, JsonFile, JsonObject, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
 
-import { PackageManagerName } from './packageManager/PackageManager';
-import { RushConfiguration } from './RushConfiguration';
+import type { PackageManagerName } from './packageManager/PackageManager';
+import type { RushConfiguration } from './RushConfiguration';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';

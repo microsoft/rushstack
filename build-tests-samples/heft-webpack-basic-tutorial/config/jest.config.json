@@ -12,5 +12,15 @@
     "!lib-commonjs/**/__tests__/**",
     "!lib-commonjs/**/__fixtures__/**",
     "!lib-commonjs/**/__mocks__/**"
-  ]
+  ],
+
+  // These additional properties exist for caching purposes in the rushstack repo
+
+  // Enable code coverage for Jest
+  "collectCoverage": true,
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["cobertura", "html"],
+
+  // Use v8 coverage provider to avoid Babel
+  "coverageProvider": "v8"
 }

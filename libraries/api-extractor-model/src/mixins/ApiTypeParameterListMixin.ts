@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.s
+// See LICENSE in the project root for license information.
 
-import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import { Excerpt, IExcerptTokenRange } from './Excerpt';
+/* eslint-disable @typescript-eslint/no-redeclare */
+
+import type { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import type { Excerpt, IExcerptTokenRange } from './Excerpt';
 import { TypeParameter } from '../model/TypeParameter';
 import { InternalError } from '@rushstack/node-core-library';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
-import { DeserializerContext } from '../model/DeserializerContext';
+import type { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Represents parameter information that is part of {@link IApiTypeParameterListMixinOptions}

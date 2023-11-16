@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
-import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
+import { ApiItem, ApiItemKind, type IApiItemJson } from '../items/ApiItem';
+import { ApiItemContainerMixin, type IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import {
   JsonFile,
-  IJsonFileSaveOptions,
+  type IJsonFileSaveOptions,
   PackageJsonLookup,
-  IPackageJson,
-  JsonObject
+  type IPackageJson,
+  type JsonObject
 } from '@rushstack/node-core-library';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
-import { ApiEntryPoint } from './ApiEntryPoint';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiDocumentedItem, type IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import type { ApiEntryPoint } from './ApiEntryPoint';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';

@@ -33,6 +33,29 @@ await typingsGenerator.generateTypings();
 await typingsGenerator.runWatcher();
 ```
 
+```TypeScript
+import { TypingsGenerator } from '@rushstack/typings-generator';
+
+const assetTypingsGenerator: TypingsGenerator = new TypingsGenerator({
+  srcFolder: '/repo/package/src',
+  generatedTsFolder: '/repo/package/temp/generated-typings',
+  fileExtensions: ['.jpg'],
+  parseAndGenerateTypings: (fileContents: false, filePath: string) => {
+    const parsedFile = parseFile(fileContents);
+    const typings: string = 'declare const path: string;\nexport default path;';
+    return typings;
+  },
+  // Don't read files at all
+  readFile: (filePath: string, relativePath: string) => false
+});
+
+// To run once before a compilation:
+await typingsGenerator.generateTypings();
+
+// To start a watcher:
+await typingsGenerator.runWatcher();
+```
+
 ## Options
 
 ### `srcFolder = '...'`
@@ -50,11 +73,19 @@ that this be a folder parallel to the source folder, specified in addition to th
 
 This property enumerates the file extensions that should be handled.
 
-### `parseAndGenerateTypings = (fileContents: string, filePath: string) => string | Promise<string>`
+### `parseAndGenerateTypings = (fileContents: TFileContents, filePath: string, relativePath: string) => string | Promise<string>`
 
 This property is used to specify the function that should be called on every file for which typings
 are being generated. In watch mode, this is called on every file creation and file update. It should
 return TypeScript declarations for the file it is called with.
+
+### `readFile = (filePath: string, relativePath: string) => TFileContents | Promise<TFileContents>`
+
+This property allows customizing the process by which files are read from the specified paths.
+Use cases include:
+- Disabling reads altogether, if the typings don't depend on file content
+- Reading from an alternate data source
+- Reading files with a different encoding than 'utf-8'
 
 ### `terminal`
 

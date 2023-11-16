@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { AsyncParallelHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineChoiceListParameter } from '@rushstack/ts-command-line';
@@ -15,27 +17,9 @@ import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
-
-// @beta
-export class CancellationToken {
-    // @internal
-    constructor(options?: _ICancellationTokenOptions);
-    get isCancelled(): boolean;
-    get onCancelledPromise(): Promise<void>;
-}
-
-// @beta
-export class CancellationTokenSource {
-    constructor(options?: ICancellationTokenSourceOptions);
-    cancel(): void;
-    get isCancelled(): boolean;
-    // @internal (undocumented)
-    get _onCancelledPromise(): Promise<void>;
-    get token(): CancellationToken;
-}
 
 export { CommandLineChoiceListParameter }
 
@@ -67,21 +51,10 @@ export class HeftConfiguration {
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
     get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
-    get rigConfig(): RigConfig;
+    get rigConfig(): IRigConfig;
     get rigPackageResolver(): IRigPackageResolver;
     get tempFolderPath(): string;
     get terminalProvider(): ITerminalProvider;
-}
-
-// @internal
-export interface _ICancellationTokenOptions {
-    cancellationTokenSource?: CancellationTokenSource;
-    isCancelled?: boolean;
-}
-
-// @beta
-export interface ICancellationTokenSourceOptions {
-    delayMs?: number;
 }
 
 // @public
@@ -100,7 +73,7 @@ export interface IFileSelectionSpecifier {
     excludeGlobs?: string[];
     fileExtensions?: string[];
     includeGlobs?: string[];
-    sourcePath: string;
+    sourcePath?: string;
 }
 
 // @public
@@ -135,7 +108,6 @@ export interface IHeftLifecycleCleanHookOptions {
 // @public
 export interface IHeftLifecycleHooks {
     clean: AsyncParallelHook<IHeftLifecycleCleanHookOptions>;
-    // (undocumented)
     recordMetrics: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
     toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
     toolStart: AsyncParallelHook<IHeftLifecycleToolStartHookOptions>;
@@ -213,7 +185,7 @@ export interface IHeftTaskPlugin<TOptions = void> extends IHeftPlugin<IHeftTaskS
 // @public
 export interface IHeftTaskRunHookOptions {
     // @beta
-    readonly cancellationToken: CancellationToken;
+    readonly abortSignal: AbortSignal;
 }
 
 // @public

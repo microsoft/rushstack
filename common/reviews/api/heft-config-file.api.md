@@ -4,8 +4,8 @@
 
 ```ts
 
+import type { IRigConfig } from '@rushstack/rig-package';
 import { ITerminal } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
 
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
@@ -14,9 +14,9 @@ export class ConfigurationFile<TConfigurationFile> {
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
-    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;
-    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
+    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: IRigConfig): Promise<TConfigurationFile | undefined>;
 }
 
 // @beta (undocumented)

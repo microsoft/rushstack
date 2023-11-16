@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
 /// <reference lib="dom" />
 
 import * as path from 'path';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
-import { CompileResult, Syntax, Exception, compileStringAsync } from 'sass-embedded';
+import { type CompileResult, type Syntax, type Exception, compileStringAsync } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
 import { FileSystem, Sort } from '@rushstack/node-core-library';
-import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
+import { type IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
  * @public
@@ -106,7 +107,13 @@ export class SassProcessor extends StringValuesTypingsGenerator {
 
     const { allFileExtensions, isFileModule } = buildExtensionClassifier(sassConfiguration);
 
-    const { cssOutputFolders, preserveSCSSExtension = false } = sassConfiguration;
+    const {
+      cssOutputFolders,
+      excludeFiles,
+      secondaryGeneratedTsFolders,
+      importIncludePaths,
+      preserveSCSSExtension = false
+    } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
@@ -125,14 +132,26 @@ export class SassProcessor extends StringValuesTypingsGenerator {
         }
       : undefined;
 
+    let globsToIgnore: string[] | undefined;
+    if (excludeFiles) {
+      globsToIgnore = [];
+      for (const excludedFile of excludeFiles) {
+        if (excludedFile.startsWith('./')) {
+          globsToIgnore.push(excludedFile.substring(2));
+        } else {
+          globsToIgnore.push(excludedFile);
+        }
+      }
+    }
+
     super({
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions: allFileExtensions,
-      filesToIgnore: sassConfiguration.excludeFiles,
-      secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
+      globsToIgnore,
+      secondaryGeneratedTsFolders,
 
       getAdditionalOutputFiles: getCssPaths,
 
@@ -149,7 +168,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.importIncludePaths
+          importIncludePaths
         );
 
         let classMap: IClassMap = {};
@@ -318,8 +337,8 @@ function buildExtensionClassifier(sassConfiguration: ISassConfiguration): IExten
   };
 }
 
-function determineSyntaxFromFilePath(path: string): Syntax {
-  switch (path.substring(path.lastIndexOf('.'))) {
+function determineSyntaxFromFilePath(filePath: string): Syntax {
+  switch (filePath.substring(filePath.lastIndexOf('.'))) {
     case '.sass':
       return 'indented';
     case '.scss':

@@ -6,7 +6,7 @@
 
 /// <reference types="node" />
 
-import { MessagePort } from 'worker_threads';
+import type { MessagePort as MessagePort_2 } from 'worker_threads';
 import { MinifyOptions } from 'terser';
 import type { RawSourceMap } from 'source-map';
 
@@ -87,12 +87,12 @@ export class LocalMinifier implements IModuleMinifier {
 
 // @public
 export class MessagePortMinifier implements IModuleMinifier {
-    constructor(port: MessagePort);
+    constructor(port: MessagePort_2);
     // (undocumented)
     connect(): Promise<IMinifierConnection>;
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
     // (undocumented)
-    readonly port: MessagePort;
+    readonly port: MessagePort_2;
 }
 
 export { MinifyOptions }

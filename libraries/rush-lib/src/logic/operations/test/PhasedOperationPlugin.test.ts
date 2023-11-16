@@ -7,16 +7,19 @@ import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../../../api/RushConfiguration';
 import {
   CommandLineConfiguration,
-  IPhase,
-  IPhasedCommandConfig
+  type IPhase,
+  type IPhasedCommandConfig
 } from '../../../api/CommandLineConfiguration';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { Operation } from '../Operation';
-import { ICommandLineJson } from '../../../api/CommandLineJson';
+import type { Operation } from '../Operation';
+import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { RushConstants } from '../../RushConstants';
 import { MockOperationRunner } from './MockOperationRunner';
-import { ICreateOperationsContext, PhasedCommandHooks } from '../../../pluginFramework/PhasedCommandHooks';
-import { RushConfigurationProject } from '../../..';
+import {
+  type ICreateOperationsContext,
+  PhasedCommandHooks
+} from '../../../pluginFramework/PhasedCommandHooks';
+import type { RushConfigurationProject } from '../../..';
 
 interface ISerializedOperation {
   name: string;

@@ -9,31 +9,17 @@
     "build": {
       "cleanFiles": [
         {
-          "sourcePath": "out-all"
-        },
-        {
-          "sourcePath": "out-all-linked"
-        },
-        {
-          "sourcePath": "out-all-flattened"
-        },
-        {
-          "sourcePath": "out-all-except-for-images"
-        },
-        {
-          "sourcePath": "out-images1"
-        },
-        {
-          "sourcePath": "out-images2"
-        },
-        {
-          "sourcePath": "out-images3"
-        },
-        {
-          "sourcePath": "out-images4"
-        },
-        {
-          "sourcePath": "out-images5"
+          "includeGlobs": [
+            "out-all",
+            "out-all-linked",
+            "out-all-flattened",
+            "out-all-except-for-images",
+            "out-images1",
+            "out-images2",
+            "out-images3",
+            "out-images4",
+            "out-images5"
+          ]
         }
       ],
 
@@ -46,13 +32,11 @@
               "copyOperations": [
                 {
                   "sourcePath": "src",
-                  "destinationFolders": ["out-all"],
-                  "includeGlobs": ["**/*"]
+                  "destinationFolders": ["out-all"]
                 },
                 {
                   "sourcePath": "src",
                   "destinationFolders": ["out-all-linked"],
-                  "includeGlobs": ["**/*"],
                   "hardlink": true
                 },
                 {
@@ -64,8 +48,7 @@
                 {
                   "sourcePath": "src",
                   "destinationFolders": ["out-all-except-for-images"],
-                  "excludeGlobs": ["**/*.png", "**/*.jpg"],
-                  "includeGlobs": ["**/*"]
+                  "excludeGlobs": ["**/*.png", "**/*.jpg"]
                 },
                 {
                   "sourcePath": "src",

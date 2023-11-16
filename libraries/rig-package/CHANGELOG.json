@@ -2,6 +2,59 @@
   "name": "@rushstack/rig-package",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@rushstack/rig-package_v0.5.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@rushstack/rig-package_v0.5.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@rushstack/rig-package_v0.4.1",
+      "date": "Tue, 08 Aug 2023 07:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/rig-package_v0.4.0",
+      "date": "Mon, 19 Jun 2023 22:40:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose an `IRigConfig` interface that `RigConfig` implements."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.21",
       "tag": "@rushstack/rig-package_v0.3.21",
       "date": "Thu, 15 Jun 2023 00:21:01 GMT",
