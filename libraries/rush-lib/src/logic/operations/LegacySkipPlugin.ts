@@ -260,12 +260,12 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         const { packageDeps, packageDepsPath } = skipRecord;
 
         if (
-          (packageDeps && status === OperationStatus.Success) ||
+          status === OperationStatus.NoOp ||
           (packageDeps &&
-            status === OperationStatus.SuccessWithWarning &&
-            record.operation.runner!.warningsAreAllowed &&
-            allowWarningsInSuccessfulBuild) ||
-          status === OperationStatus.NoOp
+            (status === OperationStatus.Success ||
+              (status === OperationStatus.SuccessWithWarning &&
+                record.operation.runner!.warningsAreAllowed &&
+                allowWarningsInSuccessfulBuild)))
         ) {
           // Write deps on success.
           await JsonFile.saveAsync(packageDeps, packageDepsPath, {
