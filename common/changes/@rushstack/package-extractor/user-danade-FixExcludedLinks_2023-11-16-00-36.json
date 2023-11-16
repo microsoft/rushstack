@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Links that target a path outside of the source directory can now be ignored using \"patternsToInclude\" and \"patternsToExclude\" options",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}
