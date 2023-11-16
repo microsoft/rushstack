@@ -494,6 +494,20 @@
       "tags": ["api-extractor-tests"]
     },
     {
+      "packageName": "api-extractor-d-cts-test",
+      "projectFolder": "build-tests/api-extractor-d-cts-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
+      "packageName": "api-extractor-d-mts-test",
+      "projectFolder": "build-tests/api-extractor-d-mts-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
       "packageName": "api-extractor-lib1-test",
       "projectFolder": "build-tests/api-extractor-lib1-test",
       "reviewCategory": "tests",
