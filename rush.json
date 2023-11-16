@@ -494,6 +494,20 @@
       "tags": ["api-extractor-tests"]
     },
     {
+      "packageName": "api-extractor-d-cts-test",
+      "projectFolder": "build-tests/api-extractor-d-cts-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
+      "packageName": "api-extractor-d-mts-test",
+      "projectFolder": "build-tests/api-extractor-d-mts-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
       "packageName": "api-extractor-lib1-test",
       "projectFolder": "build-tests/api-extractor-lib1-test",
       "reviewCategory": "tests",
@@ -513,18 +527,6 @@
       "reviewCategory": "tests",
       "shouldPublish": false,
       "tags": ["api-extractor-tests"]
-    },
-    {
-      "packageName": "api-extractor-lib4-test",
-      "projectFolder": "build-tests/api-extractor-lib4-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "api-extractor-lib5-test",
-      "projectFolder": "build-tests/api-extractor-lib5-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
     },
     {
       "packageName": "api-extractor-scenarios",

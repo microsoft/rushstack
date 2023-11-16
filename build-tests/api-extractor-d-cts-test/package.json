@@ -1,10 +1,10 @@
 {
-  "name": "api-extractor-lib5-test",
+  "name": "api-extractor-d-cts-test",
   "description": "Building this project is a regression test for api-extractor",
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.cjs",
-  "types": "dist/api-extractor-lib2-test.d.cts",
+  "types": "dist/api-extractor-d-cts-test.d.cts",
   "scripts": {
     "build": "node build.js",
     "_phase:build": "node build.js"
@@ -12,7 +12,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@types/jest": "29.2.5",
-    "@types/node": "14.18.36",
+    "@types/node": "18.17.15",
     "fs-extra": "~7.0.1",
     "typescript": "~5.0.4"
   }

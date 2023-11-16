@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * api-extractor-lib4-test
+ * api-extractor-d-cts-test
  *
  * @remarks
  * This library is consumed by api-extractor-scenarios.
