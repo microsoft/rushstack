@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Nov 2023 01:09:56 GMT and should not be manually modified.
+
+## 0.6.14
+Thu, 16 Nov 2023 01:09:56 GMT
+
+### Patches
+
+- Links that target a path outside of the source directory can now be ignored using "patternsToInclude" and "patternsToExclude" options
 
 ## 0.6.13
 Fri, 10 Nov 2023 18:02:04 GMT

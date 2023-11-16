@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.6.14",
+      "tag": "@rushstack/package-extractor_v0.6.14",
+      "date": "Thu, 16 Nov 2023 01:09:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Links that target a path outside of the source directory can now be ignored using \"patternsToInclude\" and \"patternsToExclude\" options"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.13",
       "tag": "@rushstack/package-extractor_v0.6.13",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",
