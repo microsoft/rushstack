@@ -50,6 +50,12 @@ export interface IExperimentsJson {
   buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
 
   /**
+   * If true, build skipping will respect the allowWarningsInSuccessfulBuild flag and skip builds with warnings.
+   * This will not replay warnings from the skipped build.
+   */
+  buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
+
+  /**
    * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
    * in common/config/rush/command-line.json.
    */

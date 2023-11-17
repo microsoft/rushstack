@@ -55,6 +55,7 @@ export interface ILegacySkipPluginOptions {
   terminal: ITerminal;
   changedProjectsOnly: boolean;
   isIncrementalBuildAllowed: boolean;
+  allowWarningsInSuccessfulBuild?: boolean;
 }
 
 /**
@@ -72,7 +73,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
     let projectChangeAnalyzer!: ProjectChangeAnalyzer;
 
-    const { terminal, changedProjectsOnly, isIncrementalBuildAllowed } = this._options;
+    const { terminal, changedProjectsOnly, isIncrementalBuildAllowed, allowWarningsInSuccessfulBuild } =
+      this._options;
 
     hooks.createOperations.tap(
       PLUGIN_NAME,
@@ -257,7 +259,14 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
         const { packageDeps, packageDepsPath } = skipRecord;
 
-        if ((packageDeps && status === OperationStatus.Success) || status === OperationStatus.NoOp) {
+        if (
+          status === OperationStatus.NoOp ||
+          (packageDeps &&
+            (status === OperationStatus.Success ||
+              (status === OperationStatus.SuccessWithWarning &&
+                record.operation.runner!.warningsAreAllowed &&
+                allowWarningsInSuccessfulBuild)))
+        ) {
           // Write deps on success.
           await JsonFile.saveAsync(packageDeps, packageDepsPath, {
             ensureFolderExists: true
