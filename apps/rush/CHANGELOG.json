@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.111.0",
+      "tag": "@microsoft/rush_v5.111.0",
+      "date": "Sat, 18 Nov 2023 00:06:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add experiment `buildSkipWithAllowWarningsInSuccessfulBuild` to allow skipping builds that succeeded with warnings in the previous run."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.110.2",
       "tag": "@microsoft/rush_v5.110.2",
       "date": "Thu, 16 Nov 2023 01:36:10 GMT",
