@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { clean } from './clean';
+import { prune } from './prune';
 import { suppress } from './suppress';
 import { isCorrectCwd } from './utils/is-correct-cwd';
 import { printHelp } from './utils/print-help';
@@ -20,8 +20,8 @@ const subcommand = process.argv[2];
 
 if (subcommand === 'suppress') {
   suppress();
-} else if (subcommand === 'clean') {
-  clean();
+} else if (subcommand === 'prune') {
+  prune();
 } else {
   throw new Error('@rushstack/eslint-bulk: Unknown subcommand: ' + subcommand);
 }

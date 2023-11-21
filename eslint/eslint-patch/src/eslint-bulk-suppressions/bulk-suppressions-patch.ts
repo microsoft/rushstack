@@ -246,12 +246,12 @@ export function shouldBulkSuppress(params: {
 }
 
 export function onFinish(params: { filename: string }): void {
-  if (process.env.ESLINT_BULK_CLEAN === 'true') {
-    BulkSuppressionsCleanUp(params);
+  if (process.env.ESLINT_BULK_PRUNE === 'true') {
+    BulkSuppressionsPrune(params);
   }
 }
 
-export function BulkSuppressionsCleanUp(params: { filename: string }): void {
+export function BulkSuppressionsPrune(params: { filename: string }): void {
   const { filename: fileAbsolutePath } = params;
   const suppressionsJson = readSuppressionsJson(fileAbsolutePath);
   const newSuppressionsJson = {

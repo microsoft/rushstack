@@ -3,13 +3,13 @@
 
 import { ExecException, exec } from 'child_process';
 import { getEslintCli } from './utils/get-eslint-cli';
-import { printCleanHelp } from './utils/print-help';
+import { printPruneHelp } from './utils/print-help';
 
-export function clean() {
+export function prune() {
   const args = process.argv.slice(3);
 
   if (args.includes('--help') || args.includes('-h')) {
-    printCleanHelp();
+    printPruneHelp();
     process.exit(0);
   }
 
@@ -32,7 +32,7 @@ export function clean() {
   const eslintCLI = getEslintCli(process.cwd());
 
   const env = Object.assign({}, process.env);
-  env.ESLINT_BULK_CLEAN = 'true';
+  env.ESLINT_BULK_PRUNE = 'true';
 
   exec(
     `${eslintCLI} ${parsedArgs.files.join(' ')} --format=json`,
@@ -52,7 +52,7 @@ export function clean() {
       }
 
       console.log(
-        `@rushstack/eslint-bulk: Successfully cleaned up .eslint-bulk-suppressions.json at ${process.cwd()} for ${
+        `@rushstack/eslint-bulk: Successfully pruned unused suppressions in .eslint-bulk-suppressions.json at ${process.cwd()} for ${
           parsedArgs.files
         }`
       );
