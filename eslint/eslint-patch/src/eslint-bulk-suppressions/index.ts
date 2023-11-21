@@ -18,7 +18,7 @@ if (!eslintFolder) {
   process.exit(1);
 }
 
-if (process.env.ESLINT_BULK_FIND === 'true') {
+if (process.env._RUSHSTACK_ESLINT_BULK_DETECT === 'true') {
   findAndConsoleLogPatchPathCli(__dirname);
   process.exit(0);
 }

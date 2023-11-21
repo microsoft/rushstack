@@ -6,16 +6,25 @@ import path from 'path';
 import { eslintFolder } from '../_patch-base';
 
 export function findAndConsoleLogPatchPathCli(patchPath: string): void {
-  if (process.env.ESLINT_BULK_FIND !== 'true') {
+  if (process.env._RUSHSTACK_ESLINT_BULK_DETECT !== 'true') {
     return;
   }
 
-  const startDelimiter = 'ESLINT_BULK_STDOUT_START';
-  const endDelimiter = 'ESLINT_BULK_STDOUT_END';
+  const startDelimiter = 'RUSHSTACK_ESLINT_BULK_START';
+  const endDelimiter = 'RUSHSTACK_ESLINT_BULK_END';
 
-  console.log(
-    `${startDelimiter}${path.resolve(patchPath, '..', 'exports', 'eslint-bulk.js')}${endDelimiter}`
-  );
+  const configuration = {
+    /**
+     * `@rushtack/eslint`-bulk should report an error if its package.json is older than this number
+     */
+    minCliVersion: '0.0.0',
+    /**
+     * `@rushtack/eslint-bulk` will invoke this entry point
+     */
+    cliEntryPoint: path.resolve(patchPath, '..', 'exports', 'eslint-bulk.js')
+  };
+
+  console.log(startDelimiter + JSON.stringify(configuration) + endDelimiter);
 }
 
 export function getPathToLinterJS(): string {
