@@ -13,7 +13,9 @@ export function findAndConsoleLogPatchPathCli(patchPath: string): void {
   const startDelimiter = 'ESLINT_BULK_STDOUT_START';
   const endDelimiter = 'ESLINT_BULK_STDOUT_END';
 
-  console.log(`${startDelimiter}${path.resolve(patchPath, '..', '..', 'bin', 'eslint-bulk')}${endDelimiter}`);
+  console.log(
+    `${startDelimiter}${path.resolve(patchPath, '..', 'exports', 'eslint-bulk.js')}${endDelimiter}`
+  );
 }
 
 export function getPathToLinterJS(): string {
