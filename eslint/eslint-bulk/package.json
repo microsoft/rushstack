@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft run --only build -- --clean"
+    "_phase:build": "heft run --only build -- --clean",
+    "start": "node ./lib/start.js"
   },
   "keywords": [
     "eslintrc",
@@ -29,7 +30,7 @@
   ],
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@types/node": "18.17.15"
   }
 }
