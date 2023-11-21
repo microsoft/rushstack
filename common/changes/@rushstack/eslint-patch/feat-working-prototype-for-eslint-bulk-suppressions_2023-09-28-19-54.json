@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-patch",
-      "comment": "Implementaton for eslint-bulk-suppressions, a monkey-patch for ESLint inspired by .NET Code Analysis Global Suppressions",
+      "comment": "Add an experimental new feature for ESLint bulk suppressions; for details see GitHub #4303",
       "type": "minor"
     }
   ],
