@@ -1,6 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// ----------------------------------------------------------------------------------------------------------
+// TO AVOID EXTRA DEPENDENCIES, THE CODE IN THIS FILE WAS BORROWED FROM:
+//
+// rushstack/libraries/terminal/src/PrintUtilities.ts
+//
+// KEEP IT IN SYNC WITH THAT FILE.
+// ----------------------------------------------------------------------------------------------------------
+
 /**
  * Applies word wrapping and returns an array of lines.
  *
@@ -8,7 +16,6 @@
  * @param maxLineLength - The maximum length of a line, defaults to the console width
  * @param indent - The number of spaces to indent the wrapped lines, defaults to 0
  */
-
 export function wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
 /**
  * Applies word wrapping and returns an array of lines.
