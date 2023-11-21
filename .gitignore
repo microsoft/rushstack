@@ -97,3 +97,4 @@ dist
 dist-storybook
 *.scss.ts
 *.sass.ts
+*.tsbuildinfo
