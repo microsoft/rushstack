@@ -339,8 +339,16 @@
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
+      "name": "@typescript-eslint/types",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@typescript-eslint/typescript-estree",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@vscode/test-electron",
+      "allowedCategories": [ "vscode-extensions" ]
     },
     {
       "name": "@yarnpkg/lockfile",
@@ -440,10 +448,6 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "local-eslint-config",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
@@ -635,6 +639,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "local-eslint-config",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
       "name": "local-node-rig",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
@@ -817,6 +825,10 @@
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "update-notifier",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "url-loader",

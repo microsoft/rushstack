@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-bulk",
+      "comment": "Initial release of `@rushstack/eslint-bulk` package",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-bulk"
+}

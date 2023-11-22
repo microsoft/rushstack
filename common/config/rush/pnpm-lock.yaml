@@ -1138,6 +1138,24 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  ../../build-tests/eslint-bulk-suppressions-test:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@typescript-eslint/parser':
+        specifier: ~5.59.2
+        version: 5.59.11(eslint@8.7.0)(typescript@5.0.4)
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
+
   ../../build-tests/hashed-folder-copy-plugin-webpack5-test:
     devDependencies:
       '@rushstack/hashed-folder-copy-plugin':
@@ -1734,10 +1752,10 @@ importers:
         version: link:../../heft-plugins/heft-typescript-plugin
       '@types/jest':
         specifier: ts4.9
-        version: 29.5.8
+        version: 29.5.9
       '@types/node':
         specifier: ts4.9
-        version: 20.9.0
+        version: 20.9.3
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -2183,6 +2201,18 @@ importers:
         specifier: ~5.0.4
         version: 5.0.4
 
+  ../../eslint/eslint-bulk:
+    devDependencies:
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: link:../../apps/heft
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
+
   ../../eslint/eslint-config:
     dependencies:
       '@rushstack/eslint-patch':
@@ -2237,6 +2267,12 @@ importers:
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
+      '@typescript-eslint/types':
+        specifier: ~5.59.2
+        version: 5.59.11(typescript@5.0.4)
+      typescript:
+        specifier: ~5.0.4
+        version: 5.0.4
 
   ../../eslint/eslint-plugin:
     dependencies:
@@ -11258,8 +11294,8 @@ packages:
       expect: 29.6.2
       pretty-format: 29.6.2
 
-  /@types/jest@29.5.8:
-    resolution: {integrity: sha512-fXEFTxMV2Co8ZF5aYFJv+YeA08RTYJfhtN5c9JSv/mFEMe+xxjufCb+PHL+bJcMs/ebPUsBu+UNTEz+ydXrR6g==}
+  /@types/jest@29.5.9:
+    resolution: {integrity: sha512-zJeWhqBwVoPm83sP8h1/SVntwWTu5lZbKQGCvBjxQOyEWnKnsaomt2y7SlV4KfwlrHAHHAn00Sh4IAWaIsGOgQ==}
     dependencies:
       expect: 29.6.2
       pretty-format: 29.6.2
@@ -11371,8 +11407,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.9.0:
-    resolution: {integrity: sha512-nekiGu2NDb1BcVofVcEKMIwzlx4NjHlcjhoxxKBNLtz15Y1z7MYf549DFvkHSId02Ax6kGwWntIBPC3l/JZcmw==}
+  /@types/node@20.9.3:
+    resolution: {integrity: sha512-nk5wXLAXGBKfrhLB0cyHGbSqopS+nz0BUgZkUQqSHSSgdee0kssp1IAqlQOu333bW+gMNs2QREx7iynm19Abxw==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -14011,8 +14047,8 @@ packages:
     resolution: {integrity: sha512-GHuDRO12Sypu2cV70d1dkA2EUmXHgntrzbpvOB+Qy+49ypNfGgFQIC2fhhXbnyrJRynDCAARsT7Ou0M6hirpfw==}
     dev: true
 
-  /commander@11.0.0:
-    resolution: {integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==}
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
     dev: false
 
@@ -21812,7 +21848,7 @@ packages:
   /pseudolocale@1.1.0:
     resolution: {integrity: sha512-OZ8I/hwYEJ3beN3IEcNnt8EpcqblH0/x23hulKBXjs+WhTTEle+ijCHCkh2bd+cIIeCuCwSCbBe93IthGG6hLw==}
     dependencies:
-      commander: 11.0.0
+      commander: 11.1.0
     dev: false
 
   /psl@1.9.0:

@@ -232,6 +232,7 @@ if (eslintMajorVersion === 8) {
 }
 
 export {
+  eslintFolder,
   ConfigArrayFactory,
   ModuleResolver,
   Naming,
