@@ -36,12 +36,7 @@ export function getPathToLinterJS(): string {
 }
 
 export function getPathToGeneratedPatch(patchPath: string, nameOfGeneratedPatchFile: string): string {
-  if (!fs.existsSync(path.join(patchPath, 'temp'))) {
-    fs.mkdirSync(path.join(patchPath, 'temp'));
-  }
-  if (!fs.existsSync(path.join(patchPath, 'temp', 'patches'))) {
-    fs.mkdirSync(path.join(patchPath, 'temp', 'patches'));
-  }
+  fs.mkdirSync(path.join(patchPath, 'temp', 'patches'), { recursive: true });
   const pathToGeneratedPatch = path.join(patchPath, 'temp', 'patches', nameOfGeneratedPatchFile);
 
   return pathToGeneratedPatch;

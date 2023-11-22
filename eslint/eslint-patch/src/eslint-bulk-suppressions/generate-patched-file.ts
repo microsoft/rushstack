@@ -95,7 +95,6 @@ export function generatePatchedFileIfDoesntExist(inputFilePath: string, outputFi
   }
 
   /**
-   *
    * @param {number} indexToScanTo
    * @returns {string}
    */
@@ -186,8 +185,6 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
                         // --- END MONKEY PATCH ---
 `;
 
-  // TODO: MORE PATCHING GOES HERE
-
   // Match this:
   // nodeQueue.forEach((traversalInfo) => {
   //   currentNode = traversalInfo.node;
@@ -205,6 +202,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   // });
   //
   // return lintingProblems;
+  //
   // Convert to this:
   // nodeQueue.forEach((traversalInfo) => {
   //   currentNode = traversalInfo.node;

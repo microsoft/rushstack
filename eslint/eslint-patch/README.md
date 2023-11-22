@@ -128,28 +128,28 @@ We also highly recommend globally installing the companion CLI tool to your loca
 npm i -g @rushstack/eslint-bulk
 ```
 
-The **eslint-bulk** package is a set of command line tools to use with the ESLint bulk suppressions
-patch. The commands are optional as they are just a thin wrapper over eslint shipped with the correct
-environment variables to interface with the patch.
+The **eslint-bulk** package is a set of command line tools to use with the ESLint bulk suppressions patch.
+eslint-bulk commands must be run in the same current working directory containing your package's pertaining
+.eslintrc.js or .eslintrc.cjs file.
 
 ## eslint-bulk suppress
 
-Use this command to automatically either generate a new .eslint-bulk-suppressions.json file next to
-the corresponding .eslintrc.js file for the given files and given rules. Supply the files as the main
-argument. The "files" argument is a glob pattern that follows the same rules as the "eslint" command.
+Use this command to automatically generate bulk suppressions for the given files and given rules.
+Supply the paths as the main argument. The paths argument is a glob pattern that follows the same
+rules as the "files" argument in the "eslint" command.
 
 ```bash
-eslint-bulk suppress path/to/file1 path/to/file2 path/to/directory --rule rule1 --rule rule2
+eslint-bulk suppress --rule NAME1 [--rule NAME2...] PATH1 [PATH2...]
+eslint-bulk suppress --all PATH1 [PATH2...]
 ```
 
 ## eslint-bulk prune
 
-Use this command to automatically delete unused suppression entries for the given files in the
-corresponding .eslint-bulk-suppressions.json file(s). Supply the files as the main argument. The
-"files" argument is a glob pattern thatfollows the same rules as the "eslint" command.
+Use this command to automatically delete all unused suppression entries in all .eslint-bulk-suppressions.json
+files under the current working directory.
 
 ```bash
-eslint-bulk prune path/to/file1 path/to/file2 path/to/directory
+eslint-bulk prune
 ```
 
 # Links

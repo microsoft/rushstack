@@ -13,29 +13,16 @@ export function prune() {
     process.exit(0);
   }
 
-  const parsedArgs = args.reduce<{
-    files: string[];
-  }>(
-    (acc, arg, index, arr) => {
-      acc.files.push(arg);
-      return acc;
-    },
-    { files: [] }
-  );
-
-  if (parsedArgs.files.length === 0) {
-    throw new Error(
-      '@rushstack/eslint-bulk: Files argument is required. Use glob patterns to specify files or use `.` to suppress all files for the specified rules.'
-    );
+  if (args.length > 0) {
+    throw new Error(`@rushstack/eslint-bulk: Unknown arguments: ${args.join(' ')}`);
   }
 
   const eslintCLI = getEslintCli(process.cwd());
 
-  const env = Object.assign({}, process.env);
-  env.ESLINT_BULK_PRUNE = 'true';
+  const env: NodeJS.ProcessEnv = { ...process.env, ESLINT_BULK_PRUNE: 'true' };
 
   exec(
-    `${eslintCLI} ${parsedArgs.files.join(' ')} --format=json`,
+    `${eslintCLI} . --format=json`,
     { env },
     (error: ExecException | null, stdout: string, stderr: string) => {
       // if errorCount != 0, ESLint will process.exit(1) giving the false impression
@@ -52,9 +39,7 @@ export function prune() {
       }
 
       console.log(
-        `@rushstack/eslint-bulk: Successfully pruned unused suppressions in .eslint-bulk-suppressions.json at ${process.cwd()} for ${
-          parsedArgs.files
-        }`
+        `@rushstack/eslint-bulk: Successfully pruned unused suppressions in all .eslint-bulk-suppressions.json files under directory ${process.cwd()}`
       );
     }
   );

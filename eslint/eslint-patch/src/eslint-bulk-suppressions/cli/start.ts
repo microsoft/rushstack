@@ -11,17 +11,40 @@ if (process.argv.includes('-h') || process.argv.includes('-H') || process.argv.i
   process.exit(0);
 }
 
+if (process.argv.length < 3) {
+  printHelp();
+  process.exit(1);
+}
+
 if (!isCorrectCwd(process.cwd())) {
-  throw new Error(
+  console.error(
     '@rushstack/eslint-bulk: Please call this command from the directory that contains .eslintrc.js or .eslintrc.cjs'
   );
+  process.exit(1);
 }
 const subcommand = process.argv[2];
 
 if (subcommand === 'suppress') {
-  suppress();
+  try {
+    suppress();
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    throw e;
+  }
 } else if (subcommand === 'prune') {
-  prune();
+  try {
+    prune();
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    throw e;
+  }
 } else {
-  throw new Error('@rushstack/eslint-bulk: Unknown subcommand: ' + subcommand);
+  console.error('@rushstack/eslint-bulk: Unknown subcommand: ' + subcommand);
+  process.exit(1);
 }

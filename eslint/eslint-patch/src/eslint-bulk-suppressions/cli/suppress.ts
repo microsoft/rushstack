@@ -62,7 +62,7 @@ export function suppress() {
     );
   }
 
-  const env = Object.assign({}, process.env);
+  const env: NodeJS.ProcessEnv = { ...process.env };
   if (parsedArgs.all) {
     env.ESLINT_BULK_SUPPRESS = '*';
   } else if (parsedArgs.rules.length > 0) {

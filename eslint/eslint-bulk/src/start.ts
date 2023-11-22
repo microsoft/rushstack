@@ -30,11 +30,11 @@ function findPatchPath(): string {
     process.exit(1);
   }
 
-  const env: { [key: string]: string } = { ...process.env, _RUSHSTACK_ESLINT_BULK_DETECT: 'true' };
+  const env: NodeJS.ProcessEnv = { ...process.env, _RUSHSTACK_ESLINT_BULK_DETECT: 'true' };
 
   let stdout: Buffer;
   try {
-    stdout = execSync(`echo "" | eslint --stdin --config ${eslintrcPath}`, { env, stdio: 'pipe' });
+    stdout = execSync(`eslint --stdin --config ${eslintrcPath}`, { env, input: '', stdio: 'pipe' });
   } catch (e) {
     console.error('@rushstack/eslint-bulk: Error finding patch path: ' + e.message);
     process.exit(1);

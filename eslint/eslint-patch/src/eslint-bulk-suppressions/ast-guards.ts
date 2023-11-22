@@ -3,9 +3,6 @@
 
 import type { TSESTree } from '@typescript-eslint/types';
 
-/** https://twitter.com/branmcconnell/status/1623077891423731712 */
-export type Compile<T> = T extends object ? { [K in keyof T]: Compile<T[K]> } : T;
-
 export function isArrayExpression(node: TSESTree.Node): node is TSESTree.ArrayExpression {
   return node.type === 'ArrayExpression';
 }
@@ -193,7 +190,7 @@ export function isNormalObjectProperty(node: TSESTree.Node): node is NormalObjec
   return isProperty(node) && (isIdentifier(node.key) || isPrivateIdentifier(node.key));
 }
 
-export interface NormalVariableDeclarator extends TSESTree.LetOrConstOrVarDeclarator {
+export interface NormalVariableDeclarator extends TSESTree.VariableDeclarator {
   id: TSESTree.Identifier;
   init: TSESTree.Expression;
 }
