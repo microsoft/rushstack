@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/eslint-bulk",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-bulk_v0.1.0",
+      "date": "Wed, 22 Nov 2023 01:45:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release of `@rushstack/eslint-bulk` package"
+          }
+        ]
+      }
+    }
+  ]
+}

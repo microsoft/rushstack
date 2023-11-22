@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.6.0",
+      "tag": "@rushstack/eslint-patch_v1.6.0",
+      "date": "Wed, 22 Nov 2023 01:45:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an experimental new feature for ESLint bulk suppressions; for details see GitHub #4303"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.1",
       "tag": "@rushstack/eslint-patch_v1.5.1",
       "date": "Sun, 01 Oct 2023 02:56:29 GMT",

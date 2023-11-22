@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Sun, 01 Oct 2023 02:56:29 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Nov 2023 01:45:18 GMT and should not be manually modified.
+
+## 1.6.0
+Wed, 22 Nov 2023 01:45:18 GMT
+
+### Minor changes
+
+- Add an experimental new feature for ESLint bulk suppressions; for details see GitHub #4303
 
 ## 1.5.1
 Sun, 01 Oct 2023 02:56:29 GMT
