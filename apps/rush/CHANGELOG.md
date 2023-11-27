@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 18 Nov 2023 00:06:20 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Nov 2023 23:36:11 GMT and should not be manually modified.
+
+## 5.112.0
+Mon, 27 Nov 2023 23:36:11 GMT
+
+### Updates
+
+- Update the `@azure/identity` and `@azure/storage-blob` dependencies of `@rushstack/rush-azure-storage-build-cache-plugin` to eliminate an `EBADENGINE` error when installing Rush on Node 20.
 
 ## 5.111.0
 Sat, 18 Nov 2023 00:06:20 GMT

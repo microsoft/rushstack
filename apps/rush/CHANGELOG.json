@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.112.0",
+      "tag": "@microsoft/rush_v5.112.0",
+      "date": "Mon, 27 Nov 2023 23:36:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the `@azure/identity` and `@azure/storage-blob` dependencies of `@rushstack/rush-azure-storage-build-cache-plugin` to eliminate an `EBADENGINE` error when installing Rush on Node 20."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.111.0",
       "tag": "@microsoft/rush_v5.111.0",
       "date": "Sat, 18 Nov 2023 00:06:20 GMT",
