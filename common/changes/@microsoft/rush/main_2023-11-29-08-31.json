@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow the device code credential options to be extended in subclasses Azure authentication subclasses, used in advanced authentication scenarios.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
