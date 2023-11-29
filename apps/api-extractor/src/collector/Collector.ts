@@ -157,18 +157,20 @@ export class Collector {
   }
 
   /**
-   * TODO
-   * @param bundledPackagePatterns - TODO
-   * @param packageJson - TODO
+   * Searches the provided package.json for dependencies and devDependencies that match the provided
+   * package names and/or RegExp patterns in `bundledPackages`.
+   * @param bundledPackages - The list of package names and/or RegExp patterns to search for in the package.json.
+   * @param packageJson - The package.json of the package being processed.
+   * @returns The set of matching package names.
    */
   private static _resolveBundledPackagePatterns(
-    bundledPackagePatterns: string[],
+    bundledPackages: string[],
     packageJson: INodePackageJson | undefined
   ): ReadonlySet<string> {
     // The set to be built up and returned
     const packageNames: Set<string> = new Set<string>();
 
-    if (bundledPackagePatterns.length === 0) {
+    if (bundledPackages.length === 0) {
       // If no `bundledPackages` were specified, then there is nothing to resolve.
       // Return an empty set.
       return packageNames;
@@ -191,7 +193,7 @@ export class Collector {
       return packageNames;
     }
 
-    for (const packageNameOrPattern of bundledPackagePatterns) {
+    for (const packageNameOrPattern of bundledPackages) {
       if (PackageName.isValidName(packageNameOrPattern)) {
         // If the string is an exact package name, search for exact match
         if (dependencyNames.includes(packageNameOrPattern)) {
