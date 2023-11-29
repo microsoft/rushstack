@@ -6,6 +6,7 @@
 
 import { AzureAuthorityHosts } from '@azure/identity';
 import { DeviceCodeCredential } from '@azure/identity';
+import { DeviceCodeCredentialOptions } from '@azure/identity';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
 import type { ITerminal } from '@rushstack/node-core-library';
@@ -15,6 +16,8 @@ import type { RushSession } from '@rushstack/rush-sdk';
 // @public (undocumented)
 export abstract class AzureAuthenticationBase {
     constructor(options: IAzureAuthenticationBaseOptions);
+    // (undocumented)
+    protected readonly _additionalDeviceCodeCredentialOptions: DeviceCodeCredentialOptions | undefined;
     // (undocumented)
     protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
