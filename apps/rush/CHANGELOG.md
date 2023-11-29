@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 27 Nov 2023 23:36:11 GMT and should not be manually modified.
+This log was last generated on Wed, 29 Nov 2023 08:59:31 GMT and should not be manually modified.
+
+## 5.112.1
+Wed, 29 Nov 2023 08:59:31 GMT
+
+### Updates
+
+- Allow the device code credential options to be extended Azure authentication subclasses, used in advanced authentication scenarios.
 
 ## 5.112.0
 Mon, 27 Nov 2023 23:36:11 GMT

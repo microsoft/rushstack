@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.112.1",
+      "tag": "@microsoft/rush_v5.112.1",
+      "date": "Wed, 29 Nov 2023 08:59:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow the device code credential options to be extended Azure authentication subclasses, used in advanced authentication scenarios."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.112.0",
       "tag": "@microsoft/rush_v5.112.0",
       "date": "Mon, 27 Nov 2023 23:36:11 GMT",
