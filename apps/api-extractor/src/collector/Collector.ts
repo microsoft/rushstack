@@ -3,7 +3,13 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { PackageJsonLookup, Sort, InternalError } from '@rushstack/node-core-library';
+import {
+  PackageJsonLookup,
+  Sort,
+  InternalError,
+  type INodePackageJson,
+  PackageName
+} from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
@@ -132,7 +138,11 @@ export class Collector {
 
     this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
 
-    this.bundledPackageNames = new Set<string>(this.extractorConfig.bundledPackages);
+    // Resolve glob patterns and store concrete set of bundled package dependency names
+    this.bundledPackageNames = Collector._resolveBundledPackagePatterns(
+      this.extractorConfig.bundledPackages,
+      this.extractorConfig.packageJson
+    );
 
     this.astSymbolTable = new AstSymbolTable(
       this.program,
@@ -144,6 +154,67 @@ export class Collector {
     this.astReferenceResolver = new AstReferenceResolver(this);
 
     this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
+  }
+
+  /**
+   * TODO
+   * @param bundledPackagePatterns - TODO
+   * @param packageJson - TODO
+   */
+  private static _resolveBundledPackagePatterns(
+    bundledPackagePatterns: string[],
+    packageJson: INodePackageJson | undefined
+  ): ReadonlySet<string> {
+    // The set to be built up and returned
+    const packageNames: Set<string> = new Set<string>();
+
+    if (bundledPackagePatterns.length === 0) {
+      // If no `bundledPackages` were specified, then there is nothing to resolve.
+      // Return an empty set.
+      return packageNames;
+    }
+
+    if (packageJson === undefined) {
+      // If no package.json is present, then there are no possible package matches.
+      // Return an empty set.
+      return packageNames;
+    }
+
+    const dependencyKeys: string[] = Object.keys(packageJson.dependencies ?? {});
+    const devDependencyKeys: string[] = Object.keys(packageJson.devDependencies ?? {});
+
+    const dependencyNames: string[] = dependencyKeys.concat(devDependencyKeys);
+
+    if (dependencyNames.length === 0) {
+      // If there are no dependencies nor devDependencies, then there are no possible package matches.
+      // Return an empty set.
+      return packageNames;
+    }
+
+    for (const packageNameOrPattern of bundledPackagePatterns) {
+      if (PackageName.isValidName(packageNameOrPattern)) {
+        // If the string is an exact package name, search for exact match
+        if (dependencyNames.includes(packageNameOrPattern)) {
+          packageNames.add(packageNameOrPattern);
+        } else {
+          console.warn(
+            `package.json contained no dependency or devDependency for specified bundledPackages entry "${packageNameOrPattern}".`
+          );
+        }
+      } else {
+        // If the entry isn't an exact package name, assume RegExp and search for matches
+        const regexp: RegExp = new RegExp(packageNameOrPattern);
+        const matches: string[] = dependencyNames.filter((dependencyName) => regexp.test(dependencyName));
+        if (matches.length === 0) {
+          console.warn(
+            `No matching package dependencies found for provided bundledPackages pattern "${packageNameOrPattern}".`
+          );
+        } else {
+          matches.forEach((match) => packageNames.add(match));
+        }
+      }
+    }
+    return packageNames;
   }
 
   /**

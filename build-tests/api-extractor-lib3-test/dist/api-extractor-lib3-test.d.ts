@@ -11,4 +11,9 @@ import { Lib1Class } from 'api-extractor-lib1-test';
 
 export { Lib1Class }
 
+/** @public */
+export declare class Lib3Class {
+    prop: boolean;
+}
+
 export { }
