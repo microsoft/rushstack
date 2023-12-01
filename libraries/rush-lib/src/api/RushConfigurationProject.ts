@@ -27,6 +27,7 @@ export interface IRushConfigurationProjectJson {
   skipRushCheck?: boolean;
   publishFolder?: string;
   tags?: string[];
+  subspace?: string;
 }
 
 /**
@@ -184,6 +185,11 @@ export class RushConfigurationProject {
    */
   public readonly tags: ReadonlySet<string>;
 
+  /**
+   * If this project is in a subspace, and which one
+   */
+  public readonly subspace?: string;
+
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
@@ -324,6 +330,8 @@ export class RushConfigurationProject {
     } else {
       this.tags = new Set(projectJson.tags);
     }
+
+    this.subspace = projectJson.subspace;
   }
 
   /**

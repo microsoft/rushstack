@@ -187,6 +187,16 @@ export interface ICurrentVariantJson {
 }
 
 /**
+ * The filter parameters to search from all projects
+ */
+export interface IRushConfigurationProjectsFilter {
+  /**
+   * A string representation of the subspace to filter for
+   */
+  subspace: string;
+}
+
+/**
  * Options for `RushConfiguration.tryFindRushJsonLocation`.
  * @public
  */
@@ -221,6 +231,11 @@ export class RushConfiguration {
 
   // Lazily loaded when the projectsByTag() getter is called.
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
+
+  // Cache subspace projects
+  private _subspaceProjectsCache: Map<string, RushConfigurationProject[]>;
+
+  private _hasSubspaces: boolean | undefined;
 
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
@@ -288,6 +303,14 @@ export class RushConfiguration {
   public readonly commonTempFolder: string;
 
   /**
+   * The folder where temporary files will be stored for subspaces. The specific folder will
+   * append the subspace name to this path.
+   *
+   * Example: `C:\MyRepo\common\temp\<subspace_name>`
+   */
+  public readonly commonTempSubspaceFolderRoot: string;
+
+  /**
    * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
    * under the common folder.
    * Example: `C:\MyRepo\common\scripts`
@@ -347,6 +370,25 @@ export class RushConfiguration {
    * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
    */
   public readonly tempShrinkwrapPreinstallFilename: string;
+
+  /**
+   * The filename (without any path) of the shrinkwrap file used for individual subspaces, used by the package manager.
+   * @remarks
+   * This property merely reports the filename; The file itself may not actually exist.
+   * Example: `pnpm-lock.yaml`
+   */
+  public readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
+
+  /**
+   * The full path of the temporary shrinkwrap file for a specific subspace.
+   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
+   * This function also consults the depreciated option to allow for shrinkwraps to be stored under a package folder.
+   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
+   * @remarks
+   * This property merely reports the filename, the file itself may not actually exist.
+   * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
+   */
+  public readonly tempSubspaceShrinkwrapFileName: (subspaceName: string) => string;
 
   /**
    * The filename of the variant dependency data file.  By default this is
@@ -608,6 +650,8 @@ export class RushConfiguration {
       EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this.commonFolder, RushConstants.rushTempFolderName);
 
+    this.commonTempSubspaceFolderRoot = path.join(this.commonFolder, RushConstants.rushTempFolderName);
+
     this.commonScriptsFolder = path.join(this.commonFolder, 'scripts');
 
     this.npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
@@ -621,6 +665,8 @@ export class RushConfiguration {
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+
+    this._subspaceProjectsCache = new Map<string, RushConfigurationProject[]>();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -703,6 +749,15 @@ export class RushConfiguration {
 
     this.shrinkwrapFilename = this.packageManagerWrapper.shrinkwrapFilename;
 
+    // From "pnpm-lock.yaml" --> "subspace-pnpm-lock.yaml"
+    this.subspaceShrinkwrapFilenames = (subspaceName: string): string => {
+      const shrinkwrapFilenameParsedPath: path.ParsedPath = path.parse(this.shrinkwrapFilename);
+      return path.join(
+        shrinkwrapFilenameParsedPath.dir,
+        `${subspaceName}-` + shrinkwrapFilenameParsedPath.name + shrinkwrapFilenameParsedPath.ext
+      );
+    };
+
     this.tempShrinkwrapFilename = path.join(this.commonTempFolder, this.shrinkwrapFilename);
     this.packageManagerToolFilename = path.resolve(
       path.join(
@@ -713,6 +768,16 @@ export class RushConfiguration {
         `${this.packageManager}`
       )
     );
+
+    this.tempSubspaceShrinkwrapFileName = (subspaceName: string): string => {
+      // TODO: do subspace name validation here
+      const fullSubspacePath: string = path.join(
+        this.commonTempSubspaceFolderRoot,
+        subspaceName,
+        this.shrinkwrapFilename
+      );
+      return fullSubspacePath;
+    };
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
     const parsedPath: path.ParsedPath = path.parse(this.tempShrinkwrapFilename);
@@ -880,6 +945,14 @@ export class RushConfiguration {
         );
       }
       this._projectsByName.set(project.packageName, project);
+      if (projectJson.subspace) {
+        const subspaceName: string = projectJson.subspace;
+        if (this._subspaceProjectsCache.has(subspaceName)) {
+          (this._subspaceProjectsCache.get(subspaceName) as RushConfigurationProject[]).push(project);
+        } else {
+          this._subspaceProjectsCache.set(subspaceName, [project]);
+        }
+      }
     }
 
     for (const project of this._projects) {
@@ -1091,7 +1164,11 @@ export class RushConfiguration {
 
       // If the package manager is pnpm, then also add the pnpm file to the known set.
       if (packageManagerWrapper.packageManager === 'pnpm') {
-        knownSet.add((packageManagerWrapper as PnpmPackageManager).pnpmfileFilename.toUpperCase());
+        const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
+        knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
+        // for (const subspaceName of this.subspaceNames()) {
+        //   knownSet.add(pnpmPackageManager.subspacePnpmfileFilename(subspaceName).toUpperCase());
+        // }
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -1188,6 +1265,13 @@ export class RushConfiguration {
     return this._projects!;
   }
 
+  public get subspaceNames(): string[] {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    return Array.from(this._subspaceProjectsCache.keys());
+  }
+
   public get projectsByName(): Map<string, RushConfigurationProject> {
     if (!this._projectsByName) {
       this._initializeAndValidateLocalProjects();
@@ -1260,6 +1344,16 @@ export class RushConfiguration {
       RushConstants.commonVersionsFilename
     );
     return commonVersionsFilename;
+  }
+
+  /**
+   * Does this project have subspaces
+   */
+  public get hasSubspaces(): boolean {
+    if (undefined === this._hasSubspaces) {
+      this._hasSubspaces = this._subspaceProjectsCache.size > 0;
+    }
+    return this._hasSubspaces;
   }
 
   /**

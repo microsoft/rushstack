@@ -1051,6 +1051,7 @@ export class RushConfiguration {
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;
     readonly commonTempFolder: string;
+    readonly commonTempSubspaceFolderRoot: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
@@ -1082,6 +1083,7 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
+    get hasSubspaces(): boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -1122,11 +1124,15 @@ export class RushConfiguration {
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
+    // (undocumented)
+    get subspaceNames(): string[];
+    readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
     readonly tempShrinkwrapPreinstallFilename: string;
+    readonly tempSubspaceShrinkwrapFileName: (subspaceName: string) => string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // (undocumented)
@@ -1169,6 +1175,7 @@ export class RushConfigurationProject {
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;
     readonly skipRushCheck: boolean;
+    readonly subspace?: string;
     // @beta
     readonly tags: ReadonlySet<string>;
     readonly tempProjectName: string;
