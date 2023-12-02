@@ -1124,6 +1124,8 @@ export class RushConfiguration {
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
+    // Warning: (ae-forgotten-export) The symbol "SubspaceConfiguration" needs to be exported by the entry point index.d.ts
+    readonly subspaceConfiguration?: SubspaceConfiguration;
     // (undocumented)
     get subspaceNames(): string[];
     readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;

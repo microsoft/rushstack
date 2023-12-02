@@ -42,6 +42,7 @@ import schemaJson from '../schemas/rush.schema.json';
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
+import { SubspaceConfiguration } from './SubspaceConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -372,6 +373,11 @@ export class RushConfiguration {
   public readonly tempShrinkwrapPreinstallFilename: string;
 
   /**
+   * The object that specifies subspace configurations if they are provided in the rush workspace.
+   */
+  public readonly subspaceConfiguration?: SubspaceConfiguration;
+
+  /**
    * The filename (without any path) of the shrinkwrap file used for individual subspaces, used by the package manager.
    * @remarks
    * This property merely reports the filename; The file itself may not actually exist.
@@ -665,6 +671,13 @@ export class RushConfiguration {
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+
+    // Check if we have a subspace configuration file
+    const subspaceConfigLocation: string = path.join(this.rushJsonFolder, 'subspaces.json');
+    if (FileSystem.exists(subspaceConfigLocation)) {
+      // Try getting a subspace configuration
+      this.subspaceConfiguration = SubspaceConfiguration.loadFromConfigurationFile(subspaceConfigLocation);
+    }
 
     this._subspaceProjectsCache = new Map<string, RushConfigurationProject[]>();
 
