@@ -95,7 +95,7 @@ export function getProcessStartTime(pid: number): string | undefined {
     try {
       stat = FileSystem.readFile(`/proc/${pidString}/stat`);
     } catch (error) {
-      if (error.code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
         throw error;
       }
       // Either no process with PID pid exists, or this version/configuration of linux is non-standard.
@@ -270,7 +270,7 @@ export class LockFile {
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = FileSystem.readFolder(resourceFolder);
+      const files: string[] = FileSystem.readFolderItemNames(resourceFolder);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
@@ -336,9 +336,24 @@ export class LockFile {
           // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
           // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
           // this is a lockfile pointing at something valid
-          if (otherBirthtimeMs !== undefined && otherBirthtimeMs < smallestBirthTimeMs) {
-            smallestBirthTimeMs = otherBirthtimeMs;
-            smallestBirthTimePid = otherPid;
+          if (otherBirthtimeMs !== undefined) {
+            // the other lock file was created before the current earliest lock file
+            // or the other lock file was created at the same exact time, but has earlier pid
+
+            // note that it is acceptable to do a direct comparison of the PIDs in this case
+            // since we are establishing a consistent order to apply to the lock files in all
+            // execution instances.
+
+            // it doesn't matter that the PIDs roll over, we've already
+            // established that these processes all started at the same time, so we just
+            // need to get all instances of the lock test to agree which one won.
+            if (
+              otherBirthtimeMs < smallestBirthTimeMs ||
+              (otherBirthtimeMs === smallestBirthTimeMs && otherPid < smallestBirthTimePid)
+            ) {
+              smallestBirthTimeMs = otherBirthtimeMs;
+              smallestBirthTimePid = otherPid;
+            }
           }
         }
       }
@@ -406,16 +421,20 @@ export class LockFile {
   }
 
   /**
-   * Unlocks a file and removes it from disk.
+   * Unlocks a file and optionally removes it from disk.
    * This can only be called once.
+   *
+   * @param deleteFile - Whether to delete the lockfile from disk. Defaults to true.
    */
-  public release(): void {
+  public release(deleteFile: boolean = true): void {
     if (this.isReleased) {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
     this._fileWriter!.close();
-    FileSystem.deleteFile(this._filePath);
+    if (deleteFile) {
+      FileSystem.deleteFile(this._filePath);
+    }
     this._fileWriter = undefined;
   }
 

@@ -48,7 +48,7 @@ export class TypeScriptInternals {
     if (
       // eslint-disable-next-line no-bitwise
       symbol.flags & ts.SymbolFlags.Transient &&
-      (symbol as any).checkFlags === (ts as any).CheckFlags.Late
+      (ts as any).getCheckFlags(symbol) === (ts as any).CheckFlags.Late
     ) {
       return true;
     }
@@ -83,12 +83,26 @@ export class TypeScriptInternals {
    */
   public static getResolvedModule(
     sourceFile: ts.SourceFile,
-    moduleNameText: string
+    moduleNameText: string,
+    mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined
   ): ts.ResolvedModuleFull | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
+    // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/utilities.ts#L161
 
-    return (ts as any).getResolvedModule(sourceFile, moduleNameText);
+    return (ts as any).getResolvedModule(sourceFile, moduleNameText, mode);
+  }
+
+  /**
+   * Gets the mode required for module resolution required with the addition of Node16/nodenext
+   */
+  public static getModeForUsageLocation(
+    file: { impliedNodeFormat?: ts.SourceFile['impliedNodeFormat'] },
+    usage: ts.StringLiteralLike | undefined
+  ): ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined {
+    // Compiler internal:
+    // https://github.com/microsoft/TypeScript/blob/v4.7.2/src/compiler/program.ts#L568
+
+    return (ts as any).getModeForUsageLocation?.(file, usage);
   }
 
   /**
@@ -108,10 +122,13 @@ export class TypeScriptInternals {
 
   public static getGlobalVariableAnalyzer(program: ts.Program): IGlobalVariableAnalyzer {
     const anyProgram: any = program;
-    if (!anyProgram.getDiagnosticsProducingTypeChecker) {
-      throw new InternalError('Missing Program.getDiagnosticsProducingTypeChecker');
+    const typeCheckerInstance: any =
+      anyProgram.getDiagnosticsProducingTypeChecker ?? anyProgram.getTypeChecker;
+
+    if (!typeCheckerInstance) {
+      throw new InternalError('Missing Program.getDiagnosticsProducingTypeChecker or Program.getTypeChecker');
     }
-    const typeChecker: any = anyProgram.getDiagnosticsProducingTypeChecker();
+    const typeChecker: any = typeCheckerInstance();
     if (!typeChecker.getEmitResolver) {
       throw new InternalError('Missing TypeChecker.getEmitResolver');
     }
@@ -120,5 +137,13 @@ export class TypeScriptInternals {
       throw new InternalError('Missing EmitResolver.hasGlobalName');
     }
     return resolver;
+  }
+
+  /**
+   * Returns whether a variable is declared with the const keyword
+   */
+  public static isVarConst(node: ts.VariableDeclaration | ts.VariableDeclarationList): boolean {
+    // Compiler internal: https://github.com/microsoft/TypeScript/blob/71286e3d49c10e0e99faac360a6bbd40f12db7b6/src/compiler/utilities.ts#L925
+    return (ts as any).isVarConst(node);
   }
 }

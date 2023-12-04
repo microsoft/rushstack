@@ -6,7 +6,7 @@
 
 Description of optionalReadonlyField
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly optionalReadonlyField?: boolean;

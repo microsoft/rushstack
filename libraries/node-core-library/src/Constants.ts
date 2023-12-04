@@ -6,7 +6,7 @@
  *
  * @public
  */
-export const enum FileConstants {
+export enum FileConstants {
   /**
    * "package.json" - the configuration file that defines an NPM package
    */
@@ -18,7 +18,7 @@ export const enum FileConstants {
  *
  * @public
  */
-export const enum FolderConstants {
+export enum FolderConstants {
   /**
    * ".git" - the data storage for a Git working folder
    */

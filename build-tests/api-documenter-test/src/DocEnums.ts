@@ -18,7 +18,9 @@ export enum DocEnum {
   One = 1,
 
   /**
-   * These are some docs for Two
+   * These are some docs for Two.
+   *
+   * {@link DocEnum.One} is a direct link to another enum member.
    */
   Two = DocEnum.One + 1
 }

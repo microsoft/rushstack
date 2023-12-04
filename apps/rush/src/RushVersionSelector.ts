@@ -6,10 +6,10 @@ import * as semver from 'semver';
 
 import { LockFile } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { _LastInstallFlag, _RushGlobalFolder, ILaunchOptions } from '@microsoft/rush-lib';
+import { _LastInstallFlag, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
@@ -73,12 +73,12 @@ export class RushVersionSelector {
 
     if (semver.lt(version, '3.0.20')) {
       // In old versions, requiring the entry point invoked the command-line parser immediately,
-      // so fail if "rushx" was used
+      // so fail if "rushx" or "rush-pnpm" was used
       RushCommandSelector.failIfNotInvokedAsRush(version);
       require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'rush'));
     } else if (semver.lt(version, '4.0.0')) {
       // In old versions, requiring the entry point invoked the command-line parser immediately,
-      // so fail if "rushx" was used
+      // so fail if "rushx" or "rush-pnpm" was used
       RushCommandSelector.failIfNotInvokedAsRush(version);
       require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'start'));
     } else {

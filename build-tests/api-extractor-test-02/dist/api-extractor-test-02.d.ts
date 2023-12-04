@@ -43,6 +43,7 @@ export declare function importedModuleAsGenericParameter(): GenericInterface<sem
  * @public
  */
 export declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
+
 export { RenamedReexportedClass3 }
 
 /**

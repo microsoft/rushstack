@@ -1,0 +1,19 @@
+{
+  "npmVersion": "6.4.1",
+  "rushVersion": "5.62.2",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+
+  "telemetryEnabled": true,
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b"
+    }
+  ]
+}

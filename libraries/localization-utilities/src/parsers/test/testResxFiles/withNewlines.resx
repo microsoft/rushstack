@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <data name="stringWithTabsAndNewlines" xml:space="preserve">
+    <value>
+			RESX string with newlines and tabs
+    </value>
+    <comment>RESX string with newlines and tabs</comment>
+  </data>
+</root>

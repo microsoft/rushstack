@@ -1,0 +1,8 @@
+{
+  "name": "plugins",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "rush-mock-flush-telemetry-plugin": "file:../../../../rush-mock-flush-telemetry-plugin"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "../../../../../../../../../schemas/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "cmd-parameters-test",
+      "summary": "Testing command",
+      "shellCommand": "node <packageFolder>/index.js"
+    }
+  ],
+  "parameters": [
+    {
+      "longName": "--myflag",
+      "parameterKind": "flag",
+      "description": "a simple flag parameter",
+      "associatedCommands": ["cmd-parameters-test"]
+    },
+    {
+      "longName": "--mystring",
+      "parameterKind": "string",
+      "argumentName": "STRING",
+      "description": "a simple string parameter",
+      "associatedCommands": ["cmd-parameters-test"]
+    },
+    {
+      "longName": "--myinteger",
+      "parameterKind": "integer",
+      "argumentName": "INTEGER",
+      "description": "a simple integer parameter",
+      "associatedCommands": ["cmd-parameters-test"]
+    },
+    {
+      "longName": "--mychoice",
+      "parameterKind": "choice",
+      "description": "a simple choice parameter",
+      "alternatives": [
+        {
+          "name": "a",
+          "description": "My choice A"
+        },
+        {
+          "name": "b",
+          "description": "My choice B"
+        }
+      ],
+      "associatedCommands": ["cmd-parameters-test"]
+    },
+    {
+      "longName": "--mystringlist",
+      "parameterKind": "stringList",
+      "argumentName": "STRING_LIST",
+      "description": "a simple list of string",
+      "associatedCommands": ["cmd-parameters-test"]
+    },
+    {
+      "longName": "--myintegerlist",
+      "parameterKind": "integerList",
+      "argumentName": "INTEGER_LIST",
+      "description": "a simple list of integer",
+      "associatedCommands": ["cmd-parameters-test"]
+    },
+    {
+      "longName": "--mychoicelist",
+      "parameterKind": "choiceList",
+      "description": "a simple choice list parameter",
+      "alternatives": [
+        {
+          "name": "a",
+          "description": "My choice A"
+        },
+        {
+          "name": "b",
+          "description": "My choice B"
+        },
+        {
+          "name": "c",
+          "description": "My choice C"
+        }
+      ],
+      "associatedCommands": ["cmd-parameters-test"]
+    }
+  ]
+}

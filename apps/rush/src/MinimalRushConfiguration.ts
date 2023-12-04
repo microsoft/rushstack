@@ -6,7 +6,7 @@ import * as path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
-import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
+import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLineParser';
 
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
@@ -34,7 +34,7 @@ export class MinimalRushConfiguration {
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-      showVerbose: !Utilities.shouldRestrictConsoleOutput()
+      showVerbose: !RushCommandLineParser.shouldRestrictConsoleOutput()
     });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);

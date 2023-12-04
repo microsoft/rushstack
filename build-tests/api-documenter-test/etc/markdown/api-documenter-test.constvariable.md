@@ -6,7 +6,7 @@
 
 An exported variable declaration.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constVariable: number

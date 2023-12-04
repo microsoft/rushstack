@@ -4,37 +4,56 @@
 
 ```ts
 
-import { Configuration } from 'webpack-dev-server';
-import type { IBuildStageProperties } from '@rushstack/heft';
-import type { IBundleSubstageProperties } from '@rushstack/heft';
-import type { IHeftPlugin } from '@rushstack/heft';
-import * as webpack from 'webpack';
+import type { AsyncParallelHook } from 'tapable';
+import type { AsyncSeriesBailHook } from 'tapable';
+import type { AsyncSeriesHook } from 'tapable';
+import type { Configuration } from 'webpack-dev-server';
+import type { HeftConfiguration } from '@rushstack/heft';
+import type { IHeftTaskSession } from '@rushstack/heft';
+import type * as TWebpack from 'webpack';
 
 // @public (undocumented)
-const _default: IHeftPlugin<void>;
+export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[];
 
-export default _default;
-
-// @public (undocumented)
-export interface IWebpackBuildStageProperties extends IBuildStageProperties {
-    // (undocumented)
-    webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
+// @public
+export interface IWebpackConfigurationFnEnvironment {
+    heftConfiguration: HeftConfiguration;
+    prod: boolean;
+    production: boolean;
+    taskSession: IHeftTaskSession;
+    webpack: typeof TWebpack;
 }
 
 // @public (undocumented)
-export interface IWebpackBundleSubstageProperties extends IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
-}
-
-// @public (undocumented)
-export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[] | undefined;
-
-// @public (undocumented)
-export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
+export interface IWebpackConfigurationWithDevServer extends TWebpack.Configuration {
     // (undocumented)
     devServer?: Configuration;
 }
 
+// @public (undocumented)
+export interface IWebpackPluginAccessor {
+    readonly hooks: IWebpackPluginAccessorHooks;
+    readonly parameters: IWebpackPluginAccessorParameters;
+}
+
+// @public (undocumented)
+export interface IWebpackPluginAccessorHooks {
+    readonly onAfterConfigure: AsyncParallelHook<IWebpackConfiguration, never, never>;
+    readonly onConfigure: AsyncSeriesHook<IWebpackConfiguration, never, never>;
+    readonly onEmitStats: AsyncParallelHook<TWebpack.Stats | TWebpack.compilation.MultiStats, never, never>;
+    readonly onLoadConfiguration: AsyncSeriesBailHook<never, never, never, IWebpackConfiguration | false>;
+}
+
+// @public (undocumented)
+export interface IWebpackPluginAccessorParameters {
+    readonly isServeMode: boolean;
+}
+
+// @public (undocumented)
+export const PluginName: 'webpack4-plugin';
+
+// @public
+export const STAGE_LOAD_LOCAL_CONFIG: 1000;
 
 // (No @packageDocumentation comment for this package)
 

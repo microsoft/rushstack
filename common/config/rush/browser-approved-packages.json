@@ -3,12 +3,96 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@fluentui/react",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@fluentui/react-components",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "@lifaon/path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/colors",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-checkbox",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-icons",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-scroll-area",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@radix-ui/react-tabs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@reduxjs/toolkit",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/rush-themed-ui",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-vscode-command-webview",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "axios",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "dependency-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "local-web-rig",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "office-ui-fabric-core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "react-dom",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "react-hook-form",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "react-redux",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "redux",
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
+    },
+    {
+      "name": "rxjs",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "scheduler",
+      "allowedCategories": [ "vscode-extensions" ]
+    },
+    {
+      "name": "tslib",
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     }
   ]
 }

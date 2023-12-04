@@ -1,0 +1,3 @@
+{
+  "extends": "local-web-riglibrary/config/jest.config.json"
+}

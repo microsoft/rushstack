@@ -1,0 +1,26 @@
+@use './styles/base';
+
+.ContainerCard {
+  padding: 12px;
+  @include base.card;
+}
+
+.AppContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  & > * {
+    width: 100%;
+  }
+}
+
+.AppGrid {
+  flex-grow: 1;
+}
+
+.BodyContainer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+}

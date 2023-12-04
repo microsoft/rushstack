@@ -110,7 +110,7 @@ export class ForgottenExportConsumer1 {
 
 // @public (undocumented)
 export class ForgottenExportConsumer2 {
-    // Warning: (ae-forgotten-export) The symbol "IForgottenExport" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IForgottenExport_2" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     test2(): IForgottenExport_2 | undefined;
@@ -202,6 +202,5 @@ export const VARIABLE: string;
 
 // @public
 export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
-
 
 ```

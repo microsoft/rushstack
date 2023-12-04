@@ -4,12 +4,13 @@
 
 ```ts
 
+import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { INodePackageJson } from '@rushstack/node-core-library';
+import { IRigConfig } from '@rushstack/rig-package';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 
@@ -45,12 +46,16 @@ export class Extractor {
 
 // @public
 export class ExtractorConfig {
+    readonly alphaTrimmedFilePath: string;
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
+    readonly apiReportIncludeForgottenExports: boolean;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
-    static readonly FILENAME: string;
+    readonly docModelIncludeForgottenExports: boolean;
+    readonly enumMemberOrder: EnumMemberOrder;
+    static readonly FILENAME: 'api-extractor.json';
     getDiagnosticDump(): string;
     // @internal
     _getShortFilePath(absolutePath: string): string;
@@ -67,6 +72,7 @@ export class ExtractorConfig {
     readonly packageJson: INodePackageJson | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly projectFolder: string;
+    readonly projectFolderUrl: string | undefined;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
     readonly reportTempFilePath: string;
@@ -138,9 +144,11 @@ export const enum ExtractorMessageId {
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
     SetterWithDocs = "ae-setter-with-docs",
+    Undocumented = "ae-undocumented",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
-    UnresolvedLink = "ae-unresolved-link"
+    UnresolvedLink = "ae-unresolved-link",
+    WrongInputFileType = "ae-wrong-input-file-type"
 }
 
 // @public
@@ -164,6 +172,7 @@ export interface ICompilerStateCreateOptions {
 // @public
 export interface IConfigApiReport {
     enabled: boolean;
+    includeForgottenExports?: boolean;
     reportFileName?: string;
     reportFolder?: string;
     reportTempFolder?: string;
@@ -180,10 +189,13 @@ export interface IConfigCompiler {
 export interface IConfigDocModel {
     apiJsonFilePath?: string;
     enabled: boolean;
+    includeForgottenExports?: boolean;
+    projectFolderUrl?: string;
 }
 
 // @public
 export interface IConfigDtsRollup {
+    alphaTrimmedFilePath?: string;
     betaTrimmedFilePath?: string;
     enabled: boolean;
     omitTrimmingComments?: boolean;
@@ -199,6 +211,7 @@ export interface IConfigFile {
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
+    enumMemberOrder?: EnumMemberOrder;
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
@@ -229,7 +242,7 @@ export interface IConfigTsdocMetadata {
 // @public
 export interface IExtractorConfigLoadForFolderOptions {
     packageJsonLookup?: PackageJsonLookup;
-    rigConfig?: RigConfig;
+    rigConfig?: IRigConfig;
     startingFolder: string;
 }
 
@@ -237,6 +250,7 @@ export interface IExtractorConfigLoadForFolderOptions {
 export interface IExtractorConfigPrepareOptions {
     configObject: IConfigFile;
     configObjectFullPath: string | undefined;
+    ignoreMissingEntryPoint?: boolean;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
     projectFolderLookupToken?: string;
@@ -264,6 +278,5 @@ export interface IExtractorMessagesConfig {
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
 }
-
 
 ```

@@ -3,10 +3,62 @@
 
 import * as path from 'path';
 import type { Config } from '@jest/types';
-import { ConfigurationFile } from '@rushstack/heft-config-file';
-import { Import, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import type { IHeftTaskSession, HeftConfiguration, CommandLineParameter } from '@rushstack/heft';
+import type { ConfigurationFile } from '@rushstack/heft-config-file';
+import { Import, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
-import { IHeftJestConfiguration, JestPlugin } from '../JestPlugin';
+import { default as JestPlugin, type IHeftJestConfiguration } from '../JestPlugin';
+
+interface IPartialHeftPluginJson {
+  taskPlugins?: {
+    parameters?: {
+      longName: string;
+    }[];
+  }[];
+}
+
+describe('JestPlugin', () => {
+  it('loads and requests all specified plugin parameters', async () => {
+    const requestedParameters: Set<string> = new Set();
+    function mockGetParameter<T extends CommandLineParameter>(parameterLongName: string): T {
+      requestedParameters.add(parameterLongName);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return { value: undefined, values: [] } as any as T;
+    }
+    const mockTaskSession: IHeftTaskSession = {
+      hooks: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        run: { tapPromise: () => {} } as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        runIncremental: { tapPromise: () => {} } as any
+      },
+      parameters: {
+        getChoiceParameter: mockGetParameter,
+        getChoiceListParameter: mockGetParameter,
+        getFlagParameter: mockGetParameter,
+        getIntegerParameter: mockGetParameter,
+        getIntegerListParameter: mockGetParameter,
+        getStringParameter: mockGetParameter,
+        getStringListParameter: mockGetParameter
+      }
+    } as IHeftTaskSession;
+    const mockHeftConfiguration: HeftConfiguration = {} as HeftConfiguration;
+
+    const plugin = new JestPlugin();
+    plugin.apply(mockTaskSession, mockHeftConfiguration, undefined);
+
+    // Load up all the allowed parameters
+    const heftPluginJson: IPartialHeftPluginJson = await JsonFile.loadAsync(
+      `${__dirname}/../../heft-plugin.json`
+    );
+
+    // Verify that all parameters were requested
+    expect(requestedParameters.size).toBe(heftPluginJson.taskPlugins![0].parameters!.length);
+    for (const parameter of heftPluginJson.taskPlugins![0].parameters!) {
+      expect(requestedParameters.has(parameter.longName)).toBe(true);
+    }
+  });
+});
 
 describe('JestConfigLoader', () => {
   let terminalProvider: StringBufferTerminalProvider;
@@ -40,6 +92,11 @@ describe('JestConfigLoader', () => {
 
     // Validate testEnvironment
     expect(loadedConfig.testEnvironment).toBe(require.resolve('jest-environment-node'));
+
+    // Validate watchPlugins
+    expect(loadedConfig.watchPlugins?.length).toBe(2);
+    expect(loadedConfig.watchPlugins?.[0]).toBe(require.resolve('jest-watch-select-projects'));
+    expect(loadedConfig.watchPlugins?.[1]).toBe(path.join(rootDir, 'a', 'b', 'mockWatchPlugin.js'));
 
     // Validate reporters
     expect(loadedConfig.reporters?.length).toBe(3);
@@ -102,7 +159,7 @@ describe('JestConfigLoader', () => {
   it('resolves extended package modules', async () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
-    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2');
     const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'

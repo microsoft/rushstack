@@ -1,7 +1,7 @@
 # @microsoft/api-extractor
 
 
-![API Extractor](https://github.com/microsoft/rushstack/raw/master/common/wiki-images/api-extractor-title.png?raw=true)
+![API Extractor](https://github.com/microsoft/rushstack/raw/main/common/wiki-images/api-extractor-title.png?raw=true)
 <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://api-extractor.com/
 
@@ -44,7 +44,7 @@ For more details and support resources, please visit: https://api-extractor.com/
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/apps/api-extractor/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/apps/api-extractor/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/api-extractor/)
 

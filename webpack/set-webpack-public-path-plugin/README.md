@@ -181,7 +181,7 @@ gulp.src('finizlied/webpack/bundle/path')
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/webpack/set-webpack-public-path-plugin/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/webpack/set-webpack-public-path-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/set-webpack-public-path-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

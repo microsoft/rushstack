@@ -1,0 +1,12 @@
+{
+  "extends": "../../rush-project-base.json",
+
+  "disableBuildCacheForProject": true,
+
+  "operationSettings": [
+    {
+      "operationName": "_phase:a",
+      "outputFolderNames": ["a-b"]
+    }
+  ]
+}

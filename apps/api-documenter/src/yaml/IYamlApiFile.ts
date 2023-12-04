@@ -188,7 +188,7 @@ export interface IYamlItem {
    *
    * NOTE: Corresponds to `ItemViewModel.Examples` in DocFX.
    */
-  examples?: string[];
+  example?: string[];
 
   /**
    * The syntax for this item. This value itself cannot vary by development language, but

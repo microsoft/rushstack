@@ -6,7 +6,7 @@
 
 A function inside a namespace
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 function nestedFunction(x: number): number;
@@ -18,7 +18,7 @@ function nestedFunction(x: number): number;
 |  --- | --- | --- |
 |  x | number |  |
 
-<b>Returns:</b>
+**Returns:**
 
 number
 

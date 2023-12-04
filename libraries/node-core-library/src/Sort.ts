@@ -1,14 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LegacyAdapters } from './LegacyAdapters';
-
 /**
  * Operations for sorting collections.
- *
- * @remarks
- * NOTE: Prior to Node 11.x, the `Array.sort()` algorithm is not guaranteed to be stable.  For maximum
- * compatibility, consider using {@link LegacyAdapters.sortStable} instead of `Array.sort()`.
  *
  * @public
  */
@@ -82,17 +76,24 @@ export class Sort {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): void {
-    LegacyAdapters.sortStable(array, (x, y) => comparer(keySelector(x), keySelector(y)));
+    array.sort((x, y) => comparer(keySelector(x), keySelector(y)));
   }
 
   /**
-   * Returns true if the array is already sorted.
+   * Returns true if the collection is already sorted.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static isSorted<T>(array: T[], comparer: (x: any, y: any) => number = Sort.compareByValue): boolean {
+  public static isSorted<T>(
+    collection: Iterable<T>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    comparer: (x: any, y: any) => number = Sort.compareByValue
+  ): boolean {
+    let isFirst: boolean = true;
     let previous: T | undefined = undefined;
-    for (const element of array) {
-      if (comparer(previous, element) > 0) {
+    for (const element of collection) {
+      if (isFirst) {
+        // Don't start by comparing against undefined.
+        isFirst = false;
+      } else if (comparer(previous, element) > 0) {
         return false;
       }
       previous = element;
@@ -101,7 +102,7 @@ export class Sort {
   }
 
   /**
-   * Returns true if the array is already sorted by the specified key.
+   * Returns true if the collection is already sorted by the specified key.
    *
    * @example
    *
@@ -111,16 +112,20 @@ export class Sort {
    * ```
    */
   public static isSortedBy<T>(
-    array: T[],
+    collection: Iterable<T>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keySelector: (element: T) => any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comparer: (x: any, y: any) => number = Sort.compareByValue
   ): boolean {
+    let isFirst: boolean = true;
     let previousKey: T | undefined = undefined;
-    for (const element of array) {
+    for (const element of collection) {
       const key: T = keySelector(element);
-      if (comparer(previousKey, key) > 0) {
+      if (isFirst) {
+        // Don't start by comparing against undefined.
+        isFirst = false;
+      } else if (comparer(previousKey, key) > 0) {
         return false;
       }
       previousKey = key;
@@ -148,12 +153,12 @@ export class Sort {
     map: Map<K, V>,
     keyComparer: (x: K, y: K) => number = Sort.compareByValue
   ): void {
-    const pairs: [K, V][] = Array.from(map.entries());
-
     // Sorting a map is expensive, so first check whether it's already sorted.
-    if (Sort.isSortedBy(pairs, (x) => x[0], keyComparer)) {
+    if (Sort.isSorted(map.keys(), keyComparer)) {
       return;
     }
+
+    const pairs: [K, V][] = Array.from(map.entries());
 
     Sort.sortBy(pairs, (x) => x[0], keyComparer);
     map.clear();
@@ -183,14 +188,13 @@ export class Sort {
     keySelector: (element: T) => any,
     keyComparer: (x: T, y: T) => number = Sort.compareByValue
   ): void {
-    const array: T[] = Array.from(set);
-
     // Sorting a set is expensive, so first check whether it's already sorted.
-    if (Sort.isSortedBy(array, keySelector, keyComparer)) {
+    if (Sort.isSortedBy(set, keySelector, keyComparer)) {
       return;
     }
 
-    LegacyAdapters.sortStable(array, (x, y) => keyComparer(keySelector(x), keySelector(y)));
+    const array: T[] = Array.from(set);
+    array.sort((x, y) => keyComparer(keySelector(x), keySelector(y)));
 
     set.clear();
     for (const item of array) {
@@ -214,14 +218,13 @@ export class Sort {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static sortSet<T>(set: Set<T>, comparer: (x: T, y: T) => number = Sort.compareByValue): void {
-    const array: T[] = Array.from(set);
-
     // Sorting a set is expensive, so first check whether it's already sorted.
-    if (Sort.isSorted(array, comparer)) {
+    if (Sort.isSorted(set, comparer)) {
       return;
     }
 
-    LegacyAdapters.sortStable(array, (x, y) => comparer(x, y));
+    const array: T[] = Array.from(set);
+    array.sort((x, y) => comparer(x, y));
 
     set.clear();
     for (const item of array) {

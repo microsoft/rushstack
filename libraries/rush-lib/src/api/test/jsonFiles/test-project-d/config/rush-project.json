@@ -1,0 +1,12 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:a",
+      "outputFolderNames": ["a"]
+    },
+    {
+      "operationName": "_phase:b",
+      "outputFolderNames": ["a/b"]
+    }
+  ]
+}

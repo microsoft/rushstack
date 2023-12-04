@@ -10,5 +10,7 @@
   "moduleNameMapper": {
     "\\.resx$": "<configDir>/some/path/to/overridden/module.js",
     "^@1js/search-dispatcher/lib/(.+)": "@1js/search-dispatcher/lib-commonjs/$1"
-  }
+  },
+
+  "watchPlugins": ["select-projects", "./b/mockWatchPlugin.js"]
 }

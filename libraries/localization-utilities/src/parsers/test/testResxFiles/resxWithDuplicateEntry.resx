@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <data name="stringA" xml:space="preserve">
+    <value>A string</value>
+  </data>
+  <data name="stringA" xml:space="preserve">
+    <value>Another string</value>
+  </data>
+</root>

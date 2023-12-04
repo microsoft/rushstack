@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Rush rush-plugins.json config file",
+  "description": "This file defines plugins used by Rush",
+  "type": "object",
+  "required": ["plugins"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "plugins": {
+      "description": "A list of rush plugin definition.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["packageName", "pluginName", "autoinstallerName"],
+        "additionalProperties": false,
+        "properties": {
+          "packageName": {
+            "description": "The NPM package name of the rush plugin.",
+            "type": "string"
+          },
+          "pluginName": {
+            "description": "The plugin name provided by rush plugin package.",
+            "type": "string"
+          },
+          "autoinstallerName": {
+            "description": "Specifies an autoinstaller name where the rush plugin package is installed.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

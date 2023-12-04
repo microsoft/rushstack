@@ -4,25 +4,25 @@
 import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import { PackageJsonLookup, FileSystem, IPackageJson, Path } from '@rushstack/node-core-library';
+import { PackageJsonLookup, FileSystem, type IPackageJson, Path } from '@rushstack/node-core-library';
 
 import {
   CommandLineAction,
-  CommandLineStringParameter,
-  CommandLineFlagParameter
+  type CommandLineStringParameter,
+  type CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
-import { Extractor, ExtractorResult } from '../api/Extractor';
+import { Extractor, type ExtractorResult } from '../api/Extractor';
 
-import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-import { ExtractorConfig, IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
+import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
+import { ExtractorConfig, type IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
-  private _configFileParameter!: CommandLineStringParameter;
-  private _localParameter!: CommandLineFlagParameter;
-  private _verboseParameter!: CommandLineFlagParameter;
-  private _diagnosticsParameter!: CommandLineFlagParameter;
-  private _typescriptCompilerFolder!: CommandLineStringParameter;
+  private readonly _configFileParameter: CommandLineStringParameter;
+  private readonly _localParameter: CommandLineFlagParameter;
+  private readonly _verboseParameter: CommandLineFlagParameter;
+  private readonly _diagnosticsParameter: CommandLineFlagParameter;
+  private readonly _typescriptCompilerFolder: CommandLineStringParameter;
 
   public constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -30,10 +30,7 @@ export class RunAction extends CommandLineAction {
       summary: 'Invoke API Extractor on a project',
       documentation: 'Invoke API Extractor on a project'
     });
-  }
 
-  protected onDefineParameters(): void {
-    // override
     this._configFileParameter = this.defineStringParameter({
       parameterLongName: '--config',
       parameterShortName: '-c',

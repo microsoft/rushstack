@@ -42,7 +42,7 @@ interface IRigConfigOptions {
   rigFound: boolean;
   filePath: string;
   rigPackageName: string;
-  rigProfile: string;
+  rigProfile?: string;
 }
 
 /**
@@ -60,6 +60,11 @@ export interface ILoadForProjectFolderOptions {
    * If specified, instead of loading the `config/rig.json` from disk, this object will be substituted instead.
    */
   overrideRigJsonObject?: IRigConfigJson;
+
+  /**
+   * If specified, force a fresh load instead of returning a cached entry, if one existed.
+   */
+  bypassCache?: boolean;
 }
 
 /**
@@ -67,7 +72,114 @@ export interface ILoadForProjectFolderOptions {
  *
  * @public
  */
-export class RigConfig {
+export interface IRigConfig {
+  /**
+   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder},
+   * which maybe an absolute or relative path.
+   *
+   * @remarks
+   * Example: `.`
+   */
+  readonly projectFolderOriginalPath: string;
+
+  /**
+   * The absolute path for the project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
+   *
+   * @remarks
+   * Example: `/path/to/your-project`
+   */
+  readonly projectFolderPath: string;
+
+  /**
+   * Returns `true` if `config/rig.json` was found, or `false` otherwise.
+   */
+  readonly rigFound: boolean;
+
+  /**
+   * The full path to the `rig.json` file that was found, or `""` if none was found.
+   *
+   * @remarks
+   * Example: `/path/to/your-project/config/rig.json`
+   */
+  readonly filePath: string;
+
+  /**
+   * The `"rigPackageName"` field from `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
+   *
+   * Example: `example-rig`
+   */
+  readonly rigPackageName: string;
+
+  /**
+   * The `"rigProfile"` value that was loaded from `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
+   * If the `rig.json` file exists, but the `"rigProfile"` is not specified, then the profile
+   * name will be `"default"`.
+   *
+   * Example: `example-profile`
+   */
+  readonly rigProfile: string;
+
+  /**
+   * The relative path to the rig profile specified by `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * Example: `profiles/example-profile`
+   */
+  readonly relativeProfileFolderPath: string;
+
+  /**
+   * Performs Node.js module resolution to locate the rig package folder, then returns the absolute path
+   * of the rig profile folder specified by `rig.json`.
+   *
+   * @remarks
+   * If no `rig.json` file was found, then this method throws an error.  The first time this method
+   * is called, the result is cached and will be returned by all subsequent calls.
+   *
+   * Example: `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   */
+  getResolvedProfileFolder(): string;
+
+  /**
+   * An async variant of {@link IRigConfig.getResolvedProfileFolder}
+   */
+  getResolvedProfileFolderAsync(): Promise<string>;
+
+  /**
+   * This lookup first checks for the specified relative path under `projectFolderPath`; if it does
+   * not exist there, then it checks in the resolved rig profile folder.  If the file is found,
+   * its absolute path is returned. Otherwise, `undefined` is returned.
+   *
+   * @remarks
+   * For example, suppose the rig profile is:
+   *
+   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   *
+   * And suppose `configFileRelativePath` is `folder/file.json`. Then the following locations will be checked:
+   *
+   * `/path/to/your-project/folder/file.json`
+   *
+   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile/folder/file.json`
+   */
+  tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
+
+  /**
+   * An async variant of {@link IRigConfig.tryResolveConfigFilePath}
+   */
+  tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
+}
+
+/**
+ * {@inheritdoc IRigConfig}
+ *
+ * @public
+ */
+export class RigConfig implements IRigConfig {
   // For syntax details, see PackageNameParser from @rushstack/node-core-library
   private static readonly _packageNameRegExp: RegExp = /^(@[A-Za-z0-9\-_\.]+\/)?[A-Za-z0-9\-_\.]+$/;
 
@@ -91,63 +203,40 @@ export class RigConfig {
   public static jsonSchemaPath: string = path.resolve(__dirname, './schemas/rig.schema.json');
   private static _jsonSchemaObject: object | undefined = undefined;
 
+  private static readonly _configCache: Map<string, RigConfig> = new Map();
+
   /**
-   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder},
-   * which maybe an absolute or relative path.
-   *
-   * @remarks
-   * Example: `.`
+   * {@inheritdoc IRigConfig.projectFolderOriginalPath}
    */
   public readonly projectFolderOriginalPath: string;
 
   /**
-   * The absolute path for the project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
-   *
-   * @remarks
-   * Example: `/path/to/your-project`
+   * {@inheritdoc IRigConfig.projectFolderPath}
    */
   public readonly projectFolderPath: string;
 
   /**
-   * Returns `true` if `config/rig.json` was found, or `false` otherwise.
+   * {@inheritdoc IRigConfig.rigFound}
    */
   public readonly rigFound: boolean;
 
   /**
-   * The full path to the `rig.json` file that was found, or `""` if none was found.
-   *
-   * @remarks
-   * Example: `/path/to/your-project/config/rig.json`
+   * {@inheritdoc IRigConfig.filePath}
    */
   public readonly filePath: string;
 
   /**
-   * The `"rigPackageName"` field from `rig.json`, or `""` if the file was not found.
-   *
-   * @remarks
-   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
-   *
-   * Example: `example-rig`
+   * {@inheritdoc IRigConfig.rigPackageName}
    */
   public readonly rigPackageName: string;
 
   /**
-   * The `"rigProfile"` value that was loaded from `rig.json`, or `""` if the file was not found.
-   *
-   * @remarks
-   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
-   * If the `rig.json` file exists, but the `"rigProfile"` is not specified, then the profile
-   * name will be `"default"`.
-   *
-   * Example: `example-profile`
+   * {@inheritdoc IRigConfig.rigProfile}
    */
   public readonly rigProfile: string;
 
   /**
-   * The relative path to the rig profile specified by `rig.json`, or `""` if the file was not found.
-   *
-   * @remarks
-   * Example: `profiles/example-profile`
+   * {@inheritdoc IRigConfig.relativeProfileFolderPath}
    */
   public readonly relativeProfileFolderPath: string;
 
@@ -160,13 +249,15 @@ export class RigConfig {
   private _resolvedProfileFolder: string | undefined;
 
   private constructor(options: IRigConfigOptions) {
-    this.projectFolderOriginalPath = options.projectFolderPath;
-    this.projectFolderPath = path.resolve(options.projectFolderPath);
+    const { projectFolderPath, rigFound, filePath, rigPackageName, rigProfile = 'default' } = options;
 
-    this.rigFound = options.rigFound;
-    this.filePath = options.filePath;
-    this.rigPackageName = options.rigPackageName;
-    this.rigProfile = options.rigProfile;
+    this.projectFolderOriginalPath = projectFolderPath;
+    this.projectFolderPath = path.resolve(projectFolderPath);
+
+    this.rigFound = rigFound;
+    this.filePath = filePath;
+    this.rigPackageName = rigPackageName;
+    this.rigProfile = rigProfile;
 
     if (this.rigFound) {
       this.relativeProfileFolderPath = 'profiles/' + this.rigProfile;
@@ -199,92 +290,115 @@ export class RigConfig {
    * equal to `false`.
    */
   public static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig {
-    const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
+    const { overrideRigJsonObject, projectFolderPath } = options;
 
-    let json: IRigConfigJson;
+    const fromCache: RigConfig | undefined =
+      !options.bypassCache && !overrideRigJsonObject
+        ? RigConfig._configCache.get(projectFolderPath)
+        : undefined;
+
+    if (fromCache) {
+      return fromCache;
+    }
+
+    const rigConfigFilePath: string = path.join(projectFolderPath, 'config/rig.json');
+
+    let config: RigConfig | undefined;
+    let json: IRigConfigJson | undefined = overrideRigJsonObject;
     try {
-      if (options.overrideRigJsonObject) {
-        json = options.overrideRigJsonObject;
-      } else {
-        if (!fs.existsSync(rigConfigFilePath)) {
-          return new RigConfig({
-            projectFolderPath: options.projectFolderPath,
-
-            rigFound: false,
-            filePath: '',
-            rigPackageName: '',
-            rigProfile: ''
-          });
-        }
-
+      if (!json) {
         const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
-        json = JSON.parse(stripJsonComments(rigConfigFileContent));
+        json = JSON.parse(stripJsonComments(rigConfigFileContent)) as IRigConfigJson;
       }
       RigConfig._validateSchema(json);
     } catch (error) {
-      throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
+      config = RigConfig._handleConfigError(error as Error, projectFolderPath, rigConfigFilePath);
     }
 
-    return new RigConfig({
-      projectFolderPath: options.projectFolderPath,
+    if (!config) {
+      config = new RigConfig({
+        projectFolderPath: projectFolderPath,
 
-      rigFound: true,
-      filePath: rigConfigFilePath,
-      rigPackageName: json.rigPackageName,
-      rigProfile: json.rigProfile || 'default'
-    });
+        rigFound: true,
+        filePath: rigConfigFilePath,
+        rigPackageName: json!.rigPackageName,
+        rigProfile: json!.rigProfile
+      });
+    }
+
+    if (!overrideRigJsonObject) {
+      RigConfig._configCache.set(projectFolderPath, config);
+    }
+    return config;
   }
 
   /**
    * An async variant of {@link RigConfig.loadForProjectFolder}
    */
   public static async loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig> {
-    const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
+    const { overrideRigJsonObject, projectFolderPath } = options;
 
-    let json: IRigConfigJson;
+    const fromCache: RigConfig | false | undefined =
+      !options.bypassCache && !overrideRigJsonObject && RigConfig._configCache.get(projectFolderPath);
+
+    if (fromCache) {
+      return fromCache;
+    }
+
+    const rigConfigFilePath: string = path.join(projectFolderPath, 'config/rig.json');
+
+    let config: RigConfig | undefined;
+    let json: IRigConfigJson | undefined = overrideRigJsonObject;
     try {
-      if (options.overrideRigJsonObject) {
-        json = options.overrideRigJsonObject;
-      } else {
-        if (!(await Helpers.fsExistsAsync(rigConfigFilePath))) {
-          return new RigConfig({
-            projectFolderPath: options.projectFolderPath,
-
-            rigFound: false,
-            filePath: '',
-            rigPackageName: '',
-            rigProfile: ''
-          });
-        }
-
+      if (!json) {
         const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
-        json = JSON.parse(stripJsonComments(rigConfigFileContent));
+        json = JSON.parse(stripJsonComments(rigConfigFileContent)) as IRigConfigJson;
       }
 
       RigConfig._validateSchema(json);
     } catch (error) {
+      config = RigConfig._handleConfigError(error as Error, projectFolderPath, rigConfigFilePath);
+    }
+
+    if (!config) {
+      config = new RigConfig({
+        projectFolderPath: projectFolderPath,
+
+        rigFound: true,
+        filePath: rigConfigFilePath,
+        rigPackageName: json!.rigPackageName,
+        rigProfile: json!.rigProfile
+      });
+    }
+
+    if (!overrideRigJsonObject) {
+      RigConfig._configCache.set(projectFolderPath, config);
+    }
+    return config;
+  }
+
+  private static _handleConfigError(
+    error: NodeJS.ErrnoException,
+    projectFolderPath: string,
+    rigConfigFilePath: string
+  ): RigConfig {
+    if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
       throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
     }
 
+    // File not found, i.e. no rig config
     return new RigConfig({
-      projectFolderPath: options.projectFolderPath,
+      projectFolderPath,
 
-      rigFound: true,
-      filePath: rigConfigFilePath,
-      rigPackageName: json.rigPackageName,
-      rigProfile: json.rigProfile || 'default'
+      rigFound: false,
+      filePath: '',
+      rigPackageName: '',
+      rigProfile: ''
     });
   }
 
   /**
-   * Performs Node.js module resolution to locate the rig package folder, then returns the absolute path
-   * of the rig profile folder specified by `rig.json`.
-   *
-   * @remarks
-   * If no `rig.json` file was found, then this method throws an error.  The first time this method
-   * is called, the result is cached and will be returned by all subsequent calls.
-   *
-   * Example: `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   * {@inheritdoc IRigConfig.getResolvedProfileFolder}
    */
   public getResolvedProfileFolder(): string {
     if (this._resolvedRigPackageFolder === undefined) {
@@ -317,7 +431,7 @@ export class RigConfig {
   }
 
   /**
-   * An async variant of {@link RigConfig.getResolvedProfileFolder}
+   * {@inheritdoc IRigConfig.getResolvedProfileFolderAsync}
    */
   public async getResolvedProfileFolderAsync(): Promise<string> {
     if (this._resolvedRigPackageFolder === undefined) {
@@ -350,20 +464,7 @@ export class RigConfig {
   }
 
   /**
-   * This lookup first checks for the specified relative path under `projectFolderPath`; if it does
-   * not exist there, then it checks in the resolved rig profile folder.  If the file is found,
-   * its absolute path is returned. Otherwise, `undefined` is returned.
-   *
-   * @remarks
-   * For example, suppose the rig profile is:
-   *
-   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
-   *
-   * And suppose `configFileRelativePath` is `folder/file.json`. Then the following locations will be checked:
-   *
-   * `/path/to/your-project/folder/file.json`
-   *
-   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile/folder/file.json`
+   * {@inheritdoc IRigConfig.tryResolveConfigFilePath}
    */
   public tryResolveConfigFilePath(configFileRelativePath: string): string | undefined {
     if (!Helpers.isDownwardRelative(configFileRelativePath)) {
@@ -384,7 +485,7 @@ export class RigConfig {
   }
 
   /**
-   * An async variant of {@link RigConfig.tryResolveConfigFilePath}
+   * {@inheritdoc IRigConfig.tryResolveConfigFilePathAsync}
    */
   public async tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined> {
     if (!Helpers.isDownwardRelative(configFileRelativePath)) {

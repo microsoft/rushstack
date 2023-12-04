@@ -11,12 +11,15 @@ function setLockFileGetProcessStartTime(fn: (process: number) => string | undefi
   (LockFile as any)._getStartTime = fn;
 }
 
-describe('LockFile', () => {
+// lib/test
+const libTestFolder: string = path.resolve(__dirname, '../../lib/test');
+
+describe(LockFile.name, () => {
   afterEach(() => {
     setLockFileGetProcessStartTime(getProcessStartTime);
   });
 
-  describe('getLockFilePath', () => {
+  describe(LockFile.getLockFilePath.name, () => {
     test('only accepts alphabetical characters for resource name', () => {
       expect(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo123');
@@ -49,7 +52,7 @@ describe('LockFile', () => {
     });
   });
 
-  describe('getProcessStartTimeFromProcStat', () => {
+  describe(getProcessStartTimeFromProcStat.name, () => {
     function createStatOutput(value2: string, n: number): string {
       let statOutput: string = `0 ${value2} S`;
       for (let i: number = 0; i < n; i++) {
@@ -97,7 +100,7 @@ describe('LockFile', () => {
 
   if (process.platform === 'darwin' || process.platform === 'linux') {
     describe('Linux and Mac', () => {
-      describe('getLockFilePath()', () => {
+      describe(LockFile.getLockFilePath.name, () => {
         test('returns a resolved path containing the pid', () => {
           expect(path.join(process.cwd(), `test#${process.pid}.lock`)).toEqual(
             LockFile.getLockFilePath('./', 'test')
@@ -113,7 +116,7 @@ describe('LockFile', () => {
 
       test('can acquire and close a clean lockfile', () => {
         // ensure test folder is clean
-        const testFolder: string = path.join(__dirname, '1');
+        const testFolder: string = path.join(libTestFolder, '1');
         FileSystem.ensureEmptyFolder(testFolder);
 
         const resourceName: string = 'test';
@@ -139,7 +142,7 @@ describe('LockFile', () => {
 
       test('cannot acquire a lock if another valid lock exists', () => {
         // ensure test folder is clean
-        const testFolder: string = path.join(__dirname, '2');
+        const testFolder: string = path.join(libTestFolder, '2');
         FileSystem.ensureEmptyFolder(testFolder);
 
         const otherPid: number = 999999999;
@@ -167,11 +170,42 @@ describe('LockFile', () => {
         // this lock should be undefined since there is an existing lock
         expect(lock).toBeUndefined();
       });
+      test('cannot acquire a lock if another valid lock exists with the same start time', () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(libTestFolder, '3');
+        FileSystem.ensureEmptyFolder(testFolder);
+
+        const otherPid: number = 1; // low pid so the other lock is before us
+        const otherPidStartTime: string = '2012-01-02 12:53:12';
+        const thisPidStartTime: string = otherPidStartTime;
+
+        const resourceName: string = 'test';
+
+        const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+
+        setLockFileGetProcessStartTime((pid: number) => {
+          return pid === process.pid ? thisPidStartTime : otherPidStartTime;
+        });
+
+        // create an open lockfile
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+        lockFileHandle.write(otherPidStartTime);
+        lockFileHandle.close();
+        FileSystem.updateTimes(otherPidLockFileName, {
+          accessedTime: 10000,
+          modifiedTime: 10000
+        });
+
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        // this lock should be undefined since there is an existing lock
+        expect(lock).toBeUndefined();
+      });
     });
   }
 
   if (process.platform === 'win32') {
-    describe('getLockFilePath()', () => {
+    describe(LockFile.getLockFilePath.name, () => {
       test("returns a resolved path that doesn't contain", () => {
         expect(path.join(process.cwd(), `test.lock`)).toEqual(LockFile.getLockFilePath('./', 'test'));
       });
@@ -183,7 +217,7 @@ describe('LockFile', () => {
 
     test('will not acquire if existing lock is there', () => {
       // ensure test folder is clean
-      const testFolder: string = path.join(__dirname, '1');
+      const testFolder: string = path.join(libTestFolder, '1');
       FileSystem.deleteFolder(testFolder);
       FileSystem.ensureFolder(testFolder);
 
@@ -201,9 +235,8 @@ describe('LockFile', () => {
 
     test('can acquire and close a dirty lockfile', () => {
       // ensure test folder is clean
-      const testFolder: string = path.join(__dirname, '1');
-      FileSystem.deleteFolder(testFolder);
-      FileSystem.ensureFolder(testFolder);
+      const testFolder: string = path.join(libTestFolder, '1');
+      FileSystem.ensureEmptyFolder(testFolder);
 
       // Create a lockfile that is still hanging around on disk,
       const resourceName: string = 'test';
@@ -225,9 +258,8 @@ describe('LockFile', () => {
 
     test('can acquire and close a clean lockfile', () => {
       // ensure test folder is clean
-      const testFolder: string = path.join(__dirname, '1');
-      FileSystem.deleteFolder(testFolder);
-      FileSystem.ensureFolder(testFolder);
+      const testFolder: string = path.join(libTestFolder, '1');
+      FileSystem.ensureEmptyFolder(testFolder);
 
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);

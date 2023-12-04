@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 import { AnsiEscape } from '../AnsiEscape';
 
-describe('AnsiEscape', () => {
+describe(AnsiEscape.name, () => {
   let initialColorsEnabled: boolean;
 
   beforeAll(() => {

@@ -5,7 +5,7 @@ import { TerminalChunkKind } from '../ITerminalChunk';
 import { StderrLineTransform } from '../StdioLineTransform';
 import { MockWritable } from '../MockWritable';
 
-describe('StderrLineTransform', () => {
+describe(StderrLineTransform.name, () => {
   it('should report stdout if there is no stderr', () => {
     const mockWritable: MockWritable = new MockWritable();
     const transform: StderrLineTransform = new StderrLineTransform({ destination: mockWritable });

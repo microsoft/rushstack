@@ -7,7 +7,7 @@
 Some less common TypeScript declaration kinds.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IDocInterface3 
@@ -15,11 +15,11 @@ export interface IDocInterface3
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  ["\[not.a.symbol\]"](./api-documenter-test.idocinterface3.__not.a.symbol__.md) | string | An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol. |
-|  [\[EcmaSmbols.example\]](./api-documenter-test.idocinterface3._ecmasmbols.example_.md) | string | ECMAScript symbol |
-|  [redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md) | string | A quoted identifier with redundant quotes. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  ["\[not.a.symbol\]"](./api-documenter-test.idocinterface3.__not.a.symbol__.md) |  | string | An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol. |
+|  [\[EcmaSmbols.example\]](./api-documenter-test.idocinterface3._ecmasmbols.example_.md) |  | string | ECMAScript symbol |
+|  [redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md) |  | string | A quoted identifier with redundant quotes. |
 
 ## Methods
 

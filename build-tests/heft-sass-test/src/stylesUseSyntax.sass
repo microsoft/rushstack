@@ -1,0 +1,17 @@
+/**
+ * This file gets transpiled by the heft-sass-plugin and output to the lib/ folder.
+ * Then Webpack uses css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+
+// Testing sass built-in module using use syntax
+@use 'sass:color'
+
+// Testing Sass imports using use syntax
+@use 'forwardSyntaxStyles'
+
+// Testing node_modules using use and with syntax
+@use 'utilities/configurableModule' as configuration with ($button-background-color: color.adjust(#6b717f, $red: 15))
+
+.exampleAnchor
+    @include forwardSyntaxStyles.buttono-block()
+    @include forwardSyntaxStyles.buttono-style-modifier($background-color: configuration.$button-background-color)

@@ -1,0 +1,10 @@
+{
+  "name": "a",
+  "version": "1.0.0",
+  "scripts": {
+    "cobuild": "node ../build.js a",
+    "build": "node ../build.js a",
+    "__phase:build": "exit 1",
+    "_phase:build": "node ../build.js a"
+  }
+}

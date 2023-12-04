@@ -6,7 +6,7 @@
 
 Test newline rendering when code blocks are used in tables
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 Context: ({ children }: {

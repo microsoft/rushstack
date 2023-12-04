@@ -1,0 +1,33 @@
+@use '../../styles/base';
+
+.SelectedEntryCard {
+  margin-top: 12px;
+  @include base.card;
+  padding: 12px;
+  & > * + * {
+    margin-top: 8px;
+  }
+}
+
+.SelectedEntryBookmarkRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.SelectedEntryHeader {
+  display: flex;
+  align-items: center;
+  & > * + * {
+    margin-left: 8px;
+  }
+}
+
+.NavigationButtonRow {
+  display: flex;
+  & > * {
+    height: 21px;
+  }
+  & > * + * {
+    margin-left: 8px;
+  }
+}

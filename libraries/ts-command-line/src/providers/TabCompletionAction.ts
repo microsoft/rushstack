@@ -3,23 +3,23 @@
 
 import stringArgv from 'string-argv';
 
-import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import {
   CommandLineParameterKind,
-  CommandLineParameter,
+  type CommandLineParameter,
   CommandLineParameterWithArgument
 } from '../parameters/BaseClasses';
+import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
 import { CommandLineAction } from './CommandLineAction';
-import { CommandLineChoiceParameter } from '..';
 import { CommandLineConstants } from '../Constants';
 
 const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
 
 export class TabCompleteAction extends CommandLineAction {
-  private _wordToCompleteParameter!: CommandLineStringParameter;
-  private _positionParameter!: CommandLineIntegerParameter;
+  private readonly _wordToCompleteParameter: CommandLineStringParameter;
+  private readonly _positionParameter: CommandLineIntegerParameter;
   private readonly _actions: Map<string, Map<string, CommandLineParameter>>;
   private readonly _globalParameters: Map<string, CommandLineParameter>;
 
@@ -55,9 +55,7 @@ export class TabCompleteAction extends CommandLineAction {
         this._globalParameters.set(parameter.shortName, parameter);
       }
     }
-  }
 
-  protected onDefineParameters(): void {
     this._wordToCompleteParameter = this.defineStringParameter({
       parameterLongName: '--word',
       argumentName: 'WORD',
@@ -78,6 +76,7 @@ export class TabCompleteAction extends CommandLineAction {
     const caretPosition: number = this._positionParameter.value || (commandLine && commandLine.length) || 0;
 
     for await (const value of this.getCompletions(commandLine, caretPosition)) {
+      // eslint-disable-next-line no-console
       console.log(value);
     }
   }

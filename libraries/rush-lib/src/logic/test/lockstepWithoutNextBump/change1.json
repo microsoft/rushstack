@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "h",
+      "type": "minor",
+      "comment": "Minor-bumping h"
+    }
+  ]
+}

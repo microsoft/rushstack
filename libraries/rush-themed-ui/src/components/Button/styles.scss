@@ -1,0 +1,17 @@
+@use '../../styles/colors';
+
+.ButtonWrapper {
+  padding: 4px 8px;
+  border: 1px solid colors.$primary-active;
+  border-radius: 2px;
+  &:hover {
+    cursor: pointer;
+    background-color: colors.$primary-background;
+  }
+  &:disabled {
+    cursor: default;
+    background-color: colors.$background-primary;
+    color: colors.$gray;
+    border-color: colors.$secondary-active;
+  }
+}

@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the build cache is completely disabled 1`] = `"Caching has been disabled for this project."`;
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the phase behavior is not defined 1`] = `"This project does not define the caching behavior of the \\"z\\" command, so caching has been disabled."`;
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if the phase has disabled the cache 1`] = `"Caching has been disabled for this project's \\"_phase:a\\" command."`;
+
+exports[`RushProjectConfiguration getCacheDisabledReason Indicates if tracked files are outputs of the phase 1`] = `"The following files are used to calculate project state and are considered project output: test-project-c/.cache/b/foo"`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders 1`] = `
+Map {
+  "_phase:a" => Object {
+    "disableBuildCacheForOperation": true,
+    "operationName": "_phase:a",
+    "outputFolderNames": Array [
+      ".cache/a",
+    ],
+  },
+  "_phase:b" => Object {
+    "operationName": "_phase:b",
+    "outputFolderNames": Array [
+      ".cache/b",
+    ],
+  },
+}
+`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders: validation: terminal error 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders: validation: terminal output 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders: validation: terminal verbose 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName allows outputFolderNames to be inside subfolders: validation: terminal warning 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal error 1`] = `"The project \\"test-project-d\\" has a \\"config/rush-project.json\\" configuration that defines two operations in the same command whose \\"outputFolderNames\\" would overlap. Operations outputs in the same command must be disjoint so that they can be independently cached. The \\"a/b\\" path overlaps between these operations: \\"_phase:b\\", \\"_phase:a\\"[n]"`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal output 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal verbose 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName does not allow one outputFolderName to be under another: validation: terminal warning 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file 1`] = `
+Map {
+  "_phase:a" => Object {
+    "operationName": "_phase:a",
+    "outputFolderNames": Array [
+      "a-a",
+      "a-b",
+    ],
+  },
+  "_phase:b" => Object {
+    "operationName": "_phase:b",
+    "outputFolderNames": Array [
+      "b-a",
+    ],
+  },
+}
+`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file: validation: terminal error 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file: validation: terminal output 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file: validation: terminal verbose 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file: validation: terminal warning 1`] = `""`;
+
+exports[`RushProjectConfiguration operationSettingsByOperationName throws an error when loading a rush-project.json config that lists an operation twice 1`] = `"The operation \\"_phase:a\\" occurs multiple times in the \\"operationSettings\\" array in \\"<testFolder>/config/rush-project.json\\"."`;

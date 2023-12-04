@@ -26,8 +26,8 @@ const pattern2: TreePattern = new TreePattern({
   ])
 });
 
-describe('TreePattern', () => {
-  test('matches using a tag', () => {
+describe(TreePattern.name, () => {
+  it('matches using a tag', () => {
     const tree1: TreeNode = {
       a: [
         1,
@@ -48,7 +48,7 @@ describe('TreePattern', () => {
     });
   });
 
-  test('matches alternatives', () => {
+  it('matches alternatives', () => {
     const tree2a: TreeNode = {
       c: 123
     };

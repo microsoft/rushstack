@@ -4,10 +4,11 @@ const path = require('path');
 const webpack = require('webpack');
 const { JsonFile } = require('@rushstack/node-core-library');
 
-const { LocalizationPlugin } = require('@rushstack/localization-plugin');
+const { LocalizationPlugin } = require('@rushstack/webpack4-localization-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 function resolveMissingString(localeNames, localizedResourcePath) {
   let contextRelativePath = path.relative(__dirname, localizedResourcePath);
@@ -93,6 +94,9 @@ function generateConfiguration(mode, outputFolderName) {
               },
               './src/chunks/strings6.resx': {
                 string: 'cadena de texto RESX'
+              },
+              './src/strings7.resjson': {
+                string: 'cadena resjson'
               }
             }
           },
@@ -114,12 +118,14 @@ function generateConfiguration(mode, outputFolderName) {
         },
         typingsOptions: {
           generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts'),
+          secondaryGeneratedTsFolders: ['lib'],
           sourceRoot: path.resolve(__dirname, 'src'),
           exportAsDefault: true
         },
         localizationStats: {
           dropPath: path.resolve(__dirname, 'temp', 'localization-stats.json')
-        }
+        },
+        globsToIgnore: ['**/invalid-strings.loc.json']
       }),
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
@@ -135,7 +141,15 @@ function generateConfiguration(mode, outputFolderName) {
         }
       }),
       new HtmlWebpackPlugin()
-    ]
+    ],
+    optimization: {
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new WorkerPoolMinifier(),
+          useSourceMap: true
+        })
+      ]
+    }
   };
 }
 

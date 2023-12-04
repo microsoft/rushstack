@@ -13,7 +13,8 @@ function verifyProvider(): void {
     log: provider.getOutput(),
     warning: provider.getWarningOutput(),
     error: provider.getErrorOutput(),
-    verbose: provider.getVerbose()
+    verbose: provider.getVerbose(),
+    debug: provider.getDebugOutput()
   }).toMatchSnapshot();
 }
 
@@ -524,6 +525,60 @@ describe('02 color disabled', () => {
           'message 3',
           Colors.red('message 4')
         );
+        verifyProvider();
+      });
+    });
+
+    describe('09 writeDebug', () => {
+      test('01 writes a single message', () => {
+        terminal.writeDebug('test message');
+        verifyProvider();
+      });
+
+      test('02 writes multiple messages', () => {
+        terminal.writeDebug('message 1', 'message 2');
+        verifyProvider();
+      });
+
+      test('03 writes a message with colors', () => {
+        terminal.writeDebug(Colors.green('message 1'));
+        verifyProvider();
+      });
+
+      test('04 writes a multiple messages with colors', () => {
+        terminal.writeDebug(Colors.green('message 1'), Colors.red('message 2'));
+        verifyProvider();
+      });
+
+      test('05 writes a messages with colors interspersed with non-colored messages', () => {
+        terminal.writeDebug('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+        verifyProvider();
+      });
+    });
+
+    describe('10 writeDebugLine', () => {
+      test('01 writes a single message', () => {
+        terminal.writeDebugLine('test message');
+        verifyProvider();
+      });
+
+      test('02 writes multiple messages', () => {
+        terminal.writeDebugLine('message 1', 'message 2');
+        verifyProvider();
+      });
+
+      test('03 writes a message with colors', () => {
+        terminal.writeDebugLine(Colors.green('message 1'));
+        verifyProvider();
+      });
+
+      test('04 writes a multiple messages with colors', () => {
+        terminal.writeDebugLine(Colors.green('message 1'), Colors.red('message 2'));
+        verifyProvider();
+      });
+
+      test('05 writes a messages with colors interspersed with non-colored messages', () => {
+        terminal.writeDebugLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
         verifyProvider();
       });
     });

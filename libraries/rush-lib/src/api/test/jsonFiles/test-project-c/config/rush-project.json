@@ -1,0 +1,13 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:a",
+      "outputFolderNames": [".cache/a"],
+      "disableBuildCacheForOperation": true
+    },
+    {
+      "operationName": "_phase:b",
+      "outputFolderNames": [".cache/b"]
+    }
+  ]
+}

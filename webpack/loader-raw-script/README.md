@@ -19,7 +19,7 @@ require("@rushstack/loader-raw-script!path/to/script.js");
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/webpack/loader-raw-script/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/webpack/loader-raw-script/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/loader-raw-script` is part of the [Rush Stack](https://rushstack.io/) family of projects.

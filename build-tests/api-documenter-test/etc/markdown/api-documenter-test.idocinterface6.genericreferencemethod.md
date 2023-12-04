@@ -4,7 +4,7 @@
 
 ## IDocInterface6.genericReferenceMethod() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 genericReferenceMethod<T>(x: T): T;
@@ -16,7 +16,7 @@ genericReferenceMethod<T>(x: T): T;
 |  --- | --- | --- |
 |  x | T |  |
 
-<b>Returns:</b>
+**Returns:**
 
 T
 

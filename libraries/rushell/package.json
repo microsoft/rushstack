@@ -4,23 +4,23 @@
   "description": "Execute shell commands using a consistent syntax on every platform",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/rushell"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/rushell"
   },
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft test --watch"
+    "build": "heft build --clean",
+    "start": "heft test --watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13"
+    "local-node-rig": "workspace:*"
   }
 }

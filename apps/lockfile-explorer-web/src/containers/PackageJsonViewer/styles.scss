@@ -1,0 +1,69 @@
+@use '../../styles/base';
+
+.PackageJsonWrapper {
+  @include base.card;
+  min-height: 400px;
+  flex: 1;
+  margin-top: 12px;
+}
+
+.FileContents {
+  height: calc(100% - 46px);
+  padding: 0 12px;
+}
+
+.FileInnerContent {
+  padding-top: 12px;
+}
+
+@mixin SpecWrapper {
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: white;
+}
+
+.AddedSpec {
+  background-color: #107c10;
+  @include SpecWrapper;
+}
+
+.DeletedSpec {
+  background-color: red;
+  @include SpecWrapper;
+}
+
+.ChangedSpec {
+  background-color: darkgoldenrod;
+  @include SpecWrapper;
+}
+
+.PackageSpecWrapper {
+  h5 {
+    margin-bottom: 8px;
+  }
+  & > * + * {
+    margin-top: 8px;
+  }
+}
+
+.PackageSpecEntry {
+  & > * {
+    display: inline;
+  }
+  & > * + * {
+    margin-left: 12px;
+  }
+}
+
+.DependencyRows {
+  display: flex;
+  align-items: flex-start;
+  & > * + * {
+    margin-left: 12px;
+  }
+  div {
+    & > * + * {
+      margin-top: 4px;
+    }
+  }
+}

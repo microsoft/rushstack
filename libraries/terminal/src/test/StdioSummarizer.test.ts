@@ -7,7 +7,7 @@ import { StderrLineTransform } from '../StdioLineTransform';
 import { TextRewriterTransform } from '../TextRewriterTransform';
 import { NewlineKind } from '@rushstack/node-core-library';
 
-describe('StdioSummarizer', () => {
+describe(StdioSummarizer.name, () => {
   let summarizer: StdioSummarizer;
   let stderrLineTransform: StderrLineTransform;
   let transform: TextRewriterTransform;

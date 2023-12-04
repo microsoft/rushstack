@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalizationPlugin Handles localized compilation with no async chunks (minified): Content 1`] = `
+Object {
+  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default.js\\",\\"foo\\":\\"main-foo.js\\",\\"en-us\\":\\"main-en-us.js\\",\\"qps-ploc\\":\\"main-qps-ploc.js\\"}}},\\"namedChunkGroups\\":{}}",
+  "/release/main-default.js": "(()=>{\\"use strict\\";console.log(\\"test\\",\\"another\\")})();",
+  "/release/main-en-us.js": "(()=>{\\"use strict\\";console.log(\\"blah\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022\\",\\"something else\\")})();",
+  "/release/main-foo.js": "(()=>{\\"use strict\\";console.log(\\"return:\\\\r,newline:\\\\n,tab:\\\\t,backslash:\\\\\\\\,apos:\\\\u0027,quote:\\\\u0022\\",\\"something else\\")})();",
+  "/release/main-qps-ploc.js": "(()=>{\\"use strict\\";console.log(\\"!--ƀĺàĥ\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022-|-\\",\\"!--śōmēţĥĩńĝ ēĺśē-|-\\")})();",
+}
+`;
+
+exports[`LocalizationPlugin Handles localized compilation with no async chunks (minified): Errors 1`] = `Array []`;
+
+exports[`LocalizationPlugin Handles localized compilation with no async chunks (minified): Warnings 1`] = `Array []`;
+
+exports[`LocalizationPlugin Handles localized compilation with no async chunks (unminified): Content 1`] = `
+Object {
+  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default.js\\",\\"foo\\":\\"main-foo.js\\",\\"en-us\\":\\"main-en-us.js\\",\\"qps-ploc\\":\\"main-qps-ploc.js\\"}}},\\"namedChunkGroups\\":{}}",
+  "/release/main-default.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+var __webpack_exports__ = {};
+
+;// CONCATENATED MODULE: ./a/strings1.resjson
+const strings = {\\"test\\":\\"test\\"};
+/* harmony default export */ const strings1_resjson = (strings);
+;// CONCATENATED MODULE: ./a/strings2.resjson
+const strings2_resjson_strings = {\\"another\\":\\"another\\"};
+/* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
+;// CONCATENATED MODULE: ./a/entry.js
+  console.log(strings1_resjson.test, strings2_resjson.another);
+/******/ })()
+;",
+  "/release/main-en-us.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+var __webpack_exports__ = {};
+
+;// CONCATENATED MODULE: ./a/strings1.resjson
+const strings = {\\"test\\":\\"blah\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022\\"};
+/* harmony default export */ const strings1_resjson = (strings);
+;// CONCATENATED MODULE: ./a/strings2.resjson
+const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
+/* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
+;// CONCATENATED MODULE: ./a/entry.js
+  console.log(strings1_resjson.test, strings2_resjson.another);
+/******/ })()
+;",
+  "/release/main-foo.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+var __webpack_exports__ = {};
+
+;// CONCATENATED MODULE: ./a/strings1.resjson
+const strings = {\\"test\\":\\"return:\\\\r,newline:\\\\n,tab:\\\\t,backslash:\\\\\\\\,apos:\\\\u0027,quote:\\\\u0022\\"};
+/* harmony default export */ const strings1_resjson = (strings);
+;// CONCATENATED MODULE: ./a/strings2.resjson
+const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
+/* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
+;// CONCATENATED MODULE: ./a/entry.js
+  console.log(strings1_resjson.test, strings2_resjson.another);
+/******/ })()
+;",
+  "/release/main-qps-ploc.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+var __webpack_exports__ = {};
+
+;// CONCATENATED MODULE: ./a/strings1.resjson
+const strings = {\\"test\\":\\"!--ƀĺàĥ\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022-|-\\"};
+/* harmony default export */ const strings1_resjson = (strings);
+;// CONCATENATED MODULE: ./a/strings2.resjson
+const strings2_resjson_strings = {\\"another\\":\\"!--śōmēţĥĩńĝ ēĺśē-|-\\"};
+/* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
+;// CONCATENATED MODULE: ./a/entry.js
+  console.log(strings1_resjson.test, strings2_resjson.another);
+/******/ })()
+;",
+}
+`;
+
+exports[`LocalizationPlugin Handles localized compilation with no async chunks (unminified): Errors 1`] = `Array []`;
+
+exports[`LocalizationPlugin Handles localized compilation with no async chunks (unminified): Warnings 1`] = `Array []`;

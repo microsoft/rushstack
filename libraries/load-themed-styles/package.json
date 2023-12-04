@@ -1,23 +1,23 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.10.190",
+  "version": "2.0.88",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/load-themed-styles"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/load-themed-styles"
   },
   "scripts": {
-    "build": "heft build --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "main": "lib/index.js",
   "module": "lib-es6/index.js",
   "typings": "lib/index.d.ts",
   "keywords": [],
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-web-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/webpack-env": "1.13.0"
+    "local-web-rig": "workspace:*"
   }
 }

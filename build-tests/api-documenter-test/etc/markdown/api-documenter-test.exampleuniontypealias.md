@@ -6,10 +6,10 @@
 
 A type alias that references multiple other types.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-export declare type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
 ```
-<b>References:</b> [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface3](./api-documenter-test.idocinterface3.md)
+**References:** [IDocInterface1](./api-documenter-test.idocinterface1.md)<!-- -->, [IDocInterface3](./api-documenter-test.idocinterface3.md)
 

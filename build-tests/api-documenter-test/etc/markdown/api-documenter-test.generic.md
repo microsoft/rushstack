@@ -6,7 +6,7 @@
 
 Generic class.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class Generic<T> 

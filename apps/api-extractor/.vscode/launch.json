@@ -79,7 +79,7 @@
         "run",
         "--local",
         "--config",
-        "./temp/configs/api-extractor-exportImportStarAs2.json"
+        "./temp/configs/api-extractor-spanSorting.json"
       ],
       "sourceMaps": true
     }

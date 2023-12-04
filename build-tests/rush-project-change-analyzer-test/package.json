@@ -1,0 +1,21 @@
+{
+  "name": "rush-project-change-analyzer-test",
+  "description": "This is an example project that uses rush-lib's ProjectChangeAnalyzer to ",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "dependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "18.17.15",
+    "local-node-rig": "workspace:*"
+  }
+}

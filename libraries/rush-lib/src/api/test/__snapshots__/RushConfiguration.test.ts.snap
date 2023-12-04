@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RushConfiguration RushConfigurationProject correctly updates the packageJson property after the packageJson is edited by packageJsonEditor: dependencyProjects after 1`] = `
+Array [
+  "project2",
+]
+`;
+
+exports[`RushConfiguration RushConfigurationProject correctly updates the packageJson property after the packageJson is edited by packageJsonEditor: dependencyProjects before 1`] = `Array []`;
+
+exports[`RushConfiguration RushConfigurationProject correctly updates the packageJson property after the packageJson is edited by packageJsonEditor: devDependencies after 1`] = `
+Object {
+  "project2": "1.0.0",
+}
+`;
+
+exports[`RushConfiguration RushConfigurationProject correctly updates the packageJson property after the packageJson is edited by packageJsonEditor: devDependencies before 1`] = `undefined`;
+
+exports[`RushConfiguration fails to load repo/rush-repository-url-urls.json 1`] = `"The 'repository.url' field cannot be used when 'repository.urls' is present"`;

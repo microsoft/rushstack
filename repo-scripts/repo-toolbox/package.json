@@ -6,17 +6,18 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "readme": "node ./lib/start.js readme"
+    "readme": "node ./lib/start.js readme",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/ts-command-line": "workspace:*"
+    "@rushstack/ts-command-line": "workspace:*",
+    "diff": "~5.0.0"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/node": "10.17.13"
+    "@types/diff": "5.0.1"
   }
 }

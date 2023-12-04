@@ -1,0 +1,86 @@
+################################################################################
+# When pull requests are merged to the main branch, evaluate the pull request
+# body and file a documentation ticket against the rushstack-websites repo
+# with a corresponding documentation task.
+#
+# The pull request body must contain non-comment, non-whitespace text below
+# the "Impacted documentation" header in the PR template to file a
+# documentation ticket.
+################################################################################
+name: File Doc Tickets
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  file-tickets:
+    name: File Tickets
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Parse PR body
+        run: |
+          cat <<-"EOF" > event.json
+          ${{ toJson(github.event) }}
+          EOF
+
+          cat <<-"EOF" | node
+          const fs = require('fs');
+
+          const EVENT_FILE = 'event.json';
+          const RESULT_FILE = 'issue.md';
+          const DELIMITER = '## Impacted documentation';
+
+          const event = JSON.parse(fs.readFileSync(EVENT_FILE, 'utf8'));
+          const strippedBody = (event.pull_request.body || '').replace(/<!-+(.|\r|\n)+?-+>/g, '');
+          const delimIndex = strippedBody.indexOf(DELIMITER);
+
+          if (delimIndex < 0) {
+            console.log('No documentation tasks detected -- skipping doc ticket.');
+            process.exit(0);
+          }
+
+          const delimBody = strippedBody.substring(delimIndex + DELIMITER.length).trim();
+
+          if (delimBody.length === 0) {
+            console.log('No documentation tasks detected -- skipping doc ticket.');
+            process.exit(0);
+          }
+
+          const quotedBody = delimBody.split('\n').map(line => `> ${line}`).join('\n');
+          fs.writeFileSync(RESULT_FILE, [
+            '### Summary',
+            '',
+            'Follow up on documentation tasks from ' + event.pull_request.html_url + '.',
+            '',
+            '### Details',
+            '',
+            'This ticket was generated automatically. Suggested documentation updates:',
+            '',
+            quotedBody,
+            ''
+          ].join('\n'), 'utf8');
+
+          EOF
+
+          if [ -f issue.md ]; then
+            echo "FILE_TICKET=1" >> $GITHUB_ENV
+          fi
+      - name: File ticket
+        if: ${{ env.FILE_TICKET == '1' }}
+        uses: peter-evans/create-issue-from-file@af31b99c72f9e91877aea8a2d96fd613beafac84 # @v4 (locked)
+        with:
+          repository: microsoft/rushstack-websites
+          token: '${{ secrets.RUSHSTACK_WEBSITES_PR_TOKEN }}'
+          title: '[doc] ${{ github.event.pull_request.title }}'
+          content-filepath: ./issue.md
+          labels: |
+            automated

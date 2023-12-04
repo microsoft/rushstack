@@ -1,0 +1,72 @@
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  ../../project1:
+    dependencies:
+      jquery:
+        specifier: 1.12.3
+        version: 1.12.3
+      pad-left:
+        specifier: ^1.0.0
+        version: 1.0.0
+
+  ../../project2:
+    dependencies:
+      jquery:
+        specifier: 2.2.4
+        version: 2.2.4
+      q:
+        specifier: ~1.5.0
+        version: 1.5.1
+
+  ../../project3:
+    dependencies:
+      '@scope/testDep':
+        specifier: https://github.com/jonschlinkert/pad-left/tarball/2.1.0
+        version: '@github.com/jonschlinkert/pad-left/tarball/2.1.0'
+      q:
+        specifier: 1.5.1
+        version: 1.5.1
+
+packages:
+
+  /jquery@1.12.3:
+    resolution: {integrity: sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==}
+    dev: false
+
+  /jquery@2.2.4:
+    resolution: {integrity: sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==}
+    dev: false
+
+  /pad-left@1.0.0:
+    resolution: {integrity: sha512-VIgD7DviaDL6QCj+jEU1jpjXlu0z/sl4yzAmFLmM7YvM3ZRKLaxZAe+sZ1hKHeYUeI4zoZHfMetDpazu/uAwsw==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      repeat-string: 1.6.1
+    dev: false
+
+  /q@1.5.1:
+    resolution: {integrity: sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==}
+    engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
+    dev: false
+
+  /repeat-string@1.6.1:
+    resolution: {integrity: sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==}
+    engines: {node: '>=0.10'}
+    dev: false
+
+  '@github.com/jonschlinkert/pad-left/tarball/2.1.0':
+    resolution: {tarball: https://github.com/jonschlinkert/pad-left/tarball/2.1.0}
+    name: pad-left
+    version: 2.1.0
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      repeat-string: 1.6.1
+    dev: false

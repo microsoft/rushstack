@@ -1,0 +1,7 @@
+[
+  {
+    "policyName": "lockStepWithoutNextBump",
+    "definitionName": "lockStepVersion",
+    "version": "1.0.0"
+  }
+]

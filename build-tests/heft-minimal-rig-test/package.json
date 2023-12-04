@@ -5,11 +5,15 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "dependencies": {
-    "typescript": "~3.9.7",
+    "typescript": "~5.0.4",
     "@microsoft/api-extractor": "workspace:*",
-    "@rushstack/heft-jest-plugin": "workspace:*"
+    "@rushstack/heft-api-extractor-plugin": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*"
   }
 }

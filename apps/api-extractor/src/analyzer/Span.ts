@@ -2,8 +2,54 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { StringBuilder } from '@microsoft/tsdoc';
-import { Sort } from '@rushstack/node-core-library';
+import { InternalError, Sort } from '@rushstack/node-core-library';
+
+import { IndentedWriter } from '../generators/IndentedWriter';
+
+interface IWriteModifiedTextOptions {
+  writer: IndentedWriter;
+  separatorOverride: string | undefined;
+  indentDocCommentState: IndentDocCommentState;
+}
+
+enum IndentDocCommentState {
+  /**
+   * `indentDocComment` was not requested for this subtree.
+   */
+  Inactive = 0,
+  /**
+   * `indentDocComment` was requested and we are looking for the opening `/` `*`
+   */
+  AwaitingOpenDelimiter = 1,
+  /**
+   * `indentDocComment` was requested and we are looking for the closing `*` `/`
+   */
+  AwaitingCloseDelimiter = 2,
+  /**
+   * `indentDocComment` was requested and we have finished indenting the comment.
+   */
+  Done = 3
+}
+
+/**
+ * Choices for SpanModification.indentDocComment.
+ */
+export enum IndentDocCommentScope {
+  /**
+   * Do not detect and indent comments.
+   */
+  None = 0,
+
+  /**
+   * Look for one doc comment in the {@link Span.prefix} text only.
+   */
+  PrefixOnly = 1,
+
+  /**
+   * Look for one doc comment potentially distributed across the Span and its children.
+   */
+  SpanAndChildren = 2
+}
 
 /**
  * Specifies various transformations that will be performed by Span.getModifiedText().
@@ -32,6 +78,21 @@ export class SpanModification {
    * Used if the parent span has Span.sortChildren=true.
    */
   public sortKey: string | undefined;
+
+  /**
+   * Optionally configures getModifiedText() to search for a "/*" doc comment and indent it.
+   * At most one comment is detected.
+   *
+   * @remarks
+   * The indentation can be applied to the `Span.modifier.prefix` only, or it can be applied to the
+   * full subtree of nodes (as needed for `ts.SyntaxKind.JSDocComment` trees).  However the enabled
+   * scopes must not overlap.
+   *
+   * This feature is enabled selectively because (1) we do not want to accidentally match `/*` appearing
+   * in a string literal or other expression that is not a comment, and (2) parsing comments is relatively
+   * expensive.
+   */
+  public indentDocComment: IndentDocCommentScope = IndentDocCommentScope.None;
 
   private readonly _span: Span;
   private _prefix: string | undefined;
@@ -74,6 +135,9 @@ export class SpanModification {
     this.sortKey = undefined;
     this._prefix = undefined;
     this._suffix = undefined;
+    if (this._span.kind === ts.SyntaxKind.JSDocComment) {
+      this.indentDocComment = IndentDocCommentScope.SpanAndChildren;
+    }
   }
 
   /**
@@ -142,16 +206,7 @@ export class Span {
 
     let previousChildSpan: Span | undefined = undefined;
 
-    const visitedChildren: Set<ts.Node> = new Set();
-
     for (const childNode of this.node.getChildren() || []) {
-      // FIX ME: This is a temporary workaround for a problem introduced by TypeScript 4.3.
-      // https://github.com/microsoft/TypeScript/issues/44422
-      if (visitedChildren.has(childNode)) {
-        continue;
-      }
-      visitedChildren.add(childNode);
-
       const childSpan: Span = new Span(childNode);
       childSpan._parent = this;
       childSpan._previousSibling = previousChildSpan;
@@ -170,7 +225,7 @@ export class Span {
       if (childSpan.endIndex > this.endIndex) {
         // This has never been observed empirically, but here's how we would handle it
         this.endIndex = childSpan.endIndex;
-        throw new Error('Unexpected AST case');
+        throw new InternalError('Unexpected AST case');
       }
 
       if (previousChildSpan) {
@@ -295,44 +350,6 @@ export class Span {
   }
 
   /**
-   * Starting from the first character of this span, walk backwards until we find the start of the line,
-   * and return whitespace after that position.
-   *
-   * @remarks
-   * For example, suppose the character buffer contains this text:
-   * ```
-   *              1111111111222222
-   *  012345 6 7890123456789012345
-   * "line 1\r\n  line 2 Example"
-   * ```
-   *
-   * And suppose the span starts at index 17, i.e. the the "E" in example.  The `getIndent()` method would return
-   * two spaces corresponding to the range from index 8 through and including index 9.
-   */
-  public getIndent(): string {
-    const buffer: string = this.node.getSourceFile().text;
-
-    let lineStartIndex: number = 0;
-    let firstNonSpaceIndex: number = this.startIndex;
-
-    let i: number = this.startIndex - 1;
-    while (i >= 0) {
-      const c: number = buffer.charCodeAt(i);
-      if (c === 13 /* \r */ || c === 10 /* \n */) {
-        lineStartIndex = i + 1;
-        break;
-      }
-      if (c !== 32 /* space */ && c !== 9 /* tab */) {
-        // We encountered a non-spacing character, so move the firstNonSpaceIndex backwards
-        firstNonSpaceIndex = i;
-      }
-      --i;
-    }
-
-    return buffer.substring(lineStartIndex, firstNonSpaceIndex);
-  }
-
-  /**
    * Recursively invokes the callback on this Span and all its children.  The callback
    * can make changes to Span.modification for each node.
    */
@@ -364,20 +381,23 @@ export class Span {
    * Returns the text represented by this Span, after applying all requested modifications.
    */
   public getModifiedText(): string {
-    const output: StringBuilder = new StringBuilder();
+    const writer: IndentedWriter = new IndentedWriter();
+    writer.trimLeadingSpaces = true;
 
     this._writeModifiedText({
-      output,
-      separatorOverride: undefined
+      writer: writer,
+      separatorOverride: undefined,
+      indentDocCommentState: IndentDocCommentState.Inactive
     });
 
-    return output.toString();
+    return writer.getText();
   }
 
-  public writeModifiedText(output: StringBuilder): void {
+  public writeModifiedText(output: IndentedWriter): void {
     this._writeModifiedText({
-      output,
-      separatorOverride: undefined
+      writer: output,
+      separatorOverride: undefined,
+      indentDocCommentState: IndentDocCommentState.Inactive
     });
   }
 
@@ -406,93 +426,214 @@ export class Span {
     return result;
   }
 
-  private _writeModifiedText(options: IWriteModifiedTextOptions): void {
-    options.output.append(this.modification.prefix);
+  /**
+   * Returns a diagnostic dump of the tree, showing the SpanModification settings for each nodde.
+   */
+  public getModifiedDump(indent: string = ''): string {
+    let result: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
 
-    const childCount: number = this.children.length;
+    if (this.prefix) {
+      result += ' pre=[' + this._getTrimmed(this.modification.prefix) + ']';
+    }
+    if (this.suffix) {
+      result += ' suf=[' + this._getTrimmed(this.modification.suffix) + ']';
+    }
+    if (this.separator) {
+      result += ' sep=[' + this._getTrimmed(this.separator) + ']';
+    }
+    if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
+      result += ' indentDocComment=' + IndentDocCommentScope[this.modification.indentDocComment];
+    }
+    if (this.modification.omitChildren) {
+      result += ' omitChildren';
+    }
+    if (this.modification.omitSeparatorAfter) {
+      result += ' omitSeparatorAfter';
+    }
+    if (this.modification.sortChildren) {
+      result += ' sortChildren';
+    }
+    if (this.modification.sortKey !== undefined) {
+      result += ` sortKey="${this.modification.sortKey}"`;
+    }
+    result += '\n';
 
     if (!this.modification.omitChildren) {
-      if (this.modification.sortChildren && childCount > 1) {
+      for (const child of this.children) {
+        result += child.getModifiedDump(indent + '  ');
+      }
+    } else {
+      result += `${indent}  (${this.children.length} children)\n`;
+    }
+
+    return result;
+  }
+
+  /**
+   * Recursive implementation of `getModifiedText()` and `writeModifiedText()`.
+   */
+  private _writeModifiedText(options: IWriteModifiedTextOptions): void {
+    // Apply indentation based on "{" and "}"
+    if (this.prefix === '{') {
+      options.writer.increaseIndent();
+    } else if (this.prefix === '}') {
+      options.writer.decreaseIndent();
+    }
+
+    if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
+      this._beginIndentDocComment(options);
+    }
+
+    this._write(this.modification.prefix, options);
+
+    if (this.modification.indentDocComment === IndentDocCommentScope.PrefixOnly) {
+      this._endIndentDocComment(options);
+    }
+
+    let sortedSubset: Span[] | undefined;
+
+    if (!this.modification.omitChildren) {
+      if (this.modification.sortChildren) {
         // We will only sort the items with a sortKey
-        const sortedSubset: Span[] = this.children.filter((x) => x.modification.sortKey !== undefined);
-        const sortedSubsetCount: number = sortedSubset.length;
+        const filtered: Span[] = this.children.filter((x) => x.modification.sortKey !== undefined);
 
         // Is there at least one of them?
-        if (sortedSubsetCount > 1) {
-          // Remember the separator for the first and last ones
-          const firstSeparator: string = sortedSubset[0].getLastInnerSeparator();
-          const lastSeparator: string = sortedSubset[sortedSubsetCount - 1].getLastInnerSeparator();
-
-          Sort.sortBy(sortedSubset, (x) => x.modification.sortKey);
-
-          const childOptions: IWriteModifiedTextOptions = { ...options };
-
-          let sortedSubsetIndex: number = 0;
-          for (let index: number = 0; index < childCount; ++index) {
-            let current: Span;
-
-            // Is this an item that we sorted?
-            if (this.children[index].modification.sortKey === undefined) {
-              // No, take the next item from the original array
-              current = this.children[index];
-              childOptions.separatorOverride = undefined;
-            } else {
-              // Yes, take the next item from the sortedSubset
-              current = sortedSubset[sortedSubsetIndex++];
-
-              if (sortedSubsetIndex < sortedSubsetCount) {
-                childOptions.separatorOverride = firstSeparator;
-              } else {
-                childOptions.separatorOverride = lastSeparator;
-              }
-            }
-
-            current._writeModifiedText(childOptions);
-          }
-
-          return;
+        if (filtered.length > 1) {
+          sortedSubset = filtered;
         }
-        // (fall through to the other implementations)
       }
+    }
 
-      if (options.separatorOverride !== undefined) {
-        // Special case where the separatorOverride is passed down to the "last inner separator" span
-        for (let i: number = 0; i < childCount; ++i) {
-          const child: Span = this.children[i];
+    if (sortedSubset) {
+      // This is the complicated special case that sorts an arbitrary subset of the child nodes,
+      // preserving the surrounding nodes.
 
-          if (
-            // Only the last child inherits the separatorOverride, because only it can contain
-            // the "last inner separator" span
-            i < childCount - 1 ||
-            // If this.separator is specified, then we will write separatorOverride below, so don't pass it along
-            this.separator
-          ) {
-            const childOptions: IWriteModifiedTextOptions = { ...options };
-            childOptions.separatorOverride = undefined;
-            child._writeModifiedText(childOptions);
+      const sortedSubsetCount: number = sortedSubset.length;
+      // Remember the separator for the first and last ones
+      const firstSeparator: string = sortedSubset[0].getLastInnerSeparator();
+      const lastSeparator: string = sortedSubset[sortedSubsetCount - 1].getLastInnerSeparator();
+
+      Sort.sortBy(sortedSubset, (x) => x.modification.sortKey);
+
+      const childOptions: IWriteModifiedTextOptions = { ...options };
+
+      let sortedSubsetIndex: number = 0;
+      for (let index: number = 0; index < this.children.length; ++index) {
+        let current: Span;
+
+        // Is this an item that we sorted?
+        if (this.children[index].modification.sortKey === undefined) {
+          // No, take the next item from the original array
+          current = this.children[index];
+          childOptions.separatorOverride = undefined;
+        } else {
+          // Yes, take the next item from the sortedSubset
+          current = sortedSubset[sortedSubsetIndex++];
+
+          if (sortedSubsetIndex < sortedSubsetCount) {
+            childOptions.separatorOverride = firstSeparator;
           } else {
+            childOptions.separatorOverride = lastSeparator;
+          }
+        }
+
+        current._writeModifiedText(childOptions);
+      }
+    } else {
+      // This is the normal case that does not need to sort children
+      const childrenLength: number = this.children.length;
+
+      if (!this.modification.omitChildren) {
+        if (options.separatorOverride !== undefined) {
+          // Special case where the separatorOverride is passed down to the "last inner separator" span
+          for (let i: number = 0; i < childrenLength; ++i) {
+            const child: Span = this.children[i];
+
+            if (
+              // Only the last child inherits the separatorOverride, because only it can contain
+              // the "last inner separator" span
+              i < childrenLength - 1 ||
+              // If this.separator is specified, then we will write separatorOverride below, so don't pass it along
+              this.separator
+            ) {
+              const childOptions: IWriteModifiedTextOptions = { ...options };
+              childOptions.separatorOverride = undefined;
+              child._writeModifiedText(childOptions);
+            } else {
+              child._writeModifiedText(options);
+            }
+          }
+        } else {
+          // The normal simple case
+          for (const child of this.children) {
             child._writeModifiedText(options);
           }
         }
+      }
+
+      this._write(this.modification.suffix, options);
+
+      if (options.separatorOverride !== undefined) {
+        if (this.separator || childrenLength === 0) {
+          this._write(options.separatorOverride, options);
+        }
       } else {
-        // The normal simple case
-        for (const child of this.children) {
-          child._writeModifiedText(options);
+        if (!this.modification.omitSeparatorAfter) {
+          this._write(this.separator, options);
         }
       }
     }
 
-    options.output.append(this.modification.suffix);
+    if (this.modification.indentDocComment === IndentDocCommentScope.SpanAndChildren) {
+      this._endIndentDocComment(options);
+    }
+  }
 
-    if (options.separatorOverride !== undefined) {
-      if (this.separator || childCount === 0) {
-        options.output.append(options.separatorOverride);
-      }
-    } else {
-      if (!this.modification.omitSeparatorAfter) {
-        options.output.append(this.separator);
+  private _beginIndentDocComment(options: IWriteModifiedTextOptions): void {
+    if (options.indentDocCommentState !== IndentDocCommentState.Inactive) {
+      throw new InternalError('indentDocComment cannot be nested');
+    }
+    options.indentDocCommentState = IndentDocCommentState.AwaitingOpenDelimiter;
+  }
+
+  private _endIndentDocComment(options: IWriteModifiedTextOptions): void {
+    if (options.indentDocCommentState === IndentDocCommentState.AwaitingCloseDelimiter) {
+      throw new InternalError('missing "*/" delimiter for comment block');
+    }
+    options.indentDocCommentState = IndentDocCommentState.Inactive;
+  }
+
+  /**
+   * Writes one chunk of `text` to the `options.writer`, applying the `indentDocComment` rewriting.
+   */
+  private _write(text: string, options: IWriteModifiedTextOptions): void {
+    let parsedText: string = text;
+
+    if (options.indentDocCommentState === IndentDocCommentState.AwaitingOpenDelimiter) {
+      let index: number = parsedText.indexOf('/*');
+      if (index >= 0) {
+        index += '/*'.length;
+        options.writer.write(parsedText.substring(0, index));
+        parsedText = parsedText.substring(index);
+        options.indentDocCommentState = IndentDocCommentState.AwaitingCloseDelimiter;
+
+        options.writer.increaseIndent(' ');
       }
     }
+
+    if (options.indentDocCommentState === IndentDocCommentState.AwaitingCloseDelimiter) {
+      let index: number = parsedText.indexOf('*/');
+      if (index >= 0) {
+        index += '*/'.length;
+        options.writer.write(parsedText.substring(0, index));
+        parsedText = parsedText.substring(index);
+        options.indentDocCommentState = IndentDocCommentState.Done;
+
+        options.writer.decreaseIndent();
+      }
+    }
+
+    options.writer.write(parsedText);
   }
 
   private _getTrimmed(text: string): string {
@@ -510,9 +651,4 @@ export class Span {
     }
     return this.node.getSourceFile().text.substring(startIndex, endIndex);
   }
-}
-
-interface IWriteModifiedTextOptions {
-  output: StringBuilder;
-  separatorOverride: string | undefined;
 }

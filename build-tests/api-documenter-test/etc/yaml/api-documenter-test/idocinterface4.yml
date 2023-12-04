@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: IDocInterface4
 summary: Type union in an interface.
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: interface
@@ -15,6 +16,7 @@ properties:
     fullName: Context
     summary: Test newline rendering when code blocks are used in tables
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -33,6 +35,7 @@ properties:
     fullName: generic
     summary: make sure html entities are escaped in tables.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -45,6 +48,7 @@ properties:
     fullName: numberOrFunction
     summary: a union type with a function
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -57,6 +61,7 @@ properties:
     fullName: stringOrNumber
     summary: a union type
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

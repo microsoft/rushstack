@@ -1,0 +1,13 @@
+{
+  "name": "e",
+  "version": "1.0.0",
+  "scripts": {
+    "cobuild": "node ../build.js",
+    "build": "node ../build.js",
+    "_phase:build": "node ../build.js"
+  },
+  "dependencies": {
+    "b": "workspace:*",
+    "d": "workspace:*"
+  }
+}

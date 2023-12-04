@@ -131,7 +131,7 @@
           "description": "The remarks for the item. Markdown is permitted",
           "type": "string"
         },
-        "examples": {
+        "example": {
           "description": "The examples for the item. Markdown is permitted",
           "type": "array",
           "items": {

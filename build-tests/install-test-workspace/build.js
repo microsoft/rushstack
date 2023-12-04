@@ -26,7 +26,7 @@ function checkSpawnResult(result, commandName) {
         console.error('-----------------------');
       }
     }
-    throw new Error(`Failed to execute command "${commandName}" command`);
+    throw new Error(`Failed to execute command "${commandName}"`);
   }
 }
 
@@ -106,7 +106,7 @@ const dotPnpmFolderPath = path.resolve(__dirname, 'workspace/node_modules/.pnpm'
 
 console.log('\nCleaning cached tarballs...');
 if (FileSystem.exists(dotPnpmFolderPath)) {
-  for (const filename of FileSystem.readFolder(dotPnpmFolderPath)) {
+  for (const filename of FileSystem.readFolderItemNames(dotPnpmFolderPath)) {
     if (filename.startsWith('local+')) {
       const filePath = path.join(dotPnpmFolderPath, filename);
       console.log('  Deleting ' + filePath);
@@ -139,7 +139,11 @@ const pnpmInstallArgs = [
   '--recursive',
   '--link-workspace-packages=false',
   // PNPM gets confused by the rewriting performed by our .pnpmfile.cjs afterAllResolved hook
-  '--frozen-lockfile=false'
+  '--frozen-lockfile=false',
+
+  // Workaround for this issue:
+  // https://github.com/pnpm/pnpm/issues/6778#issuecomment-1762418094
+  '--config.confirmModulesPurge=false'
 ];
 
 console.log('\nInstalling:');
@@ -148,7 +152,7 @@ console.log('  pnpm ' + pnpmInstallArgs.join(' '));
 checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, pnpmInstallArgs, {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
-    stdio: 'inherit'
+    stdio: ['ignore', 'inherit', 'inherit']
   }),
   'pnpm install'
 );
@@ -187,7 +191,7 @@ console.log('\nBuilding projects...\n');
 checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['run', '--recursive', 'build'], {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
-    stdio: 'inherit'
+    stdio: ['ignore', 'inherit', 'inherit']
   }),
   'pnpm run'
 );

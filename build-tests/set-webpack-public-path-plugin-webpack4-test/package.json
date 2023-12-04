@@ -1,0 +1,24 @@
+{
+  "name": "set-webpack-public-path-plugin-webpack4-test",
+  "description": "Building this project tests the set-webpack-public-path-plugin using Webpack 4",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/set-webpack-public-path-plugin": "workspace:*",
+    "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
+    "@types/webpack-env": "1.18.0",
+    "eslint": "~8.7.0",
+    "html-webpack-plugin": "~4.5.2",
+    "typescript": "~5.0.4",
+    "webpack": "~4.47.0"
+  }
+}

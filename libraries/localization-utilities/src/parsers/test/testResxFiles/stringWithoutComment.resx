@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <data name="stringWithoutAComment" xml:space="preserve">
+    <value>String without a comment</value>
+  </data>
+</root>

@@ -32,7 +32,7 @@ if (_.isEqual(deps, existingDeps)) {
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/libraries/package-deps-hash/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/libraries/package-deps-hash/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/package-deps-hash/)
 

@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Sass Configuration",
+  "description": "This schema describes the \"config/sass.json\" config file used to configure \"@rushstack/heft-jest-plugin\", and also the \"options\" field that can be specified in heft.json when loading the plugin.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "srcFolder": {
+      "type": "string",
+      "description": "Source code root directory."
+    },
+
+    "generatedTsFolder": {
+      "type": "string",
+      "description": "Output directory for generated Sass typings."
+    },
+
+    "secondaryGeneratedTsFolders": {
+      "type": "array",
+      "description": "Optional additional folders to which Sass typings should be output.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "exportAsDefault": {
+      "type": "boolean",
+      "description": "Determines whether export values are wrapped in a default property, or not."
+    },
+
+    "cssOutputFolders": {
+      "type": "array",
+      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation, unless \"preserveSCSSExtension\" is set.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "preserveSCSSExtension": {
+      "type": "boolean",
+      "description": "If set, when emitting compiled CSS from a file with a \".scss\" extension, the emitted CSS will have the extension \".scss\" instead of \".scss.css\"."
+    },
+
+    "fileExtensions": {
+      "type": "array",
+      "description": "Files with these extensions will be treated as SCSS modules and pass through the Sass transpiler for typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+      }
+    },
+
+    "nonModuleFileExtensions": {
+      "type": "array",
+      "description": "Files with these extensions will be treated as non-module SCSS and pass through the Sass transpiler for typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+      }
+    },
+
+    "importIncludePaths": {
+      "type": "array",
+      "description": "A list of paths used when resolving Sass imports.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "excludeFiles": {
+      "type": "array",
+      "description": "A list of file paths relative to the \"src\" folder that should be excluded from typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    }
+  }
+}

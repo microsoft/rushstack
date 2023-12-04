@@ -1,0 +1,24 @@
+{
+  "extends": "@rushstack/heft-web-rig/profiles/library/config/jest.config.json",
+
+  // Enable code coverage for Jest
+  "collectCoverage": true,
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["cobertura", "html"],
+
+  // Use v8 coverage provider to avoid Babel
+  "coverageProvider": "v8",
+
+  // Enable junit reporting for Jest
+  "reporters": [
+    "default",
+    [
+      "jest-junit",
+      {
+        "outputDirectory": "./coverage",
+        "classNameTemplate": "{classname} > ",
+        "titleTemplate": "{title} ({filepath})"
+      }
+    ]
+  ]
+}

@@ -6,7 +6,7 @@
 
 Description of optionalField
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 optionalField?: boolean;

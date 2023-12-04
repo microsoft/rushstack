@@ -7,7 +7,7 @@ import * as os from 'os';
  * The allowed types of encodings, as supported by Node.js
  * @public
  */
-export const enum Encoding {
+export enum Encoding {
   Utf8 = 'utf8'
 }
 
@@ -15,7 +15,7 @@ export const enum Encoding {
  * Enumeration controlling conversion of newline characters.
  * @public
  */
-export const enum NewlineKind {
+export enum NewlineKind {
   /**
    * Windows-style newlines
    */
@@ -93,8 +93,9 @@ export class Text {
         return '\n';
       case NewlineKind.OsDefault:
         return os.EOL;
+      default:
+        throw new Error('Unsupported newline kind');
     }
-    throw new Error('Unsupported newline kind');
   }
 
   /**
@@ -169,5 +170,12 @@ export class Text {
       return s; // yes, no change
     }
     return s + newlineKind; // no, add it
+  }
+
+  /**
+   * Escapes a string so that it can be treated as a literal string when used in a regular expression.
+   */
+  public static escapeRegExp(literal: string): string {
+    return literal.replace(/[^A-Za-z0-9_]/g, '\\$&');
   }
 }

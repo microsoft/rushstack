@@ -2,11 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import { cloneDeep, escapeRegExp } from 'lodash';
-import * as Webpack from 'webpack';
-import * as Tapable from 'tapable';
+import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
+import { Text, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
 
-import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
+import type * as Webpack from 'webpack';
+import type * as Tapable from 'tapable';
+// Workaround for https://github.com/pnpm/pnpm/issues/4301
+import type * as Webpack5 from '@rushstack/heft-webpack5-plugin/node_modules/webpack';
+
+import { type IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
 /**
  * The base options for setting the webpack public path at runtime.
@@ -96,13 +100,12 @@ interface IAsset {
   source(): string;
 }
 
-interface IExtendedMainTemplate {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+declare const __dummyWebpack4MainTemplate: Webpack.compilation.MainTemplate;
+interface IWebpack4ExtendedMainTemplate extends Webpack.compilation.MainTemplate {
   hooks: {
-    jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
-    requireExtensions: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
     startup: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
-  };
-  requireFn: string;
+  } & typeof __dummyWebpack4MainTemplate.hooks;
 }
 
 const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
@@ -111,7 +114,6 @@ const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
 
 interface IExtendedChunk extends Webpack.compilation.Chunk {
   [SHOULD_REPLACE_ASSET_NAME_TOKEN]: boolean;
-  forEachModule(callback: (module: Webpack.compilation.Module) => void): void;
 }
 
 interface IStartupCodeOptions {
@@ -149,66 +151,99 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   }
 
   public apply(compiler: Webpack.Compiler): void {
-    const isWebpack4: boolean = !!compiler.hooks;
-
-    if (!isWebpack4) {
+    // Casting here because VersionDetection refers to webpack 5 typings
+    if (VersionDetection.isWebpack3OrEarlier(compiler as unknown as Webpack5.Compiler)) {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4`);
     }
 
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-      const mainTemplate: IExtendedMainTemplate =
-        compilation.mainTemplate as unknown as IExtendedMainTemplate;
-      mainTemplate.hooks.startup.tap(
-        PLUGIN_NAME,
-        (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
-          const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
-          const assetOrChunkFound: boolean =
-            !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
-          if (assetOrChunkFound) {
-            return this._getStartupCode({
-              source,
-              chunk: extendedChunk,
-              hash,
-              requireFn: mainTemplate.requireFn
-            });
-          } else {
-            return source;
-          }
-        }
-      );
-    });
+    // Casting here because VersionDetection refers to webpack 5 typings
+    const isWebpack4: boolean = VersionDetection.isWebpack4(compiler as unknown as Webpack5.Compiler);
 
-    compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-      for (const chunkGroup of compilation.chunkGroups) {
-        for (const chunk of chunkGroup.chunks) {
-          if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
-            for (const assetFilename of chunk.files) {
-              let escapedAssetFilename: string;
-              if (assetFilename.match(/\.map$/)) {
-                escapedAssetFilename = assetFilename.substr(0, assetFilename.length - 4 /* '.map'.length */); // Trim the ".map" extension
-                escapedAssetFilename = escapeRegExp(escapedAssetFilename);
-                escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
-                escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
+    compiler.hooks.compilation.tap(
+      PLUGIN_NAME,
+      (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
+        if (isWebpack4) {
+          const webpack4Compilation: Webpack.compilation.Compilation =
+            compilation as Webpack.compilation.Compilation;
+          const mainTemplate: IWebpack4ExtendedMainTemplate =
+            webpack4Compilation.mainTemplate as IWebpack4ExtendedMainTemplate;
+          mainTemplate.hooks.startup.tap(
+            PLUGIN_NAME,
+            (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
+              const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
+              const assetOrChunkFound: boolean =
+                !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
+              if (assetOrChunkFound) {
+                return this._getStartupCode({
+                  source,
+                  chunk: extendedChunk,
+                  hash,
+                  requireFn: mainTemplate.requireFn
+                });
               } else {
-                escapedAssetFilename = escapeRegExp(assetFilename);
+                return source;
               }
+            }
+          );
+        } else {
+          // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
+          const Webpack5Error: typeof Webpack5.WebpackError = (compiler as unknown as Webpack5.Compiler)
+            .webpack.WebpackError;
+          const thisPackageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+          compilation.errors.push(
+            new Webpack5Error(
+              'Webpack 5 supports its own automatic public path detection, ' +
+                `so ${thisPackageJson.name} is unnecessary. Remove the ${SetPublicPathPlugin.name} plugin ` +
+                'from the Webpack configuration.'
+            )
+          );
+        }
+      }
+    );
 
-              const asset: IAsset = compilation.assets[assetFilename];
-              const originalAssetSource: string = asset.source();
-              const originalAssetSize: number = asset.size();
+    // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
+    if (isWebpack4) {
+      compiler.hooks.emit.tap(
+        PLUGIN_NAME,
+        (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
+          for (const chunkGroup of compilation.chunkGroups) {
+            for (const chunk of chunkGroup.chunks) {
+              if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
+                for (const assetFilename of chunk.files) {
+                  let escapedAssetFilename: string;
+                  if (assetFilename.match(/\.map$/)) {
+                    // Trim the ".map" extension
+                    escapedAssetFilename = assetFilename.substr(
+                      0,
+                      assetFilename.length - 4 /* '.map'.length */
+                    );
+                    escapedAssetFilename = Text.escapeRegExp(escapedAssetFilename);
+                    // source in sourcemaps is JSON-encoded
+                    escapedAssetFilename = JSON.stringify(escapedAssetFilename);
+                    // Trim the quotes from the JSON encoding
+                    escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1);
+                  } else {
+                    escapedAssetFilename = Text.escapeRegExp(assetFilename);
+                  }
 
-              const newAssetSource: string = originalAssetSource.replace(
-                ASSET_NAME_TOKEN_REGEX,
-                escapedAssetFilename
-              );
-              const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
-              asset.source = () => newAssetSource;
-              asset.size = () => originalAssetSize + sizeDifference;
+                  const asset: IAsset = compilation.assets[assetFilename];
+                  const originalAssetSource: string = asset.source();
+                  const originalAssetSize: number = asset.size();
+
+                  const newAssetSource: string = originalAssetSource.replace(
+                    ASSET_NAME_TOKEN_REGEX,
+                    escapedAssetFilename
+                  );
+                  const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
+                  asset.source = () => newAssetSource;
+                  asset.size = () => originalAssetSize + sizeDifference;
+                }
+              }
             }
           }
         }
-      }
-    });
+      );
+    }
   }
 
   private _detectAssetsOrChunks(chunk: IExtendedChunk): boolean {
@@ -228,7 +263,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   }
 
   private _getStartupCode(options: IStartupCodeOptions): string {
-    const moduleOptions: IInternalOptions = cloneDeep(this.options);
+    const moduleOptions: IInternalOptions = { ...this.options };
 
     // If this module has ownership over any chunks or assets, inject the public path code
     moduleOptions.webpackPublicPathVariable = `${options.requireFn}.p`;
@@ -239,7 +274,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         moduleOptions.regexName = this.options.scriptName.name;
         if (this.options.scriptName.isTokenized) {
           moduleOptions.regexName = moduleOptions.regexName
-            .replace(/\[name\]/g, escapeRegExp(options.chunk.name))
+            .replace(/\[name\]/g, Text.escapeRegExp(options.chunk.name))
             .replace(/\[hash\]/g, options.chunk.renderedHash || '');
         }
       } else if (this.options.scriptName.useAssetName) {
@@ -252,6 +287,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     return [
       '// Set the webpack public path',
       '(function () {',
+      // eslint-disable-next-line no-console
       getSetPublicPathCode(moduleOptions, console.error),
       '})();',
       '',

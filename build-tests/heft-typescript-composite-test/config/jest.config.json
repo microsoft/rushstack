@@ -1,0 +1,23 @@
+{
+  "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
+
+  // Enable code coverage for Jest
+  "collectCoverage": true,
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["cobertura", "html"],
+
+  // Use v8 coverage provider to avoid Babel
+  "coverageProvider": "v8",
+
+  "testMatch": ["<rootDir>/lib/**/*.test.cjs"],
+
+  "collectCoverageFrom": [
+    "lib/**/*.cjs",
+    "!lib/**/*.d.ts",
+    "!lib/**/*.test.cjs",
+    "!lib/**/test/**",
+    "!lib/**/__tests__/**",
+    "!lib/**/__fixtures__/**",
+    "!lib/**/__mocks__/**"
+  ]
+}

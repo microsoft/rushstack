@@ -7,16 +7,19 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start --clean",
-    "serve": "node lib/start.js"
+    "start": "heft build-watch --serve",
+    "serve": "node lib/start.js",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
-    "eslint": "~7.12.1",
-    "typescript": "~3.9.7"
+    "@types/node": "18.17.15",
+    "eslint": "~8.7.0",
+    "typescript": "~5.0.4"
   },
   "dependencies": {
     "fastify": "~3.16.1"

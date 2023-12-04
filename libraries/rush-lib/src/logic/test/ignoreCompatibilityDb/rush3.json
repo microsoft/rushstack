@@ -1,0 +1,8 @@
+{
+  "pnpmVersion": "7.9.0",
+  "rushVersion": "0.0.0",
+  "projectFolderMinDepth": 1,
+  "ensureConsistentVersions": true,
+
+  "projects": []
+}

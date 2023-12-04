@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Example Test Correctly handles snapshots 1`] = `
+Object {
+  "a": 1,
+  "b": 2,
+  "c": 3,
+}
+`;

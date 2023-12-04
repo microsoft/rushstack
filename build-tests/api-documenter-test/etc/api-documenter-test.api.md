@@ -5,11 +5,25 @@
 ```ts
 
 // @public
+export abstract class AbstractClass {
+    abstract method(): void;
+    protected abstract property: number;
+}
+
+// @public
+export interface Constraint {
+}
+
+// @public
 export const constVariable: number;
 
 // @public (undocumented)
 export class DecoratorExample {
     creationDate: Date;
+}
+
+// @public
+export interface DefaultType {
 }
 
 // @public
@@ -26,11 +40,15 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     deprecatedExample(): void;
     exampleFunction(a: string, b: string): string;
     exampleFunction(x: number): number;
+    genericWithConstraintAndDefault<T extends Constraint = DefaultType>(x: T): void;
     interestingEdgeCases(): void;
     // @eventProperty
     malformedEvent: SystemEvent;
     // @eventProperty
     readonly modifiedEvent: SystemEvent;
+    protected static readonly multipleModifiersProperty: boolean;
+    optionalParamFunction(x?: number): void;
+    protected protectedProperty: string;
     // (undocumented)
     get readonlyProperty(): string;
     regularProperty: SystemEvent;
@@ -39,6 +57,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     // (undocumented)
     get writeableProperty(): string;
     set writeableProperty(value: string);
+    set writeonlyProperty(value: string);
 }
 
 // @public
@@ -175,6 +194,5 @@ export type TypeAlias = number;
 
 // @public (undocumented)
 export function yamlReferenceUniquenessTest(): IDocInterface1;
-
 
 ```

@@ -16,7 +16,7 @@ function expectEqualPaths(path1: string, path2: string): void {
   }
 }
 
-describe('RigConfig tests', () => {
+describe(RigConfig.name, () => {
   describe('loads a rig.json file', () => {
     function validate(rigConfig: RigConfig): void {
       expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
@@ -28,15 +28,29 @@ describe('RigConfig tests', () => {
     }
 
     it('synchronously', () => {
-      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: testProjectFolder });
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+        projectFolderPath: testProjectFolder,
+        bypassCache: true
+      });
       validate(rigConfig);
+
+      // Should cache result
+      const rigConfig2: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: testProjectFolder });
+      expect(rigConfig2).toBe(rigConfig);
     });
 
     it('asynchronously', async () => {
       const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-        projectFolderPath: testProjectFolder
+        projectFolderPath: testProjectFolder,
+        bypassCache: true
       });
       validate(rigConfig);
+
+      // Should cache result
+      const rigConfig2: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: testProjectFolder
+      });
+      expect(rigConfig2).toBe(rigConfig);
     });
   });
 
@@ -51,19 +65,33 @@ describe('RigConfig tests', () => {
     }
 
     it('synchronously', () => {
-      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: __dirname });
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+        projectFolderPath: __dirname,
+        bypassCache: true
+      });
       validate(rigConfig);
+
+      // Should cache result
+      const rigConfig2: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: __dirname });
+      expect(rigConfig2).toBe(rigConfig);
     });
 
     it('asynchronously', async () => {
       const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-        projectFolderPath: __dirname
+        projectFolderPath: __dirname,
+        bypassCache: true
       });
       validate(rigConfig);
+
+      // Should cache result
+      const rigConfig2: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: __dirname
+      });
+      expect(rigConfig2).toBe(rigConfig);
     });
   });
 
-  describe(`resolves the profile path`, () => {
+  describe('resolves the profile path', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
         projectFolderPath: testProjectFolder
@@ -91,7 +119,7 @@ describe('RigConfig tests', () => {
     });
   });
 
-  describe(`reports an undefined profile`, () => {
+  describe('reports an undefined profile', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
         projectFolderPath: testProjectFolder,
@@ -123,10 +151,11 @@ describe('RigConfig tests', () => {
     });
   });
 
-  describe(`resolves a config file path`, () => {
+  describe('resolves a config file path', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
-        projectFolderPath: testProjectFolder
+        projectFolderPath: testProjectFolder,
+        bypassCache: true
       });
 
       expect(rigConfig.rigFound).toBe(true);
@@ -142,7 +171,8 @@ describe('RigConfig tests', () => {
 
     it('asynchronously', async () => {
       const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-        projectFolderPath: testProjectFolder
+        projectFolderPath: testProjectFolder,
+        bypassCache: true
       });
 
       expect(rigConfig.rigFound).toBe(true);

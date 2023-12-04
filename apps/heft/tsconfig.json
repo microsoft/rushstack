@@ -2,8 +2,8 @@
   "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "typeRoots": ["./custom-typings", "./node_modules/@types/"],
-    "types": ["heft-jest", "node"]
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "./custom-typings/**/*.ts"]
+    "types": ["heft-jest", "node"],
+    "lib": ["ES2020"],
+    "resolveJsonModule": true
+  }
 }

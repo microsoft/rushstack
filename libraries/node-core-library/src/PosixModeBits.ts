@@ -19,7 +19,7 @@
  *
  * @public
  */
-export const enum PosixModeBits {
+export enum PosixModeBits {
   // The bits
 
   /**

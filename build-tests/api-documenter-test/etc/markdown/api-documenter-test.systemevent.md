@@ -7,7 +7,7 @@
 A class used to exposed events.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SystemEvent 

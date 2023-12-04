@@ -1,0 +1,23 @@
+{
+  "name": "hashed-folder-copy-plugin-webpack5-test",
+  "description": "Building this project exercises @rushstack/hashed-folder-copy-plugin with Webpack 5. NOTE - THIS TEST IS CURRENTLY EXPECTED TO BE BROKEN",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "serve": "heft build-watch --serve",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "devDependencies": {
+    "@rushstack/hashed-folder-copy-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@types/webpack-env": "1.18.0",
+    "html-webpack-plugin": "~5.5.0",
+    "typescript": "~5.0.4",
+    "webpack-bundle-analyzer": "~4.5.0",
+    "webpack": "~5.82.1"
+  }
+}

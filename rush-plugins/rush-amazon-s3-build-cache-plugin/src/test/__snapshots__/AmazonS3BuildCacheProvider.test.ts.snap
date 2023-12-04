@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AmazonS3BuildCacheProvider Has an expected cached credential name (write allowed) 1`] = `
+Array [
+  "aws-s3|region-name|localhost:9000|cacheWriteAllowed",
+  Object {
+    "credential": "credential",
+  },
+]
+`;
+
+exports[`AmazonS3BuildCacheProvider Has an expected cached credential name (write not allowed) 1`] = `
+Array [
+  "aws-s3|region-name|localhost:9000",
+  Object {
+    "credential": "credential",
+  },
+]
+`;

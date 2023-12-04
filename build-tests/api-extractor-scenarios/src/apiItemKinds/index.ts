@@ -3,6 +3,8 @@
 
 export * from './classes';
 export * from './enums';
+export * from './functions';
 export * from './interfaces';
-export * from './typeLiterals';
+export * from './namespaces';
+export * from './typeAliases';
 export * from './variables';

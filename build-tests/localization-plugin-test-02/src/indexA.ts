@@ -5,6 +5,14 @@ import * as strings5 from './strings5.resx';
 console.log(string1);
 
 console.log(strings3.string2);
+/*! Preserved comment */
+//@preserve Another comment
+// Blah @lic Foo
+// Foo @cc_on bar
+/**
+ * Stuff
+ * @lic Blah
+ */
 
 import(/* webpackChunkName: 'chunk-with-strings' */ './chunks/chunkWithStrings').then(
   ({ ChunkWithStringsClass }) => {
@@ -19,6 +27,11 @@ import(/* webpackChunkName: 'chunk-without-strings' */ './chunks/chunkWithoutStr
     chunk.doStuff();
   }
 );
+
+// @ts-expect-error
+import('non-existent').then(() => {
+  // Do nothing.
+});
 
 console.log(strings5.string1);
 console.log(strings5.stringWithQuotes);

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CommandLineConfiguration Detects a cycle among phases 1`] = `"In command-line.json, there exists a cycle within the set of _phase:b dependencies: _phase:b, _phase:c, _phase:a"`;
+
+exports[`CommandLineConfiguration Detects a missing phase 1`] = `"In command-line.json, in the \\"phases\\" property of the \\"example\\" command, the phase \\"_phase:a\\" does not exist."`;
+
+exports[`CommandLineConfiguration Detects a missing phase dependency 1`] = `"In command-line.json, in the phase \\"_phase:a\\", the upstream dependency phase \\"_phase:b\\" does not exist."`;
+
+exports[`CommandLineConfiguration Detects a missing phase dependency 2`] = `"In command-line.json, in the phase \\"_phase:a\\", the self dependency phase \\"_phase:b\\" does not exist."`;
+
+exports[`CommandLineConfiguration Forbids a misnamed phase 1`] = `"In command-line.json, the phase \\"_faze:A\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;
+
+exports[`CommandLineConfiguration Forbids a misnamed phase 2`] = `"In command-line.json, the phase \\"_phase:\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;
+
+exports[`CommandLineConfiguration Forbids a misnamed phase 3`] = `"In command-line.json, the phase \\"_phase:0\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;
+
+exports[`CommandLineConfiguration Forbids a misnamed phase 4`] = `"In command-line.json, the phase \\"_phase:A\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;
+
+exports[`CommandLineConfiguration Forbids a misnamed phase 5`] = `"In command-line.json, the phase \\"_phase:A-\\"'s name is not a valid phase name. Phase names must begin with the required prefix \\"_phase:\\" followed by a name containing lowercase letters, numbers, or hyphens. The name must start with a letter and must not end with a hyphen."`;

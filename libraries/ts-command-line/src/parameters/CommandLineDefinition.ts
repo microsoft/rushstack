@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { SCOPING_PARAMETER_GROUP } from '../Constants';
+
 /**
  * For use with CommandLineParser, this interface represents a generic command-line parameter
  *
@@ -16,6 +18,19 @@ export interface IBaseCommandLineDefinition {
    * An optional short name for the flag including the dash, e.g. "-d"
    */
   parameterShortName?: string;
+
+  /**
+   * An optional parameter group name, shown when invoking the tool with "--help"
+   */
+  parameterGroup?: string | typeof SCOPING_PARAMETER_GROUP;
+
+  /**
+   * An optional parameter scope name, used to add a scope-prefixed parameter synonym,
+   * e.g. "--scope:do-something". Scopes provide additional flexibility for parameters
+   * in conflict resolution since when a scope is specified, parameters that have
+   * conflicting long names will be defined using only the scope-prefixed name.
+   */
+  parameterScope?: string;
 
   /**
    * Documentation for the parameter that will be shown when invoking the tool with "--help"

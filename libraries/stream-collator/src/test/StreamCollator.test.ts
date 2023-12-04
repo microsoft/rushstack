@@ -4,12 +4,12 @@
 import { TerminalChunkKind, MockWritable } from '@rushstack/terminal';
 
 import { StreamCollator } from '../StreamCollator';
-import { CollatedWriter } from '../CollatedWriter';
+import type { CollatedWriter } from '../CollatedWriter';
 
 let collator: StreamCollator;
 const mockWritable: MockWritable = new MockWritable();
 
-describe('StreamCollator tests', () => {
+describe(StreamCollator.name, () => {
   // Reset task information before each test
   beforeEach(() => {
     mockWritable.reset();

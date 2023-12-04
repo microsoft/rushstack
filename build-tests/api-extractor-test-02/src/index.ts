@@ -13,7 +13,7 @@
  */
 export { SubclassWithImport } from './SubclassWithImport';
 
-export * from './TypeFromImportedModule';
+export type * from './TypeFromImportedModule';
 
 export { importDeduping1 } from './ImportDeduping1';
 export { importDeduping2 } from './ImportDeduping2';

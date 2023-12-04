@@ -6,7 +6,7 @@
 
 An exported function with hyperlinked parameters and return value.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;
@@ -19,7 +19,7 @@ export declare function exampleFunction(x: ExampleTypeAlias, y: number): IDocInt
 |  x | [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | an API item that should get hyperlinked |
 |  y | number | a system type that should NOT get hyperlinked |
 
-<b>Returns:</b>
+**Returns:**
 
 [IDocInterface1](./api-documenter-test.idocinterface1.md)
 

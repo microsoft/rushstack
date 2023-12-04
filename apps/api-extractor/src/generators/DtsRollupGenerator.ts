@@ -4,25 +4,25 @@
 /* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, type NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { Span, SpanModification } from '../analyzer/Span';
+import { IndentDocCommentScope, Span, type SpanModification } from '../analyzer/Span';
 import { AstImport } from '../analyzer/AstImport';
-import { CollectorEntity } from '../collector/CollectorEntity';
+import type { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
-import { StringWriter } from './StringWriter';
+import type { SymbolMetadata } from '../collector/SymbolMetadata';
+import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { AstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
-import { AstEntity } from '../analyzer/AstEntity';
+import type { AstEntity } from '../analyzer/AstEntity';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -33,6 +33,13 @@ export enum DtsRollupKind {
    * This output file will contain all definitions that are reachable from the entry point.
    */
   InternalRelease,
+
+  /**
+   * Generate a *.d.ts file for a preview release.
+   * This output file will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@internal.
+   */
+  AlphaRelease,
 
   /**
    * Generate a *.d.ts file for a preview release.
@@ -61,11 +68,12 @@ export class DtsRollupGenerator {
     dtsKind: DtsRollupKind,
     newlineKind: NewlineKind
   ): void {
-    const stringWriter: StringWriter = new StringWriter();
+    const writer: IndentedWriter = new IndentedWriter();
+    writer.trimLeadingSpaces = true;
 
-    DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, writer, dtsKind);
 
-    FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
+    FileSystem.writeFile(dtsFilename, writer.toString(), {
       convertLineEndings: newlineKind,
       ensureFolderExists: true
     });
@@ -73,30 +81,26 @@ export class DtsRollupGenerator {
 
   private static _generateTypingsFileContent(
     collector: Collector,
-    stringWriter: StringWriter,
+    writer: IndentedWriter,
     dtsKind: DtsRollupKind
   ): void {
     // Emit the @packageDocumentation comment at the top of the file
     if (collector.workingPackage.tsdocParserContext) {
-      stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
-      stringWriter.writeLine();
+      writer.trimLeadingSpaces = false;
+      writer.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
+      writer.trimLeadingSpaces = true;
+      writer.ensureSkippedLine();
     }
 
     // Emit the triple slash directives
-    let directivesEmitted: boolean = false;
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
-      directivesEmitted = true;
+      writer.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
-
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
-      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
-      directivesEmitted = true;
+      writer.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
     }
-    if (directivesEmitted) {
-      stringWriter.writeLine();
-    }
+    writer.ensureSkippedLine();
 
     // Emit the imports
     for (const entity of collector.entities) {
@@ -111,10 +115,11 @@ export class DtsRollupGenerator {
           : ReleaseTag.None;
 
         if (this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
-          DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
+          DtsEmitHelpers.emitImport(writer, entity, astImport);
         }
       }
     }
+    writer.ensureSkippedLine();
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
@@ -126,8 +131,8 @@ export class DtsRollupGenerator {
 
       if (!this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
         if (!collector.extractorConfig.omitTrimmingComments) {
-          stringWriter.writeLine();
-          stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+          writer.ensureSkippedLine();
+          writer.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
         }
         continue;
       }
@@ -139,17 +144,16 @@ export class DtsRollupGenerator {
 
           if (!this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)) {
             if (!collector.extractorConfig.omitTrimmingComments) {
-              stringWriter.writeLine();
-              stringWriter.writeLine(
-                `/* Excluded declaration from this release type: ${entity.nameForEmit} */`
-              );
+              writer.ensureSkippedLine();
+              writer.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
             }
             continue;
           } else {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-            stringWriter.writeLine();
-            stringWriter.writeLine(span.getModifiedText());
+            writer.ensureSkippedLine();
+            span.writeModifiedText(writer);
+            writer.ensureNewLine();
           }
         }
       }
@@ -182,14 +186,16 @@ export class DtsRollupGenerator {
         // Note that we do not try to relocate f1()/f2() to be inside the namespace because other type
         // signatures may reference them directly (without using the namespace qualifier).
 
-        stringWriter.writeLine();
+        writer.ensureSkippedLine();
         if (entity.shouldInlineExport) {
-          stringWriter.write('export ');
+          writer.write('export ');
         }
-        stringWriter.writeLine(`declare namespace ${entity.nameForEmit} {`);
+        writer.writeLine(`declare namespace ${entity.nameForEmit} {`);
 
         // all local exports of local imported module are just references to top-level declarations
-        stringWriter.writeLine('  export {');
+        writer.increaseIndent();
+        writer.writeLine('export {');
+        writer.increaseIndent();
 
         const exportClauses: string[] = [];
         for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
@@ -218,25 +224,29 @@ export class DtsRollupGenerator {
             exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
           }
         }
-        stringWriter.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
+        writer.writeLine(exportClauses.join(',\n'));
 
-        stringWriter.writeLine('  }'); // end of "export { ... }"
-        stringWriter.writeLine('}'); // end of "declare namespace { ... }"
+        writer.decreaseIndent();
+        writer.writeLine('}'); // end of "export { ... }"
+        writer.decreaseIndent();
+        writer.writeLine('}'); // end of "declare namespace { ... }"
       }
 
       if (!entity.shouldInlineExport) {
         for (const exportName of entity.exportNames) {
-          DtsEmitHelpers.emitNamedExport(stringWriter, exportName, entity);
+          DtsEmitHelpers.emitNamedExport(writer, exportName, entity);
         }
       }
+
+      writer.ensureSkippedLine();
     }
 
-    DtsEmitHelpers.emitStarExports(stringWriter, collector);
+    DtsEmitHelpers.emitStarExports(writer, collector);
 
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.
-    stringWriter.writeLine();
-    stringWriter.writeLine('export { }');
+    writer.ensureSkippedLine();
+    writer.writeLine('export { }');
   }
 
   /**
@@ -339,30 +349,43 @@ export class DtsRollupGenerator {
             if (!/\r?\n\s*$/.test(originalComment)) {
               originalComment += '\n';
             }
+            span.modification.indentDocComment = IndentDocCommentScope.PrefixOnly;
             span.modification.prefix = originalComment + span.modification.prefix;
           }
         }
         break;
 
       case ts.SyntaxKind.Identifier:
-        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
-          span.node as ts.Identifier
-        );
+        {
+          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(
+            span.node as ts.Identifier
+          );
 
-        if (referencedEntity) {
-          if (!referencedEntity.nameForEmit) {
-            // This should never happen
-            throw new InternalError('referencedEntry.nameForEmit is undefined');
+          if (referencedEntity) {
+            if (!referencedEntity.nameForEmit) {
+              // This should never happen
+              throw new InternalError('referencedEntry.nameForEmit is undefined');
+            }
+
+            span.modification.prefix = referencedEntity.nameForEmit;
+            // For debugging:
+            // span.modification.prefix += '/*R=FIX*/';
+          } else {
+            // For debugging:
+            // span.modification.prefix += '/*R=KEEP*/';
           }
-
-          span.modification.prefix = referencedEntity.nameForEmit;
-          // For debugging:
-          // span.modification.prefix += '/*R=FIX*/';
-        } else {
-          // For debugging:
-          // span.modification.prefix += '/*R=KEEP*/';
         }
+        break;
 
+      case ts.SyntaxKind.ImportType:
+        DtsEmitHelpers.modifyImportTypeSpan(
+          collector,
+          span,
+          astDeclaration,
+          (childSpan, childAstDeclaration) => {
+            DtsRollupGenerator._modifySpan(collector, childSpan, entity, childAstDeclaration, dtsKind);
+          }
+        );
         break;
     }
 
@@ -438,15 +461,25 @@ export class DtsRollupGenerator {
     switch (dtsKind) {
       case DtsRollupKind.InternalRelease:
         return true;
-      case DtsRollupKind.BetaRelease:
-        // NOTE: If the release tag is "None", then we don't have enough information to trim it
+      case DtsRollupKind.AlphaRelease:
         return (
-          releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None
+          releaseTag === ReleaseTag.Alpha ||
+          releaseTag === ReleaseTag.Beta ||
+          releaseTag === ReleaseTag.Public ||
+          // NOTE: If the release tag is "None", then we don't have enough information to trim it
+          releaseTag === ReleaseTag.None
+        );
+      case DtsRollupKind.BetaRelease:
+        return (
+          releaseTag === ReleaseTag.Beta ||
+          releaseTag === ReleaseTag.Public ||
+          // NOTE: If the release tag is "None", then we don't have enough information to trim it
+          releaseTag === ReleaseTag.None
         );
       case DtsRollupKind.PublicRelease:
         return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+      default:
+        throw new Error(`${DtsRollupKind[dtsKind]} is not implemented`);
     }
-
-    throw new Error(`${DtsRollupKind[dtsKind]} is not implemented`);
   }
 }

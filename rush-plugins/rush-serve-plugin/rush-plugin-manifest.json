@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "rush-serve-plugin",
+      "description": "Rush plugin for serving built files from localhost",
+      "entryPoint": "lib/index.js",
+      "optionsSchema": "lib/schemas/rush-serve-plugin-options.schema.json"
+    }
+  ]
+}

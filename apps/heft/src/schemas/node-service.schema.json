@@ -27,11 +27,6 @@
       "type": "boolean"
     },
 
-    "waitBeforeRestartMs": {
-      "description": "Customizes the number of milliseconds to wait before restarting the child process, as measured from when the previous process exited.  If this interval is too small, then the new process may start while the developer is still saving changes, or while other monitoring processes are still holding OS locks.",
-      "type": "number"
-    },
-
     "waitForTerminateMs": {
       "description": "Customizes the number of milliseconds to wait for the child process to be terminated (SIGTERM) before forcibly killing it.",
       "type": "number"

@@ -3,7 +3,7 @@
 const path = require('path');
 const Autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const sass = require('node-sass');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 /**
  * If the "--production" command-line parameter is specified when invoking Heft, then the
@@ -14,12 +14,12 @@ function createWebpackConfig({ production }) {
     // Documentation: https://webpack.js.org/configuration/mode/
     mode: production ? 'production' : 'development',
     resolve: {
-      extensions: ['.js', '.jsx', '.json']
+      extensions: ['.js', '.jsx', '.json', '.css']
     },
     module: {
       rules: [
         {
-          test: /\.(scss|sass|css)$/,
+          test: /\.s?css$/,
           exclude: /node_modules/,
           use: [
             // Creates `style` nodes from JS strings
@@ -38,16 +38,6 @@ function createWebpackConfig({ production }) {
               options: {
                 postcssOptions: {
                   plugins: [new Autoprefixer()]
-                }
-              }
-            },
-            // Compiles Sass to CSS
-            {
-              loader: 'sass-loader',
-              options: {
-                implementation: sass,
-                sassOptions: {
-                  includePaths: [path.resolve(__dirname, 'node_modules')]
                 }
               }
             }
@@ -77,7 +67,15 @@ function createWebpackConfig({ production }) {
       new HtmlWebpackPlugin({
         template: 'assets/index.html'
       })
-    ]
+    ],
+    optimization: {
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new WorkerPoolMinifier(),
+          useSourceMap: true
+        })
+      ]
+    }
   };
 
   return webpackConfig;

@@ -1,0 +1,9 @@
+{
+  "name": "heft-serverless-stack-tutorial",
+  "region": "us-east-1",
+  "main": "lib/stacks/index.js",
+
+  "//": "Disable lint and typeCheck because they are handled by Heft:",
+  "lint": false,
+  "typeCheck": false
+}

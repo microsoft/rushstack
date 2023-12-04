@@ -13,15 +13,19 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strict": true,
+    "useUnknownInCatchVariables": false,
     "esModuleInterop": true,
     "noEmitOnError": false,
     "allowUnreachableCode": false,
 
-    "types": [],
+    "types": ["heft-jest"],
+    "typeRoots": ["../../../../../node_modules/@types", "../../node_modules/@types"],
 
     "module": "commonjs",
     "target": "es2017",
-    "lib": ["es2017"]
+    "lib": ["es2017"],
+
+    "incremental": true
   },
   "include": ["../../../../../src/**/*.ts", "../../../../../src/**/*.tsx"]
 }

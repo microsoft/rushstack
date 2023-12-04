@@ -6,10 +6,23 @@ import { Import } from '../Import';
 import { PackageJsonLookup } from '../PackageJsonLookup';
 import { Path } from '../Path';
 
-describe('Import', () => {
+describe(Import.name, () => {
   const packageRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
 
-  describe('resolveModule', () => {
+  function expectToThrowNormalizedErrorMatchingSnapshot(fn: () => void): void {
+    try {
+      fn();
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      const normalizedErrorMessage: string = error.message
+        .replace(packageRoot, '<packageRoot>')
+        .replace(__dirname, '<dirname>')
+        .replace(/\\/g, '/');
+      expect(normalizedErrorMessage).toMatchSnapshot();
+    }
+  }
+
+  describe(Import.resolveModule.name, () => {
     it('returns an absolute path as-is', () => {
       const absolutePaths: string[] = ['/var/test/path'];
 
@@ -54,6 +67,17 @@ describe('Import', () => {
       ).toMatch(/node_modules\/@rushstack\/heft\/lib\/start\.js$/);
     });
 
+    it('resolves a path inside a dependency without an extension', () => {
+      expect(
+        Path.convertToSlashes(
+          Import.resolveModule({
+            modulePath: '@rushstack/heft/lib/start',
+            baseFolderPath: __dirname
+          })
+        )
+      ).toMatch(/node_modules\/@rushstack\/heft\/lib\/start\.js$/);
+    });
+
     it('resolves a dependency of a dependency', () => {
       expect(
         Path.convertToSlashes(
@@ -70,6 +94,17 @@ describe('Import', () => {
         Path.convertToSlashes(
           Import.resolveModule({
             modulePath: '@rushstack/ts-command-line/lib/Constants.js',
+            baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
+          })
+        )
+      ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib\/Constants\.js$/);
+    });
+
+    it('resolves a path inside a dependency of a dependency without an extension', () => {
+      expect(
+        Path.convertToSlashes(
+          Import.resolveModule({
+            modulePath: '@rushstack/ts-command-line/lib/Constants',
             baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
           })
         )
@@ -94,48 +129,70 @@ describe('Import', () => {
         ).toEqual(nodeJsPath.join(packageRoot, 'lib', 'Constants.js'));
       });
 
+      it('resolves the real path inside a package with allowSelfReference turned on', () => {
+        const heftPackageRoot: string = nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft');
+        const heftPackageJsonRealPath: string = require.resolve('@rushstack/heft/package.json');
+        expect(
+          Import.resolveModule({
+            modulePath: '@rushstack/heft/package.json',
+            baseFolderPath: heftPackageRoot,
+            allowSelfReference: true
+          })
+        ).toEqual(heftPackageJsonRealPath);
+      });
+
       it('throws on an attempt to reference this package without allowSelfReference turned on', () => {
-        expect(() =>
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolveModule({
             modulePath: '@rushstack/node-core-library',
             baseFolderPath: __dirname
           })
-        ).toThrowError(/^Cannot find module "@rushstack\/node-core-library" from ".+"\.$/);
-        expect(() =>
+        );
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolveModule({
             modulePath: '@rushstack/node-core-library/lib/Constants.js',
             baseFolderPath: __dirname
           })
-        ).toThrowError(/^Cannot find module "@rushstack\/node-core-library\/lib\/Constants.js" from ".+"\.$/);
+        );
       });
     });
 
     describe('includeSystemModules', () => {
       it('resolves a system module with includeSystemModules turned on', () => {
         expect(
-          Import.resolveModule({ modulePath: 'http', baseFolderPath: __dirname, includeSystemModules: true })
-        ).toEqual('http');
+          Import.resolveModule({ modulePath: 'fs', baseFolderPath: __dirname, includeSystemModules: true })
+        ).toEqual('fs');
       });
 
       it('throws on an attempt to resolve a system module without includeSystemModules turned on', () => {
-        expect(() => Import.resolveModule({ modulePath: 'http', baseFolderPath: __dirname })).toThrowError(
-          /^Cannot find module "http" from ".+"\.$/
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
+          Import.resolveModule({ modulePath: 'fs', baseFolderPath: __dirname })
         );
       });
 
-      it('throws on an attempt to resolve a path inside a system module with includeSystemModules turned on', () => {
-        expect(() =>
+      it('resolves an existing path inside a system module with includeSystemModules turned on', () => {
+        expect(
           Import.resolveModule({
-            modulePath: 'http/foo/bar',
+            modulePath: 'fs/promises',
             baseFolderPath: __dirname,
             includeSystemModules: true
           })
-        ).toThrowError(/^Cannot find module "http\/foo\/bar" from ".+"\.$/);
+        ).toEqual('fs/promises');
+      });
+
+      it('throws on an attempt to resolve a non-existing path inside a system module with includeSystemModules turned on', () => {
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
+          Import.resolveModule({
+            modulePath: 'fs/foo/bar',
+            baseFolderPath: __dirname,
+            includeSystemModules: true
+          })
+        );
       });
     });
   });
 
-  describe('resolvePackage', () => {
+  describe(Import.resolvePackage.name, () => {
     it('resolves a dependency', () => {
       expect(
         Import.resolvePackage({ packageName: '@rushstack/heft', baseFolderPath: __dirname }).replace(
@@ -146,14 +203,14 @@ describe('Import', () => {
     });
 
     it('fails to resolve a path inside a dependency', () => {
-      expect(() =>
+      expectToThrowNormalizedErrorMatchingSnapshot(() =>
         Path.convertToSlashes(
           Import.resolvePackage({
             packageName: '@rushstack/heft/lib/start.js',
             baseFolderPath: __dirname
           })
         )
-      ).toThrowError(/^Cannot find package "@rushstack\/heft\/lib\/start.js" from ".+"\.$/);
+      );
     });
 
     it('resolves a dependency of a dependency', () => {
@@ -168,14 +225,14 @@ describe('Import', () => {
     });
 
     it('fails to resolve a path inside a dependency of a dependency', () => {
-      expect(() =>
+      expectToThrowNormalizedErrorMatchingSnapshot(() =>
         Path.convertToSlashes(
           Import.resolvePackage({
             packageName: '@rushstack/ts-command-line/lib/Constants.js',
             baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
           })
         )
-      ).toThrowError(/^Cannot find package "@rushstack\/ts-command-line\/lib\/Constants.js" from ".+"\.$/);
+      );
     });
 
     describe('allowSelfReference', () => {
@@ -189,25 +246,37 @@ describe('Import', () => {
         ).toEqual(packageRoot);
       });
 
+      it('resolves the real path of a package with allowSelfReference turned on', () => {
+        const heftPackageRoot: string = nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft');
+        const resolvedHeftPackageRoot: string = nodeJsPath.dirname(
+          require.resolve('@rushstack/heft/package.json')
+        );
+        expect(
+          Import.resolvePackage({
+            packageName: '@rushstack/heft',
+            baseFolderPath: heftPackageRoot,
+            allowSelfReference: true
+          })
+        ).toEqual(resolvedHeftPackageRoot);
+      });
+
       it('fails to resolve a path inside this package with allowSelfReference turned on', () => {
-        expect(() =>
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolvePackage({
             packageName: '@rushstack/node-core-library/lib/Constants.js',
             baseFolderPath: __dirname,
             allowSelfReference: true
           })
-        ).toThrowError(
-          /^Cannot find package "@rushstack\/node-core-library\/lib\/Constants.js" from ".+"\.$/
         );
       });
 
       it('throws on an attempt to reference this package without allowSelfReference turned on', () => {
-        expect(() =>
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
           Import.resolvePackage({
             packageName: '@rushstack/node-core-library',
             baseFolderPath: __dirname
           })
-        ).toThrowError(/^Cannot find package "@rushstack\/node-core-library" from ".+"\.$/);
+        );
       });
     });
 
@@ -215,27 +284,37 @@ describe('Import', () => {
       it('resolves a system module with includeSystemModules turned on', () => {
         expect(
           Import.resolvePackage({
-            packageName: 'http',
+            packageName: 'fs',
             baseFolderPath: __dirname,
             includeSystemModules: true
           })
-        ).toEqual('http');
+        ).toEqual('fs');
       });
 
       it('throws on an attempt to resolve a system module without includeSystemModules turned on', () => {
-        expect(() => Import.resolvePackage({ packageName: 'http', baseFolderPath: __dirname })).toThrowError(
-          /^Cannot find package "http" from ".+"\.$/
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
+          Import.resolvePackage({ packageName: 'fs', baseFolderPath: __dirname })
         );
       });
 
-      it('throws on an attempt to resolve a path inside a system module with includeSystemModules turned on', () => {
-        expect(() =>
+      it('resolves an an existing path inside a system module with includeSystemModules turned on', () => {
+        expect(
           Import.resolvePackage({
-            packageName: 'http/foo/bar',
+            packageName: 'fs/promises',
             baseFolderPath: __dirname,
             includeSystemModules: true
           })
-        ).toThrowError(/^Cannot find package "http\/foo\/bar" from ".+"\.$/);
+        ).toEqual('fs/promises');
+      });
+
+      it('throws on an attempt to resolve a non-existing path inside a system module with includeSystemModules turned on', () => {
+        expectToThrowNormalizedErrorMatchingSnapshot(() =>
+          Import.resolvePackage({
+            packageName: 'fs/foo/bar',
+            baseFolderPath: __dirname,
+            includeSystemModules: true
+          })
+        );
       });
     });
   });

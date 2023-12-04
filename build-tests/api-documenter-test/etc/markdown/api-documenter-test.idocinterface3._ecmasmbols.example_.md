@@ -6,7 +6,7 @@
 
 ECMAScript symbol
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 [EcmaSmbols.example]: string;

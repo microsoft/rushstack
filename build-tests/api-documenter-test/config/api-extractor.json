@@ -18,5 +18,14 @@
     "enabled": false
   },
 
-  "testMode": true
+  "testMode": true,
+
+  "messages": {
+    "extractorMessageReporting": {
+      // Purposefully disabled for the `writeonlyProperty` test case.
+      "ae-missing-getter": {
+        "logLevel": "none"
+      }
+    }
+  }
 }

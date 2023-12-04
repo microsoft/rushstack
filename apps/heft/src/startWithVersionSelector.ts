@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-console */
+
 // NOTE: Since startWithVersionSelector.ts is loaded in the same process as start.ts, any dependencies that
 // we import here may become side-by-side versions.  We want to minimize any dependencies.
 import * as path from 'path';
 import * as fs from 'fs';
 import type { IPackageJson } from '@rushstack/node-core-library';
+import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
+import { Constants } from './utilities/Constants';
 
 const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
 
@@ -46,14 +50,19 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  * Use "heft --unmanaged" to bypass this feature.
  */
 function tryStartLocalHeft(): boolean {
-  if (process.argv.indexOf('--unmanaged') >= 0) {
-    console.log('(Bypassing the Heft version selector because "--unmanaged" was specified.)');
+  const toolParameters: Set<string> = getToolParameterNamesFromArgs();
+  if (toolParameters.has(Constants.unmanagedParameterLongName)) {
+    console.log(
+      `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
+        'was specified.'
+    );
     console.log();
     return false;
-  } else if (process.argv.indexOf('--debug') >= 0) {
+  } else if (toolParameters.has(Constants.debugParameterLongName)) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
-      'Searching for a locally installed version of Heft. Use the --unmanaged flag if you want to avoid this'
+      'Searching for a locally installed version of Heft. Use the ' +
+        `${JSON.stringify(Constants.unmanagedParameterLongName)} flag if you want to avoid this.`
     );
   }
 
@@ -68,7 +77,7 @@ function tryStartLocalHeft(): boolean {
       try {
         packageJson = JSON.parse(packageJsonContent);
       } catch (error) {
-        throw new Error(`Error parsing ${packageJsonPath}:` + error.message);
+        throw new Error(`Error parsing ${packageJsonPath}:` + (error as Error).message);
       }
 
       // Does package.json have a dependency on Heft?
@@ -88,10 +97,8 @@ function tryStartLocalHeft(): boolean {
       if (!fs.existsSync(heftEntryPoint)) {
         throw new Error('Unable to find Heft entry point: ' + heftEntryPoint);
       }
-      console.log(`Using local Heft from ${heftFolder}`);
-      console.log();
     } catch (error) {
-      throw new Error('Error probing for local Heft version: ' + error.message);
+      throw new Error('Error probing for local Heft version: ' + (error as Error).message);
     }
 
     require(heftEntryPoint);

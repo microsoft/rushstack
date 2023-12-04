@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Inheritance Type Configuration",
+  "description": "Defines an arbitrary configration file used to test inheritance",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["a", "b", "d"],
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "type": "string"
+    },
+
+    "a": {
+      "type": "string"
+    },
+
+    "b": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["c"],
+        "properties": {
+          "c": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "d": {
+      "type": "object",
+      "required": ["e", "f", "g", "i", "k", "o", "r"],
+      "properties": {
+        "e": {
+          "type": "string"
+        },
+
+        "f": {
+          "type": "string"
+        },
+
+        "g": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["h"],
+            "properties": {
+              "h": {
+                "type": "string"
+              }
+            }
+          }
+        },
+
+        "i": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["j"],
+            "properties": {
+              "j": {
+                "type": "string"
+              }
+            }
+          }
+        },
+
+        "k": {
+          "type": "object",
+          "required": ["l", "m"],
+          "properties": {
+            "l": {
+              "type": "string"
+            },
+            "m": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["n"],
+                "properties": {
+                  "n": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "z": {
+              "type": "string"
+            }
+          }
+        },
+
+        "o": {
+          "type": "object",
+          "required": ["p"],
+          "properties": {
+            "p": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["q"],
+                "properties": {
+                  "q": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+
+        "r": {
+          "type": "object",
+          "required": ["s"],
+          "properties": {
+            "s": {
+              "type": "string"
+            }
+          }
+        },
+
+        "y": {
+          "type": "object",
+          "required": ["z"],
+          "properties": {
+            "z": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+
+    "y": {
+      "type": "object",
+      "required": ["z"],
+      "properties": {
+        "z": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

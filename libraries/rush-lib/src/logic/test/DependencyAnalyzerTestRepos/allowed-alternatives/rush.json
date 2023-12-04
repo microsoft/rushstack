@@ -1,0 +1,17 @@
+{
+  "pnpmVersion": "6.7.1",
+  "rushVersion": "0.0.0",
+  "projectFolderMinDepth": 1,
+  "ensureConsistentVersions": true,
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b"
+    }
+  ]
+}

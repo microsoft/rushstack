@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as argparse from 'argparse';
-import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import type * as argparse from 'argparse';
+
+import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
+import type { ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -29,6 +32,11 @@ export interface ICommandLineActionOptions {
 }
 
 /**
+ * Example: "do-something"
+ */
+const ACTION_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-:][a-z0-9]+)*$/;
+
+/**
  * Represents a sub-command that is part of the CommandLineParser command line.
  * Applications should create subclasses of CommandLineAction corresponding to
  * each action that they want to expose.
@@ -42,9 +50,6 @@ export interface ICommandLineActionOptions {
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
-  // Example: "do-something"
-  private static _actionNameRegExp: RegExp = /^[a-z][a-z0-9]*([-:][a-z0-9]+)*$/;
-
   /** {@inheritDoc ICommandLineActionOptions.actionName} */
   public readonly actionName: string;
 
@@ -59,7 +64,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   public constructor(options: ICommandLineActionOptions) {
     super();
 
-    if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {
+    if (!ACTION_NAME_REGEXP.test(options.actionName)) {
       throw new Error(
         `Invalid action name "${options.actionName}". ` +
           `The name must be comprised of lower-case words optionally separated by hyphens or colons.`
@@ -83,15 +88,30 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
       description: this.documentation
     });
 
-    this.onDefineParameters();
+    // Monkey-patch the error handling for the action parser
+    this._argumentParser.exit = (status: number, message: string) => {
+      throw new CommandLineParserExitError(status, message);
+    };
+    const originalArgumentParserErrorFn: (err: Error | string) => void = this._argumentParser.error.bind(
+      this._argumentParser
+    );
+    this._argumentParser.error = (err: Error | string) => {
+      // Ensure the ParserExitError bubbles up to the top without any special processing
+      if (err instanceof CommandLineParserExitError) {
+        throw err;
+      }
+      originalArgumentParserErrorFn(err);
+    };
+
+    this.onDefineParameters?.();
   }
 
   /**
    * This is called internally by CommandLineParser.execute()
    * @internal
    */
-  public _processParsedData(data: ICommandLineParserData): void {
-    super._processParsedData(data);
+  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
+    super._processParsedData(parserOptions, data);
   }
 
   /**
@@ -115,11 +135,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
     return this._argumentParser;
   }
-
-  /**
-   * {@inheritDoc CommandLineParameterProvider.onDefineParameters}
-   */
-  protected abstract onDefineParameters(): void;
 
   /**
    * Your subclass should implement this hook to perform the operation.

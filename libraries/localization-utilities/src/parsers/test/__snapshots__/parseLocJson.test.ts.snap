@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseLocJson correctly ignores a string: Loc file 1`] = `
+Object {
+  "foo": Object {
+    "comment": "A string",
+    "value": "Foo",
+  },
+}
+`;
+
+exports[`parseLocJson correctly ignores a string: ignoreStrings calls 1`] = `
+Array [
+  Array [
+    "test.loc.json",
+    "foo",
+  ],
+  Array [
+    "test.loc.json",
+    "bar",
+  ],
+]
+`;
+
+exports[`parseLocJson parses a valid file 1`] = `
+Object {
+  "bar": Object {
+    "comment": "Another string",
+    "value": "Bar",
+  },
+  "foo": Object {
+    "comment": "A string",
+    "value": "Foo",
+  },
+}
+`;
+
+exports[`parseLocJson throws on invalid file 1`] = `
+"The loc file is invalid. Error: Error: JSON validation failed:
+test.loc.json
+
+Error: #/foo
+       Additional properties not allowed: baz"
+`;

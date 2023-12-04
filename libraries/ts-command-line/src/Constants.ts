@@ -12,3 +12,5 @@ export const enum CommandLineConstants {
    */
   TabCompletionActionName = 'tab-complete'
 }
+
+export const SCOPING_PARAMETER_GROUP: unique symbol = Symbol('scoping');

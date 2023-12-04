@@ -18,6 +18,25 @@ export const enum ExtractorMessageId {
   ExtraReleaseTag = 'ae-extra-release-tag',
 
   /**
+   * "Missing documentation for ___."
+   * @remarks
+   * The `ae-undocumented` message is only generated if the API report feature is enabled.
+   *
+   * Because the API report file already annotates undocumented items with `// (undocumented)`,
+   * the `ae-undocumented` message is not logged by default.  To see it, add a setting such as:
+   * ```json
+   * "messages": {
+   *   "extractorMessageReporting": {
+   *     "ae-undocumented": {
+   *       "logLevel": "warning"
+   *     }
+   *   }
+   *  }
+   * ```
+   */
+  Undocumented = 'ae-undocumented',
+
+  /**
    * "This symbol has another declaration with a different release tag."
    */
   DifferentReleaseTags = 'ae-different-release-tags',
@@ -28,7 +47,7 @@ export const enum ExtractorMessageId {
   IncompatibleReleaseTags = 'ae-incompatible-release-tags',
 
   /**
-   * "___ is exported by the package, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
+   * "___ is part of the package's API, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
    */
   MissingReleaseTag = 'ae-missing-release-tag',
 
@@ -95,11 +114,18 @@ export const enum ExtractorMessageId {
   /**
    * "The property ___ has a setter but no getter."
    */
-  MissingGetter = 'ae-missing-getter'
+  MissingGetter = 'ae-missing-getter',
+
+  /**
+   * "Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension.
+   * Troubleshooting tips: `https://api-extractor.com/link/dts-error`"
+   */
+  WrongInputFileType = 'ae-wrong-input-file-type'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-extra-release-tag',
+  'ae-undocumented',
   'ae-different-release-tags',
   'ae-incompatible-release-tags',
   'ae-missing-release-tag',
@@ -114,5 +140,6 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-cyclic-inherit-doc',
   'ae-unresolved-link',
   'ae-setter-with-docs',
-  'ae-missing-getter'
+  'ae-missing-getter',
+  'ae-wrong-input-file-type'
 ]);

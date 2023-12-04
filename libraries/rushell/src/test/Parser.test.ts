@@ -3,7 +3,7 @@
 
 import { Tokenizer } from '../Tokenizer';
 import { Parser } from '../Parser';
-import { AstScript } from '../AstNode';
+import type { AstScript } from '../AstNode';
 
 function escape(s: string): string {
   return s.replace(/\n/g, '[n]').replace(/\r/g, '[r]').replace(/\t/g, '[t]').replace(/\\/g, '[b]');
@@ -26,7 +26,7 @@ function matchErrorSnapshot(input: string): void {
   try {
     parser.parse();
   } catch (e) {
-    error = e;
+    error = e as Error;
   }
   expect({
     input: escape(tokenizer.input.toString()),

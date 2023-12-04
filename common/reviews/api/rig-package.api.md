@@ -6,8 +6,24 @@
 
 // @public
 export interface ILoadForProjectFolderOptions {
+    bypassCache?: boolean;
     overrideRigJsonObject?: IRigConfigJson;
     projectFolderPath: string;
+}
+
+// @public
+export interface IRigConfig {
+    readonly filePath: string;
+    getResolvedProfileFolder(): string;
+    getResolvedProfileFolderAsync(): Promise<string>;
+    readonly projectFolderOriginalPath: string;
+    readonly projectFolderPath: string;
+    readonly relativeProfileFolderPath: string;
+    readonly rigFound: boolean;
+    readonly rigPackageName: string;
+    readonly rigProfile: string;
+    tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
+    tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
 }
 
 // @public
@@ -17,7 +33,7 @@ export interface IRigConfigJson {
 }
 
 // @public
-export class RigConfig {
+export class RigConfig implements IRigConfig {
     readonly filePath: string;
     getResolvedProfileFolder(): string;
     getResolvedProfileFolderAsync(): Promise<string>;
@@ -33,7 +49,6 @@ export class RigConfig {
     readonly rigProfile: string;
     tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
     tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
-    }
-
+}
 
 ```

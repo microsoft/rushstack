@@ -1,0 +1,45 @@
+{
+  "pnpmVersion": "5.0.0",
+  "rushVersion": "5.46.1",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+
+  "approvedPackagesPolicy": {
+    "reviewCategories": ["first-party", "third-party", "prototype"],
+    "ignoredNpmScopes": ["@types", "@internal"]
+  },
+
+  "repository": {
+    "url": "someFakeUrl",
+    "urls": ["otherFakeUrl"]
+  },
+
+  "gitPolicy": {
+    "allowedEmailRegExps": ["[^@]+@contoso\\.com"],
+    "sampleEmail": "mrexample@contoso.com"
+  },
+
+  "eventHooks": {
+    "postRushBuild": ["do something"]
+  },
+
+  "projects": [
+    {
+      "packageName": "project1",
+      "projectFolder": "project1",
+      "reviewCategory": "third-party"
+    },
+
+    {
+      "packageName": "project2",
+      "projectFolder": "project2",
+      "reviewCategory": "third-party"
+    },
+
+    {
+      "packageName": "project3",
+      "projectFolder": "project3",
+      "reviewCategory": "prototype"
+    }
+  ]
+}

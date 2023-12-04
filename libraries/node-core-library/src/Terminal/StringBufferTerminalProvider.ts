@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { StringBuilder } from '../StringBuilder';
 import { Text } from '../Text';
 import { AnsiEscape } from './AnsiEscape';
@@ -29,6 +29,7 @@ export interface IStringBufferOutputOptions {
 export class StringBufferTerminalProvider implements ITerminalProvider {
   private _standardBuffer: StringBuilder = new StringBuilder();
   private _verboseBuffer: StringBuilder = new StringBuilder();
+  private _debugBuffer: StringBuilder = new StringBuilder();
   private _warningBuffer: StringBuilder = new StringBuilder();
   private _errorBuffer: StringBuilder = new StringBuilder();
 
@@ -55,6 +56,11 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
 
       case TerminalProviderSeverity.verbose: {
         this._verboseBuffer.append(data);
+        break;
+      }
+
+      case TerminalProviderSeverity.debug: {
+        this._debugBuffer.append(data);
         break;
       }
 
@@ -92,6 +98,13 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
    */
   public getVerbose(options?: IStringBufferOutputOptions): string {
     return this._normalizeOutput(this._verboseBuffer.toString(), options);
+  }
+
+  /**
+   * Get everything that has been written at debug-level severity.
+   */
+  public getDebugOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._debugBuffer.toString(), options);
   }
 
   /**

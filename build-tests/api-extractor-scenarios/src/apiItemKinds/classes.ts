@@ -10,6 +10,8 @@ export abstract class AbstractClass {
 export class SimpleClass {
   public member(): void {}
 
+  public optionalParamMethod(x?: number): void {}
+
   public get readonlyProperty(): string {
     return 'hello';
   }
@@ -18,4 +20,13 @@ export class SimpleClass {
     return 'hello';
   }
   public set writeableProperty(value: string) {}
+
+  public readonly someReadonlyProp = 5;
+  public readonly someReadonlyPropWithType: number = 5;
 }
+
+/** @public */
+export class ClassWithTypeParameter<T> {}
+
+/** @public */
+export class ExtendsClassWithTypeParameter extends ClassWithTypeParameter<SimpleClass> {}

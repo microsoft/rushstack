@@ -1,0 +1,4 @@
+{
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
+  "include": ["src/**/*.ts", "./custom-typings/**/*.ts"]
+}

@@ -57,10 +57,25 @@
      Pushing additional commits with "small" fixes often invalidates testing.
 --------------------------------------------------------------------------->
 
+## Impacted documentation
+
 <!--------------------------------------------------------------------------
-👉 STEP 7: Don't forget to run "rush change":
+👉 STEP 7: Does your PR affect anything that is discussed in the website docs?
+     If so, please paste the URL of each affected web page, so we will
+     remember to update the documentation after your PR is merged.
+     (Updating the website is appreciated but not required.)
+     If no docs are impacted, delete the "Impacted documentation" section.
+
+     If you modified a JSON schema, remember to update init templates such as:
+     rush-lib/assets/rush-init/*.json
+     api-extractor/src/schemas/api-extractor-template.json
+--------------------------------------------------------------------------->
+
+<!--------------------------------------------------------------------------
+👉 STEP 8: Don't forget to run "rush change":
 
      https://rushjs.io/pages/best_practices/change_logs/
 --------------------------------------------------------------------------->
+
 
 <!-- Have a question?  Ask for help in the chat room: https://rushstack.zulipchat.com/ -->

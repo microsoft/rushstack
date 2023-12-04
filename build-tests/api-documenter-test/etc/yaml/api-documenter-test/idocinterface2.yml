@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: IDocInterface2
 summary: ''
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: interface
@@ -15,6 +16,7 @@ methods:
     fullName: deprecatedExample()
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: true
     customDeprecatedMessage: Use `otherThing()` instead.

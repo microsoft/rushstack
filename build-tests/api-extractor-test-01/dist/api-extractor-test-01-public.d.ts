@@ -242,6 +242,7 @@ export declare interface ISimpleInterface {
 }
 
 declare const locallyExportedCustomSymbol: unique symbol;
+
 export { MAX_UNSIGNED_VALUE }
 
 /** @public */

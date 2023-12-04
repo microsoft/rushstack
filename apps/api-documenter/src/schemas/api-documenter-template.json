@@ -89,4 +89,11 @@
      */
     // "filterByInlineTag": "@docCategory"
   }
+
+  /**
+   * Specifies whether inherited members should also be shown on an API item's page.
+   *
+   * DEFAULT VALUE: false
+   */
+  // "showInheritedMembers": false
 }

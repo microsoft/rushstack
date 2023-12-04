@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for build cache with Azure storage configuration",
+
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["storageAccountName", "storageContainerName"],
+
+  "properties": {
+    "storageAccountName": {
+      "type": "string",
+      "description": "(Required) The name of the the Azure storage account to use for build cache."
+    },
+
+    "storageContainerName": {
+      "type": "string",
+      "description": "(Required) The name of the container in the Azure storage account to use for build cache."
+    },
+
+    "azureEnvironment": {
+      "type": "string",
+      "description": "The Azure environment the storage account exists in. Defaults to AzurePublicCloud.",
+      "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
+    },
+
+    "blobPrefix": {
+      "type": "string",
+      "description": "An optional prefix for cache item blob names."
+    },
+
+    "isCacheWriteAllowed": {
+      "type": "boolean",
+      "description": "If set to true, allow writing to the cache. Defaults to false."
+    }
+  }
+}

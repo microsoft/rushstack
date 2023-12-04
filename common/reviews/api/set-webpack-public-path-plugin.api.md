@@ -4,7 +4,7 @@
 
 ```ts
 
-import * as Webpack from 'webpack';
+import type * as Webpack from 'webpack';
 
 // @public
 export function getGlobalRegisterCode(debug?: boolean): string;
@@ -40,6 +40,5 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     // (undocumented)
     options: ISetWebpackPublicPathPluginOptions;
 }
-
 
 ```

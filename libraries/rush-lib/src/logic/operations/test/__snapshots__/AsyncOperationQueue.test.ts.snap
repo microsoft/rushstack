@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AsyncOperationQueue detects cycles 1`] = `
+"A cyclic dependency was encountered:
+  a
+  -> c
+  -> d
+  -> b
+  -> a
+Consider using the decoupledLocalDependencies option for rush.json."
+`;

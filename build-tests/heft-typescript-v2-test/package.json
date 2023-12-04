@@ -1,0 +1,26 @@
+{
+  "name": "heft-typescript-v2-test",
+  "description": "Building this project tests building with TypeScript v2",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-api-extractor-plugin": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@types/jest": "ts2.9",
+    "@types/node": "ts2.9",
+    "tslint": "~5.20.1",
+    "tslint-microsoft-contrib": "~6.2.0",
+    "typescript": "~2.9.2"
+  }
+}

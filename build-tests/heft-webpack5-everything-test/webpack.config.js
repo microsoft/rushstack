@@ -1,9 +1,12 @@
 'use strict';
 
 const path = require('path');
+const { ModuleMinifierPlugin } = require('@rushstack/webpack5-module-minifier-plugin');
+const { WorkerPoolMinifier } = require('@rushstack/module-minifier');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   module: {
     rules: [
       {
@@ -12,7 +15,7 @@ module.exports = {
       }
     ]
   },
-  target: ['web', 'es5'],
+  target: ['web', 'es2020'],
   resolve: {
     extensions: ['.js', '.jsx', '.json']
   },
@@ -25,5 +28,22 @@ module.exports = {
     filename: '[name]_[contenthash].js',
     chunkFilename: '[id].[name]_[contenthash].js',
     assetModuleFilename: '[name]_[contenthash][ext][query]'
-  }
+  },
+  devtool: 'source-map',
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new ModuleMinifierPlugin({
+        minifier: new WorkerPoolMinifier({
+          terserOptions: {
+            ecma: 2020,
+            mangle: true
+          },
+          verbose: true
+        }),
+        sourceMap: true
+      })
+    ]
+  },
+  plugins: [new HtmlWebpackPlugin()]
 };

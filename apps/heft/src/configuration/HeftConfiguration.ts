@@ -4,15 +4,17 @@
 import * as path from 'path';
 import {
   Terminal,
-  ITerminalProvider,
-  IPackageJson,
+  type ITerminalProvider,
+  type IPackageJson,
   PackageJsonLookup,
-  InternalError
+  InternalError,
+  type ITerminal
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
-import { RigConfig } from '@rushstack/rig-package';
+import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
+import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver';
 
 /**
  * @internal
@@ -30,84 +32,55 @@ export interface IHeftConfigurationInitializationOptions {
 }
 
 /**
- * The base action configuration that all custom action configuration files
- * should inherit from.
- *
- * @public
- */
-export interface IHeftActionConfiguration {}
-
-/**
- * Options to be used when retrieving the action configuration.
- *
- * @public
- */
-export interface IHeftActionConfigurationOptions {
-  /**
-   * Whether or not arrays should be merged across Heft action configuration files.
-   */
-  mergeArrays?: boolean;
-}
-
-/**
  * @public
  */
 export class HeftConfiguration {
-  private _buildFolder!: string;
-  private _projectHeftDataFolder: string | undefined;
-  private _projectConfigFolder: string | undefined;
-  private _buildCacheFolder: string | undefined;
-  private _rigConfig: RigConfig | undefined;
+  private _buildFolderPath!: string;
+  private _projectConfigFolderPath: string | undefined;
+  private _cacheFolderPath: string | undefined;
+  private _tempFolderPath: string | undefined;
+  private _rigConfig: IRigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
+  private _rigPackageResolver!: RigPackageResolver;
 
   /**
-   * Project build folder. This is the folder containing the project's package.json file.
+   * Project build folder path. This is the folder containing the project's package.json file.
    */
-  public get buildFolder(): string {
-    return this._buildFolder;
-  }
-
-  /**
-   * The path to the project's ".heft" folder.
-   */
-  public get projectHeftDataFolder(): string {
-    if (!this._projectHeftDataFolder) {
-      this._projectHeftDataFolder = path.join(this.buildFolder, Constants.projectHeftFolderName);
-    }
-
-    return this._projectHeftDataFolder;
+  public get buildFolderPath(): string {
+    return this._buildFolderPath;
   }
 
   /**
    * The path to the project's "config" folder.
    */
-  public get projectConfigFolder(): string {
-    if (!this._projectConfigFolder) {
-      this._projectConfigFolder = path.join(this.buildFolder, Constants.projectConfigFolderName);
+  public get projectConfigFolderPath(): string {
+    if (!this._projectConfigFolderPath) {
+      this._projectConfigFolderPath = path.join(this.buildFolderPath, Constants.projectConfigFolderName);
     }
 
-    return this._projectConfigFolder;
+    return this._projectConfigFolderPath;
   }
 
   /**
-   * The project's build cache folder.
+   * The project's temporary folder.
    *
-   * This folder exists at \<project root\>/.heft/build-cache. TypeScript's output
-   * goes into this folder and then is either copied or linked to the final output folder
+   * @remarks This folder exists at \<project root\>/temp. In general, this folder is used to store temporary
+   * output from tasks under task-specific subfolders, and is not intended to be directly written to.
+   * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolderPath
    */
-  public get buildCacheFolder(): string {
-    if (!this._buildCacheFolder) {
-      this._buildCacheFolder = path.join(this.projectHeftDataFolder, Constants.buildCacheFolderName);
+  public get tempFolderPath(): string {
+    if (!this._tempFolderPath) {
+      this._tempFolderPath = path.join(this._buildFolderPath, Constants.tempFolderName);
     }
 
-    return this._buildCacheFolder;
+    return this._tempFolderPath;
   }
 
   /**
    * The rig.json configuration for this project, if present.
    */
-  public get rigConfig(): RigConfig {
+  public get rigConfig(): IRigConfig {
     if (!this._rigConfig) {
       throw new InternalError(
         'The rigConfig cannot be accessed until HeftConfiguration.checkForRigAsync() has been called'
@@ -117,9 +90,23 @@ export class HeftConfiguration {
   }
 
   /**
+   * The rig package resolver, which can be used to rig-resolve a requested package.
+   */
+  public get rigPackageResolver(): IRigPackageResolver {
+    if (!this._rigPackageResolver) {
+      this._rigPackageResolver = new RigPackageResolver({
+        buildFolder: this.buildFolderPath,
+        projectPackageJson: this.projectPackageJson,
+        rigConfig: this.rigConfig
+      });
+    }
+    return this._rigPackageResolver;
+  }
+
+  /**
    * Terminal instance to facilitate logging.
    */
-  public get globalTerminal(): Terminal {
+  public get globalTerminal(): ITerminal {
     return this._globalTerminal;
   }
 
@@ -141,7 +128,7 @@ export class HeftConfiguration {
    * The package.json of the project being built
    */
   public get projectPackageJson(): IPackageJson {
-    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolder)!;
+    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolderPath)!;
   }
 
   private constructor() {}
@@ -152,7 +139,9 @@ export class HeftConfiguration {
    */
   public async _checkForRigAsync(): Promise<void> {
     if (!this._rigConfig) {
-      this._rigConfig = await RigConfig.loadForProjectFolderAsync({ projectFolderPath: this._buildFolder });
+      this._rigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: this._buildFolderPath
+      });
     }
   }
 
@@ -166,20 +155,19 @@ export class HeftConfiguration {
       options.cwd
     );
     if (packageJsonPath) {
-      let buildFolder: string = path.dirname(packageJsonPath);
+      let buildFolderPath: string = path.dirname(packageJsonPath);
       // The CWD path's casing may be incorrect on a case-insensitive filesystem. Some tools, like Jest
       // expect the casing of the project path to be correct and produce unexpected behavior when the casing
       // isn't correct.
       // This ensures the casing of the project folder is correct.
-      buildFolder = trueCasePathSync(buildFolder);
-      configuration._buildFolder = buildFolder;
+      buildFolderPath = trueCasePathSync(buildFolderPath);
+      configuration._buildFolderPath = buildFolderPath;
     } else {
       throw new Error('No package.json file found. Are you in a project folder?');
     }
 
     configuration._terminalProvider = options.terminalProvider;
     configuration._globalTerminal = new Terminal(options.terminalProvider);
-
     return configuration;
   }
 }

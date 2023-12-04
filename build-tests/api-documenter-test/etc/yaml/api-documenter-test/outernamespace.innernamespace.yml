@@ -29,3 +29,4 @@ items:
           description: ''
           type:
             - number
+          optional: false

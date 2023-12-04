@@ -6,7 +6,7 @@ import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
-import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
+import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class InitAction extends CommandLineAction {
@@ -19,11 +19,6 @@ export class InitAction extends CommandLineAction {
         ` ${ExtractorConfig.FILENAME} config file template with code comments that describe all the settings.` +
         ` The file will be written in the current directory.`
     });
-  }
-
-  protected onDefineParameters(): void {
-    // override
-    // No parameters yet
   }
 
   protected async onExecute(): Promise<void> {

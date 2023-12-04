@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IYamlTocFile } from '../yaml/IYamlTocFile';
+import type { IYamlTocFile } from '../yaml/IYamlTocFile';
 
 /**
  * Typescript interface describing the config schema for toc.yml file format.
@@ -103,4 +103,9 @@ export interface IConfigFile {
 
   /** {@inheritDoc IConfigTableOfContents} */
   tableOfContents?: IConfigTableOfContents;
+
+  /**
+   * Specifies whether inherited members should also be shown on an API item's page.
+   */
+  showInheritedMembers?: boolean;
 }

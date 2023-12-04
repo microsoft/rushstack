@@ -4,7 +4,7 @@
 
 ## IDocInterface6.arrayProperty property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 arrayProperty: IDocInterface1[];

@@ -1,0 +1,36 @@
+.LogoPanel {
+  display: flex;
+  & > * + * {
+    margin-left: 12px;
+  }
+  a {
+    text-decoration: none;
+  }
+}
+
+.Icon {
+  padding-top: 5px;
+  height: 64px;
+}
+
+.Title1 {
+  padding-top: 7px;
+  height: 20px;
+}
+
+.Title2 {
+  padding-top: 5px;
+  height: 20px;
+}
+
+.Image {
+  height: 100%;
+  object-fit: contain;
+}
+
+.Detail {
+  color: #ab9e8e;
+  font-family: Tahoma, sans-serif;
+  font-size: 14px;
+  padding-top: 4px;
+}

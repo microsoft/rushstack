@@ -6,9 +6,7 @@ function writeErrorInRed(message) {
 writeErrorInRed(`* * * * * * * * * * * * * THIS PACKAGE WAS DEPRECATED! * * * * * * * * * * * * * *`);
 
 console.error(`
-@microsoft/rush-buildxl has been deprecated in favor of BuildXL's built-in Rush frontend.
-
-See here: https://github.com/microsoft/BuildXL/blob/master/Documentation/Wiki/Frontends/rush-onboarding.md`);
+@rushstack/localization-plugin has been renamed to @rushstack/webpack4-localization-plugin.`);
 
 writeErrorInRed(`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n`);
 

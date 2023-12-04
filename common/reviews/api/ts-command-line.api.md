@@ -7,6 +7,18 @@
 import * as argparse from 'argparse';
 
 // @public
+export class AliasCommandLineAction extends CommandLineAction {
+    constructor(options: IAliasCommandLineActionOptions);
+    readonly defaultParameters: ReadonlyArray<string>;
+    protected onExecute(): Promise<void>;
+    // @internal
+    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // @internal (undocumented)
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
+    readonly targetAction: CommandLineAction;
+}
+
+// @public
 export abstract class CommandLineAction extends CommandLineParameterProvider {
     constructor(options: ICommandLineActionOptions);
     readonly actionName: string;
@@ -17,10 +29,9 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     _execute(): Promise<void>;
     // @internal
     protected _getArgumentParser(): argparse.ArgumentParser;
-    protected abstract onDefineParameters(): void;
     protected abstract onExecute(): Promise<void>;
     // @internal
-    _processParsedData(data: _ICommandLineParserData): void;
+    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     readonly summary: string;
 }
 
@@ -36,7 +47,7 @@ export class CommandLineChoiceListParameter extends CommandLineParameter {
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<string>;
-    }
+}
 
 // @public
 export class CommandLineChoiceParameter extends CommandLineParameter {
@@ -53,7 +64,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     // @internal
     _setValue(data: any): void;
     get value(): string | undefined;
-    }
+}
 
 // @public
 export const enum CommandLineConstants {
@@ -70,7 +81,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     // @internal
     _setValue(data: any): void;
     get value(): boolean;
-    }
+}
 
 // @public
 export class CommandLineHelper {
@@ -87,7 +98,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<number>;
-    }
+}
 
 // @public
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
@@ -102,7 +113,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     // @internal
     _setValue(data: any): void;
     get value(): number | undefined;
-    }
+}
 
 // @public
 export abstract class CommandLineParameter {
@@ -115,13 +126,16 @@ export abstract class CommandLineParameter {
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
     abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
+    readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
+    readonly parameterScope: string | undefined;
     // @internal
     _parserKey: string | undefined;
     protected reportInvalidData(data: any): never;
     readonly required: boolean;
+    readonly scopedLongName: string | undefined;
     // @internal
     abstract _setValue(data: any): void;
-    readonly shortName: string | undefined;
+    get shortName(): string | undefined;
     readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
@@ -142,29 +156,47 @@ export enum CommandLineParameterKind {
 export abstract class CommandLineParameterProvider {
     // @internal
     constructor();
+    // @internal (undocumented)
+    readonly _ambiguousParameterParserKeysByName: Map<string, string>;
+    // @internal (undocumented)
+    protected _defineAmbiguousParameter(name: string): string;
     defineChoiceListParameter(definition: ICommandLineChoiceListDefinition): CommandLineChoiceListParameter;
     defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
     defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
     defineIntegerListParameter(definition: ICommandLineIntegerListDefinition): CommandLineIntegerListParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
+    // @internal (undocumented)
+    protected _defineParameter(parameter: CommandLineParameter): void;
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
     defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
     // @internal
     protected abstract _getArgumentParser(): argparse.ArgumentParser;
-    getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
-    getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
-    getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
-    getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
-    getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
-    getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
-    getStringParameter(parameterLongName: string): CommandLineStringParameter;
-    protected abstract onDefineParameters(): void;
+    getChoiceListParameter(parameterLongName: string, parameterScope?: string): CommandLineChoiceListParameter;
+    getChoiceParameter(parameterLongName: string, parameterScope?: string): CommandLineChoiceParameter;
+    getFlagParameter(parameterLongName: string, parameterScope?: string): CommandLineFlagParameter;
+    getIntegerListParameter(parameterLongName: string, parameterScope?: string): CommandLineIntegerListParameter;
+    getIntegerParameter(parameterLongName: string, parameterScope?: string): CommandLineIntegerParameter;
+    getParameterStringMap(): Record<string, string>;
+    getStringListParameter(parameterLongName: string, parameterScope?: string): CommandLineStringListParameter;
+    getStringParameter(parameterLongName: string, parameterScope?: string): CommandLineStringParameter;
+    protected onDefineParameters?(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
+    get parametersProcessed(): boolean;
+    parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
     // @internal (undocumented)
-    protected _processParsedData(data: _ICommandLineParserData): void;
+    protected _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // (undocumented)
+    protected _registerAmbiguousParameter(name: string, parserKey: string): void;
+    // @internal (undocumented)
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
+    // @internal (undocumented)
+    protected readonly _registeredParameterParserKeysByName: Map<string, string>;
+    // @internal (undocumented)
+    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean, ignoreShortName: boolean): void;
     get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
+    renderUsageText(): string;
 }
 
 // @public
@@ -173,7 +205,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     readonly argumentName: string;
     readonly completions: (() => Promise<string[]>) | undefined;
-    }
+}
 
 // @public
 export abstract class CommandLineParser extends CommandLineParameterProvider {
@@ -186,9 +218,11 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     // @internal
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
+    // @internal (undocumented)
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
     selectedAction: CommandLineAction | undefined;
     tryGetAction(actionName: string): CommandLineAction | undefined;
-    }
+}
 
 // @public
 export class CommandLineRemainder {
@@ -200,7 +234,7 @@ export class CommandLineRemainder {
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<string>;
-    }
+}
 
 // @public
 export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
@@ -212,7 +246,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<string>;
-    }
+}
 
 // @public
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
@@ -227,27 +261,33 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     // @internal
     _setValue(data: any): void;
     get value(): string | undefined;
-    }
+}
 
 // @public (undocumented)
 export class DynamicCommandLineAction extends CommandLineAction {
-    // (undocumented)
-    protected onDefineParameters(): void;
     // (undocumented)
     protected onExecute(): Promise<void>;
 }
 
 // @public (undocumented)
 export class DynamicCommandLineParser extends CommandLineParser {
-    // (undocumented)
-    protected onDefineParameters(): void;
+}
+
+// @public
+export interface IAliasCommandLineActionOptions {
+    aliasName: string;
+    defaultParameters?: string[];
+    targetAction: CommandLineAction;
+    toolFilename: string;
 }
 
 // @public
 export interface IBaseCommandLineDefinition {
     description: string;
     environmentVariable?: string;
+    parameterGroup?: string | typeof SCOPING_PARAMETER_GROUP;
     parameterLongName: string;
+    parameterScope?: string;
     parameterShortName?: string;
     required?: boolean;
     undocumentedSynonyms?: string[];
@@ -298,12 +338,17 @@ export interface _ICommandLineParserData {
     [key: string]: any;
     // (undocumented)
     action: string;
+    // (undocumented)
+    aliasAction?: string;
+    // (undocumented)
+    aliasDocumentation?: string;
 }
 
 // @public
 export interface ICommandLineParserOptions {
     enableTabCompletionAction?: boolean;
     toolDescription: string;
+    toolEpilog?: string;
     toolFilename: string;
 }
 
@@ -321,5 +366,36 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
+// @internal
+export interface _IRegisterDefinedParametersState {
+    parentParameterNames: Set<string>;
+}
+
+// @public
+export interface IScopedLongNameParseResult {
+    longName: string;
+    scope: string | undefined;
+}
+
+// @public
+export abstract class ScopedCommandLineAction extends CommandLineAction {
+    constructor(options: ICommandLineActionOptions);
+    // @internal (undocumented)
+    protected _defineParameter(parameter: CommandLineParameter): void;
+    // @internal
+    _execute(): Promise<void>;
+    // @internal
+    protected _getScopedCommandLineParser(): CommandLineParser;
+    protected onDefineParameters(): void;
+    protected abstract onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void;
+    protected onDefineUnscopedParameters?(): void;
+    protected abstract onExecute(): Promise<void>;
+    get parameters(): ReadonlyArray<CommandLineParameter>;
+    // @internal
+    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // @internal (undocumented)
+    _registerDefinedParameters(state: _IRegisterDefinedParametersState): void;
+    static readonly ScopingParameterGroup: typeof SCOPING_PARAMETER_GROUP;
+}
 
 ```

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
+import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { DocumenterConfig } from '../documenters/DocumenterConfig';
 import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';

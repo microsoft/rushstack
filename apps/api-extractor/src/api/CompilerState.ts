@@ -8,7 +8,7 @@ import colors = require('colors');
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
-import { IExtractorInvokeOptions } from './Extractor';
+import type { IExtractorInvokeOptions } from './Extractor';
 
 /**
  * Options for {@link CompilerState.create}

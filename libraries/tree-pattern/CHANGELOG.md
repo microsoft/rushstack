@@ -1,6 +1,41 @@
 # Change Log - @rushstack/tree-pattern
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Sep 2023 09:30:33 GMT and should not be manually modified.
+
+## 0.3.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.3.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.2.4
+Fri, 17 Jun 2022 00:16:18 GMT
+
+### Patches
+
+- Add missing types
+
+## 0.2.3
+Sat, 09 Apr 2022 02:24:27 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 0.2.2
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
 
 ## 0.2.1
 Wed, 30 Sep 2020 18:39:17 GMT

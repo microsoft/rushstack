@@ -1,6 +1,659 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 01 Jul 2021 15:08:27 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+
+## 7.38.3
+Fri, 10 Nov 2023 18:02:04 GMT
+
+### Patches
+
+- Fix an issue where "ae-undocumented" was incorrectly reported for private members
+
+## 7.38.2
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 7.38.1
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
+
+## 7.38.0
+Sun, 01 Oct 2023 02:56:29 GMT
+
+### Minor changes
+
+- Add a new message "ae-undocumented" to support logging of undocumented API items
+
+## 7.37.3
+Sat, 30 Sep 2023 00:20:51 GMT
+
+### Patches
+
+- Don't strip out @alpha items when generating API reports.
+
+## 7.37.2
+Thu, 28 Sep 2023 20:53:16 GMT
+
+_Version update only_
+
+## 7.37.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 7.37.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 7.36.4
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 7.36.3
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 7.36.2
+Wed, 12 Jul 2023 15:20:39 GMT
+
+### Patches
+
+- Add api-extractor support for .d.mts and .d.cts files
+
+## 7.36.1
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 7.36.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+- Use the `IRigConfig` interface in the `IExtractorConfigLoadForFolderOptions` object insteacd of the `RigConfig` class.
+
+## 7.35.4
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 7.35.3
+Tue, 13 Jun 2023 01:49:01 GMT
+
+_Version update only_
+
+## 7.35.2
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 7.35.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 7.35.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the TypeScript dependency to ~5.0.4
+
+## 7.34.9
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 7.34.8
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 7.34.7
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 7.34.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 7.34.5
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 7.34.4
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 7.34.3
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 7.34.2
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 7.34.1
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 7.34.0
+Wed, 25 Jan 2023 07:26:55 GMT
+
+### Minor changes
+
+- Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)
+
+## 7.33.8
+Wed, 18 Jan 2023 22:44:12 GMT
+
+### Patches
+
+- Use ts.getCheckFlags to fix TS 5.0
+
+## 7.33.7
+Fri, 09 Dec 2022 16:18:28 GMT
+
+_Version update only_
+
+## 7.33.6
+Tue, 08 Nov 2022 01:20:55 GMT
+
+_Version update only_
+
+## 7.33.5
+Wed, 26 Oct 2022 00:16:16 GMT
+
+### Patches
+
+- Update the @microsoft/tsdoc dependency version to 0.14.2.
+
+## 7.33.4
+Mon, 17 Oct 2022 22:14:21 GMT
+
+_Version update only_
+
+## 7.33.3
+Mon, 17 Oct 2022 15:16:00 GMT
+
+### Patches
+
+- Fix a regression where the "fileUrlPath" property would contain a malformed path when API Extractor is run on Windows.
+
+## 7.33.2
+Fri, 14 Oct 2022 15:26:31 GMT
+
+### Patches
+
+- Fix references from computed properties #3629
+
+## 7.33.1
+Thu, 13 Oct 2022 00:20:15 GMT
+
+_Version update only_
+
+## 7.33.0
+Tue, 11 Oct 2022 23:49:12 GMT
+
+### Minor changes
+
+- Extract the original source file path for relevant API items and add a new projectFolderUrl setting to the api-extractor.json config that allows one to specify what URL their project folder can be found at.
+
+## 7.32.1
+Mon, 10 Oct 2022 15:23:44 GMT
+
+_Version update only_
+
+## 7.32.0
+Thu, 29 Sep 2022 07:13:06 GMT
+
+### Minor changes
+
+- Update parser to TypeScript 4.8.
+
+## 7.31.2
+Wed, 21 Sep 2022 20:21:10 GMT
+
+_Version update only_
+
+## 7.31.1
+Thu, 15 Sep 2022 00:18:51 GMT
+
+_Version update only_
+
+## 7.31.0
+Tue, 13 Sep 2022 00:16:55 GMT
+
+### Minor changes
+
+- Fix an issue where aliased classes sometimes had incorrect canonical references in *.api.json (GitHub  #3593)
+
+## 7.30.1
+Mon, 12 Sep 2022 22:27:48 GMT
+
+### Patches
+
+- Fix a recent regression where items exported from both the entry point and from an exported namespace appeared only once in the API doc model (GitHub #3619)
+
+## 7.30.0
+Fri, 02 Sep 2022 17:48:42 GMT
+
+### Minor changes
+
+- Add new "apiReport.includeForgottenExports" and "docModel.includeForgottenExports" properties to control whether forgotten exports are included in the API report and doc model files.
+- Fix incorrect declaration references for symbols not exported from the package's entry point.
+
+## 7.29.5
+Wed, 24 Aug 2022 03:01:22 GMT
+
+_Version update only_
+
+## 7.29.4
+Wed, 24 Aug 2022 00:14:38 GMT
+
+### Patches
+
+- Remove use of LegacyAdapters.sortStable
+
+## 7.29.3
+Fri, 19 Aug 2022 00:17:19 GMT
+
+_Version update only_
+
+## 7.29.2
+Wed, 10 Aug 2022 09:52:12 GMT
+
+### Patches
+
+- Fix incorrect declaration references for local symbols within namespaces
+
+## 7.29.1
+Wed, 10 Aug 2022 08:12:16 GMT
+
+### Patches
+
+- Fix a regression where .api.json excerpts were sometimes missing tokens (GitHub #3561), and generally improve the quality of excerpt generation
+
+## 7.29.0
+Wed, 03 Aug 2022 18:40:35 GMT
+
+### Minor changes
+
+- Upgrade TypeScript dependency to 4.7
+
+## 7.28.7
+Mon, 01 Aug 2022 02:45:32 GMT
+
+_Version update only_
+
+## 7.28.6
+Thu, 21 Jul 2022 23:30:27 GMT
+
+_Version update only_
+
+## 7.28.5
+Thu, 21 Jul 2022 00:16:14 GMT
+
+_Version update only_
+
+## 7.28.4
+Fri, 08 Jul 2022 15:17:46 GMT
+
+### Patches
+
+- Update api-extractor-template.json to "testMode" and "enumMemberOrder" comment sections.
+
+## 7.28.3
+Mon, 04 Jul 2022 15:15:13 GMT
+
+### Patches
+
+- Make enumMemberOrder configuration field optional
+
+## 7.28.2
+Thu, 30 Jun 2022 04:48:53 GMT
+
+### Patches
+
+- Improve logic that determines whether an API item is readonly
+
+## 7.28.1
+Tue, 28 Jun 2022 22:47:13 GMT
+
+_Version update only_
+
+## 7.28.0
+Tue, 28 Jun 2022 00:23:32 GMT
+
+### Minor changes
+
+- Add support for the "ignoreMissingEntryPoint" ExtractorConfig option to allow for loading an ExtractorConfig before the target project is built.
+
+## 7.27.1
+Mon, 27 Jun 2022 18:43:09 GMT
+
+_Version update only_
+
+## 7.27.0
+Sat, 25 Jun 2022 21:00:40 GMT
+
+### Minor changes
+
+- API Extractor now populates an initializerTokenRange field for ApiProperty and ApiVariable items.
+
+## 7.26.1
+Sat, 25 Jun 2022 01:54:29 GMT
+
+_Version update only_
+
+## 7.26.0
+Fri, 24 Jun 2022 07:16:47 GMT
+
+### Minor changes
+
+- Include new configuration option for preserving enum member order
+
+## 7.25.3
+Thu, 23 Jun 2022 22:14:24 GMT
+
+_Version update only_
+
+## 7.25.2
+Fri, 17 Jun 2022 09:17:54 GMT
+
+_Version update only_
+
+## 7.25.1
+Fri, 17 Jun 2022 00:16:18 GMT
+
+_Version update only_
+
+## 7.25.0
+Tue, 07 Jun 2022 09:37:04 GMT
+
+### Minor changes
+
+- Add an "isReadonly" field to the doc model to indicate whether a property or variable is readonly
+- Add an "isProtected" field to the doc model to indicate protected class members
+
+## 7.24.2
+Wed, 25 May 2022 22:25:07 GMT
+
+### Patches
+
+- Fix an issue where API Extractor would fail to run on a project where `"moduleResolution"` is set to `"Node16"` in `tsconfig.json`
+
+## 7.24.1
+Thu, 19 May 2022 15:13:20 GMT
+
+### Patches
+
+- Fix a recent regression that produced an error "Cannot read properties of undefined" (GitHub #3423)
+
+## 7.24.0
+Sat, 14 May 2022 03:01:27 GMT
+
+### Minor changes
+
+- Throw an error early if API Extractor will attempt to process non-.d.ts files
+- Generate API doc model nodes for setters without getters
+
+### Patches
+
+- Address edge case in excerptBuilder token range logic
+
+## 7.23.2
+Tue, 10 May 2022 01:20:43 GMT
+
+_Version update only_
+
+## 7.23.1
+Wed, 04 May 2022 23:29:13 GMT
+
+### Patches
+
+- Update the global variable analyzer to add support for changes to the TypeScript internals coming in v4.7
+
+## 7.23.0
+Sat, 23 Apr 2022 02:13:06 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.6
+
+## 7.22.2
+Fri, 15 Apr 2022 00:12:36 GMT
+
+_Version update only_
+
+## 7.22.1
+Wed, 13 Apr 2022 15:12:40 GMT
+
+_Version update only_
+
+## 7.22.0
+Tue, 12 Apr 2022 23:29:34 GMT
+
+### Minor changes
+
+- Add an alphaTrimmedFilePath option that adds support for generating a DTS rollup that inclues @alpha, @beta, and @public members.
+
+## 7.21.3
+Tue, 12 Apr 2022 02:58:32 GMT
+
+### Patches
+
+- Update TSDoc dependencies.
+
+## 7.21.2
+Sat, 09 Apr 2022 19:07:47 GMT
+
+### Patches
+
+- Fix ambient modules bug caused by #3321.
+
+## 7.21.1
+Sat, 09 Apr 2022 02:24:26 GMT
+
+### Patches
+
+- Rename the "master" branch to "main".
+
+## 7.21.0
+Fri, 08 Apr 2022 20:05:59 GMT
+
+### Minor changes
+
+- Add support for projects that use tsconfig.json "baseUrl" and "paths" settings to remap imports of local files (GitHub #3291)
+
+## 7.20.1
+Wed, 06 Apr 2022 22:35:23 GMT
+
+### Patches
+
+- Fix an issue where .api.json excerpt text included extra whitespace (GitHub #3316)
+
+## 7.20.0
+Thu, 31 Mar 2022 02:06:05 GMT
+
+### Minor changes
+
+- Updated api-extractor to extract whether a parameter is optional.
+
+## 7.19.5
+Tue, 15 Mar 2022 19:15:53 GMT
+
+_Version update only_
+
+## 7.19.4
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
+
+## 7.19.3
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 7.19.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 7.19.1
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 7.19.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 7.18.21
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 7.18.20
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 7.18.19
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 7.18.18
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 7.18.17
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 7.18.16
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 7.18.15
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 7.18.14
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 7.18.13
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 7.18.12
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 7.18.11
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 7.18.10
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 7.18.9
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 7.18.8
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 7.18.7
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
+
+## 7.18.6
+Fri, 20 Aug 2021 15:08:10 GMT
+
+_Version update only_
+
+## 7.18.5
+Wed, 11 Aug 2021 00:07:21 GMT
+
+_Version update only_
+
+## 7.18.4
+Wed, 14 Jul 2021 15:06:29 GMT
+
+### Patches
+
+- Fix an issue where the .d.ts rollup sometimes used "default" as an identifier name causing a syntax error (GitHub #2804)
+
+## 7.18.3
+Tue, 13 Jul 2021 23:00:33 GMT
+
+### Patches
+
+- Revert a workaround for TypeScript issue #44422 which was fixed in 4.3.3
+
+## 7.18.2
+Mon, 12 Jul 2021 23:08:26 GMT
+
+_Version update only_
+
+## 7.18.1
+Thu, 08 Jul 2021 23:41:16 GMT
+
+### Patches
+
+- Fix a recent regression that reported "Internal Error: indentDocComment cannot be nested" (GitHub #2797)
+
+## 7.18.0
+Thu, 08 Jul 2021 06:00:48 GMT
+
+### Minor changes
+
+- Add support for import() type expressions (GitHub #1050) -- Thank you @javier-garcia-meteologica and @adventure-yunfei for solving this difficult problem!
+- Improve formatting of declarations in .d.ts rollup and .api.md files, fixing some indentation issues
 
 ## 7.17.1
 Thu, 01 Jul 2021 15:08:27 GMT

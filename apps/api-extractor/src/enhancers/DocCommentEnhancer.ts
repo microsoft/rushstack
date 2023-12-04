@@ -4,10 +4,10 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
@@ -28,7 +28,11 @@ export class DocCommentEnhancer {
   public analyze(): void {
     for (const entity of this._collector.entities) {
       if (entity.astEntity instanceof AstSymbol) {
-        if (entity.consumable) {
+        if (
+          entity.consumable ||
+          this._collector.extractorConfig.apiReportIncludeForgottenExports ||
+          this._collector.extractorConfig.docModelIncludeForgottenExports
+        ) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
             this._analyzeApiItem(astDeclaration);
           });
@@ -69,7 +73,7 @@ export class DocCommentEnhancer {
       // Constructors always do pretty much the same thing, so it's annoying to require people to write
       // descriptions for them.  Instead, if the constructor lacks a TSDoc summary, then API Extractor
       // will auto-generate one.
-      metadata.needsDocumentation = false;
+      metadata.undocumented = false;
 
       // The class that contains this constructor
       const classDeclaration: AstDeclaration = astDeclaration.parent!;
@@ -131,12 +135,12 @@ export class DocCommentEnhancer {
 
     if (metadata.tsdocComment) {
       // Require the summary to contain at least 10 non-spacing characters
-      metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
+      metadata.undocumented = !tsdoc.PlainTextEmitter.hasAnyTextContent(
         metadata.tsdocComment.summarySection,
         10
       );
     } else {
-      metadata.needsDocumentation = true;
+      metadata.undocumented = true;
     }
   }
 

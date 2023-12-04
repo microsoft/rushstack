@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
+import type * as ts from 'typescript';
 
-import { AstSymbol } from './AstSymbol';
-import { AstEntity } from './AstEntity';
+import type { AstSymbol } from './AstSymbol';
+import type { AstEntity } from './AstEntity';
 
 /**
  * Represents information collected by {@link AstSymbolTable.fetchAstModuleExportInfo}

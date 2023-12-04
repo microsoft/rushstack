@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as ts from 'typescript';
+import type * as ts from 'typescript';
 
-import { AstModule, AstModuleExportInfo } from './AstModule';
+import type { AstModule, AstModuleExportInfo } from './AstModule';
 import { AstSyntheticEntity } from './AstEntity';
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 
 export interface IAstNamespaceImportOptions {
   readonly astModule: AstModule;
   readonly namespaceName: string;
   readonly declaration: ts.Declaration;
+  readonly symbol: ts.Symbol;
 }
 
 /**
@@ -67,11 +68,17 @@ export class AstNamespaceImport extends AstSyntheticEntity {
    */
   public readonly declaration: ts.Declaration;
 
+  /**
+   * The original `ts.SymbolFlags.Namespace` symbol.
+   */
+  public readonly symbol: ts.Symbol;
+
   public constructor(options: IAstNamespaceImportOptions) {
     super();
     this.astModule = options.astModule;
     this.namespaceName = options.namespaceName;
     this.declaration = options.declaration;
+    this.symbol = options.symbol;
   }
 
   /** {@inheritdoc} */

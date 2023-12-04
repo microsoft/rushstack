@@ -1,21 +1,20 @@
 {
-  "projectOutputFolderNames": [
-    "out-all",
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
 
-    "out-all-except-for-images",
-
-    "out-all-linked",
-
-    "out-images-flattened",
-
-    "out-images1",
-
-    "out-images2",
-
-    "out-images3",
-
-    "out-images4",
-
-    "out-images5"
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": [
+        "out-all",
+        "out-all-except-for-images",
+        "out-all-linked",
+        "out-images-flattened",
+        "out-images1",
+        "out-images2",
+        "out-images3",
+        "out-images4",
+        "out-images5"
+      ]
+    }
   ]
 }

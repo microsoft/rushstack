@@ -2,6 +2,7 @@
 
 exports[`01 color enabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "test message",
   "verbose": "",
@@ -11,6 +12,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 01 write 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2",
   "verbose": "",
@@ -20,6 +22,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "[green]message 1[default]",
   "verbose": "",
@@ -29,6 +32,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "[green]message 1[default][red]message 2[default]",
   "verbose": "",
@@ -38,6 +42,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1[green]message 2[default]message 3[red]message 4[default]",
   "verbose": "",
@@ -47,6 +52,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "test message[n]",
   "verbose": "",
@@ -56,6 +62,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2[n]",
   "verbose": "",
@@ -65,6 +72,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "[green]message 1[default][n]",
   "verbose": "",
@@ -74,6 +82,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "[green]message 1[default][red]message 2[default][n]",
   "verbose": "",
@@ -83,6 +92,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1[green]message 2[default]message 3[red]message 4[default][n]",
   "verbose": "",
@@ -92,6 +102,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 03 writeWarning 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -101,6 +112,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -110,6 +122,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -119,6 +132,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -128,6 +142,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -137,6 +152,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -146,6 +162,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -155,6 +172,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -164,6 +182,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -173,6 +192,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -182,6 +202,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "[red]test message[default]",
   "log": "",
   "verbose": "",
@@ -191,6 +212,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default]",
   "log": "",
   "verbose": "",
@@ -200,6 +222,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default]",
   "log": "",
   "verbose": "",
@@ -209,6 +232,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default]",
   "log": "",
   "verbose": "",
@@ -218,6 +242,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default]",
   "log": "",
   "verbose": "",
@@ -227,6 +252,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "[red]test message[default][n]",
   "log": "",
   "verbose": "",
@@ -236,6 +262,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default][n]",
   "log": "",
   "verbose": "",
@@ -245,6 +272,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][n]",
   "log": "",
   "verbose": "",
@@ -254,6 +282,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default][n]",
   "log": "",
   "verbose": "",
@@ -263,6 +292,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n]",
   "log": "",
   "verbose": "",
@@ -272,6 +302,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "test message",
@@ -281,6 +312,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2",
@@ -290,6 +322,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "[green]message 1[default]",
@@ -299,6 +332,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "[green]message 1[default][red]message 2[default]",
@@ -308,6 +342,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1[green]message 2[default]message 3[red]message 4[default]",
@@ -317,6 +352,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "test message[n]",
@@ -326,6 +362,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2[n]",
@@ -335,6 +372,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "[green]message 1[default][n]",
@@ -344,6 +382,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "[green]message 1[default][red]message 2[default][n]",
@@ -353,6 +392,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1[green]message 2[default]message 3[red]message 4[default][n]",
@@ -362,6 +402,7 @@ Object {
 
 exports[`01 color enabled 05 writes to multiple streams 1`] = `
 Object {
+  "debug": "",
   "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][red]test message[default][n][red]message 1[default][red]message 2[default][red]message 1[default][red]message 2[default][n][red]message 1[default][red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n][red]message 1[default][n][red]test message[default][red]message 1[default][red]message 2[default][n][red]message 1[default][red]message 2[default]",
   "log": "message 1[green]message 2[default]message 3[red]message 4[default][green]message 1[default][n][green]message 1[default][green]message 1[default][red]message 2[default][green]message 1[default][red]message 2[default][n]test messagemessage 1[green]message 2[default]message 3[red]message 4[default][n]message 1message 2test message[n]message 1message 2[n]",
   "verbose": "test message[green]message 1[default]message 1[green]message 2[default]message 3[red]message 4[default][n]test message[n]message 1[green]message 2[default]message 3[red]message 4[default]message 1message 2[green]message 1[default][n][green]message 1[default][red]message 2[default][n]message 1message 2[n][green]message 1[default][red]message 2[default]",
@@ -371,6 +412,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "test message",
   "verbose": "",
@@ -380,6 +422,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 01 write 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2",
   "verbose": "",
@@ -389,6 +432,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1",
   "verbose": "",
@@ -398,6 +442,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2",
   "verbose": "",
@@ -407,6 +452,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2message 3message 4",
   "verbose": "",
@@ -416,6 +462,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "test message[n]",
   "verbose": "",
@@ -425,6 +472,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2[n]",
   "verbose": "",
@@ -434,6 +482,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1[n]",
   "verbose": "",
@@ -443,6 +492,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2[n]",
   "verbose": "",
@@ -452,6 +502,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "message 1message 2message 3message 4[n]",
   "verbose": "",
@@ -461,6 +512,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 03 writeWarning 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -470,6 +522,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -479,6 +532,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -488,6 +542,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -497,6 +552,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -506,6 +562,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -515,6 +572,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -524,6 +582,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -533,6 +592,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -542,6 +602,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "",
@@ -551,6 +612,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "test message",
   "log": "",
   "verbose": "",
@@ -560,6 +622,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2",
   "log": "",
   "verbose": "",
@@ -569,6 +632,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "message 1",
   "log": "",
   "verbose": "",
@@ -578,6 +642,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2",
   "log": "",
   "verbose": "",
@@ -587,6 +652,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2message 3message 4",
   "log": "",
   "verbose": "",
@@ -596,6 +662,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "test message[n]",
   "log": "",
   "verbose": "",
@@ -605,6 +672,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2[n]",
   "log": "",
   "verbose": "",
@@ -614,6 +682,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "message 1[n]",
   "log": "",
   "verbose": "",
@@ -623,6 +692,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2[n]",
   "log": "",
   "verbose": "",
@@ -632,6 +702,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2message 3message 4[n]",
   "log": "",
   "verbose": "",
@@ -641,6 +712,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "test message",
@@ -650,6 +722,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2",
@@ -659,6 +732,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1",
@@ -668,6 +742,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2",
@@ -677,6 +752,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2message 3message 4",
@@ -686,6 +762,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "test message[n]",
@@ -695,6 +772,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2[n]",
@@ -704,6 +782,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1[n]",
@@ -713,6 +792,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2[n]",
@@ -722,6 +802,7 @@ Object {
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
+  "debug": "",
   "error": "",
   "log": "",
   "verbose": "message 1message 2message 3message 4[n]",
@@ -729,8 +810,109 @@ Object {
 }
 `;
 
+exports[`02 color disabled 01 basic terminal functions 09 writeDebug 01 writes a single message 1`] = `
+Object {
+  "debug": "test message",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 09 writeDebug 02 writes multiple messages 1`] = `
+Object {
+  "debug": "message 1message 2",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 09 writeDebug 03 writes a message with colors 1`] = `
+Object {
+  "debug": "message 1",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 09 writeDebug 04 writes a multiple messages with colors 1`] = `
+Object {
+  "debug": "message 1message 2",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 09 writeDebug 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "debug": "message 1message 2message 3message 4",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 10 writeDebugLine 01 writes a single message 1`] = `
+Object {
+  "debug": "test message[n]",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 10 writeDebugLine 02 writes multiple messages 1`] = `
+Object {
+  "debug": "message 1message 2[n]",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 10 writeDebugLine 03 writes a message with colors 1`] = `
+Object {
+  "debug": "message 1[n]",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 10 writeDebugLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "debug": "message 1message 2[n]",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 10 writeDebugLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "debug": "message 1message 2message 3message 4[n]",
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
 exports[`02 color disabled 05 writes to multiple streams 1`] = `
 Object {
+  "debug": "",
   "error": "message 1message 2message 3message 4test message[n]message 1message 2message 1message 2[n]message 1message 1message 2message 3message 4[n]message 1[n]test messagemessage 1message 2[n]message 1message 2",
   "log": "message 1message 2message 3message 4message 1[n]message 1message 1message 2message 1message 2[n]test messagemessage 1message 2message 3message 4[n]message 1message 2test message[n]message 1message 2[n]",
   "verbose": "test messagemessage 1message 1message 2message 3message 4[n]test message[n]message 1message 2message 3message 4message 1message 2message 1[n]message 1message 2[n]message 1message 2[n]message 1message 2",

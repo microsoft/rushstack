@@ -6,13 +6,16 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "start": "node lib/start.js"
+    "start": "node lib/start.js",
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "10.17.13",
-    "eslint": "~7.12.1",
-    "typescript": "~3.9.7"
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@types/node": "18.17.15",
+    "eslint": "~8.7.0",
+    "typescript": "~5.0.4"
   }
 }

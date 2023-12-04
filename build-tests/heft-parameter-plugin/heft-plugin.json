@@ -1,0 +1,85 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "heft-parameter-plugin",
+      "entryPoint": "./lib/index",
+      "parameterScope": "heft-parameter-plugin",
+      "parameters": [
+        {
+          "longName": "--custom-parameter",
+          "parameterKind": "flag",
+          "description": "Test running a custom flag parameter"
+        },
+        {
+          "longName": "--custom-integer-parameter",
+          "parameterKind": "integer",
+          "description": "Test running a custom integer parameter",
+          "argumentName": "INTEGER"
+        },
+        {
+          "longName": "--custom-integer-list-parameter",
+          "parameterKind": "integerList",
+          "description": "Test running a custom integer list parameter",
+          "argumentName": "INTEGER"
+        },
+        {
+          "longName": "--custom-string-parameter",
+          "parameterKind": "string",
+          "argumentName": "TEXT",
+          "description": "Test running a custom string parameter",
+          "required": true
+        },
+        {
+          "longName": "--custom-string-list-parameter",
+          "parameterKind": "stringList",
+          "argumentName": "LIST_ITEM",
+          "description": "Test running a custom string list parameter"
+        },
+        {
+          "longName": "--custom-choice-parameter",
+          "parameterKind": "choice",
+          "alternatives": [
+            {
+              "name": "red",
+              "description": "The red choice"
+            },
+            {
+              "name": "blue",
+              "description": "The blue choice"
+            }
+          ],
+          "description": "Test running a custom choice parameter"
+        },
+        {
+          "longName": "--custom-choice-list-parameter",
+          "parameterKind": "choiceList",
+          "alternatives": [
+            {
+              "name": "totodile",
+              "description": "The totodile choice"
+            },
+            {
+              "name": "jynx",
+              "description": "The jynx choice"
+            },
+            {
+              "name": "gudetama",
+              "description": "The gudetama choice"
+            },
+            {
+              "name": "impidimp",
+              "description": "The impidimp choice"
+            },
+            {
+              "name": "wobbuffet",
+              "description": "The wobbuffet choice"
+            }
+          ],
+          "description": "Test running a custom choice list parameter"
+        }
+      ]
+    }
+  ]
+}

@@ -6,10 +6,10 @@
 
 A type alias that has duplicate references.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-export declare type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
 ```
-<b>References:</b> [SystemEvent](./api-documenter-test.systemevent.md)
+**References:** [SystemEvent](./api-documenter-test.systemevent.md)
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AstSymbol } from './AstSymbol';
+import type { AstSymbol } from './AstSymbol';
 import { InternalError } from '@rushstack/node-core-library';
 import { AstSyntheticEntity } from './AstEntity';
 
@@ -27,7 +27,12 @@ export enum AstImportKind {
   /**
    * An import statement such as `import x = require("y");`.
    */
-  EqualsImport
+  EqualsImport,
+
+  /**
+   * An import statement such as `interface foo { foo: import("bar").a.b.c }`.
+   */
+  ImportType
 }
 
 /**
@@ -80,6 +85,9 @@ export class AstImport extends AstSyntheticEntity {
    *
    * // For AstImportKind.EqualsImport style, exportName would be "x" in this example:
    * import x = require("y");
+   *
+   * // For AstImportKind.ImportType style, exportName would be "a.b.c" in this example:
+   * interface foo { foo: import('bar').a.b.c };
    * ```
    */
   public readonly exportName: string;
@@ -142,6 +150,14 @@ export class AstImport extends AstSyntheticEntity {
         return `${options.modulePath}:*`;
       case AstImportKind.EqualsImport:
         return `${options.modulePath}:=`;
+      case AstImportKind.ImportType: {
+        const subKey: string = !options.exportName
+          ? '*' // Equivalent to StarImport
+          : options.exportName.includes('.') // Equivalent to a named export
+          ? options.exportName.split('.')[0]
+          : options.exportName;
+        return `${options.modulePath}:${subKey}`;
+      }
       default:
         throw new InternalError('Unknown AstImportKind');
     }

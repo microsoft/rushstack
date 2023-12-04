@@ -1,0 +1,56 @@
+{
+  "name": "@rushstack/webpack4-module-minifier-plugin",
+  "version": "0.13.12",
+  "description": "This plugin splits minification of webpack compilations into smaller units.",
+  "main": "lib/index.js",
+  "typings": "dist/webpack4-module-minifier-plugin.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/webpack4-module-minifier-plugin"
+  },
+  "engines": {
+    "node": ">=10.17.1"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "peerDependencies": {
+    "@types/webpack": "*",
+    "@types/webpack-sources": "*",
+    "webpack": "^4.31.0",
+    "webpack-sources": "~1.4.3",
+    "@types/node": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/webpack": {
+      "optional": true
+    },
+    "@types/webpack-sources": {
+      "optional": true
+    },
+    "@types/node": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@rushstack/module-minifier": "workspace:*",
+    "@rushstack/worker-pool": "workspace:*",
+    "@types/tapable": "1.0.6",
+    "tapable": "1.1.3"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@types/webpack": "4.41.32",
+    "@types/webpack-sources": "1.4.2",
+    "webpack": "~4.47.0",
+    "webpack-sources": "~1.4.3"
+  },
+  "sideEffects": [
+    "./lib/OverrideWebpackIdentifierAllocation"
+  ]
+}

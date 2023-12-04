@@ -55,7 +55,6 @@ function fixup(packageJson, dependencies) {
 function readPackage(packageJson, context) {
   fixup(packageJson, packageJson.dependencies);
   fixup(packageJson, packageJson.devDependencies);
-  fixup(packageJson, packageJson.peerDependencies);
   fixup(packageJson, packageJson.optionalDependencies);
   return packageJson;
 }

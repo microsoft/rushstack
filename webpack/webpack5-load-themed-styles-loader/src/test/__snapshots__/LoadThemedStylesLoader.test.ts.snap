@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`webpack5-load-themed-style-loader generates desired loader output snapshot: LoaderContent 1`] = `
+"var content = require(\\"!!../../../../../common/temp/node_modules/.pnpm/css-loader@6.6.0_webpack@5.82.1/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./MockStyle1.css\\");
+var loader = require(\\"../../../lib/test/testData/LoadThemedStylesMock\\");
+
+if(typeof content === \\"string\\") content = [[module.id, content]];
+
+// add the styles to the DOM
+for (var i = 0; i < content.length; i++) loader.loadStyles(content[i][1], false);
+
+if(content.locals) module.exports = content.locals;"
+`;
+
+exports[`webpack5-load-themed-style-loader generates desired output for esModule option set to "true" as a snapshot: LoaderContent ESModule 1`] = `
+"import content from \\"!!../../../../../common/temp/node_modules/.pnpm/css-loader@6.6.0_webpack@5.82.1/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./MockStyle1.css\\";
+import { loadStyles } from \\"../../../lib/test/testData/LoadThemedStylesMock\\";
+
+if(typeof content === \\"string\\") content = [[module.id, content]];
+
+// add the styles to the DOM
+for (var i = 0; i < content.length; i++) loadStyles(content[i][1], false);
+
+if(content.locals) module.exports = content.locals;"
+`;

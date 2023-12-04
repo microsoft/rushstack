@@ -12,39 +12,45 @@ import {
   NewlineKind,
   InternalError
 } from '@rushstack/node-core-library';
-import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
 import {
-  ApiModel,
-  ApiItem,
+  StringBuilder,
+  type DocSection,
+  type DocComment,
+  type DocBlock,
+  StandardTags
+} from '@microsoft/tsdoc';
+import {
+  type ApiModel,
+  type ApiItem,
   ApiItemKind,
   ApiDocumentedItem,
   ApiReleaseTagMixin,
   ReleaseTag,
-  ApiPropertyItem,
+  type ApiPropertyItem,
   ApiItemContainerMixin,
-  ApiPackage,
-  ApiEnumMember,
+  type ApiPackage,
+  type ApiEnumMember,
   ApiClass,
   ApiInterface,
-  ApiMethod,
-  ApiMethodSignature,
-  ApiConstructor,
-  ApiFunction,
+  type ApiMethod,
+  type ApiMethodSignature,
+  type ApiConstructor,
+  type ApiFunction,
   ApiReturnTypeMixin,
   ApiTypeParameterListMixin,
-  Excerpt,
-  ExcerptToken,
+  type Excerpt,
+  type ExcerptToken,
   ExcerptTokenKind,
-  HeritageType,
-  ApiVariable,
-  ApiTypeAlias
+  type HeritageType,
+  type ApiVariable,
+  type ApiTypeAlias
 } from '@microsoft/api-extractor-model';
 import {
-  DeclarationReference,
+  type DeclarationReference,
   Navigation,
   Meaning
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
-import {
+import type {
   IYamlApiFile,
   IYamlItem,
   IYamlSyntax,
@@ -53,14 +59,13 @@ import {
   IYamlReferenceSpec,
   IYamlInheritanceTree
 } from '../yaml/IYamlApiFile';
-import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
+import type { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
+import typescriptSchema from '../yaml/typescript.schema.json';
 
-const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
-  path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
-);
+const yamlApiSchema: JsonSchema = JsonSchema.fromLoadedObject(typescriptSchema);
 
 interface IYamlReferences {
   references: IYamlReference[];
@@ -89,15 +94,17 @@ interface INameOptions {
  */
 export class YamlDocumenter {
   protected readonly newDocfxNamespaces: boolean;
+  private readonly _yamlFormat: string;
   private readonly _apiModel: ApiModel;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
   private _yamlReferences: IYamlReferences | undefined;
 
-  public constructor(apiModel: ApiModel, newDocfxNamespaces: boolean = false) {
+  public constructor(apiModel: ApiModel, newDocfxNamespaces: boolean = false, yamlFormat: string = 'sdp') {
     this._apiModel = apiModel;
     this.newDocfxNamespaces = newDocfxNamespaces;
+    this._yamlFormat = yamlFormat;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
 
@@ -114,7 +121,9 @@ export class YamlDocumenter {
       this._visitApiItems(outputFolder, apiPackage, undefined);
     }
 
-    convertUDPYamlToSDP(outputFolder);
+    if (this._yamlFormat === 'sdp') {
+      convertUDPYamlToSDP(outputFolder);
+    }
 
     this._writeTocFile(outputFolder, this._apiModel.packages);
   }
@@ -352,6 +361,7 @@ export class YamlDocumenter {
       case ApiItemKind.Package:
       case ApiItemKind.Interface:
       case ApiItemKind.Enum:
+      case ApiItemKind.TypeAlias:
         return false;
       case ApiItemKind.Namespace:
         return !this.newDocfxNamespaces;
@@ -397,6 +407,20 @@ export class YamlDocumenter {
         }
       }
 
+      if (tsdocComment) {
+        // Write the @example blocks
+        const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
+          (x) => x.blockTag.tagNameWithUpperCase === StandardTags.example.tagNameWithUpperCase
+        );
+
+        for (const exampleBlock of exampleBlocks) {
+          const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
+          if (example) {
+            yamlItem.example = [...(yamlItem.example || []), example];
+          }
+        }
+      }
+
       if (tsdocComment.deprecatedBlock) {
         const deprecatedMessage: string = this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
         if (deprecatedMessage.length > 0) {
@@ -406,7 +430,7 @@ export class YamlDocumenter {
     }
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha || apiItem.releaseTag === ReleaseTag.Beta) {
         yamlItem.isPreview = true;
       }
     }
@@ -437,7 +461,7 @@ export class YamlDocumenter {
         yamlItem.type = 'field';
         const enumMember: ApiEnumMember = apiItem as ApiEnumMember;
 
-        if (enumMember.initializerExcerpt.text.length > 0) {
+        if (enumMember.initializerExcerpt && enumMember.initializerExcerpt.text.length > 0) {
           yamlItem.numericValue = enumMember.initializerExcerpt.text;
         }
 
@@ -621,7 +645,8 @@ export class YamlDocumenter {
       parameters.push({
         id: apiParameter.name,
         description: parameterDescription,
-        type: [this._renderType(uid, apiParameter.parameterTypeExcerpt)]
+        type: [this._renderType(uid, apiParameter.parameterTypeExcerpt)],
+        optional: apiParameter.isOptional
       } as IYamlParameter);
     }
 

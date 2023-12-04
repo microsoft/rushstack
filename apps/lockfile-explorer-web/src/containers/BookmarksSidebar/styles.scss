@@ -1,0 +1,19 @@
+.BookmarksWrapper {
+  margin: 12px 0;
+  height: calc(100vh - 94px - 44px);
+}
+
+.BookmarkEntry {
+  padding: 4px 0;
+  margin-top: 8px;
+  cursor: pointer;
+  & > * + * {
+    margin-top: 8px;
+  }
+}
+
+.BookmarkLabel {
+  &:hover {
+    background: #dff6dd;
+  }
+}

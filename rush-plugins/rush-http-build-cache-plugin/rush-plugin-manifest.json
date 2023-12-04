@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "rush-http-build-cache-plugin",
+      "description": "Rush plugin for generic HTTP build cache",
+      "entryPoint": "lib/index.js",
+      "optionsSchema": "lib/schemas/plugin-config.schema.json"
+    }
+  ]
+}

@@ -5,7 +5,13 @@
  * controlled by API Extractor's own "api-extractor.json" config file.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/api-extractor-task.schema.json"
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/api-extractor-task.schema.json"
+
+  /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  // "extends": "base-project/config/api-extractor-task.json",
 
   /**
    * If set to true, use the project's TypeScript compiler version for API Extractor's

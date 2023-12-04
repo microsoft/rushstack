@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: IDocInterface5
 summary: Interface without inline tag to test custom TOC
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: interface
@@ -15,6 +16,7 @@ properties:
     fullName: regularProperty
     summary: Property of type string that does something
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

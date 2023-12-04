@@ -4,9 +4,9 @@
 
 ```ts
 
-import { Brand } from '@rushstack/node-core-library';
+import type { Brand } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
-import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class CallbackWritable extends TerminalWritable {
@@ -23,7 +23,7 @@ export class DiscardStdoutTransform extends TerminalTransform {
     constructor(options: IDiscardStdoutTransformOptions);
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
-    }
+}
 
 // @public
 export interface ICallbackWritableOptions {
@@ -113,8 +113,13 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
 // @public
 export class PrintUtilities {
     static getConsoleWidth(): number | undefined;
-    static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void;
+    static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
+    static wrapWords(text: string, maxLineLength?: number, linePrefix?: string): string;
+    static wrapWords(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string;
+    static wrapWordsToLines(text: string, maxLineLength?: number, indent?: number): string[];
+    static wrapWordsToLines(text: string, maxLineLength?: number, linePrefix?: string): string[];
+    static wrapWordsToLines(text: string, maxLineLength?: number, indentOrLinePrefix?: number | string): string[];
 }
 
 // @public
@@ -147,7 +152,7 @@ export class StderrLineTransform extends TerminalTransform {
     protected onClose(): void;
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
-    }
+}
 
 // @beta
 export class StdioSummarizer extends TerminalWritable {
@@ -155,7 +160,7 @@ export class StdioSummarizer extends TerminalWritable {
     getReport(): string;
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
-    }
+}
 
 // @public
 export class StdioWritable extends TerminalWritable {
@@ -218,6 +223,5 @@ export class TextRewriterTransform extends TerminalTransform {
     // (undocumented)
     readonly textRewriters: ReadonlyArray<TextRewriter>;
 }
-
 
 ```

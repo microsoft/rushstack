@@ -1,6 +1,10 @@
-import { DynamicCommandLineParser, DynamicCommandLineAction } from '..';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
+import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { TabCompleteAction } from '../providers/TabCompletionAction';
-import { ICommandLineStringDefinition } from '../parameters/CommandLineDefinition';
+import type { ICommandLineStringDefinition } from '../parameters/CommandLineDefinition';
 
 /**
  * Provides the parameter configuration for '--variant'.
@@ -31,8 +35,8 @@ function getCommandLineParser(): DynamicCommandLineParser {
 
   const addAction: DynamicCommandLineAction = new DynamicCommandLineAction({
     actionName: 'add',
-    summary: 'Adds a dependency to the package.json and runs rush upgrade.',
-    documentation: 'Adds a dependency to the package.json and runs rush upgrade.'
+    summary: 'Adds a dependency to the package.json and runs rush update.',
+    documentation: 'Adds a dependency to the package.json and runs rush update.'
   });
   commandLineParser.addAction(addAction);
   addAction.defineStringParameter({
@@ -211,7 +215,7 @@ function getCommandLineParser(): DynamicCommandLineParser {
 const commandLineParser: DynamicCommandLineParser = getCommandLineParser();
 const tc: TabCompleteAction = new TabCompleteAction(commandLineParser.actions, commandLineParser.parameters);
 
-describe('Gets TabCompletion(s)', () => {
+describe(TabCompleteAction.name, () => {
   it(`gets completion(s) for rush <tab>`, async () => {
     const commandLine: string = 'rush ';
     const actual: string[] = await arrayFromAsyncIteractorAsync(
@@ -370,7 +374,7 @@ describe('Gets TabCompletion(s)', () => {
   });
 });
 
-describe(`Tokenize command line`, () => {
+describe(TabCompleteAction.prototype.tokenizeCommandLine.name, () => {
   it(`tokenizes "rush change -"`, () => {
     const commandLine: string = 'rush change -';
     const actual: string[] = tc.tokenizeCommandLine(commandLine.trim());

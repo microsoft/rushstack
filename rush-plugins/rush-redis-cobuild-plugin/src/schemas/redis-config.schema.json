@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for cobuild lock with Redis configuration\n\nhttps://github.com/redis/node-redis/blob/master/docs/client-configuration.md",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "redis[s]://[[username][:password]@][host][:port][/db-number]\n\n See the following links for more information:\n\nredis: https://www.iana.org/assignments/uri-schemes/prov/redis\n\nrediss: https://www.iana.org/assignments/uri-schemes/prov/rediss"
+    },
+    "socket": {
+      "type": "object",
+      "description": "Socket connection properties. Unlisted net.connect properties (and tls.connect) are also supported",
+      "properties": {
+        "port": {
+          "description": "Redis server port. Default value is 6379",
+          "type": "number"
+        },
+        "host": {
+          "description": "Redis server host. Default value is localhost",
+          "type": "string"
+        },
+        "family": {
+          "description": "IP Stack version (one of 4 | 6 | 0). Default value is 0",
+          "type": "number"
+        },
+        "path": {
+          "description": "path to the UNIX Socket",
+          "type": "string"
+        },
+        "connectTimeout": {
+          "description": "Connection timeout in milliseconds. Default value is 5000",
+          "type": "number"
+        },
+        "noDelay": {
+          "description": "Toggle Nagle's algorithm. Default value is true",
+          "type": "boolean"
+        },
+        "keepAlive": {
+          "description": "Toggle keep alive on the socket",
+          "type": "boolean"
+        }
+      }
+    },
+    "username": {
+      "description": "ACL username",
+      "type": "string"
+    },
+    "passwordEnvironmentVariable": {
+      "description": "The environment variable used to get the ACL password",
+      "type": "string"
+    },
+    "name": {
+      "description": "Redis client name",
+      "type": "string"
+    },
+    "database": {
+      "description": "Redis database number",
+      "type": "number"
+    },
+    "legacyMode": {
+      "description": "Maintain some backwards compatibility",
+      "type": "boolean"
+    },
+    "pingInterval": {
+      "description": "Send PING command at interval (in ms). Useful with \"Azure Cache for Redis\".",
+      "type": "number"
+    }
+  }
+}

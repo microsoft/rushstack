@@ -6,7 +6,7 @@
 
 A namespace containing an ECMAScript symbol
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare namespace EcmaSmbols 
