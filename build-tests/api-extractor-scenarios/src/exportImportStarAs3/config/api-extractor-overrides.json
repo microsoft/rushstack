@@ -1,0 +1,7 @@
+{
+  "dtsRollup": {
+    "enabled": true,
+    "untrimmedFilePath": "<projectFolder>/temp/etc/exportImportStarAs3/rollup.d.ts",
+    "publicTrimmedFilePath": "<projectFolder>/temp/etc/exportImportStarAs3/rollup-public.d.ts"
+  }
+}

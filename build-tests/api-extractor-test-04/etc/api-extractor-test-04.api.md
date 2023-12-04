@@ -61,14 +61,14 @@ export namespace EntangledNamespace {
 export type ExportedAlias = AlphaClass;
 
 // Warning: (ae-internal-missing-underscore) The name "InternalClass" should be prefixed with an underscore because the declaration is marked as @internal
-//
+// 
 // @internal
 export class InternalClass {
     undecoratedMember(): void;
 }
 
 // Warning: (ae-internal-missing-underscore) The name "IPublicClassInternalParameters" should be prefixed with an underscore because the declaration is marked as @internal
-//
+// 
 // @internal
 export interface IPublicClassInternalParameters {
 }
@@ -82,24 +82,6 @@ export interface IPublicComplexInterface {
 }
 
 export { Lib1Interface }
-
-declare namespace NS {
-  export {
-    NS_PUBLIC,
-    NS_BETA,
-    NS_INTERNAL
-  }
-}
-export { NS }
-
-// @beta (undocumented)
-const NS_BETA = "BETA";
-
-// @internal (undocumented)
-const NS_INTERNAL = "INTERNAL";
-
-// @public (undocumented)
-const NS_PUBLIC = "PUBLIC";
 
 // @public
 export class PublicClass {
