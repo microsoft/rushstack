@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import schemaJson from '../schemas/subspaces.schema.json';
 import path from 'path';
 import { trueCasePathSync } from 'true-case-path';
 import { RushConfiguration } from './RushConfiguration';
@@ -15,10 +16,9 @@ export interface ISubspaceConfig {
  * See subspace.schema.json for documentation.
  */
 export interface ISubspaceConfigurationJson {
-  $schema: string;
   enabled: boolean;
   splitWorkspaceCompatibility?: boolean;
-  availableSubspaces: ISubspaceConfig;
+  availableSubspaces: ISubspaceConfig[];
 }
 
 /**
@@ -27,6 +27,7 @@ export interface ISubspaceConfigurationJson {
  * @beta
  */
 export class SubspaceConfiguration {
+  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
   /**
    * The absolute path to the "subspaces.json" configuration file that was loaded to construct this object.
    */
@@ -37,19 +38,26 @@ export class SubspaceConfiguration {
    *
    * @internal
    */
-  public readonly subspaceConfigurationJson: ISubspaceConfigurationJson;
+  public readonly configuration: Readonly<ISubspaceConfigurationJson>;
 
   /**
    * A set of the available subspaces
    */
   public readonly availableSubspaceSet: Set<string>;
 
-  private constructor(subspaceConfigurationJson: ISubspaceConfigurationJson, subspaceJsonFilename: string) {
-    this.subspaceConfigurationJson = subspaceConfigurationJson;
+  private constructor(subspaceJsonFilename: string) {
+    this.configuration = {
+      enabled: false,
+      availableSubspaces: []
+    };
     this.subspaceJsonFile = subspaceJsonFilename;
     this.availableSubspaceSet = new Set();
 
-    for (const { subspaceName } of Object.values(subspaceConfigurationJson.availableSubspaces)) {
+    if (FileSystem.exists(this.subspaceJsonFile)) {
+      this.configuration = JsonFile.loadAndValidate(this.subspaceJsonFile, SubspaceConfiguration._jsonSchema);
+    }
+
+    for (const { subspaceName } of Object.values(this.configuration.availableSubspaces)) {
       this.availableSubspaceSet.add(subspaceName);
     }
   }
@@ -57,15 +65,13 @@ export class SubspaceConfiguration {
   public static loadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration {
     let resolvedSubspaceJsonFilename: string = path.resolve(subspaceJsonFilename);
 
-    const subspaceConfigurationJson: ISubspaceConfigurationJson = JsonFile.load(resolvedSubspaceJsonFilename);
-
     try {
       resolvedSubspaceJsonFilename = trueCasePathSync(resolvedSubspaceJsonFilename);
     } catch (error) {
       /* ignore errors from true-case-path */
     }
 
-    return new SubspaceConfiguration(subspaceConfigurationJson, resolvedSubspaceJsonFilename);
+    return new SubspaceConfiguration(resolvedSubspaceJsonFilename);
   }
 
   public static loadFromDefaultLocation(): SubspaceConfiguration | undefined {

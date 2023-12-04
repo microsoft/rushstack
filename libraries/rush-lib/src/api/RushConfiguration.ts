@@ -42,7 +42,7 @@ import schemaJson from '../schemas/rush.schema.json';
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
-import { SubspaceConfiguration } from './SubspaceConfiguration';
+import { ISubspaceConfig, SubspaceConfiguration } from './SubspaceConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
