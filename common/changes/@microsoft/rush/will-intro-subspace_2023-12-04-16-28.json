@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add subspace configuration file structure",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
