@@ -374,6 +374,7 @@ export class RushConfiguration {
 
   /**
    * The object that specifies subspace configurations if they are provided in the rush workspace.
+   * @beta
    */
   public readonly subspaceConfiguration?: SubspaceConfiguration;
 

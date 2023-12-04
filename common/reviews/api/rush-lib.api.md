@@ -1124,7 +1124,7 @@ export class RushConfiguration {
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
-    // Warning: (ae-incompatible-release-tags) The symbol "subspaceConfiguration" is marked as @public, but its signature references "SubspaceConfiguration" which is marked as @beta
+    // @beta
     readonly subspaceConfiguration?: SubspaceConfiguration;
     get subspaceNames(): string[];
     readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;

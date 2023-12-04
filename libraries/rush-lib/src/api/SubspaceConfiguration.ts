@@ -11,13 +11,17 @@ export interface ISubspaceConfig {
 }
 
 /**
+ * (DEPRECATED)
+ *
  * This represents the JSON data structure for the "subspace.json" configuration file.
- * See subspace.schema.json for documentation.
+ * See subspace.schema.json for documentation. Includes the depreciated splitWorkspaceCompatibility property
+ * used to help migrate workspaces from a split-workspace state.
+ *
  */
 export interface ISubspaceConfigurationJson {
   $schema: string;
   enabled: boolean;
-  depreciatedTTSupport?: boolean;
+  splitWorkspaceCompatibility?: boolean;
   availableSubspaces: ISubspaceConfig;
 }
 
