@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 import path from 'path';
 import { trueCasePathSync } from 'true-case-path';
+import { ITryFindRushJsonLocationOptions, RushConfiguration } from './RushConfiguration';
 
 export interface ISubspaceConfig {
   subspaceName: string;
@@ -60,5 +61,13 @@ export class SubspaceConfiguration {
     }
 
     return new SubspaceConfiguration(subspaceConfigurationJson, resolvedSubspaceJsonFilename);
+  }
+
+  public static loadFromDefaultLocation(): SubspaceConfiguration | undefined {
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+    if (rushJsonLocation) {
+      const subspaceJsonLocation = path.join(path.dirname(rushJsonLocation), 'subspace.json');
+      return SubspaceConfiguration.loadFromConfigurationFile(subspaceJsonLocation);
+    }
   }
 }
