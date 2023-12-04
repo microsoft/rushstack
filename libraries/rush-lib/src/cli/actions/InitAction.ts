@@ -52,6 +52,7 @@ const ANY_MACRO_REGEXP: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 export class InitAction extends BaseConfiglessRushAction {
   private readonly _overwriteParameter: CommandLineFlagParameter;
   private readonly _rushExampleParameter: CommandLineFlagParameter;
+  private readonly _experimentsParameter: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
@@ -79,6 +80,12 @@ export class InitAction extends BaseConfiglessRushAction {
         'When copying the template config files, this uncomments fragments that are used' +
         ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush' +
         ' features. This option is primarily intended for maintaining that example.'
+    });
+    this._experimentsParameter = this.defineFlagParameter({
+      parameterLongName: '--include-experiments',
+      description:
+        'Include features that may not be complete features, useful for demoing specific future features' +
+        ' or current work in progress features.'
     });
   }
 
@@ -177,6 +184,12 @@ export class InitAction extends BaseConfiglessRushAction {
       '[dot]gitignore',
       'rush.json'
     ];
+
+    const experimentalTemplateFilePaths: string[] = ['subspaces.json'];
+
+    if (this._experimentsParameter.value) {
+      templateFilePaths.push(...experimentalTemplateFilePaths);
+    }
 
     const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
 

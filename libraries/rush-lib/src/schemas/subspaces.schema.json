@@ -19,11 +19,14 @@
     },
     "availableSubspaces": {
       "description": "Individual subspace configurations",
-      "type": "object",
-      "properties": {
-        "subspaceName": {
-          "description": "The name of the specific subspace.",
-          "type": "string"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "subspaceName": {
+            "description": "The name of the specific subspace.",
+            "type": "string"
+          }
         }
       }
     }

@@ -11,12 +11,8 @@ export interface ISubspaceConfig {
 }
 
 /**
- * (DEPRECATED)
- *
- * This represents the JSON data structure for the "subspace.json" configuration file.
- * See subspace.schema.json for documentation. Includes the depreciated splitWorkspaceCompatibility property
- * used to help migrate workspaces from a split-workspace state.
- *
+ * This represents the JSON data structure for the "subspaces.json" configuration file.
+ * See subspace.schema.json for documentation.
  */
 export interface ISubspaceConfigurationJson {
   $schema: string;
@@ -26,18 +22,18 @@ export interface ISubspaceConfigurationJson {
 }
 
 /**
- * This represents the subspace configurations for a repository, based on the "subspace.json"
+ * This represents the subspace configurations for a repository, based on the "subspaces.json"
  * configuration file.
  * @beta
  */
 export class SubspaceConfiguration {
   /**
-   * The absolute path to the "subspace.json" configuration file that was loaded to construct this object.
+   * The absolute path to the "subspaces.json" configuration file that was loaded to construct this object.
    */
   public readonly subspaceJsonFile: string;
 
   /**
-   * Gets the JSON data structure for the "subspace.json" configuration file.
+   * Gets the JSON data structure for the "subspaces.json" configuration file.
    *
    * @internal
    */
@@ -75,7 +71,7 @@ export class SubspaceConfiguration {
   public static loadFromDefaultLocation(): SubspaceConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
     if (rushJsonLocation) {
-      const subspaceJsonLocation: string = path.join(path.dirname(rushJsonLocation), 'subspace.json');
+      const subspaceJsonLocation: string = path.join(path.dirname(rushJsonLocation), 'subspaces.json');
       return SubspaceConfiguration.loadFromConfigurationFile(subspaceJsonLocation);
     }
   }
