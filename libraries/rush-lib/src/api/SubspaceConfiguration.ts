@@ -21,6 +21,11 @@ export interface ISubspaceConfigurationJson {
   availableSubspaces: ISubspaceConfig;
 }
 
+/**
+ * This represents the subspace configurations for a repository, based on the "subspace.json"
+ * configuration file.
+ * @beta
+ */
 export class SubspaceConfiguration {
   /**
    * The absolute path to the "subspace.json" configuration file that was loaded to construct this object.

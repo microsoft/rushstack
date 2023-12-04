@@ -1278,6 +1278,9 @@ export class RushConfiguration {
     return this._projects!;
   }
 
+  /**
+   * A list of all the available subspaces in this workspace.
+   */
   public get subspaceNames(): string[] {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();

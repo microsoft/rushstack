@@ -1124,9 +1124,8 @@ export class RushConfiguration {
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
-    // Warning: (ae-forgotten-export) The symbol "SubspaceConfiguration" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-incompatible-release-tags) The symbol "subspaceConfiguration" is marked as @public, but its signature references "SubspaceConfiguration" which is marked as @beta
     readonly subspaceConfiguration?: SubspaceConfiguration;
-    // (undocumented)
     get subspaceNames(): string[];
     readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
     readonly suppressNodeLtsWarning: boolean;
@@ -1307,6 +1306,20 @@ export class RushUserConfiguration {
     static getRushUserFolderPath(): string;
     // (undocumented)
     static initializeAsync(): Promise<RushUserConfiguration>;
+}
+
+// @beta
+export class SubspaceConfiguration {
+    readonly availableSubspaceSet: Set<string>;
+    // (undocumented)
+    static loadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration;
+    // (undocumented)
+    static loadFromDefaultLocation(): SubspaceConfiguration | undefined;
+    // Warning: (ae-forgotten-export) The symbol "ISubspaceConfigurationJson" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    readonly subspaceConfigurationJson: ISubspaceConfigurationJson;
+    readonly subspaceJsonFile: string;
 }
 
 // @public
