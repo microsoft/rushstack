@@ -105,6 +105,7 @@ export class DtsRollupGenerator {
     // Emit the imports
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstImport) {
+        // BUG MITIGATION: don't trim imports based on their release tags
         const astImport: AstImport = entity.astEntity;
         DtsEmitHelpers.emitImport(writer, entity, astImport);
       }
