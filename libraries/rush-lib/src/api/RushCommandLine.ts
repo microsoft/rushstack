@@ -22,7 +22,7 @@ export interface ICommandLineParameter {
   /**
    * The long name of the flag including double dashes, e.g. "--do-something"
    */
-  readonly longName: string;
+  readonly longName?: string;
 
   /**
    * An optional short name for the flag including the dash, e.g. "-d"
@@ -56,15 +56,20 @@ export interface ICommandLineSpec {
  * @beta
  */
 export class RushCommandLine {
-  private static _commandLineParser: RushCommandLineParser;
+  private static workspaceCommandLineMap: Map<string, RushCommandLineParser>;
 
   public static getSpec(workspaceFolder: string): ICommandLineSpec[] {
-    if (!RushCommandLine._commandLineParser) {
-      RushCommandLine._commandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
+    let commandLineParser: RushCommandLineParser;
+    if (!RushCommandLine.workspaceCommandLineMap.has(workspaceFolder)) {
+      RushCommandLine.workspaceCommandLineMap.set(
+        workspaceFolder,
+        new RushCommandLineParser({ cwd: workspaceFolder })
+      );
     }
+    commandLineParser = RushCommandLine.workspaceCommandLineMap.get(workspaceFolder) as RushCommandLineParser;
 
     // Copy the actions
-    const commandLineActions: readonly CommandLineAction[] = RushCommandLine._commandLineParser.actions;
+    const commandLineActions: readonly CommandLineAction[] = commandLineParser.actions;
 
     // extract the set of command line elements from the command line parser
     const filledCommandLineActions: ICommandLineSpec[] = [];
@@ -73,10 +78,12 @@ export class RushCommandLine {
         .slice()
         .map((parameter: CommandLineParameter) => {
           const o: ICommandLineParameter = {
-            ...parameter,
+            shortName: parameter.shortName,
+            longName: parameter.scopedLongName,
+            description: parameter.description,
+            required: parameter.required,
             // kind is a getter in CommandLineParameter
-            kind: CommandLineParameterKind[parameter.kind],
-            shortName: parameter.shortName
+            kind: CommandLineParameterKind[parameter.kind]
           };
           return o;
         });
