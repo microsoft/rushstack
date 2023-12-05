@@ -180,10 +180,10 @@ export class EnvironmentMap {
 
 // @public
 export class Executable {
-    static listProcessInfoById(): Promise<Map<number, IProcessInfo>>;
-    static listProcessInfoByIdSync(): Map<number, IProcessInfo>;
-    static listProcessInfoByName(): Promise<Map<string, IProcessInfo[]>>;
-    static listProcessInfoByNameSync(): Map<string, IProcessInfo[]>;
+    static listProcessInfoById(): Map<number, IProcessInfo>;
+    static listProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>>;
+    static listProcessInfoByName(): Map<string, IProcessInfo[]>;
+    static listProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>>;
     static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
@@ -669,6 +669,12 @@ export interface IProtectableMapParameters<K, V> {
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @public
+export interface IReadLinesFromIterableOptions {
+    encoding?: Encoding;
+    skipEmptyLines?: boolean;
+}
+
 // @beta (undocumented)
 export interface IRunWithRetriesOptions<TResult> {
     // (undocumented)
@@ -1002,6 +1008,8 @@ export class Text {
     static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
+    static readLinesFromIterable(iterable: Iterable<string | Buffer | null>, options?: IReadLinesFromIterableOptions): Generator<string>;
+    static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
     static truncateWithEllipsis(s: string, maximumLength: number): string;
 }

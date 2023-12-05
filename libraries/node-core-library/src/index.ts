@@ -72,7 +72,7 @@ export {
   IParsedPackageNameOrError
 } from './PackageName';
 export { Path, FileLocationStyle, IPathFormatFileLocationOptions, IPathFormatConciselyOptions } from './Path';
-export { Encoding, Text, NewlineKind } from './Text';
+export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {
   AlreadyExistsBehavior,

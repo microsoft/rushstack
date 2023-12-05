@@ -8,6 +8,7 @@ import { EnvironmentMap } from './EnvironmentMap';
 
 import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
+import { Text } from './Text';
 import { InternalError } from './InternalError';
 
 /**
@@ -153,62 +154,12 @@ export interface IProcessInfo {
   childProcessInfos: IProcessInfo[];
 }
 
-// Match the newline character(s) at the end of a line of text in order to split on it. On Windows,
-// it is possible for multiple \r characters may precede the \n character, so we need to match all
-// of them.
-const NEWLINE_REGEX: RegExp = /\r*\n/;
-
-async function* readLinesFromStreamAsync(stream: NodeJS.ReadableStream): AsyncGenerator<string> {
-  let remaining: string = '';
-  for await (const chunk of stream) {
-    remaining += chunk;
-    // eslint-disable-next-line @rushstack/no-new-null
-    let match: RegExpMatchArray | null;
-    while ((match = remaining.match(NEWLINE_REGEX)) && match.index !== undefined && match.index >= 0) {
-      const index: number = match.index;
-      const line: string = remaining.substring(0, index);
-      if (line.length) {
-        yield line;
-      }
-      remaining = remaining.substring(index + match[0].length);
-    }
-  }
-  if (remaining.length) {
-    yield remaining;
-  }
-}
-
-// eslint-disable-next-line @rushstack/no-new-null
-function* readLinesFromStringArray(text: (string | null)[]): Generator<string> {
-  let remaining: string = '';
-  let index: number;
-  for (const chunk of text) {
-    if (chunk === null) {
-      continue;
-    }
-    remaining += chunk;
-    // eslint-disable-next-line @rushstack/no-new-null
-    let match: RegExpMatchArray | null;
-    while ((match = remaining.match(NEWLINE_REGEX)) && match.index !== undefined && match.index >= 0) {
-      index = match.index;
-      const line: string = remaining.substring(0, index);
-      if (line.length) {
-        yield line;
-      }
-      remaining = remaining.substring(index + match[0].length);
-    }
-  }
-  if (remaining.length) {
-    yield remaining;
-  }
-}
-
 export async function parseProcessListOutputAsync(
   stream: NodeJS.ReadableStream
 ): Promise<Map<number, IProcessInfo>> {
   const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
   let seenHeaders: boolean = false;
-  for await (const line of readLinesFromStreamAsync(stream)) {
+  for await (const line of Text.readLinesFromIterableAsync(stream, { skipEmptyLines: true })) {
     if (!seenHeaders) {
       seenHeaders = true;
     } else {
@@ -219,10 +170,10 @@ export async function parseProcessListOutputAsync(
 }
 
 // eslint-disable-next-line @rushstack/no-new-null
-export function parseProcessListOutput(output: (string | null)[]): Map<number, IProcessInfo> {
+export function parseProcessListOutput(output: Iterable<string | null>): Map<number, IProcessInfo> {
   const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
   let seenHeaders: boolean = false;
-  for (const line of readLinesFromStringArray(output)) {
+  for (const line of Text.readLinesFromIterable(output, { skipEmptyLines: true })) {
     if (!seenHeaders) {
       seenHeaders = true;
     } else {
@@ -493,7 +444,7 @@ export class Executable {
    * - On Windows, this uses the `wmic.exe` utility.
    * - On Unix, this uses the `ps` utility.
    */
-  public static async listProcessInfoById(): Promise<Map<number, IProcessInfo>> {
+  public static async listProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>> {
     const { path: command, args } = getProcessListProcessOptions();
     const process: child_process.ChildProcess = Executable.spawn(command, args, {
       stdio: ['ignore', 'pipe', 'ignore']
@@ -507,7 +458,7 @@ export class Executable {
       (resolve: () => void, reject: (error: Error) => void) => {
         process.on('error', (error: Error) => {
           errorThrown = true;
-          reject(new Error(`Unable to list processes: ${command} failed with error ${error}`));
+          reject(new InternalError(`Unable to list processes: ${command} failed with error ${error}`));
         });
         process.on('exit', (code: number | null) => {
           if (errorThrown) {
@@ -515,7 +466,7 @@ export class Executable {
             return;
           }
           if (code !== 0) {
-            reject(new Error(`Unable to list processes: ${command} exited with code ${code}`));
+            reject(new InternalError(`Unable to list processes: ${command} exited with code ${code}`));
           } else {
             resolve();
           }
@@ -536,7 +487,7 @@ export class Executable {
    * - On Windows, this uses the `wmic.exe` utility.
    * - On Unix, this uses the `ps` utility.
    */
-  public static listProcessInfoByIdSync(): Map<number, IProcessInfo> {
+  public static listProcessInfoById(): Map<number, IProcessInfo> {
     const { path: command, args } = getProcessListProcessOptions();
     const processOutput: child_process.SpawnSyncReturns<string> = Executable.spawnSync(command, args);
     if (processOutput.error) {
@@ -554,8 +505,8 @@ export class Executable {
    * - On Windows, this uses the `wmic.exe` utility.
    * - On Unix, this uses the `ps` utility.
    */
-  public static async listProcessInfoByName(): Promise<Map<string, IProcessInfo[]>> {
-    const processInfoById: Map<number, IProcessInfo> = await Executable.listProcessInfoById();
+  public static async listProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>> {
+    const processInfoById: Map<number, IProcessInfo> = await Executable.listProcessInfoByIdAsync();
     return convertToProcessInfoByNameMap(processInfoById);
   }
 
@@ -565,8 +516,8 @@ export class Executable {
    * - On Windows, this uses the `wmic.exe` utility.
    * - On Unix, this uses the `ps` utility.
    */
-  public static listProcessInfoByNameSync(): Map<string, IProcessInfo[]> {
-    const processInfoByIdMap: Map<number, IProcessInfo> = Executable.listProcessInfoByIdSync();
+  public static listProcessInfoByName(): Map<string, IProcessInfo[]> {
+    const processInfoByIdMap: Map<number, IProcessInfo> = Executable.listProcessInfoById();
     return convertToProcessInfoByNameMap(processInfoByIdMap);
   }
 

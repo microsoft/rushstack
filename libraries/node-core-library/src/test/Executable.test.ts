@@ -230,7 +230,7 @@ describe('Executable process tests', () => {
 });
 
 describe('Executable process list', () => {
-  const WIN32_PROCESS_LIST_OUTPUT: string[] = [
+  const WIN32_PROCESS_LIST_OUTPUT: (string | null)[] = [
     'Name                                                         ParentProcessId  ProcessId\r\r\n',
     // Test that the parser can handle referencing a parent that is the same as the current process
     // Test that the parser can handle multiple return characters
@@ -243,18 +243,23 @@ describe('Executable process list', () => {
     'executable0.exe                                              1                2\r\r\n',
     // Test children handling when multiple entries reference the same parent
     'executable1.exe                                              1                3\r\r\n',
+    // Test that the parser can handle empty strings
+    '',
     // Test that the parser can handle referencing a parent that doesn't exist
     'executable3.exe                                              6                5\r\r\n'
   ];
 
-  const UNIX_PROCESS_LIST_OUTPUT: string[] = [
+  const UNIX_PROCESS_LIST_OUTPUT: (string | null)[] = [
     'COMMAND                PPID   PID\n',
     // Test that the parser can handle referencing a parent that doesn't exist
     'init                      0     1\n',
+    'process2           ',
     // Test that the parser can handle a line that is truncated in the middle of a field
     // Test that the parser can handle an entry referencing a parent that hasn't been seen yet
-    'process2           ' + '       2     4\n',
+    '       2     4\n',
     'process0                  1     2\n',
+    // Test that the parser can handle empty strings
+    '',
     // Test children handling when multiple entries reference the same parent
     'process1                  1     3\n'
   ];

@@ -36,6 +36,28 @@ export enum NewlineKind {
 }
 
 /**
+ * Options used when calling the {@link Text.readLinesFromIterable} or
+ * {@link Text.readLinesFromIterableAsync} methods.
+ *
+ * @public
+ */
+export interface IReadLinesFromIterableOptions {
+  /**
+   * The encoding of the input iterable. The default is utf8.
+   */
+  encoding?: Encoding;
+
+  /**
+   * If true, empty lines will not be returned. The default is false.
+   */
+  skipEmptyLines?: boolean;
+}
+
+interface IReadLinesFromIterableState {
+  remaining: string;
+}
+
+/**
  * Operations for working with strings that contain text.
  *
  * @remarks
@@ -177,5 +199,73 @@ export class Text {
    */
   public static escapeRegExp(literal: string): string {
     return literal.replace(/[^A-Za-z0-9_]/g, '\\$&');
+  }
+
+  /**
+   * Read lines from an iterable object that returns strings or buffers, and return a generator that
+   * produces the lines as strings. The lines will not include the newline characters.
+   *
+   * @param iterable - An iterable object that returns strings or buffers
+   * @param options - Options used when reading the lines from the provided iterable
+   */
+  public static async *readLinesFromIterableAsync(
+    iterable: AsyncIterable<string | Buffer>,
+    options: IReadLinesFromIterableOptions = {}
+  ): AsyncGenerator<string> {
+    const { encoding = Encoding.Utf8, skipEmptyLines = false } = options;
+    const state: IReadLinesFromIterableState = { remaining: '' };
+    for await (const chunk of iterable) {
+      yield* Text._readLinesFromChunk(chunk, encoding, skipEmptyLines, state);
+    }
+    const remaining: string = state.remaining;
+    if (remaining.length) {
+      yield remaining;
+    }
+  }
+
+  /**
+   * Read lines from an iterable object that returns strings or buffers, and return a generator that
+   * produces the lines as strings. The lines will not include the newline characters.
+   *
+   * @param iterable - An iterable object that returns strings or buffers
+   * @param options - Options used when reading the lines from the provided iterable
+   */
+  public static *readLinesFromIterable(
+    // eslint-disable-next-line @rushstack/no-new-null
+    iterable: Iterable<string | Buffer | null>,
+    options: IReadLinesFromIterableOptions = {}
+  ): Generator<string> {
+    const { encoding = Encoding.Utf8, skipEmptyLines = false } = options;
+    const state: IReadLinesFromIterableState = { remaining: '' };
+    for (const chunk of iterable) {
+      yield* Text._readLinesFromChunk(chunk, encoding, skipEmptyLines, state);
+    }
+    const remaining: string = state.remaining;
+    if (remaining.length) {
+      yield remaining;
+    }
+  }
+
+  private static *_readLinesFromChunk(
+    chunk: string | Buffer | null,
+    encoding: Encoding,
+    skipEmptyLines: boolean,
+    state: IReadLinesFromIterableState
+  ): Generator<string> {
+    if (!chunk) {
+      return;
+    }
+    const remaining: string =
+      state.remaining + (typeof chunk === 'string' ? chunk : chunk.toString(encoding));
+    let startIndex: number = 0;
+    const matches: IterableIterator<RegExpMatchArray> = remaining.matchAll(Text._newLineRegEx);
+    for (const match of matches) {
+      const endIndex: number = match.index!;
+      if (startIndex !== endIndex || !skipEmptyLines) {
+        yield remaining.substring(startIndex, endIndex);
+      }
+      startIndex = endIndex + match[0].length;
+    }
+    state.remaining = remaining.substring(startIndex);
   }
 }
