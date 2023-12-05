@@ -373,7 +373,7 @@ export interface ICobuildLockProvider {
 export interface ICommandLineParameter {
     readonly description: string;
     readonly kind: string;
-    readonly longName: string;
+    readonly longName?: string;
     readonly required?: boolean;
     readonly shortName?: string;
 }
