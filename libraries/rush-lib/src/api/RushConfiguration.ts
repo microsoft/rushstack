@@ -961,8 +961,9 @@ export class RushConfiguration {
       this._projectsByName.set(project.packageName, project);
       if (projectJson.subspace) {
         const subspaceName: string = projectJson.subspace;
-        if (this._subspaceProjectsCache.has(subspaceName)) {
-          (this._subspaceProjectsCache.get(subspaceName) as RushConfigurationProject[]).push(project);
+        const projectsForSubspace: RushConfigurationProject[] | undefined = this._subspaceProjectsCache.get(subspaceName);
+        if (projectsForSubspace) {
+          projectsForSubspace.push(project);
         } else {
           this._subspaceProjectsCache.set(subspaceName, [project]);
         }
