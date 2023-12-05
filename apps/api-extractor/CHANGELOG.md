@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Dec 2023 01:10:16 GMT and should not be manually modified.
+
+## 7.38.4
+Tue, 05 Dec 2023 01:10:16 GMT
+
+### Patches
+
+- Don't export trimmed namespace members during rollup (#2791)
 
 ## 7.38.3
 Fri, 10 Nov 2023 18:02:04 GMT
