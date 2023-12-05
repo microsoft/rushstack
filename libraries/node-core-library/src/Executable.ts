@@ -207,13 +207,12 @@ function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number
   const processId: number = parseInt(match.groups[PROCESS_ID_GROUP], 10);
   const parentProcessId: number = parseInt(match.groups[PARENT_PROCESS_ID_GROUP], 10);
 
-  // Set the parent process info to an existing value, or create a placeholder if the parent does
-  // not yet exist. This will be updated when th parent process is found in the list. Only care
-  // about the parent process if it is not the same as the current process.
+  // Only care about the parent process if it is not the same as the current process.
   let parentProcessInfo: IProcessInfo | undefined;
   if (parentProcessId !== processId) {
     parentProcessInfo = existingProcessInfoById.get(parentProcessId);
     if (!parentProcessInfo) {
+      // Create a new placeholder entry for the parent with the information we have so far
       parentProcessInfo = {
         processId: parentProcessId,
         processName: '',
@@ -225,7 +224,7 @@ function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number
 
   let processInfo: IProcessInfo | undefined = existingProcessInfoById.get(processId);
   if (!processInfo) {
-    // Create a new entry, and set the
+    // Create a new entry
     processInfo = {
       processName,
       processId,
@@ -234,12 +233,12 @@ function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number
     };
     existingProcessInfoById.set(processId, processInfo);
   } else {
-    // Update placeholder entry with the process name
+    // Update placeholder entry
     processInfo.processName = processName;
     processInfo.parentProcessInfo = parentProcessInfo;
   }
 
-  // Add this process as a child of the parent process, if it exists
+  // Add the process as a child of the parent process
   parentProcessInfo?.childProcessInfos.push(processInfo);
 }
 
