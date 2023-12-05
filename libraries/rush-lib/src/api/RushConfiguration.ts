@@ -1280,11 +1280,11 @@ export class RushConfiguration {
   /**
    * A list of all the available subspaces in this workspace.
    */
-  public get subspaceNames(): string[] {
+  public get subspaceNames(): Iterable<string> {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return Array.from(this._subspaceProjectsCache.keys());
+    return this._subspaceProjectsCache.keys();
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
