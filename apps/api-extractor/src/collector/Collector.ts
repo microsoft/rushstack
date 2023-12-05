@@ -138,7 +138,7 @@ export class Collector {
 
     this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
 
-    // Resolve glob patterns and store concrete set of bundled package dependency names
+    // Resolve package name patterns and store concrete set of bundled package dependency names
     this.bundledPackageNames = Collector._resolveBundledPackagePatterns(
       this.extractorConfig.bundledPackages,
       this.extractorConfig.packageJson
@@ -157,8 +157,8 @@ export class Collector {
   }
 
   /**
-   * Searches the provided package.json for dependencies and devDependencies that match the provided
-   * package names and/or RegExp patterns in `bundledPackages`.
+   * Searches the provided package.json for dependencies that match the provided package names and/or RegExp patterns
+   * in `bundledPackages`.
    * @param bundledPackages - The list of package names and/or RegExp patterns to search for in the package.json.
    * @param packageJson - The package.json of the package being processed.
    * @returns The set of matching package names.
@@ -182,38 +182,25 @@ export class Collector {
       return packageNames;
     }
 
-    const dependencyKeys: string[] = Object.keys(packageJson.dependencies ?? {});
-    const devDependencyKeys: string[] = Object.keys(packageJson.devDependencies ?? {});
-
-    const dependencyNames: string[] = dependencyKeys.concat(devDependencyKeys);
+    const dependencyNames: string[] = Object.keys(packageJson.dependencies ?? {});
 
     if (dependencyNames.length === 0) {
-      // If there are no dependencies nor devDependencies, then there are no possible package matches.
+      // If there are no dependencies, then there are no possible package matches.
       // Return an empty set.
       return packageNames;
     }
 
     for (const packageNameOrPattern of bundledPackages) {
+      // If the string is an exact package name, search for exact match
       if (PackageName.isValidName(packageNameOrPattern)) {
-        // If the string is an exact package name, search for exact match
         if (dependencyNames.includes(packageNameOrPattern)) {
           packageNames.add(packageNameOrPattern);
-        } else {
-          console.warn(
-            `package.json contained no dependency or devDependency for specified bundledPackages entry "${packageNameOrPattern}".`
-          );
         }
       } else {
         // If the entry isn't an exact package name, assume RegExp and search for matches
         const regexp: RegExp = new RegExp(packageNameOrPattern);
         const matches: string[] = dependencyNames.filter((dependencyName) => regexp.test(dependencyName));
-        if (matches.length === 0) {
-          console.warn(
-            `No matching package dependencies found for provided bundledPackages pattern "${packageNameOrPattern}".`
-          );
-        } else {
-          matches.forEach((match) => packageNames.add(match));
-        }
+        matches.forEach((match) => packageNames.add(match));
       }
     }
     return packageNames;
