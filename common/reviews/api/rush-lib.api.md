@@ -1311,15 +1311,16 @@ export class RushUserConfiguration {
 // @beta
 export class SubspaceConfiguration {
     readonly availableSubspaceSet: Set<string>;
+    // Warning: (ae-forgotten-export) The symbol "ISubspaceConfigurationJson" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    readonly configuration: Readonly<ISubspaceConfigurationJson>;
     // (undocumented)
     static loadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration;
     // (undocumented)
     static loadFromDefaultLocation(): SubspaceConfiguration | undefined;
-    // Warning: (ae-forgotten-export) The symbol "ISubspaceConfigurationJson" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    readonly subspaceConfigurationJson: ISubspaceConfigurationJson;
     readonly subspaceJsonFile: string;
+    static _subspaceRegex: RegExp;
 }
 
 // @public

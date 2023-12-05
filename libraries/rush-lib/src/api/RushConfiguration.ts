@@ -42,7 +42,7 @@ import schemaJson from '../schemas/rush.schema.json';
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
-import { ISubspaceConfig, SubspaceConfiguration } from './SubspaceConfiguration';
+import { SubspaceConfiguration } from './SubspaceConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -1180,9 +1180,6 @@ export class RushConfiguration {
       if (packageManagerWrapper.packageManager === 'pnpm') {
         const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
         knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
-        // for (const subspaceName of this.subspaceNames()) {
-        //   knownSet.add(pnpmPackageManager.subspacePnpmfileFilename(subspaceName).toUpperCase());
-        // }
       }
 
       // Is the filename something we know?  If not, report an error.

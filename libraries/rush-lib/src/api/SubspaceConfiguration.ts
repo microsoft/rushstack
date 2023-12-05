@@ -28,6 +28,7 @@ export interface ISubspaceConfigurationJson {
  */
 export class SubspaceConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
   /**
    * The absolute path to the "subspaces.json" configuration file that was loaded to construct this object.
    */
@@ -39,6 +40,11 @@ export class SubspaceConfiguration {
    * @internal
    */
   public readonly configuration: Readonly<ISubspaceConfigurationJson>;
+
+  /**
+   * The allowed naming convention for subspace names
+   */
+  public static _subspaceRegex: RegExp = new RegExp('/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/');
 
   /**
    * A set of the available subspaces
@@ -58,7 +64,13 @@ export class SubspaceConfiguration {
     }
 
     for (const { subspaceName } of Object.values(this.configuration.availableSubspaces)) {
-      this.availableSubspaceSet.add(subspaceName);
+      if (SubspaceConfiguration._subspaceRegex.test(subspaceName)) {
+        this.availableSubspaceSet.add(subspaceName);
+      } else {
+        throw new Error(
+          `Invalid subspace name: ${subspaceName}. Subspace names must only consist of lowercase letters, numbers, and hyphens (-).`
+        );
+      }
     }
   }
 
