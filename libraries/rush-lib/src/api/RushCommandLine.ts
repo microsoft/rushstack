@@ -53,7 +53,7 @@ export interface ICommandLineSpec {
  * @beta
  */
 export class RushCommandLine {
-  private static _workspaceCommandLineMap: Map<string, RushCommandLineParser>;
+  private static _workspaceCommandLineMap: Map<string, RushCommandLineParser> = new Map();
 
   public static getSpec(workspaceFolder: string): ICommandLineSpec[] {
     if (!RushCommandLine._workspaceCommandLineMap.has(workspaceFolder)) {
