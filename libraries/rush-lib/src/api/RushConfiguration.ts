@@ -1365,10 +1365,7 @@ export class RushConfiguration {
    * Does this project have subspaces
    */
   public get hasSubspaces(): boolean {
-    if (undefined === this._hasSubspaces) {
-      this._hasSubspaces = this._subspaceProjectsCache.size > 0;
-    }
-    return this._hasSubspaces;
+    return this._subspaceProjectsCache.size > 0;
   }
 
   /**
