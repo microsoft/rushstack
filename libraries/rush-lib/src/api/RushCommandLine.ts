@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  CommandLineAction,
-  CommandLineParameter,
-  CommandLineParameterKind
-} from '@rushstack/ts-command-line';
+import type { CommandLineAction, CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 
 /**
@@ -56,17 +53,18 @@ export interface ICommandLineSpec {
  * @beta
  */
 export class RushCommandLine {
-  private static workspaceCommandLineMap: Map<string, RushCommandLineParser>;
+  private static _workspaceCommandLineMap: Map<string, RushCommandLineParser>;
 
   public static getSpec(workspaceFolder: string): ICommandLineSpec[] {
-    let commandLineParser: RushCommandLineParser;
-    if (!RushCommandLine.workspaceCommandLineMap.has(workspaceFolder)) {
-      RushCommandLine.workspaceCommandLineMap.set(
+    if (!RushCommandLine._workspaceCommandLineMap.has(workspaceFolder)) {
+      RushCommandLine._workspaceCommandLineMap.set(
         workspaceFolder,
         new RushCommandLineParser({ cwd: workspaceFolder })
       );
     }
-    commandLineParser = RushCommandLine.workspaceCommandLineMap.get(workspaceFolder) as RushCommandLineParser;
+    const commandLineParser: RushCommandLineParser = RushCommandLine._workspaceCommandLineMap.get(
+      workspaceFolder
+    ) as RushCommandLineParser;
 
     // Copy the actions
     const commandLineActions: readonly CommandLineAction[] = commandLineParser.actions;
