@@ -1126,7 +1126,7 @@ export class RushConfiguration {
     get shrinkwrapFilePhrase(): string;
     // @beta
     readonly subspaceConfiguration?: SubspaceConfiguration;
-    get subspaceNames(): string[];
+    get subspaceNames(): Iterable<string>;
     readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
     readonly suppressNodeLtsWarning: boolean;
     // @beta
