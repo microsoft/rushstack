@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/subspaces.schema.json",
   "title": "Rush subspace config file.",
   "description": "The configuration file for enabling the subspaces feature in rush. This is an EXPERIMENTAL feature which is not yet fully implemented. To opt into the experiemnt, simply toggle the 'enabled' property in this file.",
   "type": "object",
