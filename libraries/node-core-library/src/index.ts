@@ -20,6 +20,7 @@ export {
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
   IExecutableSpawnOptions,
+  IProcessInfo,
   Executable
 } from './Executable';
 export { IFileErrorOptions, IFileErrorFormattingOptions, FileError } from './FileError';

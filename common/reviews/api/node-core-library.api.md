@@ -180,6 +180,10 @@ export class EnvironmentMap {
 
 // @public
 export class Executable {
+    static listProcessInfoById(): Promise<Map<number, IProcessInfo>>;
+    static listProcessInfoByIdSync(): Map<number, IProcessInfo>;
+    static listProcessInfoByName(): Promise<Map<string, IProcessInfo[]>>;
+    static listProcessInfoByNameSync(): Map<string, IProcessInfo[]>;
     static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
@@ -648,6 +652,14 @@ export type IPrefixProxyTerminalProviderOptions = IStaticPrefixProxyTerminalProv
 // @beta (undocumented)
 export interface IPrefixProxyTerminalProviderOptionsBase {
     terminalProvider: ITerminalProvider;
+}
+
+// @public
+export interface IProcessInfo {
+    childProcessInfos: IProcessInfo[];
+    parentProcessInfo?: IProcessInfo;
+    processId: number;
+    processName: string;
 }
 
 // @public

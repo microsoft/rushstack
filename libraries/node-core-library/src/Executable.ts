@@ -8,6 +8,7 @@ import { EnvironmentMap } from './EnvironmentMap';
 
 import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
+import { InternalError } from './InternalError';
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
@@ -113,9 +114,219 @@ interface IExecutableContext {
   windowsExecutableExtensions: string[];
 }
 
-interface ICommandLineFixup {
+interface ICommandLineOptions {
   path: string;
   args: string[];
+}
+
+/**
+ * Process information sourced from the system. This process info is sourced differently depending
+ * on the operating system:
+ * - On Windows, this uses the `wmic.exe` utility.
+ * - On Unix, this uses the `ps` utility.
+ *
+ * @public
+ */
+export interface IProcessInfo {
+  /**
+   * The name of the process.
+   *
+   * @remarks On Windows, the process name will be empty if the process is a kernel process.
+   * On Unix, the process name will be empty if the process is the root process.
+   */
+  processName: string;
+  /**
+   * The process ID.
+   */
+  processId: number;
+  /**
+   * The parent process info.
+   *
+   * @remarks On Windows, the parent process info will be undefined if the process is a kernel process.
+   * On Unix, the parent process info will be undefined if the process is the root process.
+   */
+  parentProcessInfo?: IProcessInfo;
+
+  /**
+   * The child process infos.
+   */
+  childProcessInfos: IProcessInfo[];
+}
+
+// Match the newline character(s) at the end of a line of text in order to split on it. On Windows,
+// it is possible for multiple \r characters may precede the \n character, so we need to match all
+// of them.
+const NEWLINE_REGEX: RegExp = /\r*\n/;
+
+async function* readLinesFromStreamAsync(stream: NodeJS.ReadableStream): AsyncGenerator<string> {
+  let remaining: string = '';
+  for await (const chunk of stream) {
+    remaining += chunk;
+    // eslint-disable-next-line @rushstack/no-new-null
+    let match: RegExpMatchArray | null;
+    while ((match = remaining.match(NEWLINE_REGEX)) && match.index !== undefined && match.index >= 0) {
+      const index: number = match.index;
+      const line: string = remaining.substring(0, index);
+      if (line.length) {
+        yield line;
+      }
+      remaining = remaining.substring(index + match[0].length);
+    }
+  }
+  if (remaining.length) {
+    yield remaining;
+  }
+}
+
+// eslint-disable-next-line @rushstack/no-new-null
+function* readLinesFromStringArray(text: (string | null)[]): Generator<string> {
+  let remaining: string = '';
+  let index: number;
+  for (const chunk of text) {
+    if (chunk === null) {
+      continue;
+    }
+    remaining += chunk;
+    // eslint-disable-next-line @rushstack/no-new-null
+    let match: RegExpMatchArray | null;
+    while ((match = remaining.match(NEWLINE_REGEX)) && match.index !== undefined && match.index >= 0) {
+      index = match.index;
+      const line: string = remaining.substring(0, index);
+      if (line.length) {
+        yield line;
+      }
+      remaining = remaining.substring(index + match[0].length);
+    }
+  }
+  if (remaining.length) {
+    yield remaining;
+  }
+}
+
+export async function parseProcessListOutputAsync(
+  stream: NodeJS.ReadableStream
+): Promise<Map<number, IProcessInfo>> {
+  const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
+  let seenHeaders: boolean = false;
+  for await (const line of readLinesFromStreamAsync(stream)) {
+    if (!seenHeaders) {
+      seenHeaders = true;
+    } else {
+      parseProcessInfoEntry(line, processInfoById);
+    }
+  }
+  return processInfoById;
+}
+
+// eslint-disable-next-line @rushstack/no-new-null
+export function parseProcessListOutput(output: (string | null)[]): Map<number, IProcessInfo> {
+  const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
+  let seenHeaders: boolean = false;
+  for (const line of readLinesFromStringArray(output)) {
+    if (!seenHeaders) {
+      seenHeaders = true;
+    } else {
+      parseProcessInfoEntry(line, processInfoById);
+    }
+  }
+  return processInfoById;
+}
+
+// win32 format:
+// Name             ParentProcessId   ProcessId
+// process name     1234              5678
+// unix format:
+// COMMAND             PPID     PID
+// process name       51234   56784
+const NAME_GROUP: 'name' = 'name';
+const PROCESS_ID_GROUP: 'pid' = 'pid';
+const PARENT_PROCESS_ID_GROUP: 'ppid' = 'ppid';
+// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
+const PROCESS_LIST_ENTRY_REGEX: RegExp = new RegExp(
+  `^(?<${NAME_GROUP}>.+?)\\s+(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s*$`
+);
+
+function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number, IProcessInfo>): void {
+  const match: RegExpMatchArray | null = line.match(PROCESS_LIST_ENTRY_REGEX);
+  if (!match?.groups) {
+    throw new InternalError(`Invalid process list entry: ${line}`);
+  }
+
+  const processName: string = match.groups[NAME_GROUP];
+  const processId: number = parseInt(match.groups[PROCESS_ID_GROUP], 10);
+  const parentProcessId: number = parseInt(match.groups[PARENT_PROCESS_ID_GROUP], 10);
+
+  // Set the parent process info to an existing value, or create a placeholder if the parent does
+  // not yet exist. This will be updated when th parent process is found in the list. Only care
+  // about the parent process if it is not the same as the current process.
+  let parentProcessInfo: IProcessInfo | undefined;
+  if (parentProcessId !== processId) {
+    parentProcessInfo = existingProcessInfoById.get(parentProcessId);
+    if (!parentProcessInfo) {
+      parentProcessInfo = {
+        processId: parentProcessId,
+        processName: '',
+        childProcessInfos: []
+      };
+      existingProcessInfoById.set(parentProcessId, parentProcessInfo);
+    }
+  }
+
+  let processInfo: IProcessInfo | undefined = existingProcessInfoById.get(processId);
+  if (!processInfo) {
+    // Create a new entry, and set the
+    processInfo = {
+      processName,
+      processId,
+      parentProcessInfo,
+      childProcessInfos: []
+    };
+    existingProcessInfoById.set(processId, processInfo);
+  } else {
+    // Update placeholder entry with the process name
+    processInfo.processName = processName;
+    processInfo.parentProcessInfo = parentProcessInfo;
+  }
+
+  // Add this process as a child of the parent process, if it exists
+  parentProcessInfo?.childProcessInfos.push(processInfo);
+}
+
+function convertToProcessInfoByNameMap(
+  processInfoById: Map<number, IProcessInfo>
+): Map<string, IProcessInfo[]> {
+  const processInfoByNameMap: Map<string, IProcessInfo[]> = new Map<string, IProcessInfo[]>();
+  for (const processInfo of processInfoById.values()) {
+    let processInfoNameEntries: IProcessInfo[] | undefined = processInfoByNameMap.get(
+      processInfo.processName
+    );
+    if (!processInfoNameEntries) {
+      processInfoNameEntries = [];
+      processInfoByNameMap.set(processInfo.processName, processInfoNameEntries);
+    }
+    processInfoNameEntries.push(processInfo);
+  }
+  return processInfoByNameMap;
+}
+
+const OS_PLATFORM: NodeJS.Platform = os.platform();
+
+function getProcessListProcessOptions(): ICommandLineOptions {
+  let command: string;
+  let args: string[];
+  if (OS_PLATFORM === 'win32') {
+    command = 'wmic.exe';
+    // Order of declared properties does not impact the order of the output
+    args = ['process', 'get', 'Name,ParentProcessId,ProcessId'];
+  } else {
+    command = 'ps';
+    // -A: Select all processes
+    // -o: User-defined format
+    // Order of declared properties impacts the order of the output, so match
+    // the order of wmic.exe output
+    args = ['-Ao', 'comm,ppid,pid'];
+  }
+  return { path: command, args };
 }
 
 /**
@@ -210,7 +421,7 @@ export class Executable {
       shell: false
     };
 
-    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+    const normalizedCommandLine: ICommandLineOptions = Executable._buildCommandLineFixup(
       resolvedPath,
       args,
       context
@@ -267,13 +478,96 @@ export class Executable {
       shell: false
     };
 
-    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+    const normalizedCommandLine: ICommandLineOptions = Executable._buildCommandLineFixup(
       resolvedPath,
       args,
       context
     );
 
     return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+  }
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process ID. The underlying
+   * implementation depends on the operating system:
+   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Unix, this uses the `ps` utility.
+   */
+  public static async listProcessInfoById(): Promise<Map<number, IProcessInfo>> {
+    const { path: command, args } = getProcessListProcessOptions();
+    const process: child_process.ChildProcess = Executable.spawn(command, args, {
+      stdio: ['ignore', 'pipe', 'ignore']
+    });
+    if (process.stdout === null) {
+      throw new InternalError('Child process did not provide stdout');
+    }
+
+    let errorThrown: boolean = false;
+    const processFinishedPromise: Promise<void> = new Promise<void>(
+      (resolve: () => void, reject: (error: Error) => void) => {
+        process.on('error', (error: Error) => {
+          errorThrown = true;
+          reject(new Error(`Unable to list processes: ${command} failed with error ${error}`));
+        });
+        process.on('exit', (code: number | null) => {
+          if (errorThrown) {
+            // We've already rejected the promise
+            return;
+          }
+          if (code !== 0) {
+            reject(new Error(`Unable to list processes: ${command} exited with code ${code}`));
+          } else {
+            resolve();
+          }
+        });
+      }
+    );
+
+    const [processInfoByIdMap] = await Promise.all([
+      parseProcessListOutputAsync(process.stdout),
+      processFinishedPromise
+    ]);
+    return processInfoByIdMap;
+  }
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process ID. The underlying
+   * implementation depends on the operating system:
+   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Unix, this uses the `ps` utility.
+   */
+  public static listProcessInfoByIdSync(): Map<number, IProcessInfo> {
+    const { path: command, args } = getProcessListProcessOptions();
+    const processOutput: child_process.SpawnSyncReturns<string> = Executable.spawnSync(command, args);
+    if (processOutput.error) {
+      throw new Error(`Unable to list processes: ${command} failed with error ${processOutput.error}`);
+    }
+    if (processOutput.status !== 0) {
+      throw new Error(`Unable to list processes: ${command} exited with code ${processOutput.status}`);
+    }
+    return parseProcessListOutput(processOutput.output);
+  }
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process name. All processes
+   * with the same name will be grouped. The underlying implementation depends on the operating system:
+   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Unix, this uses the `ps` utility.
+   */
+  public static async listProcessInfoByName(): Promise<Map<string, IProcessInfo[]>> {
+    const processInfoById: Map<number, IProcessInfo> = await Executable.listProcessInfoById();
+    return convertToProcessInfoByNameMap(processInfoById);
+  }
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process name. All processes
+   * with the same name will be grouped. The underlying implementation depends on the operating system:
+   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Unix, this uses the `ps` utility.
+   */
+  public static listProcessInfoByNameSync(): Map<string, IProcessInfo[]> {
+    const processInfoByIdMap: Map<number, IProcessInfo> = Executable.listProcessInfoByIdSync();
+    return convertToProcessInfoByNameMap(processInfoByIdMap);
   }
 
   // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
@@ -295,10 +589,10 @@ export class Executable {
     resolvedPath: string,
     args: string[],
     context: IExecutableContext
-  ): ICommandLineFixup {
+  ): ICommandLineOptions {
     const fileExtension: string = path.extname(resolvedPath);
 
-    if (os.platform() === 'win32') {
+    if (OS_PLATFORM === 'win32') {
       // Do we need a custom handler for this file type?
       switch (fileExtension.toUpperCase()) {
         case '.EXE':
@@ -377,7 +671,7 @@ export class Executable {
     // NOTE: Since "filename" cannot contain command-line arguments, the "/" here
     // must be interpreted as a path delimiter
     const hasPathSeparators: boolean =
-      filename.indexOf('/') >= 0 || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
+      filename.indexOf('/') >= 0 || (OS_PLATFORM === 'win32' && filename.indexOf('\\') >= 0);
 
     // Are there any path separators?
     if (hasPathSeparators) {
@@ -449,7 +743,7 @@ export class Executable {
       return false;
     }
 
-    if (os.platform() === 'win32') {
+    if (OS_PLATFORM === 'win32') {
       // NOTE: For Windows, we don't validate that the file extension appears in PATHEXT.
       // That environment variable determines which extensions can be appended if the
       // extension is missing, but it does not affect whether a file may be executed or not.
@@ -534,7 +828,7 @@ export class Executable {
 
     const windowsExecutableExtensions: string[] = [];
 
-    if (os.platform() === 'win32') {
+    if (OS_PLATFORM === 'win32') {
       const pathExtVariable: string = environment.get('PATHEXT') || '';
       for (const splitValue of pathExtVariable.split(';')) {
         const trimmed: string = splitValue.trim().toLowerCase();
