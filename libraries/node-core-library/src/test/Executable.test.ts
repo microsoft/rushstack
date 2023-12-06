@@ -265,44 +265,88 @@ describe('Executable process list', () => {
   ];
 
   test('parses win32 output', () => {
-    const results: IProcessInfo[] = [...parseProcessListOutput(WIN32_PROCESS_LIST_OUTPUT).values()].sort();
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(WIN32_PROCESS_LIST_OUTPUT);
+    const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 7 because we reference a parent that doesn't exist
     expect(results.length).toEqual(7);
+
+    // Since snapshot validation of circular entries is difficult to parse by humans, manually validate
+    // that the parent/child relationships are correct
+    expect(processListMap.get(0)!.parentProcessInfo).toBeUndefined();
+    expect(processListMap.get(1)!.parentProcessInfo).toBe(processListMap.get(0));
+    expect(processListMap.get(2)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(3)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(4)!.parentProcessInfo).toBe(processListMap.get(2));
+    expect(processListMap.get(5)!.parentProcessInfo).toBe(processListMap.get(6));
+    expect(processListMap.get(6)!.parentProcessInfo).toBeUndefined();
+
     for (const processInfo of results) {
       expect(processInfo).toMatchSnapshot();
     }
   });
 
   test('parses win32 stream output', async () => {
-    const results: IProcessInfo[] = [
-      ...(await parseProcessListOutputAsync(Readable.from(WIN32_PROCESS_LIST_OUTPUT))).values()
-    ].sort();
+    const processListMap: Map<number, IProcessInfo> = await parseProcessListOutputAsync(
+      Readable.from(WIN32_PROCESS_LIST_OUTPUT)
+    );
+    const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 7 because we reference a parent that doesn't exist
     expect(results.length).toEqual(7);
+
+    // Since snapshot validation of circular entries is difficult to parse by humans, manually validate
+    // that the parent/child relationships are correct
+    expect(processListMap.get(0)!.parentProcessInfo).toBeUndefined();
+    expect(processListMap.get(1)!.parentProcessInfo).toBe(processListMap.get(0));
+    expect(processListMap.get(2)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(3)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(4)!.parentProcessInfo).toBe(processListMap.get(2));
+    expect(processListMap.get(5)!.parentProcessInfo).toBe(processListMap.get(6));
+    expect(processListMap.get(6)!.parentProcessInfo).toBeUndefined();
+
     for (const processInfo of results) {
       expect(processInfo).toMatchSnapshot();
     }
   });
 
   test('parses unix output', () => {
-    const results: IProcessInfo[] = [...parseProcessListOutput(UNIX_PROCESS_LIST_OUTPUT).values()].sort();
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(UNIX_PROCESS_LIST_OUTPUT);
+    const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 5 because we reference a parent that doesn't exist
     expect(results.length).toEqual(5);
+
+    // Since snapshot validation of circular entries is difficult to parse by humans, manually validate
+    // that the parent/child relationships are correct
+    expect(processListMap.get(0)!.parentProcessInfo).toBeUndefined();
+    expect(processListMap.get(1)!.parentProcessInfo).toBe(processListMap.get(0));
+    expect(processListMap.get(2)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(3)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(4)!.parentProcessInfo).toBe(processListMap.get(2));
+
     for (const processInfo of results) {
       expect(processInfo).toMatchSnapshot();
     }
   });
 
   test('parses unix stream output', async () => {
-    const results: IProcessInfo[] = [
-      ...(await parseProcessListOutputAsync(Readable.from(UNIX_PROCESS_LIST_OUTPUT))).values()
-    ].sort();
+    const processListMap: Map<number, IProcessInfo> = await parseProcessListOutputAsync(
+      Readable.from(UNIX_PROCESS_LIST_OUTPUT)
+    );
+    const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 5 because we reference a parent that doesn't exist
     expect(results.length).toEqual(5);
+
+    // Since snapshot validation of circular entries is difficult to parse by humans, manually validate
+    // that the parent/child relationships are correct
+    expect(processListMap.get(0)!.parentProcessInfo).toBeUndefined();
+    expect(processListMap.get(1)!.parentProcessInfo).toBe(processListMap.get(0));
+    expect(processListMap.get(2)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(3)!.parentProcessInfo).toBe(processListMap.get(1));
+    expect(processListMap.get(4)!.parentProcessInfo).toBe(processListMap.get(2));
+
     for (const processInfo of results) {
       expect(processInfo).toMatchSnapshot();
     }

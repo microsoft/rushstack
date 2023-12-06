@@ -146,7 +146,7 @@ export interface IProcessInfo {
    * @remarks On Windows, the parent process info will be undefined if the process is a kernel process.
    * On Unix, the parent process info will be undefined if the process is the root process.
    */
-  parentProcessInfo?: IProcessInfo;
+  parentProcessInfo: IProcessInfo | undefined;
 
   /**
    * The child process infos.
@@ -214,8 +214,9 @@ function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number
     if (!parentProcessInfo) {
       // Create a new placeholder entry for the parent with the information we have so far
       parentProcessInfo = {
-        processId: parentProcessId,
         processName: '',
+        processId: parentProcessId,
+        parentProcessInfo: undefined,
         childProcessInfos: []
       };
       existingProcessInfoById.set(parentProcessId, parentProcessInfo);

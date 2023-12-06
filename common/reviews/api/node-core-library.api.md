@@ -657,7 +657,7 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
 // @public
 export interface IProcessInfo {
     childProcessInfos: IProcessInfo[];
-    parentProcessInfo?: IProcessInfo;
+    parentProcessInfo: IProcessInfo | undefined;
     processId: number;
     processName: string;
 }
