@@ -10,7 +10,7 @@
       "type": "string"
     },
     "enabled": {
-      "description": "If true, rush will use the subspaces configuration",
+      "description": "If true, rush will use the subspaces configuration.",
       "type": "boolean"
     },
     "splitWorkspaceCompatibility": {
@@ -18,7 +18,7 @@
       "type": "boolean"
     },
     "subspaceNames": {
-      "description": "Individual subspace configurations",
+      "description": "Individual subspace configurations.",
       "type": "array",
       "items": {
         "type": "string"
