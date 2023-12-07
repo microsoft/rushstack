@@ -1,0 +1,785 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Executable process list parses unix output 1`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [
+            Object {
+              "childProcessInfos": Array [],
+              "parentProcessInfo": [Circular],
+              "processId": 4,
+              "processName": "process2",
+            },
+          ],
+          "parentProcessInfo": [Circular],
+          "processId": 2,
+          "processName": "process0",
+        },
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "process1",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 1,
+      "processName": "init",
+    },
+  ],
+  "parentProcessInfo": undefined,
+  "processId": 0,
+  "processName": "",
+}
+`;
+
+exports[`Executable process list parses unix output 2`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 4,
+          "processName": "process2",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 2,
+      "processName": "process0",
+    },
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 3,
+      "processName": "process1",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 0,
+    "processName": "",
+  },
+  "processId": 1,
+  "processName": "init",
+}
+`;
+
+exports[`Executable process list parses unix output 3`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 4,
+      "processName": "process2",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+      Object {
+        "childProcessInfos": Array [],
+        "parentProcessInfo": [Circular],
+        "processId": 3,
+        "processName": "process1",
+      },
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "",
+    },
+    "processId": 1,
+    "processName": "init",
+  },
+  "processId": 2,
+  "processName": "process0",
+}
+`;
+
+exports[`Executable process list parses unix output 4`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "process1",
+        },
+      ],
+      "parentProcessInfo": Object {
+        "childProcessInfos": Array [
+          [Circular],
+        ],
+        "parentProcessInfo": undefined,
+        "processId": 0,
+        "processName": "",
+      },
+      "processId": 1,
+      "processName": "init",
+    },
+    "processId": 2,
+    "processName": "process0",
+  },
+  "processId": 4,
+  "processName": "process2",
+}
+`;
+
+exports[`Executable process list parses unix output 5`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [
+          Object {
+            "childProcessInfos": Array [],
+            "parentProcessInfo": [Circular],
+            "processId": 4,
+            "processName": "process2",
+          },
+        ],
+        "parentProcessInfo": [Circular],
+        "processId": 2,
+        "processName": "process0",
+      },
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "",
+    },
+    "processId": 1,
+    "processName": "init",
+  },
+  "processId": 3,
+  "processName": "process1",
+}
+`;
+
+exports[`Executable process list parses unix stream output 1`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [
+            Object {
+              "childProcessInfos": Array [],
+              "parentProcessInfo": [Circular],
+              "processId": 4,
+              "processName": "process2",
+            },
+          ],
+          "parentProcessInfo": [Circular],
+          "processId": 2,
+          "processName": "process0",
+        },
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "process1",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 1,
+      "processName": "init",
+    },
+  ],
+  "parentProcessInfo": undefined,
+  "processId": 0,
+  "processName": "",
+}
+`;
+
+exports[`Executable process list parses unix stream output 2`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 4,
+          "processName": "process2",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 2,
+      "processName": "process0",
+    },
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 3,
+      "processName": "process1",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 0,
+    "processName": "",
+  },
+  "processId": 1,
+  "processName": "init",
+}
+`;
+
+exports[`Executable process list parses unix stream output 3`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 4,
+      "processName": "process2",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+      Object {
+        "childProcessInfos": Array [],
+        "parentProcessInfo": [Circular],
+        "processId": 3,
+        "processName": "process1",
+      },
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "",
+    },
+    "processId": 1,
+    "processName": "init",
+  },
+  "processId": 2,
+  "processName": "process0",
+}
+`;
+
+exports[`Executable process list parses unix stream output 4`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "process1",
+        },
+      ],
+      "parentProcessInfo": Object {
+        "childProcessInfos": Array [
+          [Circular],
+        ],
+        "parentProcessInfo": undefined,
+        "processId": 0,
+        "processName": "",
+      },
+      "processId": 1,
+      "processName": "init",
+    },
+    "processId": 2,
+    "processName": "process0",
+  },
+  "processId": 4,
+  "processName": "process2",
+}
+`;
+
+exports[`Executable process list parses unix stream output 5`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [
+          Object {
+            "childProcessInfos": Array [],
+            "parentProcessInfo": [Circular],
+            "processId": 4,
+            "processName": "process2",
+          },
+        ],
+        "parentProcessInfo": [Circular],
+        "processId": 2,
+        "processName": "process0",
+      },
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "",
+    },
+    "processId": 1,
+    "processName": "init",
+  },
+  "processId": 3,
+  "processName": "process1",
+}
+`;
+
+exports[`Executable process list parses win32 output 1`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [
+            Object {
+              "childProcessInfos": Array [],
+              "parentProcessInfo": [Circular],
+              "processId": 4,
+              "processName": "executable2.exe",
+            },
+          ],
+          "parentProcessInfo": [Circular],
+          "processId": 2,
+          "processName": "executable0.exe",
+        },
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "executable1.exe",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 1,
+      "processName": "System",
+    },
+  ],
+  "parentProcessInfo": undefined,
+  "processId": 0,
+  "processName": "System Idle Process",
+}
+`;
+
+exports[`Executable process list parses win32 output 2`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 4,
+          "processName": "executable2.exe",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 2,
+      "processName": "executable0.exe",
+    },
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 3,
+      "processName": "executable1.exe",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 0,
+    "processName": "System Idle Process",
+  },
+  "processId": 1,
+  "processName": "System",
+}
+`;
+
+exports[`Executable process list parses win32 output 3`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 4,
+      "processName": "executable2.exe",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+      Object {
+        "childProcessInfos": Array [],
+        "parentProcessInfo": [Circular],
+        "processId": 3,
+        "processName": "executable1.exe",
+      },
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "System Idle Process",
+    },
+    "processId": 1,
+    "processName": "System",
+  },
+  "processId": 2,
+  "processName": "executable0.exe",
+}
+`;
+
+exports[`Executable process list parses win32 output 4`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "executable1.exe",
+        },
+      ],
+      "parentProcessInfo": Object {
+        "childProcessInfos": Array [
+          [Circular],
+        ],
+        "parentProcessInfo": undefined,
+        "processId": 0,
+        "processName": "System Idle Process",
+      },
+      "processId": 1,
+      "processName": "System",
+    },
+    "processId": 2,
+    "processName": "executable0.exe",
+  },
+  "processId": 4,
+  "processName": "executable2.exe",
+}
+`;
+
+exports[`Executable process list parses win32 output 5`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [
+          Object {
+            "childProcessInfos": Array [],
+            "parentProcessInfo": [Circular],
+            "processId": 4,
+            "processName": "executable2.exe",
+          },
+        ],
+        "parentProcessInfo": [Circular],
+        "processId": 2,
+        "processName": "executable0.exe",
+      },
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "System Idle Process",
+    },
+    "processId": 1,
+    "processName": "System",
+  },
+  "processId": 3,
+  "processName": "executable1.exe",
+}
+`;
+
+exports[`Executable process list parses win32 output 6`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 5,
+      "processName": "executable3.exe",
+    },
+  ],
+  "parentProcessInfo": undefined,
+  "processId": 6,
+  "processName": "",
+}
+`;
+
+exports[`Executable process list parses win32 output 7`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 6,
+    "processName": "",
+  },
+  "processId": 5,
+  "processName": "executable3.exe",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 1`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [
+            Object {
+              "childProcessInfos": Array [],
+              "parentProcessInfo": [Circular],
+              "processId": 4,
+              "processName": "executable2.exe",
+            },
+          ],
+          "parentProcessInfo": [Circular],
+          "processId": 2,
+          "processName": "executable0.exe",
+        },
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "executable1.exe",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 1,
+      "processName": "System",
+    },
+  ],
+  "parentProcessInfo": undefined,
+  "processId": 0,
+  "processName": "System Idle Process",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 2`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 4,
+          "processName": "executable2.exe",
+        },
+      ],
+      "parentProcessInfo": [Circular],
+      "processId": 2,
+      "processName": "executable0.exe",
+    },
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 3,
+      "processName": "executable1.exe",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 0,
+    "processName": "System Idle Process",
+  },
+  "processId": 1,
+  "processName": "System",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 3`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 4,
+      "processName": "executable2.exe",
+    },
+  ],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+      Object {
+        "childProcessInfos": Array [],
+        "parentProcessInfo": [Circular],
+        "processId": 3,
+        "processName": "executable1.exe",
+      },
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "System Idle Process",
+    },
+    "processId": 1,
+    "processName": "System",
+  },
+  "processId": 2,
+  "processName": "executable0.exe",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 4`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+        Object {
+          "childProcessInfos": Array [],
+          "parentProcessInfo": [Circular],
+          "processId": 3,
+          "processName": "executable1.exe",
+        },
+      ],
+      "parentProcessInfo": Object {
+        "childProcessInfos": Array [
+          [Circular],
+        ],
+        "parentProcessInfo": undefined,
+        "processId": 0,
+        "processName": "System Idle Process",
+      },
+      "processId": 1,
+      "processName": "System",
+    },
+    "processId": 2,
+    "processName": "executable0.exe",
+  },
+  "processId": 4,
+  "processName": "executable2.exe",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 5`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      Object {
+        "childProcessInfos": Array [
+          Object {
+            "childProcessInfos": Array [],
+            "parentProcessInfo": [Circular],
+            "processId": 4,
+            "processName": "executable2.exe",
+          },
+        ],
+        "parentProcessInfo": [Circular],
+        "processId": 2,
+        "processName": "executable0.exe",
+      },
+      [Circular],
+    ],
+    "parentProcessInfo": Object {
+      "childProcessInfos": Array [
+        [Circular],
+      ],
+      "parentProcessInfo": undefined,
+      "processId": 0,
+      "processName": "System Idle Process",
+    },
+    "processId": 1,
+    "processName": "System",
+  },
+  "processId": 3,
+  "processName": "executable1.exe",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 6`] = `
+Object {
+  "childProcessInfos": Array [
+    Object {
+      "childProcessInfos": Array [],
+      "parentProcessInfo": [Circular],
+      "processId": 5,
+      "processName": "executable3.exe",
+    },
+  ],
+  "parentProcessInfo": undefined,
+  "processId": 6,
+  "processName": "",
+}
+`;
+
+exports[`Executable process list parses win32 stream output 7`] = `
+Object {
+  "childProcessInfos": Array [],
+  "parentProcessInfo": Object {
+    "childProcessInfos": Array [
+      [Circular],
+    ],
+    "parentProcessInfo": undefined,
+    "processId": 6,
+    "processName": "",
+  },
+  "processId": 5,
+  "processName": "executable3.exe",
+}
+`;

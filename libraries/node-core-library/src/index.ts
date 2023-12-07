@@ -20,6 +20,11 @@ export {
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
   IExecutableSpawnOptions,
+  IWaitForExitOptions,
+  IWaitForExitWithBufferOptions,
+  IWaitForExitWithStringOptions,
+  IWaitForExitResult,
+  IProcessInfo,
   Executable
 } from './Executable';
 export { IFileErrorOptions, IFileErrorFormattingOptions, FileError } from './FileError';
@@ -71,7 +76,7 @@ export {
   IParsedPackageNameOrError
 } from './PackageName';
 export { Path, FileLocationStyle, IPathFormatFileLocationOptions, IPathFormatConciselyOptions } from './Path';
-export { Encoding, Text, NewlineKind } from './Text';
+export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {
   AlreadyExistsBehavior,
