@@ -253,9 +253,9 @@ describe('Executable process tests', () => {
     expect(result.exitCode).toEqual(0);
     expect(Buffer.isBuffer(result.stdout)).toEqual(true);
     expect(Buffer.isBuffer(result.stderr)).toEqual(true);
-    expect(result.stdout.toString('utf8').startsWith('Executing npm-binary-wrapper.cmd with args:')).toEqual(
-      true
-    );
+    expect(
+      result.stdout.toString('utf8').indexOf('Executing javascript-file.js with args:')
+    ).toBeGreaterThanOrEqual(0);
     expect(result.stderr.toString('utf8')).toEqual('');
   });
 
@@ -271,12 +271,12 @@ describe('Executable process tests', () => {
     expect(result.exitCode).toEqual(0);
     expect(typeof result.stdout).toEqual('string');
     expect(typeof result.stderr).toEqual('string');
-    expect(result.stdout.startsWith('Executing npm-binary-wrapper.cmd with args:')).toEqual(true);
+    expect(result.stdout.indexOf('Executing javascript-file.js with args:')).toBeGreaterThanOrEqual(0);
     expect(result.stderr).toEqual('');
   });
 
   test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) failure', async () => {
-    const executablePath: string = path.join(executableFolder, 'failure', 'npm-binary-wrapper');
+    const executablePath: string = path.join(executableFolder, 'fail', 'npm-binary-wrapper');
     const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
       environment,
       currentWorkingDirectory: executableFolder
@@ -288,12 +288,12 @@ describe('Executable process tests', () => {
     expect(result.exitCode).toEqual(1);
     expect(typeof result.stdout).toEqual('string');
     expect(typeof result.stderr).toEqual('string');
-    expect(result.stdout.startsWith('Executing npm-binary-wrapper.cmd with args:')).toEqual(true);
+    expect(result.stdout.indexOf('Executing javascript-file.js with args:')).toBeGreaterThanOrEqual(0);
     expect(result.stderr.endsWith('This is a failure'));
   });
 
   test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) failure with throw', async () => {
-    const executablePath: string = path.join(executableFolder, 'failure', 'npm-binary-wrapper');
+    const executablePath: string = path.join(executableFolder, 'fail', 'npm-binary-wrapper');
     const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
       environment,
       currentWorkingDirectory: executableFolder
