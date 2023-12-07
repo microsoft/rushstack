@@ -304,7 +304,7 @@ describe('Executable process tests', () => {
     expect(result.exitCode).toEqual(1);
     expect(typeof result.stdout).toEqual('string');
     expect(typeof result.stderr).toEqual('string');
-    expect(result.stdout).toEqual('');
+    expect(result.stdout.indexOf('Executing javascript-file.js with args:')).toEqual(-1);
     expect(result.stderr.endsWith('This is a failure'));
   });
 
