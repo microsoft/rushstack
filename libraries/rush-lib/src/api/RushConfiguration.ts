@@ -765,11 +765,8 @@ export class RushConfiguration {
 
     // From "pnpm-lock.yaml" --> "subspace-pnpm-lock.yaml"
     this.subspaceShrinkwrapFilenames = (subspaceName: string): string => {
-      const shrinkwrapFilenameParsedPath: path.ParsedPath = path.parse(this.shrinkwrapFilename);
-      return path.join(
-        shrinkwrapFilenameParsedPath.dir,
-        `${subspaceName}-` + shrinkwrapFilenameParsedPath.name + shrinkwrapFilenameParsedPath.ext
-      );
+      const lastSlashIndex: number = Math.max(this.shrinkwrapFilename.lastIndexOf('/'), this.shrinkwrapFilename.lastIndexOf('\\'));
+      return `${this.shrinkwrapFilename.substring(0, lastSlashIndex)}/${subspaceName}-${this.shrinkwrapFilename.substring(lastSlashIndex + 1)}`;
     };
 
     this.tempShrinkwrapFilename = path.join(this.commonTempFolder, this.shrinkwrapFilename);
