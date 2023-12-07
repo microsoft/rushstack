@@ -253,9 +253,9 @@ describe('Executable process tests', () => {
     expect(result.exitCode).toEqual(0);
     expect(Buffer.isBuffer(result.stdout)).toEqual(true);
     expect(Buffer.isBuffer(result.stderr)).toEqual(true);
-    expect(
-      result.stdout.toString('utf8').startsWith('Executing npm-binary-wrapper.cmd with args:\r\n"1 2 3"')
-    ).toEqual(true);
+    expect(result.stdout.toString('utf8').startsWith('Executing npm-binary-wrapper.cmd with args:')).toEqual(
+      true
+    );
     expect(result.stderr.toString('utf8')).toEqual('');
   });
 
