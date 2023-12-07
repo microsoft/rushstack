@@ -782,11 +782,7 @@ export class RushConfiguration {
 
     this.tempSubspaceShrinkwrapFileName = (subspaceName: string): string => {
       // TODO: do subspace name validation here
-      const fullSubspacePath: string = path.join(
-        this.commonTempSubspaceFolderRoot,
-        subspaceName,
-        this.shrinkwrapFilename
-      );
+      const fullSubspacePath: string = `${this.commonTempSubspaceFolderRoot}/${subspaceName}/${this.shrinkwrapFilename}`;
       return fullSubspacePath;
     };
 
