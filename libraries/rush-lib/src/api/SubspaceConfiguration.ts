@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import schemaJson from '../schemas/subspaces.schema.json';
 import path from 'path';
 import { trueCasePathSync } from 'true-case-path';
+
 import { RushConfiguration } from './RushConfiguration';
+import schemaJson from '../schemas/subspaces.schema.json';
 
 export interface ISubspaceConfig {
   subspaceName: string;
