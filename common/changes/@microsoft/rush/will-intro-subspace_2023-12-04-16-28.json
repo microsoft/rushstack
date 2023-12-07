@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add subspace configuration file structure",
+      "comment": "(EXPERIMENTAL) Implemented config file loader for the not-yet-released \"subspaces\" feature (GitHub #4230)",
       "type": "none"
     }
   ],
