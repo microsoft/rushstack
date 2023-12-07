@@ -234,7 +234,7 @@ export class RushConfiguration {
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
   // Cache subspace projects
-  private _subspaceProjectsCache: Map<string, RushConfigurationProject[]>;
+  private _cachedRushProjectsBySubspaceName: Map<string, RushConfigurationProject[]>;
 
   private _hasSubspaces: boolean | undefined;
 
@@ -385,17 +385,6 @@ export class RushConfiguration {
    * Example: `pnpm-lock.yaml`
    */
   public readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
-
-  /**
-   * The full path of the temporary shrinkwrap file for a specific subspace.
-   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
-   * This function also consults the depreciated option to allow for shrinkwraps to be stored under a package folder.
-   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
-   * @remarks
-   * This property merely reports the filename, the file itself may not actually exist.
-   * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
-   */
-  public readonly tempSubspaceShrinkwrapFileName: (subspaceName: string) => string;
 
   /**
    * The filename of the variant dependency data file.  By default this is
@@ -675,12 +664,10 @@ export class RushConfiguration {
 
     // Check if we have a subspace configuration file
     const subspaceConfigLocation: string = path.join(this.rushJsonFolder, 'subspaces.json');
-    if (FileSystem.exists(subspaceConfigLocation)) {
-      // Try getting a subspace configuration
-      this.subspaceConfiguration = SubspaceConfiguration.loadFromConfigurationFile(subspaceConfigLocation);
-    }
+    // Try getting a subspace configuration
+    this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceConfigLocation);
 
-    this._subspaceProjectsCache = new Map<string, RushConfigurationProject[]>();
+    this._cachedRushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -765,8 +752,14 @@ export class RushConfiguration {
 
     // From "pnpm-lock.yaml" --> "subspace-pnpm-lock.yaml"
     this.subspaceShrinkwrapFilenames = (subspaceName: string): string => {
-      const lastSlashIndex: number = Math.max(this.shrinkwrapFilename.lastIndexOf('/'), this.shrinkwrapFilename.lastIndexOf('\\'));
-      return `${this.shrinkwrapFilename.substring(0, lastSlashIndex)}/${subspaceName}-${this.shrinkwrapFilename.substring(lastSlashIndex + 1)}`;
+      const lastSlashIndex: number = Math.max(
+        this.shrinkwrapFilename.lastIndexOf('/'),
+        this.shrinkwrapFilename.lastIndexOf('\\')
+      );
+      return `${this.shrinkwrapFilename.substring(
+        0,
+        lastSlashIndex
+      )}/${subspaceName}-${this.shrinkwrapFilename.substring(lastSlashIndex + 1)}`;
     };
 
     this.tempShrinkwrapFilename = path.join(this.commonTempFolder, this.shrinkwrapFilename);
@@ -779,12 +772,6 @@ export class RushConfiguration {
         `${this.packageManager}`
       )
     );
-
-    this.tempSubspaceShrinkwrapFileName = (subspaceName: string): string => {
-      // TODO: do subspace name validation here
-      const fullSubspacePath: string = `${this.commonTempSubspaceFolderRoot}/${subspaceName}/${this.shrinkwrapFilename}`;
-      return fullSubspacePath;
-    };
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
     const parsedPath: path.ParsedPath = path.parse(this.tempShrinkwrapFilename);
@@ -952,13 +939,14 @@ export class RushConfiguration {
         );
       }
       this._projectsByName.set(project.packageName, project);
-      if (projectJson.subspace) {
-        const subspaceName: string = projectJson.subspace;
-        const projectsForSubspace: RushConfigurationProject[] | undefined = this._subspaceProjectsCache.get(subspaceName);
+      if (projectJson.subspaceName) {
+        const subspaceName: string = projectJson.subspaceName;
+        const projectsForSubspace: RushConfigurationProject[] | undefined =
+          this._cachedRushProjectsBySubspaceName.get(subspaceName);
         if (projectsForSubspace) {
           projectsForSubspace.push(project);
         } else {
-          this._subspaceProjectsCache.set(subspaceName, [project]);
+          this._cachedRushProjectsBySubspaceName.set(subspaceName, [project]);
         }
       }
     }
@@ -1230,6 +1218,21 @@ export class RushConfiguration {
   }
 
   /**
+   * The full path of the temporary shrinkwrap file for a specific subspace.
+   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
+   * This function also consults the depreciated option to allow for shrinkwraps to be stored under a package folder.
+   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
+   * @remarks
+   * This property merely reports the filename, the file itself may not actually exist.
+   * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
+   */
+  public getTempSubspaceShrinkwrapFileName(subspaceName: string): string {
+    // TODO: do subspace name validation here
+    const fullSubspacePath: string = `${this.commonTempSubspaceFolderRoot}/${subspaceName}/${this.shrinkwrapFilename}`;
+    return fullSubspacePath;
+  }
+
+  /**
    * Returns an English phrase such as "shrinkwrap file" that can be used in logging messages
    * to refer to the shrinkwrap file using appropriate terminology for the currently selected
    * package manager.
@@ -1277,7 +1280,7 @@ export class RushConfiguration {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return this._subspaceProjectsCache.keys();
+    return this._cachedRushProjectsBySubspaceName.keys();
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
@@ -1358,7 +1361,7 @@ export class RushConfiguration {
    * Does this project have subspaces
    */
   public get hasSubspaces(): boolean {
-    return this._subspaceProjectsCache.size > 0;
+    return this._cachedRushProjectsBySubspaceName.size > 0;
   }
 
   /**

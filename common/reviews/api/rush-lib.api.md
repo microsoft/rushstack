@@ -736,14 +736,12 @@ export interface IStopwatchResult {
 
 // @beta
 export interface ISubspaceConfigurationJson {
-    // Warning: (ae-forgotten-export) The symbol "ISubspaceConfig" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    availableSubspaces: ISubspaceConfig[];
     // (undocumented)
     enabled: boolean;
     // (undocumented)
     splitWorkspaceCompatibility?: boolean;
+    // (undocumented)
+    subspaceNames: string[];
 }
 
 // @beta (undocumented)
@@ -1089,6 +1087,7 @@ export class RushConfiguration {
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
+    getTempSubspaceShrinkwrapFileName(subspaceName: string): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;
@@ -1145,7 +1144,6 @@ export class RushConfiguration {
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
     readonly tempShrinkwrapPreinstallFilename: string;
-    readonly tempSubspaceShrinkwrapFileName: (subspaceName: string) => string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // (undocumented)
@@ -1188,7 +1186,7 @@ export class RushConfigurationProject {
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;
     readonly skipRushCheck: boolean;
-    readonly subspace?: string;
+    readonly subspaceName: string | undefined;
     // @beta
     readonly tags: ReadonlySet<string>;
     readonly tempProjectName: string;
@@ -1322,14 +1320,12 @@ export class RushUserConfiguration {
 
 // @beta
 export class SubspaceConfiguration {
-    readonly availableSubspaceSet: Set<string>;
-    // @internal
-    readonly configuration: Readonly<ISubspaceConfigurationJson>;
-    // (undocumented)
-    static loadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration;
     // (undocumented)
     static loadFromDefaultLocation(): SubspaceConfiguration | undefined;
     readonly subspaceJsonFile: string;
+    readonly subspaceNames: Set<string>;
+    // (undocumented)
+    static tryLoadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration | undefined;
 }
 
 // @public

@@ -25,6 +25,6 @@
     * The next field is an object describing the available subspaces in this workspace. Each individual subspace
     * must be defined in this array.
     */
-  "availableSubspaces": []
+  "subspaceNames": []
 
 }

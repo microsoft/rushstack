@@ -8,10 +8,6 @@ import { trueCasePathSync } from 'true-case-path';
 import { RushConfiguration } from './RushConfiguration';
 import schemaJson from '../schemas/subspaces.schema.json';
 
-export interface ISubspaceConfig {
-  subspaceName: string;
-}
-
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
  * See subspace.schema.json for documentation.
@@ -20,13 +16,14 @@ export interface ISubspaceConfig {
 export interface ISubspaceConfigurationJson {
   enabled: boolean;
   splitWorkspaceCompatibility?: boolean;
-  availableSubspaces: ISubspaceConfig[];
+  subspaceNames: string[];
 }
 
 /**
- * The allowed naming convention for subspace names
+ * The allowed naming convention for subspace names.
+ * Allows for names to be formed of letters, numbers, and hyphens (-)
  */
-export const SubspaceRegex: RegExp = new RegExp('/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/');
+export const SUBSPACE_NAME_REGEXP: RegExp = new RegExp('/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/');
 
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
@@ -46,28 +43,35 @@ export class SubspaceConfiguration {
    *
    * @internal
    */
-  public readonly configuration: Readonly<ISubspaceConfigurationJson>;
+  private readonly _configuration: Readonly<ISubspaceConfigurationJson>;
 
   /**
    * A set of the available subspaces
    */
-  public readonly availableSubspaceSet: Set<string>;
+  public readonly subspaceNames: Set<string>;
 
   private constructor(subspaceJsonFilename: string) {
-    this.configuration = {
+    this._configuration = {
       enabled: false,
-      availableSubspaces: []
+      subspaceNames: []
     };
     this.subspaceJsonFile = subspaceJsonFilename;
-    this.availableSubspaceSet = new Set();
+    this.subspaceNames = new Set();
 
-    if (FileSystem.exists(this.subspaceJsonFile)) {
-      this.configuration = JsonFile.loadAndValidate(this.subspaceJsonFile, SubspaceConfiguration._jsonSchema);
+    try {
+      this._configuration = JsonFile.loadAndValidate(
+        this.subspaceJsonFile,
+        SubspaceConfiguration._jsonSchema
+      );
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
     }
 
-    for (const { subspaceName } of Object.values(this.configuration.availableSubspaces)) {
-      if (SubspaceRegex.test(subspaceName)) {
-        this.availableSubspaceSet.add(subspaceName);
+    for (const subspaceName of this._configuration.subspaceNames) {
+      if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
+        this.subspaceNames.add(subspaceName);
       } else {
         throw new Error(
           `Invalid subspace name: ${subspaceName}. Subspace names must only consist of lowercase letters, numbers, and hyphens (-).`
@@ -76,7 +80,13 @@ export class SubspaceConfiguration {
     }
   }
 
-  public static loadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration {
+  public static tryLoadFromConfigurationFile(
+    subspaceJsonFilename: string
+  ): SubspaceConfiguration | undefined {
+    if (FileSystem.exists(subspaceJsonFilename)) {
+      return undefined;
+    }
+
     let resolvedSubspaceJsonFilename: string = path.resolve(subspaceJsonFilename);
 
     try {
@@ -92,7 +102,7 @@ export class SubspaceConfiguration {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
     if (rushJsonLocation) {
       const subspaceJsonLocation: string = path.join(path.dirname(rushJsonLocation), 'subspaces.json');
-      return SubspaceConfiguration.loadFromConfigurationFile(subspaceJsonLocation);
+      return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
     }
   }
 }
