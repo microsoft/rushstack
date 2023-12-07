@@ -255,7 +255,7 @@ describe('Executable process tests', () => {
     expect(Buffer.isBuffer(result.stderr)).toEqual(true);
     expect(
       result.stdout.toString('utf8').startsWith('Executing npm-binary-wrapper.cmd with args:\r\n"1 2 3"')
-    ).toBe(true);
+    ).toEqual(true);
     expect(result.stderr.toString('utf8')).toEqual('');
   });
 
@@ -288,7 +288,7 @@ describe('Executable process tests', () => {
     expect(result.exitCode).toEqual(1);
     expect(typeof result.stdout).toEqual('string');
     expect(typeof result.stderr).toEqual('string');
-    expect(result.stdout.startsWith('Executing npm-binary-wrapper.cmd with args:')).toBe(true);
+    expect(result.stdout.startsWith('Executing npm-binary-wrapper.cmd with args:')).toEqual(true);
     expect(result.stderr.endsWith('This is a failure'));
   });
 
