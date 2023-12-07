@@ -125,20 +125,26 @@ export interface IWaitForExitOptions {
 }
 
 /**
- * {@inheritDoc IRunToCompletionOptions}
+ * {@inheritDoc IWaitForExitOptions}
  *
  * @public
  */
 export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
+  /**
+   * {@inheritDoc IWaitForExitOptions.encoding}
+   */
   encoding: BufferEncoding;
 }
 
 /**
- * {@inheritDoc IRunToCompletionOptions}
+ * {@inheritDoc IWaitForExitOptions}
  *
  * @public
  */
 export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
+  /**
+   * {@inheritDoc IWaitForExitOptions.encoding}
+   */
   encoding: 'buffer';
 }
 
@@ -529,7 +535,7 @@ export class Executable {
     const { throwOnNonZeroExitCode = false, encoding } = options;
     if (encoding && (!childProcess.stdout || !childProcess.stderr)) {
       throw new Error(
-        'An encoding was specified, but stdout and/or stderr are not piped. Did you set stdio?'
+        'An encoding was specified, but stdout and/or stderr on the child process are not defined'
       );
     }
 

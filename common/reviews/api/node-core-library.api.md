@@ -752,19 +752,13 @@ export interface IWaitForExitResult<T extends Buffer | string | never = never> {
     stdout: T;
 }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/node-core-library" does not have an export "IRunToCompletionOptions"
-//
-// @public (undocumented)
+// @public
 export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
-    // (undocumented)
     encoding: 'buffer';
 }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/node-core-library" does not have an export "IRunToCompletionOptions"
-//
-// @public (undocumented)
+// @public
 export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
-    // (undocumented)
     encoding: BufferEncoding;
 }
 
