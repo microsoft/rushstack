@@ -79,6 +79,14 @@ describe('Executable process tests', () => {
         path.join(executableFolder, 'success', 'bash-script.sh'),
         PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
       );
+      FileSystem.changePosixModeBits(
+        path.join(executableFolder, 'fail', 'npm-binary-wrapper'),
+        PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
+      );
+      FileSystem.changePosixModeBits(
+        path.join(executableFolder, 'fail', 'bash-script.sh'),
+        PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute
+      );
     }
   });
 
@@ -91,6 +99,14 @@ describe('Executable process tests', () => {
       );
       FileSystem.changePosixModeBits(
         path.join(executableFolder, 'success', 'bash-script.sh'),
+        PosixModeBits.AllRead | PosixModeBits.AllWrite
+      );
+      FileSystem.changePosixModeBits(
+        path.join(executableFolder, 'fail', 'npm-binary-wrapper'),
+        PosixModeBits.AllRead | PosixModeBits.AllWrite
+      );
+      FileSystem.changePosixModeBits(
+        path.join(executableFolder, 'fail', 'bash-script.sh'),
         PosixModeBits.AllRead | PosixModeBits.AllWrite
       );
     }
