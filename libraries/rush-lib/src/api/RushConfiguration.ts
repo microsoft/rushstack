@@ -236,8 +236,6 @@ export class RushConfiguration {
   // Cache subspace projects
   private _cachedRushProjectsBySubspaceName: Map<string, RushConfigurationProject[]>;
 
-  private _hasSubspaces: boolean | undefined;
-
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
 
@@ -1365,6 +1363,9 @@ export class RushConfiguration {
    * Does this project have subspaces
    */
   public get hasSubspaces(): boolean {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
     return this._cachedRushProjectsBySubspaceName.size > 0;
   }
 
