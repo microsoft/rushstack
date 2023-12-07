@@ -1,6 +1,15 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 28 Sep 2023 20:53:17 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Dec 2023 03:44:13 GMT and should not be manually modified.
+
+## 3.62.0
+Thu, 07 Dec 2023 03:44:13 GMT
+
+### Minor changes
+
+- Add functions inside the `Executable` API to list all process trees (`getProcessInfoById`, `getProcessInfoByIdAsync`, `getProcessInfoByName`, and `getProcessInfoByNameAsync`).
+- Add functions inside the `Text` API to split iterables (or async iterables) that produce strings or buffers on newlines (`readLinesFromIterable` and `readLinesFromIterableAsync`).
+- Add the `waitForExitAsync` method inside the `Executable` API used to wait for a provided child process to exit.
 
 ## 3.61.0
 Thu, 28 Sep 2023 20:53:17 GMT
