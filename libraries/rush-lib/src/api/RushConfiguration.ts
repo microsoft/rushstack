@@ -234,7 +234,7 @@ export class RushConfiguration {
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
   // Cache subspace projects
-  private _cachedRushProjectsBySubspaceName: Map<string, RushConfigurationProject[]>;
+  private _rushProjectsBySubspaceName: Map<string, RushConfigurationProject[]>;
 
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
@@ -669,7 +669,7 @@ export class RushConfiguration {
     // Try getting a subspace configuration
     this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceConfigLocation);
 
-    this._cachedRushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
+    this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -944,11 +944,11 @@ export class RushConfiguration {
       if (projectJson.subspaceName) {
         const subspaceName: string = projectJson.subspaceName;
         const projectsForSubspace: RushConfigurationProject[] | undefined =
-          this._cachedRushProjectsBySubspaceName.get(subspaceName);
+          this._rushProjectsBySubspaceName.get(subspaceName);
         if (projectsForSubspace) {
           projectsForSubspace.push(project);
         } else {
-          this._cachedRushProjectsBySubspaceName.set(subspaceName, [project]);
+          this._rushProjectsBySubspaceName.set(subspaceName, [project]);
         }
       }
     }
@@ -1282,7 +1282,7 @@ export class RushConfiguration {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return this._cachedRushProjectsBySubspaceName.keys();
+    return this._rushProjectsBySubspaceName.keys();
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
@@ -1366,7 +1366,7 @@ export class RushConfiguration {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return this._cachedRushProjectsBySubspaceName.size > 0;
+    return this._rushProjectsBySubspaceName.size > 0;
   }
 
   /**
