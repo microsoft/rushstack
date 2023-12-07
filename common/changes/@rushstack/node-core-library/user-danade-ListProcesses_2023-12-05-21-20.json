@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add the ability to list all process trees using `Executable.listProcessInfoById` and `Executable.listProcessInfoByName` methods",
+      "comment": "Add functions inside the `Executable` API to list all process trees (`getProcessInfoById`, `getProcessInfoByIdAsync`, `getProcessInfoByName`, and `getProcessInfoByNameAsync`).",
       "type": "minor"
     }
   ],

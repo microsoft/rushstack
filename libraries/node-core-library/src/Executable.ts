@@ -107,6 +107,64 @@ export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
   stdio?: ExecutableStdioMapping;
 }
 
+/**
+ * The options for running a process to completion using {@link Executable.(waitForExitAsync:3)}.
+ *
+ * @public
+ */
+export interface IWaitForExitOptions {
+  /**
+   * Whether or not to throw when the process completes with a non-zero exit code. Defaults to false.
+   */
+  throwOnNonZeroExitCode?: boolean;
+
+  /**
+   * The encoding of the output. If not provided, the output will not be collected.
+   */
+  encoding?: BufferEncoding | 'buffer';
+}
+
+/**
+ * {@inheritDoc IRunToCompletionOptions}
+ *
+ * @public
+ */
+export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
+  encoding: BufferEncoding;
+}
+
+/**
+ * {@inheritDoc IRunToCompletionOptions}
+ *
+ * @public
+ */
+export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
+  encoding: 'buffer';
+}
+
+/**
+ * The result of running a process to completion using {@link Executable.(waitForExitAsync:3)}.
+ *
+ * @public
+ */
+export interface IWaitForExitResult<T extends Buffer | string | never = never> {
+  /**
+   * The process stdout output, if encoding was specified.
+   */
+  stdout: T;
+
+  /**
+   * The process stderr output, if encoding was specified.
+   */
+  stderr: T;
+
+  /**
+   * The process exit code. If the process was terminated, this will be null.
+   */
+  // eslint-disable-next-line @rushstack/no-new-null
+  exitCode: number | null;
+}
+
 // Common environmental state used by Executable members
 interface IExecutableContext {
   currentWorkingDirectory: string;
@@ -136,10 +194,12 @@ export interface IProcessInfo {
    * On Unix, the process name will be empty if the process is the root process.
    */
   processName: string;
+
   /**
    * The process ID.
    */
   processId: number;
+
   /**
    * The parent process info.
    *
@@ -159,7 +219,7 @@ export async function parseProcessListOutputAsync(
 ): Promise<Map<number, IProcessInfo>> {
   const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
   let seenHeaders: boolean = false;
-  for await (const line of Text.readLinesFromIterableAsync(stream, { skipEmptyLines: true })) {
+  for await (const line of Text.readLinesFromIterableAsync(stream, { ignoreEmptyLines: true })) {
     if (!seenHeaders) {
       seenHeaders = true;
     } else {
@@ -173,7 +233,7 @@ export async function parseProcessListOutputAsync(
 export function parseProcessListOutput(output: Iterable<string | null>): Map<number, IProcessInfo> {
   const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
   let seenHeaders: boolean = false;
-  for (const line of Text.readLinesFromIterable(output, { skipEmptyLines: true })) {
+  for (const line of Text.readLinesFromIterable(output, { ignoreEmptyLines: true })) {
     if (!seenHeaders) {
       seenHeaders = true;
     } else {
@@ -438,13 +498,106 @@ export class Executable {
     return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
   }
 
+  /* eslint-disable @rushstack/no-new-null */
+  /** {@inheritDoc Executable.(waitForExitAsync:3)} */
+  public static async waitForExitAsync(
+    childProcess: child_process.ChildProcess,
+    options: IWaitForExitWithStringOptions
+  ): Promise<IWaitForExitResult<string>>;
+
+  /** {@inheritDoc Executable.(waitForExitAsync:3)} */
+  public static async waitForExitAsync(
+    childProcess: child_process.ChildProcess,
+    options: IWaitForExitWithBufferOptions
+  ): Promise<IWaitForExitResult<Buffer>>;
+
   /**
-   * Get the list of processes currently running on the system, keyed by the process ID. The underlying
-   * implementation depends on the operating system:
+   * Wait for a child process to exit and return the result.
+   *
+   * @param childProcess - The child process to wait for.
+   * @param options - Options for waiting for the process to exit.
+   */
+  public static async waitForExitAsync(
+    childProcess: child_process.ChildProcess,
+    options?: IWaitForExitOptions
+  ): Promise<IWaitForExitResult<never>>;
+
+  public static async waitForExitAsync<T extends Buffer | string | never = never>(
+    childProcess: child_process.ChildProcess,
+    options: IWaitForExitOptions = {}
+  ): Promise<IWaitForExitResult<T>> {
+    const { throwOnNonZeroExitCode = false, encoding } = options;
+    if (encoding && (!childProcess.stdout || !childProcess.stderr)) {
+      throw new Error(
+        'An encoding was specified, but stdout and/or stderr are not piped. Did you set stdio?'
+      );
+    }
+
+    const collectedStdout: T[] = [];
+    const collectedStderr: T[] = [];
+    const useBufferEncoding: boolean = encoding === 'buffer';
+
+    function normalizeChunk<TChunk extends Buffer | string>(chunk: Buffer | string): TChunk {
+      if (typeof chunk === 'string') {
+        return (useBufferEncoding ? Buffer.from(chunk) : chunk) as TChunk;
+      } else {
+        return (useBufferEncoding ? chunk : chunk.toString(encoding as BufferEncoding)) as TChunk;
+      }
+    }
+
+    let errorThrown: boolean = false;
+    const exitCode: number | null = await new Promise<number | null>(
+      (resolve: (result: number | null) => void, reject: (error: Error) => void) => {
+        if (encoding) {
+          childProcess.stdout!.on('data', (chunk: Buffer | string) => {
+            collectedStdout.push(normalizeChunk(chunk));
+          });
+          childProcess.stderr!.on('data', (chunk: Buffer | string) => {
+            collectedStderr.push(normalizeChunk(chunk));
+          });
+        }
+        childProcess.on('error', (error: Error) => {
+          errorThrown = true;
+          reject(error);
+        });
+        childProcess.on('exit', (code: number | null) => {
+          if (errorThrown) {
+            // We've already rejected the promise
+            return;
+          }
+          if (code !== 0 && throwOnNonZeroExitCode) {
+            reject(new Error(`Process exited with code ${code}`));
+          } else {
+            resolve(code);
+          }
+        });
+      }
+    );
+
+    const result: IWaitForExitResult<T> = {
+      exitCode
+    } as IWaitForExitResult<T>;
+
+    if (encoding === 'buffer') {
+      result.stdout = Buffer.concat(collectedStdout as Buffer[]) as T;
+      result.stderr = Buffer.concat(collectedStderr as Buffer[]) as T;
+    } else if (encoding) {
+      result.stdout = collectedStdout.join('') as T;
+      result.stderr = collectedStderr.join('') as T;
+    }
+
+    return result;
+  }
+  /* eslint-enable @rushstack/no-new-null */
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process ID.
+   *
+   * @remarks The underlying implementation depends on the operating system:
    * - On Windows, this uses the `wmic.exe` utility.
    * - On Unix, this uses the `ps` utility.
    */
-  public static async listProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>> {
+  public static async getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>> {
     const { path: command, args } = getProcessListProcessOptions();
     const process: child_process.ChildProcess = Executable.spawn(command, args, {
       stdio: ['ignore', 'pipe', 'ignore']
@@ -452,42 +605,18 @@ export class Executable {
     if (process.stdout === null) {
       throw new InternalError('Child process did not provide stdout');
     }
-
-    let errorThrown: boolean = false;
-    const processFinishedPromise: Promise<void> = new Promise<void>(
-      (resolve: () => void, reject: (error: Error) => void) => {
-        process.on('error', (error: Error) => {
-          errorThrown = true;
-          reject(new InternalError(`Unable to list processes: ${command} failed with error ${error}`));
-        });
-        process.on('exit', (code: number | null) => {
-          if (errorThrown) {
-            // We've already rejected the promise
-            return;
-          }
-          if (code !== 0) {
-            reject(new InternalError(`Unable to list processes: ${command} exited with code ${code}`));
-          } else {
-            resolve();
-          }
-        });
-      }
-    );
-
     const [processInfoByIdMap] = await Promise.all([
       parseProcessListOutputAsync(process.stdout),
-      processFinishedPromise
+      // Don't collect output in the result since we process it directly
+      Executable.waitForExitAsync(process, { throwOnNonZeroExitCode: true })
     ]);
     return processInfoByIdMap;
   }
 
   /**
-   * Get the list of processes currently running on the system, keyed by the process ID. The underlying
-   * implementation depends on the operating system:
-   * - On Windows, this uses the `wmic.exe` utility.
-   * - On Unix, this uses the `ps` utility.
+   * {@inheritDoc Executable.getProcessInfoByIdAsync}
    */
-  public static listProcessInfoById(): Map<number, IProcessInfo> {
+  public static getProcessInfoById(): Map<number, IProcessInfo> {
     const { path: command, args } = getProcessListProcessOptions();
     const processOutput: child_process.SpawnSyncReturns<string> = Executable.spawnSync(command, args);
     if (processOutput.error) {
@@ -501,23 +630,22 @@ export class Executable {
 
   /**
    * Get the list of processes currently running on the system, keyed by the process name. All processes
-   * with the same name will be grouped. The underlying implementation depends on the operating system:
+   * with the same name will be grouped.
+   *
+   * @remarks The underlying implementation depends on the operating system:
    * - On Windows, this uses the `wmic.exe` utility.
    * - On Unix, this uses the `ps` utility.
    */
-  public static async listProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>> {
-    const processInfoById: Map<number, IProcessInfo> = await Executable.listProcessInfoByIdAsync();
+  public static async getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>> {
+    const processInfoById: Map<number, IProcessInfo> = await Executable.getProcessInfoByIdAsync();
     return convertToProcessInfoByNameMap(processInfoById);
   }
 
   /**
-   * Get the list of processes currently running on the system, keyed by the process name. All processes
-   * with the same name will be grouped. The underlying implementation depends on the operating system:
-   * - On Windows, this uses the `wmic.exe` utility.
-   * - On Unix, this uses the `ps` utility.
+   * {@inheritDoc Executable.getProcessInfoByNameAsync}
    */
-  public static listProcessInfoByName(): Map<string, IProcessInfo[]> {
-    const processInfoByIdMap: Map<number, IProcessInfo> = Executable.listProcessInfoById();
+  public static getProcessInfoByName(): Map<string, IProcessInfo[]> {
+    const processInfoByIdMap: Map<number, IProcessInfo> = Executable.getProcessInfoById();
     return convertToProcessInfoByNameMap(processInfoByIdMap);
   }
 

@@ -20,6 +20,10 @@ export {
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
   IExecutableSpawnOptions,
+  IWaitForExitOptions,
+  IWaitForExitWithBufferOptions,
+  IWaitForExitWithStringOptions,
+  IWaitForExitResult,
   IProcessInfo,
   Executable
 } from './Executable';

@@ -50,11 +50,37 @@ export interface IReadLinesFromIterableOptions {
   /**
    * If true, empty lines will not be returned. The default is false.
    */
-  skipEmptyLines?: boolean;
+  ignoreEmptyLines?: boolean;
 }
 
 interface IReadLinesFromIterableState {
   remaining: string;
+}
+
+const NEWLINE_REGEX: RegExp = /\r\n|\n\r|\r|\n/g;
+const NEWLINE_AT_END_REGEX: RegExp = /(\r\n|\n\r|\r|\n)$/;
+
+function* readLinesFromChunk(
+  // eslint-disable-next-line @rushstack/no-new-null
+  chunk: string | Buffer | null,
+  encoding: Encoding,
+  ignoreEmptyLines: boolean,
+  state: IReadLinesFromIterableState
+): Generator<string> {
+  if (!chunk) {
+    return;
+  }
+  const remaining: string = state.remaining + (typeof chunk === 'string' ? chunk : chunk.toString(encoding));
+  let startIndex: number = 0;
+  const matches: IterableIterator<RegExpMatchArray> = remaining.matchAll(NEWLINE_REGEX);
+  for (const match of matches) {
+    const endIndex: number = match.index!;
+    if (startIndex !== endIndex || !ignoreEmptyLines) {
+      yield remaining.substring(startIndex, endIndex);
+    }
+    startIndex = endIndex + match[0].length;
+  }
+  state.remaining = remaining.substring(startIndex);
 }
 
 /**
@@ -67,8 +93,8 @@ interface IReadLinesFromIterableState {
  * @public
  */
 export class Text {
-  private static readonly _newLineRegEx: RegExp = /\r\n|\n\r|\r|\n/g;
-  private static readonly _newLineAtEndRegEx: RegExp = /(\r\n|\n\r|\r|\n)$/;
+  private static readonly _newLineRegEx: RegExp = NEWLINE_REGEX;
+  private static readonly _newLineAtEndRegEx: RegExp = NEWLINE_AT_END_REGEX;
 
   /**
    * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
@@ -212,10 +238,10 @@ export class Text {
     iterable: AsyncIterable<string | Buffer>,
     options: IReadLinesFromIterableOptions = {}
   ): AsyncGenerator<string> {
-    const { encoding = Encoding.Utf8, skipEmptyLines = false } = options;
+    const { encoding = Encoding.Utf8, ignoreEmptyLines = false } = options;
     const state: IReadLinesFromIterableState = { remaining: '' };
     for await (const chunk of iterable) {
-      yield* Text._readLinesFromChunk(chunk, encoding, skipEmptyLines, state);
+      yield* readLinesFromChunk(chunk, encoding, ignoreEmptyLines, state);
     }
     const remaining: string = state.remaining;
     if (remaining.length) {
@@ -235,37 +261,14 @@ export class Text {
     iterable: Iterable<string | Buffer | null>,
     options: IReadLinesFromIterableOptions = {}
   ): Generator<string> {
-    const { encoding = Encoding.Utf8, skipEmptyLines = false } = options;
+    const { encoding = Encoding.Utf8, ignoreEmptyLines = false } = options;
     const state: IReadLinesFromIterableState = { remaining: '' };
     for (const chunk of iterable) {
-      yield* Text._readLinesFromChunk(chunk, encoding, skipEmptyLines, state);
+      yield* readLinesFromChunk(chunk, encoding, ignoreEmptyLines, state);
     }
     const remaining: string = state.remaining;
     if (remaining.length) {
       yield remaining;
     }
-  }
-
-  private static *_readLinesFromChunk(
-    chunk: string | Buffer | null,
-    encoding: Encoding,
-    skipEmptyLines: boolean,
-    state: IReadLinesFromIterableState
-  ): Generator<string> {
-    if (!chunk) {
-      return;
-    }
-    const remaining: string =
-      state.remaining + (typeof chunk === 'string' ? chunk : chunk.toString(encoding));
-    let startIndex: number = 0;
-    const matches: IterableIterator<RegExpMatchArray> = remaining.matchAll(Text._newLineRegEx);
-    for (const match of matches) {
-      const endIndex: number = match.index!;
-      if (startIndex !== endIndex || !skipEmptyLines) {
-        yield remaining.substring(startIndex, endIndex);
-      }
-      startIndex = endIndex + match[0].length;
-    }
-    state.remaining = remaining.substring(startIndex);
   }
 }

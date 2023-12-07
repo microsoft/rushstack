@@ -180,13 +180,16 @@ export class EnvironmentMap {
 
 // @public
 export class Executable {
-    static listProcessInfoById(): Map<number, IProcessInfo>;
-    static listProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>>;
-    static listProcessInfoByName(): Map<string, IProcessInfo[]>;
-    static listProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>>;
+    static getProcessInfoById(): Map<number, IProcessInfo>;
+    static getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>>;
+    static getProcessInfoByName(): Map<string, IProcessInfo[]>;
+    static getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>>;
     static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithStringOptions): Promise<IWaitForExitResult<string>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithBufferOptions): Promise<IWaitForExitResult<Buffer>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options?: IWaitForExitOptions): Promise<IWaitForExitResult<never>>;
 }
 
 // @public
@@ -672,7 +675,7 @@ export interface IProtectableMapParameters<K, V> {
 // @public
 export interface IReadLinesFromIterableOptions {
     encoding?: Encoding;
-    skipEmptyLines?: boolean;
+    ignoreEmptyLines?: boolean;
 }
 
 // @beta (undocumented)
@@ -734,6 +737,35 @@ export interface ITerminalWritableOptions {
     severity: TerminalProviderSeverity;
     terminal: ITerminal;
     writableOptions?: WritableOptions;
+}
+
+// @public
+export interface IWaitForExitOptions {
+    encoding?: BufferEncoding | 'buffer';
+    throwOnNonZeroExitCode?: boolean;
+}
+
+// @public
+export interface IWaitForExitResult<T extends Buffer | string | never = never> {
+    exitCode: number | null;
+    stderr: T;
+    stdout: T;
+}
+
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/node-core-library" does not have an export "IRunToCompletionOptions"
+//
+// @public (undocumented)
+export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
+    // (undocumented)
+    encoding: 'buffer';
+}
+
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/node-core-library" does not have an export "IRunToCompletionOptions"
+//
+// @public (undocumented)
+export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
+    // (undocumented)
+    encoding: BufferEncoding;
 }
 
 // @public

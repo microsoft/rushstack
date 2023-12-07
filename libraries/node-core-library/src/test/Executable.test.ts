@@ -10,7 +10,8 @@ import {
   parseProcessListOutput,
   parseProcessListOutputAsync,
   type IProcessInfo,
-  type IExecutableSpawnSyncOptions
+  type IExecutableSpawnSyncOptions,
+  type IWaitForExitResult
 } from '../Executable';
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
@@ -226,6 +227,80 @@ describe('Executable process tests', () => {
         });
       })()
     ).resolves.toBe('Exit with code=0');
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) without output', async () => {
+    const executablePath: string = path.join(executableFolder, 'success', 'npm-binary-wrapper');
+    const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
+      environment,
+      currentWorkingDirectory: executableFolder
+    });
+    const result: IWaitForExitResult = await Executable.waitForExitAsync(childProcess);
+    expect(result.exitCode).toEqual(0);
+    expect(result.stderr).toBeUndefined();
+    expect(result.stderr).toBeUndefined();
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) with buffer output', async () => {
+    const executablePath: string = path.join(executableFolder, 'success', 'npm-binary-wrapper');
+    const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
+      environment,
+      currentWorkingDirectory: executableFolder
+    });
+    const result: IWaitForExitResult<Buffer> = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'buffer'
+    });
+    expect(result.exitCode).toEqual(0);
+    expect(Buffer.isBuffer(result.stdout)).toBe(true);
+    expect(Buffer.isBuffer(result.stderr)).toBe(true);
+    expect(
+      result.stdout.toString('utf8').startsWith('Executing npm-binary-wrapper.cmd with args:\r\n"1 2 3"')
+    ).toBe(true);
+    expect(result.stderr.toString('utf8')).toEqual('');
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) with string output', async () => {
+    const executablePath: string = path.join(executableFolder, 'success', 'npm-binary-wrapper');
+    const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
+      environment,
+      currentWorkingDirectory: executableFolder
+    });
+    const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'utf8'
+    });
+    expect(result.exitCode).toEqual(0);
+    expect(typeof result.stdout).toEqual('string');
+    expect(typeof result.stderr).toEqual('string');
+    expect(result.stdout.startsWith('Executing npm-binary-wrapper.cmd with args:')).toBe(true);
+    expect(result.stderr).toEqual('');
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) failure', async () => {
+    const executablePath: string = path.join(executableFolder, 'failure', 'npm-binary-wrapper');
+    const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
+      environment,
+      currentWorkingDirectory: executableFolder
+    });
+    const result: IWaitForExitResult<string> = await Executable.waitForExitAsync(childProcess, {
+      encoding: 'utf8',
+      throwOnNonZeroExitCode: false
+    });
+    expect(result.exitCode).toEqual(1);
+    expect(typeof result.stdout).toEqual('string');
+    expect(typeof result.stderr).toEqual('string');
+    expect(result.stdout.startsWith('Executing npm-binary-wrapper.cmd with args:')).toBe(true);
+    expect(result.stderr.endsWith('This is a failure'));
+  });
+
+  test('Executable.runToCompletion(Executable.spawn("npm-binary-wrapper")) failure with throw', async () => {
+    const executablePath: string = path.join(executableFolder, 'failure', 'npm-binary-wrapper');
+    const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
+      environment,
+      currentWorkingDirectory: executableFolder
+    });
+    await expect(
+      Executable.waitForExitAsync(childProcess, { encoding: 'utf8', throwOnNonZeroExitCode: true })
+    ).rejects.toThrowError(/exited with code 1/);
   });
 });
 
