@@ -14,12 +14,18 @@ export interface ISubspaceConfig {
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
  * See subspace.schema.json for documentation.
+ * @beta
  */
 export interface ISubspaceConfigurationJson {
   enabled: boolean;
   splitWorkspaceCompatibility?: boolean;
   availableSubspaces: ISubspaceConfig[];
 }
+
+/**
+ * The allowed naming convention for subspace names
+ */
+export const SubspaceRegex: RegExp = new RegExp('/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/');
 
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
@@ -42,11 +48,6 @@ export class SubspaceConfiguration {
   public readonly configuration: Readonly<ISubspaceConfigurationJson>;
 
   /**
-   * The allowed naming convention for subspace names
-   */
-  public static _subspaceRegex: RegExp = new RegExp('/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/');
-
-  /**
    * A set of the available subspaces
    */
   public readonly availableSubspaceSet: Set<string>;
@@ -64,7 +65,7 @@ export class SubspaceConfiguration {
     }
 
     for (const { subspaceName } of Object.values(this.configuration.availableSubspaces)) {
-      if (SubspaceConfiguration._subspaceRegex.test(subspaceName)) {
+      if (SubspaceRegex.test(subspaceName)) {
         this.availableSubspaceSet.add(subspaceName);
       } else {
         throw new Error(

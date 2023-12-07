@@ -734,6 +734,18 @@ export interface IStopwatchResult {
     toString(): string;
 }
 
+// @beta
+export interface ISubspaceConfigurationJson {
+    // Warning: (ae-forgotten-export) The symbol "ISubspaceConfig" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    availableSubspaces: ISubspaceConfig[];
+    // (undocumented)
+    enabled: boolean;
+    // (undocumented)
+    splitWorkspaceCompatibility?: boolean;
+}
+
 // @beta (undocumented)
 export interface ITelemetryData {
     readonly durationInSeconds: number;
@@ -1311,8 +1323,6 @@ export class RushUserConfiguration {
 // @beta
 export class SubspaceConfiguration {
     readonly availableSubspaceSet: Set<string>;
-    // Warning: (ae-forgotten-export) The symbol "ISubspaceConfigurationJson" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     readonly configuration: Readonly<ISubspaceConfigurationJson>;
     // (undocumented)
@@ -1320,7 +1330,6 @@ export class SubspaceConfiguration {
     // (undocumented)
     static loadFromDefaultLocation(): SubspaceConfiguration | undefined;
     readonly subspaceJsonFile: string;
-    static _subspaceRegex: RegExp;
 }
 
 // @public
