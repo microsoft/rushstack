@@ -17,6 +17,7 @@ import { BaseConfiglessRushAction } from './BaseRushAction';
 
 import { Rush } from '../../api/Rush';
 import { assetsFolderPath } from '../../utilities/PathConstants';
+import { RushConstants } from '../../logic/RushConstants';
 
 // Matches a well-formed BEGIN macro starting a block section.
 // Example:  /*[BEGIN "DEMO"]*/
@@ -185,7 +186,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'rush.json'
     ];
 
-    const experimentalTemplateFilePaths: string[] = ['subspaces.json'];
+    const experimentalTemplateFilePaths: string[] = [`common/config/rush/${RushConstants.subspacesFilename}`];
 
     if (this._experimentsParameter.value) {
       templateFilePaths.push(...experimentalTemplateFilePaths);

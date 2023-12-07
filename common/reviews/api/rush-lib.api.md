@@ -1245,6 +1245,7 @@ export class RushConstants {
     static readonly rushUserConfigurationFolderName: string;
     static readonly rushVariantsFolderName: string;
     static readonly rushWebSiteUrl: string;
+    static readonly subspacesFilename: string;
     // (undocumented)
     static readonly updateCloudCredentialsCommandName: string;
     // (undocumented)
@@ -1321,7 +1322,7 @@ export class RushUserConfiguration {
 // @beta
 export class SubspaceConfiguration {
     // (undocumented)
-    static loadFromDefaultLocation(): SubspaceConfiguration | undefined;
+    static loadFromDefaultLocation(rushConfiguration: RushConfiguration): SubspaceConfiguration | undefined;
     readonly subspaceJsonFile: string;
     readonly subspaceNames: Set<string>;
     // (undocumented)

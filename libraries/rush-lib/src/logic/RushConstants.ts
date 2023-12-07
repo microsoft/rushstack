@@ -179,6 +179,11 @@ export class RushConstants {
   public static readonly artifactoryFilename: string = 'artifactory.json';
 
   /**
+   * The subspaces.json configuration file name
+   */
+  public static readonly subspacesFilename: string = 'subspaces.json';
+
+  /**
    * Build cache configuration file.
    */
   public static readonly buildCacheFilename: string = 'build-cache.json';

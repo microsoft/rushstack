@@ -3,10 +3,10 @@
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import path from 'path';
-import { trueCasePathSync } from 'true-case-path';
 
-import { RushConfiguration } from './RushConfiguration';
+import type { RushConfiguration } from './RushConfiguration';
 import schemaJson from '../schemas/subspaces.schema.json';
+import { RushConstants } from '../logic/RushConstants';
 
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
@@ -86,22 +86,19 @@ export class SubspaceConfiguration {
     if (FileSystem.exists(subspaceJsonFilename)) {
       return undefined;
     }
-
-    let resolvedSubspaceJsonFilename: string = path.resolve(subspaceJsonFilename);
-
-    try {
-      resolvedSubspaceJsonFilename = trueCasePathSync(resolvedSubspaceJsonFilename);
-    } catch (error) {
-      /* ignore errors from true-case-path */
-    }
-
-    return new SubspaceConfiguration(resolvedSubspaceJsonFilename);
+    return new SubspaceConfiguration(subspaceJsonFilename);
   }
 
-  public static loadFromDefaultLocation(): SubspaceConfiguration | undefined {
-    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+  public static loadFromDefaultLocation(
+    rushConfiguration: RushConfiguration
+  ): SubspaceConfiguration | undefined {
+    const rushJsonLocation: string = rushConfiguration.rushJsonFolder;
     if (rushJsonLocation) {
-      const subspaceJsonLocation: string = path.join(path.dirname(rushJsonLocation), 'subspaces.json');
+      const subspaceJsonLocation: string = path.join(
+        path.dirname(rushJsonLocation),
+        'common/config/rush',
+        RushConstants.subspacesFilename
+      );
       return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
     }
   }
