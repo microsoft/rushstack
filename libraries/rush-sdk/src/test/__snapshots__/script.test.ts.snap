@@ -48,6 +48,7 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'RushProjectConfiguration',
   'RushSession',
   'RushUserConfiguration',
+  'SubspaceConfiguration',
   'VersionPolicy',
   'VersionPolicyConfiguration',
   'VersionPolicyDefinitionName',
