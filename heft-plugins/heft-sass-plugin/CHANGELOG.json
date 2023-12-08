@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.13.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.13.0",
+      "date": "Fri, 08 Dec 2023 20:48:44 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade postcss-modules from v1.5.0 to v6.0.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.14",
       "tag": "@rushstack/heft-sass-plugin_v0.12.14",
       "date": "Thu, 07 Dec 2023 03:44:13 GMT",
