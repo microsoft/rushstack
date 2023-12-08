@@ -14,7 +14,7 @@
       "type": "boolean"
     },
     "splitWorkspaceCompatibility": {
-      "description": "(DEPRECATED) A depreciated option that allows individual subspaces to be configured at the package level if that package is the only project in the subspace. Used to help migrate from a split workspace state.",
+      "description": "(DEPRECATED) Allows individual subspaces to be configured at the package level if that package is the only project in the subspace. Used to help migrate from a split workspace state.",
       "type": "boolean"
     },
     "subspaceNames": {

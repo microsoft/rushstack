@@ -1184,13 +1184,14 @@ export class RushConfiguration {
   }
 
   /**
-   * The full path of the temporary shrinkwrap file for a specific subspace.
-   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
-   * This function also consults the depreciated option to allow for shrinkwraps to be stored under a package folder.
-   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
+   * Returns full path of the temporary shrinkwrap file for a specific subspace.
    * @remarks
+   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
+   * This function also consults the deprecated option to allow for shrinkwraps to be stored under a package folder.
+   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
    * This property merely reports the filename, the file itself may not actually exist.
    * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
+   * @beta
    */
   public getTempSubspaceShrinkwrapFileName(subspaceName: string): string {
     // TODO: do subspace name validation here
@@ -1203,6 +1204,7 @@ export class RushConfiguration {
    * @remarks
    * This property merely reports the filename; The file itself may not actually exist.
    * Example: From "pnpm-lock.yaml" to "subspace-pnpm-lock.yaml"
+   * @beta
    */
   public subspaceShrinkwrapFilenames(subspaceName: string): string {
     const lastSlashIndex: number = Math.max(
@@ -1258,6 +1260,7 @@ export class RushConfiguration {
 
   /**
    * A list of all the available subspaces in this workspace.
+   * @beta
    */
   public get subspaceNames(): Iterable<string> {
     if (!this._projects) {
@@ -1266,6 +1269,9 @@ export class RushConfiguration {
     return this._rushProjectsBySubspaceName.keys();
   }
 
+  /**
+   * @beta
+   */
   public get projectsByName(): Map<string, RushConfigurationProject> {
     if (!this._projectsByName) {
       this._initializeAndValidateLocalProjects();
@@ -1341,7 +1347,9 @@ export class RushConfiguration {
   }
 
   /**
-   * Does this project have subspaces
+   * Returns `true` if the subspaces feature is enabled and at least one subspaces is defined
+   * in the `subspaces.json` config file.
+   * @beta
    */
   public get hasSubspaces(): boolean {
     if (!this._projects) {

@@ -1076,6 +1076,7 @@ export class RushConfiguration {
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
+    // @beta
     getTempSubspaceShrinkwrapFileName(subspaceName: string): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
@@ -1083,6 +1084,7 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
+    // @beta
     get hasSubspaces(): boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
@@ -1103,7 +1105,7 @@ export class RushConfiguration {
     readonly projectFolderMinDepth: number;
     // (undocumented)
     get projects(): RushConfigurationProject[];
-    // (undocumented)
+    // @beta (undocumented)
     get projectsByName(): Map<string, RushConfigurationProject>;
     // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
@@ -1126,7 +1128,9 @@ export class RushConfiguration {
     get shrinkwrapFilePhrase(): string;
     // @beta
     readonly subspaceConfiguration?: SubspaceConfiguration;
+    // @beta
     get subspaceNames(): Iterable<string>;
+    // @beta
     subspaceShrinkwrapFilenames(subspaceName: string): string;
     readonly suppressNodeLtsWarning: boolean;
     // @beta
@@ -1175,6 +1179,7 @@ export class RushConfigurationProject {
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;
     readonly skipRushCheck: boolean;
+    // @beta
     readonly subspaceName: string | undefined;
     // @beta
     readonly tags: ReadonlySet<string>;

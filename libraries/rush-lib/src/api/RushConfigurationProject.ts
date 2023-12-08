@@ -186,7 +186,15 @@ export class RushConfigurationProject {
   public readonly tags: ReadonlySet<string>;
 
   /**
-   * If this project is in a subspace, and which one
+   * Returns the name of the subspace that this project belongs to, as assigned by the `"subspaceName"`
+   * property in `rush.json`.
+   *
+   * @remarks
+   * If the Rush subspaces feature is disabled, the value is still return.
+   * When the Rush subspaces feature is enabled, an undefined `subspaceName` specifies that
+   * the project belongs to the default subspace (whose name is `"default"`).
+   *
+   * @beta
    */
   public readonly subspaceName: string | undefined;
 
