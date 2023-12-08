@@ -24,7 +24,7 @@
     "@rushstack/typings-generator": "workspace:*",
     "sass-embedded": "~1.62.0",
     "postcss": "~8.4.6",
-    "postcss-modules": "~1.5.0"
+    "postcss-modules": "~6.0.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
