@@ -661,11 +661,7 @@ export class RushConfiguration {
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
     // Check if we have a subspace configuration file
-    const subspaceConfigLocation: string = path.join(
-      this.rushJsonFolder,
-      'common/config/rush',
-      RushConstants.subspacesFilename
-    );
+    const subspaceConfigLocation: string = `${this.rushJsonFolder}/common/config/rush/${RushConstants.subspacesFilename}`;
     // Try getting a subspace configuration
     this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceConfigLocation);
 
