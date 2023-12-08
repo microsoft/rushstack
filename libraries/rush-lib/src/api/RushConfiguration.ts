@@ -302,14 +302,6 @@ export class RushConfiguration {
   public readonly commonTempFolder: string;
 
   /**
-   * The folder where temporary files will be stored for subspaces. The specific folder will
-   * append the subspace name to this path.
-   *
-   * Example: `C:\MyRepo\common\temp\<subspace_name>`
-   */
-  public readonly commonTempSubspaceFolderRoot: string;
-
-  /**
    * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
    * under the common folder.
    * Example: `C:\MyRepo\common\scripts`
@@ -375,14 +367,6 @@ export class RushConfiguration {
    * @beta
    */
   public readonly subspaceConfiguration?: SubspaceConfiguration;
-
-  /**
-   * The filename (without any path) of the shrinkwrap file used for individual subspaces, used by the package manager.
-   * @remarks
-   * This property merely reports the filename; The file itself may not actually exist.
-   * Example: `pnpm-lock.yaml`
-   */
-  public readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
 
   /**
    * The filename of the variant dependency data file.  By default this is
@@ -644,8 +628,6 @@ export class RushConfiguration {
       EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this.commonFolder, RushConstants.rushTempFolderName);
 
-    this.commonTempSubspaceFolderRoot = path.join(this.commonFolder, RushConstants.rushTempFolderName);
-
     this.commonScriptsFolder = path.join(this.commonFolder, 'scripts');
 
     this.npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
@@ -660,10 +642,8 @@ export class RushConfiguration {
 
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
-    // Check if we have a subspace configuration file
-    const subspaceConfigLocation: string = `${this.rushJsonFolder}/common/config/rush/${RushConstants.subspacesFilename}`;
     // Try getting a subspace configuration
-    this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceConfigLocation);
+    this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromDefaultLocation(this);
 
     this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
 
@@ -747,18 +727,6 @@ export class RushConfiguration {
     }
 
     this.shrinkwrapFilename = this.packageManagerWrapper.shrinkwrapFilename;
-
-    // From "pnpm-lock.yaml" --> "subspace-pnpm-lock.yaml"
-    this.subspaceShrinkwrapFilenames = (subspaceName: string): string => {
-      const lastSlashIndex: number = Math.max(
-        this.shrinkwrapFilename.lastIndexOf('/'),
-        this.shrinkwrapFilename.lastIndexOf('\\')
-      );
-      return `${this.shrinkwrapFilename.substring(
-        0,
-        lastSlashIndex
-      )}/${subspaceName}-${this.shrinkwrapFilename.substring(lastSlashIndex + 1)}`;
-    };
 
     this.tempShrinkwrapFilename = path.join(this.commonTempFolder, this.shrinkwrapFilename);
     this.packageManagerToolFilename = path.resolve(
@@ -1226,8 +1194,25 @@ export class RushConfiguration {
    */
   public getTempSubspaceShrinkwrapFileName(subspaceName: string): string {
     // TODO: do subspace name validation here
-    const fullSubspacePath: string = `${this.commonTempSubspaceFolderRoot}/${subspaceName}/${this.shrinkwrapFilename}`;
+    const fullSubspacePath: string = `${this.commonTempFolder}/${subspaceName}/${this.shrinkwrapFilename}`;
     return fullSubspacePath;
+  }
+
+  /**
+   * The filename (without any path) of the shrinkwrap file used for individual subspaces, used by the package manager.
+   * @remarks
+   * This property merely reports the filename; The file itself may not actually exist.
+   * Example: From "pnpm-lock.yaml" to "subspace-pnpm-lock.yaml"
+   */
+  public subspaceShrinkwrapFilenames(subspaceName: string): string {
+    const lastSlashIndex: number = Math.max(
+      this.shrinkwrapFilename.lastIndexOf('/'),
+      this.shrinkwrapFilename.lastIndexOf('\\')
+    );
+    return `${this.shrinkwrapFilename.substring(
+      0,
+      lastSlashIndex
+    )}/${subspaceName}-${this.shrinkwrapFilename.substring(lastSlashIndex + 1)}`;
   }
 
   /**

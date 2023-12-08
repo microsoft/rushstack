@@ -186,7 +186,9 @@ export class InitAction extends BaseConfiglessRushAction {
       'rush.json'
     ];
 
-    const experimentalTemplateFilePaths: string[] = [`common/config/rush/${RushConstants.subspacesFilename}`];
+    const experimentalTemplateFilePaths: string[] = [
+      `common/config/rush/${RushConstants.subspacesConfigFilename}`
+    ];
 
     if (this._experimentsParameter.value) {
       templateFilePaths.push(...experimentalTemplateFilePaths);

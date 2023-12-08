@@ -10,7 +10,7 @@ export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export { RushConfiguration, ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
 
-export { SubspaceConfiguration, ISubspaceConfigurationJson } from './api/SubspaceConfiguration';
+export { SubspaceConfiguration } from './api/SubspaceConfiguration';
 
 export {
   IPackageManagerOptionsJsonBase,

@@ -734,16 +734,6 @@ export interface IStopwatchResult {
     toString(): string;
 }
 
-// @beta
-export interface ISubspaceConfigurationJson {
-    // (undocumented)
-    enabled: boolean;
-    // (undocumented)
-    splitWorkspaceCompatibility?: boolean;
-    // (undocumented)
-    subspaceNames: string[];
-}
-
 // @beta (undocumented)
 export interface ITelemetryData {
     readonly durationInSeconds: number;
@@ -1061,7 +1051,6 @@ export class RushConfiguration {
     readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;
     readonly commonTempFolder: string;
-    readonly commonTempSubspaceFolderRoot: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
@@ -1138,7 +1127,7 @@ export class RushConfiguration {
     // @beta
     readonly subspaceConfiguration?: SubspaceConfiguration;
     get subspaceNames(): Iterable<string>;
-    readonly subspaceShrinkwrapFilenames: (subspaceName: string) => string;
+    subspaceShrinkwrapFilenames(subspaceName: string): string;
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
@@ -1245,7 +1234,7 @@ export class RushConstants {
     static readonly rushUserConfigurationFolderName: string;
     static readonly rushVariantsFolderName: string;
     static readonly rushWebSiteUrl: string;
-    static readonly subspacesFilename: string;
+    static readonly subspacesConfigFilename: string;
     // (undocumented)
     static readonly updateCloudCredentialsCommandName: string;
     // (undocumented)
@@ -1321,12 +1310,12 @@ export class RushUserConfiguration {
 
 // @beta
 export class SubspaceConfiguration {
-    // (undocumented)
-    static loadFromDefaultLocation(rushConfiguration: RushConfiguration): SubspaceConfiguration | undefined;
-    readonly subspaceJsonFile: string;
+    readonly subspaceJsonFilePath: string;
     readonly subspaceNames: Set<string>;
     // (undocumented)
-    static tryLoadFromConfigurationFile(subspaceJsonFilename: string): SubspaceConfiguration | undefined;
+    static tryLoadFromConfigurationFile(subspaceJsonFilePath: string): SubspaceConfiguration | undefined;
+    // (undocumented)
+    static tryLoadFromDefaultLocation(rushConfiguration: RushConfiguration): SubspaceConfiguration | undefined;
 }
 
 // @public

@@ -181,7 +181,7 @@ export class RushConstants {
   /**
    * The subspaces.json configuration file name
    */
-  public static readonly subspacesFilename: string = 'subspaces.json';
+  public static readonly subspacesConfigFilename: string = 'subspaces.json';
 
   /**
    * Build cache configuration file.

@@ -2,28 +2,26 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import path from 'path';
 
 import type { RushConfiguration } from './RushConfiguration';
 import schemaJson from '../schemas/subspaces.schema.json';
 import { RushConstants } from '../logic/RushConstants';
 
 /**
- * This represents the JSON data structure for the "subspaces.json" configuration file.
- * See subspace.schema.json for documentation.
- * @beta
- */
-export interface ISubspaceConfigurationJson {
-  enabled: boolean;
-  splitWorkspaceCompatibility?: boolean;
-  subspaceNames: string[];
-}
-
-/**
  * The allowed naming convention for subspace names.
  * Allows for names to be formed of letters, numbers, and hyphens (-)
  */
 export const SUBSPACE_NAME_REGEXP: RegExp = new RegExp('/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/');
+
+/**
+ * This represents the JSON data structure for the "subspaces.json" configuration file.
+ * See subspace.schema.json for documentation.
+ */
+interface ISubspaceConfigurationJson {
+  enabled: boolean;
+  splitWorkspaceCompatibility?: boolean;
+  subspaceNames: string[];
+}
 
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
@@ -36,7 +34,7 @@ export class SubspaceConfiguration {
   /**
    * The absolute path to the "subspaces.json" configuration file that was loaded to construct this object.
    */
-  public readonly subspaceJsonFile: string;
+  public readonly subspaceJsonFilePath: string;
 
   /**
    * Gets the JSON data structure for the "subspaces.json" configuration file.
@@ -50,26 +48,11 @@ export class SubspaceConfiguration {
    */
   public readonly subspaceNames: Set<string>;
 
-  private constructor(subspaceJsonFilename: string) {
-    this._configuration = {
-      enabled: false,
-      subspaceNames: []
-    };
-    this.subspaceJsonFile = subspaceJsonFilename;
+  private constructor(configuration: Readonly<ISubspaceConfigurationJson>, subspaceJsonFilePath: string) {
+    this._configuration = configuration;
+    this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.subspaceNames = new Set();
-
-    try {
-      this._configuration = JsonFile.loadAndValidate(
-        this.subspaceJsonFile,
-        SubspaceConfiguration._jsonSchema
-      );
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
-      }
-    }
-
-    for (const subspaceName of this._configuration.subspaceNames) {
+    for (const subspaceName of configuration.subspaceNames) {
       if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
         this.subspaceNames.add(subspaceName);
       } else {
@@ -81,24 +64,27 @@ export class SubspaceConfiguration {
   }
 
   public static tryLoadFromConfigurationFile(
-    subspaceJsonFilename: string
+    subspaceJsonFilePath: string
   ): SubspaceConfiguration | undefined {
-    if (FileSystem.exists(subspaceJsonFilename)) {
-      return undefined;
+    let configuration: Readonly<ISubspaceConfigurationJson> | undefined;
+    try {
+      configuration = JsonFile.loadAndValidate(subspaceJsonFilePath, SubspaceConfiguration._jsonSchema);
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
     }
-    return new SubspaceConfiguration(subspaceJsonFilename);
+    if (configuration) {
+      return new SubspaceConfiguration(configuration, subspaceJsonFilePath);
+    }
   }
 
-  public static loadFromDefaultLocation(
+  public static tryLoadFromDefaultLocation(
     rushConfiguration: RushConfiguration
   ): SubspaceConfiguration | undefined {
-    const rushJsonLocation: string = rushConfiguration.rushJsonFolder;
-    if (rushJsonLocation) {
-      const subspaceJsonLocation: string = path.join(
-        path.dirname(rushJsonLocation),
-        'common/config/rush',
-        RushConstants.subspacesFilename
-      );
+    const commonRushConfigFolder: string = rushConfiguration.commonRushConfigFolder;
+    if (commonRushConfigFolder) {
+      const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
       return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
     }
   }
