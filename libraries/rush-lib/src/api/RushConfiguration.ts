@@ -233,7 +233,7 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByTag() getter is called.
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
-  // Cache subspace projects
+  // Subspace projects
   private _rushProjectsBySubspaceName: Map<string, RushConfigurationProject[]>;
 
   // variant -> common-versions configuration
