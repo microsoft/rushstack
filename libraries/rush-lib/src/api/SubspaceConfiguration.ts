@@ -55,6 +55,10 @@ export class SubspaceConfiguration {
     }
   }
 
+  public get isEnabled(): boolean {
+    return this._configuration.enabled;
+  }
+
   public static tryLoadFromConfigurationFile(
     subspaceJsonFilePath: string
   ): SubspaceConfiguration | undefined {
