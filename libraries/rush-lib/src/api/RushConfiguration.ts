@@ -905,8 +905,14 @@ export class RushConfiguration {
         );
       }
       this._projectsByName.set(project.packageName, project);
-      if (projectJson.subspaceName) {
-        const subspaceName: string = projectJson.subspaceName;
+      if (this.subspaceConfiguration?.isEnabled) {
+        let subspaceName: string;
+        if (projectJson.subspaceName) {
+          subspaceName = projectJson.subspaceName;
+        } else {
+          // Default subspace
+          subspaceName = RushConstants.defaultSubspaceName;
+        }
         const projectsForSubspace: RushConfigurationProject[] | undefined =
           this._rushProjectsBySubspaceName.get(subspaceName);
         if (projectsForSubspace) {
