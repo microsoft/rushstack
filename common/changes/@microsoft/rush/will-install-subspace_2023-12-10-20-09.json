@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add BaseFlag class to simplify flag classes",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
