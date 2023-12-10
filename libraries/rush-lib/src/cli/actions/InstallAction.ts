@@ -10,7 +10,8 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  private readonly _checkOnlyParameter: CommandLineFlagParameter;
+  private readonly _checkOnlyParameter!: CommandLineFlagParameter;
+  private _ignoreScriptsParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -42,6 +43,17 @@ export class InstallAction extends BaseInstallAction {
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
+
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description:
+        'Do not execute any install lifecycle scripts specified in package.json files and its' +
+        ' dependencies when "rush install". Running with this flag leaves your installation in a uncompleted' +
+        ' state, you need to run without this flag again to complete a full installation. Meanwhile, it makes' +
+        ' your installing faster. Later, you can run "rush install" to run all ignored scripts. Moreover, you' +
+        ' can partial install such as "rush install --to <package>" to run ignored scripts of the dependencies' +
+        ' of the selected projects.'
+    });
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
@@ -49,6 +61,7 @@ export class InstallAction extends BaseInstallAction {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
+      ignoreScripts: this._ignoreScriptsParameter.value!,
       bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,

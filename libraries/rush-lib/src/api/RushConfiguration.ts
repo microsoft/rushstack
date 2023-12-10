@@ -1190,6 +1190,22 @@ export class RushConfiguration {
   }
 
   /**
+   * Returns the temporary folder where installation files are kept for a specific subspace
+   * @remarks
+   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
+   * This function also consults the deprecated option to allow for shrinkwraps to be stored under a package folder.
+   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
+   * This property merely reports the filename, the file itself may not actually exist.
+   * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
+   * @beta
+   */
+  public getSubspaceTempFolder(subspaceName: string): string {
+    this.validateSubspaceName(subspaceName);
+
+    return `${this.commonTempFolder}/${subspaceName}`;
+  }
+
+  /**
    * Returns full path of the temporary shrinkwrap file for a specific subspace.
    * @remarks
    * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
@@ -1200,9 +1216,21 @@ export class RushConfiguration {
    * @beta
    */
   public getTempSubspaceShrinkwrapFileName(subspaceName: string): string {
-    // TODO: do subspace name validation here
-    const fullSubspacePath: string = `${this.commonTempFolder}/${subspaceName}/${this.shrinkwrapFilename}`;
+    const fullSubspacePath: string = `${this.getSubspaceTempFolder(subspaceName)}/${this.shrinkwrapFilename}`;
     return fullSubspacePath;
+  }
+
+  public validateSubspaceName(subspaceName: string): void {
+    // Validate that subspace configuration has been initialized
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    if (!this.subspaceConfiguration) {
+      throw new Error(`Subspaces is not enabled!`);
+    }
+    if (!this.subspaceConfiguration.isValidSubspaceName(subspaceName)) {
+      throw new Error(`Received an invalid subspace name: ${subspaceName}`);
+    }
   }
 
   /**

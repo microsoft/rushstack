@@ -59,6 +59,10 @@ export class SubspaceConfiguration {
     return this._configuration.enabled;
   }
 
+  public isValidSubspaceName(subspaceName: string): boolean {
+    return this.subspaceNames.has(subspaceName);
+  }
+
   public static tryLoadFromConfigurationFile(
     subspaceJsonFilePath: string
   ): SubspaceConfiguration | undefined {

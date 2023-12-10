@@ -59,8 +59,18 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  */
 export abstract class BaseInstallManager {
   private readonly _commonTempLinkFlag: LastLinkFlag;
+  private readonly _commonTempInstallFlag: LastInstallFlag;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
+
+  /**
+   * If deferredInstallationScripts, installation will be divided into two stages:
+   * Stage 1: rush implicitly adds "--ignore-scripts" for "pnpm install"
+   * Stage 2: run "pnpm rebuild --pending"
+   *
+   * Note: This feature only works when using pnpm and turn on "useWorkspaces" in rush.json
+   */
+  private _deferredInstallationScripts: boolean = false;
 
   private readonly _terminalProvider: ITerminalProvider;
   protected readonly _terminal: Terminal;
@@ -69,6 +79,7 @@ export abstract class BaseInstallManager {
   protected readonly rushGlobalFolder: RushGlobalFolder;
   protected readonly installRecycler: AsyncRecycler;
   protected readonly options: IInstallManagerOptions;
+  protected readonly commonTempInstallFlag: LastInstallFlag;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -82,15 +93,25 @@ export abstract class BaseInstallManager {
     this.options = options;
 
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
+    this.commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
+  }
+
+  protected get deferredInstallationScripts(): boolean {
+    return this._deferredInstallationScripts;
   }
 
   public async doInstallAsync(): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+
+    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
+      // Only works for pnpm and useWorkspaces=true
+      this._deferredInstallationScripts = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
+    }
 
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
@@ -101,6 +122,18 @@ export abstract class BaseInstallManager {
         colors.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
             'command again without specifying these arguments.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    if (this.options.ignoreScripts && this.rushConfiguration.packageManager !== 'pnpm') {
+      console.log();
+      console.log(
+        console.log(
+          colors.red(
+            `The --ignore-scripts parameter can only be used with "pnpm" package manager, current package manager is ${this.rushConfiguration.packageManager}.`
+          )
         )
       );
       throw new AlreadyReportedError();
@@ -641,6 +674,10 @@ ${gitLfsHookHandling}
         args.push('--no-strict-peer-dependencies');
       } else {
         args.push('--strict-peer-dependencies');
+      }
+
+      if (this._deferredInstallationScripts || this.options.ignoreScripts) {
+        args.push('--ignore-scripts');
       }
 
       /*
