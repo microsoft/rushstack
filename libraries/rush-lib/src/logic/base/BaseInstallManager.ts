@@ -59,7 +59,6 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
  */
 export abstract class BaseInstallManager {
   private readonly _commonTempLinkFlag: LastLinkFlag;
-  private readonly _commonTempInstallFlag: LastInstallFlag;
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
 
@@ -128,12 +127,12 @@ export abstract class BaseInstallManager {
     }
 
     if (this.options.ignoreScripts && this.rushConfiguration.packageManager !== 'pnpm') {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(
-        console.log(
-          colors.red(
-            `The --ignore-scripts parameter can only be used with "pnpm" package manager, current package manager is ${this.rushConfiguration.packageManager}.`
-          )
+        colors.red(
+          `The --ignore-scripts parameter can only be used with "pnpm" package manager, current package manager is ${this.rushConfiguration.packageManager}.`
         )
       );
       throw new AlreadyReportedError();
