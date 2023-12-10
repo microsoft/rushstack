@@ -92,4 +92,10 @@ export interface IInstallManagerOptions {
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
   beforeInstallAsync?: () => Promise<void>;
+
+  /**
+   * Whether to specify "--ignore-scripts" command-line parameter, which ignores
+   * install lifecycle scripts in package.json and its dependencies
+   */
+  ignoreScripts: boolean;
 }

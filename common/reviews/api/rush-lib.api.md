@@ -1209,6 +1209,7 @@ export class RushConstants {
     static readonly commonVersionsFilename: string;
     static readonly customTipsFilename: string;
     static readonly defaultMaxInstallAttempts: number;
+    static readonly defaultSubspaceName: string;
     static readonly defaultWatchDebounceMs: number;
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
@@ -1317,6 +1318,8 @@ export class RushUserConfiguration {
 
 // @beta
 export class SubspaceConfiguration {
+    // (undocumented)
+    get isEnabled(): boolean;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: Set<string>;
     // (undocumented)
