@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
-import { FileSystem, JsonFile, type JsonObject, Path, IPackageJson } from '@rushstack/node-core-library';
+import { type JsonObject, type IPackageJson, JsonFile, Path } from '@rushstack/node-core-library';
 
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
