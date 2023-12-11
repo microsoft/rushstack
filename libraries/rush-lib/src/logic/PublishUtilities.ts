@@ -332,23 +332,6 @@ export class PublishUtilities {
     }
   }
 
-  private static _getChangeTypeForSemverReleaseType(releaseType: semver.ReleaseType): ChangeType {
-    switch (releaseType) {
-      case 'major':
-        return ChangeType.major;
-      case 'minor':
-        return ChangeType.minor;
-      case 'patch':
-        return ChangeType.patch;
-      case 'premajor':
-      case 'prepatch':
-      case 'prerelease':
-        return ChangeType.hotfix;
-      default:
-        throw new Error(`Unsupported release type "${releaseType}"`);
-    }
-  }
-
   private static _getNewRangeDependency(newVersion: string): string {
     let upperLimit: string = newVersion;
     if (semver.prerelease(newVersion)) {

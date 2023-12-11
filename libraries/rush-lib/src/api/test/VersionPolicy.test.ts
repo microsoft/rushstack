@@ -90,6 +90,14 @@ describe(VersionPolicy.name, () => {
       expect(lockStepVersionPolicy.nextBump).toEqual(undefined);
     });
 
+    it('bumps version for preminor release', () => {
+      expect(versionPolicy1).toBeInstanceOf(LockStepVersionPolicy);
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy1 as LockStepVersionPolicy;
+      lockStepVersionPolicy.bump(BumpType.preminor, 'pr');
+      expect(lockStepVersionPolicy.version).toEqual('1.2.0-pr.0');
+      expect(lockStepVersionPolicy.nextBump).toEqual(BumpType.patch);
+    });
+
     it('bumps version for minor release', () => {
       expect(versionPolicy1).toBeInstanceOf(LockStepVersionPolicy);
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy1 as LockStepVersionPolicy;
