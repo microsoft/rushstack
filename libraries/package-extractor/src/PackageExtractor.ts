@@ -363,7 +363,7 @@ export class PackageExtractor {
       mainProjectName,
       sourceRootFolder,
       targetRootFolder,
-      folderToCopy: addditionalFolderToCopy,
+      folderToCopy: additionalFolderToCopy,
       linkCreation
     } = options;
     const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer } = state;
@@ -409,19 +409,14 @@ export class PackageExtractor {
       }
     );
 
-    if (addditionalFolderToCopy) {
-      // Copy the additional folder directly into the root of the target folder by postfixing the
-      // folder name to the target folder and setting the sourceRootFolder to the root of the
-      // folderToCopy
-      const additionalFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
-      const targetFolderPath: string = path.join(
-        options.targetRootFolder,
-        path.basename(additionalFolderPath)
-      );
+    if (additionalFolderToCopy) {
+      // Copy the additional folder directly into the root of the target folder by setting the sourceRootFolder
+      // to the root of the folderToCopy
+      const additionalFolderPath: string = path.resolve(sourceRootFolder, additionalFolderToCopy);
       const additionalFolderExtractorOptions: IExtractorOptions = {
         ...options,
         sourceRootFolder: additionalFolderPath,
-        targetRootFolder: targetFolderPath
+        targetRootFolder: options.targetRootFolder
       };
       await this._extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
     }

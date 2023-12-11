@@ -422,8 +422,7 @@ describe(PackageExtractor.name, () => {
     expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(true);
 
     // Validate project 2 files
-    const project2FolderName: string = path.basename(project2Path);
-    expect(FileSystem.exists(path.join(targetFolder, project2FolderName, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project2FolderName, 'src', 'index.js'))).toBe(true);
+    expect(FileSystem.exists(path.join(targetFolder, 'package.json'))).toBe(true);
+    expect(FileSystem.exists(path.join(targetFolder, 'src', 'index.js'))).toBe(true);
   });
 });
