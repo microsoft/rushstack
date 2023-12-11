@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the contents of a folder set in the `\"folderToCopy\"` field of the `deploy.json` config file would be copied into a subfolder instead of into the root of the deploy folder.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
