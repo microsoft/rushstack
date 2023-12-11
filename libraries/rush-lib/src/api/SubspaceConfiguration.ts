@@ -59,6 +59,9 @@ export class SubspaceConfiguration {
     return this._configuration.enabled;
   }
 
+  /**
+   * Checks if the given subspace name is a registered subspace in the subspaces.json file.
+   */
   public isValidSubspaceName(subspaceName: string): boolean {
     return this.subspaceNames.has(subspaceName);
   }
