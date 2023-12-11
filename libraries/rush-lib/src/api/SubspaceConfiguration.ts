@@ -37,19 +37,11 @@ export class SubspaceConfiguration {
   public readonly subspaceJsonFilePath: string;
 
   /**
-   * Gets the JSON data structure for the "subspaces.json" configuration file.
-   *
-   * @internal
-   */
-  private readonly _configuration: Readonly<ISubspaceConfigurationJson>;
-
-  /**
    * A set of the available subspaces
    */
   public readonly subspaceNames: Set<string>;
 
   private constructor(configuration: Readonly<ISubspaceConfigurationJson>, subspaceJsonFilePath: string) {
-    this._configuration = configuration;
     this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.subspaceNames = new Set();
     for (const subspaceName of configuration.subspaceNames) {
@@ -83,9 +75,7 @@ export class SubspaceConfiguration {
     rushConfiguration: RushConfiguration
   ): SubspaceConfiguration | undefined {
     const commonRushConfigFolder: string = rushConfiguration.commonRushConfigFolder;
-    if (commonRushConfigFolder) {
-      const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
-      return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
-    }
+    const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
+    return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
   }
 }
