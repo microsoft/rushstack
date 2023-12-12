@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.112.2",
+      "tag": "@microsoft/rush_v5.112.2",
+      "date": "Tue, 12 Dec 2023 00:20:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bring back the erroneously removed `preminor` bump type for lockstepped packages."
+          },
+          {
+            "comment": "Fix an issue where the contents of a folder set in the `\"folderToCopy\"` field of the `deploy.json` config file would be copied into a subfolder instead of into the root of the deploy folder."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Implemented config file loader for the not-yet-released \"subspaces\" feature (GitHub #4230)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.112.1",
       "tag": "@microsoft/rush_v5.112.1",
       "date": "Wed, 29 Nov 2023 08:59:31 GMT",
