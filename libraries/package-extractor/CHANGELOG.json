@@ -2,6 +2,18 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.6.17",
+      "tag": "@rushstack/package-extractor_v0.6.17",
+      "date": "Tue, 12 Dec 2023 00:20:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the `folderToCopy` option, where the folder contents would be copied into a subfolder instead of into the target folder root."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.16",
       "tag": "@rushstack/package-extractor_v0.6.16",
       "date": "Thu, 07 Dec 2023 03:44:13 GMT",

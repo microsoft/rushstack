@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Thu, 07 Dec 2023 03:44:13 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Dec 2023 00:20:33 GMT and should not be manually modified.
+
+## 0.6.17
+Tue, 12 Dec 2023 00:20:33 GMT
+
+### Patches
+
+- Fix an issue with the `folderToCopy` option, where the folder contents would be copied into a subfolder instead of into the target folder root.
 
 ## 0.6.16
 Thu, 07 Dec 2023 03:44:13 GMT
