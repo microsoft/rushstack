@@ -181,7 +181,7 @@ export interface INodePackageJson {
    * An array of metadata for dependencies declared inside dependencies, optionalDependencies, and devDependencies.
    * https://pnpm.io/package_json#dependenciesmeta
    */
-  dependenciesMeta?: IPeerDependenciesMetaTable;
+  dependenciesMeta?: IDependenciesMetaTable;
 
   /**
    * An array of metadata about peer dependencies.

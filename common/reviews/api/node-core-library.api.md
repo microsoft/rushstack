@@ -553,7 +553,7 @@ export class Import {
 export interface INodePackageJson {
     bin?: string;
     dependencies?: IPackageJsonDependencyTable;
-    dependenciesMeta?: IPeerDependenciesMetaTable;
+    dependenciesMeta?: IDependenciesMetaTable;
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;
     homepage?: string;
