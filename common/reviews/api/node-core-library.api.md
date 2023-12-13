@@ -340,6 +340,14 @@ export interface IConsoleTerminalProviderOptions {
     verboseEnabled: boolean;
 }
 
+// @public
+export interface IDependenciesMetaTable {
+    // (undocumented)
+    [dependencyName: string]: {
+        injected?: boolean;
+    };
+}
+
 // @beta
 export interface IDynamicPrefixProxyTerminalProviderOptions extends IPrefixProxyTerminalProviderOptionsBase {
     getPrefix: () => string;
@@ -545,6 +553,7 @@ export class Import {
 export interface INodePackageJson {
     bin?: string;
     dependencies?: IPackageJsonDependencyTable;
+    dependenciesMeta?: IPeerDependenciesMetaTable;
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;
     homepage?: string;

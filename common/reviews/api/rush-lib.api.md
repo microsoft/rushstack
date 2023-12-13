@@ -902,12 +902,22 @@ export class PackageJsonDependency {
 }
 
 // @public (undocumented)
+export class PackageJsonDependencyMeta {
+    constructor(name: string, injected: boolean, onChange: () => void);
+    // (undocumented)
+    get injected(): boolean;
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public (undocumented)
 export class PackageJsonEditor {
     // @internal
     protected constructor(filepath: string, data: IPackageJson);
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
     get dependencyList(): ReadonlyArray<PackageJsonDependency>;
+    get dependencyMetaList(): ReadonlyArray<PackageJsonDependencyMeta>;
     get devDependencyList(): ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
     readonly filePath: string;

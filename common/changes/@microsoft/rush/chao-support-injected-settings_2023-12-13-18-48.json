@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where rush update can not handle dependenciesMeta changes in pnpm",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

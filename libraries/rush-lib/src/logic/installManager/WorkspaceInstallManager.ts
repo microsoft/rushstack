@@ -4,13 +4,23 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, FileConstants, AlreadyReportedError, Async } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  FileConstants,
+  AlreadyReportedError,
+  Async,
+  type IDependenciesMetaTable
+} from '@rushstack/node-core-library';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { type PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
+import {
+  type PackageJsonEditor,
+  DependencyType,
+  type PackageJsonDependencyMeta
+} from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
@@ -23,6 +33,8 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
+import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -56,7 +68,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * @override
    */
   protected async prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined
+    shrinkwrapFile: (PnpmShrinkwrapFile & BaseShrinkwrapFile) | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     // Block use of the RUSH_TEMP_FOLDER environment variable
     if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
@@ -233,6 +245,54 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
         shrinkwrapIsUpToDate = false;
       }
+    }
+
+    // For pnpm pacakge manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
+    // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      // First build a object for dependenciesMeta settings in package.json
+      // key is the package path, value is the dependenciesMeta info for that package
+      const packagePathToDependenciesMetaInPackageJson: { [key: string]: IDependenciesMetaTable } = {};
+      const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
+
+      for (const rushProject of this.rushConfiguration.projects) {
+        const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
+        const packageJsonFilePath: string = packageJson.filePath;
+
+        // get the relativePackagePath for a package, to align with the value in pnpm-lock.yaml
+        const relativePackagePath: string = path.relative(
+          commonTempFolder,
+          packageJsonFilePath.replace('/package.json', '')
+        );
+        const dependencyMetaList: ReadonlyArray<PackageJsonDependencyMeta> = packageJson.dependencyMetaList;
+
+        if (dependencyMetaList.length !== 0) {
+          const dependenciesMeta: IDependenciesMetaTable = {};
+          for (const dependencyMeta of dependencyMetaList) {
+            dependenciesMeta[dependencyMeta.name] = {
+              injected: dependencyMeta.injected
+            };
+          }
+          packagePathToDependenciesMetaInPackageJson[relativePackagePath] = dependenciesMeta;
+        }
+      }
+
+      // First build a object for dependenciesMeta settings in pnpm-lock.yaml
+      // key is the package path, value is the dependenciesMeta info for that package
+      const packagePathToDependenciesMetaInShrinkwrapFile: { [key: string]: IDependenciesMetaTable } = {};
+      if (shrinkwrapFile?.importers !== undefined) {
+        for (const [key, value] of shrinkwrapFile?.importers) {
+          if (value.dependenciesMeta !== undefined) {
+            packagePathToDependenciesMetaInShrinkwrapFile[key] = value.dependenciesMeta;
+          }
+        }
+      }
+
+      // Now, we compare these two objects to see if they are equal or not
+      shrinkwrapIsUpToDate = objectsAreDeepEqual(
+        packagePathToDependenciesMetaInPackageJson,
+        packagePathToDependenciesMetaInShrinkwrapFile
+      );
     }
 
     // Write the common package.json
