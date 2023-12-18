@@ -229,9 +229,9 @@ export class LastInstallFlagFactory {
    * @internal
    */
   public static getSubspaceTempFlag(
+    subspace: string,
     rushConfiguration: RushConfiguration,
-    extraState: Record<string, string> = {},
-    subspace: string
+    extraState: Record<string, string> = {}
   ): LastInstallFlag {
     const currentState: ILastInstallFlagJson = {
       nodeVersion: process.versions.node,

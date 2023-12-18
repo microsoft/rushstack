@@ -98,4 +98,9 @@ export interface IInstallManagerOptions {
    * install lifecycle scripts in package.json and its dependencies
    */
   ignoreScripts: boolean;
+
+  /**
+   * The subspace to install for
+   */
+  subspace?: string;
 }

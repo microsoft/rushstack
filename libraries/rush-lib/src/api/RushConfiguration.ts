@@ -1306,6 +1306,16 @@ export class RushConfiguration {
   }
 
   /**
+   * Returns a list of rush projects that belong to a subspace
+   */
+  public getSubspaceProjects(subspaceName: string): RushConfigurationProject[] {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    return this._rushProjectsBySubspaceName.get(subspaceName) || [];
+  }
+
+  /**
    * @beta
    */
   public get projectsByName(): Map<string, RushConfigurationProject> {

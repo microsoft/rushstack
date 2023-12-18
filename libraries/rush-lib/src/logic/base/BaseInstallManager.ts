@@ -44,6 +44,7 @@ import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -79,6 +80,8 @@ export abstract class BaseInstallManager {
   protected readonly installRecycler: AsyncRecycler;
   protected readonly options: IInstallManagerOptions;
   protected readonly commonTempInstallFlag: LastInstallFlag;
+  // Mapping of subspaceName -> LastInstallFlag
+  protected readonly subspaceInstallFlags: Map<string, LastInstallFlag>;
 
   public constructor(
     rushConfiguration: RushConfiguration,
@@ -94,8 +97,22 @@ export abstract class BaseInstallManager {
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
     this.commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
 
+    this.subspaceInstallFlags = new Map();
+    if (rushConfiguration.subspaceConfiguration?.isEnabled) {
+      for (const subspaceName of rushConfiguration.subspaceNames) {
+        this.subspaceInstallFlags.set(
+          subspaceName,
+          LastInstallFlagFactory.getSubspaceTempFlag(subspaceName, rushConfiguration)
+        );
+      }
+    }
+
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
+  }
+
+  protected subspaceTempInstallFlag(subspaceName: string): LastInstallFlag | undefined {
+    return this.subspaceInstallFlags.get(subspaceName);
   }
 
   protected get deferredInstallationScripts(): boolean {
@@ -103,7 +120,21 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
+    let subspaceProjectsToInstall: RushConfigurationProject[] = [];
+    if (this.options.subspace) {
+      this.rushConfiguration.validateSubspaceName(this.options.subspace);
+      // Find the list of projects in this workspace
+      const subspaceName: string = this.options.subspace;
+      subspaceProjectsToInstall = this.rushConfiguration.getSubspaceProjects(subspaceName);
+      // const subspaceProjectNames: string[] = subspaceProjects.map(rushProject => rushProject.packageName);
+      // const subspaceInstallFlag = this.subspaceInstallFlags.get(subspaceName) as LastInstallFlag;
+      // subspaceInstallFlag.mergeFromObject({
+      //   selectedProjectNames: subspaceProjectNames
+      // })
+    }
+
+    const isFilteredInstall: boolean =
+      this.options.pnpmFilterArguments.length + subspaceProjectsToInstall.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
@@ -258,6 +289,10 @@ export abstract class BaseInstallManager {
 
     // eslint-disable-next-line no-console
     console.log('');
+  }
+
+  public async installForSubspace(subspaceName: string): Promise<void> {
+    this.rushConfiguration.validateSubspaceName(subspaceName);
   }
 
   protected abstract prepareCommonTempAsync(
