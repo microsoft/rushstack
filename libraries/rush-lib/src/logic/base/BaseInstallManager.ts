@@ -44,7 +44,7 @@ import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -119,22 +119,45 @@ export abstract class BaseInstallManager {
     return this._deferredInstallationScripts;
   }
 
-  public async doInstallAsync(): Promise<void> {
+  public async doSubspaceInstallAsync(subspaceName: string): Promise<void> {
+    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     let subspaceProjectsToInstall: RushConfigurationProject[] = [];
-    if (this.options.subspace) {
-      this.rushConfiguration.validateSubspaceName(this.options.subspace);
-      // Find the list of projects in this workspace
-      const subspaceName: string = this.options.subspace;
-      subspaceProjectsToInstall = this.rushConfiguration.getSubspaceProjects(subspaceName);
-      // const subspaceProjectNames: string[] = subspaceProjects.map(rushProject => rushProject.packageName);
-      // const subspaceInstallFlag = this.subspaceInstallFlags.get(subspaceName) as LastInstallFlag;
-      // subspaceInstallFlag.mergeFromObject({
-      //   selectedProjectNames: subspaceProjectNames
-      // })
+    // Ensure that subspaces is enabled
+    if (!this.rushConfiguration.subspaceConfiguration?.isEnabled) {
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(
+        colors.red(
+          `A subspace parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+    this.rushConfiguration.validateSubspaceName(subspaceName);
+    subspaceProjectsToInstall = this.rushConfiguration.getSubspaceProjects(subspaceName);
+    // const subspaceProjectNames: string[] = subspaceProjects.map(rushProject => rushProject.packageName);
+    // const subspaceInstallFlag = this.subspaceInstallFlags.get(subspaceName) as LastInstallFlag;
+    // subspaceInstallFlag.mergeFromObject({
+    //   selectedProjectNames: subspaceProjectNames
+    // })
+
+    // Assume useWorkspaces is true
+    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
+      this._deferredInstallationScripts = this.rushConfiguration.packageManager === 'pnpm';
     }
 
-    const isFilteredInstall: boolean =
-      this.options.pnpmFilterArguments.length + subspaceProjectsToInstall.length > 0;
+    if (!subspaceProjectsToInstall.length) {
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(colors.red(`The subspace ${subspaceName} is empty and has no projects to install.`));
+      throw new AlreadyReportedError();
+    }
+  }
+
+  public async doInstallAsync(): Promise<void> {
+    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
@@ -171,16 +194,19 @@ export abstract class BaseInstallManager {
 
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
-            'without specifying these arguments.'
-        )
-      );
-      throw new AlreadyReportedError();
+      // Allow partial update when there are subspace projects
+      if (!this.options.subspace) {
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          colors.red(
+            'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
+              'without specifying these arguments.'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
     }
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
@@ -296,6 +322,7 @@ export abstract class BaseInstallManager {
   }
 
   protected abstract prepareCommonTempAsync(
+    subspaceName: string | undefined,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
@@ -332,7 +359,7 @@ export abstract class BaseInstallManager {
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
-  protected async prepareAsync(): Promise<{
+  protected async prepareAsync(subspaceName?: string): Promise<{
     variantIsUpToDate: boolean;
     shrinkwrapIsUpToDate: boolean;
     npmrcHash: string | undefined;
@@ -370,11 +397,20 @@ export abstract class BaseInstallManager {
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!this.options.fullUpgrade) {
+      let commitedShrinkwrapFileName: string;
+      if (subspaceName) {
+        commitedShrinkwrapFileName =
+          this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName);
+      } else {
+        commitedShrinkwrapFileName = this.rushConfiguration.getCommittedShrinkwrapFilename(
+          this.options.variant
+        );
+      }
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
           this.rushConfiguration.packageManagerOptions,
-          this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
+          commitedShrinkwrapFileName
         );
       } catch (ex) {
         // eslint-disable-next-line no-console
@@ -424,10 +460,13 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    const npmrcText: string | undefined = Utilities.syncNpmrc(
-      this.rushConfiguration.commonRushConfigFolder,
-      this.rushConfiguration.commonTempFolder
-    );
+    const configFolderToUse: string = subspaceName
+      ? this.rushConfiguration.getSubspaceConfigFolderPath(subspaceName)
+      : this.rushConfiguration.commonRushConfigFolder;
+    const commonTempFolderToUse: string = subspaceName
+      ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
+      : this.rushConfiguration.commonTempFolder;
+    const npmrcText: string | undefined = Utilities.syncNpmrc(configFolderToUse, commonTempFolderToUse);
     this._syncNpmrcAlreadyCalled = true;
 
     const npmrcHash: string | undefined = npmrcText
@@ -436,7 +475,7 @@ export abstract class BaseInstallManager {
 
     // Copy the committed patches folder if using pnpm
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      const commonTempPnpmPatchesFolder: string = `${this.rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+      const commonTempPnpmPatchesFolder: string = `${commonTempFolderToUse}/${RushConstants.pnpmPatchesFolderName}`;
       const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
       if (FileSystem.exists(rushPnpmPatchesFolder)) {
         FileSystem.copyFiles({
@@ -449,15 +488,22 @@ export abstract class BaseInstallManager {
     // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(this.rushConfiguration, this.options);
+      await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
+        this.rushConfiguration,
+        commonTempFolderToUse,
+        this.options
+      );
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
-    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
+    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(
+      subspaceName,
+      shrinkwrapFile
+    );
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
-    this._syncTempShrinkwrap(shrinkwrapFile);
+    this._syncTempShrinkwrap(subspaceName, shrinkwrapFile);
 
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
@@ -911,19 +957,25 @@ ${gitLfsHookHandling}
     return true;
   }
 
-  private _syncTempShrinkwrap(shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
+  private _syncTempShrinkwrap(
+    subspaceName: string | undefined,
+    shrinkwrapFile: BaseShrinkwrapFile | undefined
+  ): void {
+    const commitedShrinkwrapFileName: string = subspaceName
+      ? this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName)
+      : this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant);
+    const tempShrinkwrapFilename: string = subspaceName
+      ? this.rushConfiguration.getTempSubspaceShrinkwrapFileName(subspaceName)
+      : this.rushConfiguration.tempShrinkwrapFilename;
+    const tempShrinkwrapPreinstallFilename: string = subspaceName
+      ? this.rushConfiguration.getTempSubspaceShrinkwrapPreinstallFilename(subspaceName)
+      : this.rushConfiguration.tempShrinkwrapPreinstallFilename;
     if (shrinkwrapFile) {
-      Utilities.syncFile(
-        this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
-        this.rushConfiguration.tempShrinkwrapFilename
-      );
-      Utilities.syncFile(
-        this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
-        this.rushConfiguration.tempShrinkwrapPreinstallFilename
-      );
+      Utilities.syncFile(commitedShrinkwrapFileName, tempShrinkwrapFilename);
+      Utilities.syncFile(commitedShrinkwrapFileName, tempShrinkwrapPreinstallFilename);
     } else {
       // Otherwise delete the temporary file
-      FileSystem.deleteFile(this.rushConfiguration.tempShrinkwrapFilename);
+      FileSystem.deleteFile(tempShrinkwrapFilename);
 
       if (this.rushConfiguration.packageManager === 'pnpm') {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
@@ -937,7 +989,9 @@ ${gitLfsHookHandling}
 
         FileSystem.deleteFile(
           path.join(
-            this.rushConfiguration.commonTempFolder,
+            subspaceName
+              ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
+              : this.rushConfiguration.commonTempFolder,
             pnpmPackageManager.internalShrinkwrapRelativePath
           )
         );

@@ -1206,6 +1206,15 @@ export class RushConfiguration {
   }
 
   /**
+   * Returns the configuration folder for a specific subspace
+   */
+  public getSubspaceConfigFolderPath(subspaceName: string): string {
+    this.validateSubspaceName(subspaceName);
+
+    return `${this.commonFolder}/config/subspaces/${subspaceName}`;
+  }
+
+  /**
    * Returns full path of the temporary shrinkwrap file for a specific subspace.
    * @remarks
    * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
@@ -1220,6 +1229,21 @@ export class RushConfiguration {
       this.shrinkwrapFilename
     }`;
     return fullSubspacePath;
+  }
+
+  /**
+   * The full path of a backup copy of tempShrinkwrapFilename for a subspace. This backup copy is made
+   * before installation begins, and can be compared to determine how the package manager
+   * modified tempShrinkwrapFilename.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `C:\repo\common\temp\subspaces\subspace-name\npm-shrinkwrap-preinstall.json`
+   * or `C:\repo\common\temp\subspaces\subspace-name\pnpm-lock-preinstall.yaml`
+   */
+  public getTempSubspaceShrinkwrapPreinstallFilename(subspaceName: string): string {
+    /// From "C:\repo\common\temp\subspaces\subspace-name\pnpm-lock.yaml" --> "C:\repo\common\temp\subspaces\subspace-name\pnpm-lock-preinstall.yaml"
+    const parsedPath: path.ParsedPath = path.parse(this.getTempSubspaceShrinkwrapFileName(subspaceName));
+    return path.join(parsedPath.dir, parsedPath.name + '-preinstall' + parsedPath.ext);
   }
 
   public validateSubspaceName(subspaceName: string): void {
@@ -1448,7 +1472,10 @@ export class RushConfiguration {
    * Gets the path to the repo-state.json file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getRepoStateFilePath(variant?: string | undefined): string {
+  public getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string {
+    if (subspaceName) {
+      return path.join(this.getSubspaceConfigFolderPath(subspaceName), RushConstants.repoStateFilename);
+    }
     const repoStateFilename: string = path.join(
       this.commonRushConfigFolder,
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
@@ -1461,8 +1488,8 @@ export class RushConfiguration {
    * Gets the contents from the repo-state.json file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getRepoState(variant?: string | undefined): RepoStateFile {
-    const repoStateFilename: string = this.getRepoStateFilePath(variant);
+  public getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile {
+    const repoStateFilename: string = this.getRepoStateFilePath(subspaceName, variant);
     return RepoStateFile.loadFromFile(repoStateFilename, variant);
   }
 
@@ -1486,6 +1513,18 @@ export class RushConfiguration {
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
     return path.join(variantConfigFolderPath, this.shrinkwrapFilename);
+  }
+
+  /**
+   * Gets the committed shrinkwrap file name for a subspace.
+   * @param subspaceName - The name of the subspace.
+   */
+  public getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string {
+    this.validateSubspaceName(subspaceName);
+
+    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath(subspaceName);
+
+    return path.join(subspaceConfigFolderPath, this.shrinkwrapFilename);
   }
 
   /**

@@ -248,6 +248,6 @@ export class LastInstallFlagFactory {
       }
     }
 
-    return new LastInstallFlag(rushConfiguration.getSubspaceTempFolder(subspace), currentState);
+    return new LastInstallFlag(rushConfiguration.getSubspaceTempFolderPath(subspace), currentState);
   }
 }

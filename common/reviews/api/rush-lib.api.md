@@ -511,14 +511,14 @@ export interface _ILastInstallFlagJson {
     // (undocumented)
     [key: string]: unknown;
     ignoreScripts?: true;
-    node: string;
+    nodeVersion: string;
     packageJson?: IPackageJson;
     packageManager: PackageManagerName;
     packageManagerVersion: string;
     rushJsonFolder: string;
     selectedProjectNames?: string[];
     storePath?: string;
-    workspaces?: true;
+    useWorkspaces?: true;
 }
 
 // @public
@@ -1096,6 +1096,7 @@ export class RushConfiguration {
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
+    getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
@@ -1103,12 +1104,15 @@ export class RushConfiguration {
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
-    getRepoState(variant?: string | undefined): RepoStateFile;
-    getRepoStateFilePath(variant?: string | undefined): string;
+    getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile;
+    getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string;
+    getSubspaceConfigFolderPath(subspaceName: string): string;
+    getSubspaceProjects(subspaceName: string): RushConfigurationProject[];
     // @beta
-    getSubspaceTempFolder(subspaceName: string): string;
+    getSubspaceTempFolderPath(subspaceName: string): string;
     // @beta
     getTempSubspaceShrinkwrapFileName(subspaceName: string): string;
+    getTempSubspaceShrinkwrapPreinstallFilename(subspaceName: string): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;

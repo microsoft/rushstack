@@ -82,13 +82,18 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   public async prepareCommonTempAsync(
+    subspaceName: string | undefined,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
+    const commonTempFolderToUse: string = subspaceName
+      ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
+      : this.rushConfiguration.commonTempFolder;
+
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(
-      this.rushConfiguration.commonTempFolder,
+      commonTempFolderToUse,
       RushConstants.rushTempProjectsFolderName
     );
 
@@ -368,7 +373,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, commonDependencies);
+    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, commonDependencies, subspaceName);
 
     stopwatch.stop();
     // eslint-disable-next-line no-console

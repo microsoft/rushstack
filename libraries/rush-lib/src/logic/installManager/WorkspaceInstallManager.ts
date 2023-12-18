@@ -56,6 +56,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * @override
    */
   protected async prepareCommonTempAsync(
+    subspaceName: string | undefined,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     // Block use of the RUSH_TEMP_FOLDER environment variable
@@ -66,8 +67,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
+    const commonTempFolderToUse: string = subspaceName
+      ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
+      : this.rushConfiguration.commonTempFolder;
+
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder));
+    console.log('\n' + colors.bold('Updating workspace files in ' + commonTempFolderToUse));
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -108,7 +113,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // If preferred versions have been updated, or if the repo-state.json is invalid,
     // we can't be certain of the state of the shrinkwrap
-    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(this.options.variant);
+    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(subspaceName, this.options.variant);
     if (!repoState.isValid) {
       shrinkwrapWarnings.push(
         `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker in the file.`
@@ -128,12 +133,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
-      path.join(this.rushConfiguration.commonTempFolder, 'pnpm-workspace.yaml')
+      path.join(commonTempFolderToUse, 'pnpm-workspace.yaml')
     );
 
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
+      if (subspaceName && rushProject.subspaceName !== subspaceName) {
+        // skip processing any project that isn't in this subspace
+        continue;
+      }
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
       workspaceFile.addPackage(rushProject.projectFolder);
 
@@ -236,7 +245,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration);
+    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, undefined, subspaceName);
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp

@@ -34,7 +34,8 @@ interface ICommonPackageJson extends IPackageJson {
 export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
-    dependencies: Map<string, string> = new Map<string, string>()
+    dependencies: Map<string, string> = new Map<string, string>(),
+    subspaceName: string | undefined
   ): void {
     const commonPackageJson: ICommonPackageJson = {
       dependencies: {},
@@ -85,10 +86,10 @@ export class InstallHelpers {
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
-    const commonPackageJsonFilename: string = path.join(
-      rushConfiguration.commonTempFolder,
-      FileConstants.PackageJson
-    );
+    const commonTempToUse: string = subspaceName
+      ? rushConfiguration.getSubspaceTempFolderPath(subspaceName)
+      : rushConfiguration.commonTempFolder;
+    const commonPackageJsonFilename: string = path.join(commonTempToUse, FileConstants.PackageJson);
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp

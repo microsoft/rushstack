@@ -58,6 +58,7 @@ export class PnpmfileConfiguration {
 
   public static async writeCommonTempPnpmfileShimAsync(
     rushConfiguration: RushConfiguration,
+    targetDir: string,
     options?: IPnpmfileShimOptions
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
@@ -66,7 +67,6 @@ export class PnpmfileConfiguration {
       );
     }
 
-    const targetDir: string = rushConfiguration.commonTempFolder;
     const pnpmfilePath: string = path.join(
       targetDir,
       (rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
@@ -87,6 +87,7 @@ export class PnpmfileConfiguration {
     });
   }
 
+  // SUBSPACE-TODO: add common versions for subspaces
   private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
     options?: IPnpmfileShimOptions

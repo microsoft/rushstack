@@ -120,14 +120,10 @@ function cloneDeepInner<TObject>(obj: TObject, seenObjects: Set<unknown>): TObje
  * determine if `obj` contains equivalent property values.
  */
 export function isMatch<TObject>(obj: TObject, source: TObject): boolean {
-  if (obj === source) {
-    return true;
-  }
-  
-  if (typeof obj !== typeof source) {
-    return false;
-  }
+  return obj === source || (typeof obj === typeof source && isMatchInner(obj, source));
+}
 
+function isMatchInner<TObject>(obj: TObject, source: TObject): boolean {
   let sourceKeys: (string | number)[] | undefined;
   if (typeof source === 'object' && source !== null && !Array.isArray(source)) {
     sourceKeys = Object.keys(source);
