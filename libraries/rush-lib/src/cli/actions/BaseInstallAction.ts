@@ -37,6 +37,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
   protected readonly _offlineParameter: CommandLineFlagParameter;
+  protected readonly _ignoreScriptsParameter: CommandLineFlagParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -95,6 +96,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
         `Enables installation to be performed without internet access. PNPM will instead report an error` +
         ` if the necessary NPM packages cannot be obtained from the local cache.` +
         ` For details, see the documentation for PNPM's "--offline" parameter.`
+    });
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description:
+        'Do not execute any install lifecycle scripts specified in package.json files and its' +
+        ' dependencies when "rush update". Running with this flag leaves your installation in a uncompleted' +
+        ' state, you need to run this command without this flag again or run "rush install" to complete a ' +
+        ' full installation. Meanwhile, it makes faster retries on running install lifecycle scripts. You' +
+        ' can partial install such as "rush install --to <package>" to run the ignored scripts of the' +
+        ' dependencies of the selected projects.'
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }

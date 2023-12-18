@@ -1199,7 +1199,7 @@ export class RushConfiguration {
    * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
    * @beta
    */
-  public getSubspaceTempFolder(subspaceName: string): string {
+  public getSubspaceTempFolderPath(subspaceName: string): string {
     this.validateSubspaceName(subspaceName);
 
     return `${this.commonTempFolder}/${subspaceName}`;
@@ -1216,7 +1216,9 @@ export class RushConfiguration {
    * @beta
    */
   public getTempSubspaceShrinkwrapFileName(subspaceName: string): string {
-    const fullSubspacePath: string = `${this.getSubspaceTempFolder(subspaceName)}/${this.shrinkwrapFilename}`;
+    const fullSubspacePath: string = `${this.getSubspaceTempFolderPath(subspaceName)}/${
+      this.shrinkwrapFilename
+    }`;
     return fullSubspacePath;
   }
 
