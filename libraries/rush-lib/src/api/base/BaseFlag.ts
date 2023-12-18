@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
+
 import { isMatch, merge } from '../../utilities/objectUtilities';
 
 /**
@@ -33,7 +34,8 @@ export class BaseFlag<T extends object = JsonObject> {
     if (!this.flagName) {
       throw new Error('Do not use this class directly, extends this class instead');
     }
-    this.path = path.join(folderPath, this.flagName);
+
+    this.path = `${folderPath}/${this.flagName}`;
     this._state = (state || {}) as T;
     this._isModified = true;
   }

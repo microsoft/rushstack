@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError } from '@rushstack/node-core-library';
+
 import type { RushConfiguration } from './RushConfiguration';
 import { BaseFlag } from './base/BaseFlag';
 
