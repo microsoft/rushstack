@@ -19,7 +19,7 @@ export interface ILastInstallFlagJson {
   /**
    * Current node version
    */
-  node: string;
+  nodeVersion: string;
   /**
    * Current package manager name
    */
@@ -43,7 +43,7 @@ export interface ILastInstallFlagJson {
   /**
    * True when "useWorkspaces" is true in rush.json
    */
-  workspaces?: true;
+  useWorkspaces?: true;
   /**
    * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
    */
@@ -203,7 +203,7 @@ export class LastInstallFlagFactory {
     extraState: Record<string, string> = {}
   ): LastInstallFlag {
     const currentState: ILastInstallFlagJson = {
-      node: process.versions.node,
+      nodeVersion: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder,
@@ -213,7 +213,7 @@ export class LastInstallFlagFactory {
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
       currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
       if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+        currentState.useWorkspaces = rushConfiguration.pnpmOptions.useWorkspaces;
       }
     }
 
@@ -234,7 +234,7 @@ export class LastInstallFlagFactory {
     subspace: string
   ): LastInstallFlag {
     const currentState: ILastInstallFlagJson = {
-      node: process.versions.node,
+      nodeVersion: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
       rushJsonFolder: rushConfiguration.rushJsonFolder,
@@ -243,6 +243,9 @@ export class LastInstallFlagFactory {
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
       currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+      if (rushConfiguration.pnpmOptions.useWorkspaces) {
+        currentState.useWorkspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+      }
     }
 
     return new LastInstallFlag(rushConfiguration.getSubspaceTempFolder(subspace), currentState);
