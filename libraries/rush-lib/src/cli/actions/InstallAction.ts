@@ -65,6 +65,7 @@ export class InstallAction extends BaseInstallAction {
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
       checkOnly: this._checkOnlyParameter.value,
+      subspace: this._subspaceParameter.value,
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };

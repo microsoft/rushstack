@@ -81,6 +81,7 @@ export class UpdateAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       pnpmFilterArguments: [],
       checkOnly: false,
+      subspace: this._subspaceParameter.value,
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };

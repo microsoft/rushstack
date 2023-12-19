@@ -253,7 +253,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
-  protected canSkipInstall(lastModifiedDate: Date): boolean {
+  protected canSkipInstall(lastModifiedDate: Date, subspaceName?: string | undefined): boolean {
     if (!super.canSkipInstall(lastModifiedDate)) {
       return false;
     }
@@ -263,7 +263,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
-        this.rushConfiguration.getCommonTempFolder(),
+        this.rushConfiguration.getCommonTempFolder(subspaceName),
         'pnpm-workspace.yaml'
       );
 
@@ -292,7 +292,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  protected async installAsync(cleanInstall: boolean): Promise<void> {
+  protected async installAsync(cleanInstall: boolean, subspaceName?: string | undefined): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
     const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 
@@ -305,7 +305,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const commonNodeModulesFolder: string = path.join(
-      this.rushConfiguration.getCommonTempFolder(),
+      this.rushConfiguration.getCommonTempFolder(subspaceName),
       RushConstants.nodeModulesFolderName
     );
 
@@ -337,7 +337,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         '\n' +
           colors.bold(
             `Running "${this.rushConfiguration.packageManager} install" in` +
-              ` ${this.rushConfiguration.getCommonTempFolder()}`
+              ` ${this.rushConfiguration.getCommonTempFolder(subspaceName)}`
           ) +
           '\n'
       );
@@ -391,7 +391,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           {
             command: packageManagerFilename,
             args: installArgs,
-            workingDirectory: this.rushConfiguration.getCommonTempFolder(),
+            workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName),
             environment: packageManagerEnv,
             suppressOutput: false
           },
@@ -446,7 +446,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
     // to determine if the install can be skipped
     const projectNodeModulesFolders: string[] = [
-      path.join(this.rushConfiguration.getCommonTempFolder(), RushConstants.nodeModulesFolderName),
+      path.join(
+        this.rushConfiguration.getCommonTempFolder(subspaceName),
+        RushConstants.nodeModulesFolderName
+      ),
       ...this.rushConfiguration.projects.map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       })
@@ -502,7 +505,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
+    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration, subspaceName).create();
 
     // Stage 2 rebuild pending
     if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
@@ -522,7 +525,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         '\n' +
           colors.bold(
             `Running "${this.rushConfiguration.packageManager} rebuild --pending" in` +
-              ` ${this.rushConfiguration.getCommonTempFolder()}`
+              ` ${this.rushConfiguration.getCommonTempFolder(subspaceName)}`
           ) +
           '\n'
       );
@@ -544,7 +547,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         Utilities.executeCommand({
           command: packageManagerFilename,
           args: rebuildArgs,
-          workingDirectory: this.rushConfiguration.getCommonTempFolder(),
+          workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName),
           environment: packageManagerEnv,
           suppressOutput: false
         });

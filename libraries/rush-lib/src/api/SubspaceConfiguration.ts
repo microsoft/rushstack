@@ -59,6 +59,8 @@ export class SubspaceConfiguration {
         );
       }
     }
+    // Add the default subspace
+    this.subspaceNames.add(RushConstants.defaultSubspaceName);
   }
 
   /**

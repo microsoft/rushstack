@@ -122,18 +122,6 @@ export abstract class BaseInstallManager {
   public async doSubspaceInstallAsync(subspaceName: string): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     let subspaceProjectsToInstall: RushConfigurationProject[] = [];
-    // Ensure that subspaces is enabled
-    if (!this.rushConfiguration.subspaceConfiguration?.isEnabled) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          `A subspace parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
-        )
-      );
-      throw new AlreadyReportedError();
-    }
     this.rushConfiguration.validateSubspaceName(subspaceName);
     subspaceProjectsToInstall = this.rushConfiguration.getSubspaceProjects(subspaceName);
     // const subspaceProjectNames: string[] = subspaceProjects.map(rushProject => rushProject.packageName);
@@ -192,6 +180,34 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
+    // Ensure that subspaces is enabled
+    let subspaceName = this.options.subspace;
+    if (this.rushConfiguration.subspaceConfiguration?.isEnabled) {
+      // Temporarily ensure that a subspace is provided
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(
+        colors.red(
+          `A subspace parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+        )
+      );
+      throw new AlreadyReportedError();
+    } else if (this.options.subspace) {
+      // Ensure that subspaces is enabled
+      if (!this.rushConfiguration.subspaceConfiguration?.isEnabled) {
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          colors.red(
+            `A subspace parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+    }
+
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
       // Allow partial update when there are subspace projects
@@ -209,7 +225,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync();
+    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync(subspaceName);
 
     if (this.options.checkOnly) {
       return;
@@ -217,7 +233,8 @@ export abstract class BaseInstallManager {
 
     // eslint-disable-next-line no-console
     console.log(
-      '\n' + colors.bold(`Checking installation in "${this.rushConfiguration.getCommonTempFolder()}"`)
+      '\n' +
+        colors.bold(`Checking installation in "${this.rushConfiguration.getCommonTempFolder(subspaceName)}"`)
     );
 
     // This marker file indicates that the last "rush install" completed successfully.
@@ -226,7 +243,8 @@ export abstract class BaseInstallManager {
     // need to perform a clean install.  Otherwise, we can do an incremental install.
     const commonTempInstallFlag: LastInstallFlag = LastInstallFlagFactory.getCommonTempFlag(
       this.rushConfiguration,
-      { npmrcHash: npmrcHash || '<NO NPMRC>' }
+      { npmrcHash: npmrcHash || '<NO NPMRC>' },
+      subspaceName
     );
     const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
       .configuration.cleanInstallAfterNpmrcChanges
@@ -317,10 +335,6 @@ export abstract class BaseInstallManager {
 
     // eslint-disable-next-line no-console
     console.log('');
-  }
-
-  public async installForSubspace(subspaceName: string): Promise<void> {
-    this.rushConfiguration.validateSubspaceName(subspaceName);
   }
 
   protected abstract prepareCommonTempAsync(

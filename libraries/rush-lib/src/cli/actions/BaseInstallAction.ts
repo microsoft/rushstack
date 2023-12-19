@@ -38,6 +38,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
   protected readonly _offlineParameter: CommandLineFlagParameter;
   protected readonly _ignoreScriptsParameter: CommandLineFlagParameter;
+  protected readonly _subspaceParameter: CommandLineStringParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -108,6 +109,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
         ' dependencies of the selected projects.'
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
+    this._subspaceParameter = this.defineStringParameter({
+      parameterLongName: '--subspace',
+      argumentName: 'SUBSPACE',
+      description: 'The subspace to install for.'
+    });
   }
 
   protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
