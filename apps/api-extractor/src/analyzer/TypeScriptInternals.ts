@@ -88,7 +88,7 @@ export class TypeScriptInternals {
     mode: ts.ModuleKind.CommonJS | ts.ModuleKind.ESNext | undefined
   ): ts.ResolvedModuleFull | undefined {
     // Compiler internal:
-    // https://github.com/microsoft/TypeScript/blob/v5.3-beta/src/compiler/types.ts#L4678
+    // https://github.com/microsoft/TypeScript/blob/v5.3.3/src/compiler/types.ts#L4698
     const result: ts.ResolvedModuleWithFailedLookupLocations | undefined = (program as any).getResolvedModule(
       sourceFile,
       moduleNameText,
