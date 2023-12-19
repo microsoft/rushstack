@@ -127,7 +127,7 @@ export class Autoinstaller {
         }
 
         // Copy: .../common/autoinstallers/my-task/.npmrc
-        Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, autoinstallerFullPath);
+        Utilities.syncNpmrc(this._rushConfiguration.getCommonRushConfigFolder(), autoinstallerFullPath);
 
         this._logIfConsoleOutputIsNotRestricted(
           `Installing dependencies under ${autoinstallerFullPath}...\n`
@@ -209,7 +209,7 @@ export class Autoinstaller {
 
     this._logIfConsoleOutputIsNotRestricted();
 
-    Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this.folderFullPath);
+    Utilities.syncNpmrc(this._rushConfiguration.getCommonRushConfigFolder(), this.folderFullPath);
 
     Utilities.executeCommand({
       command: this._rushConfiguration.packageManagerToolFilename,

@@ -61,12 +61,12 @@ export class PnpmLinkManager extends BaseLinkManager {
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
       // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        this._rushConfiguration.tempShrinkwrapFilename
+        this._rushConfiguration.getTempShrinkwrapFilename()
       );
 
       if (!pnpmShrinkwrapFile) {
         throw new InternalError(
-          `Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`
+          `Cannot load shrinkwrap at "${this._rushConfiguration.getTempShrinkwrapFilename()}"`
         );
       }
 
@@ -104,7 +104,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // Example: "C:\MyRepo\common\temp\projects\project1
     const extractedFolder: string = path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._rushConfiguration.getCommonTempFolder(),
       RushConstants.rushTempProjectsFolderName,
       unscopedTempProjectName
     );
@@ -114,7 +114,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
     const installFolderName: string = path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._rushConfiguration.getCommonTempFolder(),
       RushConstants.nodeModulesFolderName,
       RushConstants.rushTempNpmScope,
       unscopedTempProjectName
@@ -200,7 +200,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
     const absolutePathToTgzFile: string = path.resolve(
-      this._rushConfiguration.commonTempFolder,
+      this._rushConfiguration.getCommonTempFolder(),
       relativePathToTgzFile
     );
 
@@ -313,7 +313,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
 
       return path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         folderName,
@@ -328,7 +328,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       //   file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       const folderName: string = depPathToFilename(`${tarballEntry}${folderSuffix}`);
       return path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         folderName,
@@ -343,7 +343,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       const escapedLocalPath: string = depPathToFilename(tarballEntry);
       const folderName: string = `${escapedLocalPath}${folderSuffix}`;
       return path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         folderName,
@@ -359,7 +359,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
       return path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         'local',

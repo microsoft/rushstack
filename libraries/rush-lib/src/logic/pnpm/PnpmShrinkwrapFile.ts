@@ -590,7 +590,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(rushConfiguration.commonTempFolder, importerKey);
+      const rushProjectPath: string = path.resolve(rushConfiguration.getCommonTempFolder(), importerKey);
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -671,7 +671,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     variant?: string
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      project.rushConfiguration.commonTempFolder,
+      project.rushConfiguration.getCommonTempFolder(),
       project.projectFolder
     );
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);

@@ -102,7 +102,7 @@ export abstract class BaseInstallManager {
       for (const subspaceName of rushConfiguration.subspaceNames) {
         this.subspaceInstallFlags.set(
           subspaceName,
-          LastInstallFlagFactory.getSubspaceTempFlag(subspaceName, rushConfiguration)
+          LastInstallFlagFactory.getCommonTempFlag(rushConfiguration, undefined, subspaceName)
         );
       }
     }
@@ -216,7 +216,9 @@ export abstract class BaseInstallManager {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`));
+    console.log(
+      '\n' + colors.bold(`Checking installation in "${this.rushConfiguration.getCommonTempFolder()}"`)
+    );
 
     // This marker file indicates that the last "rush install" completed successfully.
     // Always perform a clean install if filter flags were provided. Additionally, if
@@ -282,7 +284,7 @@ export abstract class BaseInstallManager {
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
-          this.rushConfiguration.tempShrinkwrapFilename,
+          this.rushConfiguration.getTempShrinkwrapFilename(),
           this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
         );
       } else {
@@ -328,7 +330,7 @@ export abstract class BaseInstallManager {
 
   protected abstract installAsync(cleanInstall: boolean): Promise<void>;
 
-  protected abstract postInstallAsync(): Promise<void>;
+  protected abstract postInstallAsync(subspaceName?: string | undefined): Promise<void>;
 
   protected canSkipInstall(lastModifiedDate: Date): boolean {
     // Based on timestamps, can we skip this install entirely?
@@ -337,7 +339,7 @@ export abstract class BaseInstallManager {
     // Consider the timestamp on the node_modules folder; if someone tampered with it
     // or deleted it entirely, then we can't skip this install
     potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
+      path.join(this.rushConfiguration.getCommonTempFolder(), RushConstants.nodeModulesFolderName)
     );
 
     // Additionally, if they pulled an updated shrinkwrap file from Git,
@@ -460,13 +462,10 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    const configFolderToUse: string = subspaceName
-      ? this.rushConfiguration.getSubspaceConfigFolderPath(subspaceName)
-      : this.rushConfiguration.commonRushConfigFolder;
-    const commonTempFolderToUse: string = subspaceName
-      ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
-      : this.rushConfiguration.commonTempFolder;
-    const npmrcText: string | undefined = Utilities.syncNpmrc(configFolderToUse, commonTempFolderToUse);
+    const npmrcText: string | undefined = Utilities.syncNpmrc(
+      this.rushConfiguration.getCommonRushConfigFolder(subspaceName),
+      this.rushConfiguration.getCommonTempFolder(subspaceName)
+    );
     this._syncNpmrcAlreadyCalled = true;
 
     const npmrcHash: string | undefined = npmrcText
@@ -475,7 +474,9 @@ export abstract class BaseInstallManager {
 
     // Copy the committed patches folder if using pnpm
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      const commonTempPnpmPatchesFolder: string = `${commonTempFolderToUse}/${RushConstants.pnpmPatchesFolderName}`;
+      const commonTempPnpmPatchesFolder: string = `${this.rushConfiguration.getCommonTempFolder(
+        subspaceName
+      )}/${RushConstants.pnpmPatchesFolderName}`;
       const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
       if (FileSystem.exists(rushPnpmPatchesFolder)) {
         FileSystem.copyFiles({
@@ -490,7 +491,7 @@ export abstract class BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
-        commonTempFolderToUse,
+        this.rushConfiguration.getCommonTempFolder(subspaceName),
         this.options
       );
     }
@@ -767,7 +768,7 @@ ${gitLfsHookHandling}
         If user does not set auto-install-peers in both pnpm-config.json and .npmrc, rush will default it to "false"
       */
       const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
-        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.getCommonRushConfigFolder(),
         'auto-install-peers'
       );
 
@@ -795,7 +796,7 @@ ${gitLfsHookHandling}
         If user does not set resolution-mode in pnpm-config.json and .npmrc, rush will default it to "highest"
       */
       const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
-        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.getCommonRushConfigFolder(),
         'resolution-mode'
       );
 
@@ -964,18 +965,18 @@ ${gitLfsHookHandling}
     const commitedShrinkwrapFileName: string = subspaceName
       ? this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName)
       : this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant);
-    const tempShrinkwrapFilename: string = subspaceName
-      ? this.rushConfiguration.getTempSubspaceShrinkwrapFileName(subspaceName)
-      : this.rushConfiguration.tempShrinkwrapFilename;
-    const tempShrinkwrapPreinstallFilename: string = subspaceName
-      ? this.rushConfiguration.getTempSubspaceShrinkwrapPreinstallFilename(subspaceName)
-      : this.rushConfiguration.tempShrinkwrapPreinstallFilename;
     if (shrinkwrapFile) {
-      Utilities.syncFile(commitedShrinkwrapFileName, tempShrinkwrapFilename);
-      Utilities.syncFile(commitedShrinkwrapFileName, tempShrinkwrapPreinstallFilename);
+      Utilities.syncFile(
+        commitedShrinkwrapFileName,
+        this.rushConfiguration.getTempShrinkwrapFilename(subspaceName)
+      );
+      Utilities.syncFile(
+        commitedShrinkwrapFileName,
+        this.rushConfiguration.getTempShrinkwrapPreinstallFilename(subspaceName)
+      );
     } else {
       // Otherwise delete the temporary file
-      FileSystem.deleteFile(tempShrinkwrapFilename);
+      FileSystem.deleteFile(this.rushConfiguration.getTempShrinkwrapFilename(subspaceName));
 
       if (this.rushConfiguration.packageManager === 'pnpm') {
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
@@ -989,9 +990,7 @@ ${gitLfsHookHandling}
 
         FileSystem.deleteFile(
           path.join(
-            subspaceName
-              ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
-              : this.rushConfiguration.commonTempFolder,
+            this.rushConfiguration.getCommonTempFolder(subspaceName),
             pnpmPackageManager.internalShrinkwrapRelativePath
           )
         );

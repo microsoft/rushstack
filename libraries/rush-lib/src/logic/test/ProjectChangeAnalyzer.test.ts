@@ -26,7 +26,7 @@ describe(ProjectChangeAnalyzer.name, () => {
     files: Map<string, string>
   ): ProjectChangeAnalyzer {
     const rushConfiguration: RushConfiguration = {
-      commonRushConfigFolder: '',
+      getCommonRushConfigFolder: () => '',
       projects,
       rushJsonFolder: '',
       getCommittedShrinkwrapFilename(): string {

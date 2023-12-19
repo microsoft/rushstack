@@ -200,7 +200,8 @@ export class LastInstallFlagFactory {
    */
   public static getCommonTempFlag(
     rushConfiguration: RushConfiguration,
-    extraState: Record<string, string> = {}
+    extraState: Record<string, string> = {},
+    subspaceName?: string | undefined
   ): LastInstallFlag {
     const currentState: ILastInstallFlagJson = {
       nodeVersion: process.versions.node,
@@ -217,37 +218,6 @@ export class LastInstallFlagFactory {
       }
     }
 
-    return new LastInstallFlag(rushConfiguration.commonTempFolder, currentState);
-  }
-
-  /**
-   * Gets the LastInstall flag for a specific subspace. This state is used to compare
-   * against the last-known-good state tracked by the LastInstall flag.
-   * @param rushConfiguration - the configuration of the Rush repo to get the install
-   * state from
-   *
-   * @internal
-   */
-  public static getSubspaceTempFlag(
-    subspace: string,
-    rushConfiguration: RushConfiguration,
-    extraState: Record<string, string> = {}
-  ): LastInstallFlag {
-    const currentState: ILastInstallFlagJson = {
-      nodeVersion: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion,
-      rushJsonFolder: rushConfiguration.rushJsonFolder,
-      ...extraState
-    };
-
-    if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
-      if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.useWorkspaces = rushConfiguration.pnpmOptions.useWorkspaces;
-      }
-    }
-
-    return new LastInstallFlag(rushConfiguration.getSubspaceTempFolderPath(subspace), currentState);
+    return new LastInstallFlag(rushConfiguration.getCommonTempFolder(subspaceName), currentState);
   }
 }

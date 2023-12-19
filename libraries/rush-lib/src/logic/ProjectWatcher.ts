@@ -120,7 +120,7 @@ export class ProjectWatcher {
       pathsToWatch.set(repoRoot, { recurse: false });
 
       // Watch the rush config folder non-recursively
-      pathsToWatch.set(Path.convertToSlashes(this._rushConfiguration.commonRushConfigFolder), {
+      pathsToWatch.set(Path.convertToSlashes(this._rushConfiguration.getCommonRushConfigFolder()), {
         recurse: false
       });
 

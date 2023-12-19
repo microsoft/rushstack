@@ -33,7 +33,7 @@ export class NpmLinkManager extends BaseLinkManager {
       readPackageTree.Node,
       Error,
       string
-    >(readPackageTree, this._rushConfiguration.commonTempFolder);
+    >(readPackageTree, this._rushConfiguration.getCommonTempFolder());
 
     const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
@@ -74,14 +74,14 @@ export class NpmLinkManager extends BaseLinkManager {
 
       // Example: "C:\MyRepo\common\temp\projects\project1
       const extractedFolder: string = path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.rushTempProjectsFolderName,
         unscopedTempProjectName
       );
 
       // Example: "C:\MyRepo\common\temp\projects\project1.tgz"
       const tarballFile: string = path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.rushTempProjectsFolderName,
         unscopedTempProjectName + '.tgz'
       );
@@ -98,7 +98,7 @@ export class NpmLinkManager extends BaseLinkManager {
 
       // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
       const installFolderName: string = path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         RushConstants.nodeModulesFolderName,
         RushConstants.rushTempNpmScope,
         unscopedTempProjectName
@@ -305,7 +305,7 @@ export class NpmLinkManager extends BaseLinkManager {
     // Also symlink the ".bin" folder
     if (localProjectPackage.children.length > 0) {
       const commonBinFolder: string = path.join(
-        this._rushConfiguration.commonTempFolder,
+        this._rushConfiguration.getCommonTempFolder(),
         'node_modules',
         '.bin'
       );

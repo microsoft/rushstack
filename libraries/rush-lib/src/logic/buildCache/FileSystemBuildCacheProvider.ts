@@ -35,7 +35,7 @@ export class FileSystemBuildCacheProvider {
   public constructor(options: IFileSystemBuildCacheProviderOptions) {
     this._cacheFolderPath =
       options.rushUserConfiguration.buildCacheFolder ||
-      path.join(options.rushConfiguration.commonTempFolder, DEFAULT_BUILD_CACHE_FOLDER_NAME);
+      path.join(options.rushConfiguration.getCommonTempFolder(), DEFAULT_BUILD_CACHE_FOLDER_NAME);
   }
 
   /**

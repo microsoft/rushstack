@@ -671,7 +671,7 @@ export class PackageJsonUpdater {
         const allVersions: string = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
-          this._rushConfiguration.commonTempFolder
+          this._rushConfiguration.getCommonTempFolder()
         );
 
         let versionList: string[];
@@ -732,7 +732,7 @@ export class PackageJsonUpdater {
         selectedVersion = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
-          this._rushConfiguration.commonTempFolder
+          this._rushConfiguration.getCommonTempFolder()
         ).trim();
       }
 

@@ -3935,7 +3935,11 @@ packages:
       '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.14.3.tgz(@types/node@18.17.15)
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.62.0.tgz(@types/node@18.17.15)
       '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.1.14.tgz(@types/node@18.17.15)
+<<<<<<< HEAD
       '@rushstack/package-extractor': file:../temp/tarballs/rushstack-package-extractor-0.6.17.tgz(@types/node@18.17.15)
+=======
+      '@rushstack/package-extractor': file:../temp/tarballs/rushstack-package-extractor-0.6.16.tgz(@types/node@18.17.15)
+>>>>>>> 77f8ba6d40 (Rewrite rush getters to accept a subspace name)
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.5.1.tgz
       '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.1.15.tgz(@types/node@18.17.15)
       '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.7.14.tgz(@types/node@18.17.15)
@@ -4238,11 +4242,19 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
+<<<<<<< HEAD
   file:../temp/tarballs/rushstack-package-extractor-0.6.17.tgz(@types/node@18.17.15):
     resolution: {tarball: file:../temp/tarballs/rushstack-package-extractor-0.6.17.tgz}
     id: file:../temp/tarballs/rushstack-package-extractor-0.6.17.tgz
     name: '@rushstack/package-extractor'
     version: 0.6.17
+=======
+  file:../temp/tarballs/rushstack-package-extractor-0.6.16.tgz(@types/node@18.17.15):
+    resolution: {tarball: file:../temp/tarballs/rushstack-package-extractor-0.6.16.tgz}
+    id: file:../temp/tarballs/rushstack-package-extractor-0.6.16.tgz
+    name: '@rushstack/package-extractor'
+    version: 0.6.16
+>>>>>>> 77f8ba6d40 (Rewrite rush getters to accept a subspace name)
     dependencies:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.62.0.tgz(@types/node@18.17.15)

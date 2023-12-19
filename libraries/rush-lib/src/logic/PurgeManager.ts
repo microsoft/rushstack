@@ -24,7 +24,7 @@ export class PurgeManager {
     this._rushGlobalFolder = rushGlobalFolder;
 
     const commonAsyncRecyclerPath: string = path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._rushConfiguration.getCommonTempFolder(),
       RushConstants.rushRecyclerFolderName
     );
     this.commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
@@ -53,11 +53,11 @@ export class PurgeManager {
   public purgeNormal(): void {
     // Delete everything under common\temp except for the recycler folder itself
     // eslint-disable-next-line no-console
-    console.log('Purging ' + this._rushConfiguration.commonTempFolder);
+    console.log('Purging ' + this._rushConfiguration.getCommonTempFolder());
 
     this.commonTempFolderRecycler.moveAllItemsInFolder(
-      this._rushConfiguration.commonTempFolder,
-      this._getMembersToExclude(this._rushConfiguration.commonTempFolder, true)
+      this._rushConfiguration.getCommonTempFolder(),
+      this._getMembersToExclude(this._rushConfiguration.getCommonTempFolder(), true)
     );
   }
 

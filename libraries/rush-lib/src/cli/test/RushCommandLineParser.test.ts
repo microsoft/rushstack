@@ -378,7 +378,7 @@ describe('RushCommandLineParser', () => {
       it('creates a custom telemetry file', async () => {
         const repoName: string = 'tapFlushTelemetryAndRunBuildActionRepo';
         const instance: IParserTestInstance = await getCommandLineParserInstanceAsync(repoName, 'build');
-        const telemetryFilePath: string = `${instance.parser.rushConfiguration.commonTempFolder}/test-telemetry.json`;
+        const telemetryFilePath: string = `${instance.parser.rushConfiguration.getCommonTempFolder()}/test-telemetry.json`;
         FileSystem.deleteFile(telemetryFilePath);
 
         /**

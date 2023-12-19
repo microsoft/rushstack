@@ -282,7 +282,7 @@ export class RushCommandLineParser extends CommandLineParser {
     let commandLineConfigFilePath: string | undefined;
     if (this.rushConfiguration) {
       commandLineConfigFilePath = path.join(
-        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.getCommonRushConfigFolder(),
         RushConstants.commandLineFilename
       );
     }

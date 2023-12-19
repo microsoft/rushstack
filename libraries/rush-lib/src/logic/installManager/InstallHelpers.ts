@@ -86,10 +86,10 @@ export class InstallHelpers {
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
-    const commonTempToUse: string = subspaceName
-      ? rushConfiguration.getSubspaceTempFolderPath(subspaceName)
-      : rushConfiguration.commonTempFolder;
-    const commonPackageJsonFilename: string = path.join(commonTempToUse, FileConstants.PackageJson);
+    const commonPackageJsonFilename: string = path.join(
+      rushConfiguration.getCommonTempFolder(subspaceName),
+      FileConstants.PackageJson
+    );
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
     // will consider this timestamp
@@ -186,7 +186,7 @@ export class InstallHelpers {
         // In particular, we'll assume that two different NPM registries cannot have two
         // different implementations of the same version of the same package.
         // This was needed for: https://github.com/microsoft/rushstack/issues/691
-        commonRushConfigFolder: rushConfiguration.commonRushConfigFolder
+        commonRushConfigFolder: rushConfiguration.getCommonRushConfigFolder()
       });
 
       logIfConsoleOutputIsNotRestricted(
@@ -201,11 +201,11 @@ export class InstallHelpers {
     packageManagerMarker.create();
 
     // Example: "C:\MyRepo\common\temp"
-    FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
+    FileSystem.ensureFolder(rushConfiguration.getCommonTempFolder());
 
     // Example: "C:\MyRepo\common\temp\pnpm-local"
     const localPackageManagerToolFolder: string = path.join(
-      rushConfiguration.commonTempFolder,
+      rushConfiguration.getCommonTempFolder(),
       `${packageManager}-local`
     );
 

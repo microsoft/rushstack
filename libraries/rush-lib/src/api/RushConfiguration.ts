@@ -285,23 +285,6 @@ export class RushConfiguration {
   public readonly commonFolder: string;
 
   /**
-   * The folder where Rush's additional config files are stored.  This folder is always a
-   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
-   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
-   * Rush will report an error if this this folder contains any unrecognized files.
-   *
-   * Example: `C:\MyRepo\common\config\rush`
-   */
-  public readonly commonRushConfigFolder: string;
-
-  /**
-   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
-   * under the common folder.
-   * Example: `C:\MyRepo\common\temp`
-   */
-  public readonly commonTempFolder: string;
-
-  /**
    * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
    * under the common folder.
    * Example: `C:\MyRepo\common\scripts`
@@ -341,26 +324,6 @@ export class RushConfiguration {
    * Example: `npm-shrinkwrap.json` or `pnpm-lock.yaml`
    */
   public readonly shrinkwrapFilename: string;
-
-  /**
-   * The full path of the temporary shrinkwrap file that is used during "rush install".
-   * This file may get rewritten by the package manager during installation.
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\pnpm-lock.yaml`
-   */
-  public readonly tempShrinkwrapFilename: string;
-
-  /**
-   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
-   * before installation begins, and can be compared to determine how the package manager
-   * modified tempShrinkwrapFilename.
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
-   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
-   */
-  public readonly tempShrinkwrapPreinstallFilename: string;
 
   /**
    * The object that specifies subspace configurations if they are provided in the rush workspace.
@@ -622,21 +585,15 @@ export class RushConfiguration {
 
     this.commonFolder = path.resolve(path.join(this.rushJsonFolder, RushConstants.commonFolderName));
 
-    this.commonRushConfigFolder = path.join(this.commonFolder, 'config', 'rush');
-
-    this.commonTempFolder =
-      EnvironmentConfiguration.rushTempFolderOverride ||
-      path.join(this.commonFolder, RushConstants.rushTempFolderName);
-
     this.commonScriptsFolder = path.join(this.commonFolder, 'scripts');
 
-    this.npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
-    this.npmTmpFolder = path.resolve(path.join(this.commonTempFolder, 'npm-tmp'));
-    this.yarnCacheFolder = path.resolve(path.join(this.commonTempFolder, 'yarn-cache'));
+    this.npmCacheFolder = path.resolve(path.join(this.getCommonTempFolder(), 'npm-cache'));
+    this.npmTmpFolder = path.resolve(path.join(this.getCommonTempFolder(), 'npm-tmp'));
+    this.yarnCacheFolder = path.resolve(path.join(this.getCommonTempFolder(), 'yarn-cache'));
 
     this.changesFolder = path.join(this.commonFolder, RushConstants.changeFilesFolderName);
 
-    this.currentVariantJsonFilename = path.join(this.commonTempFolder, 'current-variant.json');
+    this.currentVariantJsonFilename = path.join(this.getCommonTempFolder(), 'current-variant.json');
 
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
@@ -648,13 +605,13 @@ export class RushConfiguration {
     this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
 
     const experimentsConfigFile: string = path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       RushConstants.experimentsFilename
     );
     this.experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
     const rushPluginsConfigFilename: string = path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       RushConstants.rushPluginsConfigFilename
     );
     this._rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
@@ -663,8 +620,8 @@ export class RushConfiguration {
     this.yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
     try {
       this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-        `${this.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
-        this.commonTempFolder
+        `${this.getCommonRushConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
+        this.getCommonTempFolder()
       );
       if (rushConfigurationJson.pnpmOptions) {
         throw new Error(
@@ -676,7 +633,7 @@ export class RushConfiguration {
       if (FileSystem.isNotExistError(error as Error)) {
         this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
           rushConfigurationJson.pnpmOptions || {},
-          this.commonTempFolder
+          this.getCommonTempFolder()
         );
       } else {
         throw error;
@@ -728,10 +685,9 @@ export class RushConfiguration {
 
     this.shrinkwrapFilename = this.packageManagerWrapper.shrinkwrapFilename;
 
-    this.tempShrinkwrapFilename = path.join(this.commonTempFolder, this.shrinkwrapFilename);
     this.packageManagerToolFilename = path.resolve(
       path.join(
-        this.commonTempFolder,
+        this.getCommonTempFolder(),
         `${this.packageManager}-local`,
         'node_modules',
         '.bin',
@@ -739,15 +695,8 @@ export class RushConfiguration {
       )
     );
 
-    /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
-    const parsedPath: path.ParsedPath = path.parse(this.tempShrinkwrapFilename);
-    this.tempShrinkwrapPreinstallFilename = path.join(
-      parsedPath.dir,
-      parsedPath.name + '-preinstall' + parsedPath.ext
-    );
-
     RushConfiguration._validateCommonRushConfigFolder(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       this.packageManagerWrapper,
       this.experimentsConfiguration
     );
@@ -841,13 +790,13 @@ export class RushConfiguration {
     this.eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
     this.versionPolicyConfigurationFilePath = path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       RushConstants.versionPoliciesFilename
     );
     this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
 
     this.customTipsConfigurationFilePath = path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       RushConstants.customTipsFilename
     );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
@@ -1190,7 +1139,43 @@ export class RushConfiguration {
   }
 
   /**
-   * Returns the temporary folder where installation files are kept for a specific subspace
+   * The folder where Rush's additional config files are stored.  This folder is always a
+   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
+   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
+   * Rush will report an error if this this folder contains any unrecognized files.
+   *
+   * Example: `C:\MyRepo\common\config\rush`
+   */
+  public getCommonRushConfigFolder(subspaceName?: string | undefined): string {
+    if (subspaceName) {
+      this.validateSubspaceName(subspaceName);
+
+      return `${this.commonFolder}/config/subspaces/${subspaceName}`;
+    } else {
+      return path.join(this.commonFolder, 'config', 'rush');
+    }
+  }
+
+  /**
+   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\temp`
+   */
+  public getCommonTempFolder(subspaceName?: string | undefined): string {
+    const commonTempFolder: string =
+      EnvironmentConfiguration.rushTempFolderOverride ||
+      path.join(this.commonFolder, RushConstants.rushTempFolderName);
+    if (subspaceName) {
+      this.validateSubspaceName(subspaceName);
+
+      return `${commonTempFolder}/${subspaceName}`;
+    } else {
+      return commonTempFolder;
+    }
+  }
+
+  /**
+   * Returns full path of the temporary shrinkwrap file for a specific subspace and returns the common workspace shrinkwrap if no subspaceName is provided..
    * @remarks
    * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
    * This function also consults the deprecated option to allow for shrinkwraps to be stored under a package folder.
@@ -1199,50 +1184,27 @@ export class RushConfiguration {
    * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
    * @beta
    */
-  public getSubspaceTempFolderPath(subspaceName: string): string {
-    this.validateSubspaceName(subspaceName);
-
-    return `${this.commonTempFolder}/${subspaceName}`;
+  public getTempShrinkwrapFilename(subspaceName?: string | undefined): string {
+    if (subspaceName) {
+      const fullSubspacePath: string = `${this.getCommonTempFolder(subspaceName)}/${this.shrinkwrapFilename}`;
+      return fullSubspacePath;
+    } else {
+      return path.join(this.getCommonTempFolder(), this.shrinkwrapFilename);
+    }
   }
 
   /**
-   * Returns the configuration folder for a specific subspace
-   */
-  public getSubspaceConfigFolderPath(subspaceName: string): string {
-    this.validateSubspaceName(subspaceName);
-
-    return `${this.commonFolder}/config/subspaces/${subspaceName}`;
-  }
-
-  /**
-   * Returns full path of the temporary shrinkwrap file for a specific subspace.
-   * @remarks
-   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
-   * This function also consults the deprecated option to allow for shrinkwraps to be stored under a package folder.
-   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
-   * This property merely reports the filename, the file itself may not actually exist.
-   * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
-   * @beta
-   */
-  public getTempSubspaceShrinkwrapFileName(subspaceName: string): string {
-    const fullSubspacePath: string = `${this.getSubspaceTempFolderPath(subspaceName)}/${
-      this.shrinkwrapFilename
-    }`;
-    return fullSubspacePath;
-  }
-
-  /**
-   * The full path of a backup copy of tempShrinkwrapFilename for a subspace. This backup copy is made
+   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
    * before installation begins, and can be compared to determine how the package manager
    * modified tempShrinkwrapFilename.
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\repo\common\temp\subspaces\subspace-name\npm-shrinkwrap-preinstall.json`
-   * or `C:\repo\common\temp\subspaces\subspace-name\pnpm-lock-preinstall.yaml`
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
+   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
    */
-  public getTempSubspaceShrinkwrapPreinstallFilename(subspaceName: string): string {
-    /// From "C:\repo\common\temp\subspaces\subspace-name\pnpm-lock.yaml" --> "C:\repo\common\temp\subspaces\subspace-name\pnpm-lock-preinstall.yaml"
-    const parsedPath: path.ParsedPath = path.parse(this.getTempSubspaceShrinkwrapFileName(subspaceName));
+  public getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string {
+    /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
+    const parsedPath: path.ParsedPath = path.parse(this.getTempShrinkwrapFilename(subspaceName));
     return path.join(parsedPath.dir, parsedPath.name + '-preinstall' + parsedPath.ext);
   }
 
@@ -1409,7 +1371,7 @@ export class RushConfiguration {
    */
   public getCommonVersionsFilePath(variant?: string | undefined): string {
     const commonVersionsFilename: string = path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.commonVersionsFilename
     );
@@ -1473,11 +1435,8 @@ export class RushConfiguration {
    * @param variant - The name of the current variant in use by the active command.
    */
   public getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string {
-    if (subspaceName) {
-      return path.join(this.getSubspaceConfigFolderPath(subspaceName), RushConstants.repoStateFilename);
-    }
     const repoStateFilename: string = path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(subspaceName),
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.repoStateFilename
     );
@@ -1522,7 +1481,7 @@ export class RushConfiguration {
   public getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string {
     this.validateSubspaceName(subspaceName);
 
-    const subspaceConfigFolderPath: string = this.getSubspaceConfigFolderPath(subspaceName);
+    const subspaceConfigFolderPath: string = this.getCommonRushConfigFolder(subspaceName);
 
     return path.join(subspaceConfigFolderPath, this.shrinkwrapFilename);
   }
@@ -1639,7 +1598,7 @@ export class RushConfiguration {
     }
 
     return path.join(
-      this.commonRushConfigFolder,
+      this.getCommonRushConfigFolder(),
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
     );
   }

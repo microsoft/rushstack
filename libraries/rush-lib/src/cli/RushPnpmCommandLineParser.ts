@@ -102,7 +102,7 @@ export class RushPnpmCommandLineParser {
       );
     }
 
-    const workspaceFolder: string = rushConfiguration.commonTempFolder;
+    const workspaceFolder: string = rushConfiguration.getCommonTempFolder();
     const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
 
     if (!FileSystem.exists(workspaceFilePath)) {
@@ -292,7 +292,7 @@ export class RushPnpmCommandLineParser {
         }
         case 'patch-commit': {
           const pnpmOptionsJsonFilename: string = path.join(
-            this._rushConfiguration.commonRushConfigFolder,
+            this._rushConfiguration.getCommonRushConfigFolder(),
             RushConstants.pnpmConfigFilename
           );
           if (this._rushConfiguration.rushConfigurationJson.pnpmOptions) {
@@ -347,7 +347,7 @@ export class RushPnpmCommandLineParser {
 
   private _execute(): void {
     const rushConfiguration: RushConfiguration = this._rushConfiguration;
-    const workspaceFolder: string = rushConfiguration.commonTempFolder;
+    const workspaceFolder: string = rushConfiguration.getCommonTempFolder();
     const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
     pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
@@ -397,7 +397,9 @@ export class RushPnpmCommandLineParser {
     switch (commandName) {
       case 'patch-commit': {
         // Example: "C:\MyRepo\common\temp\package.json"
-        const commonPackageJsonFilename: string = `${this._rushConfiguration.commonTempFolder}/${FileConstants.PackageJson}`;
+        const commonPackageJsonFilename: string = `${this._rushConfiguration.getCommonTempFolder()}/${
+          FileConstants.PackageJson
+        }`;
         const commonPackageJson: JsonObject = JsonFile.load(commonPackageJsonFilename);
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
@@ -405,7 +407,9 @@ export class RushPnpmCommandLineParser {
           this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
-          const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
+          const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.getCommonTempFolder()}/${
+            RushConstants.pnpmPatchesFolderName
+          }`;
           const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {

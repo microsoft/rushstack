@@ -67,12 +67,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
-    const commonTempFolderToUse: string = subspaceName
-      ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
-      : this.rushConfiguration.commonTempFolder;
-
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold('Updating workspace files in ' + commonTempFolderToUse));
+    console.log(
+      '\n' +
+        colors.bold('Updating workspace files in ' + this.rushConfiguration.getCommonTempFolder(subspaceName))
+    );
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -133,7 +132,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
-      path.join(commonTempFolderToUse, 'pnpm-workspace.yaml')
+      path.join(this.rushConfiguration.getCommonTempFolder(subspaceName), 'pnpm-workspace.yaml')
     );
 
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
@@ -264,7 +263,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
-        this.rushConfiguration.commonTempFolder,
+        this.rushConfiguration.getCommonTempFolder(),
         'pnpm-workspace.yaml'
       );
 
@@ -306,7 +305,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const commonNodeModulesFolder: string = path.join(
-      this.rushConfiguration.commonTempFolder,
+      this.rushConfiguration.getCommonTempFolder(),
       RushConstants.nodeModulesFolderName
     );
 
@@ -338,7 +337,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         '\n' +
           colors.bold(
             `Running "${this.rushConfiguration.packageManager} install" in` +
-              ` ${this.rushConfiguration.commonTempFolder}`
+              ` ${this.rushConfiguration.getCommonTempFolder()}`
           ) +
           '\n'
       );
@@ -392,7 +391,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           {
             command: packageManagerFilename,
             args: installArgs,
-            workingDirectory: this.rushConfiguration.commonTempFolder,
+            workingDirectory: this.rushConfiguration.getCommonTempFolder(),
             environment: packageManagerEnv,
             suppressOutput: false
           },
@@ -447,7 +446,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
     // to determine if the install can be skipped
     const projectNodeModulesFolders: string[] = [
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName),
+      path.join(this.rushConfiguration.getCommonTempFolder(), RushConstants.nodeModulesFolderName),
       ...this.rushConfiguration.projects.map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       })
@@ -461,7 +460,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log('');
   }
 
-  protected async postInstallAsync(): Promise<void> {
+  protected async postInstallAsync(subspaceName?: string | undefined): Promise<void> {
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
     // Note that if there are no projects, or if we're in PNPM workspace mode and there are no
@@ -469,7 +468,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       this.rushConfiguration.packageManager,
       this.rushConfiguration.pnpmOptions,
-      this.rushConfiguration.tempShrinkwrapFilename
+      this.rushConfiguration.getTempShrinkwrapFilename(subspaceName)
     );
 
     if (tempShrinkwrapFile) {
@@ -523,7 +522,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         '\n' +
           colors.bold(
             `Running "${this.rushConfiguration.packageManager} rebuild --pending" in` +
-              ` ${this.rushConfiguration.commonTempFolder}`
+              ` ${this.rushConfiguration.getCommonTempFolder()}`
           ) +
           '\n'
       );
@@ -545,7 +544,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         Utilities.executeCommand({
           command: packageManagerFilename,
           args: rebuildArgs,
-          workingDirectory: this.rushConfiguration.commonTempFolder,
+          workingDirectory: this.rushConfiguration.getCommonTempFolder(),
           environment: packageManagerEnv,
           suppressOutput: false
         });

@@ -87,13 +87,9 @@ export class RushInstallManager extends BaseInstallManager {
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const commonTempFolderToUse: string = subspaceName
-      ? this.rushConfiguration.getSubspaceTempFolderPath(subspaceName)
-      : this.rushConfiguration.commonTempFolder;
-
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(
-      commonTempFolderToUse,
+      this.rushConfiguration.getCommonTempFolder(subspaceName),
       RushConstants.rushTempProjectsFolderName
     );
 
@@ -360,7 +356,7 @@ export class RushInstallManager extends BaseInstallManager {
     // Remove the workspace file if it exists
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const workspaceFilePath: string = path.join(
-        this.rushConfiguration.commonTempFolder,
+        this.rushConfiguration.getCommonTempFolder(),
         'pnpm-workspace.yaml'
       );
       try {
@@ -489,7 +485,7 @@ export class RushInstallManager extends BaseInstallManager {
     );
 
     const commonNodeModulesFolder: string = path.join(
-      this.rushConfiguration.commonTempFolder,
+      this.rushConfiguration.getCommonTempFolder(),
       RushConstants.nodeModulesFolderName
     );
 
@@ -514,7 +510,7 @@ export class RushInstallManager extends BaseInstallManager {
           // eslint-disable-next-line no-console
           console.log(
             `Running "${this.rushConfiguration.packageManager} prune"` +
-              ` in ${this.rushConfiguration.commonTempFolder}`
+              ` in ${this.rushConfiguration.getCommonTempFolder()}`
           );
           const args: string[] = ['prune'];
           this.pushConfigurationArgs(args, this.options);
@@ -523,7 +519,7 @@ export class RushInstallManager extends BaseInstallManager {
             {
               command: packageManagerFilename,
               args: args,
-              workingDirectory: this.rushConfiguration.commonTempFolder,
+              workingDirectory: this.rushConfiguration.getCommonTempFolder(),
               environment: packageManagerEnv
             },
             this.options.maxInstallAttempts
@@ -582,7 +578,7 @@ export class RushInstallManager extends BaseInstallManager {
       '\n' +
         colors.bold(
           `Running "${this.rushConfiguration.packageManager} install" in` +
-            ` ${this.rushConfiguration.commonTempFolder}`
+            ` ${this.rushConfiguration.getCommonTempFolder()}`
         ) +
         '\n'
     );
@@ -604,7 +600,7 @@ export class RushInstallManager extends BaseInstallManager {
       {
         command: packageManagerFilename,
         args: installArgs,
-        workingDirectory: this.rushConfiguration.commonTempFolder,
+        workingDirectory: this.rushConfiguration.getCommonTempFolder(),
         environment: packageManagerEnv,
         suppressOutput: false
       },
@@ -632,7 +628,7 @@ export class RushInstallManager extends BaseInstallManager {
       Utilities.executeCommand({
         command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
-        workingDirectory: this.rushConfiguration.commonTempFolder
+        workingDirectory: this.rushConfiguration.getCommonTempFolder()
       });
       // eslint-disable-next-line no-console
       console.log('"npm shrinkwrap" completed\n');
@@ -669,7 +665,7 @@ export class RushInstallManager extends BaseInstallManager {
    */
   private async _fixupNpm5RegressionAsync(): Promise<void> {
     const pathToDeleteWithoutStar: string = path.join(
-      this.rushConfiguration.commonTempFolder,
+      this.rushConfiguration.getCommonTempFolder(),
       'node_modules',
       RushConstants.rushTempNpmScope
     );

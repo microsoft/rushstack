@@ -37,12 +37,18 @@ export class SubspaceConfiguration {
   public readonly subspaceJsonFilePath: string;
 
   /**
+   * Determines if the subspace feature is enabled
+   */
+  public readonly enabled: boolean;
+
+  /**
    * A set of the available subspaces
    */
   public readonly subspaceNames: Set<string>;
 
   private constructor(configuration: Readonly<ISubspaceConfigurationJson>, subspaceJsonFilePath: string) {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
+    this.enabled = configuration.enabled;
     this.subspaceNames = new Set();
     for (const subspaceName of configuration.subspaceNames) {
       if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
@@ -53,10 +59,6 @@ export class SubspaceConfiguration {
         );
       }
     }
-  }
-
-  public get isEnabled(): boolean {
-    return this._configuration.enabled;
   }
 
   /**
@@ -85,8 +87,10 @@ export class SubspaceConfiguration {
   public static tryLoadFromDefaultLocation(
     rushConfiguration: RushConfiguration
   ): SubspaceConfiguration | undefined {
-    const commonRushConfigFolder: string = rushConfiguration.commonRushConfigFolder;
-    const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
-    return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
+    const commonRushConfigFolder: string = rushConfiguration.getCommonRushConfigFolder();
+    if (commonRushConfigFolder) {
+      const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
+      return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
+    }
   }
 }

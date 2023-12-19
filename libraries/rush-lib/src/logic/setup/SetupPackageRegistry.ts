@@ -74,7 +74,7 @@ export class SetupPackageRegistry {
     );
 
     this._artifactoryConfiguration = new ArtifactoryConfiguration(
-      path.join(this.rushConfiguration.commonRushConfigFolder, 'artifactory.json')
+      path.join(this.rushConfiguration.getCommonRushConfigFolder(), 'artifactory.json')
     );
 
     this._messages = {
@@ -112,8 +112,8 @@ export class SetupPackageRegistry {
 
     if (!this._options.syncNpmrcAlreadyCalled) {
       Utilities.syncNpmrc(
-        this.rushConfiguration.commonRushConfigFolder,
-        this.rushConfiguration.commonTempFolder
+        this.rushConfiguration.getCommonRushConfigFolder(),
+        this.rushConfiguration.getCommonTempFolder()
       );
     }
 
@@ -131,7 +131,7 @@ export class SetupPackageRegistry {
     this._terminal.writeLine('Testing access to private NPM registry: ' + packageRegistry.registryUrl);
 
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync('npm', npmArgs, {
-      currentWorkingDirectory: this.rushConfiguration.commonTempFolder,
+      currentWorkingDirectory: this.rushConfiguration.getCommonTempFolder(),
       stdio: ['ignore', 'pipe', 'pipe'],
       // Wait at most 10 seconds for "npm view" to succeed
       timeoutMs: 10 * 1000

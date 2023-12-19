@@ -23,7 +23,7 @@ export class TempProjectHelper {
    * Deletes the existing tarball and creates a tarball for the given rush project
    */
   public createTempProjectTarball(rushProject: RushConfigurationProject): void {
-    FileSystem.ensureFolder(path.resolve(this._rushConfiguration.commonTempFolder, 'projects'));
+    FileSystem.ensureFolder(path.resolve(this._rushConfiguration.getCommonTempFolder(), 'projects'));
     const tarballFile: string = this.getTarballFilePath(rushProject);
     const tempProjectFolder: string = this.getTempProjectFolder(rushProject);
 
@@ -61,7 +61,7 @@ export class TempProjectHelper {
    */
   public getTarballFilePath(project: RushConfigurationProject): string {
     return path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._rushConfiguration.getCommonTempFolder(),
       RushConstants.rushTempProjectsFolderName,
       `${project.unscopedTempProjectName}.tgz`
     );
@@ -70,7 +70,7 @@ export class TempProjectHelper {
   public getTempProjectFolder(rushProject: RushConfigurationProject): string {
     const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
     return path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._rushConfiguration.getCommonTempFolder(),
       RushConstants.rushTempProjectsFolderName,
       unscopedTempProjectName
     );

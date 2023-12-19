@@ -215,7 +215,7 @@ export class PublishAction extends BaseRushAction {
     await PolicyValidator.validatePolicyAsync(this.rushConfiguration, { bypassPolicy: false });
 
     // Example: "common\temp\publish-home"
-    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.getCommonTempFolder(), 'publish-home');
 
     // Example: "common\temp\publish-home\.npmrc"
     this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
@@ -524,7 +524,7 @@ export class PublishAction extends BaseRushAction {
       const tarballPath: string = path.join(project.publishFolder, tarballName);
       const destFolder: string = this._releaseFolder.value
         ? this._releaseFolder.value
-        : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
+        : path.join(this.rushConfiguration.getCommonTempFolder(), 'artifacts', 'packages');
 
       FileSystem.move({
         sourcePath: tarballPath,
@@ -576,7 +576,11 @@ export class PublishAction extends BaseRushAction {
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
     // Copy down the committed "common\config\rush\.npmrc-publish" file, if there is one
-    Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._targetNpmrcPublishFolder, true);
+    Utilities.syncNpmrc(
+      this.rushConfiguration.getCommonRushConfigFolder(),
+      this._targetNpmrcPublishFolder,
+      true
+    );
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {

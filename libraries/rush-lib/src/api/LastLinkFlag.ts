@@ -46,6 +46,6 @@ export class LastLinkFlagFactory {
    * @internal
    */
   public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastLinkFlag {
-    return new LastLinkFlag(rushConfiguration.commonTempFolder, {});
+    return new LastLinkFlag(rushConfiguration.getCommonTempFolder(), {});
   }
 }

@@ -150,7 +150,7 @@ export class DeployAction extends BaseRushAction {
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
       if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-        pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
+        pnpmInstallFolder = this.rushConfiguration.getCommonTempFolder();
       }
     }
 

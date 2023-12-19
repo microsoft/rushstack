@@ -1077,9 +1077,7 @@ export class RushConfiguration {
     get committedShrinkwrapFilename(): string;
     get commonAutoinstallersFolder(): string;
     readonly commonFolder: string;
-    readonly commonRushConfigFolder: string;
     readonly commonScriptsFolder: string;
-    readonly commonTempFolder: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
@@ -1097,6 +1095,8 @@ export class RushConfiguration {
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string;
+    getCommonRushConfigFolder(subspaceName?: string | undefined): string;
+    getCommonTempFolder(subspaceName?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
@@ -1106,13 +1106,10 @@ export class RushConfiguration {
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
     getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string;
-    getSubspaceConfigFolderPath(subspaceName: string): string;
     getSubspaceProjects(subspaceName: string): RushConfigurationProject[];
     // @beta
-    getSubspaceTempFolderPath(subspaceName: string): string;
-    // @beta
-    getTempSubspaceShrinkwrapFileName(subspaceName: string): string;
-    getTempSubspaceShrinkwrapPreinstallFilename(subspaceName: string): string;
+    getTempShrinkwrapFilename(subspaceName?: string | undefined): string;
+    getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;
@@ -1170,8 +1167,6 @@ export class RushConfiguration {
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
-    readonly tempShrinkwrapFilename: string;
-    readonly tempShrinkwrapPreinstallFilename: string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // (undocumented)
