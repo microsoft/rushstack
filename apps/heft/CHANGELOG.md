@@ -1,6 +1,39 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sun, 01 Oct 2023 02:56:29 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Dec 2023 03:44:13 GMT and should not be manually modified.
+
+## 0.63.4
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.63.3
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 0.63.2
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.63.1
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.63.0
+Mon, 30 Oct 2023 23:36:37 GMT
+
+### Minor changes
+
+- [BREAKING CHANGE] Remove "heft run" short-parameters for "--to" ("-t"), "--to-except" ("-T"), and "--only" ("-o").
+
+### Patches
+
+- Fix an issue with parsing of the "--debug" and "--unmanaged" flags for Heft
 
 ## 0.62.3
 Sun, 01 Oct 2023 02:56:29 GMT

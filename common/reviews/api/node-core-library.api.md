@@ -180,9 +180,16 @@ export class EnvironmentMap {
 
 // @public
 export class Executable {
+    static getProcessInfoById(): Map<number, IProcessInfo>;
+    static getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>>;
+    static getProcessInfoByName(): Map<string, IProcessInfo[]>;
+    static getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>>;
     static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithStringOptions): Promise<IWaitForExitResult<string>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithBufferOptions): Promise<IWaitForExitResult<Buffer>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options?: IWaitForExitOptions): Promise<IWaitForExitResult<never>>;
 }
 
 // @public
@@ -651,10 +658,24 @@ export interface IPrefixProxyTerminalProviderOptionsBase {
 }
 
 // @public
+export interface IProcessInfo {
+    childProcessInfos: IProcessInfo[];
+    parentProcessInfo: IProcessInfo | undefined;
+    processId: number;
+    processName: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
+}
+
+// @public
+export interface IReadLinesFromIterableOptions {
+    encoding?: Encoding;
+    ignoreEmptyLines?: boolean;
 }
 
 // @beta (undocumented)
@@ -716,6 +737,29 @@ export interface ITerminalWritableOptions {
     severity: TerminalProviderSeverity;
     terminal: ITerminal;
     writableOptions?: WritableOptions;
+}
+
+// @public
+export interface IWaitForExitOptions {
+    encoding?: BufferEncoding | 'buffer';
+    throwOnNonZeroExitCode?: boolean;
+}
+
+// @public
+export interface IWaitForExitResult<T extends Buffer | string | never = never> {
+    exitCode: number | null;
+    stderr: T;
+    stdout: T;
+}
+
+// @public
+export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
+    encoding: 'buffer';
+}
+
+// @public
+export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
+    encoding: BufferEncoding;
 }
 
 // @public
@@ -990,6 +1034,8 @@ export class Text {
     static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
+    static readLinesFromIterable(iterable: Iterable<string | Buffer | null>, options?: IReadLinesFromIterableOptions): Generator<string>;
+    static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
     static truncateWithEllipsis(s: string, maximumLength: number): string;
 }

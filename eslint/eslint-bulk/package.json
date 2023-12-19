@@ -1,0 +1,36 @@
+{
+  "name": "@rushstack/eslint-bulk",
+  "version": "0.1.2",
+  "description": "A set of helper CLIs to use with the rushstack ESLint toolchain",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "eslint/eslint-bulk"
+  },
+  "homepage": "https://rushstack.io",
+  "bin": {
+    "eslint-bulk": "./bin/eslint-bulk"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "start": "node ./lib/start.js"
+  },
+  "keywords": [
+    "eslintrc",
+    "eslint",
+    "bulk",
+    "legacy",
+    "retroactive",
+    "disable",
+    "ignore",
+    "suppression"
+  ],
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@types/node": "18.17.15"
+  }
+}

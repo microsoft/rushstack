@@ -2,6 +2,104 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.10.6",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.6",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.3` to `^0.63.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.5",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.5",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.2` to `^0.63.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.4",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.4",
+      "date": "Fri, 10 Nov 2023 18:02:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.1` to `^0.63.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.3",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.3",
+      "date": "Wed, 01 Nov 2023 23:11:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix line endings in published package."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.0` to `^0.63.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.2",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.2",
+      "date": "Mon, 30 Oct 2023 23:36:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.62.3` to `^0.63.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.1",
+      "tag": "@rushstack/heft-jest-plugin_v0.10.1",
+      "date": "Thu, 26 Oct 2023 00:27:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add an option (`enableNodeEnvManagement`) to ensure that the NODE_ENV environment variable is set to `\"test\"` during test execution."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.0",
       "tag": "@rushstack/heft-jest-plugin_v0.10.0",
       "date": "Mon, 23 Oct 2023 15:18:38 GMT",

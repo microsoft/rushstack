@@ -1,6 +1,56 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 20 Oct 2023 01:54:21 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Dec 2023 00:20:51 GMT and should not be manually modified.
+
+## 5.112.2
+Tue, 12 Dec 2023 00:20:51 GMT
+
+### Updates
+
+- Bring back the erroneously removed `preminor` bump type for lockstepped packages.
+- Fix an issue where the contents of a folder set in the `"folderToCopy"` field of the `deploy.json` config file would be copied into a subfolder instead of into the root of the deploy folder.
+- (EXPERIMENTAL) Implemented config file loader for the not-yet-released "subspaces" feature (GitHub #4230)
+
+## 5.112.1
+Wed, 29 Nov 2023 08:59:31 GMT
+
+### Updates
+
+- Allow the device code credential options to be extended Azure authentication subclasses, used in advanced authentication scenarios.
+
+## 5.112.0
+Mon, 27 Nov 2023 23:36:11 GMT
+
+### Updates
+
+- Update the `@azure/identity` and `@azure/storage-blob` dependencies of `@rushstack/rush-azure-storage-build-cache-plugin` to eliminate an `EBADENGINE` error when installing Rush on Node 20.
+
+## 5.111.0
+Sat, 18 Nov 2023 00:06:20 GMT
+
+### Updates
+
+- Add experiment `buildSkipWithAllowWarningsInSuccessfulBuild` to allow skipping builds that succeeded with warnings in the previous run.
+
+## 5.110.2
+Thu, 16 Nov 2023 01:36:10 GMT
+
+_Version update only_
+
+## 5.110.1
+Wed, 01 Nov 2023 23:29:47 GMT
+
+### Updates
+
+- Fix line endings in published package.
+
+## 5.110.0
+Mon, 30 Oct 2023 23:37:07 GMT
+
+### Updates
+
+- Include the filename of the shrinkwrap file in logging messages for all package managers, not just Yarn.
+- performance improvements by running asynchronous code concurrently using Promise.all
 
 ## 5.109.2
 Fri, 20 Oct 2023 01:54:21 GMT

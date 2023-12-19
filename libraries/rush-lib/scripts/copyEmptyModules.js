@@ -1,6 +1,6 @@
 'use strict';
 
-const { FileSystem } = require('@rushstack/node-core-library');
+const { FileSystem, Async, AsyncQueue } = require('@rushstack/node-core-library');
 
 const JS_FILE_EXTENSION = '.js';
 const DTS_FILE_EXTENSION = '.d.ts';
@@ -46,39 +46,45 @@ module.exports = {
     const jsInFolderPath = `${buildFolderPath}/lib-esnext`;
     const dtsInFolderPath = `${buildFolderPath}/lib-commonjs`;
     const outFolderPath = `${buildFolderPath}/lib`;
-    async function searchAsync(relativeFolderPath) {
-      const folderItems = await FileSystem.readFolderItemsAsync(
-        relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath
-      );
-      for (const folderItem of folderItems) {
-        const itemName = folderItem.name;
-        const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
+    const emptyModuleBuffer = Buffer.from('module.exports = {};', 'utf8');
+    const folderPathQueue = new AsyncQueue([undefined]);
 
-        if (folderItem.isDirectory()) {
-          await searchAsync(relativeItemPath);
-        } else if (folderItem.isFile() && itemName.endsWith(JS_FILE_EXTENSION)) {
-          const jsInPath = `${jsInFolderPath}/${relativeItemPath}`;
-          const jsFileText = await FileSystem.readFileAsync(jsInPath);
-          const strippedJsFileText = stripCommentsFromJsFile(jsFileText);
-          if (strippedJsFileText === 'export {};') {
-            const outJsPath = `${outFolderPath}/${relativeItemPath}`;
-            terminal.writeVerboseLine(`Writing stub to ${outJsPath}`);
-            await FileSystem.writeFileAsync(outJsPath, 'module.exports = {};', {
-              ensureFolderExists: true
-            });
+    await Async.forEachAsync(
+      folderPathQueue,
+      async ([relativeFolderPath, callback]) => {
+        const folderPath = relativeFolderPath ? `${jsInFolderPath}/${relativeFolderPath}` : jsInFolderPath;
+        const folderItems = await FileSystem.readFolderItemsAsync(folderPath);
+        for (const folderItem of folderItems) {
+          const itemName = folderItem.name;
+          const relativeItemPath = relativeFolderPath ? `${relativeFolderPath}/${itemName}` : itemName;
 
-            const relativeDtsPath = relativeItemPath.slice(0, -JS_FILE_EXTENSION.length) + DTS_FILE_EXTENSION;
-            const inDtsPath = `${dtsInFolderPath}/${relativeDtsPath}`;
-            const outDtsPath = `${outFolderPath}/${relativeDtsPath}`;
-            terminal.writeVerboseLine(`Copying ${inDtsPath} to ${outDtsPath}`);
-            // We know this is a file, don't need the redundant checks in FileSystem.copyFileAsync
-            const buffer = await FileSystem.readFileToBufferAsync(inDtsPath);
-            await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
+          if (folderItem.isDirectory()) {
+            folderPathQueue.push(relativeItemPath);
+          } else if (folderItem.isFile() && itemName.endsWith(JS_FILE_EXTENSION)) {
+            const jsInPath = `${jsInFolderPath}/${relativeItemPath}`;
+            const jsFileText = await FileSystem.readFileAsync(jsInPath);
+            const strippedJsFileText = stripCommentsFromJsFile(jsFileText);
+            if (strippedJsFileText === 'export {};') {
+              const outJsPath = `${outFolderPath}/${relativeItemPath}`;
+              terminal.writeVerboseLine(`Writing stub to ${outJsPath}`);
+              await FileSystem.writeFileAsync(outJsPath, emptyModuleBuffer, {
+                ensureFolderExists: true
+              });
+
+              const relativeDtsPath =
+                relativeItemPath.slice(0, -JS_FILE_EXTENSION.length) + DTS_FILE_EXTENSION;
+              const inDtsPath = `${dtsInFolderPath}/${relativeDtsPath}`;
+              const outDtsPath = `${outFolderPath}/${relativeDtsPath}`;
+              terminal.writeVerboseLine(`Copying ${inDtsPath} to ${outDtsPath}`);
+              // We know this is a file, don't need the redundant checks in FileSystem.copyFileAsync
+              const buffer = await FileSystem.readFileToBufferAsync(inDtsPath);
+              await FileSystem.writeFileAsync(outDtsPath, buffer, { ensureFolderExists: true });
+            }
           }
         }
-      }
-    }
-
-    await searchAsync(undefined);
+        callback();
+      },
+      { concurrency: 10 }
+    );
   }
 };

@@ -180,14 +180,6 @@ export abstract class CommandLineParameter {
   public abstract _setValue(data: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
-   * Called internally by CommandLineParameterProvider._registerDefinedParameters()
-   * @internal
-   */
-  public _disableShortName(): void {
-    this._shortNameValue = undefined;
-  }
-
-  /**
    * Returns additional text used by the help formatter.
    * @internal
    */

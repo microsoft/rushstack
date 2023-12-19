@@ -21,6 +21,9 @@ extends:
       - stage:
         jobs:
           - job:
+            pool:
+              name: publish-rushstack
+              os: linux
             templateContext:
               outputs:
                 - output: pipelineArtifact

@@ -1,6 +1,47 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Sun, 01 Oct 2023 02:56:30 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Dec 2023 00:20:33 GMT and should not be manually modified.
+
+## 0.6.17
+Tue, 12 Dec 2023 00:20:33 GMT
+
+### Patches
+
+- Fix an issue with the `folderToCopy` option, where the folder contents would be copied into a subfolder instead of into the target folder root.
+
+## 0.6.16
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.6.15
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 0.6.14
+Thu, 16 Nov 2023 01:09:56 GMT
+
+### Patches
+
+- Links that target a path outside of the source directory can now be ignored using "patternsToInclude" and "patternsToExclude" options
+
+## 0.6.13
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.6.12
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.6.11
+Mon, 30 Oct 2023 23:36:37 GMT
+
+_Version update only_
 
 ## 0.6.10
 Sun, 01 Oct 2023 02:56:30 GMT

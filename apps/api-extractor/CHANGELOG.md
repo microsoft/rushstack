@@ -1,6 +1,37 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sun, 01 Oct 2023 02:56:29 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Dec 2023 03:44:13 GMT and should not be manually modified.
+
+## 7.38.5
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 7.38.4
+Tue, 05 Dec 2023 01:10:16 GMT
+
+### Patches
+
+- Don't export trimmed namespace members during rollup (#2791)
+
+## 7.38.3
+Fri, 10 Nov 2023 18:02:04 GMT
+
+### Patches
+
+- Fix an issue where "ae-undocumented" was incorrectly reported for private members
+
+## 7.38.2
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 7.38.1
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
 
 ## 7.38.0
 Sun, 01 Oct 2023 02:56:29 GMT

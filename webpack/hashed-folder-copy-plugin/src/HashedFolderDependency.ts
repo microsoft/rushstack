@@ -238,7 +238,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
             return renderError(errorMessage);
           }
 
-          const globResultFullPath: string = path.posix.resolve(resolvedGlobsBase, globResult);
+          const globResultFullPath: string = path.resolve(resolvedGlobsBase, globResult);
 
           let assetContents: string | Buffer | undefined;
           try {

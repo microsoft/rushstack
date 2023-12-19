@@ -1,6 +1,20 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Tue, 26 Sep 2023 09:30:33 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Nov 2023 23:11:35 GMT and should not be manually modified.
+
+## 4.17.1
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 4.17.0
+Mon, 30 Oct 2023 23:36:37 GMT
+
+### Minor changes
+
+- Consider parent tool and action parameters when determining ambiguous abbreviations. For example, if a CLI tool `mytool` has a parameter `--myparam` and an action `myaction`, then `myaction` would not accept a parameter named `--myparam` (i.e. - `mytool --myparam myaction` is valid, `mytool myaction --myparam` is not). Additionally, any parameter that can be abbreviated to `--myparam` must be uniquely provided (i.e. - `--myparam-2` can only be abbreviated to `--myparam-`, since any shorter abbreviation would be ambiguous with the original `--myparam` on the tool).
 
 ## 4.16.1
 Tue, 26 Sep 2023 09:30:33 GMT

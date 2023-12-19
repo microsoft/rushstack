@@ -5,6 +5,7 @@ import type * as argparse from 'argparse';
 
 import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
 import type { ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -86,6 +87,21 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
       help: this.summary,
       description: this.documentation
     });
+
+    // Monkey-patch the error handling for the action parser
+    this._argumentParser.exit = (status: number, message: string) => {
+      throw new CommandLineParserExitError(status, message);
+    };
+    const originalArgumentParserErrorFn: (err: Error | string) => void = this._argumentParser.error.bind(
+      this._argumentParser
+    );
+    this._argumentParser.error = (err: Error | string) => {
+      // Ensure the ParserExitError bubbles up to the top without any special processing
+      if (err instanceof CommandLineParserExitError) {
+        throw err;
+      }
+      originalArgumentParserErrorFn(err);
+    };
 
     this.onDefineParameters?.();
   }

@@ -27,6 +27,7 @@ export interface IRushConfigurationProjectJson {
   skipRushCheck?: boolean;
   publishFolder?: string;
   tags?: string[];
+  subspaceName?: string;
 }
 
 /**
@@ -184,6 +185,19 @@ export class RushConfigurationProject {
    */
   public readonly tags: ReadonlySet<string>;
 
+  /**
+   * Returns the name of the subspace that this project belongs to, as assigned by the `"subspaceName"`
+   * property in `rush.json`.
+   *
+   * @remarks
+   * If the Rush subspaces feature is disabled, the value is still return.
+   * When the Rush subspaces feature is enabled, an undefined `subspaceName` specifies that
+   * the project belongs to the default subspace (whose name is `"default"`).
+   *
+   * @beta
+   */
+  public readonly subspaceName: string | undefined;
+
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
@@ -324,6 +338,8 @@ export class RushConfigurationProject {
     } else {
       this.tags = new Set(projectJson.tags);
     }
+
+    this.subspaceName = projectJson.subspaceName;
   }
 
   /**

@@ -259,7 +259,7 @@ export class ApiReportGenerator {
   ): void {
     // Should we process this declaration at all?
     // eslint-disable-next-line no-bitwise
-    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
+    if (!ApiReportGenerator._shouldIncludeInReport(astDeclaration)) {
       span.modification.skipAll();
       return;
     }
@@ -402,29 +402,39 @@ export class ApiReportGenerator {
             astDeclaration
           );
 
-          if (sortChildren) {
-            span.modification.sortChildren = true;
-            child.modification.sortKey = Collector.getSortKeyIgnoringUnderscore(
-              childAstDeclaration.astSymbol.localName
-            );
-          }
+          if (ApiReportGenerator._shouldIncludeInReport(childAstDeclaration)) {
+            if (sortChildren) {
+              span.modification.sortChildren = true;
+              child.modification.sortKey = Collector.getSortKeyIgnoringUnderscore(
+                childAstDeclaration.astSymbol.localName
+              );
+            }
 
-          if (!insideTypeLiteral) {
-            const messagesToReport: ExtractorMessage[] =
-              collector.messageRouter.fetchAssociatedMessagesForReviewFile(childAstDeclaration);
-            const aedocSynopsis: string = ApiReportGenerator._getAedocSynopsis(
-              collector,
-              childAstDeclaration,
-              messagesToReport
-            );
+            if (!insideTypeLiteral) {
+              const messagesToReport: ExtractorMessage[] =
+                collector.messageRouter.fetchAssociatedMessagesForReviewFile(childAstDeclaration);
 
-            child.modification.prefix = aedocSynopsis + child.modification.prefix;
+              // NOTE: This generates ae-undocumented messages as a side effect
+              const aedocSynopsis: string = ApiReportGenerator._getAedocSynopsis(
+                collector,
+                childAstDeclaration,
+                messagesToReport
+              );
+
+              child.modification.prefix = aedocSynopsis + child.modification.prefix;
+            }
           }
         }
 
         ApiReportGenerator._modifySpan(collector, child, entity, childAstDeclaration, insideTypeLiteral);
       }
     }
+  }
+
+  private static _shouldIncludeInReport(astDeclaration: AstDeclaration): boolean {
+    // Private declarations are not included in the API report
+    // eslint-disable-next-line no-bitwise
+    return (astDeclaration.modifierFlags & ts.ModifierFlags.Private) === 0;
   }
 
   /**

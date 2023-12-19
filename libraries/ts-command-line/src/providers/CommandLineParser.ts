@@ -6,7 +6,11 @@ import colors from 'colors';
 
 import type { CommandLineAction } from './CommandLineAction';
 import type { AliasCommandLineAction } from './AliasCommandLineAction';
-import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
+import {
+  CommandLineParameterProvider,
+  type IRegisterDefinedParametersState,
+  type ICommandLineParserData
+} from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
 
@@ -202,7 +206,10 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       this._validateDefinitions();
 
       // Register the parameters before we print help or parse the CLI
-      this._registerDefinedParameters();
+      const initialState: IRegisterDefinedParametersState = {
+        parentParameterNames: new Set()
+      };
+      this._registerDefinedParameters(initialState);
 
       if (!args) {
         // 0=node.exe, 1=script name
@@ -243,7 +250,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       this.selectedAction?._processParsedData(this._options, data);
-      return this.onExecute();
+      await this.onExecute();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
@@ -262,10 +269,21 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
-    super._registerDefinedParameters();
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    super._registerDefinedParameters(state);
+
+    const { parentParameterNames } = state;
+    const updatedParentParameterNames: Set<string> = new Set([
+      ...parentParameterNames,
+      ...this._registeredParameterParserKeysByName.keys()
+    ]);
+
+    const parentState: IRegisterDefinedParametersState = {
+      ...state,
+      parentParameterNames: updatedParentParameterNames
+    };
     for (const action of this._actions) {
-      action._registerDefinedParameters();
+      action._registerDefinedParameters(parentState);
     }
   }
 

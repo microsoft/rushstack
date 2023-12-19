@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.6.1 <21.0.0",
+  "nodeSupportedVersionRange": ">=16.13.0 <17.0.0 || >=18.15.0 <19.0.0 || >=20.9.0 <21.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -63,7 +63,7 @@
    * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
    * to disable Rush's warning.
    */
-  "suppressNodeLtsWarning": true, // TODO: Remove when Node 20 goes LTS
+  "suppressNodeLtsWarning": false,
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -483,61 +483,85 @@
       "packageName": "api-documenter-test",
       "projectFolder": "build-tests/api-documenter-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-documenter-scenarios",
       "projectFolder": "build-tests/api-documenter-scenarios",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
+      "packageName": "api-extractor-d-cts-test",
+      "projectFolder": "build-tests/api-extractor-d-cts-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
+    },
+    {
+      "packageName": "api-extractor-d-mts-test",
+      "projectFolder": "build-tests/api-extractor-d-mts-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib1-test",
       "projectFolder": "build-tests/api-extractor-lib1-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib2-test",
       "projectFolder": "build-tests/api-extractor-lib2-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-lib3-test",
       "projectFolder": "build-tests/api-extractor-lib3-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-scenarios",
       "projectFolder": "build-tests/api-extractor-scenarios",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-01",
       "projectFolder": "build-tests/api-extractor-test-01",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-02",
       "projectFolder": "build-tests/api-extractor-test-02",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-03",
       "projectFolder": "build-tests/api-extractor-test-03",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "api-extractor-test-04",
       "projectFolder": "build-tests/api-extractor-test-04",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "tags": ["api-extractor-tests"]
     },
     {
       "packageName": "eslint-7-7-test",
@@ -560,6 +584,12 @@
     {
       "packageName": "eslint-8-test",
       "projectFolder": "build-tests/eslint-8-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-bulk-suppressions-test",
+      "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -651,6 +681,12 @@
     },
 
     // "eslint" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/eslint-bulk",
+      "projectFolder": "eslint/eslint-bulk",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     {
       "packageName": "@rushstack/eslint-config",
       "projectFolder": "eslint/eslint-config",

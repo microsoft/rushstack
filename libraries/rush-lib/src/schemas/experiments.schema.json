@@ -34,6 +34,10 @@
       "description": "If true, build caching will respect the allowWarningsInSuccessfulBuild flag and cache builds with warnings. This will not replay warnings from the cached build.",
       "type": "boolean"
     },
+    "buildSkipWithAllowWarningsInSuccessfulBuild": {
+      "description": "If true, build skipping will respect the allowWarningsInSuccessfulBuild flag and skip builds with warnings. This will not replay warnings from the skipped build.",
+      "type": "boolean"
+    },
     "phasedCommands": {
       "description": "If true, the phased commands feature is enabled. To use this feature, create a \"phased\" command in common/config/rush/command-line.json.",
       "type": "boolean"

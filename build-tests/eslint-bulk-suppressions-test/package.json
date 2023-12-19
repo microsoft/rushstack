@@ -1,0 +1,16 @@
+{
+  "name": "eslint-bulk-suppressions-test",
+  "description": "Sample code to test eslint bulk suppressions",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@typescript-eslint/parser": "~5.59.2",
+    "eslint": "~8.7.0",
+    "typescript": "~5.0.4"
+  }
+}

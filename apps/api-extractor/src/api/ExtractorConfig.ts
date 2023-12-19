@@ -210,6 +210,7 @@ export class ExtractorConfig {
     path.join(__dirname, '../schemas/api-extractor-defaults.json')
   );
 
+  /** Match all three flavors for type declaration files (.d.ts, .d.mts, .d.cts) */
   private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.(c|m)?ts$/i;
 
   /** {@inheritDoc IConfigFile.projectFolder} */

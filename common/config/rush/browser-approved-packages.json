@@ -47,10 +47,6 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
-      "name": "@vscode/test-electron",
-      "allowedCategories": [ "vscode-extensions" ]
-    },
-    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },
@@ -97,10 +93,6 @@
     {
       "name": "tslib",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
-    },
-    {
-      "name": "update-notifier",
-      "allowedCategories": [ "libraries" ]
     }
   ]
 }

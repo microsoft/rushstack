@@ -363,7 +363,7 @@ export class PackageExtractor {
       mainProjectName,
       sourceRootFolder,
       targetRootFolder,
-      folderToCopy: addditionalFolderToCopy,
+      folderToCopy: additionalFolderToCopy,
       linkCreation
     } = options;
     const { projectConfigurationsByName, foldersToCopy, symlinkAnalyzer } = state;
@@ -409,19 +409,14 @@ export class PackageExtractor {
       }
     );
 
-    if (addditionalFolderToCopy) {
-      // Copy the additional folder directly into the root of the target folder by postfixing the
-      // folder name to the target folder and setting the sourceRootFolder to the root of the
-      // folderToCopy
-      const additionalFolderPath: string = path.resolve(sourceRootFolder, addditionalFolderToCopy);
-      const targetFolderPath: string = path.join(
-        options.targetRootFolder,
-        path.basename(additionalFolderPath)
-      );
+    if (additionalFolderToCopy) {
+      // Copy the additional folder directly into the root of the target folder by setting the sourceRootFolder
+      // to the root of the folderToCopy
+      const additionalFolderPath: string = path.resolve(sourceRootFolder, additionalFolderToCopy);
       const additionalFolderExtractorOptions: IExtractorOptions = {
         ...options,
         sourceRootFolder: additionalFolderPath,
-        targetRootFolder: targetFolderPath
+        targetRootFolder: options.targetRootFolder
       };
       await this._extractFolderAsync(additionalFolderPath, additionalFolderExtractorOptions, state);
     }
@@ -538,7 +533,7 @@ export class PackageExtractor {
               baseFolderPath: packageJsonRealFolderPath,
               getRealPathAsync: async (filePath: string) => {
                 try {
-                  return (await state.symlinkAnalyzer.analyzePathAsync(filePath)).nodePath;
+                  return (await state.symlinkAnalyzer.analyzePathAsync({ inputPath: filePath })).nodePath;
                 } catch (error: unknown) {
                   if (FileSystem.isFileDoesNotExistError(error as Error)) {
                     return filePath;
@@ -577,7 +572,7 @@ export class PackageExtractor {
               baseFolderPath: pnpmDotFolderPath,
               getRealPathAsync: async (filePath: string) => {
                 try {
-                  return (await state.symlinkAnalyzer.analyzePathAsync(filePath)).nodePath;
+                  return (await state.symlinkAnalyzer.analyzePathAsync({ inputPath: filePath })).nodePath;
                 } catch (error: unknown) {
                   if (FileSystem.isFileDoesNotExistError(error as Error)) {
                     return filePath;
@@ -791,7 +786,9 @@ export class PackageExtractor {
 
           const copyDestinationPath: string = path.join(targetFolderPath, npmPackFile);
 
-          const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(copySourcePath);
+          const copySourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync({
+            inputPath: copySourcePath
+          });
           if (copySourcePathNode.kind !== 'link') {
             if (!options.createArchiveOnly) {
               await FileSystem.ensureFolderAsync(path.dirname(copyDestinationPath));
@@ -838,8 +835,24 @@ export class PackageExtractor {
             return;
           }
 
-          const sourcePathNode: PathNode = await state.symlinkAnalyzer.analyzePathAsync(sourcePath);
-          if (sourcePathNode.kind === 'file') {
+          const sourcePathNode: PathNode | undefined = await state.symlinkAnalyzer.analyzePathAsync({
+            inputPath: sourcePath,
+            // Treat all links to external paths as if they are files for this scenario. In the future, we may
+            // want to explore the target of the external link to see if all files within the target are
+            // excluded, and throw if they are not.
+            shouldIgnoreExternalLink: (linkSourcePath: string) => {
+              // Ignore the provided linkSourcePath since it may not be the first link in the chain. Instead,
+              // we will consider only the relativeSourcePath, since that would be our entrypoint into the
+              // link chain.
+              return isFileExcluded(relativeSourcePath);
+            }
+          });
+
+          if (sourcePathNode === undefined) {
+            // The target was a symlink that is excluded. We don't need to do anything.
+            callback();
+            return;
+          } else if (sourcePathNode.kind === 'file') {
             // Only ignore files and not folders to ensure that we traverse the contents of all folders. This is
             // done so that we can match against subfolder patterns, ex. "src/subfolder/**/*"
             if (relativeSourcePath !== '' && isFileExcluded(relativeSourcePath)) {

@@ -507,6 +507,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: init 1`] = `
 "usage: rush init [-h] [--overwrite-existing] [--rush-example-repo]
+                 [--include-experiments]
+                 
 
 When invoked in an empty folder, this command provisions a standard set of 
 config file templates to start managing projects using Rush.
@@ -523,6 +525,10 @@ Optional arguments:
                         monorepo that illustrates many Rush features. This 
                         option is primarily intended for maintaining that 
                         example.
+  --include-experiments
+                        Include features that may not be complete features, 
+                        useful for demoing specific future features or 
+                        current work in progress features.
 "
 `;
 
@@ -1312,9 +1318,9 @@ Optional arguments:
   --override-bump BUMPTYPE
                         Overrides the bump type in the version-policy.json 
                         for the specified version policy. Valid BUMPTYPE 
-                        values include: prerelease, patch, minor, major. This 
-                        setting only works for lock-step version policy in 
-                        bump action.
+                        values include: prerelease, patch, preminor, minor, 
+                        major. This setting only works for lock-step version 
+                        policy in bump action.
   --override-prerelease-id ID
                         Overrides the prerelease identifier in the version 
                         value of version-policy.json for the specified 

@@ -1,0 +1,30 @@
+/**
+ * This is the main configuration file for Rush.
+ * For full documentation, please see https://rushjs.io
+ */
+ {
+  /**
+   * Temporarily use the default schema until the subspaces schema is uploaded
+   */
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/subspaces.schema.json",
+
+  /**
+   * This specifies whether or not to use the "subspaces" feature in rush. This allows grouping of
+   * projects into discrete workspaces known as "subspaces".
+   */
+  "enabled": false,
+
+  /**
+   * (DEPRECATED) A property that allows subspace configuration files to be stored under project folders directly.
+   * Used for migrating from a split-workspace format where there may be a large number of individual lockfiles and
+   * starting subspaces.
+   */
+   "splitWorkspaceCompatibility": false,
+
+   /**
+    * The next field is an object describing the available subspaces in this workspace. Each individual subspace
+    * must be defined in this array.
+    */
+  "subspaceNames": []
+
+}
