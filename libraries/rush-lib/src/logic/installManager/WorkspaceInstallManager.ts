@@ -256,13 +256,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
       const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
 
-      // get the relative package path from common temp folder to repo root folder
+      // get the relative path from common temp folder to repo root folder
       const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
       for (const rushProject of this.rushConfiguration.projects) {
         const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
         const projectRelativeFolder: string = rushProject.projectRelativeFolder;
 
-        // get the relative package path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
+        // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
         const relativePathFromTempFolderToPackageFolder: string =
           relativeFromTempFolderToRootFolder + '/' + projectRelativeFolder;
         const dependencyMetaList: ReadonlyArray<PackageJsonDependencyMeta> = packageJson.dependencyMetaList;
