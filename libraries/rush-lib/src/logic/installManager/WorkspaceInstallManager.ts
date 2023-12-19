@@ -250,20 +250,21 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // For pnpm pacakge manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
     // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      // First build a object for dependenciesMeta settings in package.json
+      // First, build a object for dependenciesMeta settings in package.json
       // key is the package path, value is the dependenciesMeta info for that package
       const packagePathToDependenciesMetaInPackageJson: { [key: string]: IDependenciesMetaTable } = {};
       const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
+      const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
 
+      // get the relative package path from common temp folder to repo root folder
+      const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
       for (const rushProject of this.rushConfiguration.projects) {
         const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
-        const packageJsonFilePath: string = packageJson.filePath;
+        const projectRelativeFolder: string = rushProject.projectRelativeFolder;
 
-        // get the relativePackagePath for a package, to align with the value in pnpm-lock.yaml
-        const relativePackagePath: string = path.relative(
-          commonTempFolder,
-          packageJsonFilePath.replace('/package.json', '')
-        );
+        // get the relative package path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
+        const relativePathFromTempFolderToPackageFolder: string =
+          relativeFromTempFolderToRootFolder + '/' + projectRelativeFolder;
         const dependencyMetaList: ReadonlyArray<PackageJsonDependencyMeta> = packageJson.dependencyMetaList;
 
         if (dependencyMetaList.length !== 0) {
@@ -273,11 +274,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               injected: dependencyMeta.injected
             };
           }
-          packagePathToDependenciesMetaInPackageJson[relativePackagePath] = dependenciesMeta;
+          packagePathToDependenciesMetaInPackageJson[relativePathFromTempFolderToPackageFolder] =
+            dependenciesMeta;
         }
       }
 
-      // First build a object for dependenciesMeta settings in pnpm-lock.yaml
+      // Second, build a object for dependenciesMeta settings in pnpm-lock.yaml
       // key is the package path, value is the dependenciesMeta info for that package
       const packagePathToDependenciesMetaInShrinkwrapFile: { [key: string]: IDependenciesMetaTable } = {};
       if (shrinkwrapFile?.importers !== undefined) {

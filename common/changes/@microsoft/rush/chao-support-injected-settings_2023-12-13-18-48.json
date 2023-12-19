@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where rush update can not handle dependenciesMeta changes in pnpm",
+      "comment": "Fix an issue where Rush does not detect changes to the `dependenciesMeta` field in project's `package.json` files, so may incorrectly skip updating/installation.",
       "type": "none"
     }
   ],
