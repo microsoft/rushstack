@@ -511,14 +511,14 @@ export interface _ILastInstallFlagJson {
     // (undocumented)
     [key: string]: unknown;
     ignoreScripts?: true;
-    node: string;
+    nodeVersion: string;
     packageJson?: IPackageJson;
     packageManager: PackageManagerName;
     packageManagerVersion: string;
     rushJsonFolder: string;
     selectedProjectNames?: string[];
     storePath?: string;
-    workspaces?: true;
+    useWorkspaces?: true;
 }
 
 // @public
@@ -1106,7 +1106,7 @@ export class RushConfiguration {
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
     // @beta
-    getSubspaceTempFolder(subspaceName: string): string;
+    getSubspaceTempFolderPath(subspaceName: string): string;
     // @beta
     getTempSubspaceShrinkwrapFileName(subspaceName: string): string;
     readonly gitAllowedEmailRegExps: string[];
