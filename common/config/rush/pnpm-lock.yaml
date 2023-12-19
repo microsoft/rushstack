@@ -86,8 +86,8 @@ importers:
         specifier: ~0.6.1
         version: 0.6.1
       typescript:
-        specifier: 5.3.0-beta
-        version: 5.3.0-beta
+        specifier: 5.3.3
+        version: 5.3.3
     devDependencies:
       '@rushstack/heft':
         specifier: 0.62.0
@@ -24775,7 +24775,7 @@ packages:
     engines: {node: '>=12.20'}
     hasBin: true
 
-  /typescript@5.3.0-beta:
+  /typescript@5.3.3:
     resolution: {integrity: sha512-SiTeC1C8wAS6v2SD05iyfojeuIkUZIbb8suZz0d4BR+RErwpG+05iolat+VjM9hqXSrjb3xutEBzh4X3NJ7Jgw==}
     engines: {node: '>=14.17'}
     hasBin: true
