@@ -138,7 +138,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
-      if (subspaceName && rushProject.subspaceName !== subspaceName) {
+      if (
+        subspaceName &&
+        rushProject.subspaceName !== subspaceName &&
+        !rushProject.subspaceName &&
+        subspaceName === RushConstants.defaultSubspaceName
+      ) {
         // skip processing any project that isn't in this subspace
         continue;
       }

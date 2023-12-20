@@ -182,18 +182,18 @@ export abstract class BaseInstallManager {
 
     // Ensure that subspaces is enabled
     let subspaceName = this.options.subspace;
-    if (this.rushConfiguration.subspaceConfiguration?.isEnabled) {
+    if (this.rushConfiguration.subspaceConfiguration?.isEnabled && !this.options.subspace) {
       // Temporarily ensure that a subspace is provided
       // eslint-disable-next-line no-console
       console.log();
       // eslint-disable-next-line no-console
       console.log(
         colors.red(
-          `A subspace parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+          `The subspaces feature currently only supports installing for a specified subspace, passed by the "--subspace" parameter.`
         )
       );
       throw new AlreadyReportedError();
-    } else if (this.options.subspace) {
+    } else if (this.options.subspace && !this.rushConfiguration.subspaceConfiguration?.isEnabled) {
       // Ensure that subspaces is enabled
       if (!this.rushConfiguration.subspaceConfiguration?.isEnabled) {
         // eslint-disable-next-line no-console

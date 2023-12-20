@@ -134,6 +134,10 @@ export function syncNpmrc(
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
     if (fs.existsSync(sourceNpmrcPath)) {
+      // Ensure the target folder exists
+      if (!fs.existsSync(targetNpmrcFolder)) {
+        fs.mkdirSync(targetNpmrcFolder, { recursive: true });
+      }
       return _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath);
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
