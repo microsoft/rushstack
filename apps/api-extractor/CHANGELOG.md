@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 07 Dec 2023 03:44:13 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Dec 2023 01:09:45 GMT and should not be manually modified.
+
+## 7.39.0
+Wed, 20 Dec 2023 01:09:45 GMT
+
+### Minor changes
+
+- Update API Extractor to support TypeScript 5.3.3
 
 ## 7.38.5
 Thu, 07 Dec 2023 03:44:13 GMT

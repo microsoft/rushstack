@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.39.0",
+      "tag": "@microsoft/api-extractor_v7.39.0",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update API Extractor to support TypeScript 5.3.3"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.38.5",
       "tag": "@microsoft/api-extractor_v7.38.5",
       "date": "Thu, 07 Dec 2023 03:44:13 GMT",
