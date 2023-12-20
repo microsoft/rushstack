@@ -576,11 +576,11 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--offline] [--variant VARIANT] [-t PROJECT] [-T PROJECT]
+                    [--offline] [--ignore-scripts] [--variant VARIANT]
+                    [--subspace SUBSPACE] [-t PROJECT] [-T PROJECT]
                     [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [--check-only]
-                    [--ignore-scripts]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -626,9 +626,20 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
+  --ignore-scripts      Do not execute any install lifecycle scripts 
+                        specified in package.json files and its dependencies 
+                        when \\"rush update\\". Running with this flag leaves 
+                        your installation in a uncompleted state, you need to 
+                        run this command without this flag again or run \\"rush 
+                        install\\" to complete a full installation. Meanwhile, 
+                        it makes faster retries on running install lifecycle 
+                        scripts. You can partial install such as \\"rush 
+                        install --to <package>\\" to run the ignored scripts of 
+                        the dependencies of the selected projects.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
+  --subspace SUBSPACE   The subspace to install for.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -708,16 +719,6 @@ Optional arguments:
                         subsets of projects\\".
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
-  --ignore-scripts      Do not execute any install lifecycle scripts 
-                        specified in package.json files and its dependencies 
-                        when \\"rush install\\". Running with this flag leaves 
-                        your installation in a uncompleted state, you need to 
-                        run without this flag again to complete a full 
-                        installation. Meanwhile, it makes your installing 
-                        faster. Later, you can run \\"rush install\\" to run all 
-                        ignored scripts. Moreover, you can partial install 
-                        such as \\"rush install --to <package>\\" to run ignored 
-                        scripts of the dependencies of the selected projects.
 "
 `;
 
@@ -1161,8 +1162,8 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--offline] [--variant VARIANT] [--full] [--recheck]
-                   [--ignore-scripts]
+                   [--offline] [--ignore-scripts] [--variant VARIANT]
+                   [--subspace SUBSPACE] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1207,9 +1208,20 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
+  --ignore-scripts      Do not execute any install lifecycle scripts 
+                        specified in package.json files and its dependencies 
+                        when \\"rush update\\". Running with this flag leaves 
+                        your installation in a uncompleted state, you need to 
+                        run this command without this flag again or run \\"rush 
+                        install\\" to complete a full installation. Meanwhile, 
+                        it makes faster retries on running install lifecycle 
+                        scripts. You can partial install such as \\"rush 
+                        install --to <package>\\" to run the ignored scripts of 
+                        the dependencies of the selected projects.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
+  --subspace SUBSPACE   The subspace to install for.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 
@@ -1229,16 +1241,6 @@ Optional arguments:
                         your shrinkwrap file with Rush's fixups. (To minimize 
                         shrinkwrap churn, these fixups are normally performed 
                         only in the temporary folder.)
-  --ignore-scripts      Do not execute any install lifecycle scripts 
-                        specified in package.json files and its dependencies 
-                        when \\"rush update\\". Running with this flag leaves 
-                        your installation in a uncompleted state, you need to 
-                        run this command without this flag again or run \\"rush 
-                        install\\" to complete a full installation. Meanwhile, 
-                        it makes faster retries on running install lifecycle 
-                        scripts. You can partial install such as \\"rush 
-                        install --to <package>\\" to run the ignored scripts of 
-                        the dependencies of the selected projects.
 "
 `;
 
