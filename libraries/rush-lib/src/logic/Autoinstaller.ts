@@ -83,6 +83,7 @@ export class Autoinstaller {
       this._rushConfiguration,
       this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
+      undefined,
       this._restrictConsoleOutput
     );
 
@@ -163,6 +164,7 @@ export class Autoinstaller {
       this._rushConfiguration,
       this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
+      undefined,
       this._restrictConsoleOutput
     );
 

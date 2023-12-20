@@ -28,12 +28,12 @@ interface IQueueItem {
 }
 
 export class NpmLinkManager extends BaseLinkManager {
-  protected async _linkProjects(): Promise<void> {
+  protected async _linkProjects(subspaceName: string | undefined): Promise<void> {
     const npmPackage: readPackageTree.Node = await LegacyAdapters.convertCallbackToPromise<
       readPackageTree.Node,
       Error,
       string
-    >(readPackageTree, this._rushConfiguration.getCommonTempFolder());
+    >(readPackageTree, this._rushConfiguration.getCommonTempFolder(subspaceName));
 
     const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 

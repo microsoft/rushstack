@@ -612,7 +612,8 @@ export class PackageJsonUpdater {
     await InstallHelpers.ensureLocalPackageManager(
       this._rushConfiguration,
       this._rushGlobalFolder,
-      RushConstants.defaultMaxInstallAttempts
+      RushConstants.defaultMaxInstallAttempts,
+      undefined
     );
 
     const useWorkspaces: boolean = !!(

@@ -44,7 +44,6 @@ import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -119,31 +118,6 @@ export abstract class BaseInstallManager {
     return this._deferredInstallationScripts;
   }
 
-  public async doSubspaceInstallAsync(subspaceName: string): Promise<void> {
-    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
-    let subspaceProjectsToInstall: RushConfigurationProject[] = [];
-    this.rushConfiguration.validateSubspaceName(subspaceName);
-    subspaceProjectsToInstall = this.rushConfiguration.getSubspaceProjects(subspaceName);
-    // const subspaceProjectNames: string[] = subspaceProjects.map(rushProject => rushProject.packageName);
-    // const subspaceInstallFlag = this.subspaceInstallFlags.get(subspaceName) as LastInstallFlag;
-    // subspaceInstallFlag.mergeFromObject({
-    //   selectedProjectNames: subspaceProjectNames
-    // })
-
-    // Assume useWorkspaces is true
-    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
-      this._deferredInstallationScripts = this.rushConfiguration.packageManager === 'pnpm';
-    }
-
-    if (!subspaceProjectsToInstall.length) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(colors.red(`The subspace ${subspaceName} is empty and has no projects to install.`));
-      throw new AlreadyReportedError();
-    }
-  }
-
   public async doInstallAsync(): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
@@ -181,7 +155,7 @@ export abstract class BaseInstallManager {
     }
 
     // Ensure that subspaces is enabled
-    let subspaceName = this.options.subspace;
+    const subspaceName: string | undefined = this.options.subspace;
     if (this.rushConfiguration.subspaceConfiguration?.isEnabled && !this.options.subspace) {
       // Temporarily ensure that a subspace is provided
       // eslint-disable-next-line no-console
@@ -261,7 +235,7 @@ export abstract class BaseInstallManager {
     const canSkipInstall: () => boolean = () => {
       // Based on timestamps, can we skip this install entirely?
       const outputStats: FileSystemStats = FileSystem.getStatistics(commonTempInstallFlag.path);
-      return this.canSkipInstall(outputStats.mtime);
+      return this.canSkipInstall(outputStats.mtime, subspaceName);
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
@@ -297,7 +271,7 @@ export abstract class BaseInstallManager {
       }
 
       // Perform the actual install
-      await this.installAsync(cleanInstall);
+      await this.installAsync(cleanInstall, subspaceName);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
@@ -331,7 +305,7 @@ export abstract class BaseInstallManager {
     }
 
     // Perform any post-install work the install manager requires
-    await this.postInstallAsync();
+    await this.postInstallAsync(subspaceName);
 
     // eslint-disable-next-line no-console
     console.log('');
@@ -342,18 +316,18 @@ export abstract class BaseInstallManager {
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
-  protected abstract installAsync(cleanInstall: boolean): Promise<void>;
+  protected abstract installAsync(cleanInstall: boolean, subspaceName: string | undefined): Promise<void>;
 
-  protected abstract postInstallAsync(subspaceName?: string | undefined): Promise<void>;
+  protected abstract postInstallAsync(subspaceName: string | undefined): Promise<void>;
 
-  protected canSkipInstall(lastModifiedDate: Date): boolean {
+  protected canSkipInstall(lastModifiedDate: Date, subspaceName: string | undefined): boolean {
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 
     // Consider the timestamp on the node_modules folder; if someone tampered with it
     // or deleted it entirely, then we can't skip this install
     potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.getCommonTempFolder(), RushConstants.nodeModulesFolderName)
+      path.join(this.rushConfiguration.getCommonTempFolder(subspaceName), RushConstants.nodeModulesFolderName)
     );
 
     // Additionally, if they pulled an updated shrinkwrap file from Git,
@@ -406,7 +380,8 @@ export abstract class BaseInstallManager {
     await InstallHelpers.ensureLocalPackageManager(
       this.rushConfiguration,
       this.rushGlobalFolder,
-      this.options.maxInstallAttempts
+      this.options.maxInstallAttempts,
+      subspaceName
     );
 
     let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;

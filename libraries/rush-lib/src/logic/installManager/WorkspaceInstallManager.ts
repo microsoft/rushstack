@@ -259,7 +259,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected canSkipInstall(lastModifiedDate: Date, subspaceName?: string | undefined): boolean {
-    if (!super.canSkipInstall(lastModifiedDate)) {
+    if (!super.canSkipInstall(lastModifiedDate, subspaceName)) {
       return false;
     }
 
@@ -297,7 +297,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  protected async installAsync(cleanInstall: boolean, subspaceName?: string | undefined): Promise<void> {
+  protected async installAsync(cleanInstall: boolean, subspaceName: string | undefined): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
     const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 

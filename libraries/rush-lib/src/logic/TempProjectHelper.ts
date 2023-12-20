@@ -22,10 +22,15 @@ export class TempProjectHelper {
   /**
    * Deletes the existing tarball and creates a tarball for the given rush project
    */
-  public createTempProjectTarball(rushProject: RushConfigurationProject): void {
-    FileSystem.ensureFolder(path.resolve(this._rushConfiguration.getCommonTempFolder(), 'projects'));
-    const tarballFile: string = this.getTarballFilePath(rushProject);
-    const tempProjectFolder: string = this.getTempProjectFolder(rushProject);
+  public createTempProjectTarball(
+    rushProject: RushConfigurationProject,
+    subspaceName: string | undefined
+  ): void {
+    FileSystem.ensureFolder(
+      path.resolve(this._rushConfiguration.getCommonTempFolder(subspaceName), 'projects')
+    );
+    const tarballFile: string = this.getTarballFilePath(rushProject, subspaceName);
+    const tempProjectFolder: string = this.getTempProjectFolder(rushProject, subspaceName);
 
     FileSystem.deleteFile(tarballFile);
 
@@ -59,18 +64,21 @@ export class TempProjectHelper {
    * Gets the path to the tarball
    * Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
    */
-  public getTarballFilePath(project: RushConfigurationProject): string {
+  public getTarballFilePath(project: RushConfigurationProject, subspaceName: string | undefined): string {
     return path.join(
-      this._rushConfiguration.getCommonTempFolder(),
+      this._rushConfiguration.getCommonTempFolder(subspaceName),
       RushConstants.rushTempProjectsFolderName,
       `${project.unscopedTempProjectName}.tgz`
     );
   }
 
-  public getTempProjectFolder(rushProject: RushConfigurationProject): string {
+  public getTempProjectFolder(
+    rushProject: RushConfigurationProject,
+    subspaceName: string | undefined
+  ): string {
     const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
     return path.join(
-      this._rushConfiguration.getCommonTempFolder(),
+      this._rushConfiguration.getCommonTempFolder(subspaceName),
       RushConstants.rushTempProjectsFolderName,
       unscopedTempProjectName
     );

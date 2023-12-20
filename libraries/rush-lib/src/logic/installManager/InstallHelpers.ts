@@ -129,6 +129,7 @@ export class InstallHelpers {
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
     maxInstallAttempts: number,
+    subspaceName: string | undefined,
     restrictConsoleOutput?: boolean
   ): Promise<void> {
     let logIfConsoleOutputIsNotRestricted: (message?: string) => void;
@@ -186,7 +187,7 @@ export class InstallHelpers {
         // In particular, we'll assume that two different NPM registries cannot have two
         // different implementations of the same version of the same package.
         // This was needed for: https://github.com/microsoft/rushstack/issues/691
-        commonRushConfigFolder: rushConfiguration.getCommonRushConfigFolder()
+        commonRushConfigFolder: rushConfiguration.getCommonRushConfigFolder(subspaceName)
       });
 
       logIfConsoleOutputIsNotRestricted(
@@ -201,11 +202,11 @@ export class InstallHelpers {
     packageManagerMarker.create();
 
     // Example: "C:\MyRepo\common\temp"
-    FileSystem.ensureFolder(rushConfiguration.getCommonTempFolder());
+    FileSystem.ensureFolder(rushConfiguration.getCommonTempFolder(subspaceName));
 
     // Example: "C:\MyRepo\common\temp\pnpm-local"
     const localPackageManagerToolFolder: string = path.join(
-      rushConfiguration.getCommonTempFolder(),
+      rushConfiguration.getCommonTempFolder(subspaceName),
       `${packageManager}-local`
     );
 
