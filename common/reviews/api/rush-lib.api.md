@@ -1348,8 +1348,7 @@ export class RushUserConfiguration {
 
 // @beta
 export class SubspaceConfiguration {
-    // (undocumented)
-    get isEnabled(): boolean;
+    readonly enabled: boolean;
     isValidSubspaceName(subspaceName: string): boolean;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: Set<string>;

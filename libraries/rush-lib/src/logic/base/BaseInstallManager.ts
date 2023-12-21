@@ -97,7 +97,7 @@ export abstract class BaseInstallManager {
     this.commonTempInstallFlag = LastInstallFlagFactory.getCommonTempFlag(rushConfiguration);
 
     this.subspaceInstallFlags = new Map();
-    if (rushConfiguration.subspaceConfiguration?.isEnabled) {
+    if (rushConfiguration.subspaceConfiguration?.enabled) {
       for (const subspaceName of rushConfiguration.subspaceNames) {
         this.subspaceInstallFlags.set(
           subspaceName,
@@ -156,7 +156,7 @@ export abstract class BaseInstallManager {
 
     // Ensure that subspaces is enabled
     const subspaceName: string | undefined = this.options.subspace;
-    if (this.rushConfiguration.subspaceConfiguration?.isEnabled && !this.options.subspace) {
+    if (this.rushConfiguration.subspaceConfiguration?.enabled && !this.options.subspace) {
       // Temporarily ensure that a subspace is provided
       // eslint-disable-next-line no-console
       console.log();
@@ -167,9 +167,9 @@ export abstract class BaseInstallManager {
         )
       );
       throw new AlreadyReportedError();
-    } else if (this.options.subspace && !this.rushConfiguration.subspaceConfiguration?.isEnabled) {
+    } else if (this.options.subspace && !this.rushConfiguration.subspaceConfiguration?.enabled) {
       // Ensure that subspaces is enabled
-      if (!this.rushConfiguration.subspaceConfiguration?.isEnabled) {
+      if (!this.rushConfiguration.subspaceConfiguration?.enabled) {
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console

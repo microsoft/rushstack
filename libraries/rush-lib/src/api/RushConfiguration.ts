@@ -855,7 +855,7 @@ export class RushConfiguration {
         );
       }
       this._projectsByName.set(project.packageName, project);
-      if (this.subspaceConfiguration?.isEnabled) {
+      if (this.subspaceConfiguration?.enabled) {
         let subspaceName: string;
         if (projectJson.subspaceName) {
           subspaceName = projectJson.subspaceName;
