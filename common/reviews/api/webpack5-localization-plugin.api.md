@@ -40,6 +40,7 @@ export interface ILocaleFileObject {
 
 // @public
 export interface ILocalizationPluginOptions {
+    formatLocaleForFilename?: (locale: string) => string;
     globsToIgnore?: string[];
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;

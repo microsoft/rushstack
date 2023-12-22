@@ -134,6 +134,13 @@ export interface ILocalizationPluginOptions {
    * Options for how localization stats data should be produced.
    */
   localizationStats?: ILocalizationStatsOptions;
+
+  /**
+   * Custom function for controlling how locale names are formatted based on the locale specified.
+   * This is useful if you want to emit non-localized files to the root output directory instead
+   * of a '/none' subdirectory.
+   */
+  formatLocaleForFilename?: (locale: string) => string;
 }
 
 /**
