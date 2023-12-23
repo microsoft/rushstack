@@ -44,6 +44,12 @@
   /*[LINE "HYPOTHETICAL"]*/ "buildCacheWithAllowWarningsInSuccessfulBuild": true,
 
   /**
+   * If true, build skipping will respect the allowWarningsInSuccessfulBuild flag and skip builds with warnings.
+   * This will not replay warnings from the skipped build.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "buildSkipWithAllowWarningsInSuccessfulBuild": true,
+
+  /**
    * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
    * in common/config/rush/command-line.json.
    */

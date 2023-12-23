@@ -13,13 +13,13 @@ import schemaJson from '../schemas/experiments.schema.json';
 export interface IExperimentsJson {
   /**
    * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
-   * Set this option to true to pass '--frozen-lockfile' instead.
+   * Set this option to true to pass '--frozen-lockfile' instead for faster installs.
    */
   usePnpmFrozenLockfileForRushInstall?: boolean;
 
   /**
    * By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'.
-   * Set this option to true to pass '--prefer-frozen-lockfile' instead.
+   * Set this option to true to pass '--prefer-frozen-lockfile' instead to minimize shrinkwrap changes.
    */
   usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 
