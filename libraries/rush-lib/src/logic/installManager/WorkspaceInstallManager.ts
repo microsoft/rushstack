@@ -541,7 +541,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           suppressOutput: false
         });
       } catch (err) {
-        throw new Error(`Encounter an error when running install lifecycle scripts. error: ${err.message}`);
+        throw new Error(`An error occurred while running install lifecycle scripts: ${err.message}`);
       } finally {
         // Always save after pnpm rebuild to update timestamp of last install flag file.
         this.commonTempInstallFlag.create();
