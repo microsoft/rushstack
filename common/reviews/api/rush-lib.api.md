@@ -58,20 +58,6 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
-// @internal
-export class _BaseFlag<T extends object = JsonObject> {
-    constructor(folderPath: string, state?: Partial<T>);
-    clear(): void;
-    create(): void;
-    protected get flagName(): string;
-    protected _isModified: boolean;
-    isValid(): boolean;
-    mergeFromObject(data: JsonObject): void;
-    readonly path: string;
-    saveIfModified(): void;
-    protected _state: T;
-}
-
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -466,7 +452,6 @@ export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
-    deferredInstallationScripts?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
@@ -504,21 +489,6 @@ export interface IGetChangedProjectsOptions {
 
 // @beta
 export interface IGlobalCommand extends IRushCommand {
-}
-
-// @internal
-export interface _ILastInstallFlagJson {
-    // (undocumented)
-    [key: string]: unknown;
-    ignoreScripts?: true;
-    nodeVersion: string;
-    packageJson?: IPackageJson;
-    packageManager: PackageManagerName;
-    packageManagerVersion: string;
-    rushJsonFolder: string;
-    selectedProjectNames?: string[];
-    storePath?: string;
-    useWorkspaces?: true;
 }
 
 // @public
@@ -812,13 +782,16 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
+export class _LastInstallFlag {
+    constructor(folderPath: string, state?: JsonObject);
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;
+    clear(): void;
+    create(): void;
     protected get flagName(): string;
-    // @override
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
+    readonly path: string;
 }
 
 // @public

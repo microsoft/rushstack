@@ -94,12 +94,6 @@ export interface IInstallManagerOptions {
   beforeInstallAsync?: () => Promise<void>;
 
   /**
-   * Whether to specify "--ignore-scripts" command-line parameter, which ignores
-   * install lifecycle scripts in package.json and its dependencies
-   */
-  ignoreScripts: boolean;
-
-  /**
    * The subspace to install for
    */
   subspace?: string;

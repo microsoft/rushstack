@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError } from '@rushstack/node-core-library';
-
+import { LastInstallFlag } from './LastInstallFlag';
+import { type JsonObject, JsonFile, InternalError } from '@rushstack/node-core-library';
 import type { RushConfiguration } from './RushConfiguration';
-import { BaseFlag } from './base/BaseFlag';
 
 export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
 
@@ -13,7 +12,20 @@ export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
  * indicates that linking was completed successfully.
  * @internal
  */
-export class LastLinkFlag extends BaseFlag {
+export class LastLinkFlag extends LastInstallFlag {
+  /**
+   * @override
+   */
+  public isValid(): boolean {
+    let oldState: JsonObject | undefined;
+    try {
+      oldState = JsonFile.load(this.path);
+    } catch (err) {
+      // Swallow error
+    }
+    return !!oldState;
+  }
+
   /**
    * @override
    */

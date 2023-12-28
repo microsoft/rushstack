@@ -49,7 +49,6 @@ export class InstallAction extends BaseInstallAction {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
-      ignoreScripts: this._ignoreScriptsParameter.value!,
       bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,

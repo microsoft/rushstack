@@ -33,7 +33,6 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
     {
       debug: isDebug,
       allowShrinkwrapUpdates: false,
-      ignoreScripts: false,
       checkOnly: false,
       bypassPolicy: false,
       noLink: false,

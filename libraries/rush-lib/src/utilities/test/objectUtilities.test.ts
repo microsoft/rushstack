@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { objectsAreDeepEqual, cloneDeep, merge, isMatch } from '../objectUtilities';
+import { objectsAreDeepEqual, cloneDeep, merge } from '../objectUtilities';
 
 describe('objectUtilities', () => {
   describe(objectsAreDeepEqual.name, () => {
@@ -145,83 +145,6 @@ describe('objectUtilities', () => {
       expect(merge({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
       expect(merge({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
       expect(merge({ a: { b: 1 } }, { a: { c: 2 } })).toEqual({ a: { b: 1, c: 2 } });
-    });
-  });
-
-  describe(isMatch.name, () => {
-    it('can match primitives', () => {
-      expect(isMatch(1, 1)).toEqual(true);
-      expect(isMatch(1, undefined)).toEqual(false);
-      expect(isMatch(1, null)).toEqual(false);
-      expect(isMatch(undefined, 1)).toEqual(false);
-      expect(isMatch(null, 1)).toEqual(false);
-      expect(isMatch(1, 2)).toEqual(false);
-
-      expect(isMatch('a', 'a')).toEqual(true);
-      expect(isMatch('a', undefined)).toEqual(false);
-      expect(isMatch('a', null)).toEqual(false);
-      expect(isMatch(undefined, 'a')).toEqual(false);
-      expect(isMatch(null, 'a')).toEqual(false);
-      expect(isMatch('a', 'b')).toEqual(false);
-
-      expect(isMatch(true, true)).toEqual(true);
-      expect(isMatch(true, undefined)).toEqual(false);
-      expect(isMatch(true, null)).toEqual(false);
-      expect(isMatch(undefined, true)).toEqual(false);
-      expect(isMatch(null, true)).toEqual(false);
-      expect(isMatch(true, false)).toEqual(false);
-
-      expect(isMatch(undefined, undefined)).toEqual(true);
-      expect(isMatch(undefined, null)).toEqual(false);
-      expect(isMatch(null, null)).toEqual(true);
-    });
-
-    it('can match objects', () => {
-      expect(isMatch({}, {})).toEqual(true);
-      expect(isMatch({}, undefined)).toEqual(false);
-      expect(isMatch({}, null)).toEqual(false);
-      expect(isMatch(undefined, {})).toEqual(false);
-      expect(isMatch(null, {})).toEqual(false);
-
-      expect(isMatch({ a: 1 }, { a: 1 })).toEqual(true);
-      expect(isMatch({ a: 1 }, { a: 2 })).toEqual(false);
-      expect(isMatch({ a: 1 }, {})).toEqual(true);
-      expect(isMatch({}, { a: 1 })).toEqual(false);
-      expect(isMatch({ a: 1 }, { b: 1 })).toEqual(false);
-
-      expect(isMatch({ a: 1, b: 2 }, { b: 2 })).toEqual(true);
-      expect(isMatch({ a: 1, b: 2 }, { a: 1, b: 2 })).toEqual(true);
-      expect(isMatch({ a: 1, b: 2 }, { a: 1, b: 3 })).toEqual(false);
-      expect(isMatch({ a: 1, b: 2 }, { a: 1, c: 2 })).toEqual(false);
-      expect(isMatch({ a: 1, b: 2 }, { b: 2, a: 1 })).toEqual(true);
-    });
-
-    it('can match nested objects', () => {
-      expect(isMatch({ a: { b: 1 } }, { a: { b: 1 } })).toEqual(true);
-      expect(isMatch({ a: { b: 1 } }, { a: { b: 2 } })).toEqual(false);
-      expect(isMatch({ a: { b: 1 } }, { a: { c: 1 } })).toEqual(false);
-      expect(isMatch({ a: { b: 1 } }, { a: { b: 1, c: 2 } })).toEqual(false);
-      expect(isMatch({ a: { b: 1 } }, { a: { b: 1 }, c: 2 })).toEqual(false);
-      expect(isMatch({ a: { b: 1, c: 2 } }, { a: { b: 1 } })).toEqual(true);
-      expect(isMatch({ a: { b: { c: 1 } } }, { a: { b: { c: 1 } } })).toEqual(true);
-    });
-
-    it('can match arrays', () => {
-      expect(isMatch([], [])).toEqual(true);
-      expect(isMatch([], undefined)).toEqual(false);
-      expect(isMatch([], null)).toEqual(false);
-      expect(isMatch(undefined, [])).toEqual(false);
-      expect(isMatch(null, [])).toEqual(false);
-
-      expect(isMatch([1], [1])).toEqual(true);
-      expect(isMatch([1], [2])).toEqual(false);
-
-      expect(isMatch([1, 2], [1])).toEqual(true);
-      expect(isMatch([1, 2], [1, 2])).toEqual(true);
-      expect(isMatch([1, 2], [2, 1])).toEqual(false);
-
-      expect(isMatch([1, 2, 3], [1, 2, 3])).toEqual(true);
-      expect(isMatch([1, 2, 3], [1, 2, 4])).toEqual(false);
     });
   });
 });

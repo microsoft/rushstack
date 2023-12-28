@@ -511,58 +511,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration, subspaceName).create();
-
-    // Stage 2 rebuild pending
-    if (this.deferredInstallationScripts && !this.options.ignoreScripts) {
-      // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-      const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
-
-      const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
-        this.rushConfiguration,
-        this.options
-      );
-
-      const rebuildArgs: string[] = ['rebuild', '--pending'];
-      this.pushRebuildArgs(rebuildArgs, this.options.pnpmFilterArguments);
-
-      // eslint-disable-next-line no-console
-      console.log(
-        '\n' +
-          colors.bold(
-            `Running "${this.rushConfiguration.packageManager} rebuild --pending" in` +
-              ` ${this.rushConfiguration.getCommonTempFolder(subspaceName)}`
-          ) +
-          '\n'
-      );
-
-      // If any diagnostic options were specified, then show the full command-line
-      if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
-        // eslint-disable-next-line no-console
-        console.log(
-          '\n' +
-            colors.green('Invoking package manager: ') +
-            FileSystem.getRealPath(packageManagerFilename) +
-            ' ' +
-            rebuildArgs.join(' ') +
-            '\n'
-        );
-      }
-
-      try {
-        Utilities.executeCommand({
-          command: packageManagerFilename,
-          args: rebuildArgs,
-          workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName),
-          environment: packageManagerEnv,
-          suppressOutput: false
-        });
-      } catch (err) {
-        throw new Error(`Encounter an error when running install lifecycle scripts. error: ${err.message}`);
-      } finally {
-        // Always save after pnpm rebuild to update timestamp of last install flag file.
-        this.commonTempInstallFlag.create();
-      }
-    }
   }
 
   /**
@@ -600,40 +548,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       for (const arg of this.options.pnpmFilterArguments) {
         args.push(arg);
       }
-    }
-  }
-
-  /**
-   * Used when invoking pnpm rebuild for running deferred installation scripts.
-   */
-  protected pushRebuildArgs(args: string[], filterArguments: string[]): void {
-    args.push('--recursive');
-
-    if (
-      this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
-      EnvironmentConfiguration.pnpmStorePathOverride
-    ) {
-      // pnpm rebuild does not accept --store-dir now... So, config.storeDir is used here
-      args.push(`--config.storeDir=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
-    }
-
-    if (this.options.collectLogFile) {
-      args.push('--reporter', 'ndjson');
-    }
-
-    for (const arg of filterArguments) {
-      args.push(arg);
-    }
-  }
-
-  // Push installArgs for split workspace
-  protected pushConfigurationArgsForSplitWorkspace(args: string[], options: IInstallManagerOptions): void {
-    super.pushConfigurationArgs(args, options);
-
-    // Add workspace-specific args
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      args.push('--recursive');
-      args.push('--link-workspace-packages', 'false');
     }
   }
 }

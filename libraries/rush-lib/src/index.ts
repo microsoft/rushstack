@@ -84,10 +84,8 @@ export { ChangeManager } from './api/ChangeManager';
 
 export {
   LastInstallFlag as _LastInstallFlag,
-  ILastInstallFlagJson as _ILastInstallFlagJson,
   ILockfileValidityCheckOptions as _ILockfileValidityCheckOptions
 } from './api/LastInstallFlag';
-export { BaseFlag as _BaseFlag } from './api/base/BaseFlag';
 
 export {
   VersionPolicyDefinitionName,
