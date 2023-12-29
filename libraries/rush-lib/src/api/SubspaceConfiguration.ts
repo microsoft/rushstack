@@ -4,6 +4,7 @@
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from './RushConfiguration';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import schemaJson from '../schemas/subspaces.schema.json';
 import { RushConstants } from '../logic/RushConstants';
 
@@ -94,5 +95,12 @@ export class SubspaceConfiguration {
       const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
       return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
     }
+  }
+
+  public static belongsInSubspace(rushProject: RushConfigurationProject, subspaceName: string): boolean {
+    return (
+      rushProject.subspaceName === subspaceName ||
+      (!rushProject.subspaceName && subspaceName === RushConstants.defaultSubspaceName)
+    );
   }
 }

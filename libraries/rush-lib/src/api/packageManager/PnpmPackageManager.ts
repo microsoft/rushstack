@@ -22,6 +22,14 @@ export class PnpmPackageManager extends PackageManager {
    */
   public readonly pnpmfileFilename: string;
 
+  /**
+   * The filename of the shrinkwrap file of a subspace that is used by the package manager.
+   *
+   * @remarks
+   * Example: `.pnpmfile-subspace.cjs`
+   */
+  public subspacePnpmfileFilename: string;
+
   /** @internal */
   public constructor(version: string) {
     super(version, 'pnpm', RushConstants.pnpmV3ShrinkwrapFilename);
@@ -35,8 +43,20 @@ export class PnpmPackageManager extends PackageManager {
       this.pnpmfileFilename = RushConstants.pnpmfileV1Filename;
     }
 
+    this.subspacePnpmfileFilename = '.pnpmfile-subspace.cjs';
+
     // node_modules/.pnpm/lock.yaml
     // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0 for more details.
     this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm', 'lock.yaml');
+  }
+
+  /**
+   * The filename of the global shrinkwrap file that is used by the package manager.
+   *
+   * @remarks
+   * Example: `global-pnpmfile.cjs`
+   */
+  public get globalPnpmfileFilename(): string {
+    return 'global-pnpmfile.cjs';
   }
 }

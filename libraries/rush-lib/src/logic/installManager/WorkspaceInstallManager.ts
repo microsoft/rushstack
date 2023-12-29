@@ -23,6 +23,7 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
+import { SubspaceConfiguration } from '../../api/SubspaceConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -138,13 +139,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
-      if (
-        subspaceName &&
-        rushProject.subspaceName !== subspaceName &&
-        !rushProject.subspaceName &&
-        subspaceName === RushConstants.defaultSubspaceName
-      ) {
+      console.log(
+        `Processing project ${rushProject.packageName} who belongs in subspace ${rushProject.subspaceName} in subspace ${subspaceName}`
+      );
+      if (subspaceName && !SubspaceConfiguration.belongsInSubspace(rushProject, subspaceName)) {
         // skip processing any project that isn't in this subspace
+        console.log(
+          `Skipping project ${rushProject.packageName} as it does not belong to subspace ${subspaceName}`
+        );
         continue;
       }
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;

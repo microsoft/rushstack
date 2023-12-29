@@ -1084,6 +1084,7 @@ export class RushConfiguration {
       if (packageManagerWrapper.packageManager === 'pnpm') {
         const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
         knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
+        knownSet.add(pnpmPackageManager.subspacePnpmfileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.

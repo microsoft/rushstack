@@ -44,6 +44,7 @@ import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
+import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -107,7 +108,7 @@ export abstract class BaseInstallManager {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
-
+    console.log('USE WORKSPACES: ', useWorkspaces);
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
       // eslint-disable-next-line no-console
@@ -416,6 +417,11 @@ export abstract class BaseInstallManager {
       console.log(colors.bold('Using the default variant for installation.'));
     }
 
+    if (subspaceName) {
+      // _RUSH_SUBSPACE_TEMP_FOLDER is used in .npmrc for subspaces.
+      process.env['_RUSH_SUBSPACE_TEMP_FOLDER'] = this.rushConfiguration.getCommonTempFolder(subspaceName);
+    }
+
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
@@ -451,6 +457,13 @@ export abstract class BaseInstallManager {
         this.rushConfiguration.getCommonTempFolder(subspaceName),
         this.options
       );
+
+      if (subspaceName) {
+        await SubspacePnpmfileConfiguration.writeCommonTempSubspaceGlobalPnpmfileAsync(
+          this.rushConfiguration,
+          subspaceName
+        );
+      }
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
