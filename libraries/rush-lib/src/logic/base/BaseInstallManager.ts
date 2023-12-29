@@ -417,9 +417,12 @@ export abstract class BaseInstallManager {
       console.log(colors.bold('Using the default variant for installation.'));
     }
 
+    const subspaceEnvironmentVariable: string = `_RUSH_SUBSPACE_${subspaceName}_TEMP_FOLDER`;
+    const extraNpmrcLines: string[] = [];
     if (subspaceName) {
       // _RUSH_SUBSPACE_TEMP_FOLDER is used in .npmrc for subspaces.
-      process.env['_RUSH_SUBSPACE_TEMP_FOLDER'] = this.rushConfiguration.getCommonTempFolder(subspaceName);
+      process.env[subspaceEnvironmentVariable] = this.rushConfiguration.getCommonTempFolder(subspaceName);
+      extraNpmrcLines.push(`global-pnpmfile=\${${subspaceEnvironmentVariable}}/global-pnpmfile.cjs`);
     }
 
     // Also copy down the committed .npmrc file, if there is one
@@ -427,7 +430,10 @@ export abstract class BaseInstallManager {
     // Also ensure that we remove any old one that may be hanging around
     const npmrcText: string | undefined = Utilities.syncNpmrc(
       this.rushConfiguration.getCommonRushConfigFolder(subspaceName),
-      this.rushConfiguration.getCommonTempFolder(subspaceName)
+      this.rushConfiguration.getCommonTempFolder(subspaceName),
+      undefined,
+      undefined,
+      extraNpmrcLines
     );
     this._syncNpmrcAlreadyCalled = true;
 

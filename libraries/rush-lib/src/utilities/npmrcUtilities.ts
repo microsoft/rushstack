@@ -22,7 +22,7 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
-function _trimNpmrcFile(sourceNpmrcPath: string): string {
+function _trimNpmrcFile(sourceNpmrcPath: string, extraLines: string[] = []): string {
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
@@ -74,6 +74,8 @@ function _trimNpmrcFile(sourceNpmrcPath: string): string {
     }
   }
 
+  resultLines.push(...extraLines);
+
   const combinedNpmrc: string = resultLines.join('\n');
 
   //save the cache
@@ -96,11 +98,16 @@ function _trimNpmrcFile(sourceNpmrcPath: string): string {
  * @returns
  * The text of the the .npmrc with lines containing undefined variables commented out.
  */
-function _copyAndTrimNpmrcFile(logger: ILogger, sourceNpmrcPath: string, targetNpmrcPath: string): string {
+function _copyAndTrimNpmrcFile(
+  logger: ILogger,
+  sourceNpmrcPath: string,
+  targetNpmrcPath: string,
+  extraLines?: string[]
+): string {
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
   logger.info(`  --> "${targetNpmrcPath}"`);
 
-  const combinedNpmrc: string = _trimNpmrcFile(sourceNpmrcPath);
+  const combinedNpmrc: string = _trimNpmrcFile(sourceNpmrcPath, extraLines);
 
   fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
 
@@ -125,7 +132,8 @@ export function syncNpmrc(
     info: console.log,
     // eslint-disable-next-line no-console
     error: console.error
-  }
+  },
+  extraLines?: string[]
 ): string | undefined {
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
@@ -138,7 +146,7 @@ export function syncNpmrc(
       if (!fs.existsSync(targetNpmrcFolder)) {
         fs.mkdirSync(targetNpmrcFolder, { recursive: true });
       }
-      return _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath);
+      return _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath, extraLines);
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
       logger.info(`Deleting ${targetNpmrcPath}`); // Verbose
