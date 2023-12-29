@@ -113,7 +113,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @returns a list of orphaned projects.
    */
-  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+  public findOrphanedProjects(
+    rushConfiguration: RushConfiguration,
+    subspaceName: string | undefined
+  ): ReadonlyArray<string> {
     const orphanedProjectNames: string[] = [];
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of this.getTempProjectNames()) {
@@ -145,6 +148,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
+    subspaceName: string | undefined,
     variant?: string
   ): Promise<boolean>;
 

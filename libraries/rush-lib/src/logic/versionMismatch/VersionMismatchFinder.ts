@@ -67,9 +67,10 @@ export class VersionMismatchFinder {
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
+    subspaceName: string | undefined,
     options: IVersionMismatchFinderRushCheckOptions = {}
   ): void {
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, subspaceName, {
       ...options,
       terminal,
       isRushCheckCommand: true
@@ -79,9 +80,10 @@ export class VersionMismatchFinder {
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
+    subspaceName: string | undefined,
     options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
   ): void {
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, subspaceName, {
       ...options,
       terminal,
       isRushCheckCommand: false,
@@ -95,9 +97,13 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
+    subspaceName: string | undefined,
     options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
-    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
+    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(
+      subspaceName,
+      options.variant
+    );
 
     const projects: VersionMismatchFinderEntity[] = [];
 
@@ -114,6 +120,7 @@ export class VersionMismatchFinder {
 
   private static _checkForInconsistentVersions(
     rushConfiguration: RushConfiguration,
+    subspaceName: string | undefined,
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
@@ -125,6 +132,7 @@ export class VersionMismatchFinder {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         rushConfiguration,
+        subspaceName,
         options
       );
 

@@ -61,7 +61,7 @@ if (!skipPack) {
       let result;
 
       try {
-        result = Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['pack'], {
+        result = Executable.spawnSync(rushConfiguration.getPackageManagerToolFilename(), ['pack'], {
           currentWorkingDirectory: project.publishFolder,
           stdio: ['ignore', 'pipe', 'pipe']
         });
@@ -150,7 +150,7 @@ console.log('\nInstalling:');
 console.log('  pnpm ' + pnpmInstallArgs.join(' '));
 
 checkSpawnResult(
-  Executable.spawnSync(rushConfiguration.packageManagerToolFilename, pnpmInstallArgs, {
+  Executable.spawnSync(rushConfiguration.getPackageManagerToolFilename(), pnpmInstallArgs, {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
     stdio: ['ignore', 'inherit', 'inherit']
   }),
@@ -189,7 +189,7 @@ console.log('\n\nInstallation completed successfully.');
 console.log('\nBuilding projects...\n');
 
 checkSpawnResult(
-  Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['run', '--recursive', 'build'], {
+  Executable.spawnSync(rushConfiguration.getPackageManagerToolFilename(), ['run', '--recursive', 'build'], {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
     stdio: ['ignore', 'inherit', 'inherit']
   }),

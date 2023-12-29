@@ -121,7 +121,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // dependency name --> version specifier
     const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration
-      .getCommonVersions(this.options.variant)
+      .getCommonVersions(subspaceName, this.options.variant)
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
@@ -146,8 +146,10 @@ export class RushInstallManager extends BaseInstallManager {
 
       // If there are orphaned projects, we need to update
       const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
-        this.rushConfiguration
+        this.rushConfiguration,
+        subspaceName
       );
+
       if (orphanedProjects.length > 0) {
         for (const orhpanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
@@ -484,7 +486,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
+    const packageManagerFilename: string = this.rushConfiguration.getPackageManagerToolFilename(subspaceName);
 
     const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
       this.rushConfiguration,
@@ -633,7 +635,7 @@ export class RushInstallManager extends BaseInstallManager {
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options);
       Utilities.executeCommand({
-        command: this.rushConfiguration.packageManagerToolFilename,
+        command: this.rushConfiguration.getPackageManagerToolFilename(subspaceName),
         args: npmArgs,
         workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName)
       });

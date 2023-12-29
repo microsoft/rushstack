@@ -1023,7 +1023,7 @@ export class ProjectChangeAnalyzer {
 export class RepoStateFile {
     readonly filePath: string;
     get isValid(): boolean;
-    static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile;
+    static loadFromFile(jsonFilename: string, subspaceName: string | undefined, variant: string | undefined): RepoStateFile;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration): boolean;
@@ -1047,12 +1047,12 @@ export class RushConfiguration {
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
     readonly changesFolder: string;
     // @deprecated
-    get committedShrinkwrapFilename(): string;
+    committedShrinkwrapFilename(subspaceName: string | undefined): string;
     get commonAutoinstallersFolder(): string;
     readonly commonFolder: string;
     readonly commonScriptsFolder: string;
     // @deprecated
-    get commonVersions(): CommonVersionsConfiguration;
+    commonVersions(subspaceName: string | undefined): CommonVersionsConfiguration;
     get currentInstalledVariant(): string | undefined;
     readonly currentVariantJsonFilename: string;
     // @beta
@@ -1066,14 +1066,15 @@ export class RushConfiguration {
     readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-    getCommittedShrinkwrapFilename(variant?: string | undefined): string;
+    getCommittedShrinkwrapFilename(subspaceName: string | undefined, variant?: string | undefined): string;
     getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string;
     getCommonRushConfigFolder(subspaceName?: string | undefined): string;
     getCommonTempFolder(subspaceName?: string | undefined): string;
-    getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
-    getCommonVersionsFilePath(variant?: string | undefined): string;
+    getCommonVersions(subspaceName: string | undefined, variant?: string | undefined): CommonVersionsConfiguration;
+    getCommonVersionsFilePath(subspaceName: string | undefined, variant?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
-    getPnpmfilePath(variant?: string | undefined): string;
+    getPackageManagerToolFilename(subspaceName?: string | undefined): string;
+    getPnpmfilePath(subspaceName: string | undefined, variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
@@ -1100,7 +1101,6 @@ export class RushConfiguration {
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
     readonly packageManagerOptions: PackageManagerOptionsConfigurationBase;
-    readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     // @beta
     readonly packageManagerWrapper: PackageManager;

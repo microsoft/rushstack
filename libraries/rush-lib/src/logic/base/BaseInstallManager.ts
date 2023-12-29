@@ -108,7 +108,6 @@ export abstract class BaseInstallManager {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
-    console.log('USE WORKSPACES: ', useWorkspaces);
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
       // eslint-disable-next-line no-console
@@ -245,8 +244,8 @@ export abstract class BaseInstallManager {
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
-          this.rushConfiguration.getTempShrinkwrapFilename(),
-          this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant)
+          this.rushConfiguration.getTempShrinkwrapFilename(subspaceName),
+          this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName, this.options.variant)
         );
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
@@ -254,7 +253,11 @@ export abstract class BaseInstallManager {
 
       // Always update the state file if running "rush update"
       if (this.options.allowShrinkwrapUpdates) {
-        if (this.rushConfiguration.getRepoState(this.options.variant).refreshState(this.rushConfiguration)) {
+        if (
+          this.rushConfiguration
+            .getRepoState(subspaceName, this.options.variant)
+            .refreshState(this.rushConfiguration)
+        ) {
           // eslint-disable-next-line no-console
           console.log(
             colors.yellow(
@@ -301,14 +304,21 @@ export abstract class BaseInstallManager {
 
     // Additionally, if they pulled an updated shrinkwrap file from Git,
     // then we can't skip this install
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
+    potentiallyChangedFiles.push(
+      this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName, this.options.variant)
+    );
 
     // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
+    potentiallyChangedFiles.push(
+      this.rushConfiguration.getCommonVersionsFilePath(subspaceName, this.options.variant)
+    );
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
+      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(
+        subspaceName,
+        this.options.variant
+      );
 
       if (FileSystem.exists(pnpmFileFilename)) {
         potentiallyChangedFiles.push(pnpmFileFilename);
@@ -461,6 +471,7 @@ export abstract class BaseInstallManager {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
         this.rushConfiguration.getCommonTempFolder(subspaceName),
+        subspaceName,
         this.options
       );
 

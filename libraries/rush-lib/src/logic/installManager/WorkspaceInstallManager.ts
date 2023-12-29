@@ -98,8 +98,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // If there are orphaned projects, we need to update
       const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
-        this.rushConfiguration
+        this.rushConfiguration,
+        subspaceName
       );
+
       if (orphanedProjects.length > 0) {
         for (const orhpanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
@@ -121,6 +123,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       shrinkwrapIsUpToDate = false;
     } else {
       const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
+        subspaceName,
         this.options.variant
       );
       if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
@@ -139,14 +142,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
-      console.log(
-        `Processing project ${rushProject.packageName} who belongs in subspace ${rushProject.subspaceName} in subspace ${subspaceName}`
-      );
       if (subspaceName && !SubspaceConfiguration.belongsInSubspace(rushProject, subspaceName)) {
         // skip processing any project that isn't in this subspace
-        console.log(
-          `Skipping project ${rushProject.packageName} as it does not belong to subspace ${subspaceName}`
-        );
         continue;
       }
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
@@ -242,7 +239,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, this.options.variant)) {
+      if (
+        await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspaceName, this.options.variant)
+      ) {
+        console.log('unmatched in workspace install manager');
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
         );
@@ -301,7 +301,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    */
   protected async installAsync(cleanInstall: boolean, subspaceName: string | undefined): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
+    const packageManagerFilename: string = this.rushConfiguration.getPackageManagerToolFilename(subspaceName);
 
     const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
       this.rushConfiguration,
@@ -392,7 +392,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               }
             }
           : undefined;
-
       try {
         await Utilities.executeCommandAndProcessOutputWithRetryAsync(
           {

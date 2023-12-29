@@ -29,7 +29,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       getCommonRushConfigFolder: () => '',
       projects,
       rushJsonFolder: '',
-      getCommittedShrinkwrapFilename(): string {
+      getCommittedShrinkwrapFilename(subspaceName: string | undefined): string {
         return 'common/config/rush/pnpm-lock.yaml';
       },
       getProjectLookupForRoot(root: string): LookupByPath<RushConfigurationProject> {

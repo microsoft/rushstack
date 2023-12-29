@@ -3955,6 +3955,7 @@ packages:
       inquirer: 7.3.3
       js-yaml: 3.13.1
       node-fetch: 2.6.7
+      normalize-path: 3.0.0
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
       read-package-tree: 5.1.6

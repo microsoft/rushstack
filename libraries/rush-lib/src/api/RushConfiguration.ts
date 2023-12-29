@@ -240,6 +240,9 @@ export class RushConfiguration {
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
 
+  // subspace -> common-versions configuration
+  private _commonVersionsConfigurationsBySubspace: Map<string, CommonVersionsConfiguration> | undefined;
+
   /**
    * The name of the package manager being used to install dependencies
    */
@@ -345,13 +348,6 @@ export class RushConfiguration {
    * The version of the locally package manager tool.  (Example: "1.2.3")
    */
   public readonly packageManagerToolVersion: string;
-
-  /**
-   * The absolute path to the locally package manager tool.  If "rush install" has not
-   * been run, then this file may not exist yet.
-   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
-   */
-  public readonly packageManagerToolFilename: string;
 
   /**
    * The minimum allowable folder depth for the projectFolder field in the rush.json file.
@@ -685,16 +681,6 @@ export class RushConfiguration {
     }
 
     this.shrinkwrapFilename = this.packageManagerWrapper.shrinkwrapFilename;
-
-    this.packageManagerToolFilename = path.resolve(
-      path.join(
-        this.getCommonTempFolder(),
-        `${this.packageManager}-local`,
-        'node_modules',
-        '.bin',
-        `${this.packageManager}`
-      )
-    );
 
     RushConfiguration._validateCommonRushConfigFolder(
       this.getCommonRushConfigFolder(),
@@ -1136,8 +1122,8 @@ export class RushConfiguration {
    * @deprecated Use `getCommittedShrinkwrapFilename` instead, which gets the correct common
    * shrinkwrap file name for a given active variant.
    */
-  public get committedShrinkwrapFilename(): string {
-    return this.getCommittedShrinkwrapFilename();
+  public committedShrinkwrapFilename(subspaceName: string | undefined): string {
+    return this.getCommittedShrinkwrapFilename(subspaceName);
   }
 
   /**
@@ -1177,6 +1163,23 @@ export class RushConfiguration {
   }
 
   /**
+   * The absolute path to the locally package manager tool.  If "rush install" has not
+   * been run, then this file may not exist yet.
+   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
+   */
+  public getPackageManagerToolFilename(subspaceName?: string | undefined): string {
+    return path.resolve(
+      path.join(
+        this.getCommonTempFolder(subspaceName),
+        `${this.packageManager}-local`,
+        'node_modules',
+        '.bin',
+        `${this.packageManager}`
+      )
+    );
+  }
+
+  /**
    * Returns full path of the temporary shrinkwrap file for a specific subspace and returns the common workspace shrinkwrap if no subspaceName is provided..
    * @remarks
    * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
@@ -1191,7 +1194,7 @@ export class RushConfiguration {
       const fullSubspacePath: string = `${this.getCommonTempFolder(subspaceName)}/${this.shrinkwrapFilename}`;
       return fullSubspacePath;
     } else {
-      return path.join(this.getCommonTempFolder(), this.shrinkwrapFilename);
+      return path.join(this.getCommonTempFolder(subspaceName), this.shrinkwrapFilename);
     }
   }
 
@@ -1345,8 +1348,8 @@ export class RushConfiguration {
    * @deprecated Use `getCommonVersions` instead, which gets the correct common version data
    * for a given active variant.
    */
-  public get commonVersions(): CommonVersionsConfiguration {
-    return this.getCommonVersions();
+  public commonVersions(subspaceName: string | undefined): CommonVersionsConfiguration {
+    return this.getCommonVersions(subspaceName);
   }
 
   /**
@@ -1371,12 +1374,13 @@ export class RushConfiguration {
    * Gets the path to the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommonVersionsFilePath(variant?: string | undefined): string {
+  public getCommonVersionsFilePath(subspaceName: string | undefined, variant?: string | undefined): string {
     const commonVersionsFilename: string = path.join(
-      this.getCommonRushConfigFolder(),
+      this.getCommonRushConfigFolder(subspaceName),
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.commonVersionsFilename
     );
+    console.log('generated file name: ', commonVersionsFilename, subspaceName);
     return commonVersionsFilename;
   }
 
@@ -1396,9 +1400,15 @@ export class RushConfiguration {
    * Gets the settings from the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
+  public getCommonVersions(
+    subspaceName: string | undefined,
+    variant?: string | undefined
+  ): CommonVersionsConfiguration {
     if (!this._commonVersionsConfigurationsByVariant) {
       this._commonVersionsConfigurationsByVariant = new Map();
+    }
+    if (!this._commonVersionsConfigurationsBySubspace) {
+      this._commonVersionsConfigurationsBySubspace = new Map();
     }
 
     // Use an empty string as the key when no variant provided. Anything else would possibly conflict
@@ -1406,10 +1416,18 @@ export class RushConfiguration {
     const variantKey: string = variant || '';
     let commonVersionsConfiguration: CommonVersionsConfiguration | undefined =
       this._commonVersionsConfigurationsByVariant.get(variantKey);
+    if (subspaceName) {
+      commonVersionsConfiguration = this._commonVersionsConfigurationsBySubspace.get(subspaceName);
+    }
     if (!commonVersionsConfiguration) {
-      const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
+      const commonVersionsFilename: string = this.getCommonVersionsFilePath(subspaceName, variant);
+      console.log('common Versions Filename: ', commonVersionsFilename, subspaceName);
       commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
-      this._commonVersionsConfigurationsByVariant.set(variantKey, commonVersionsConfiguration);
+      if (subspaceName) {
+        this._commonVersionsConfigurationsBySubspace.set(subspaceName, commonVersionsConfiguration);
+      } else {
+        this._commonVersionsConfigurationsByVariant.set(variantKey, commonVersionsConfiguration);
+      }
     }
 
     return commonVersionsConfiguration;
@@ -1447,18 +1465,22 @@ export class RushConfiguration {
 
   /**
    * Gets the contents from the repo-state.json file for a specific variant.
+   * @param subspaceName - The name of the subspace in use by the active command.
    * @param variant - The name of the current variant in use by the active command.
    */
   public getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile {
     const repoStateFilename: string = this.getRepoStateFilePath(subspaceName, variant);
-    return RepoStateFile.loadFromFile(repoStateFilename, variant);
+    return RepoStateFile.loadFromFile(repoStateFilename, subspaceName, variant);
   }
 
   /**
    * Gets the committed shrinkwrap file name for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommittedShrinkwrapFilename(variant?: string | undefined): string {
+  public getCommittedShrinkwrapFilename(
+    subspaceName: string | undefined,
+    variant?: string | undefined
+  ): string {
     if (variant) {
       if (!this._variants.has(variant)) {
         throw new Error(
@@ -1471,7 +1493,7 @@ export class RushConfiguration {
       }
     }
 
-    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
+    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(subspaceName, variant);
 
     return path.join(variantConfigFolderPath, this.shrinkwrapFilename);
   }
@@ -1494,8 +1516,8 @@ export class RushConfiguration {
    * @remarks
    * The file path is returned even if PNPM is not configured as the package manager.
    */
-  public getPnpmfilePath(variant?: string | undefined): string {
-    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
+  public getPnpmfilePath(subspaceName: string | undefined, variant?: string | undefined): string {
+    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(subspaceName, variant);
 
     return path.join(
       variantConfigFolderPath,
@@ -1586,7 +1608,10 @@ export class RushConfiguration {
     return undefined;
   }
 
-  private _getVariantConfigFolderPath(variant?: string | undefined): string {
+  private _getVariantConfigFolderPath(
+    subspaceName: string | undefined,
+    variant?: string | undefined
+  ): string {
     if (variant) {
       if (!this._variants.has(variant)) {
         throw new Error(
@@ -1600,7 +1625,7 @@ export class RushConfiguration {
     }
 
     return path.join(
-      this.getCommonRushConfigFolder(),
+      this.getCommonRushConfigFolder(subspaceName),
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
     );
   }

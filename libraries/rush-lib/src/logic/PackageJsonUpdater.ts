@@ -225,6 +225,7 @@ export class PackageJsonUpdater {
     if (updateOtherPackages) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         this._rushConfiguration,
+        undefined,
         {
           variant: variant
         }
@@ -412,6 +413,7 @@ export class PackageJsonUpdater {
       if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
           this._rushConfiguration,
+          undefined,
           {
             variant: variant
           }
@@ -668,7 +670,7 @@ export class PackageJsonUpdater {
         }
 
         const allVersions: string = Utilities.executeCommandAndCaptureOutput(
-          this._rushConfiguration.packageManagerToolFilename,
+          this._rushConfiguration.getPackageManagerToolFilename(),
           commandArgs,
           this._rushConfiguration.getCommonTempFolder()
         );
@@ -729,7 +731,7 @@ export class PackageJsonUpdater {
         }
 
         selectedVersion = Utilities.executeCommandAndCaptureOutput(
-          this._rushConfiguration.packageManagerToolFilename,
+          this._rushConfiguration.getPackageManagerToolFilename(),
           commandArgs,
           this._rushConfiguration.getCommonTempFolder()
         ).trim();

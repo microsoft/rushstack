@@ -36,6 +36,7 @@ export class PnpmfileConfiguration {
 
   public static async initializeAsync(
     rushConfiguration: RushConfiguration,
+    subspaceName: string | undefined,
     pnpmfileShimOptions?: IPnpmfileShimOptions
   ): Promise<PnpmfileConfiguration> {
     if (rushConfiguration.packageManager !== 'pnpm') {
@@ -49,6 +50,7 @@ export class PnpmfileConfiguration {
       log: (message: string) => {},
       pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
         rushConfiguration,
+        subspaceName,
         pnpmfileShimOptions
       )
     };
@@ -59,6 +61,7 @@ export class PnpmfileConfiguration {
   public static async writeCommonTempPnpmfileShimAsync(
     rushConfiguration: RushConfiguration,
     targetDir: string,
+    subspaceName: string | undefined,
     options?: IPnpmfileShimOptions
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
@@ -79,7 +82,7 @@ export class PnpmfileConfiguration {
     });
 
     const pnpmfileShimSettings: IPnpmfileShimSettings =
-      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, options);
+      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspaceName, options);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
@@ -87,9 +90,9 @@ export class PnpmfileConfiguration {
     });
   }
 
-  // SUBSPACE-TODO: add common versions for subspaces
   private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
+    subspaceName: string | undefined,
     options?: IPnpmfileShimOptions
   ): Promise<IPnpmfileShimSettings> {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
@@ -98,7 +101,8 @@ export class PnpmfileConfiguration {
 
     // Only workspaces shims in the common versions using pnpmfile
     if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
-      const commonVersionsConfiguration: CommonVersionsConfiguration = rushConfiguration.getCommonVersions();
+      const commonVersionsConfiguration: CommonVersionsConfiguration =
+        rushConfiguration.getCommonVersions(subspaceName);
       const preferredVersions: Map<string, string> = new Map();
       MapExtensions.mergeFromMap(preferredVersions, commonVersionsConfiguration.getAllPreferredVersions());
       MapExtensions.mergeFromMap(preferredVersions, rushConfiguration.getImplicitlyPreferredVersions());
@@ -120,7 +124,10 @@ export class PnpmfileConfiguration {
     };
 
     // Use the provided path if available. Otherwise, use the default path.
-    const userPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(options?.variant);
+    const userPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(
+      subspaceName,
+      options?.variant
+    );
     if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
       settings.userPnpmfilePath = userPnpmfilePath;
     }

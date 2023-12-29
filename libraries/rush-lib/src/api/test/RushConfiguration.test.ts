@@ -50,7 +50,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.packageManager).toEqual('npm');
     assertPathProperty(
       'committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename,
+      rushConfiguration.committedShrinkwrapFilename(undefined),
       './repo/common/config/rush/npm-shrinkwrap.json'
     );
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
@@ -70,7 +70,7 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty(
       'packageManagerToolFilename',
-      rushConfiguration.packageManagerToolFilename,
+      rushConfiguration.getPackageManagerToolFilename(),
       './repo/common/temp/npm-local/node_modules/.bin/npm'
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
@@ -123,12 +123,12 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
     assertPathProperty(
       'committedShrinkwrapFilename',
-      rushConfiguration.getCommittedShrinkwrapFilename(),
+      rushConfiguration.getCommittedShrinkwrapFilename(undefined),
       './repo/common/config/rush/pnpm-lock.yaml'
     );
     assertPathProperty(
       'getPnpmfilePath',
-      rushConfiguration.getPnpmfilePath(),
+      rushConfiguration.getPnpmfilePath(undefined),
       './repo/common/config/rush/.pnpmfile.cjs'
     );
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
@@ -148,7 +148,7 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty(
       'packageManagerToolFilename',
-      rushConfiguration.packageManagerToolFilename,
+      rushConfiguration.getPackageManagerToolFilename(),
       './repo/common/temp/pnpm-local/node_modules/.bin/pnpm'
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
@@ -195,7 +195,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
     assertPathProperty(
       'getPnpmfilePath',
-      rushConfiguration.getPnpmfilePath(),
+      rushConfiguration.getPnpmfilePath(undefined),
       './repo/common/config/rush/pnpmfile.js'
     );
     expect(rushConfiguration.repositoryUrls).toEqual(['someFakeUrl', 'otherFakeUrl']);
@@ -224,7 +224,7 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty(
       'packageManagerToolFilename',
-      rushConfiguration.packageManagerToolFilename,
+      rushConfiguration.getPackageManagerToolFilename(),
       `${expectedValue}/pnpm-local/node_modules/.bin/pnpm`
     );
   });

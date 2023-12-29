@@ -580,17 +580,23 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+  public findOrphanedProjects(
+    rushConfiguration: RushConfiguration,
+    subspaceName: string | undefined
+  ): ReadonlyArray<string> {
     // The base shrinkwrap handles orphaned projects the same across all package managers,
     // but this is only valid for non-workspace installs
     if (!this.isWorkspaceCompatible) {
-      return super.findOrphanedProjects(rushConfiguration);
+      return super.findOrphanedProjects(rushConfiguration, subspaceName);
     }
 
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(rushConfiguration.getCommonTempFolder(), importerKey);
+      const rushProjectPath: string = path.resolve(
+        rushConfiguration.getCommonTempFolder(subspaceName),
+        importerKey
+      );
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -668,10 +674,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
+    subspaceName: string | undefined,
     variant?: string
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      project.rushConfiguration.getCommonTempFolder(),
+      project.rushConfiguration.getCommonTempFolder(subspaceName),
       project.projectFolder
     );
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
@@ -684,9 +691,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Initialize the pnpmfile if it doesn't exist
     if (!this._pnpmfileConfiguration) {
-      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(project.rushConfiguration, {
-        variant
-      });
+      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
+        project.rushConfiguration,
+        subspaceName,
+        {
+          variant
+        }
+      );
     }
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the

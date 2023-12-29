@@ -21,7 +21,7 @@ export interface IRunInstallOptions {
 export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<void> {
   const { rushConfiguration, rushGlobalFolder, isDebug } = options;
 
-  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, options.terminal);
+  VersionMismatchFinder.ensureConsistentVersions(rushConfiguration, options.terminal, undefined);
   SetupChecks.validate(rushConfiguration);
 
   const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
