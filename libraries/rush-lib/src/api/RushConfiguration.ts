@@ -1138,7 +1138,29 @@ export class RushConfiguration {
     if (subspaceName) {
       this.validateSubspaceName(subspaceName);
 
-      return `${this.commonFolder}/config/subspaces/${subspaceName}`;
+      // If this subspace doesn't have a configuration folder, check if it is in the project folder itself
+      // if the splitWorkspaceCompatibility option is enabled in the subspace configuration
+      let subspaceConfigFolder: string = `${this.commonFolder}/config/subspaces/${subspaceName}`;
+      if (
+        !FileSystem.exists(subspaceConfigFolder) &&
+        this.subspaceConfiguration?.splitWorkspaceCompatibility
+      ) {
+        // Look in the project folder
+        const rushProjectsInSubspace: RushConfigurationProject[] | undefined =
+          this._rushProjectsBySubspaceName.get(subspaceName);
+        if (!rushProjectsInSubspace || rushProjectsInSubspace.length > 1) {
+          throw new Error(
+            `The subspace contains more than one package and no configuration folder was found in common/config/subspaces/${subspaceName}`
+          );
+        }
+        const rushProject: RushConfigurationProject = rushProjectsInSubspace[0];
+        subspaceConfigFolder = `${rushProject.projectFolder}/subspace/${subspaceName}`;
+        if (!FileSystem.exists(subspaceConfigFolder)) {
+          throw new Error(`The configuration folder for the ${subspaceName} subspace was not found.`);
+        }
+      }
+
+      return subspaceConfigFolder;
     } else {
       return path.join(this.commonFolder, 'config', 'rush');
     }

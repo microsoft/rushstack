@@ -1326,6 +1326,7 @@ export class SubspaceConfiguration {
     static belongsInSubspace(rushProject: RushConfigurationProject, subspaceName: string): boolean;
     readonly enabled: boolean;
     isValidSubspaceName(subspaceName: string): boolean;
+    readonly splitWorkspaceCompatibility: boolean;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: Set<string>;
     // (undocumented)

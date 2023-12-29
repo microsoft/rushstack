@@ -43,6 +43,11 @@ export class SubspaceConfiguration {
   public readonly enabled: boolean;
 
   /**
+   * This determines if the subspaces feature supports adding configuration files under the project folder itself
+   */
+  public readonly splitWorkspaceCompatibility: boolean;
+
+  /**
    * A set of the available subspaces
    */
   public readonly subspaceNames: Set<string>;
@@ -50,6 +55,7 @@ export class SubspaceConfiguration {
   private constructor(configuration: Readonly<ISubspaceConfigurationJson>, subspaceJsonFilePath: string) {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.enabled = configuration.enabled;
+    this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
     this.subspaceNames = new Set();
     for (const subspaceName of configuration.subspaceNames) {
       if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
