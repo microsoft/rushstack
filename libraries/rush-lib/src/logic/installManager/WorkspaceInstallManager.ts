@@ -242,7 +242,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       if (
         await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspaceName, this.options.variant)
       ) {
-        console.log('unmatched in workspace install manager');
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
         );

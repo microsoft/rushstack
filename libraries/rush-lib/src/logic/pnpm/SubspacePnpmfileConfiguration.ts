@@ -10,6 +10,7 @@ import type { IPnpmfileContext, ISubspacePnpmfileShimSettings, IWorkspaceProject
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { SubspaceConfiguration } from '../../api/SubspaceConfiguration';
+import { RushConstants } from '../RushConstants';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -51,10 +52,7 @@ export class SubspacePnpmfileConfiguration {
     }
 
     const targetDir: string = rushConfiguration.getCommonTempFolder(subspaceName);
-    const subspaceGlobalPnpmfilePath: string = path.join(
-      targetDir,
-      (rushConfiguration.packageManagerWrapper as PnpmPackageManager).globalPnpmfileFilename
-    );
+    const subspaceGlobalPnpmfilePath: string = path.join(targetDir, RushConstants.pnpmfileGlobalFilename);
 
     // Write the shim itself
     await FileSystem.copyFileAsync({

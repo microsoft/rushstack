@@ -432,7 +432,9 @@ export abstract class BaseInstallManager {
     if (subspaceName) {
       // _RUSH_SUBSPACE_TEMP_FOLDER is used in .npmrc for subspaces.
       process.env[subspaceEnvironmentVariable] = this.rushConfiguration.getCommonTempFolder(subspaceName);
-      extraNpmrcLines.push(`global-pnpmfile=\${${subspaceEnvironmentVariable}}/global-pnpmfile.cjs`);
+      extraNpmrcLines.push(
+        `global-pnpmfile=\${${subspaceEnvironmentVariable}}/${RushConstants.pnpmfileGlobalFilename}`
+      );
     }
 
     // Also copy down the committed .npmrc file, if there is one

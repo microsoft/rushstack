@@ -49,14 +49,4 @@ export class PnpmPackageManager extends PackageManager {
     // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0 for more details.
     this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm', 'lock.yaml');
   }
-
-  /**
-   * The filename of the global shrinkwrap file that is used by the package manager.
-   *
-   * @remarks
-   * Example: `global-pnpmfile.cjs`
-   */
-  public get globalPnpmfileFilename(): string {
-    return 'global-pnpmfile.cjs';
-  }
 }

@@ -1225,6 +1225,7 @@ export class RushConstants {
     // @deprecated
     static readonly pinnedVersionsFilename: string;
     static readonly pnpmConfigFilename: string;
+    static readonly pnpmfileGlobalFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
     static readonly pnpmPatchesFolderName: string;

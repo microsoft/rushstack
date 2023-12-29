@@ -1380,7 +1380,6 @@ export class RushConfiguration {
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.commonVersionsFilename
     );
-    console.log('generated file name: ', commonVersionsFilename, subspaceName);
     return commonVersionsFilename;
   }
 
@@ -1421,7 +1420,6 @@ export class RushConfiguration {
     }
     if (!commonVersionsConfiguration) {
       const commonVersionsFilename: string = this.getCommonVersionsFilePath(subspaceName, variant);
-      console.log('common Versions Filename: ', commonVersionsFilename, subspaceName);
       commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
       if (subspaceName) {
         this._commonVersionsConfigurationsBySubspace.set(subspaceName, commonVersionsConfiguration);
