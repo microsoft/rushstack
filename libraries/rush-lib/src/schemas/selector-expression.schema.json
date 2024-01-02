@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "JSON Selector Expression",
+  "description": "A JSON representation of selector expressions, which can be used to select sets of projects.",
+  "definitions": {
+    "expression": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/simpleSelector"
+        },
+        {
+          "$ref": "#/definitions/detailedSelector"
+        },
+        {
+          "$ref": "#/definitions/parameter"
+        },
+        {
+          "$ref": "#/definitions/unionOperator"
+        },
+        {
+          "$ref": "#/definitions/intersectOperator"
+        },
+        {
+          "$ref": "#/definitions/subtractOperator"
+        }
+      ]
+    },
+    "simpleSelector": {
+      "type": "string"
+    },
+    "detailedSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "requiredProperties": ["scope", "value"],
+      "properties": {
+        "scope": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "patternProperties": {
+        "^--.+$": {
+          "$ref": "#/definitions/expression"
+        }
+      }
+    },
+    "unionOperator": {
+      "type": "object",
+      "additionalProperties": false,
+      "requiredProperties": ["union"],
+      "properties": {
+        "union": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/expression"
+          }
+        }
+      }
+    },
+    "intersectOperator": {
+      "type": "object",
+      "additionalProperties": false,
+      "requiredProperties": ["intersect"],
+      "properties": {
+        "intersect": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/expression"
+          }
+        }
+      }
+    },
+    "notOperator": {
+      "type": "object",
+      "additionalProperties": false,
+      "requiredProperties": ["subtract"],
+      "properties": {
+        "subtract": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/expression"
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "$ref": "#/definitions/expression"
+}

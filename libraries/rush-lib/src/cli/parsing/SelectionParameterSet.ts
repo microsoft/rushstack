@@ -23,6 +23,10 @@ import {
 import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
+import { JsonFileSelectorParser } from '../../logic/selectors/JsonFileSelectorParser';
+
+import { RushProjectSelector } from '../../api/RushProjectSelector';
+import { SelectorError } from '../../logic/selectors/SelectorError';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -32,6 +36,7 @@ import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/Versio
  */
 export class SelectionParameterSet {
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _gitOptions: IGitSelectorParserOptions;
 
   private readonly _fromProject: CommandLineStringListParameter;
   private readonly _impactedByProject: CommandLineStringListParameter;
@@ -45,23 +50,32 @@ export class SelectionParameterSet {
 
   private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
+  private readonly _projectSelector: RushProjectSelector;
+
   public constructor(
     rushConfiguration: RushConfiguration,
     action: CommandLineParameterProvider,
     gitOptions: IGitSelectorParserOptions
   ) {
     this._rushConfiguration = rushConfiguration;
+    this._gitOptions = gitOptions;
 
+    // New project selection interface
+    this._projectSelector = new RushProjectSelector(rushConfiguration, {
+      gitSelectorParserOptions: this._gitOptions
+    });
+
+    // Classic, directly instantiated selector parsers
     const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
       string,
       ISelectorParser<RushConfigurationProject>
     >();
-
     const nameSelectorParser: NamedProjectSelectorParser = new NamedProjectSelectorParser(rushConfiguration);
     selectorParsers.set('name', nameSelectorParser);
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('json', new JsonFileSelectorParser(rushConfiguration, this._projectSelector));
 
     this._selectorParserByScope = selectorParsers;
 
@@ -393,12 +407,23 @@ export class SelectionParameterSet {
         throw new AlreadyReportedError();
       }
 
-      for (const project of await handler.evaluateSelectorAsync({
-        unscopedSelector,
-        terminal,
-        parameterName
-      })) {
-        selection.add(project);
+      const context: string = `parameter '${parameterName}'`;
+
+      try {
+        for (const project of await handler.evaluateSelectorAsync({
+          unscopedSelector,
+          terminal,
+          context
+        })) {
+          selection.add(project);
+        }
+      } catch (error) {
+        if (error instanceof SelectorError) {
+          terminal.writeErrorLine(error.message);
+          throw new AlreadyReportedError();
+        } else {
+          throw error;
+        }
       }
     }
 

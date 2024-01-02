@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add selector expressions to Rush CLI",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

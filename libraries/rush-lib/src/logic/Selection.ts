@@ -30,6 +30,13 @@ export class Selection {
   }
 
   /**
+   * Computes the subtraction of two or more sets (e.g. A - B - C).
+   */
+  public static subtraction<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
+    return new Set(generateSubtraction(first, ...rest));
+  }
+
+  /**
    * Computes a set that contains the input projects and all the direct and indirect dependencies thereof.
    */
   public static expandAllDependencies<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
@@ -72,6 +79,14 @@ interface IExpansionStepFunction<T> {
 function* generateIntersection<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Iterable<T> {
   for (const item of first) {
     if (rest.every((set: ReadonlySet<T>) => set.has(item))) {
+      yield item;
+    }
+  }
+}
+
+function* generateSubtraction<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Iterable<T> {
+  for (const item of first) {
+    if (rest.every((set: ReadonlySet<T>) => !set.has(item))) {
       yield item;
     }
   }

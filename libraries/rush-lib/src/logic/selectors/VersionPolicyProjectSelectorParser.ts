@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
-
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
+import { SelectorError } from './SelectorError';
 
 export class VersionPolicyProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
@@ -17,15 +16,14 @@ export class VersionPolicyProjectSelectorParser implements ISelectorParser<RushC
   public async evaluateSelectorAsync({
     unscopedSelector,
     terminal,
-    parameterName
+    context
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const selection: Set<RushConfigurationProject> = new Set();
 
     if (!this._rushConfiguration.versionPolicyConfiguration.versionPolicies.has(unscopedSelector)) {
-      terminal.writeErrorLine(
-        `The version policy "${unscopedSelector}" passed to "${parameterName}" does not exist in version-policies.json.`
+      throw new SelectorError(
+        `The version policy "${unscopedSelector}" in ${context} does not exist in version-policies.json.`
       );
-      throw new AlreadyReportedError();
     }
 
     for (const project of this._rushConfiguration.projects) {
