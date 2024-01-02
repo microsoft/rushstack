@@ -447,6 +447,7 @@ function _getOrCreatePhaseOperation(
     // Only create the operation. Dependencies are hooked up separately
     operation = new Operation({
       groupName: phase.phaseName,
+      name: `${phase.phaseName} phase`,
       runner: new PhaseOperationRunner({ phase, internalHeftSession })
     });
     operations.set(key, operation);
@@ -466,6 +467,7 @@ function _getOrCreateTaskOperation(
   if (!operation) {
     operation = new Operation({
       groupName: task.parentPhase.phaseName,
+      name: `${task.taskName} task`,
       runner: new TaskOperationRunner({
         internalHeftSession,
         task

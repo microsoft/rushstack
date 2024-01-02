@@ -58,7 +58,7 @@ export interface IOperationExecutionOptions {
 // @beta
 export interface IOperationOptions {
     groupName?: string | undefined;
-    name?: string | undefined;
+    name: string;
     runner?: IOperationRunner | undefined;
     weight?: number | undefined;
 }
@@ -140,7 +140,7 @@ export interface IWatchLoopState {
 
 // @beta
 export class Operation implements IOperationStates {
-    constructor(options?: IOperationOptions);
+    constructor(options: IOperationOptions);
     // (undocumented)
     addDependency(dependency: Operation): void;
     readonly consumers: Set<Operation>;
@@ -152,7 +152,7 @@ export class Operation implements IOperationStates {
     _executeAsync(context: IExecuteOperationContext): Promise<OperationStatus>;
     readonly groupName: string | undefined;
     lastState: IOperationState | undefined;
-    readonly name: string | undefined;
+    readonly name: string;
     // (undocumented)
     reset(): void;
     runner: IOperationRunner | undefined;
