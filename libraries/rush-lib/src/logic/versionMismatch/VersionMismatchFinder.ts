@@ -11,6 +11,7 @@ import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity'
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
@@ -111,7 +112,14 @@ export class VersionMismatchFinder {
     // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    for (const project of rushConfiguration.projects) {
+    // If subspace is specified, only go through projects in that subspace
+    let projectsToParse: RushConfigurationProject[] = [];
+    if (subspaceName) {
+      projectsToParse = rushConfiguration.getSubspaceProjects(subspaceName);
+    } else {
+      projectsToParse = rushConfiguration.projects;
+    }
+    for (const project of projectsToParse) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
