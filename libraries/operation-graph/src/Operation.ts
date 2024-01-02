@@ -21,7 +21,7 @@ export interface IOperationOptions {
   /**
    * The name of this operation, for logging.
    */
-  name?: string | undefined;
+  name: string;
 
   /**
    * The group that this operation belongs to. Will be used for logging and duration tracking.
@@ -100,7 +100,7 @@ export class Operation implements IOperationStates {
   /**
    * The name of this operation, for logging.
    */
-  public readonly name: string | undefined;
+  public readonly name: string;
 
   /**
    * When the scheduler is ready to process this `Operation`, the `runner` implements the actual work of
@@ -173,11 +173,11 @@ export class Operation implements IOperationStates {
    */
   private _runPending: boolean = true;
 
-  public constructor(options?: IOperationOptions) {
+  public constructor(options: IOperationOptions) {
     this.groupName = options?.groupName;
     this.runner = options?.runner;
     this.weight = options?.weight || 1;
-    this.name = options?.name;
+    this.name = options.name;
   }
 
   public addDependency(dependency: Operation): void {
