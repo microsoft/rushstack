@@ -472,6 +472,7 @@ function _getOrCreateTaskOperation(
   if (!operation) {
     operation = new Operation({
       groupName: task.parentPhase.phaseName,
+      name: task.taskName,
       runner: new TaskOperationRunner({
         internalHeftSession,
         task
