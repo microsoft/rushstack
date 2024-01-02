@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Improve logging by setting a task name on the task operation",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
