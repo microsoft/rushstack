@@ -48,7 +48,7 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
         }
       }
     },
-    runtimeLocaleExpression: 'self.__locale',
+    runtimeLocaleExpression: 'self.__locale + "/"',
     localizationStats: {
       callback: statsCallback
     },
@@ -56,7 +56,7 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
       if (locale === 'none') {
         return '';
       } else {
-        return locale;
+        return `${locale}/`;
       }
     }
   };
@@ -70,8 +70,8 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
     },
     output: {
       path: '/release',
-      filename: '[locale]/[name].js',
-      chunkFilename: 'chunks/[locale]/[name].js'
+      filename: '[locale][name].js',
+      chunkFilename: 'chunks/[locale][name].js'
     },
     module: {
       rules: [
