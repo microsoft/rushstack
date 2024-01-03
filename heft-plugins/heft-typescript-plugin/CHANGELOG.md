@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Wed, 20 Dec 2023 01:09:46 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Jan 2024 00:31:18 GMT and should not be manually modified.
+
+## 0.2.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+### Patches
+
+- Fix break in watch mode during updateShapeSignature call.
 
 ## 0.2.15
 Wed, 20 Dec 2023 01:09:46 GMT
