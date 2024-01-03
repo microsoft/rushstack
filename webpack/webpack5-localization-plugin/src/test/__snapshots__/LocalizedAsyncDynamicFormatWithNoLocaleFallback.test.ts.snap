@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`LocalizationPlugin Handles async localized chunks with a runtime locale expression (minified): Assets 1`] = `
+Object {
+  "/main.js": SizeOnlySource {
+    "_size": 2440,
+  },
+  "/other.js": SizeOnlySource {
+    "_size": 27,
+  },
+  "chunks/en-us/async.js": SizeOnlySource {
+    "_size": 199,
+  },
+  "chunks/foo/async.js": SizeOnlySource {
+    "_size": 207,
+  },
+}
+`;
+
 exports[`LocalizationPlugin Handles async localized chunks with a runtime locale expression (minified): Content 1`] = `
 Object {
   "/release/chunks/en-us/async.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[931],{\\"./a/async.js\\":(_,s,e)=>{e.r(s);const a=JSON.parse('{\\"B\\":\\"blah\\"}'),h=JSON.parse('{\\"P\\":\\"something else\\"}');console.log(a.B,h.P)}}]);",
@@ -26,6 +43,23 @@ Object {
 `;
 
 exports[`LocalizationPlugin Handles async localized chunks with a runtime locale expression (minified): Warnings 1`] = `Array []`;
+
+exports[`LocalizationPlugin Handles async localized chunks with a runtime locale expression (unminified): Assets 1`] = `
+Object {
+  "/main.js": SizeOnlySource {
+    "_size": 10644,
+  },
+  "/other.js": SizeOnlySource {
+    "_size": 111,
+  },
+  "chunks/en-us/async.js": SizeOnlySource {
+    "_size": 628,
+  },
+  "chunks/foo/async.js": SizeOnlySource {
+    "_size": 636,
+  },
+}
+`;
 
 exports[`LocalizationPlugin Handles async localized chunks with a runtime locale expression (unminified): Content 1`] = `
 Object {

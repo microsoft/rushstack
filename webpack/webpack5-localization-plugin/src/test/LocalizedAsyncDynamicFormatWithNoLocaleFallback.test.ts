@@ -103,6 +103,8 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
   expect(errors).toMatchSnapshot('Errors');
   expect(warnings).toMatchSnapshot('Warnings');
 
+  expect(stats.compilation.assets).toMatchSnapshot('Assets');
+
   const results: {} = memoryFileSystem.toJSON('/release');
   expect(results).toMatchSnapshot('Content');
 
