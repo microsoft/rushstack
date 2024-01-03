@@ -1,34 +1,37 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as childProcess from 'child_process';
+import type {
+  CommandLineFlagParameter,
+  HeftConfiguration,
+  IHeftTaskPlugin,
+  IHeftTaskRunHookOptions,
+  IHeftTaskSession,
+  IScopedLogger
+} from '@rushstack/heft';
+import type {
+  IWebpackPluginAccessor as IWebpack4PluginAccessor,
+  PluginName as Webpack4PluginName
+} from '@rushstack/heft-webpack4-plugin';
+import type {
+  IWebpackPluginAccessor as IWebpack5PluginAccessor,
+  PluginName as Webpack5PluginName
+} from '@rushstack/heft-webpack5-plugin';
 import {
   AlreadyExistsBehavior,
   FileSystem,
   Import,
-  type IParsedPackageNameOrError,
+  InternalError,
   PackageName,
   SubprocessTerminator,
+  TerminalProviderSeverity,
   TerminalWritable,
-  type ITerminal,
-  TerminalProviderSeverity
+  type IParsedPackageNameOrError,
+  type ITerminal
 } from '@rushstack/node-core-library';
-import type {
-  HeftConfiguration,
-  IHeftTaskSession,
-  IScopedLogger,
-  IHeftTaskPlugin,
-  CommandLineFlagParameter,
-  IHeftTaskRunHookOptions
-} from '@rushstack/heft';
-import type {
-  PluginName as Webpack4PluginName,
-  IWebpackPluginAccessor as IWebpack4PluginAccessor
-} from '@rushstack/heft-webpack4-plugin';
-import type {
-  PluginName as Webpack5PluginName,
-  IWebpackPluginAccessor as IWebpack5PluginAccessor
-} from '@rushstack/heft-webpack5-plugin';
+import * as child_process from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 const PLUGIN_NAME: 'storybook-plugin' = 'storybook-plugin';
 const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
@@ -96,6 +99,19 @@ export interface IStorybookPluginOptions {
    * `"staticBuildOutputFolder": "newStaticBuildDir"`
    */
   staticBuildOutputFolder?: string;
+
+  /**
+   * Specifies an NPM package that is used as the (cwd) target for the storybook commands
+   * By default the plugin executes the storybook commands in the local package context,
+   * but for distribution purposes it can be useful to split the TS library and storybook exports into two packages.
+   *
+   * @example
+   * If you create an 'my-storybook-ui-app' project for distribution purposes and the library holding
+   * the (storybook) sources is `my-storybook-ui-library`, then the storybook package name would be:
+   *
+   * `"storybookPackageNameTarget": "my-storybook-ui-library"`
+   */
+  storybookPackageNameTarget?: string;
 }
 
 interface IRunStorybookOptions {
@@ -178,7 +194,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           heftConfiguration,
           options
         );
-        await this._runStorybookAsync(runStorybookOptions);
+        await this._runStorybookAsync(runStorybookOptions, options);
       });
     }
   }
@@ -264,30 +280,90 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     };
   }
 
-  private async _runStorybookAsync(runStorybookOptions: IRunStorybookOptions): Promise<void> {
-    const { workingDirectory, resolvedModulePath, outputFolder, verbose } = runStorybookOptions;
+  private async _runStorybookAsync(
+    runStorybookOptions: IRunStorybookOptions,
+    options: IStorybookPluginOptions
+  ): Promise<void> {
+    const { resolvedModulePath, verbose } = runStorybookOptions;
+    let { workingDirectory, outputFolder } = runStorybookOptions;
     this._logger.terminal.writeLine('Running Storybook compilation');
     this._logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
 
+    /**
+     * Support \'storybookPackageNameTarget\' option
+     * by changing the working directory of the storybook command
+     */
+    if (options.storybookPackageNameTarget) {
+      // Map outputFolder to local context.
+      if (outputFolder) outputFolder = path.resolve(workingDirectory, outputFolder);
+
+      // Update workingDirectory to target context.
+      workingDirectory = path.resolve(workingDirectory, 'node_modules', options.storybookPackageNameTarget);
+      if (!fs.existsSync(workingDirectory)) {
+        throw new Error(
+          `storybookPackageNameTarget ${options.storybookPackageNameTarget} could not be found ${workingDirectory}`
+        );
+      }
+
+      this._logger.terminal.writeVerboseLine(`Changing Storybook working directory to "${workingDirectory}"`);
+    }
+
     const storybookArgs: string[] = [];
+
+    /**
+     * Storybook 7 is using the new '\@storybook/cli' module
+     * combining storybook-build and storybook-start commands
+     * into a single script by using 'dev' and 'build' arguments
+     */
+    if (resolvedModulePath.includes('@storybook/cli')) {
+      if (this._isServeMode) {
+        storybookArgs.push('dev');
+      } else {
+        storybookArgs.push('build');
+      }
+    }
+
     if (outputFolder) {
       storybookArgs.push('--output-dir', outputFolder);
     }
     if (!verbose) {
       storybookArgs.push('--quiet');
     }
-    const storybookEnv: NodeJS.ProcessEnv = { ...process.env };
 
-    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      const forkedProcess: childProcess.ChildProcess = childProcess.fork(resolvedModulePath, storybookArgs, {
+    if (this._isServeMode) {
+      // Instantiate storybook runner synchronously for incremental builds
+      // this ensure that the process is not killed when heft watcher detects file changes
+      this._invokeSync(resolvedModulePath, storybookArgs);
+    } else {
+      await this._invokeAsSubprocessAsync(resolvedModulePath, storybookArgs, workingDirectory);
+    }
+  }
+
+  /**
+   * Invoke storybook cli in a forked subprocess
+   * @param command - storybook command
+   * @param args - storybook args
+   * @param cwd - working directory
+   * @returns
+   */
+  private async _invokeAsSubprocessAsync(command: string, args: string[], cwd: string): Promise<void> {
+    return await new Promise<void>((resolve, reject) => {
+      const storybookEnv: NodeJS.ProcessEnv = { ...process.env };
+      const forkedProcess: child_process.ChildProcess = child_process.fork(command, args, {
         execArgv: process.execArgv,
-        cwd: workingDirectory,
+        cwd,
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
         env: storybookEnv,
         ...SubprocessTerminator.RECOMMENDED_OPTIONS
       });
 
       SubprocessTerminator.killProcessTreeOnExit(forkedProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+
+      const childPid: number | undefined = forkedProcess.pid;
+      if (childPid === undefined) {
+        throw new InternalError(`Failed to spawn child process`);
+      }
+      this._logger.terminal.writeVerboseLine(`Started storybook process #${childPid}`);
 
       // Apply the pipe here instead of doing it in the forked process args due to a bug in Node
       // We will output stderr to the normal stdout stream since all output is piped through
@@ -318,5 +394,28 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         }
       });
     });
+  }
+
+  /**
+   * Invoke storybook cli synchronously within the current process
+   * @param command - storybook command
+   * @param args - storybook args
+   * @param cwd - working directory
+   */
+  private _invokeSync(command: string, args: string[]): void {
+    this._logger.terminal.writeLine('Launching ' + command);
+
+    // simulate storybook cli command
+    const originalArgv: string[] = process.argv;
+    const node: string = originalArgv[0];
+    process.argv = [node, command, ...args];
+
+    // invoke command synchronously
+    require(command);
+
+    // restore original heft process argv
+    process.argv = originalArgv;
+
+    this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }
 }

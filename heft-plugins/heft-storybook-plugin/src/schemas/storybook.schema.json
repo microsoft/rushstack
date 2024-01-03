@@ -28,6 +28,11 @@
       "description": "If this is empty, then it will use the storybook default output dir. If you want to change the static build output dir to staticBuildDir, then the static build output dir would be: `\"staticBuildOutputFolder\": \"staticBuildDir\"`",
       "type": "string",
       "pattern": "[^\\\\]"
+    },
+    "storybookPackageNameTarget": {
+      "title": "Specifies an NPM package that is used as the (cwd) target for the storybook commands",
+      "description": "By default the plugin executes the storybook commands in the local package context, but for distribution purposes it can be useful to split the TS library and storybook exports into two packages. For example, If you create an 'empty' storybook 'app' project for distribution purposes, then the storybook package name would be: `\"storybookPackageName\": \"my-ui-storybook-library\"`",
+      "type": "string"
     }
   }
 }
