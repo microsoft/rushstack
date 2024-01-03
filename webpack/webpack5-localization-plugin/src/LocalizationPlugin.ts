@@ -706,12 +706,8 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     // END options.noStringsLocaleName
 
     // START options.formatLocaleForFilename
-    const { formatLocaleForFilename } = this._options;
-    if (!formatLocaleForFilename) {
-      this._formatLocaleForFilename = (localeName: string) => localeName;
-    } else {
-      this._formatLocaleForFilename = formatLocaleForFilename;
-    }
+    const { formatLocaleForFilename = (localeName: string) => localeName } = this._options;
+    this._formatLocaleForFilename = formatLocaleForFilename;
     // END options.formatLocaleForFilename
     return { errors, warnings };
   }
