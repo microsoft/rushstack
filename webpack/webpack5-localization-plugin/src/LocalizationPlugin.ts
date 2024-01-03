@@ -230,7 +230,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                     chunkMapping[id] = 1;
                   }
 
-                  const noLocaleExpression: string = JSON.stringify(this._noStringsLocaleName);
+                  const noLocaleExpression: string = JSON.stringify(this._formatLocaleForFilename(this._noStringsLocaleName));
 
                   return this._formatLocaleForFilename(
                     `" + (${JSON.stringify(chunkMapping)}[chunkId]?${
