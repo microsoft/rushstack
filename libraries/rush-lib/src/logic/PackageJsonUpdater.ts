@@ -261,7 +261,8 @@ export class PackageJsonUpdater {
         variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
-        checkOnly: false
+        checkOnly: false,
+        subspace: this._rushConfiguration.getProjectSubspace(options.projects[0])
       };
 
       const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
@@ -313,7 +314,8 @@ export class PackageJsonUpdater {
         variant: variant,
         maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
         pnpmFilterArguments: [],
-        checkOnly: false
+        checkOnly: false,
+        subspace: this._rushConfiguration.getProjectSubspace(options.projects[0])
       };
 
       const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(

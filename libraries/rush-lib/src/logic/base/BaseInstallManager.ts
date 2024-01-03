@@ -84,7 +84,10 @@ export abstract class BaseInstallManager {
     this.installRecycler = purgeManager.commonTempFolderRecycler;
     this.options = options;
 
-    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(rushConfiguration);
+    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(
+      rushConfiguration,
+      this.options.subspace
+    );
 
     this.subspaceInstallFlags = new Map();
     if (rushConfiguration.subspaceConfiguration?.enabled) {
@@ -124,6 +127,7 @@ export abstract class BaseInstallManager {
 
     // Ensure that subspaces is enabled
     const subspaceName: string | undefined = this.options.subspace;
+
     if (this.rushConfiguration.subspaceConfiguration?.enabled && !this.options.subspace) {
       // Temporarily ensure that a subspace is provided
       // eslint-disable-next-line no-console

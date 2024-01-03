@@ -510,7 +510,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
+    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration, subspaceName).create();
   }
 
   /**

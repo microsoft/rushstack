@@ -1329,6 +1329,23 @@ export class RushConfiguration {
   }
 
   /**
+   * Returns the subspace name that a project belongs to. Returns undefined if subspaces is not enabled.
+   */
+  public getProjectSubspace(project: RushConfigurationProject): string | undefined {
+    if (!this.subspaceConfiguration?.enabled) {
+      return undefined;
+    }
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    if (project.subspaceName) {
+      return project.subspaceName;
+    } else {
+      return RushConstants.defaultSubspaceName;
+    }
+  }
+
+  /**
    * @beta
    */
   public get projectsByName(): Map<string, RushConfigurationProject> {
