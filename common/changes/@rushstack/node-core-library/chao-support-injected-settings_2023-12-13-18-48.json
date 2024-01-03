@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add dependenciesMeta interface in packageJson",
-      "type": "patch"
+      "comment": "Add the `dependenciesMeta` property to the `INodePackageJson` interface.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/node-core-library"
