@@ -19,7 +19,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   },
   "dependencies": {
     "fastify": "~3.16.1"

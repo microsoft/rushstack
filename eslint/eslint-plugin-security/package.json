@@ -38,6 +38,6 @@
     "@typescript-eslint/parser": "~5.59.2",
     "@typescript-eslint/typescript-estree": "~5.59.2",
     "eslint": "~8.7.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }
