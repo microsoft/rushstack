@@ -24,6 +24,7 @@ interface IDynamicReconstructionElement {
 }
 
 type IReconstructionElement = ILocalizedReconstructionElement | IDynamicReconstructionElement;
+type FormatLocaleForFilenameFn = (locale: string) => string;
 
 interface IParseResult {
   issues: string[];
@@ -50,6 +51,7 @@ export interface IProcessAssetOptionsBase {
 export interface IProcessNonLocalizedAssetOptions extends IProcessAssetOptionsBase {
   fileName: string;
   noStringsLocaleName: string;
+  formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
 
 export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase {
@@ -57,6 +59,7 @@ export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase 
   fillMissingTranslationStrings: boolean;
   defaultLocale: string;
   filenameTemplate: Parameters<typeof Compilation.prototype.getAssetPath>[0];
+  formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
 
 export interface IProcessAssetResult {
@@ -70,14 +73,18 @@ export const PLACEHOLDER_REGEX: RegExp = new RegExp(
 );
 
 export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): Record<string, string> {
-  const { compilation, asset, chunk, filenameTemplate, locales } = options;
+  const { compilation, asset, chunk, filenameTemplate, locales, formatLocaleForFilenameFn } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
   const rawSource: sources.CachedSource = new sources.CachedSource(asset.source);
   const assetSource: string = rawSource.source().toString();
 
-  const parsedAsset: IParseResult = _parseStringToReconstructionSequence(options.plugin, assetSource);
+  const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
+    options.plugin,
+    assetSource,
+    formatLocaleForFilenameFn
+  );
 
   const { issues } = parsedAsset;
 
@@ -120,6 +127,7 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
     const wrapped: sources.CachedSource = new sources.CachedSource(localeResult);
     localizedFiles[locale] = fileName;
 
+    // If file already exists
     if (originName === fileName) {
       // This helper throws if the asset doesn't already exist
       compilation.updateAsset(fileName, wrapped, info);
@@ -139,14 +147,18 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): R
 }
 
 export function processNonLocalizedAsset(options: IProcessNonLocalizedAssetOptions): void {
-  const { asset, fileName, compilation } = options;
+  const { asset, fileName, compilation, formatLocaleForFilenameFn } = options;
 
   const { sources, WebpackError } = compilation.compiler.webpack;
 
   const rawSource: sources.CachedSource = new sources.CachedSource(asset.source);
   const assetSource: string = rawSource.source().toString();
 
-  const parsedAsset: IParseResult = _parseStringToReconstructionSequence(options.plugin, assetSource);
+  const parsedAsset: IParseResult = _parseStringToReconstructionSequence(
+    options.plugin,
+    assetSource,
+    formatLocaleForFilenameFn
+  );
 
   const { info: originInfo } = asset;
   const { issues } = parsedAsset;
@@ -282,17 +294,16 @@ function _reconstructNonLocalized(
   };
 }
 
-function _rawLocaleToken(locale: string): string {
-  return locale;
-}
-
-function _jsonLocaleToken(locale: string): string {
-  return JSON.stringify(locale);
-}
-
-function _parseStringToReconstructionSequence(plugin: LocalizationPlugin, source: string): IParseResult {
+function _parseStringToReconstructionSequence(
+  plugin: LocalizationPlugin,
+  source: string,
+  formatLocaleForFilenameFn: FormatLocaleForFilenameFn
+): IParseResult {
   const issues: string[] = [];
   const reconstructionSeries: IReconstructionElement[] = [];
+
+  const jsonStringifyFormatLocaleForFilenameFn: FormatLocaleForFilenameFn = (locale: string) =>
+    JSON.stringify(formatLocaleForFilenameFn(locale));
 
   let regexResult: RegExpExecArray | null;
   PLACEHOLDER_REGEX.lastIndex = -1;
@@ -328,7 +339,7 @@ function _parseStringToReconstructionSequence(plugin: LocalizationPlugin, source
           start,
           end,
           escapedBackslash,
-          valueFn: _rawLocaleToken
+          valueFn: formatLocaleForFilenameFn
         };
         localizedReconstructionElement = dynamicElement;
         break;
@@ -340,7 +351,7 @@ function _parseStringToReconstructionSequence(plugin: LocalizationPlugin, source
           start,
           end,
           escapedBackslash,
-          valueFn: _jsonLocaleToken
+          valueFn: jsonStringifyFormatLocaleForFilenameFn
         };
         localizedReconstructionElement = dynamicElement;
         break;
