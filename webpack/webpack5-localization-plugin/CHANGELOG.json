@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.6.0",
+      "date": "Thu, 04 Jan 2024 01:08:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a `formatLocaleForFilename` option to customize how a locale (or the lack thereof) is rendered in file paths."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.16",
       "tag": "@rushstack/webpack5-localization-plugin_v0.5.16",
       "date": "Wed, 03 Jan 2024 00:31:18 GMT",
