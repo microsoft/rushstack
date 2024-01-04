@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add ability to enable IPC channels in `Utilities#executeLifeCycleCommand`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
