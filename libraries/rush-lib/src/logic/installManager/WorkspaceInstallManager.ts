@@ -482,7 +482,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (tempShrinkwrapFile) {
       // Write or delete all project shrinkwraps related to the install
       await Async.forEachAsync(
-        this.rushConfiguration.projects,
+        subspaceName
+          ? this.rushConfiguration.getSubspaceProjects(subspaceName)
+          : this.rushConfiguration.projects,
         async (project) => {
           await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
         },
@@ -495,7 +497,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
       // there are no dependencies. Generate empty shrinkwrap files for all projects.
       await Async.forEachAsync(
-        this.rushConfiguration.projects,
+        subspaceName
+          ? this.rushConfiguration.getSubspaceProjects(subspaceName)
+          : this.rushConfiguration.projects,
         async (project) => {
           await BaseProjectShrinkwrapFile.saveEmptyProjectShrinkwrapFileAsync(project);
         },

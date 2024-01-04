@@ -135,7 +135,7 @@ export abstract class BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log(
         colors.red(
-          `The subspaces feature currently only supports installing for a specified subspace, passed by the "--subspace" parameter.`
+          `The subspaces feature currently only supports installing for a specified set of subspace, passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
         )
       );
       throw new AlreadyReportedError();

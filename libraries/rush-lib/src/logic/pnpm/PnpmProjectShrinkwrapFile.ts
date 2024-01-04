@@ -72,8 +72,9 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
 
   protected generateWorkspaceProjectShrinkwrapMap(): Map<string, string> | undefined {
     // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
+    const subspaceName: string | undefined = this.project.rushConfiguration.getProjectSubspace(this.project);
     const importerKey: string = this.shrinkwrapFile.getImporterKeyByPath(
-      this.project.rushConfiguration.getCommonTempFolder(),
+      this.project.rushConfiguration.getCommonTempFolder(subspaceName),
       this.project.projectFolder
     );
 

@@ -109,10 +109,36 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
 
   protected async runAsync(): Promise<void> {
-    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
-      variant: this._variant.value,
-      subspaceName: this._subspaceParameter.value
-    });
+    const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
+
+    // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
+    let subspaceNames: string[] | undefined;
+    if (
+      installManagerOptions.pnpmFilterArguments.length &&
+      this.rushConfiguration.subspaceConfiguration?.enabled
+    ) {
+      const selectedProjects: Set<RushConfigurationProject> | undefined =
+        await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
+      if (selectedProjects) {
+        subspaceNames = this.rushConfiguration.getProjectsSubspaceSet(selectedProjects);
+      } else {
+        throw new Error('Specified filter arguments resolved in no projects being selected.');
+      }
+    }
+
+    if (subspaceNames) {
+      // Check each subspace for version inconsistencies
+      for (const subspaceName of subspaceNames) {
+        VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
+          variant: this._variant.value,
+          subspaceName: subspaceName
+        });
+      }
+    } else {
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
+        variant: this._variant.value
+      });
+    }
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -155,23 +181,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
 
-    const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
-
-    // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
-    let subspaceNames: string[] | undefined;
-    if (
-      installManagerOptions.pnpmFilterArguments.length &&
-      this.rushConfiguration.subspaceConfiguration?.enabled
-    ) {
-      const selectedProjects: Set<RushConfigurationProject> | undefined =
-        await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
-      if (selectedProjects) {
-        subspaceNames = this.rushConfiguration.getProjectsSubspaceSet(selectedProjects);
-      } else {
-        throw new Error('Specified filter arguments resolved in no projects being selected.');
-      }
-    }
-
     const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
       /* webpackChunkName: 'InstallManagerFactory' */
       '../../logic/InstallManagerFactory'
@@ -183,6 +192,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         // Run the install for each affected subspace
         for (const subspaceName of subspaceNames) {
           installManagerOptions.subspaceName = subspaceName;
+          // eslint-disable-next-line no-console
           console.log(colors.green(`Installing for subspace: ${subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
         }

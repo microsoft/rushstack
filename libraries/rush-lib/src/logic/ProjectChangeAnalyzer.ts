@@ -402,7 +402,10 @@ export class ProjectChangeAnalyzer {
     }
   }
 
-  private async _getRepoDepsAsync(terminal: ITerminal): Promise<IGitState | undefined> {
+  private async _getRepoDepsAsync(
+    terminal: ITerminal,
+    currProject?: RushConfigurationProject
+  ): Promise<IGitState | undefined> {
     try {
       const gitPath: string = this._git.getGitPathOrThrow();
 

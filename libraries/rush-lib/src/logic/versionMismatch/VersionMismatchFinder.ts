@@ -148,7 +148,13 @@ export class VersionMismatchFinder {
 
         if (mismatchFinder.numberOfMismatches > 0) {
           // eslint-disable-next-line no-console
-          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          console.log(
+            colors.red(
+              `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
+                options.subspaceName && `in subspace: ${options.subspaceName}`
+              }`
+            )
+          );
           rushConfiguration.customTipsConfiguration._showErrorTip(
             options.terminal,
             CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
