@@ -1081,7 +1081,7 @@ export class RushConfiguration {
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
-    getProjectsSubspaceSet(projects: RushConfigurationProject[]): string[];
+    getProjectsSubspaceSet(projects: Set<RushConfigurationProject>): string[];
     getProjectSubspace(project: RushConfigurationProject): string | undefined;
     getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string;

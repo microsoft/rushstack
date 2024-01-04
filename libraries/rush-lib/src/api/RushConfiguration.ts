@@ -1352,7 +1352,7 @@ export class RushConfiguration {
   /**
    * Returns a list of unique subspace names that the given projects belong to
    */
-  public getProjectsSubspaceSet(projects: RushConfigurationProject[]): string[] {
+  public getProjectsSubspaceSet(projects: Set<RushConfigurationProject>): string[] {
     if (!this.subspaceConfiguration?.enabled) {
       return [];
     }

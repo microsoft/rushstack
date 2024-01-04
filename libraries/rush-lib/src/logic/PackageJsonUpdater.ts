@@ -243,7 +243,9 @@ export class PackageJsonUpdater {
 
     if (!skipUpdate) {
       if (this._rushConfiguration.subspaceConfiguration?.enabled) {
-        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(options.projects);
+        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(
+          new Set(options.projects)
+        );
         for (const subspaceName of subspaceNames) {
           await this._doUpdate(debugInstall, variant, subspaceName);
         }
@@ -271,7 +273,9 @@ export class PackageJsonUpdater {
 
     if (!skipUpdate) {
       if (this._rushConfiguration.subspaceConfiguration?.enabled) {
-        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(options.projects);
+        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(
+          new Set(options.projects)
+        );
         for (const subspaceName of subspaceNames) {
           await this._doUpdate(debugInstall, variant, subspaceName);
         }

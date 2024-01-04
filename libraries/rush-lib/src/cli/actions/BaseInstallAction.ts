@@ -22,6 +22,7 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -156,37 +157,38 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
+    // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
+    let subspaceNames: string[] | undefined;
+    if (
+      installManagerOptions.pnpmFilterArguments.length &&
+      this.rushConfiguration.subspaceConfiguration?.enabled
+    ) {
+      const selectedProjects: Set<RushConfigurationProject> | undefined =
+        await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
+      if (selectedProjects) {
+        subspaceNames = this.rushConfiguration.getProjectsSubspaceSet(selectedProjects);
+      } else {
+        throw new Error('Specified filter arguments resolved in no projects being selected.');
+      }
+    }
+
     const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
       /* webpackChunkName: 'InstallManagerFactory' */
       '../../logic/InstallManagerFactory'
     );
-    const installManager: BaseInstallManager =
-      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
-        this.rushConfiguration,
-        this.rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-
     let installSuccessful: boolean = true;
+
     try {
-      await installManager.doInstallAsync();
-
-      if (warnAboutScriptUpdate) {
-        // eslint-disable-next-line no-console
-        console.log(
-          '\n' +
-            colors.yellow(
-              'Rush refreshed some files in the "common/scripts" folder.' +
-                '  Please commit this change to Git.'
-            )
-        );
+      if (subspaceNames) {
+        // Run the install for each affected subspace
+        for (const subspaceName of subspaceNames) {
+          installManagerOptions.subspaceName = subspaceName;
+          console.log(colors.green(`Installing for subspace: ${subspaceName}`));
+          await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
+        }
+      } else {
+        await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
       }
-
-      // eslint-disable-next-line no-console
-      console.log(
-        '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
-      );
     } catch (error) {
       installSuccessful = false;
       throw error;
@@ -202,6 +204,38 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this._ignoreHooksParameter.value
       );
     }
+
+    if (warnAboutScriptUpdate) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '\n' +
+          colors.yellow(
+            'Rush refreshed some files in the "common/scripts" folder.' +
+              '  Please commit this change to Git.'
+          )
+      );
+    }
+
+    // eslint-disable-next-line no-console
+    console.log(
+      '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+    );
+  }
+
+  private async _doInstall(
+    installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory'),
+    purgeManager: PurgeManager,
+    installManagerOptions: IInstallManagerOptions
+  ): Promise<void> {
+    const installManager: BaseInstallManager =
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
+        this.rushConfiguration,
+        this.rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
+
+    await installManager.doInstallAsync();
   }
 
   private _collectTelemetry(
