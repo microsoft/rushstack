@@ -10,7 +10,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  private readonly _checkOnlyParameter!: CommandLineFlagParameter;
+  private readonly _checkOnlyParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

@@ -129,7 +129,7 @@ export class InstallHelpers {
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
     maxInstallAttempts: number,
-    subspaceName: string | undefined,
+    subspaceName?: string | undefined,
     restrictConsoleOutput?: boolean
   ): Promise<void> {
     let logIfConsoleOutputIsNotRestricted: (message?: string) => void;

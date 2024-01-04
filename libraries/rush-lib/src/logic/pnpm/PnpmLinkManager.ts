@@ -39,7 +39,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   /**
    * @override
    */
-  public async createSymlinksForProjects(force: boolean, subspaceName: string | undefined): Promise<void> {
+  public async createSymlinksForProjects(force: boolean, subspaceName?: string | undefined): Promise<void> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {

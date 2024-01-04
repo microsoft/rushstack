@@ -249,7 +249,10 @@ export abstract class BaseInstallManager {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
           this.rushConfiguration.getTempShrinkwrapFilename(subspaceName),
-          this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName, this.options.variant)
+          this.rushConfiguration.getCommittedShrinkwrapFilename({
+            subspaceName,
+            variant: this.options.variant
+          })
         );
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
@@ -309,7 +312,7 @@ export abstract class BaseInstallManager {
     // Additionally, if they pulled an updated shrinkwrap file from Git,
     // then we can't skip this install
     potentiallyChangedFiles.push(
-      this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName, this.options.variant)
+      this.rushConfiguration.getCommittedShrinkwrapFilename({ subspaceName, variant: this.options.variant })
     );
 
     // Add common-versions.json file to the potentially changed files list.
@@ -376,9 +379,9 @@ export abstract class BaseInstallManager {
         commitedShrinkwrapFileName =
           this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName);
       } else {
-        commitedShrinkwrapFileName = this.rushConfiguration.getCommittedShrinkwrapFilename(
-          this.options.variant
-        );
+        commitedShrinkwrapFileName = this.rushConfiguration.getCommittedShrinkwrapFilename({
+          variant: this.options.variant
+        });
       }
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
@@ -953,7 +956,7 @@ ${gitLfsHookHandling}
   ): void {
     const commitedShrinkwrapFileName: string = subspaceName
       ? this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName)
-      : this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant);
+      : this.rushConfiguration.getCommittedShrinkwrapFilename({ variant: this.options.variant });
     if (shrinkwrapFile) {
       Utilities.syncFile(
         commitedShrinkwrapFileName,

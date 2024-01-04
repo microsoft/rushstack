@@ -1047,7 +1047,7 @@ export class RushConfiguration {
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
     readonly changesFolder: string;
     // @deprecated
-    committedShrinkwrapFilename(subspaceName: string | undefined): string;
+    committedShrinkwrapFilename(subspaceName?: string | undefined): string;
     get commonAutoinstallersFolder(): string;
     readonly commonFolder: string;
     readonly commonScriptsFolder: string;
@@ -1066,7 +1066,10 @@ export class RushConfiguration {
     readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-    getCommittedShrinkwrapFilename(subspaceName: string | undefined, variant?: string | undefined): string;
+    getCommittedShrinkwrapFilename({ subspaceName, variant }: {
+        subspaceName?: string | undefined;
+        variant?: string | undefined;
+    }): string;
     getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string;
     getCommonRushConfigFolder(subspaceName?: string | undefined): string;
     getCommonTempFolder(subspaceName?: string | undefined): string;
@@ -1078,6 +1081,7 @@ export class RushConfiguration {
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
+    getProjectsSubspaceSet(projects: RushConfigurationProject[]): string[];
     getProjectSubspace(project: RushConfigurationProject): string | undefined;
     getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string;

@@ -56,7 +56,7 @@ export class CheckAction extends BaseRushAction {
       );
     }
 
-    VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, undefined, {
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, this._terminal, {
       variant: this._variant.value,
       printAsJson: this._jsonFlag.value,
       truncateLongPackageNameLists: !this._verboseFlag.value

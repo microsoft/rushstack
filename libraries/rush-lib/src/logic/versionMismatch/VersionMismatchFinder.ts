@@ -17,6 +17,7 @@ const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
   variant?: string | undefined;
+  subspaceName?: string | undefined;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
@@ -68,10 +69,9 @@ export class VersionMismatchFinder {
   public static rushCheck(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    subspaceName: string | undefined,
     options: IVersionMismatchFinderRushCheckOptions = {}
   ): void {
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, subspaceName, {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
       terminal,
       isRushCheckCommand: true
@@ -81,10 +81,9 @@ export class VersionMismatchFinder {
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
     terminal: ITerminal,
-    subspaceName: string | undefined,
     options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
   ): void {
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, subspaceName, {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
       terminal,
       isRushCheckCommand: false,
@@ -98,11 +97,10 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
-    subspaceName: string | undefined,
     options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(
-      subspaceName,
+      options.subspaceName,
       options.variant
     );
 
@@ -114,8 +112,8 @@ export class VersionMismatchFinder {
 
     // If subspace is specified, only go through projects in that subspace
     let projectsToParse: RushConfigurationProject[] = [];
-    if (subspaceName) {
-      projectsToParse = rushConfiguration.getSubspaceProjects(subspaceName);
+    if (options.subspaceName) {
+      projectsToParse = rushConfiguration.getSubspaceProjects(options.subspaceName);
     } else {
       projectsToParse = rushConfiguration.projects;
     }
@@ -128,10 +126,10 @@ export class VersionMismatchFinder {
 
   private static _checkForInconsistentVersions(
     rushConfiguration: RushConfiguration,
-    subspaceName: string | undefined,
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
+      subspaceName?: string | undefined;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
@@ -140,7 +138,6 @@ export class VersionMismatchFinder {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         rushConfiguration,
-        subspaceName,
         options
       );
 

@@ -214,7 +214,7 @@ export class VersionAction extends BaseRushAction {
       return;
     }
 
-    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig, undefined);
+    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
     if (mismatchFinder.numberOfMismatches) {
       throw new Error(
         'Unable to finish version bump because inconsistencies were encountered. ' +

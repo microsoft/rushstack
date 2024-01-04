@@ -234,7 +234,7 @@ export class ProjectChangeAnalyzer {
       // Determine the current variant from the link JSON.
       const variant: string | undefined = rushConfiguration.currentInstalledVariant;
 
-      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename(variant);
+      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename({ variant });
 
       const shrinkwrapFile: string = Path.convertToSlashes(path.relative(repoRoot, fullShrinkwrapPath));
       const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(shrinkwrapFile);
@@ -357,7 +357,7 @@ export class ProjectChangeAnalyzer {
 
       // Add the shrinkwrap file to every project's dependencies
       const shrinkwrapFile: string = Path.convertToSlashes(
-        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
+        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename({ variant }))
       );
 
       const shrinkwrapHash: string | undefined = repoDeps.get(shrinkwrapFile);

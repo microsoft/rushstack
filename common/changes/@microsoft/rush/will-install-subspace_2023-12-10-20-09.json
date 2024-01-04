@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add BaseFlag class to simplify flag classes",
+      "comment": "Add ability to customize where rush looks for configuration files.",
       "type": "none"
     }
   ],

@@ -17,4 +17,4 @@ import { VersionMismatchFinder } from '@microsoft/rush-lib/lib/logic/versionMism
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 const terminal = new Terminal(new ConsoleTerminalProvider());
-VersionMismatchFinder.ensureConsistentVersions(config, terminal, undefined);
+VersionMismatchFinder.ensureConsistentVersions(config, terminal);

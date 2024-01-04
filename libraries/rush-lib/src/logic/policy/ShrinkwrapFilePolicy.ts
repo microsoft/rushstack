@@ -20,7 +20,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
   const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
     rushConfiguration.packageManager,
     rushConfiguration.packageManagerOptions,
-    rushConfiguration.getCommittedShrinkwrapFilename(options.shrinkwrapVariant)
+    rushConfiguration.getCommittedShrinkwrapFilename({ variant: options.shrinkwrapVariant })
   );
 
   if (!shrinkwrapFile) {

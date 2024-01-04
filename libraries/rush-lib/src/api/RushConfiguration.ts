@@ -189,6 +189,10 @@ export interface ICurrentVariantJson {
 }
 
 /**
+ * This is used when a function needs
+ */
+
+/**
  * The filter parameters to search from all projects
  */
 export interface IRushConfigurationProjectsFilter {
@@ -1122,8 +1126,8 @@ export class RushConfiguration {
    * @deprecated Use `getCommittedShrinkwrapFilename` instead, which gets the correct common
    * shrinkwrap file name for a given active variant.
    */
-  public committedShrinkwrapFilename(subspaceName: string | undefined): string {
-    return this.getCommittedShrinkwrapFilename(subspaceName);
+  public committedShrinkwrapFilename(subspaceName?: string | undefined): string {
+    return this.getCommittedShrinkwrapFilename({ subspaceName });
   }
 
   /**
@@ -1346,6 +1350,27 @@ export class RushConfiguration {
   }
 
   /**
+   * Returns a list of unique subspace names that the given projects belong to
+   */
+  public getProjectsSubspaceSet(projects: RushConfigurationProject[]): string[] {
+    if (!this.subspaceConfiguration?.enabled) {
+      return [];
+    }
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    const subspaceSet: Set<string> = new Set<string>();
+    for (const project of projects) {
+      if (project.subspaceName) {
+        subspaceSet.add(project.subspaceName);
+      } else {
+        subspaceSet.add(RushConstants.defaultSubspaceName);
+      }
+    }
+    return Array.from(subspaceSet);
+  }
+
+  /**
    * @beta
    */
   public get projectsByName(): Map<string, RushConfigurationProject> {
@@ -1514,10 +1539,13 @@ export class RushConfiguration {
    * Gets the committed shrinkwrap file name for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommittedShrinkwrapFilename(
-    subspaceName: string | undefined,
-    variant?: string | undefined
-  ): string {
+  public getCommittedShrinkwrapFilename({
+    subspaceName,
+    variant
+  }: {
+    subspaceName?: string | undefined;
+    variant?: string | undefined;
+  }): string {
     if (variant) {
       if (!this._variants.has(variant)) {
         throw new Error(

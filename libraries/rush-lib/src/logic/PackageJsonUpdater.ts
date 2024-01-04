@@ -225,7 +225,6 @@ export class PackageJsonUpdater {
     if (updateOtherPackages) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         this._rushConfiguration,
-        undefined,
         {
           variant: variant
         }
@@ -243,38 +242,13 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      this._terminal.writeLine();
-      this._terminal.writeLine(colors.green('Running "rush update"'));
-      this._terminal.writeLine();
-
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: debugInstall,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        offline: false,
-        networkConcurrency: undefined,
-        collectLogFile: false,
-        variant: variant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        pnpmFilterArguments: [],
-        checkOnly: false,
-        subspace: this._rushConfiguration.getProjectSubspace(options.projects[0])
-      };
-
-      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
-        this._rushConfiguration,
-        this._rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        await purgeManager.startDeleteAllAsync();
+      if (this._rushConfiguration.subspaceConfiguration?.enabled) {
+        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(options.projects);
+        for (const subspaceName of subspaceNames) {
+          await this._doUpdate(debugInstall, variant, subspaceName);
+        }
+      } else {
+        await this._doUpdate(debugInstall, variant);
       }
     }
   }
@@ -296,39 +270,54 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      this._terminal.writeLine();
-      this._terminal.writeLine(Colors.green('Running "rush update"'));
-      this._terminal.writeLine();
-
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: debugInstall,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        networkConcurrency: undefined,
-        offline: false,
-        collectLogFile: false,
-        variant: variant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        pnpmFilterArguments: [],
-        checkOnly: false,
-        subspace: this._rushConfiguration.getProjectSubspace(options.projects[0])
-      };
-
-      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
-        this._rushConfiguration,
-        this._rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        await purgeManager.startDeleteAllAsync();
+      if (this._rushConfiguration.subspaceConfiguration?.enabled) {
+        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(options.projects);
+        for (const subspaceName of subspaceNames) {
+          await this._doUpdate(debugInstall, variant, subspaceName);
+        }
+      } else {
+        await this._doUpdate(debugInstall, variant);
       }
+    }
+  }
+
+  private async _doUpdate(
+    debugInstall: boolean,
+    variant: string | undefined,
+    subspaceName?: string | undefined
+  ): Promise<void> {
+    this._terminal.writeLine();
+    this._terminal.writeLine(Colors.green('Running "rush update"'));
+    this._terminal.writeLine();
+
+    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+    const installManagerOptions: IInstallManagerOptions = {
+      debug: debugInstall,
+      allowShrinkwrapUpdates: true,
+      bypassPolicy: false,
+      noLink: false,
+      fullUpgrade: false,
+      recheckShrinkwrap: false,
+      networkConcurrency: undefined,
+      offline: false,
+      collectLogFile: false,
+      variant: variant,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      pnpmFilterArguments: [],
+      checkOnly: false,
+      subspace: subspaceName
+    };
+
+    const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      purgeManager,
+      installManagerOptions
+    );
+    try {
+      await installManager.doInstallAsync();
+    } finally {
+      await purgeManager.startDeleteAllAsync();
     }
   }
 
@@ -415,7 +404,6 @@ export class PackageJsonUpdater {
       if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
           this._rushConfiguration,
-          undefined,
           {
             variant: variant
           }
@@ -614,8 +602,7 @@ export class PackageJsonUpdater {
     await InstallHelpers.ensureLocalPackageManager(
       this._rushConfiguration,
       this._rushGlobalFolder,
-      RushConstants.defaultMaxInstallAttempts,
-      undefined
+      RushConstants.defaultMaxInstallAttempts
     );
 
     const useWorkspaces: boolean = !!(

@@ -50,7 +50,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.packageManager).toEqual('npm');
     assertPathProperty(
       'committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename(undefined),
+      rushConfiguration.committedShrinkwrapFilename(),
       './repo/common/config/rush/npm-shrinkwrap.json'
     );
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
@@ -123,7 +123,7 @@ describe(RushConfiguration.name, () => {
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
     assertPathProperty(
       'committedShrinkwrapFilename',
-      rushConfiguration.getCommittedShrinkwrapFilename(undefined),
+      rushConfiguration.getCommittedShrinkwrapFilename({}),
       './repo/common/config/rush/pnpm-lock.yaml'
     );
     assertPathProperty(
