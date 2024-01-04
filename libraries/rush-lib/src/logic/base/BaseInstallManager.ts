@@ -86,7 +86,7 @@ export abstract class BaseInstallManager {
 
     this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(
       rushConfiguration,
-      this.options.subspace
+      this.options.subspaceName
     );
 
     this.subspaceInstallFlags = new Map();
@@ -126,9 +126,9 @@ export abstract class BaseInstallManager {
     }
 
     // Ensure that subspaces is enabled
-    const subspaceName: string | undefined = this.options.subspace;
+    const subspaceName: string | undefined = this.options.subspaceName;
 
-    if (this.rushConfiguration.subspaceConfiguration?.enabled && !this.options.subspace) {
+    if (this.rushConfiguration.subspaceConfiguration?.enabled && !this.options.subspaceName) {
       // Temporarily ensure that a subspace is provided
       // eslint-disable-next-line no-console
       console.log();
@@ -139,7 +139,7 @@ export abstract class BaseInstallManager {
         )
       );
       throw new AlreadyReportedError();
-    } else if (this.options.subspace && !this.rushConfiguration.subspaceConfiguration?.enabled) {
+    } else if (this.options.subspaceName && !this.rushConfiguration.subspaceConfiguration?.enabled) {
       // Ensure that subspaces is enabled
       if (!this.rushConfiguration.subspaceConfiguration?.enabled) {
         // eslint-disable-next-line no-console
@@ -157,7 +157,7 @@ export abstract class BaseInstallManager {
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
       // Allow partial update when there are subspace projects
-      if (!this.options.subspace) {
+      if (!this.options.subspaceName) {
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console

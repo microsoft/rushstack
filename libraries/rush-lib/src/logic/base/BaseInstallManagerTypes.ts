@@ -96,5 +96,5 @@ export interface IInstallManagerOptions {
   /**
    * The subspace to install for
    */
-  subspace?: string;
+  subspaceName?: string;
 }
