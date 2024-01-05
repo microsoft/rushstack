@@ -33,7 +33,7 @@ export class UpdateAction extends BaseInstallAction {
       parser
     });
 
-    if (this.rushConfiguration.subspaceConfiguration?.enabled) {
+    if (this.rushConfiguration?.subspaceConfiguration?.enabled) {
       // Partial update is supported only when subspaces is enabled.
       this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
         // Include lockfile processing since this expands the selection, and we need to select
