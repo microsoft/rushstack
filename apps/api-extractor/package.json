@@ -47,8 +47,7 @@
     "lodash": "~4.17.15",
     "resolve": "~1.22.1",
     "semver": "~7.5.4",
-    "source-map": "~0.6.1",
-    "typescript": "5.3.3"
+    "source-map": "~0.6.1"
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
@@ -58,6 +57,10 @@
     "@types/lodash": "4.14.116",
     "@types/node": "18.17.15",
     "@types/resolve": "1.20.2",
-    "@types/semver": "7.5.0"
+    "@types/semver": "7.5.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.3.3"
   }
 }

@@ -78,7 +78,7 @@
       // For testing Heft with TS V4
       "~4.9.5",
 
-      "5.3.3"
+      "^5.3.3"
     ],
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async

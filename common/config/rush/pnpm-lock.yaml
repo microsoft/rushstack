@@ -85,9 +85,6 @@ importers:
       source-map:
         specifier: ~0.6.1
         version: 0.6.1
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
     devDependencies:
       '@rushstack/heft':
         specifier: 0.62.0
@@ -113,6 +110,9 @@ importers:
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
 
   ../../apps/heft:
     dependencies:
@@ -24749,7 +24749,7 @@ packages:
     resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: false
+    dev: true
 
   /uc.micro@1.0.6:
     resolution: {integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==}
