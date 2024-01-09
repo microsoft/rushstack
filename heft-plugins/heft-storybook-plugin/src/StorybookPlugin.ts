@@ -1,37 +1,36 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  CommandLineFlagParameter,
-  HeftConfiguration,
-  IHeftTaskPlugin,
-  IHeftTaskRunHookOptions,
-  IHeftTaskSession,
-  IScopedLogger
-} from '@rushstack/heft';
-import type {
-  IWebpackPluginAccessor as IWebpack4PluginAccessor,
-  PluginName as Webpack4PluginName
-} from '@rushstack/heft-webpack4-plugin';
-import type {
-  IWebpackPluginAccessor as IWebpack5PluginAccessor,
-  PluginName as Webpack5PluginName
-} from '@rushstack/heft-webpack5-plugin';
+import * as child_process from 'child_process';
 import {
   AlreadyExistsBehavior,
   FileSystem,
   Import,
-  InternalError,
+  type IParsedPackageNameOrError,
   PackageName,
   SubprocessTerminator,
-  TerminalProviderSeverity,
   TerminalWritable,
-  type IParsedPackageNameOrError,
-  type ITerminal
+  type ITerminal,
+  TerminalProviderSeverity,
+  InternalError
 } from '@rushstack/node-core-library';
-import * as child_process from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import type {
+  HeftConfiguration,
+  IHeftTaskSession,
+  IScopedLogger,
+  IHeftTaskPlugin,
+  CommandLineFlagParameter,
+  IHeftTaskRunHookOptions
+} from '@rushstack/heft';
+import type {
+  PluginName as Webpack4PluginName,
+  IWebpackPluginAccessor as IWebpack4PluginAccessor
+} from '@rushstack/heft-webpack4-plugin';
+import type {
+  PluginName as Webpack5PluginName,
+  IWebpackPluginAccessor as IWebpack5PluginAccessor
+} from '@rushstack/heft-webpack5-plugin';
+import * as path from 'path';
 
 const PLUGIN_NAME: 'storybook-plugin' = 'storybook-plugin';
 const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
@@ -101,7 +100,7 @@ export interface IStorybookPluginOptions {
   staticBuildOutputFolder?: string;
 
   /**
-   * Specifies an NPM package that is used as the (cwd) target for the storybook commands
+   * Specifies an NPM dependency name that is used as the (cwd) target for the storybook commands
    * By default the plugin executes the storybook commands in the local package context,
    * but for distribution purposes it can be useful to split the TS library and storybook exports into two packages.
    *
@@ -295,15 +294,15 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
      */
     if (options.storybookPackageNameTarget) {
       // Map outputFolder to local context.
-      if (outputFolder) outputFolder = path.resolve(workingDirectory, outputFolder);
+      if (outputFolder) {
+        outputFolder = path.resolve(workingDirectory, outputFolder);
+      }
 
       // Update workingDirectory to target context.
-      workingDirectory = path.resolve(workingDirectory, 'node_modules', options.storybookPackageNameTarget);
-      if (!fs.existsSync(workingDirectory)) {
-        throw new Error(
-          `storybookPackageNameTarget ${options.storybookPackageNameTarget} could not be found ${workingDirectory}`
-        );
-      }
+      workingDirectory = await Import.resolvePackageAsync({
+        packageName: options.storybookPackageNameTarget,
+        baseFolderPath: workingDirectory
+      });
 
       this._logger.terminal.writeVerboseLine(`Changing Storybook working directory to "${workingDirectory}"`);
     }
