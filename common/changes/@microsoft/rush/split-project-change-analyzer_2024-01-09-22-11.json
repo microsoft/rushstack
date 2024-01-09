@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Replaced use of ProjectChangeAnalyzer in phased command hooks with a new InputSnapshot data structure that is completely synchronous and does not perform any I/O. All I/O operations and state computation are now performed up front before operation graph creation.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

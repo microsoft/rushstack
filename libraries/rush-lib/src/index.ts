@@ -77,7 +77,7 @@ export { PackageJsonEditor, PackageJsonDependency, DependencyType } from './api/
 
 export { RepoStateFile } from './logic/RepoStateFile';
 
-export { LookupByPath, IPrefixMatch } from './logic/LookupByPath';
+export { LookupByPath, IPrefixMatch, IReadonlyLookupByPath } from './logic/LookupByPath';
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
@@ -111,11 +111,8 @@ export {
   CustomTipType
 } from './api/CustomTipsConfiguration';
 
-export {
-  ProjectChangeAnalyzer,
-  IGetChangedProjectsOptions,
-  IRawRepoState as _IRawRepoState
-} from './logic/ProjectChangeAnalyzer';
+export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+export { IInputSnapshot, IRushConfigurationProjectForSnapshot } from './logic/snapshots/InputSnapshot';
 
 export { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export { IExecutionResult, IOperationExecutionResult } from './logic/operations/IOperationExecutionResult';

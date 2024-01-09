@@ -31,6 +31,59 @@ export interface IPrefixMatch<TItem> {
 }
 
 /**
+ * The readonly component of `LookupByPath`, to simplify unit testing.
+ *
+ * @beta
+ */
+export interface IReadonlyLookupByPath<TItem> {
+  /**
+   * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * tree.findChildPath('foo/baz'); // returns 1
+   * tree.findChildPath('foo/bar/baz'); // returns 2
+   * ```
+   */
+  findChildPath(childPath: string): TItem | undefined;
+
+  /**
+   * Searches for the item for which the recorded prefix is the longest matching prefix of `query`.
+   * Obtains both the item and the length of the matched prefix, so that the remainder of the path can be
+   * extracted.
+   *
+   * @returns the found item and the length of the matched prefix, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * tree.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
+   * tree.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
+   * ```
+   */
+  findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
+
+  /**
+   * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
+   *
+   * @example
+   * ```ts
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
+   * tree.findChildPathFromSegments(['foo', 'baz']); // returns 1
+   * tree.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
+   * ```
+   */
+  findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+}
+
+/**
  * This class is used to associate POSIX relative paths, such as those returned by `git` commands,
  * with entities that correspond with ancestor folders, such as Rush Projects.
  *
@@ -47,7 +100,7 @@ export interface IPrefixMatch<TItem> {
  * ```
  * @beta
  */
-export class LookupByPath<TItem> {
+export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
   /**
    * The delimiter used to split paths
    */
@@ -159,52 +212,21 @@ export class LookupByPath<TItem> {
   }
 
   /**
-   * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
-   * has an associated item.
-   *
-   * @returns the found item, or `undefined` if no item was found
-   *
-   * @example
-   * ```ts
-   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findChildPath('foo/baz'); // returns 1
-   * tree.findChildPath('foo/bar/baz'); // returns 2
-   * ```
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public findChildPath(childPath: string): TItem | undefined {
     return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
   }
 
   /**
-   * Searches for the item for which the recorded prefix is the longest matching prefix of `query`.
-   * Obtains both the item and the length of the matched prefix, so that the remainder of the path can be
-   * extracted.
-   *
-   * @returns the found item and the length of the matched prefix, or `undefined` if no item was found
-   *
-   * @example
-   * ```ts
-   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findLongestPrefixMatch('foo/baz'); // returns { item: 1, index: 3 }
-   * tree.findLongestPrefixMatch('foo/bar/baz'); // returns { item: 2, index: 7 }
-   * ```
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined {
     return this._findLongestPrefixMatch(LookupByPath._iteratePrefixes(query, this.delimiter));
   }
 
   /**
-   * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
-   * has an associated item.
-   *
-   * @returns the found item, or `undefined` if no item was found
-   *
-   * @example
-   * ```ts
-   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findChildPathFromSegments(['foo', 'baz']); // returns 1
-   * tree.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
-   * ```
+   * {@inheritdoc IReadonlyLookupByPath}
    */
   public findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined {
     let node: IPathTreeNode<TItem> = this._root;

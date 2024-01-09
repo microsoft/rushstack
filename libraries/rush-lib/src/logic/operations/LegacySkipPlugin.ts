@@ -22,7 +22,7 @@ import type {
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { IInputSnapshot } from '../snapshots/InputSnapshot';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 
@@ -71,7 +71,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     const stateMap: WeakMap<Operation, ILegacySkipRecord> = new WeakMap();
 
-    let projectChangeAnalyzer!: ProjectChangeAnalyzer;
+    let inputSnapshot: IInputSnapshot | undefined;
 
     const { terminal, changedProjectsOnly, isIncrementalBuildAllowed, allowWarningsInSuccessfulBuild } =
       this._options;
@@ -79,7 +79,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
     hooks.createOperations.tap(
       PLUGIN_NAME,
       (operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> => {
-        projectChangeAnalyzer = context.projectChangeAnalyzer;
+        inputSnapshot = context.inputSnapshot;
 
         return operations;
       }
@@ -116,8 +116,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           let packageDeps: IProjectDeps | undefined;
 
           try {
-            const fileHashes: Map<string, string> | undefined =
-              await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
+            const fileHashes: ReadonlyMap<string, string> | undefined =
+              inputSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase?.name);
 
             if (!fileHashes) {
               logGitWarning = true;

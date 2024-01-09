@@ -22,14 +22,12 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
-  projectChangeAnalyzer: ProjectChangeAnalyzer;
   displayName: string;
   phase: IPhase;
   /**

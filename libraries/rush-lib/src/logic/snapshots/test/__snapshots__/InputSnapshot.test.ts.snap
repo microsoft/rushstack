@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InputSnapshot getLocalStateHashForOperation Detects outputFileNames collisions 1`] = `"Configured output folder \\"lib\\" for operation \\"_phase:build\\" in project \\"a\\" contains tracked input file \\"a/lib/file3.js\\"."`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Handles trivial input 1`] = `"acf14e45ed255b0288e449432d48c285f619d146"`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Respects additionalOutputFilesByOperationName 1`] = `"07f4147294d21a07865de84875d60bfbcc690652"`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Respects dependsOnEnvVars 1`] = `"ad1f915d0ac6331c09febbbe1496c970a5401b73"`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Respects dependsOnEnvVars 2`] = `"2c68d56fc9278b6495496070a6a992b929c37a83"`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Respects globalAdditionalFiles 1`] = `"0e0437ad1941bacd098b22da15dc673f86ca6003"`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Respects incrementalBuildIgnoredGlobs 1`] = `"f7b5af9ffdaa39831ed3374f28d0f7dccbee9c8d"`;
+
+exports[`InputSnapshot getLocalStateHashForOperation Respects incrementalBuildIgnoredGlobs 2`] = `"24047d4271ebf8badc9403c9a21a09fb6db2fb9c"`;
+
+exports[`InputSnapshot getTrackedFileHashesForOperation Detects outputFileNames collisions 1`] = `"Configured output folder \\"lib\\" for operation \\"_phase:build\\" in project \\"a\\" contains tracked input file \\"a/lib/file3.js\\"."`;
+
+exports[`InputSnapshot getTrackedFileHashesForOperation Handles trivial input 1`] = `
+Map {
+  "a/file1.js" => "hash1",
+  "a/file2.js" => "hash2",
+  "a/lib/file3.js" => "hash3",
+}
+`;
+
+exports[`InputSnapshot getTrackedFileHashesForOperation Respects additionalFilesByOperationName 1`] = `
+Map {
+  "/ext/config.json" => "hash4",
+  "a/file1.js" => "hash1",
+  "a/file2.js" => "hash2",
+  "a/lib/file3.js" => "hash3",
+}
+`;
+
+exports[`InputSnapshot getTrackedFileHashesForOperation Respects globalAdditionalFiles 1`] = `
+Map {
+  "a/file1.js" => "hash1",
+  "a/file2.js" => "hash2",
+  "a/lib/file3.js" => "hash3",
+  "common/config/some-config.json" => "hash5",
+}
+`;
+
+exports[`InputSnapshot getTrackedFileHashesForOperation Respects incrementalBuildIgnoredGlobs 1`] = `
+Map {
+  "a/file1.js" => "hash1",
+  "a/lib/file3.js" => "hash3",
+}
+`;

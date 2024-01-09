@@ -387,12 +387,12 @@ export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly inputSnapshot?: IInputSnapshot;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
     readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
-    readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
@@ -489,6 +489,12 @@ export interface IGetChangedProjectsOptions {
 
 // @beta
 export interface IGlobalCommand extends IRushCommand {
+}
+
+// @beta
+export interface IInputSnapshot {
+    getLocalStateHashForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
+    getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
 }
 
 // @public
@@ -683,20 +689,20 @@ export interface IPrefixMatch<TItem> {
     value: TItem;
 }
 
-// @internal (undocumented)
-export interface _IRawRepoState {
-    // (undocumented)
-    projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
-    // (undocumented)
-    rawHashes: Map<string, string>;
-    // (undocumented)
-    rootDir: string;
+// @beta
+export interface IReadonlyLookupByPath<TItem> {
+    findChildPath(childPath: string): TItem | undefined;
+    findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+    findLongestPrefixMatch(query: string): IPrefixMatch<TItem> | undefined;
 }
 
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
 }
+
+// @beta (undocumented)
+export type IRushConfigurationProjectForSnapshot = Pick<RushConfigurationProject, 'projectFolder' | 'projectRelativeFolder'>;
 
 // @beta (undocumented)
 export interface IRushPlugin {
@@ -812,7 +818,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
 }
 
 // @beta
-export class LookupByPath<TItem> {
+export class LookupByPath<TItem> implements IReadonlyLookupByPath<TItem> {
     constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
     readonly delimiter: string;
     findChildPath(childPath: string): TItem | undefined;
@@ -1009,14 +1015,10 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     // @internal (undocumented)
-    _ensureInitializedAsync(terminal: ITerminal): Promise<_IRawRepoState | undefined>;
-    // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
-    _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
-    // @internal
-    _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
+    _tryGetSnapshotAsync(terminal: ITerminal): Promise<IInputSnapshot | undefined>;
 }
 
 // @public

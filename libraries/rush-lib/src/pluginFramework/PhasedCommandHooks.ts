@@ -9,7 +9,6 @@ import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { Operation } from '../logic/operations/Operation';
-import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 import type {
   IExecutionResult,
   IOperationExecutionResult
@@ -19,6 +18,7 @@ import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
+import type { IInputSnapshot } from '../logic/snapshots/InputSnapshot';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -50,6 +50,10 @@ export interface ICreateOperationsContext {
    */
   readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
   /**
+   * The current state of the repository, if available
+   */
+  readonly inputSnapshot?: IInputSnapshot;
+  /**
    * If true, projects may read their output from cache or be skipped if already up to date.
    * If false, neither of the above may occur, e.g. "rush rebuild"
    */
@@ -71,10 +75,6 @@ export interface ICreateOperationsContext {
    * The set of phases selected for the current command execution.
    */
   readonly phaseSelection: ReadonlySet<IPhase>;
-  /**
-   * The current state of the repository
-   */
-  readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
   /**
    * The set of Rush projects selected for the current command execution.
    */

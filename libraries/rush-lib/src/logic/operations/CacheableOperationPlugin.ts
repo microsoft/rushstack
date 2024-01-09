@@ -2,14 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
-import {
-  Async,
-  InternalError,
-  type ITerminal,
-  NewlineKind,
-  Sort,
-  Terminal
-} from '@rushstack/node-core-library';
+
+import { InternalError, type ITerminal, NewlineKind, Sort, Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { DiscardStdoutTransform, TextRewriterTransform } from '@rushstack/terminal';
 import { SplitterTransform, type TerminalWritable } from '@rushstack/terminal';
@@ -19,8 +13,7 @@ import { OperationStatus } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { RushConstants } from '../RushConstants';
-import type { IOperationSettings, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { getHashesForGlobsAsync } from '../buildCache/getHashesForGlobsAsync';
+import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { DisjointSet } from '../cobuild/DisjointSet';
@@ -36,11 +29,11 @@ import type {
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import type { IInputSnapshot } from '../snapshots/InputSnapshot';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -54,10 +47,11 @@ export interface IOperationBuildCacheContext {
   isCacheWriteAllowed: boolean;
   isCacheReadAllowed: boolean;
 
-  projectChangeAnalyzer: ProjectChangeAnalyzer;
-  projectBuildCache: ProjectBuildCache | undefined;
+  stateHash: string;
+
+  operationBuildCache: ProjectBuildCache | undefined;
   cacheDisabledReason: string | undefined;
-  operationSettings: IOperationSettings | undefined;
+  outputFolderNames: ReadonlyArray<string> | undefined;
 
   cobuildLock: CobuildLock | undefined;
 
@@ -90,81 +84,121 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    const { allowWarningsInSuccessfulBuild, buildCacheConfiguration, cobuildConfiguration, terminal } =
-      this._options;
+    const { allowWarningsInSuccessfulBuild, buildCacheConfiguration, cobuildConfiguration } = this._options;
 
-    hooks.beforeExecuteOperations.tapPromise(
+    hooks.beforeExecuteOperations.tap(
       PLUGIN_NAME,
-      async (
+      (
         recordByOperation: Map<Operation, IOperationExecutionResult>,
         context: ICreateOperationsContext
-      ): Promise<void> => {
-        const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
-          context;
+      ): void => {
+        const { isIncrementalBuildAllowed, inputSnapshot, projectConfigurations, isInitial } = context;
+
+        if (!inputSnapshot) {
+          throw new Error(
+            `Build cache is only supported if running in a Git repository. Either disable the build cache or run Rush in a Git repository.`
+          );
+        }
+
+        const definitelyDefinedInputSnapshot: IInputSnapshot = inputSnapshot;
 
         const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
           ? new DisjointSet()
           : undefined;
 
-        await Async.forEachAsync(
-          recordByOperation.keys(),
-          async (operation: Operation) => {
-            const { associatedProject, associatedPhase, runner } = operation;
-            if (!associatedProject || !associatedPhase || !runner) {
-              return;
-            }
-
-            const { name: phaseName } = associatedPhase;
-
-            const projectConfiguration: RushProjectConfiguration | undefined =
-              projectConfigurations.get(associatedProject);
-
-            // This value can *currently* be cached per-project, but in the future the list of files will vary
-            // depending on the selected phase.
-            const fileHashes: Map<string, string> | undefined =
-              await projectChangeAnalyzer._tryGetProjectDependenciesAsync(associatedProject, terminal);
-
-            if (!fileHashes) {
-              throw new Error(
-                `Build cache is only supported if running in a Git repository. Either disable the build cache or run Rush in a Git repository.`
-              );
-            }
-
-            const operationSettings: IOperationSettings | undefined =
-              projectConfiguration?.operationSettingsByOperationName.get(phaseName);
-            const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName)
-              : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-                'or one provided by a rig, so it does not support caching.';
-
-            disjointSet?.add(operation);
-
-            const buildCacheContext: IOperationBuildCacheContext = {
-              // Supports cache writes by default for initial operations.
-              // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
-              isCacheWriteAllowed: isInitial,
-              isCacheReadAllowed: isIncrementalBuildAllowed,
-              projectBuildCache: undefined,
-              projectChangeAnalyzer,
-              operationSettings,
-              cacheDisabledReason,
-              cobuildLock: undefined,
-              cobuildClusterId: undefined,
-              buildCacheTerminal: undefined,
-              buildCacheProjectLogWritable: undefined,
-              periodicCallback: new PeriodicCallback({
-                interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
-              }),
-              cacheRestored: false,
-              isCacheReadAttempted: false
-            };
-            // Upstream runners may mutate the property of build cache context for downstream runners
-            this._buildCacheContextByOperation.set(operation, buildCacheContext);
-          },
-          {
-            concurrency: 10
+        const hashByOperation: Map<Operation, string> = new Map();
+        function getOrCreateOperationHash(operation: Operation): string {
+          const cachedHash: string | undefined = hashByOperation.get(operation);
+          if (cachedHash !== undefined) {
+            return cachedHash;
           }
-        );
+
+          const configHash: string | undefined = operation.runner?.getConfigHash();
+
+          const { associatedProject, associatedPhase } = operation;
+          const localStateHash: string | undefined =
+            associatedProject &&
+            definitelyDefinedInputSnapshot.getLocalStateHashForOperation(
+              associatedProject,
+              associatedPhase?.name
+            );
+
+          const dependencyHashes: string[] = Array.from(operation.dependencies, getDependencyHash).sort();
+
+          const hasher: crypto.Hash = crypto.createHash('sha1');
+          // This property is used to force cache bust when version changes
+          hasher.update(`${RushConstants.buildCacheVersion}`);
+
+          for (const dependencyHash of dependencyHashes) {
+            hasher.update(dependencyHash);
+          }
+          if (localStateHash) {
+            hasher.update(`${RushConstants.hashDelimiter}${localStateHash}`);
+          }
+
+          if (configHash) {
+            hasher.update(`${RushConstants.hashDelimiter}${configHash}`);
+          }
+
+          const hashString: string = hasher.digest('hex');
+
+          hashByOperation.set(operation, hashString);
+          return hashString;
+        }
+
+        function getDependencyHash(operation: Operation): string {
+          return `${RushConstants.hashDelimiter}${operation.name}=${getOrCreateOperationHash(operation)}`;
+        }
+
+        for (const operation of recordByOperation.keys()) {
+          const { associatedProject, associatedPhase, runner } = operation;
+          if (!associatedProject || !associatedPhase || !runner) {
+            return;
+          }
+
+          const { name: phaseName } = associatedPhase;
+
+          const projectConfiguration: RushProjectConfiguration | undefined =
+            projectConfigurations.get(associatedProject);
+
+          // This value can *currently* be cached per-project, but in the future the list of files will vary
+          // depending on the selected phase.
+          const fileHashes: ReadonlyMap<string, string> | undefined =
+            inputSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
+          const stateHash: string = getOrCreateOperationHash(operation);
+
+          const cacheDisabledReason: string | undefined = projectConfiguration
+            ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName)
+            : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+              'or one provided by a rig, so it does not support caching.';
+
+          const outputFolderNames: ReadonlyArray<string> | undefined =
+            projectConfiguration?.operationSettingsByOperationName.get(phaseName)?.outputFolderNames;
+
+          disjointSet?.add(operation);
+
+          const buildCacheContext: IOperationBuildCacheContext = {
+            // Supports cache writes by default for initial operations.
+            // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
+            isCacheWriteAllowed: isInitial,
+            isCacheReadAllowed: isIncrementalBuildAllowed,
+            operationBuildCache: undefined,
+            outputFolderNames,
+            stateHash,
+            cacheDisabledReason,
+            cobuildLock: undefined,
+            cobuildClusterId: undefined,
+            buildCacheTerminal: undefined,
+            buildCacheProjectLogWritable: undefined,
+            periodicCallback: new PeriodicCallback({
+              interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
+            }),
+            cacheRestored: false,
+            isCacheReadAttempted: false
+          };
+          // Upstream runners may mutate the property of build cache context for downstream runners
+          this._buildCacheContextByOperation.set(operation, buildCacheContext);
+        }
 
         if (disjointSet) {
           // If disjoint set exists, connect build cache disabled project with its consumers
@@ -261,14 +295,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           });
           buildCacheContext.buildCacheTerminal = buildCacheTerminal;
 
-          const configHash: string = runner.getConfigHash() || '';
-
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheContext,
             buildCacheConfiguration,
             rushProject: project,
             phase,
-            configHash,
             terminal: buildCacheTerminal,
             operationMetadataManager
           });
@@ -289,7 +320,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 buildCacheContext,
                 rushProject: project,
                 phase,
-                configHash,
                 terminal: buildCacheTerminal,
                 operationMetadataManager
               });
@@ -447,8 +477,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
         }
 
-        const { cobuildLock, projectBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =
-          buildCacheContext;
+        const {
+          cobuildLock,
+          operationBuildCache: projectBuildCache,
+          isCacheWriteAllowed,
+          buildCacheTerminal,
+          cacheRestored
+        } = buildCacheContext;
 
         try {
           if (!cacheRestored) {
@@ -579,7 +614,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheContext,
     rushProject,
     phase,
-    configHash,
     terminal,
     operationMetadataManager
   }: {
@@ -587,51 +621,38 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheConfiguration: BuildCacheConfiguration | undefined;
     rushProject: RushConfigurationProject;
     phase: IPhase;
-    configHash: string;
     terminal: ITerminal;
     operationMetadataManager: OperationMetadataManager | undefined;
   }): Promise<ProjectBuildCache | undefined> {
-    if (!buildCacheContext.projectBuildCache) {
+    if (!buildCacheContext.operationBuildCache) {
       const { cacheDisabledReason } = buildCacheContext;
       if (cacheDisabledReason) {
         terminal.writeVerboseLine(cacheDisabledReason);
         return;
       }
 
-      const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
-      if (!operationSettings || !buildCacheConfiguration) {
+      const { outputFolderNames, stateHash: operationStateHash } = buildCacheContext;
+      if (!outputFolderNames || !buildCacheConfiguration) {
         // Unreachable, since this will have set `cacheDisabledReason`.
         return;
       }
 
-      const projectOutputFolderNames: ReadonlyArray<string> = operationSettings.outputFolderNames || [];
       const additionalProjectOutputFilePaths: ReadonlyArray<string> =
         operationMetadataManager?.relativeFilepaths || [];
-      const additionalContext: Record<string, string> = {};
-
-      await updateAdditionalContextAsync({
-        operationSettings,
-        additionalContext,
-        projectChangeAnalyzer,
-        terminal,
-        rushProject
-      });
 
       // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
-      buildCacheContext.projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
+      buildCacheContext.operationBuildCache = await ProjectBuildCache.getProjectBuildCache({
         project: rushProject,
-        projectOutputFolderNames,
+        projectOutputFolderNames: outputFolderNames,
         additionalProjectOutputFilePaths,
-        additionalContext,
         buildCacheConfiguration,
         terminal,
-        configHash,
-        projectChangeAnalyzer,
+        operationStateHash,
         phaseName: phase.name
       });
     }
 
-    return buildCacheContext.projectBuildCache;
+    return buildCacheContext.operationBuildCache;
   }
 
   // Get a ProjectBuildCache only cache/restore log files
@@ -639,7 +660,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     buildCacheContext,
     rushProject,
     terminal,
-    configHash,
     buildCacheConfiguration,
     cobuildConfiguration,
     phase,
@@ -650,7 +670,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     cobuildConfiguration: CobuildConfiguration;
     rushProject: RushConfigurationProject;
     phase: IPhase;
-    configHash: string;
     terminal: ITerminal;
     operationMetadataManager: OperationMetadataManager | undefined;
   }): Promise<ProjectBuildCache | undefined> {
@@ -658,43 +677,34 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       return;
     }
 
-    const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
+    const { outputFolderNames, stateHash } = buildCacheContext;
 
-    const projectOutputFolderNames: ReadonlyArray<string> = operationSettings?.outputFolderNames ?? [];
     const additionalProjectOutputFilePaths: ReadonlyArray<string> =
       operationMetadataManager?.relativeFilepaths || [];
-    const additionalContext: Record<string, string> = {
-      // Force the cache to be a log files only cache
-      logFilesOnly: '1'
-    };
+
+    const hasher: crypto.Hash = crypto.createHash('sha1');
+    hasher.update(stateHash);
+
     if (cobuildConfiguration.cobuildContextId) {
-      additionalContext.cobuildContextId = cobuildConfiguration.cobuildContextId;
+      hasher.update(`\ncobuildContextId=${cobuildConfiguration.cobuildContextId}`);
     }
 
-    if (operationSettings) {
-      await updateAdditionalContextAsync({
-        operationSettings,
-        additionalContext,
-        projectChangeAnalyzer,
-        terminal,
-        rushProject
-      });
-    }
+    hasher.update(`\nlogFilesOnly=1`);
 
-    const projectBuildCache: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
+    const operationStateHash: string = hasher.digest('hex');
+
+    const projectBuildCache: ProjectBuildCache | undefined = await ProjectBuildCache.getProjectBuildCache({
       project: rushProject,
-      projectOutputFolderNames,
+      projectOutputFolderNames: outputFolderNames || [],
       additionalProjectOutputFilePaths,
-      additionalContext,
       buildCacheConfiguration,
       terminal,
-      configHash,
-      projectChangeAnalyzer,
+      operationStateHash,
       phaseName: phase.name
     });
 
     // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent
-    buildCacheContext.projectBuildCache = projectBuildCache;
+    buildCacheContext.operationBuildCache = projectBuildCache;
 
     return projectBuildCache;
   }
@@ -858,46 +868,5 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       `${logFilenameIdentifier}.cache`
     );
     return buildCacheContext.buildCacheProjectLogWritable;
-  }
-}
-async function updateAdditionalContextAsync({
-  operationSettings,
-  additionalContext,
-  projectChangeAnalyzer,
-  terminal,
-  rushProject
-}: {
-  operationSettings: IOperationSettings;
-  additionalContext: Record<string, string>;
-  projectChangeAnalyzer: ProjectChangeAnalyzer;
-  terminal: ITerminal;
-  rushProject: RushConfigurationProject;
-}): Promise<void> {
-  if (operationSettings.dependsOnEnvVars) {
-    for (const varName of operationSettings.dependsOnEnvVars) {
-      additionalContext['$' + varName] = process.env[varName] || '';
-    }
-  }
-
-  if (operationSettings.dependsOnAdditionalFiles) {
-    const repoState: IRawRepoState | undefined = await projectChangeAnalyzer._ensureInitializedAsync(
-      terminal
-    );
-
-    const additionalFiles: Map<string, string> = await getHashesForGlobsAsync(
-      operationSettings.dependsOnAdditionalFiles,
-      rushProject.projectFolder,
-      repoState
-    );
-
-    terminal.writeDebugLine(
-      `Including additional files to calculate build cache hash:\n  ${Array.from(additionalFiles.keys()).join(
-        '\n  '
-      )} `
-    );
-
-    for (const [filePath, fileHash] of additionalFiles) {
-      additionalContext['file://' + filePath] = fileHash;
-    }
   }
 }

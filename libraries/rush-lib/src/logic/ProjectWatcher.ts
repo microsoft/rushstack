@@ -6,19 +6,28 @@ import * as os from 'os';
 import * as readline from 'readline';
 import { once } from 'events';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
-import { Colors, Path, type ITerminal, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import {
+  Colors,
+  Path,
+  type ITerminal,
+  type FileSystemStats,
+  FileSystem,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { Git } from './Git';
-import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
+import type { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
+import type { IInputSnapshot } from './snapshots/InputSnapshot';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IProjectWatcherOptions {
+  analyzer: ProjectChangeAnalyzer;
   debounceMs?: number;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
   terminal: ITerminal;
-  initialState?: ProjectChangeAnalyzer | undefined;
+  initialState?: IInputSnapshot | undefined;
 }
 
 export interface IProjectChangeResult {
@@ -29,7 +38,7 @@ export interface IProjectChangeResult {
   /**
    * Contains the git hashes for all tracked files in the repo
    */
-  state: ProjectChangeAnalyzer;
+  state: IInputSnapshot;
 }
 
 interface IPathWatchOptions {
@@ -47,14 +56,15 @@ interface IPathWatchOptions {
  * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
  */
 export class ProjectWatcher {
+  private readonly _analyzer: ProjectChangeAnalyzer;
   private readonly _debounceMs: number;
   private readonly _repoRoot: string;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
   private readonly _terminal: ITerminal;
 
-  private _initialState: ProjectChangeAnalyzer | undefined;
-  private _previousState: ProjectChangeAnalyzer | undefined;
+  private _initialState: IInputSnapshot | undefined;
+  private _previousState: IInputSnapshot | undefined;
   private _resolveIfChanged: undefined | (() => Promise<void>);
 
   private _hasRenderedStatus: boolean;
@@ -62,7 +72,14 @@ export class ProjectWatcher {
   public isPaused: boolean = false;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { debounceMs = 1000, rushConfiguration, projectsToWatch, terminal, initialState } = options;
+    const {
+      analyzer,
+      debounceMs = 1000,
+      rushConfiguration,
+      projectsToWatch,
+      terminal,
+      initialState
+    } = options;
 
     this._debounceMs = debounceMs;
     this._rushConfiguration = rushConfiguration;
@@ -76,6 +93,7 @@ export class ProjectWatcher {
     this._previousState = initialState;
 
     this._hasRenderedStatus = false;
+    this._analyzer = analyzer;
   }
 
   public pause(): void {
@@ -105,7 +123,7 @@ export class ProjectWatcher {
       return initialChangeResult;
     }
 
-    const previousState: ProjectChangeAnalyzer = initialChangeResult.state;
+    const previousState: IInputSnapshot = initialChangeResult.state;
     const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
 
     // Map of path to whether config for the path
@@ -130,10 +148,8 @@ export class ProjectWatcher {
       }
     } else {
       for (const project of this._projectsToWatch) {
-        const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
-          project,
-          this._terminal
-        ))!;
+        const projectState: ReadonlyMap<string, string> =
+          previousState.getTrackedFileHashesForOperation(project);
 
         const prefixLength: number = project.projectFolder.length - repoRoot.length - 1;
         // Watch files in the root of the project, or
@@ -331,9 +347,13 @@ export class ProjectWatcher {
    * Determines which, if any, projects (within the selection) have new hashes for files that are not in .gitignore
    */
   private async _computeChanged(): Promise<IProjectChangeResult> {
-    const state: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
+    const state: IInputSnapshot | undefined = await this._analyzer._tryGetSnapshotAsync(this._terminal);
 
-    const previousState: ProjectChangeAnalyzer | undefined = this._previousState;
+    if (!state) {
+      throw new AlreadyReportedError();
+    }
+
+    const previousState: IInputSnapshot | undefined = this._previousState;
 
     if (!previousState) {
       return {
@@ -344,10 +364,10 @@ export class ProjectWatcher {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     for (const project of this._projectsToWatch) {
-      const [previous, current] = await Promise.all([
-        previousState._tryGetProjectDependenciesAsync(project, this._terminal),
-        state._tryGetProjectDependenciesAsync(project, this._terminal)
-      ]);
+      const previous: ReadonlyMap<string, string> | undefined =
+        previousState.getTrackedFileHashesForOperation(project);
+      const current: ReadonlyMap<string, string> | undefined =
+        state.getTrackedFileHashesForOperation(project);
 
       if (ProjectWatcher._haveProjectDepsChanged(previous, current)) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
@@ -361,7 +381,7 @@ export class ProjectWatcher {
     };
   }
 
-  private _commitChanges(state: ProjectChangeAnalyzer): void {
+  private _commitChanges(state: IInputSnapshot): void {
     this._previousState = state;
     if (!this._initialState) {
       this._initialState = state;
@@ -374,8 +394,8 @@ export class ProjectWatcher {
    * @returns `true` if the maps are different, `false` otherwise
    */
   private static _haveProjectDepsChanged(
-    prev: Map<string, string> | undefined,
-    next: Map<string, string> | undefined
+    prev: ReadonlyMap<string, string> | undefined,
+    next: ReadonlyMap<string, string> | undefined
   ): boolean {
     if (!prev && !next) {
       return false;
