@@ -341,8 +341,8 @@ export class HeftActionRunner {
       executeAsync: (state: IWatchLoopState): Promise<OperationStatus> => {
         return this._executeOnceAsync(executionManager, state.abortSignal, state.requestRun);
       },
-      onRequestRun: (requestor?: string) => {
-        terminal.writeLine(Colors.bold(`New run requested by ${requestor || 'unknown task'}`));
+      onRequestRun: (requester: string) => {
+        terminal.writeLine(Colors.bold(`New run requested by ${requester}`));
       },
       onAbort: () => {
         terminal.writeLine(Colors.bold(`Cancelling incremental build...`));
@@ -354,7 +354,7 @@ export class HeftActionRunner {
   private async _executeOnceAsync(
     executionManager: OperationExecutionManager,
     abortSignal: AbortSignal,
-    requestRun?: (requestor?: string) => void
+    requestRun?: (requester: string) => void
   ): Promise<OperationStatus> {
     // Execute the action operations
     return await runWithLoggingAsync(
@@ -453,7 +453,7 @@ function _getOrCreatePhaseOperation(
     // Only create the operation. Dependencies are hooked up separately
     operation = new Operation({
       groupName: phase.phaseName,
-      name: `${phase.phaseName} phase`,
+      operationName: `${phase.phaseName} phase`,
       runner: new PhaseOperationRunner({ phase, internalHeftSession })
     });
     operations.set(key, operation);
@@ -473,7 +473,7 @@ function _getOrCreateTaskOperation(
   if (!operation) {
     operation = new Operation({
       groupName: task.parentPhase.phaseName,
-      name: `${task.taskName} task`,
+      operationName: `${task.taskName} task`,
       runner: new TaskOperationRunner({
         internalHeftSession,
         task
