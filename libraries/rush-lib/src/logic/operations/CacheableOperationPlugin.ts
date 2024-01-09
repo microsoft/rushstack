@@ -107,15 +107,23 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           : undefined;
 
         const hashByOperation: Map<Operation, string> = new Map();
+        // Build cache hashes are computed up front to ensure stability and to catch configuration errors early.
         function getOrCreateOperationHash(operation: Operation): string {
           const cachedHash: string | undefined = hashByOperation.get(operation);
           if (cachedHash !== undefined) {
             return cachedHash;
           }
 
+          // Examples of data in the config hash:
+          // - CLI parameters (ShellOperationRunner)
           const configHash: string | undefined = operation.runner?.getConfigHash();
 
           const { associatedProject, associatedPhase } = operation;
+          // Examples of data in the local state hash:
+          // - Environment variables specified in `dependsOnEnvVars`
+          // - Git hashes of tracked files in the associated project
+          // - Git hash of the shrinkwrap file for the project
+          // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
           const localStateHash: string | undefined =
             associatedProject &&
             definitelyDefinedInputSnapshot.getLocalStateHashForOperation(
@@ -123,15 +131,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               associatedPhase?.name
             );
 
+          // The final state hashes of operation dependencies are factored into the hash to ensure that any
+          // state changes in dependencies will invalidate the cache.
           const dependencyHashes: string[] = Array.from(operation.dependencies, getDependencyHash).sort();
 
           const hasher: crypto.Hash = crypto.createHash('sha1');
-          // This property is used to force cache bust when version changes
+          // This property is used to force cache bust when version changes, e.g. when fixing bugs in the content
+          // of the build cache.
           hasher.update(`${RushConstants.buildCacheVersion}`);
 
           for (const dependencyHash of dependencyHashes) {
             hasher.update(dependencyHash);
           }
+
           if (localStateHash) {
             hasher.update(`${RushConstants.hashDelimiter}${localStateHash}`);
           }
