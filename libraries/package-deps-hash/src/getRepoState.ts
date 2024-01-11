@@ -3,7 +3,7 @@
 
 import type * as child_process from 'child_process';
 import { once } from 'events';
-import { Readable } from 'stream';
+import { Readable, pipeline } from 'stream';
 
 import { Executable, FileSystem, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
 
@@ -282,7 +282,13 @@ async function spawnGitAsync(
   });
 
   if (stdin) {
-    stdin.pipe(proc.stdin!);
+    /**
+     * We are just interested in catching "error" events there from child process'
+     * proc.stdin to avoid stdin based git commands to throw unhandled exceptions
+     * hence to let a chance for the error to be thrown in a context we can recover
+     * from.
+     */
+    pipeline(stdin, proc.stdin!, (err) => {});
   }
 
   const [status] = await once(proc, 'exit');
