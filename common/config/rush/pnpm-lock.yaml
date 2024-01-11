@@ -1755,7 +1755,7 @@ importers:
         version: 29.5.11
       '@types/node':
         specifier: ts4.9
-        version: 20.10.5
+        version: 20.11.0
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -4097,18 +4097,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@rushstack/heft-webpack5-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-webpack5-plugin
-      '@types/tapable':
-        specifier: 1.0.6
-        version: 1.0.6
-      '@types/webpack':
-        specifier: 4.41.32
-        version: 4.41.32
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      webpack:
+        specifier: ~5.82.1
+        version: 5.82.1
 
   ../../webpack/webpack-deep-imports-plugin:
     dependencies:
@@ -11399,8 +11393,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.10.5:
-    resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
+  /@types/node@20.11.0:
+    resolution: {integrity: sha512-o9bjXmDNcF7GbM4CNQpmi+TutCgap/K3w1JyKgxAjqx41zp9qlIAVFi0IhCNsJcXolEqLWhbFbEeL0PvYm4pcQ==}
     dependencies:
       undici-types: 5.26.5
     dev: true
