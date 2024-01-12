@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack-plugin-utilities",
+      "comment": "Expand the peer dependency specifier on Webpack to allow both Webpack 4 and Webpack 5.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack-plugin-utilities"
+}

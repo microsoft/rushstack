@@ -2,7 +2,8 @@
 
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
+const { ModuleMinifierPlugin } = require('@rushstack/webpack5-module-minifier-plugin');
+const { WorkerPoolMinifier } = require('@rushstack/module-minifier');
 
 function generateConfiguration(mode, outputFolderName) {
   return {

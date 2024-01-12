@@ -156,7 +156,10 @@
     // "allowedVersions": { "react": "17" },
     // "allowAny": ["@babel/*"]
     // TODO: Remove once Heft is 1.0.0
-    "allowAny": ["@rushstack/heft"]
+    "allowAny": ["@rushstack/heft"],
+    "allowedVersions": {
+      "webpack": "^4 || ^5"
+    }
   },
 
   /**

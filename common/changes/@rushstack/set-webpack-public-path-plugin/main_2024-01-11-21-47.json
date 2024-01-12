@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Remove old options, specifically `systemJs`, `urlPrefix`, `publicPath`, and `skipDetection`.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}
