@@ -178,7 +178,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
-| [/build-tests/set-webpack-public-path-plugin-webpack4-test](./build-tests/set-webpack-public-path-plugin-webpack4-test/) | Building this project tests the set-webpack-public-path-plugin using Webpack 4 |
+| [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-webpack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
 | [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
