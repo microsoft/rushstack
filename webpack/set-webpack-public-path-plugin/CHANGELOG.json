@@ -2,6 +2,26 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.0.0",
+      "date": "Fri, 12 Jan 2024 01:23:10 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Update the plugin to work with Webpack 5 and drop support for Webpack 4."
+          },
+          {
+            "comment": "Remove old options, specifically `systemJs`, `urlPrefix`, `publicPath`, and `skipDetection`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.16",
       "tag": "@rushstack/set-webpack-public-path-plugin_v4.1.16",
       "date": "Wed, 03 Jan 2024 00:31:18 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack-plugin-utilities
 
-This log was last generated on Wed, 03 Jan 2024 00:31:18 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jan 2024 01:23:10 GMT and should not be manually modified.
+
+## 0.4.0
+Fri, 12 Jan 2024 01:23:10 GMT
+
+### Minor changes
+
+- Expand the peer dependency specifier on Webpack to allow both Webpack 4 and Webpack 5.
 
 ## 0.3.16
 Wed, 03 Jan 2024 00:31:18 GMT
