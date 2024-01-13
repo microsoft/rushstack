@@ -40,12 +40,10 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
 
     // Example: /path/to/my-project/tsconfig.json
     const program: ts.Program = ESLintUtils.getParserServices(context).program;
-    const tsconfigFilePath: string | undefined = program.getCompilerOptions()['configFilePath'] as string;
+    const compilerOptions = program.getCompilerOptions();
+    const tsconfigFilePath: string | undefined = compilerOptions['configFilePath'] as string;
 
-    const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
-      inputFilePath,
-      tsconfigFilePath
-    );
+    const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(inputFilePath, compilerOptions);
     if (packletAnalyzer.nothingToDo) {
       return {};
     }

@@ -3,6 +3,7 @@
 
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/experimental-utils';
+import { MapLike } from 'typescript';
 
 import { PackletAnalyzer, IAnalyzerError, InputFileMessageIds, ImportMessageIds } from './PackletAnalyzer';
 
@@ -53,15 +54,9 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
     // Example: /path/to/my-project/src/packlets/my-packlet/index.ts
     const inputFilePath: string = context.getFilename();
 
-    // Example: /path/to/my-project/tsconfig.json
-    const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
-      context
-    ).program.getCompilerOptions()['configFilePath'] as string;
+    const compilerOptions = ESLintUtils.getParserServices(context).program.getCompilerOptions();
 
-    const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
-      inputFilePath,
-      tsconfigFilePath
-    );
+    const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(inputFilePath, compilerOptions);
     if (packletAnalyzer.nothingToDo) {
       return {};
     }
@@ -103,14 +98,15 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
             if (typeof modulePath !== 'string') {
               return;
             }
-
             if (!(modulePath.startsWith('.') || modulePath.startsWith('..'))) {
-              // It's not a local import.
+              if (!packletAnalyzer.isModulePathAnAlias(modulePath)) {
+                // It's not a local import.
 
-              // Examples:
-              //   import { X } from "npm-package";
-              //   import { X } from "raw-loader!./webpack-file.ts";
-              return;
+                // Examples:
+                //   import { X } from "npm-package";
+                //   import { X } from "raw-loader!./webpack-file.ts";
+                return;
+              }
             }
 
             const lint: IAnalyzerError | undefined = packletAnalyzer.analyzeImport(modulePath);
