@@ -33,12 +33,30 @@ export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPat
 }
 
 // @public
-export class SetPublicPathPlugin implements webpack.WebpackPluginInstance {
+export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
+    constructor();
+    // (undocumented)
+    protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void;
+}
+
+// @public
+export class SetPublicPathPlugin extends SetPublicPathPluginBase {
     constructor(options: ISetWebpackPublicPathPluginOptions);
     // (undocumented)
-    apply(compiler: webpack.Compiler): void;
+    protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void;
     // (undocumented)
     readonly options: ISetWebpackPublicPathPluginOptions;
 }
+
+// @public (undocumented)
+export abstract class SetPublicPathPluginBase implements webpack.WebpackPluginInstance {
+    constructor(pluginName: string);
+    // (undocumented)
+    apply(compiler: webpack.Compiler): void;
+    // (undocumented)
+    protected abstract _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void;
+}
+
+// (No @packageDocumentation comment for this package)
 
 ```

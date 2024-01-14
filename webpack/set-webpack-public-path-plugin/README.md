@@ -4,13 +4,48 @@
 
 `npm install @rushstack/set-webpack-public-path-plugin --save-dev`
 
-## Overview
+## Mode 1: Using the `document.currentScript` API
+
+### Overview
+
+This plugin wraps the entire webpack bundle in an immediately executed function expression (IIFE) that sets a variable
+to the value of `document.currentScript` and then injects code that extracts the current script's base path from
+the `src` attribute when setting the `__webpack_public_path__` variable.
+
+This is similar to the `output.publicPath = 'auto'` option, but differs in two important ways:
+
+1. It does not contain any fallback logic to look at `<script />` elements
+2. It stores the `document.currentScript` value immediately when the bundle is executed, not when
+   the runtime is executed. This is important when the bundle's factory function is called by another script, like
+   when an AMD output target is produced.
+
+### Plugin
+
+To use the plugin, add it to the `plugins` array of your Webpack config. For example:
+
+```JavaScript
+import { SetPublicPathCurrentScriptPlugin } from '@rushstack/set-webpack-public-path-plugin';
+
+{
+  plugins: [
+    new SetPublicPathCurrentScriptPlugin()
+  ]
+}
+```
+
+### Options
+
+This plugin has no options.
+
+## Mode 2: Automatic public path detection via regular expression
+
+### Overview
 
 This simple plugin uses a specified regular expression or the emitted asset name to set the `__webpack_public_path__`
 variable. This is useful for scenarios where the Webpack automatic public path detection does not work. For example,
 when emitting AMD-style assets that are initialized by a callback.
 
-# Plugin
+### Plugin
 
 To use the plugin, add it to the `plugins` array of your Webpack config. For example:
 
@@ -24,7 +59,7 @@ import { SetPublicPathPlugin } from '@rushstack/set-webpack-public-path-plugin';
 }
 ```
 
-## Options
+### Options
 
 #### `scriptName = { }`
 
@@ -49,7 +84,7 @@ property. `useAssetName` is exclusive to `name` and `isTokenized`.
 
 This option is exclusive to other options. If it is set, `systemJs`, `publicPath`, and `urlPrefix` will be ignored.
 
-#### `regexVariable = '...'`
+##### `regexVariable = '...'`
 
 Check for a variable with name `...` on the page and use its value as a regular expression against script paths to
 the bundle's script. If a value `foo` is passed into `regexVariable`, the produced bundle will look for a variable
@@ -59,7 +94,7 @@ detect the bundle's script.
 For example, if the `regexVariable` option is set to `scriptRegex` and `scriptName` is set to `{ name: 'myscript' }`,
 consider two cases:
 
-##### Case 1
+###### Case 1
 
 ```HTML
 <html>
@@ -77,7 +112,7 @@ consider two cases:
 In this case, because there is a `scriptRegex` variable defined on the page, the bundle will use its value
 (`/thescript/i`) to find the script.
 
-##### Case 2
+###### Case 2
 
 ```HTML
 <html>
@@ -92,7 +127,7 @@ In this case, because there is a `scriptRegex` variable defined on the page, the
 In this case, because there is not a `scriptRegex` variable defined on the page, the bundle will use the value
 passed into the `scriptName` option to find the script.
 
-#### `getPostProcessScript = (variableName) => { ... }`
+##### `getPostProcessScript = (variableName) => { ... }`
 
 A function that returns a snippet of code that manipulates the variable with the name that's specified in the
 parameter. If this parameter isn't provided, no post-processing code is included. The variable must be modified
@@ -111,7 +146,7 @@ the public path variable will have `/assets/` appended to the found path.
 
 Note that the existing value of the variable already ends in a slash (`/`).
 
-#### `preferLastFoundScript = false`
+##### `preferLastFoundScript = false`
 
 If true, find the last script matching the regexVariable (if it is set). If false, find the first matching script.
 This can be useful if there are multiple scripts loaded in the DOM that match the regexVariable.

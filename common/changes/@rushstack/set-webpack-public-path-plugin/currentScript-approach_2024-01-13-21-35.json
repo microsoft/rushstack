@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Add a second exported plugin (`SetPublicPathCurrentScriptPlugin`) that creates a wrapper around the runtime chunk and uses the `document.currentScript` API to get the current script's URL.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}
