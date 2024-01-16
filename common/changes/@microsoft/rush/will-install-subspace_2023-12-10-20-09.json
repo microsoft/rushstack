@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add BaseFlag class to simplify flag classes",
+      "comment": "Add `deferredInstallationScripts` setting to improve robustness of install lifecycle scripts",
       "type": "none"
     }
   ],
