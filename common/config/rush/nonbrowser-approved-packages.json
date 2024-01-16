@@ -15,6 +15,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@eslint/eslintrc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -100,7 +104,7 @@
     },
     {
       "name": "@rushstack/eslint-patch",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/eslint-plugin",
@@ -331,12 +335,12 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "@typescript-eslint/experimental-utils",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@typescript-eslint/parser",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@typescript-eslint/rule-tester",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/types",
@@ -344,6 +348,10 @@
     },
     {
       "name": "@typescript-eslint/typescript-estree",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@typescript-eslint/utils",
       "allowedCategories": [ "libraries" ]
     },
     {

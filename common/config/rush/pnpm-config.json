@@ -156,7 +156,10 @@
     // "allowedVersions": { "react": "17" },
     // "allowAny": ["@babel/*"]
     // TODO: Remove once Heft is 1.0.0
-    "allowAny": ["@rushstack/heft"]
+    "allowAny": ["@rushstack/heft"],
+    "allowedVersions": {
+      "webpack": "^4 || ^5"
+    }
   },
 
   /**
@@ -268,6 +271,13 @@
     "@types/webpack": {
       "dependencies": {
         "anymatch": "^3"
+      }
+    },
+
+    // Temporary workaround for https://github.com/typescript-eslint/typescript-eslint/issues/8259
+    "@typescript-eslint/rule-tester": {
+      "dependencies": {
+        "@types/semver": "*"
       }
     },
 

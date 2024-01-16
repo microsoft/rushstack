@@ -1,6 +1,18 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Wed, 20 Dec 2023 01:09:46 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+
+## 0.11.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3
+
+## 0.10.8
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
 
 ## 0.10.7
 Wed, 20 Dec 2023 01:09:46 GMT

@@ -1,6 +1,24 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Wed, 20 Dec 2023 01:09:45 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jan 2024 18:30:11 GMT and should not be manually modified.
+
+## 5.0.1
+Tue, 16 Jan 2024 18:30:11 GMT
+
+_Version update only_
+
+## 5.0.0
+Fri, 12 Jan 2024 01:23:10 GMT
+
+### Breaking changes
+
+- Update the plugin to work with Webpack 5 and drop support for Webpack 4.
+- Remove old options, specifically `systemJs`, `urlPrefix`, `publicPath`, and `skipDetection`.
+
+## 4.1.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
 
 ## 4.1.15
 Wed, 20 Dec 2023 01:09:45 GMT

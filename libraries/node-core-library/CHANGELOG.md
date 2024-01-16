@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 07 Dec 2023 03:44:13 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Jan 2024 00:31:18 GMT and should not be manually modified.
+
+## 3.63.0
+Wed, 03 Jan 2024 00:31:18 GMT
+
+### Minor changes
+
+- Updates the `JsonFile` API to format JSON as JSON5 if an existing string is being updated to preserve the style of the existing JSON.
 
 ## 3.62.0
 Thu, 07 Dec 2023 03:44:13 GMT

@@ -12,6 +12,6 @@
     "@rushstack/ts-command-line": "workspace:*",
     "@types/node": "18.17.15",
     "fs-extra": "~7.0.1",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

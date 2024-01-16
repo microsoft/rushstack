@@ -10,8 +10,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "react-dom": "~16.13.1",
-    "react": "~16.13.1",
+    "react-dom": "~17.0.2",
+    "react": "~17.0.2",
     "tslib": "~2.3.1"
   },
   "devDependencies": {
@@ -22,15 +22,15 @@
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/react-dom": "16.9.14",
-    "@types/react": "16.14.23",
+    "@types/react-dom": "17.0.25",
+    "@types/react": "17.0.74",
     "@types/webpack-env": "1.18.0",
     "css-loader": "~6.6.0",
     "eslint": "~8.7.0",
     "html-webpack-plugin": "~5.5.0",
     "source-map-loader": "~3.0.1",
     "style-loader": "~3.3.1",
-    "typescript": "~5.0.4",
+    "typescript": "~5.3.3",
     "webpack": "~5.82.1"
   }
 }
