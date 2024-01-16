@@ -274,6 +274,13 @@
       }
     },
 
+    // Temporary workaround for https://github.com/typescript-eslint/typescript-eslint/issues/8259
+    "@typescript-eslint/rule-tester": {
+      "dependencies": {
+        "@types/semver": "*"
+      }
+    },
+
     "@typescript-eslint/types": {
       "peerDependencies": {
         "typescript": "*"
