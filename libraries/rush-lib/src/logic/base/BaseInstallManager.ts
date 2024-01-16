@@ -107,7 +107,7 @@ export abstract class BaseInstallManager {
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
-    if (this.rushConfiguration.experimentsConfiguration.configuration.deferredInstallationScripts) {
+    if (this.rushConfiguration.pnpmOptions.deferredInstallationScripts) {
       // Only works for pnpm and useWorkspaces=true
       this._deferredInstallationScripts = useWorkspaces && this.rushConfiguration.packageManager === 'pnpm';
     }

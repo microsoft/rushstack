@@ -466,7 +466,6 @@ export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
-    deferredInstallationScripts?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
@@ -689,6 +688,7 @@ export interface IPhasedCommand extends IRushCommand {
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     autoInstallPeers?: boolean;
+    deferredInstallationScripts?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
@@ -1001,6 +1001,7 @@ export class PhasedCommandHooks {
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     readonly autoInstallPeers: boolean | undefined;
+    readonly deferredInstallationScripts: boolean;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;

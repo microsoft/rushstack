@@ -122,6 +122,20 @@
   /*[LINE "HYPOTHETICAL"]*/ "preventManualShrinkwrapChanges": true,
 
   /**
+   * If true, then "rush install" and "rush update" will improve robustness of
+   * install lifecycle scripts by running them as a second stage ("pnpm rebuild --pending")
+   * after installation ("pnpm install --ignore-scripts").
+   *
+   * Install lifecycle scripts are often poorly implemented, they may download large files
+   * without recovery logic or invoke complex C++ build tools.  In this situation, a two stage
+   * approach allows the second stage to be reattempted without having to recheck the first stage.
+   *
+   * This feature is only supported when useWorkspaces=true.
+   * The default value is false.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "deferredInstallationScripts": true,
+
+  /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
    * for all dependencies of all projects in the monorepo workspace.  The settings are copied
    * into the `pnpm.overrides` field of the `common/temp/package.json` file that is generated
