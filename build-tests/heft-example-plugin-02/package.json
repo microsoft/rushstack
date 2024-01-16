@@ -26,6 +26,6 @@
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",
     "heft-example-plugin-01": "workspace:*",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

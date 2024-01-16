@@ -51,6 +51,6 @@
     "jest-environment-jsdom": "~29.5.0",
     "jest-environment-node": "~29.5.0",
     "jest-watch-select-projects": "2.0.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

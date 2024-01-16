@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/estree": "1.0.2",
+    "@types/estree": "1.0.5",
     "local-node-rig": "workspace:*",
     "memfs": "3.4.3",
     "webpack": "~5.82.1"

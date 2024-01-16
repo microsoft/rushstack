@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/tree-pattern",
+      "comment": "Upgrade build dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/tree-pattern"
+}

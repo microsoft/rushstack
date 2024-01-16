@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Upgrade build dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}

@@ -32,6 +32,6 @@
     "@rushstack/heft-node-rig": "2.3.2",
     "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Upgrade build dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}

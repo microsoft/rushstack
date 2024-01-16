@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@fluentui/react": "^8.96.1",
-    "react": "~16.13.1",
-    "react-dom": "~16.13.1",
+    "react": "~17.0.2",
+    "react-dom": "~17.0.2",
     "@lifaon/path": "~2.1.0",
     "@reduxjs/toolkit": "~1.8.6",
     "react-redux": "~8.0.4",
@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/react-dom": "16.9.14",
-    "@types/react": "16.14.23",
+    "@types/react-dom": "17.0.25",
+    "@types/react": "17.0.74",
     "local-web-rig": "workspace:*"
   }
 }
