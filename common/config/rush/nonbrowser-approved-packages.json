@@ -6,14 +6,6 @@
       "name": "@azure/identity",
       "allowedCategories": [ "libraries" ]
     },
-        {
-      "name": "@eslint/eslintrc",
-      "allowedCategories": [ "libraries" ]
-    },
-        {
-      "name": "@typescript-eslint/rule-tester",
-      "allowedCategories": [ "libraries" ]
-    },
     {
       "name": "@azure/storage-blob",
       "allowedCategories": [ "libraries" ]
@@ -21,6 +13,10 @@
     {
       "name": "@babel/core",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@eslint/eslintrc",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@jest/core",
@@ -108,7 +104,7 @@
     },
     {
       "name": "@rushstack/eslint-patch",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/eslint-plugin",
@@ -341,6 +337,10 @@
     {
       "name": "@typescript-eslint/parser",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@typescript-eslint/rule-tester",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@typescript-eslint/types",

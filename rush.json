@@ -829,7 +829,8 @@
       "packageName": "heft-typescript-v4-test",
       "projectFolder": "build-tests/heft-typescript-v4-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "heft-web-rig-library-test",

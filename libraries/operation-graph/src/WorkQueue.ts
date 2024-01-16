@@ -28,6 +28,9 @@ export class WorkQueue {
       : new Promise<void>((resolve) => {
           abortSignal.addEventListener('abort', () => resolve(), { once: true });
         });
+
+    // ESLINT: "An array of Promises may be unintentional."
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     [this._pushPromise, this._resolvePush] = Async.getSignal();
     this._resolvePushTimeout = undefined;
   }
@@ -50,6 +53,8 @@ export class WorkQueue {
         priority
       });
 
+      // ESLINT: "Promises must be awaited, end with a call to .catch, end with a call to .then ..."
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._abortPromise.finally(() => resolve(OperationStatus.Aborted));
 
       this._resolvePushDebounced();
@@ -61,6 +66,9 @@ export class WorkQueue {
       this._resolvePushTimeout = setTimeout(() => {
         this._resolvePushTimeout = undefined;
         this._resolvePush();
+
+        // ESLINT: "An array of Promises may be unintentional."
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         [this._pushPromise, this._resolvePush] = Async.getSignal();
       });
     }
