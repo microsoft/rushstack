@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
+import { RuleTester } from '@typescript-eslint/rule-tester';
 import { noNewNullRule } from '../no-new-null';
 
-const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
   /*
    * The underlying API requires an absolute path. `@typescript-eslint/utils` calls `require.resolve()` on the input

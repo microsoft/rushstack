@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 import { TreePattern } from '@rushstack/tree-pattern';
 
@@ -60,9 +60,7 @@ const noUnsafeRegExp: TSESLint.RuleModule<MessageIds, Options> = {
       description:
         'Requires regular expressions to be constructed from string constants rather than dynamically' +
         ' building strings at runtime.',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Best Practices',
-      recommended: 'warn',
+      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-security'
     } as TSESLint.RuleMetaDataDocs
   },

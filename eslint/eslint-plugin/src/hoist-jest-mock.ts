@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 import * as hoistJestMockPatterns from './hoistJestMockPatterns';
 
@@ -36,9 +36,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
         ' "hoist" these calls, however this can produce counterintuitive results. Instead, the hoist-jest-mocks' +
         ' lint rule requires developers to manually hoist these calls. For technical background, please read the' +
         ' Jest documentation here: https://jestjs.io/docs/en/es6-class-mocks',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Possible Errors',
-      recommended: 'error',
+      recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     } as TSESLint.RuleMetaDataDocs
   },
