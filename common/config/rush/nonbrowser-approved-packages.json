@@ -331,7 +331,7 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "@typescript-eslint/experimental-utils",
+      "name": "@typescript-eslint/utils",
       "allowedCategories": [ "libraries" ]
     },
     {
