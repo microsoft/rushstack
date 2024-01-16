@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Upgrade to TypeScript 5.3.3",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}

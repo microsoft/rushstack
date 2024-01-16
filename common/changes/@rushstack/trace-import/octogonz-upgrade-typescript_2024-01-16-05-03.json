@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/trace-import",
+      "comment": "Upgrade to TypeScript 5.3.3",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/trace-import"
+}

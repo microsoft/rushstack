@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/tree-pattern",
+      "comment": "Upgrade to TypeScript 5.3.3",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/tree-pattern"
+}
