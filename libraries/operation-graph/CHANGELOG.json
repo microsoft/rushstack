@@ -2,6 +2,18 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/operation-graph_v0.2.3",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade build dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/operation-graph_v0.2.2",
       "date": "Wed, 03 Jan 2024 00:31:18 GMT",

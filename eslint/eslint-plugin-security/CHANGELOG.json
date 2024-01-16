@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.8.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 5.3 with @typescript-eslint 6.19.x"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.1",
       "tag": "@rushstack/eslint-plugin-security_v0.7.1",
       "date": "Tue, 26 Sep 2023 09:30:33 GMT",
