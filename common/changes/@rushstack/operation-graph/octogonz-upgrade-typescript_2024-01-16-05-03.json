@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/operation-graph",
-      "comment": "Upgrade to TypeScript 5.3.3",
-      "type": "minor"
+      "comment": "Upgrade build dependencies",
+      "type": "patch"
     }
   ],
   "packageName": "@rushstack/operation-graph"

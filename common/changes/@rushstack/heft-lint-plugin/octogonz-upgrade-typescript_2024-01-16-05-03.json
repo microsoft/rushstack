@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-lint-plugin",
-      "comment": "Upgrade to TypeScript 5.3.3",
+      "comment": "Add support for TypeScript 5.3",
       "type": "minor"
     }
   ],

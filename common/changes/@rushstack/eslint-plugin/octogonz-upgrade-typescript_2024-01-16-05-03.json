@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-plugin",
-      "comment": "Upgrade to TypeScript 5.3.x and @typescript-eslint 6.19.x",
+      "comment": "Add support for TypeScript 5.3 with @typescript-eslint 6.19.x",
       "type": "minor"
     }
   ],
