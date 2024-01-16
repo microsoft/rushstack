@@ -55,15 +55,6 @@ function readPackage(packageJson, context) {
       packageJson.peerDependencies['typescript'] = '*';
       break;
     }
-
-    // TODO: REMOVE THIS AFTER UPGRADING DECOUPLED DEPENDENCIES
-    // This is a temporary hack because local-eslint-config uses the latest TypeScript
-    // and cannot be decoupled because it does not get published.
-    case '@rushstack/heft-node-rig':
-    case '@rushstack/heft-web-rig': {
-      packageJson.dependencies['typescript'] = '5.3.3';
-      break;
-    }
   }
 
   return packageJson;
