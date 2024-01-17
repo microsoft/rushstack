@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/package-deps-hash",
-      "comment": "Avoid defect to be produced bit spawnGitAsync when the underlying child process stdin stream fails while computing repo-state",
+      "comment": "Handle an edge case in `getRepoState` wherein it tries to asynchronously pipe data to `git hash-object` but the subprocess has already exited.",
       "type": "patch"
     }
   ],

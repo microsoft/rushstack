@@ -283,10 +283,9 @@ async function spawnGitAsync(
 
   if (stdin) {
     /**
-     * We are just interested in catching "error" events there from child process'
-     * proc.stdin to avoid stdin based git commands to throw unhandled exceptions
-     * hence to let a chance for the error to be thrown in a context we can recover
-     * from.
+     * For `git hash-object` data is piped in asynchronously. In the event that one of the
+     * passed filenames cannot be hashed, subsequent writes to `proc.stdin` will error.
+     * Silence this error since it will be handled by the non-zero exit code of the process.
      */
     pipeline(stdin, proc.stdin!, (err) => {});
   }
