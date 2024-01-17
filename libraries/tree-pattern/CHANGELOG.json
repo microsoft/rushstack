@@ -2,6 +2,18 @@
   "name": "@rushstack/tree-pattern",
   "entries": [
     {
+      "version": "0.3.2",
+      "tag": "@rushstack/tree-pattern_v0.3.2",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade build dependencies"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.1",
       "tag": "@rushstack/tree-pattern_v0.3.1",
       "date": "Tue, 26 Sep 2023 09:30:33 GMT",

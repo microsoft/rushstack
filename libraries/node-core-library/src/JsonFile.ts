@@ -90,7 +90,7 @@ export enum JsonSyntax {
    * Files using this format should use the `.json5` file extension instead of `.json`.
    *
    * JSON5 has substantial differences from JSON: object keys may be unquoted, trailing commas
-   * are allowed, and strings may span multiple lines.  Whereas `JsonSyntax.JsonWithComments` can
+   * are allowed, and strings may span multiple lines.  Whereas {@link JsonSyntax.JsonWithComments} can
    * be cheaply converted to standard JSON by stripping comments, parsing JSON5 requires a
    * nontrivial algorithm that may not be easily available in some contexts or programming languages.
    *
@@ -109,7 +109,7 @@ export interface IJsonFileParseOptions {
    * Specifies the variant of JSON syntax to be used.
    *
    * @defaultValue
-   * `JsonSyntax.Json5`
+   * {@link JsonSyntax.Json5}
    *
    * NOTE: This default will be changed to `JsonSyntax.JsonWithComments` in a future release.
    */
@@ -135,8 +135,9 @@ export interface IJsonFileStringifyOptions {
   newlineConversion?: NewlineKind;
 
   /**
-   * By default, `JsonFile.stringify()` validates that the object does not contain any
-   * keys whose value is `undefined`.  To disable this validation, set `ignoreUndefinedValues=true`
+   * By default, {@link JsonFile.stringify} validates that the object does not contain any
+   * keys whose value is `undefined`.  To disable this validation, set
+   * {@link IJsonFileStringifyOptions.ignoreUndefinedValues} to `true`
    * which causes such keys to be silently discarded, consistent with the system `JSON.stringify()`.
    *
    * @remarks
@@ -146,8 +147,9 @@ export interface IJsonFileStringifyOptions {
    * as `undefined`, because it is the default value of missing/uninitialized variables.
    * (In practice, distinguishing "null" versus "uninitialized" has more drawbacks than benefits.)
    * This poses a problem when serializing ECMAScript objects that contain `undefined` members.
-   * As a safeguard, `JsonFile` will report an error if any `undefined` values are encountered
-   * during serialization.  Set `ignoreUndefinedValues=true` to disable this safeguard.
+   * As a safeguard, {@link JsonFile} will report an error if any `undefined` values are encountered
+   * during serialization.  Set {@link IJsonFileStringifyOptions.ignoreUndefinedValues} to `true`
+   * to disable this safeguard.
    */
   ignoreUndefinedValues?: boolean;
 
@@ -336,12 +338,8 @@ export class JsonFile {
   public static updateString(
     previousJson: string,
     newJsonObject: JsonObject,
-    options?: IJsonFileStringifyOptions
+    options: IJsonFileStringifyOptions = {}
   ): string {
-    if (!options) {
-      options = {};
-    }
-
     if (!options.ignoreUndefinedValues) {
       // Standard handling of `undefined` in JSON stringification is to discard the key.
       JsonFile.validateNoUndefinedMembers(newJsonObject);
@@ -352,7 +350,7 @@ export class JsonFile {
     if (previousJson !== '') {
       // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
       stringified = jju.update(previousJson, newJsonObject, {
-        mode: 'cjson',
+        mode: JsonSyntax.Json5,
         indent: 2
       });
     } else if (options.prettyFormatting) {
@@ -375,7 +373,7 @@ export class JsonFile {
     // Add the trailing newline
     stringified = Text.ensureTrailingNewline(stringified);
 
-    if (options && options.newlineConversion) {
+    if (options.newlineConversion) {
       stringified = Text.convertTo(stringified, options.newlineConversion);
     }
 
@@ -389,11 +387,11 @@ export class JsonFile {
    * @param options - other settings that control how the file is saved
    * @returns false if ISaveJsonFileOptions.onlyIfChanged didn't save anything; true otherwise
    */
-  public static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
-    if (!options) {
-      options = {};
-    }
-
+  public static save(
+    jsonObject: JsonObject,
+    jsonFilename: string,
+    options: IJsonFileSaveOptions = {}
+  ): boolean {
     // Do we need to read the previous file contents?
     let oldBuffer: Buffer | undefined = undefined;
     if (options.updateExistingFile || options.onlyIfChanged) {
@@ -446,12 +444,8 @@ export class JsonFile {
   public static async saveAsync(
     jsonObject: JsonObject,
     jsonFilename: string,
-    options?: IJsonFileSaveOptions
+    options: IJsonFileSaveOptions = {}
   ): Promise<boolean> {
-    if (!options) {
-      options = {};
-    }
-
     // Do we need to read the previous file contents?
     let oldBuffer: Buffer | undefined = undefined;
     if (options.updateExistingFile || options.onlyIfChanged) {
@@ -576,10 +570,7 @@ export class JsonFile {
     return lines.join('\n') + '\n';
   }
 
-  private static _buildJjuParseOptions(options: IJsonFileParseOptions | undefined): jju.ParseOptions {
-    if (!options) {
-      options = {};
-    }
+  private static _buildJjuParseOptions(options: IJsonFileParseOptions = {}): jju.ParseOptions {
     const parseOptions: jju.ParseOptions = {};
     switch (options.jsonSyntax) {
       case JsonSyntax.Strict:

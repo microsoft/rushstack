@@ -6,9 +6,9 @@
 
 ## Overview
 
-This simple plugin sets the `__webpack_public_path__` variable to
-a value specified in the arguments, optionally appended to the SystemJs baseURL
-property.
+This simple plugin uses a specified regular expression or the emitted asset name to set the `__webpack_public_path__`
+variable. This is useful for scenarios where the Webpack automatic public path detection does not work. For example,
+when emitting AMD-style assets that are initialized by a callback.
 
 # Plugin
 
@@ -48,21 +48,6 @@ If the `useAssetName` property is set, the plugin will use the Webpack-produced 
 property. `useAssetName` is exclusive to `name` and `isTokenized`.
 
 This option is exclusive to other options. If it is set, `systemJs`, `publicPath`, and `urlPrefix` will be ignored.
-
-#### `systemJs = true`
-
-Use `System.baseURL` if it is defined.
-
-#### `publicPath = '...'`
-
-Use the specified path as the base public path. If `urlPrefix` is also defined, the public path will
-be the concatenation of the two (i.e. - `__webpack_public_path__ = URL.concat({publicPath} + {urlPrefix}`).
-This option takes precedence over the `systemJs` option.
-
-#### `urlPrefix = '...'`
-
-Use the specified string as a URL prefix after the SystemJS path or the `publicPath` option. If neither
-`systemJs` nor `publicPath` is defined, this option will not apply and an exception will be thrown.
 
 #### `regexVariable = '...'`
 
@@ -130,58 +115,3 @@ Note that the existing value of the variable already ends in a slash (`/`).
 
 If true, find the last script matching the regexVariable (if it is set). If false, find the first matching script.
 This can be useful if there are multiple scripts loaded in the DOM that match the regexVariable.
-
-#### `skipDetection = false`
-
-If true, always include the code snippet to detect the public path regardless of whether chunks or assets are present.
-
-# SystemJS Caveat
-
-When modules are loaded with SystemJS (and with the , `scriptLoad: true` meta option) `<script src="..."></script>`
-tags are injected onto the page, evaludated and then immediately removed. This causes an issue because they are removed
-before webpack module code begins to execute, so the `publicPath=...` option won't work for modules loaded with SystemJS.
-
-To circumvent this issue, a small bit of code is availble to that will maintain a global register of script paths
-that have been inserted onto the page. This code block should be appended to bundles that are expected to be loaded
-with SystemJS and use the `publicPath=...` option.
-
-## `getGlobalRegisterCode(bool)`
-
-This function returns a block of JavaScript that maintains a global register of script tags. If the optional boolean parameter
-is set to `true`, the code is not minified. By default, it is minified. You can detect if the plugin may require
-the global register code by searching for the value of the `registryVariableName` field.
-
-## Usage without registryVariableName
-
-``` javascript
-var setWebpackPublicPath = require('@rushstack/set-webpack-public-path-plugin');
-var gulpInsert = require('gulp-insert');
-
-gulp.src('finizlied/webpack/bundle/path')
-  .pipe(gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true)))
-  .pipe(gulp.dest('dest/path'));
-```
-
-## Usage with registryVariableName
-
-``` javascript
-var setWebpackPublicPath = require('@rushstack/set-webpack-public-path-plugin');
-var gulpInsert = require('gulp-insert');
-var gulpIf = require('gulp-if');
-
-var detectRegistryVariableName = function (file) {
-  return file.contents.toString().indexOf(setWebpackPublicPath.registryVariableName) !== -1;
-};
-
-gulp.src('finizlied/webpack/bundle/path')
-  .pipe(gulpIf(detectRegistryVariableName, gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true))))
-  .pipe(gulp.dest('dest/path'));
-```
-
-## Links
-
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/webpack/set-webpack-public-path-plugin/CHANGELOG.md) - Find
-  out what's new in the latest version
-
-`@rushstack/set-webpack-public-path-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

@@ -829,7 +829,8 @@
       "packageName": "heft-typescript-v4-test",
       "projectFolder": "build-tests/heft-typescript-v4-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/eslint-config"]
     },
     {
       "packageName": "heft-web-rig-library-test",
@@ -865,19 +866,22 @@
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/set-webpack-public-path-plugin"]
     },
     {
       "packageName": "localization-plugin-test-02",
       "projectFolder": "build-tests/localization-plugin-test-02",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/set-webpack-public-path-plugin"]
     },
     {
       "packageName": "localization-plugin-test-03",
       "projectFolder": "build-tests/localization-plugin-test-03",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "decoupledLocalDependencies": ["@rushstack/set-webpack-public-path-plugin"]
     },
     {
       "packageName": "rush-amazon-s3-build-cache-plugin-integration-test",
@@ -904,8 +908,8 @@
       "shouldPublish": false
     },
     {
-      "packageName": "set-webpack-public-path-plugin-webpack4-test",
-      "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
+      "packageName": "set-webpack-public-path-plugin-test",
+      "projectFolder": "build-tests/set-webpack-public-path-plugin-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -1270,7 +1274,8 @@
       "packageName": "@rushstack/webpack4-localization-plugin",
       "projectFolder": "webpack/webpack4-localization-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/set-webpack-public-path-plugin"]
     },
     {
       "packageName": "@rushstack/webpack4-module-minifier-plugin",

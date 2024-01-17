@@ -17,7 +17,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",
-    "typescript": "~5.0.4",
+    "typescript": "~5.3.3",
     "http-proxy": "~1.18.1",
     "@types/http-proxy": "~1.17.8"
   }

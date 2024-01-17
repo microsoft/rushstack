@@ -17,6 +17,6 @@
     "local-eslint-config": "workspace:*",
     "eslint": "~8.7.0",
     "jest-junit": "12.3.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

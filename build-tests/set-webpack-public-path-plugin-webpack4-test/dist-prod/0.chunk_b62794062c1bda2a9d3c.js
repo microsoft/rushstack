@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[0],[,(function(e,t,n){"use strict";n.r(t),n.d(t,"ChunkClass",(function(){return a}));var a=function(){function e(){}return e.prototype.doStuff=function(){console.log("stuff")},e}()})]]);

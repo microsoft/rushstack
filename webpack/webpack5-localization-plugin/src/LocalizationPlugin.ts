@@ -91,6 +91,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   private _defaultLocale!: string;
   private _noStringsLocaleName!: string;
   private _fillMissingTranslationStrings!: boolean;
+  private _formatLocaleForFilename!: (loc: string) => string;
   private readonly _pseudolocalizers: Map<string, (str: string) => string> = new Map();
 
   /**
@@ -207,7 +208,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                   Constants.JSONP_PLACEHOLDER;
 
                 if (chunkIdsWithStrings.size === 0) {
-                  return this._noStringsLocaleName;
+                  return this._formatLocaleForFilename(this._noStringsLocaleName);
                 } else if (chunkIdsWithoutStrings.size === 0) {
                   return `" + ${localeExpression} + "`;
                 } else {
@@ -229,7 +230,9 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                     chunkMapping[id] = 1;
                   }
 
-                  const noLocaleExpression: string = JSON.stringify(this._noStringsLocaleName);
+                  const noLocaleExpression: string = JSON.stringify(
+                    this._formatLocaleForFilename(this._noStringsLocaleName)
+                  );
 
                   return `" + (${JSON.stringify(chunkMapping)}[chunkId]?${
                     isLocalizedSmaller ? localeExpression : noLocaleExpression
@@ -247,7 +250,10 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 // Ensure that the initial name maps to a file that should exist in the final output
                 locale = isLocalized ? this._defaultLocale : this._noStringsLocaleName;
               }
-              return assetPath.replace(Constants.LOCALE_FILENAME_TOKEN_REGEX, locale);
+              return assetPath.replace(
+                Constants.LOCALE_FILENAME_TOKEN_REGEX,
+                this._formatLocaleForFilename(locale)
+              );
             }
           } else {
             return assetPath;
@@ -306,6 +312,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 locales,
                 defaultLocale: this._defaultLocale,
                 fillMissingTranslationStrings: this._fillMissingTranslationStrings,
+                formatLocaleForFilenameFn: this._formatLocaleForFilename,
                 // Chunk-specific values
                 chunk,
                 asset,
@@ -324,6 +331,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 plugin: this,
                 compilation,
                 noStringsLocaleName: this._noStringsLocaleName,
+                formatLocaleForFilenameFn: this._formatLocaleForFilename,
                 // Chunk-specific values
                 chunk,
                 asset,
@@ -700,6 +708,10 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     }
     // END options.noStringsLocaleName
 
+    // START options.formatLocaleForFilename
+    const { formatLocaleForFilename = (localeName: string) => localeName } = this._options;
+    this._formatLocaleForFilename = formatLocaleForFilename;
+    // END options.formatLocaleForFilename
     return { errors, warnings };
   }
 }

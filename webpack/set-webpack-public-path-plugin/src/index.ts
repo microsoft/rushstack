@@ -3,10 +3,15 @@
 
 /**
  * This simple plugin sets the `__webpack_public_path__` variable to
- *  a value specified in the arguments, optionally appended to the SystemJs baseURL
- *  property.
+ * a value specified in the arguments.
  * @packageDocumentation
  */
 
-export * from './SetPublicPathPlugin';
-export { getGlobalRegisterCode, registryVariableName } from './codeGenerator';
+export {
+  SetPublicPathPlugin,
+  ISetWebpackPublicPathOptions,
+  ISetWebpackPublicPathPluginOptions,
+  IScriptNameAssetNameOptions,
+  IScriptNameOptions,
+  IScriptNameRegexOptions
+} from './SetPublicPathPlugin';

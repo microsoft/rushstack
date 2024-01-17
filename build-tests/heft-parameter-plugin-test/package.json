@@ -17,6 +17,6 @@
     "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "heft-parameter-plugin": "workspace:*",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }
