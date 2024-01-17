@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Handle an edge case in `getRepoState` wherein it tries to asynchronously pipe data to `git hash-object` but the subprocess has already exited.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}
