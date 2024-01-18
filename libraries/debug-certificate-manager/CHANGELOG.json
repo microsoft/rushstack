@@ -2,6 +2,72 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.3.17",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.17",
+      "date": "Tue, 16 Jan 2024 18:30:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.16",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.16",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.15",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.15",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.14",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.14",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.13",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.13",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.12",
       "tag": "@rushstack/debug-certificate-manager_v1.3.12",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",

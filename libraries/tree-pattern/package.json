@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/tree-pattern",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A fast, lightweight pattern matcher for tree structures such as an Abstract Syntax Tree (AST)",
   "main": "lib/index.js",
   "typings": "dist/tree-pattern.d.ts",
@@ -16,12 +16,12 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "3.4.0",
-    "@rushstack/heft": "0.62.0",
-    "@rushstack/heft-node-rig": "2.3.2",
+    "@rushstack/eslint-config": "3.6.0",
+    "@rushstack/heft": "0.64.0",
+    "@rushstack/heft-node-rig": "2.4.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

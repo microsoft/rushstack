@@ -2,6 +2,173 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.4.0",
+      "tag": "@rushstack/heft-node-rig_v2.4.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to TypeScript 5.3"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.6` to `^0.64.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.16",
+      "tag": "@rushstack/heft-node-rig_v2.3.16",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.39.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.5` to `^0.63.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.15",
+      "tag": "@rushstack/heft-node-rig_v2.3.15",
+      "date": "Wed, 20 Dec 2023 01:09:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.39.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.10.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.4` to `^0.63.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.14",
+      "tag": "@rushstack/heft-node-rig_v2.3.14",
+      "date": "Fri, 15 Dec 2023 01:10:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.13",
+      "tag": "@rushstack/heft-node-rig_v2.3.13",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.38.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.3` to `^0.63.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.12",
+      "tag": "@rushstack/heft-node-rig_v2.3.12",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.38.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.10.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.2` to `^0.63.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.11",
       "tag": "@rushstack/heft-node-rig_v2.3.11",
       "date": "Wed, 22 Nov 2023 01:45:18 GMT",

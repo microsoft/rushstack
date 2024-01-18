@@ -2,6 +2,143 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.1.1",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.1",
+      "date": "Thu, 18 Jan 2024 05:07:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Only emit an error about unsupported library types if the public path is actually used."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.0",
+      "date": "Thu, 18 Jan 2024 03:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a second exported plugin (`SetPublicPathCurrentScriptPlugin`) that creates a wrapper around the runtime chunk and uses the `document.currentScript` API to get the current script's URL."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.1",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.0.1",
+      "date": "Tue, 16 Jan 2024 18:30:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.0.0",
+      "date": "Fri, 12 Jan 2024 01:23:10 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Update the plugin to work with Webpack 5 and drop support for Webpack 4."
+          },
+          {
+            "comment": "Remove old options, specifically `systemJs`, `urlPrefix`, `publicPath`, and `skipDetection`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.16",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v4.1.16",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.15",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v4.1.15",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.14",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v4.1.14",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.13",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v4.1.13",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-plugin-utilities\" to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.12",
       "tag": "@rushstack/set-webpack-public-path-plugin_v4.1.12",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",

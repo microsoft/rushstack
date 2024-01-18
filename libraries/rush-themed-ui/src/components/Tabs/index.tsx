@@ -50,9 +50,9 @@ export const Tabs = ({ items, def, value, onChange, renderChildren }: ITabsProps
       </RadixTabs.List>
       {renderChildren
         ? renderChildren()
-        : items.map((item) =>
+        : items.map((item, index) =>
             item.body ? (
-              <RadixTabs.Content className={styles.TabsContent} value={getItemValue(item)}>
+              <RadixTabs.Content key={`${index}`} className={styles.TabsContent} value={getItemValue(item)}>
                 {item.body}
               </RadixTabs.Content>
             ) : null

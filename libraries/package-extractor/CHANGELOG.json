@@ -2,6 +2,129 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.6.20",
+      "tag": "@rushstack/package-extractor_v0.6.20",
+      "date": "Tue, 16 Jan 2024 18:30:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.19",
+      "tag": "@rushstack/package-extractor_v0.6.19",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.18",
+      "tag": "@rushstack/package-extractor_v0.6.18",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.17",
+      "tag": "@rushstack/package-extractor_v0.6.17",
+      "date": "Tue, 12 Dec 2023 00:20:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the `folderToCopy` option, where the folder contents would be copied into a subfolder instead of into the target folder root."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.16",
+      "tag": "@rushstack/package-extractor_v0.6.16",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.15",
+      "tag": "@rushstack/package-extractor_v0.6.15",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.7.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.11.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.14",
       "tag": "@rushstack/package-extractor_v0.6.14",
       "date": "Thu, 16 Nov 2023 01:09:56 GMT",

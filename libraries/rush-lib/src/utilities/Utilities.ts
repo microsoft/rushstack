@@ -85,6 +85,11 @@ export interface ILifecycleCommandOptions {
    * Options for what should be added to the PATH variable
    */
   environmentPathOptions: IEnvironmentPathOptions;
+
+  /**
+   * If true, attempt to establish a NodeJS IPC channel to the child process.
+   */
+  ipc?: boolean;
 }
 
 export interface IEnvironmentPathOptions {
@@ -593,11 +598,16 @@ export class Utilities {
       }
     });
 
+    const stdio: child_process.StdioOptions = options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2];
+    if (options.ipc) {
+      stdio.push('ipc');
+    }
+
     return spawnFunction(shellCommand, [commandFlags, command], {
       cwd: options.workingDirectory,
       shell: useShell,
       env: environment,
-      stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+      stdio
     });
   }
 

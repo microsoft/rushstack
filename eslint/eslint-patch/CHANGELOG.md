@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Wed, 22 Nov 2023 01:45:18 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+
+## 1.7.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3 with @typescript-eslint 6.19.x
+
+## 1.6.1
+Fri, 15 Dec 2023 01:10:06 GMT
+
+### Patches
+
+- Fix bulk suppression patch's eslintrc detection in polyrepos
 
 ## 1.6.0
 Wed, 22 Nov 2023 01:45:18 GMT

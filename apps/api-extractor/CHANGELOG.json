@@ -2,6 +2,60 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.39.1",
+      "tag": "@microsoft/api-extractor_v7.39.1",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.39.0",
+      "tag": "@microsoft/api-extractor_v7.39.0",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update API Extractor to support TypeScript 5.3.3"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.38.5",
+      "tag": "@microsoft/api-extractor_v7.38.5",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.38.4",
+      "tag": "@microsoft/api-extractor_v7.38.4",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Don't export trimmed namespace members during rollup (#2791)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.38.3",
       "tag": "@microsoft/api-extractor_v7.38.3",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",

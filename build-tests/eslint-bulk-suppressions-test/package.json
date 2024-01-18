@@ -9,8 +9,8 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*",
-    "@typescript-eslint/parser": "~5.59.2",
+    "@typescript-eslint/parser": "~6.19.0",
     "eslint": "~8.7.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

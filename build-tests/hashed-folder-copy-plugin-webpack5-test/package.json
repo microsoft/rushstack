@@ -16,7 +16,7 @@
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@types/webpack-env": "1.18.0",
     "html-webpack-plugin": "~5.5.0",
-    "typescript": "~5.0.4",
+    "typescript": "~5.3.3",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack": "~5.82.1"
   }

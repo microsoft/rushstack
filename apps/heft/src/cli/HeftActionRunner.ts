@@ -519,7 +519,7 @@ async function _startLifecycleAsync(this: void, internalHeftSession: InternalHef
     if (lifecycle.hooks.clean.isUsed()) {
       try {
         await lifecycle.hooks.clean.promise(cleanHookOptions);
-      } catch (e: unknown) {
+      } catch (e) {
         // Log out using the clean logger, and return an error status
         if (!(e instanceof AlreadyReportedError)) {
           lifecycleLogger.emitError(e as Error);

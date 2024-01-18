@@ -2,6 +2,117 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.4.17",
+      "tag": "@rushstack/heft-storybook-plugin_v0.4.17",
+      "date": "Tue, 16 Jan 2024 18:30:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.6` to `^0.64.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.16",
+      "tag": "@rushstack/heft-storybook-plugin_v0.4.16",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.5` to `^0.63.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.15",
+      "tag": "@rushstack/heft-storybook-plugin_v0.4.15",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.4` to `^0.63.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.14",
+      "tag": "@rushstack/heft-storybook-plugin_v0.4.14",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.3` to `^0.63.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.13",
+      "tag": "@rushstack/heft-storybook-plugin_v0.4.13",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.63.2` to `^0.63.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.12",
       "tag": "@rushstack/heft-storybook-plugin_v0.4.12",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",

@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft-api-extractor-plugin
 
-This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+
+## 0.3.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3
+
+## 0.2.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 0.2.15
+Wed, 20 Dec 2023 01:09:46 GMT
+
+_Version update only_
+
+## 0.2.14
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.2.13
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
 
 ## 0.2.12
 Fri, 10 Nov 2023 18:02:04 GMT

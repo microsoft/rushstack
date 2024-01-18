@@ -86,6 +86,8 @@ export class WatchLoop implements IWatchLoopState {
     }
 
     if (!this._outerSignals.has(abortSignal)) {
+      // ESLINT: "Promises must be awaited, end with a call to .catch, end with a call to .then ..."
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       once(abortSignal, 'abort').finally(this._abortCurrent);
     }
 
@@ -193,6 +195,8 @@ export class WatchLoop implements IWatchLoopState {
 
             try {
               status = await this.runUntilStableAsync(abortController.signal);
+              // ESLINT: "Promises must be awaited, end with a call to .catch, end with a call to .then ..."
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               this._requestRunPromise.finally(requestRunFromHost);
             } catch (err) {
               status = OperationStatus.Failure;

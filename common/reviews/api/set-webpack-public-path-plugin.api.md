@@ -4,41 +4,59 @@
 
 ```ts
 
-import type * as Webpack from 'webpack';
+import type webpack from 'webpack';
 
-// @public
-export function getGlobalRegisterCode(debug?: boolean): string;
+// @public (undocumented)
+export interface IScriptNameAssetNameOptions {
+    useAssetName: true;
+}
+
+// @public (undocumented)
+export type IScriptNameOptions = IScriptNameAssetNameOptions | IScriptNameRegexOptions;
+
+// @public (undocumented)
+export interface IScriptNameRegexOptions {
+    isTokenized?: boolean;
+    name: string;
+}
 
 // @public
 export interface ISetWebpackPublicPathOptions {
     getPostProcessScript?: (varName: string) => string;
     preferLastFoundScript?: boolean;
-    publicPath?: string;
     regexVariable?: string;
-    skipDetection?: boolean;
-    systemJs?: boolean;
-    urlPrefix?: string;
 }
 
 // @public
 export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
-    scriptName?: {
-        useAssetName?: boolean;
-        name?: string;
-        isTokenized?: boolean;
-    };
+    scriptName: IScriptNameOptions;
+}
+
+// @public
+export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
+    constructor();
+    // (undocumented)
+    protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void;
+}
+
+// @public
+export class SetPublicPathPlugin extends SetPublicPathPluginBase {
+    constructor(options: ISetWebpackPublicPathPluginOptions);
+    // (undocumented)
+    protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void;
+    // (undocumented)
+    readonly options: ISetWebpackPublicPathPluginOptions;
 }
 
 // @public (undocumented)
-export const registryVariableName: string;
-
-// @public
-export class SetPublicPathPlugin implements Webpack.Plugin {
-    constructor(options: ISetWebpackPublicPathPluginOptions);
+export abstract class SetPublicPathPluginBase implements webpack.WebpackPluginInstance {
+    constructor(pluginName: string);
     // (undocumented)
-    apply(compiler: Webpack.Compiler): void;
+    apply(compiler: webpack.Compiler): void;
     // (undocumented)
-    options: ISetWebpackPublicPathPluginOptions;
+    protected abstract _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void;
 }
+
+// (No @packageDocumentation comment for this package)
 
 ```
