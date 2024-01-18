@@ -346,6 +346,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
 
+      if (isWatch) {
+        new (
+          await import(
+            /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
+          )
+        ).IPCOperationRunnerPlugin().apply(this.hooks);
+      }
+
       const customParametersByName: Map<string, CommandLineParameter> = new Map();
       for (const [configParameter, parserParameter] of this.customParameters) {
         customParametersByName.set(configParameter.longName, parserParameter);

@@ -3,17 +3,21 @@
 
 import type * as child_process from 'node:child_process';
 
-import { Text, ITerminal, ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
+import {
+  TerminalProviderSeverity,
+  Text,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/node-core-library';
 
-import { Utilities } from '../../utilities/Utilities';
-import { OperationStatus } from './OperationStatus';
-import { OperationError } from './OperationError';
-import { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IPhase } from '../../api/CommandLineConfiguration';
+import { Utilities } from '../../utilities/Utilities';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import { OperationError } from './OperationError';
+import { OperationStatus } from './OperationStatus';
 
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;

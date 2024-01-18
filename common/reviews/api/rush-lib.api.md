@@ -608,6 +608,7 @@ export interface IOperationSettings {
     disableBuildCacheForOperation?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    useIPCInWatchMode?: boolean;
 }
 
 // @internal (undocumented)

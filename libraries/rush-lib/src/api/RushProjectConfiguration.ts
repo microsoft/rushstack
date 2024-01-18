@@ -91,6 +91,14 @@ export interface IOperationSettings {
    * calculating final hash value when reading and writing the build cache
    */
   dependsOnAdditionalFiles?: string[];
+
+  /**
+   * When running this operation in watch mode, enable IPC functionality. This allows reusing a long-lived child
+   * process instead of spawning a new child process for each incremental build.
+   *
+   * Implicitly disables the build cache for this operation.
+   */
+  useIPCInWatchMode?: boolean;
 }
 
 interface IOldRushProjectJson {
