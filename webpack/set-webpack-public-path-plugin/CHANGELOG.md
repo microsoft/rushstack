@@ -1,6 +1,13 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Tue, 16 Jan 2024 18:30:11 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jan 2024 03:30:10 GMT and should not be manually modified.
+
+## 5.1.0
+Thu, 18 Jan 2024 03:30:10 GMT
+
+### Minor changes
+
+- Add a second exported plugin (`SetPublicPathCurrentScriptPlugin`) that creates a wrapper around the runtime chunk and uses the `document.currentScript` API to get the current script's URL.
 
 ## 5.0.1
 Tue, 16 Jan 2024 18:30:11 GMT

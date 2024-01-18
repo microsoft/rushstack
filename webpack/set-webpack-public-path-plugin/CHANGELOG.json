@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.1.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.0",
+      "date": "Thu, 18 Jan 2024 03:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a second exported plugin (`SetPublicPathCurrentScriptPlugin`) that creates a wrapper around the runtime chunk and uses the `document.currentScript` API to get the current script's URL."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.1",
       "tag": "@rushstack/set-webpack-public-path-plugin_v5.0.1",
       "date": "Tue, 16 Jan 2024 18:30:11 GMT",
