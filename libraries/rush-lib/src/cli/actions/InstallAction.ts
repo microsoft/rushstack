@@ -10,7 +10,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  private readonly _checkOnlyParameter: CommandLineFlagParameter;
+  private readonly _checkOnlyParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -49,6 +49,7 @@ export class InstallAction extends BaseInstallAction {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
+      ignoreScripts: this._ignoreScriptsParameter.value!,
       bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,

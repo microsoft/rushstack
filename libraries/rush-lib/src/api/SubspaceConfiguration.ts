@@ -37,12 +37,18 @@ export class SubspaceConfiguration {
   public readonly subspaceJsonFilePath: string;
 
   /**
+   * Determines if the subspace feature is enabled
+   */
+  public readonly enabled: boolean;
+
+  /**
    * A set of the available subspaces
    */
   public readonly subspaceNames: Set<string>;
 
   private constructor(configuration: Readonly<ISubspaceConfigurationJson>, subspaceJsonFilePath: string) {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
+    this.enabled = configuration.enabled;
     this.subspaceNames = new Set();
     for (const subspaceName of configuration.subspaceNames) {
       if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
@@ -53,6 +59,13 @@ export class SubspaceConfiguration {
         );
       }
     }
+  }
+
+  /**
+   * Checks if the given subspace name is a registered subspace in the subspaces.json file.
+   */
+  public isValidSubspaceName(subspaceName: string): boolean {
+    return this.subspaceNames.has(subspaceName);
   }
 
   public static tryLoadFromConfigurationFile(

@@ -58,6 +58,20 @@ export class ApprovedPackagesPolicy {
     readonly reviewCategories: ReadonlySet<string>;
 }
 
+// @internal
+export class _BaseFlag<T extends object = JsonObject> {
+    constructor(folderPath: string, state?: Partial<T>);
+    clear(): void;
+    create(): void;
+    protected get flagName(): string;
+    protected _isModified: boolean;
+    isValid(): boolean;
+    mergeFromObject(data: JsonObject): void;
+    readonly path: string;
+    saveIfModified(): void;
+    protected _state: T;
+}
+
 // @beta
 export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
@@ -491,6 +505,21 @@ export interface IGetChangedProjectsOptions {
 export interface IGlobalCommand extends IRushCommand {
 }
 
+// @internal
+export interface _ILastInstallFlagJson {
+    // (undocumented)
+    [key: string]: unknown;
+    ignoreScripts?: true;
+    nodeVersion: string;
+    packageJson?: IPackageJson;
+    packageManager: PackageManagerName;
+    packageManagerVersion: string;
+    rushJsonFolder: string;
+    selectedProjectNames?: string[];
+    storePath?: string;
+    useWorkspaces?: true;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -659,6 +688,7 @@ export interface IPhasedCommand extends IRushCommand {
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     autoInstallPeers?: boolean;
+    deferredInstallationScripts?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
@@ -782,16 +812,13 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
 }
 
 // @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
+export class _LastInstallFlag extends _BaseFlag<_ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;
-    clear(): void;
-    create(): void;
     protected get flagName(): string;
+    // @override
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
-    readonly path: string;
 }
 
 // @public
@@ -974,6 +1001,7 @@ export class PhasedCommandHooks {
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     readonly autoInstallPeers: boolean | undefined;
+    readonly deferredInstallationScripts: boolean;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOverrides: Record<string, string> | undefined;
@@ -1079,6 +1107,8 @@ export class RushConfiguration {
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
     // @beta
+    getSubspaceTempFolderPath(subspaceName: string): string;
+    // @beta
     getTempSubspaceShrinkwrapFileName(subspaceName: string): string;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
@@ -1143,6 +1173,8 @@ export class RushConfiguration {
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // (undocumented)
     static tryLoadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration | undefined;
+    // (undocumented)
+    validateSubspaceName(subspaceName: string): void;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     // @beta (undocumented)
@@ -1209,6 +1241,7 @@ export class RushConstants {
     static readonly commonVersionsFilename: string;
     static readonly customTipsFilename: string;
     static readonly defaultMaxInstallAttempts: number;
+    static readonly defaultSubspaceName: string;
     static readonly defaultWatchDebounceMs: number;
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
@@ -1317,6 +1350,8 @@ export class RushUserConfiguration {
 
 // @beta
 export class SubspaceConfiguration {
+    readonly enabled: boolean;
+    isValidSubspaceName(subspaceName: string): boolean;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: Set<string>;
     // (undocumented)

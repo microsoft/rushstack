@@ -72,6 +72,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   preventManualShrinkwrapChanges?: boolean;
   /**
+   * {@inheritDoc PnpmOptionsConfiguration.deferredInstallationScripts}
+   */
+  deferredInstallationScripts?: boolean;
+  /**
    * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
    */
   useWorkspaces?: boolean;
@@ -206,6 +210,21 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly preventManualShrinkwrapChanges: boolean;
 
   /**
+   * If true, then "rush install" and "rush update" will improve robustness of
+   * install lifecycle scripts by running them as a second stage ("pnpm rebuild --pending")
+   * after installation ("pnpm install --ignore-scripts").
+   *
+   * @remarks
+   * Install lifecycle scripts are often poorly implemented, they may download large files
+   * without recovery logic or invoke complex C++ build tools.  In this situation, a two stage
+   * approach allows the second stage to be reattempted without having to recheck the first stage.
+   *
+   * This feature is only supported when useWorkspaces=true.
+   * The default value is false.
+   */
+  public readonly deferredInstallationScripts: boolean;
+
+  /**
    * If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM.
    *
    * @remarks
@@ -334,6 +353,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
+    this.deferredInstallationScripts = !!json.deferredInstallationScripts;
     this.useWorkspaces = !!json.useWorkspaces;
 
     this.globalOverrides = json.globalOverrides;

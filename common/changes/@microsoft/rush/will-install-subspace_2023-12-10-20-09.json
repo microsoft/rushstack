@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `deferredInstallationScripts` setting to improve robustness of install lifecycle scripts",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

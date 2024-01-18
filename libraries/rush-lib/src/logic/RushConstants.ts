@@ -184,6 +184,11 @@ export class RushConstants {
   public static readonly subspacesConfigFilename: string = 'subspaces.json';
 
   /**
+   * The name of the default subspace if one isn't specified but subspaces is enabled.
+   */
+  public static readonly defaultSubspaceName: string = 'default';
+
+  /**
    * Build cache configuration file.
    */
   public static readonly buildCacheFilename: string = 'build-cache.json';
