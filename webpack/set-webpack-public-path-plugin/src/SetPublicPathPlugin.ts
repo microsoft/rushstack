@@ -192,9 +192,9 @@ export class SetPublicPathPlugin extends SetPublicPathPluginBase {
               const newAsset: webpack.sources.ReplaceSource = new thisWebpack.sources.ReplaceSource(asset);
               const sourceString: string = asset.source().toString();
               for (
-                let index: number = sourceString.indexOf(ASSET_NAME_TOKEN);
+                let index: number = sourceString.lastIndexOf(ASSET_NAME_TOKEN);
                 index >= 0;
-                index = sourceString.indexOf(ASSET_NAME_TOKEN, index + 1)
+                index = sourceString.lastIndexOf(ASSET_NAME_TOKEN, index - 1)
               ) {
                 newAsset.replace(index, index + ASSET_NAME_TOKEN.length - 1, escapedAssetFilename);
               }
