@@ -29,17 +29,6 @@ export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
 
   protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void {
     const outputLibraryType: string | undefined = compilation.options.output.library?.type;
-    switch (outputLibraryType) {
-      case 'var':
-      case 'module':
-        compilation.errors.push(
-          new thisWebpack.WebpackError(
-            `The "${outputLibraryType}" output.library.type is not supported by the ${SetPublicPathCurrentScriptPlugin.name}` +
-              ' plugin. Including this plugin with produce unexpected or invalid results.'
-          )
-        );
-        break;
-    }
 
     class SetPublicPathRuntimeModule extends thisWebpack.RuntimeModule {
       public constructor() {
@@ -88,6 +77,36 @@ export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
       hash.update(PLUGIN_NAME);
       if (appliesToChunk(chunk, codeGenerationResults)) {
         hash.update('set-public-path');
+      }
+    });
+
+    compilation.hooks.afterSeal.tap(PLUGIN_NAME, () => {
+      let hasProblematicLibraryType: boolean = false;
+      switch (outputLibraryType) {
+        case 'var':
+        case 'module':
+          hasProblematicLibraryType = true;
+          break;
+      }
+
+      if (hasProblematicLibraryType) {
+        const codeGenerationResults: CodeGenerationResults = compilation.codeGenerationResults;
+        let appliesToAnyChunk: boolean = false;
+        for (const chunk of compilation.chunks) {
+          if (appliesToChunk(chunk, codeGenerationResults)) {
+            appliesToAnyChunk = true;
+            break;
+          }
+        }
+
+        if (appliesToAnyChunk) {
+          compilation.errors.push(
+            new thisWebpack.WebpackError(
+              `The "${outputLibraryType}" output.library.type is not supported by the ${SetPublicPathCurrentScriptPlugin.name}` +
+                ' plugin. Including this plugin with produce unexpected or invalid results.'
+            )
+          );
+        }
       }
     });
   }
