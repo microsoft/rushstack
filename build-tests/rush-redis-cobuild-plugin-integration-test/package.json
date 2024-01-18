@@ -19,6 +19,6 @@
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",
     "http-proxy": "~1.18.1",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

@@ -2,6 +2,90 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.1.18",
+      "tag": "@rushstack/package-deps-hash_v4.1.18",
+      "date": "Thu, 18 Jan 2024 01:08:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle an edge case in `getRepoState` wherein it tries to asynchronously pipe data to `git hash-object` but the subprocess has already exited."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.17",
+      "tag": "@rushstack/package-deps-hash_v4.1.17",
+      "date": "Tue, 16 Jan 2024 18:30:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.16",
+      "tag": "@rushstack/package-deps-hash_v4.1.16",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.15",
+      "tag": "@rushstack/package-deps-hash_v4.1.15",
+      "date": "Wed, 20 Dec 2023 01:09:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.14",
+      "tag": "@rushstack/package-deps-hash_v4.1.14",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.13",
+      "tag": "@rushstack/package-deps-hash_v4.1.13",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.63.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.12",
       "tag": "@rushstack/package-deps-hash_v4.1.12",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",

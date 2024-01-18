@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/experimental-utils';
+import { TSESTree, TSESLint, ParserServices } from '@typescript-eslint/utils';
 import * as ts from 'typescript';
 
 type MessageIds = 'error-untyped-underscore';
@@ -21,9 +21,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
       description:
         'Prevent TypeScript code from accessing legacy JavaScript members' +
         ' whose names have an underscore prefix',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Stylistic Issues',
-      recommended: false,
+      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     } as TSESLint.RuleMetaDataDocs
   },

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-api-extractor-plugin",
-  "version": "0.2.12",
+  "version": "0.3.0",
   "description": "A Heft plugin for API Extractor",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "0.63.2"
+    "@rushstack/heft": "0.64.0"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",
@@ -26,10 +26,10 @@
     "@microsoft/api-extractor": "workspace:*",
     "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.3.2",
+    "@rushstack/heft-node-rig": "2.4.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "@types/semver": "7.5.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

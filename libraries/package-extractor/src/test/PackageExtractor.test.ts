@@ -62,20 +62,22 @@ describe(PackageExtractor.name, () => {
     ).resolves.not.toThrow();
 
     // Validate project 1 files
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
 
     // Validate project 2 is linked through node_modules
     const project1NodeModulesPath: string = path.join(targetFolder, project1RelativePath, 'node_modules');
-    expect(
-      FileSystem.getRealPath(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
-    ).toEqual(path.join(targetFolder, project2RelativePath, 'src', 'index.js'));
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project2RelativePath, 'src', 'index.js'));
 
     // Validate project 3 is linked through node_modules
-    expect(
-      FileSystem.getRealPath(path.join(project1NodeModulesPath, project3PackageName, 'src', 'index.js'))
-    ).toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
-    expect(
-      FileSystem.getRealPath(
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project3PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+    await expect(
+      FileSystem.getRealPathAsync(
         path.join(
           project1NodeModulesPath,
           project2PackageName,
@@ -85,7 +87,7 @@ describe(PackageExtractor.name, () => {
           'index.js'
         )
       )
-    ).toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
   });
 
   it('should extract project with dependencies only', async () => {
@@ -107,18 +109,22 @@ describe(PackageExtractor.name, () => {
     ).resolves.not.toThrow();
 
     // Validate project 1 files
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
 
     // Validate project 2 is linked through node_modules
     const project1NodeModulesPath: string = path.join(targetFolder, project1RelativePath, 'node_modules');
-    expect(
-      FileSystem.getRealPath(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
-    ).toEqual(path.join(targetFolder, project2RelativePath, 'src', 'index.js'));
+    await expect(
+      FileSystem.getRealPathAsync(path.join(project1NodeModulesPath, project2PackageName, 'src', 'index.js'))
+    ).resolves.toEqual(path.join(targetFolder, project2RelativePath, 'src', 'index.js'));
 
     // Validate project 3 is not linked through node_modules on project 1 but is linked through node_modules on project 2
-    expect(FileSystem.exists(path.join(project1NodeModulesPath, project3PackageName))).toBe(false);
-    expect(
-      FileSystem.getRealPath(
+    await expect(
+      FileSystem.existsAsync(path.join(project1NodeModulesPath, project3PackageName))
+    ).resolves.toBe(false);
+    await expect(
+      FileSystem.getRealPathAsync(
         path.join(
           project1NodeModulesPath,
           project2PackageName,
@@ -128,7 +134,7 @@ describe(PackageExtractor.name, () => {
           'index.js'
         )
       )
-    ).toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
+    ).resolves.toEqual(path.join(targetFolder, project3RelativePath, 'src', 'index.js'));
   });
 
   it('should throw error if main project does not exist', async () => {
@@ -203,13 +209,23 @@ describe(PackageExtractor.name, () => {
     ).resolves.not.toThrow();
 
     // Validate project 1 files
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(false);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'subdir'))).toBe(false);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'package.json'))
+    ).resolves.toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(false);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'subdir'))
+    ).resolves.toBe(false);
 
     // Validate project 2 files
-    expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))).toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project2RelativePath, 'package.json'))
+    ).resolves.toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
   });
 
   it('should include specified dependencies', async () => {
@@ -237,13 +253,21 @@ describe(PackageExtractor.name, () => {
     ).resolves.not.toThrow();
 
     // Validate project 1 files
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(false);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(false);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'subdir'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'subdir', 'file.js'))).toBe(
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'package.json'))
+    ).resolves.toBe(false);
+    await expect(FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src'))).resolves.toBe(
       true
     );
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(false);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'subdir'))
+    ).resolves.toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'subdir', 'file.js'))
+    ).resolves.toBe(true);
   });
 
   it('should exclude specified dependencies on local dependencies', async () => {
@@ -279,12 +303,20 @@ describe(PackageExtractor.name, () => {
     ).resolves.not.toThrow();
 
     // Validate project 1 files
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'package.json'))
+    ).resolves.toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
 
     // Validate project 2 files
-    expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))).toBe(false);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project2RelativePath, 'package.json'))
+    ).resolves.toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project2RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(false);
   });
 
   it('should exclude specified files on third party dependencies with semver version', async () => {
@@ -325,21 +357,23 @@ describe(PackageExtractor.name, () => {
       })
     ).resolves.not.toThrow();
     // Validate project 1 files
-    expect(
-      FileSystem.exists(
+    await expect(
+      FileSystem.existsAsync(
         path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
       )
-    ).toBe(false);
-    expect(
-      FileSystem.exists(path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/path.d.ts'))
-    ).toBe(true);
+    ).resolves.toBe(false);
+    await expect(
+      FileSystem.existsAsync(
+        path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/path.d.ts')
+      )
+    ).resolves.toBe(true);
 
     // Validate project 3 files
-    expect(
-      FileSystem.exists(
+    await expect(
+      FileSystem.existsAsync(
         path.join(targetFolder, project3RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
       )
-    ).toBe(true);
+    ).resolves.toBe(true);
   });
   it('should not exclude specified files on third party dependencies if semver version not match', async () => {
     const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-08');
@@ -379,18 +413,18 @@ describe(PackageExtractor.name, () => {
       })
     ).resolves.not.toThrow();
     // Validate project 1 files
-    expect(
-      FileSystem.exists(
+    await expect(
+      FileSystem.existsAsync(
         path.join(targetFolder, project1RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
       )
-    ).toBe(true);
+    ).resolves.toBe(true);
 
     // Validate project file that shouldn't be exclude
-    expect(
-      FileSystem.exists(
+    await expect(
+      FileSystem.existsAsync(
         path.join(targetFolder, project3RelativePath, 'node_modules/@types/node/fs/promises.d.ts')
       )
-    ).toBe(true);
+    ).resolves.toBe(true);
   });
 
   it('should include folderToCopy', async () => {
@@ -418,12 +452,15 @@ describe(PackageExtractor.name, () => {
     ).resolves.not.toThrow();
 
     // Validate project 1 files
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))).toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'package.json'))
+    ).resolves.toBe(true);
+    await expect(
+      FileSystem.existsAsync(path.join(targetFolder, project1RelativePath, 'src', 'index.js'))
+    ).resolves.toBe(true);
 
     // Validate project 2 files
-    const project2FolderName: string = path.basename(project2Path);
-    expect(FileSystem.exists(path.join(targetFolder, project2FolderName, 'package.json'))).toBe(true);
-    expect(FileSystem.exists(path.join(targetFolder, project2FolderName, 'src', 'index.js'))).toBe(true);
+    await expect(FileSystem.existsAsync(path.join(targetFolder, 'package.json'))).resolves.toBe(true);
+    await expect(FileSystem.existsAsync(path.join(targetFolder, 'src', 'index.js'))).resolves.toBe(true);
   });
 });

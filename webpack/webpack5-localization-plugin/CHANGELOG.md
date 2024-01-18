@@ -1,6 +1,38 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Fri, 10 Nov 2023 18:02:04 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jan 2024 18:30:11 GMT and should not be manually modified.
+
+## 0.6.1
+Tue, 16 Jan 2024 18:30:11 GMT
+
+_Version update only_
+
+## 0.6.0
+Thu, 04 Jan 2024 01:08:53 GMT
+
+### Minor changes
+
+- Introduce a `formatLocaleForFilename` option to customize how a locale (or the lack thereof) is rendered in file paths.
+
+## 0.5.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 0.5.15
+Wed, 20 Dec 2023 01:09:46 GMT
+
+_Version update only_
+
+## 0.5.14
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.5.13
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
 
 ## 0.5.12
 Fri, 10 Nov 2023 18:02:04 GMT

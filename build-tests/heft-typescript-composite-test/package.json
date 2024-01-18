@@ -21,6 +21,6 @@
     "eslint": "~8.7.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
-    "typescript": "~5.0.4"
+    "typescript": "~5.3.3"
   }
 }

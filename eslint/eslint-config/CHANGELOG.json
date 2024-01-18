@@ -2,6 +2,44 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.6.0",
+      "tag": "@rushstack/eslint-config_v3.6.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 5.3 with @typescript-eslint 6.19.x"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.14.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.1",
+      "tag": "@rushstack/eslint-config_v3.5.1",
+      "date": "Fri, 15 Dec 2023 01:10:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.6.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.0",
       "tag": "@rushstack/eslint-config_v3.5.0",
       "date": "Wed, 22 Nov 2023 01:45:18 GMT",

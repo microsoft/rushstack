@@ -17,6 +17,7 @@ describe(JsonFile.name, () => {
       )
     ).toMatchSnapshot();
   });
+
   it('adds an empty header comment', () => {
     expect(
       JsonFile.stringify(
@@ -27,6 +28,7 @@ describe(JsonFile.name, () => {
       )
     ).toMatchSnapshot();
   });
+
   it('allows undefined values when asked', () => {
     expect(
       JsonFile.stringify(
@@ -45,6 +47,24 @@ describe(JsonFile.name, () => {
           prettyFormatting: true
         }
       )
+    ).toMatchSnapshot();
+  });
+
+  it('supports updating a simple file', () => {
+    expect(JsonFile.updateString('{"a": 1}', { a: 1, b: 2 })).toMatchSnapshot();
+  });
+
+  it('supports updating a simple file with a comment', () => {
+    expect(JsonFile.updateString(`{\n  // comment\n  "a": 1\n}`, { a: 1, b: 2 })).toMatchSnapshot();
+  });
+
+  it('supports updating a simple file with a comment and a trailing comma', () => {
+    expect(JsonFile.updateString(`{\n  // comment\n  "a": 1,\n}`, { a: 1, b: 2 })).toMatchSnapshot();
+  });
+
+  it('supports updating a simple file with an unquoted property', () => {
+    expect(
+      JsonFile.updateString(`{\n  // comment\n  a: 1,\n}`, { a: 1, b: 2, 'c-123': 3 })
     ).toMatchSnapshot();
   });
 });

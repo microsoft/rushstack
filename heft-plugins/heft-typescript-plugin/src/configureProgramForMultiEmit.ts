@@ -51,7 +51,9 @@ export function configureProgramForMultiEmit(
     // Attach the originals to the Program instance to avoid modifying the same Program twice.
     // Don't use WeakMap because this Program could theoretically get a { ... } applied to it.
     [INNER_GET_COMPILER_OPTIONS_SYMBOL]?: TTypescript.Program['getCompilerOptions'];
-    [INNER_EMIT_SYMBOL]?: TTypescript.Program['emit'];
+    [INNER_EMIT_SYMBOL]?: // https://github.com/microsoft/TypeScript/blob/88cb76d314a93937ce8d9543114ccbad993be6d1/src/compiler/program.ts#L2697-L2698
+    // There is a "forceDtsEmit" parameter that is not on the published types.
+    (...args: [...Parameters<TTypescript.Program['emit']>, boolean | undefined]) => TTypescript.EmitResult;
   }
 
   const program: IProgramWithMultiEmit = innerProgram;
@@ -118,7 +120,8 @@ export function configureProgramForMultiEmit(
     writeFile?: TTypescript.WriteFileCallback,
     cancellationToken?: TTypescript.CancellationToken,
     emitOnlyDtsFiles?: boolean,
-    customTransformers?: TTypescript.CustomTransformers
+    customTransformers?: TTypescript.CustomTransformers,
+    forceDtsEmit?: boolean
   ) => {
     if (emitOnlyDtsFiles) {
       return program[INNER_EMIT_SYMBOL]!(
@@ -126,7 +129,8 @@ export function configureProgramForMultiEmit(
         writeFile,
         cancellationToken,
         emitOnlyDtsFiles,
-        customTransformers
+        customTransformers,
+        forceDtsEmit
       );
     }
 
@@ -151,7 +155,8 @@ export function configureProgramForMultiEmit(
           writeFile && wrapWriteFile(writeFile, moduleKindToEmit.jsExtensionOverride),
           cancellationToken,
           emitOnlyDtsFiles,
-          customTransformers
+          customTransformers,
+          forceDtsEmit
         );
 
         emitSkipped = emitSkipped || flavorResult.emitSkipped;

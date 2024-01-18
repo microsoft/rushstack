@@ -1,6 +1,8 @@
 {
   "extends": "./node_modules/local-web-rig/profiles/library/tsconfig-base.json",
   "compilerOptions": {
-    "skipLibCheck": true // This project imports some projects that target Node
+    "skipLibCheck": true, // This project imports some projects that target Node
+    "target": "es2017",
+    "lib": ["es2017", "scripthost", "dom"]
   }
 }

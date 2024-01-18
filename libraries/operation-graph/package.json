@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/operation-graph",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "Library for managing and executing operations in a directed acyclic graph.",
   "main": "lib/index.js",
   "typings": "dist/operation-graph.d.ts",
@@ -20,8 +20,8 @@
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
-    "@rushstack/heft": "0.62.0",
-    "@rushstack/heft-node-rig": "2.3.2",
+    "@rushstack/heft": "0.64.0",
+    "@rushstack/heft-node-rig": "2.4.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15"
   },

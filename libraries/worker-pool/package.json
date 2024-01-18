@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/worker-pool",
-  "version": "0.4.12",
+  "version": "0.4.17",
   "description": "Lightweight worker pool using NodeJS worker_threads",
   "main": "lib/index.js",
   "typings": "dist/worker-pool.d.ts",

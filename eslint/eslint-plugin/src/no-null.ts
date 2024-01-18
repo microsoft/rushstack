@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESTree, TSESLint } from '@typescript-eslint/experimental-utils';
+import { TSESTree, TSESLint } from '@typescript-eslint/utils';
 
 type MessageIds = 'error-usage-of-null';
 type Options = [];
@@ -17,9 +17,7 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     schema: [],
     docs: {
       description: 'Prevent usage of JavaScript\'s "null" keyword',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Stylistic Issues',
-      recommended: 'error',
+      recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     } as TSESLint.RuleMetaDataDocs
   },

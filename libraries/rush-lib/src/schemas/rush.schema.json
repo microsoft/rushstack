@@ -307,6 +307,10 @@
               "type": "string",
               "pattern": "^[a-z0-9.@]+([-/][a-z0-9.@]+)*$"
             }
+          },
+          "subspaceName": {
+            "description": "(EXPERIMENTAL) An optional entry for specifying which subspace this project belongs to if the subspaces feature is enabled.",
+            "type": "string"
           }
         },
         "additionalProperties": false,

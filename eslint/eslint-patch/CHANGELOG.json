@@ -2,6 +2,30 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.7.0",
+      "tag": "@rushstack/eslint-patch_v1.7.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 5.3 with @typescript-eslint 6.19.x"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.6.1",
+      "tag": "@rushstack/eslint-patch_v1.6.1",
+      "date": "Fri, 15 Dec 2023 01:10:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bulk suppression patch's eslintrc detection in polyrepos"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.6.0",
       "tag": "@rushstack/eslint-patch_v1.6.0",
       "date": "Wed, 22 Nov 2023 01:45:18 GMT",

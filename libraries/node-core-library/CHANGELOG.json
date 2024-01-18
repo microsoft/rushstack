@@ -2,6 +2,36 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.63.0",
+      "tag": "@rushstack/node-core-library_v3.63.0",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updates the `JsonFile` API to format JSON as JSON5 if an existing string is being updated to preserve the style of the existing JSON."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.62.0",
+      "tag": "@rushstack/node-core-library_v3.62.0",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add functions inside the `Executable` API to list all process trees (`getProcessInfoById`, `getProcessInfoByIdAsync`, `getProcessInfoByName`, and `getProcessInfoByNameAsync`)."
+          },
+          {
+            "comment": "Add functions inside the `Text` API to split iterables (or async iterables) that produce strings or buffers on newlines (`readLinesFromIterable` and `readLinesFromIterableAsync`)."
+          },
+          {
+            "comment": "Add the `waitForExitAsync` method inside the `Executable` API used to wait for a provided child process to exit."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.61.0",
       "tag": "@rushstack/node-core-library_v3.61.0",
       "date": "Thu, 28 Sep 2023 20:53:17 GMT",

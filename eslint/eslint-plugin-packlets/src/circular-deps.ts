@@ -4,8 +4,8 @@
 import type * as ts from 'typescript';
 import * as path from 'path';
 
-import type { ParserServices, TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
+import type { ParserServices, TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { ESLintUtils } from '@typescript-eslint/utils';
 
 import { PackletAnalyzer } from './PackletAnalyzer';
 import { DependencyAnalyzer, IPackletImport } from './DependencyAnalyzer';
@@ -27,9 +27,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
     ],
     docs: {
       description: 'Check for circular dependencies between packlets',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Best Practices',
-      recommended: 'warn',
+      recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
     } as TSESLint.RuleMetaDataDocs
   },

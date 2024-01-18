@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeviceCodeCredential, type DeviceCodeInfo, AzureAuthorityHosts } from '@azure/identity';
+import {
+  DeviceCodeCredential,
+  type DeviceCodeInfo,
+  AzureAuthorityHosts,
+  type DeviceCodeCredentialOptions
+} from '@azure/identity';
 import type { ITerminal } from '@rushstack/node-core-library';
 import { CredentialCache } from '@rushstack/rush-sdk';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
@@ -90,6 +95,7 @@ export abstract class AzureAuthenticationBase {
   protected abstract readonly _credentialNameForCache: string;
   protected abstract readonly _credentialKindForLogging: string;
   protected readonly _credentialUpdateCommandForLogging: string | undefined;
+  protected readonly _additionalDeviceCodeCredentialOptions: DeviceCodeCredentialOptions | undefined;
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
 
@@ -239,6 +245,7 @@ export abstract class AzureAuthenticationBase {
     }
 
     const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential({
+      ...this._additionalDeviceCodeCredentialOptions,
       authorityHost: authorityHost,
       userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
         PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);

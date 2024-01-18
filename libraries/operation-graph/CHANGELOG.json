@@ -2,6 +2,42 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/operation-graph_v0.2.3",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade build dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/operation-graph_v0.2.2",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/operation-graph_v0.2.1",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/operation-graph_v0.2.0",
       "date": "Thu, 28 Sep 2023 20:53:17 GMT",

@@ -2,6 +2,89 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.64.0",
+      "tag": "@rushstack/heft_v0.64.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 5.3"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.63.6",
+      "tag": "@rushstack/heft_v0.63.6",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.63.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.39.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.63.5",
+      "tag": "@rushstack/heft_v0.63.5",
+      "date": "Wed, 20 Dec 2023 01:09:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.39.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.63.4",
+      "tag": "@rushstack/heft_v0.63.4",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.14.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.62.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.38.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.63.3",
+      "tag": "@rushstack/heft_v0.63.3",
+      "date": "Tue, 05 Dec 2023 01:10:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.38.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.63.2",
       "tag": "@rushstack/heft_v0.63.2",
       "date": "Fri, 10 Nov 2023 18:02:04 GMT",

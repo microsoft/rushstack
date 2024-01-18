@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@rushstack/eslint-plugin"
+      "packageName": "@rushstack/webpack-plugin-utilities"
     }
   ],
-  "packageName": "@rushstack/eslint-plugin",
+  "packageName": "@rushstack/webpack-plugin-utilities",
   "email": "iclanton@users.noreply.github.com"
 }

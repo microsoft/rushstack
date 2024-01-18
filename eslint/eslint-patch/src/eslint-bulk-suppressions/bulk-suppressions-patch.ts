@@ -74,7 +74,11 @@ export function getGitRootPath(): string {
 export const GitRootPath = getGitRootPath();
 
 function findEslintrcDirectory(fileAbsolutePath: string): string {
-  for (let currentDir = fileAbsolutePath; currentDir !== GitRootPath; currentDir = path.dirname(currentDir))
+  for (
+    let currentDir = fileAbsolutePath;
+    currentDir.startsWith(GitRootPath);
+    currentDir = path.dirname(currentDir)
+  )
     if (['.eslintrc.js', '.eslintrc.cjs'].some((eslintrc) => fs.existsSync(path.join(currentDir, eslintrc))))
       return currentDir;
   throw new Error('Cannot locate eslintrc');

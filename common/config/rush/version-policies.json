@@ -40,7 +40,7 @@
   //    * When creating a release branch in Git, this field should be updated according to the
   //    * type of release.
   //    *
-  //    * Valid values are: "prerelease", "minor", "patch", "major"
+  //    * Valid values are: "prerelease", "preminor", "minor", "patch", "major"
   //    */
   //   "nextBump": "prerelease",
   //
@@ -102,8 +102,8 @@
   {
     "policyName": "rush",
     "definitionName": "lockStepVersion",
-    "version": "5.112.0",
-    "nextBump": "minor",
+    "version": "5.112.2",
+    "nextBump": "patch",
     "mainProject": "@microsoft/rush"
   }
 ]

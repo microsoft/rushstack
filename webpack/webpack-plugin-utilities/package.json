@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-plugin-utilities",
-  "version": "0.3.12",
+  "version": "0.4.1",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "dist/webpack-plugin-utilities.d.ts",
@@ -20,7 +20,7 @@
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",
-    "webpack": "^5.35.1"
+    "webpack": "^5.35.1 || ^4.31.0"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
