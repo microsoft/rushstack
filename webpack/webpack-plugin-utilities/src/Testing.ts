@@ -24,13 +24,13 @@ import type { MultiStats, Stats, Configuration, Compiler, StatsError } from 'web
  * import Testing from '@rushstack/webpack-plugin-utilities';
  *
  * describe('MyPlugin', () => {
-    it('should run', async () => {
-      const stats = await Testing.getTestingWebpackCompiler(
-        `./src/index.ts`,
-      );
-
-      expect(stats).toBeDefined();
-    });
+ *   it('should run', async () => {
+ *     const stats = await Testing.getTestingWebpackCompiler(
+ *       `./src/index.ts`,
+ *     );
+ *
+ *     expect(stats).toBeDefined();
+ *  });
  * });
  * ```
  *
