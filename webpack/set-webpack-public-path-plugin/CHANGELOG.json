@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "5.1.1",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.1",
+      "date": "Thu, 18 Jan 2024 05:07:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Only emit an error about unsupported library types if the public path is actually used."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.1.0",
       "tag": "@rushstack/set-webpack-public-path-plugin_v5.1.0",
       "date": "Thu, 18 Jan 2024 03:30:10 GMT",
