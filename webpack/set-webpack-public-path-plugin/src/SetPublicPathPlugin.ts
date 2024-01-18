@@ -177,12 +177,12 @@ export class SetPublicPathPlugin extends SetPublicPathPluginBase {
               let escapedAssetFilename: string;
               if (assetFilename.match(/\.map$/)) {
                 // Trim the ".map" extension
-                escapedAssetFilename = assetFilename.substr(0, assetFilename.length - 4 /* '.map'.length */);
+                escapedAssetFilename = assetFilename.slice(0, -4 /* '.map'.length */);
                 escapedAssetFilename = Text.escapeRegExp(escapedAssetFilename);
                 // source in sourcemaps is JSON-encoded
                 escapedAssetFilename = JSON.stringify(escapedAssetFilename);
                 // Trim the quotes from the JSON encoding
-                escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1);
+                escapedAssetFilename = escapedAssetFilename.slice(1, -1);
               } else {
                 escapedAssetFilename = Text.escapeRegExp(assetFilename);
               }

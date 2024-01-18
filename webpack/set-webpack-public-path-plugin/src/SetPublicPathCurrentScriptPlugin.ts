@@ -49,7 +49,7 @@ export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
       public generate(): string {
         return [
           `var ${PUBLIC_PATH_VARIABLE_NAME} = ${CURRENT_SCRIPT_VARIABLE_NAME} ? ${CURRENT_SCRIPT_VARIABLE_NAME}.src : '';`,
-          `${thisWebpack.RuntimeGlobals.publicPath} = ${PUBLIC_PATH_VARIABLE_NAME}.substring(0, ${PUBLIC_PATH_VARIABLE_NAME}.lastIndexOf('/') + 1);`
+          `${thisWebpack.RuntimeGlobals.publicPath} = ${PUBLIC_PATH_VARIABLE_NAME}.slice(0, ${PUBLIC_PATH_VARIABLE_NAME}.lastIndexOf('/') + 1);`
         ].join('\n');
       }
     }
