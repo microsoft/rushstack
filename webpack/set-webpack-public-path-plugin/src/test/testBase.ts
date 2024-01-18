@@ -13,13 +13,16 @@ export function testForPlugin(pluginName: string, getPlugin: () => webpack.Webpa
   async function testForLibraryType(
     libraryType: string,
     mode: 'development' | 'production',
-    withHash: boolean
+    withHash: boolean,
+    includePublicPath: boolean
   ): Promise<void> {
     const memoryFileSystem: Volume = new Volume();
     memoryFileSystem.fromJSON(
       {
         '/package.json': '{}',
-        '/entry.js': 'console.log(__webpack_public_path__);'
+        '/entry.js': includePublicPath
+          ? 'console.log(__webpack_public_path__);'
+          : 'console.log("Hello world!");'
       },
       '/src'
     );
@@ -77,20 +80,36 @@ export function testForPlugin(pluginName: string, getPlugin: () => webpack.Webpa
       'jsonp',
       'system'
     ]) {
-      it(`Handles ${libraryType} library output (production)`, async () => {
-        await testForLibraryType(libraryType, 'production', false);
+      it(`Handles ${libraryType} library output (production) (uses public path)`, async () => {
+        await testForLibraryType(libraryType, 'production', false, true);
       });
 
-      it(`Handles ${libraryType} library output (production+hash)`, async () => {
-        await testForLibraryType(libraryType, 'production', true);
+      it(`Handles ${libraryType} library output (production+hash) (uses public path)`, async () => {
+        await testForLibraryType(libraryType, 'production', true, true);
       });
 
-      it(`Handles ${libraryType} library output (development)`, async () => {
-        await testForLibraryType(libraryType, 'development', false);
+      it(`Handles ${libraryType} library output (development) (uses public path)`, async () => {
+        await testForLibraryType(libraryType, 'development', false, true);
       });
 
-      it(`Handles ${libraryType} library output (development+hash)`, async () => {
-        await testForLibraryType(libraryType, 'development', false);
+      it(`Handles ${libraryType} library output (development+hash) (uses public path)`, async () => {
+        await testForLibraryType(libraryType, 'development', false, true);
+      });
+
+      it(`Handles ${libraryType} library output (production) (doesn't use public path)`, async () => {
+        await testForLibraryType(libraryType, 'production', false, false);
+      });
+
+      it(`Handles ${libraryType} library output (production+hash) (doesn't use public path)`, async () => {
+        await testForLibraryType(libraryType, 'production', true, false);
+      });
+
+      it(`Handles ${libraryType} library output (development) (doesn't use public path)`, async () => {
+        await testForLibraryType(libraryType, 'development', false, false);
+      });
+
+      it(`Handles ${libraryType} library output (development+hash) (doesn't use public path)`, async () => {
+        await testForLibraryType(libraryType, 'development', false, false);
       });
     }
   });
