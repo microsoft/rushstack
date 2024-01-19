@@ -59,10 +59,6 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
-      "name": "normalize-path",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },

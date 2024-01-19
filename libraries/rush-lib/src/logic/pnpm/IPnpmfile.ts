@@ -32,7 +32,6 @@ export interface IWorkspaceProjectInfo
  */
 export interface ISubspacePnpmfileShimSettings {
   semverPath: string;
-  pathNormalizerPath: string;
   workspaceProjects: Record<string, IWorkspaceProjectInfo>;
   subspaceProjects: Record<string, IWorkspaceProjectInfo>;
   userPnpmfilePath?: string;

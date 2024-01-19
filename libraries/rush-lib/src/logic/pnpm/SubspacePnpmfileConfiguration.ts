@@ -94,8 +94,7 @@ export class SubspacePnpmfileConfiguration {
     const settings: ISubspacePnpmfileShimSettings = {
       workspaceProjects,
       subspaceProjects,
-      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname }),
-      pathNormalizerPath: Import.resolveModule({ modulePath: 'normalize-path', baseFolderPath: __dirname })
+      semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
     };
 
     // common/config/rush/.pnpmfile-split-workspace.cjs

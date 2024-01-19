@@ -3185,9 +3185,6 @@ importers:
       node-fetch:
         specifier: 2.6.7
         version: 2.6.7
-      normalize-path:
-        specifier: ~3.0.0
-        version: 3.0.0
       npm-check:
         specifier: ~6.0.1
         version: 6.0.1
@@ -3246,9 +3243,6 @@ importers:
       '@types/js-yaml':
         specifier: 3.12.1
         version: 3.12.1
-      '@types/normalize-path':
-        specifier: ~3.0.2
-        version: 3.0.2
       '@types/npm-package-arg':
         specifier: 6.1.0
         version: 6.1.0
@@ -11608,10 +11602,6 @@ packages:
 
   /@types/normalize-package-data@2.4.4:
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
-
-  /@types/normalize-path@3.0.2:
-    resolution: {integrity: sha512-DO++toKYPaFn0Z8hQ7Tx+3iT9t77IJo/nDiqTXilgEP+kPNIYdpS9kh3fXuc53ugqwp9pxC1PVjCpV1tQDyqMA==}
-    dev: true
 
   /@types/npm-package-arg@6.1.0:
     resolution: {integrity: sha512-vbt5fb0y1svMhu++1lwtKmZL76d0uPChFlw7kEzyUmTwfmpHRcFb8i0R8ElT69q/L+QLgK2hgECivIAvaEDwag==}
