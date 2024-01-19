@@ -7,7 +7,8 @@ import { once } from 'node:events';
 import {
   TerminalProviderSeverity,
   type ITerminal,
-  type ITerminalProvider
+  type ITerminalProvider,
+  SubprocessTerminator
 } from '@rushstack/node-core-library';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -96,6 +97,11 @@ export class IPCOperationRunner implements IOperationRunner {
               includeProjectBin: true
             },
             ipc: true
+          });
+
+          // Ensure that Rush doesn't outlive its children
+          SubprocessTerminator.killProcessTreeOnExit(this._ipcProcess, {
+            detached: false
           });
 
           let resolveReadyPromise!: () => void;
