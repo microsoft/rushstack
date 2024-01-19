@@ -249,10 +249,7 @@ export abstract class BaseInstallManager {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
           this.rushConfiguration.getTempShrinkwrapFilename(subspaceName),
-          this.rushConfiguration.getCommittedShrinkwrapFilename({
-            subspaceName,
-            variant: this.options.variant
-          })
+          this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName)
         );
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
@@ -260,11 +257,7 @@ export abstract class BaseInstallManager {
 
       // Always update the state file if running "rush update"
       if (this.options.allowShrinkwrapUpdates) {
-        if (
-          this.rushConfiguration
-            .getRepoState(subspaceName, this.options.variant)
-            .refreshState(this.rushConfiguration)
-        ) {
+        if (this.rushConfiguration.getRepoState(subspaceName).refreshState(this.rushConfiguration)) {
           // eslint-disable-next-line no-console
           console.log(
             colors.yellow(
@@ -311,14 +304,10 @@ export abstract class BaseInstallManager {
 
     // Additionally, if they pulled an updated shrinkwrap file from Git,
     // then we can't skip this install
-    potentiallyChangedFiles.push(
-      this.rushConfiguration.getCommittedShrinkwrapFilename({ subspaceName, variant: this.options.variant })
-    );
+    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName));
 
     // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(
-      this.rushConfiguration.getCommonVersionsFilePath(subspaceName, this.options.variant)
-    );
+    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(subspaceName));
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // If the repo is using pnpmfile.js, consider that also
@@ -374,15 +363,8 @@ export abstract class BaseInstallManager {
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!this.options.fullUpgrade) {
-      let commitedShrinkwrapFileName: string;
-      if (subspaceName) {
-        commitedShrinkwrapFileName =
-          this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName);
-      } else {
-        commitedShrinkwrapFileName = this.rushConfiguration.getCommittedShrinkwrapFilename({
-          variant: this.options.variant
-        });
-      }
+      const commitedShrinkwrapFileName: string =
+        this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName);
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
@@ -954,9 +936,8 @@ ${gitLfsHookHandling}
     subspaceName: string | undefined,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): void {
-    const commitedShrinkwrapFileName: string = subspaceName
-      ? this.rushConfiguration.getCommittedSubspaceShrinkwrapFilename(subspaceName)
-      : this.rushConfiguration.getCommittedShrinkwrapFilename({ variant: this.options.variant });
+    const commitedShrinkwrapFileName: string =
+      this.rushConfiguration.getCommittedShrinkwrapFilename(subspaceName);
     if (shrinkwrapFile) {
       Utilities.syncFile(
         commitedShrinkwrapFileName,

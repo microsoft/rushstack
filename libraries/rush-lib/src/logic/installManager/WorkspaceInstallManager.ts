@@ -115,17 +115,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // If preferred versions have been updated, or if the repo-state.json is invalid,
     // we can't be certain of the state of the shrinkwrap
-    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(subspaceName, this.options.variant);
+    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(subspaceName);
     if (!repoState.isValid) {
       shrinkwrapWarnings.push(
         `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker in the file.`
       );
       shrinkwrapIsUpToDate = false;
     } else {
-      const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
-        subspaceName,
-        this.options.variant
-      );
+      const commonVersions: CommonVersionsConfiguration =
+        this.rushConfiguration.getCommonVersions(subspaceName);
       if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
         shrinkwrapWarnings.push(
           `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`

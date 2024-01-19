@@ -189,10 +189,6 @@ export interface ICurrentVariantJson {
 }
 
 /**
- * This is used when a function needs
- */
-
-/**
  * The filter parameters to search from all projects
  */
 export interface IRushConfigurationProjectsFilter {
@@ -293,6 +289,23 @@ export class RushConfiguration {
   public readonly commonFolder: string;
 
   /**
+   * The folder where Rush's additional config files are stored.  This folder is always a
+   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
+   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
+   * Rush will report an error if this this folder contains any unrecognized files.
+   *
+   * Example: `C:\MyRepo\common\config\rush`
+   */
+  public readonly commonRushConfigFolder: string;
+
+  /**
+   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\temp`
+   */
+  public readonly commonTempFolder: string;
+
+  /**
    * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
    * under the common folder.
    * Example: `C:\MyRepo\common\scripts`
@@ -352,6 +365,13 @@ export class RushConfiguration {
    * The version of the locally package manager tool.  (Example: "1.2.3")
    */
   public readonly packageManagerToolVersion: string;
+
+  /**
+   * The absolute path to the locally package manager tool.  If "rush install" has not
+   * been run, then this file may not exist yet.
+   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
+   */
+  public readonly packageManagerToolFilename: string;
 
   /**
    * The minimum allowable folder depth for the projectFolder field in the rush.json file.
@@ -586,15 +606,21 @@ export class RushConfiguration {
 
     this.commonFolder = path.resolve(path.join(this.rushJsonFolder, RushConstants.commonFolderName));
 
+    this.commonRushConfigFolder = path.join(this.commonFolder, 'config', 'rush');
+
+    this.commonTempFolder =
+      EnvironmentConfiguration.rushTempFolderOverride ||
+      path.join(this.commonFolder, RushConstants.rushTempFolderName);
+
     this.commonScriptsFolder = path.join(this.commonFolder, 'scripts');
 
-    this.npmCacheFolder = path.resolve(path.join(this.getCommonTempFolder(), 'npm-cache'));
-    this.npmTmpFolder = path.resolve(path.join(this.getCommonTempFolder(), 'npm-tmp'));
-    this.yarnCacheFolder = path.resolve(path.join(this.getCommonTempFolder(), 'yarn-cache'));
+    this.npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
+    this.npmTmpFolder = path.resolve(path.join(this.commonTempFolder, 'npm-tmp'));
+    this.yarnCacheFolder = path.resolve(path.join(this.commonTempFolder, 'yarn-cache'));
 
     this.changesFolder = path.join(this.commonFolder, RushConstants.changeFilesFolderName);
 
-    this.currentVariantJsonFilename = path.join(this.getCommonTempFolder(), 'current-variant.json');
+    this.currentVariantJsonFilename = path.join(this.commonTempFolder, 'current-variant.json');
 
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
@@ -606,13 +632,13 @@ export class RushConfiguration {
     this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
 
     const experimentsConfigFile: string = path.join(
-      this.getCommonRushConfigFolder(),
+      this.commonRushConfigFolder,
       RushConstants.experimentsFilename
     );
     this.experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
 
     const rushPluginsConfigFilename: string = path.join(
-      this.getCommonRushConfigFolder(),
+      this.commonRushConfigFolder,
       RushConstants.rushPluginsConfigFilename
     );
     this._rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
@@ -621,8 +647,8 @@ export class RushConfiguration {
     this.yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
     try {
       this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-        `${this.getCommonRushConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
-        this.getCommonTempFolder()
+        `${this.commonRushConfigFolder}/${RushConstants.pnpmConfigFilename}`,
+        this.commonTempFolder
       );
       if (rushConfigurationJson.pnpmOptions) {
         throw new Error(
@@ -634,7 +660,7 @@ export class RushConfiguration {
       if (FileSystem.isNotExistError(error as Error)) {
         this.pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
           rushConfigurationJson.pnpmOptions || {},
-          this.getCommonTempFolder()
+          this.commonTempFolder
         );
       } else {
         throw error;
@@ -686,8 +712,18 @@ export class RushConfiguration {
 
     this.shrinkwrapFilename = this.packageManagerWrapper.shrinkwrapFilename;
 
+    this.packageManagerToolFilename = path.resolve(
+      path.join(
+        this.commonTempFolder,
+        `${this.packageManager}-local`,
+        'node_modules',
+        '.bin',
+        `${this.packageManager}`
+      )
+    );
+
     RushConfiguration._validateCommonRushConfigFolder(
-      this.getCommonRushConfigFolder(),
+      this.commonRushConfigFolder,
       this.packageManagerWrapper,
       this.experimentsConfiguration
     );
@@ -781,13 +817,13 @@ export class RushConfiguration {
     this.eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
     this.versionPolicyConfigurationFilePath = path.join(
-      this.getCommonRushConfigFolder(),
+      this.commonRushConfigFolder,
       RushConstants.versionPoliciesFilename
     );
     this.versionPolicyConfiguration = new VersionPolicyConfiguration(this.versionPolicyConfigurationFilePath);
 
     this.customTipsConfigurationFilePath = path.join(
-      this.getCommonRushConfigFolder(),
+      this.commonRushConfigFolder,
       RushConstants.customTipsFilename
     );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
@@ -1126,8 +1162,8 @@ export class RushConfiguration {
    * @deprecated Use `getCommittedShrinkwrapFilename` instead, which gets the correct common
    * shrinkwrap file name for a given active variant.
    */
-  public committedShrinkwrapFilename(subspaceName?: string | undefined): string {
-    return this.getCommittedShrinkwrapFilename({ subspaceName });
+  public get committedShrinkwrapFilename(): string {
+    return this.getCommittedShrinkwrapFilename();
   }
 
   /**
@@ -1412,8 +1448,8 @@ export class RushConfiguration {
    * @deprecated Use `getCommonVersions` instead, which gets the correct common version data
    * for a given active variant.
    */
-  public commonVersions(subspaceName: string | undefined): CommonVersionsConfiguration {
-    return this.getCommonVersions(subspaceName);
+  public get commonVersions(): CommonVersionsConfiguration {
+    return this.getCommonVersions();
   }
 
   /**
@@ -1438,10 +1474,9 @@ export class RushConfiguration {
    * Gets the path to the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommonVersionsFilePath(subspaceName: string | undefined, variant?: string | undefined): string {
+  public getCommonVersionsFilePath(subspaceName?: string | undefined): string {
     const commonVersionsFilename: string = path.join(
       this.getCommonRushConfigFolder(subspaceName),
-      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.commonVersionsFilename
     );
     return commonVersionsFilename;
@@ -1463,10 +1498,7 @@ export class RushConfiguration {
    * Gets the settings from the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommonVersions(
-    subspaceName: string | undefined,
-    variant?: string | undefined
-  ): CommonVersionsConfiguration {
+  public getCommonVersions(subspaceName?: string | undefined): CommonVersionsConfiguration {
     if (!this._commonVersionsConfigurationsByVariant) {
       this._commonVersionsConfigurationsByVariant = new Map();
     }
@@ -1476,19 +1508,15 @@ export class RushConfiguration {
 
     // Use an empty string as the key when no variant provided. Anything else would possibly conflict
     // with a variant created by the user
-    const variantKey: string = variant || '';
+    const subspaceKey: string = subspaceName || '';
     let commonVersionsConfiguration: CommonVersionsConfiguration | undefined =
-      this._commonVersionsConfigurationsByVariant.get(variantKey);
-    if (subspaceName) {
-      commonVersionsConfiguration = this._commonVersionsConfigurationsBySubspace.get(subspaceName);
-    }
+      this._commonVersionsConfigurationsBySubspace.get(subspaceKey);
+
     if (!commonVersionsConfiguration) {
-      const commonVersionsFilename: string = this.getCommonVersionsFilePath(subspaceName, variant);
+      const commonVersionsFilename: string = this.getCommonVersionsFilePath(subspaceName);
       commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
       if (subspaceName) {
         this._commonVersionsConfigurationsBySubspace.set(subspaceName, commonVersionsConfiguration);
-      } else {
-        this._commonVersionsConfigurationsByVariant.set(variantKey, commonVersionsConfiguration);
       }
     }
 
@@ -1530,46 +1558,16 @@ export class RushConfiguration {
    * @param subspaceName - The name of the subspace in use by the active command.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getRepoState(subspaceName: string | undefined, variant?: string | undefined): RepoStateFile {
-    const repoStateFilename: string = this.getRepoStateFilePath(subspaceName, variant);
-    return RepoStateFile.loadFromFile(repoStateFilename, subspaceName, variant);
+  public getRepoState(subspaceName: string | undefined): RepoStateFile {
+    const repoStateFilename: string = this.getRepoStateFilePath(subspaceName);
+    return RepoStateFile.loadFromFile(repoStateFilename, subspaceName);
   }
 
   /**
    * Gets the committed shrinkwrap file name for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommittedShrinkwrapFilename({
-    subspaceName,
-    variant
-  }: {
-    subspaceName?: string | undefined;
-    variant?: string | undefined;
-  }): string {
-    if (variant) {
-      if (!this._variants.has(variant)) {
-        throw new Error(
-          `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
-            `one of the following from rush.json: ` +
-            `${Array.from(this._variants.values())
-              .map((name: string) => `"${name}"`)
-              .join(', ')}.`
-        );
-      }
-    }
-
-    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(subspaceName, variant);
-
-    return path.join(variantConfigFolderPath, this.shrinkwrapFilename);
-  }
-
-  /**
-   * Gets the committed shrinkwrap file name for a subspace.
-   * @param subspaceName - The name of the subspace.
-   */
-  public getCommittedSubspaceShrinkwrapFilename(subspaceName: string): string {
-    this.validateSubspaceName(subspaceName);
-
+  public getCommittedShrinkwrapFilename(subspaceName?: string | undefined): string {
     const subspaceConfigFolderPath: string = this.getCommonRushConfigFolder(subspaceName);
 
     return path.join(subspaceConfigFolderPath, this.shrinkwrapFilename);

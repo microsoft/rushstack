@@ -121,7 +121,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // dependency name --> version specifier
     const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration
-      .getCommonVersions(subspaceName, this.options.variant)
+      .getCommonVersions(subspaceName)
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {

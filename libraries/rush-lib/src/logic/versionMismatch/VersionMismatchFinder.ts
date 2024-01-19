@@ -100,8 +100,7 @@ export class VersionMismatchFinder {
     options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(
-      options.subspaceName,
-      options.variant
+      options.subspaceName
     );
 
     const projects: VersionMismatchFinderEntity[] = [];
