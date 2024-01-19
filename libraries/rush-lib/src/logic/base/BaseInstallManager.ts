@@ -311,10 +311,7 @@ export abstract class BaseInstallManager {
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(
-        subspaceName,
-        this.options.variant
-      );
+      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(subspaceName);
 
       if (FileSystem.exists(pnpmFileFilename)) {
         potentiallyChangedFiles.push(pnpmFileFilename);

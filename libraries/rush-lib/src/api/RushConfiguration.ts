@@ -1544,10 +1544,9 @@ export class RushConfiguration {
    * Gets the path to the repo-state.json file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string {
+  public getRepoStateFilePath(subspaceName?: string | undefined): string {
     const repoStateFilename: string = path.join(
       this.getCommonRushConfigFolder(subspaceName),
-      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.repoStateFilename
     );
     return repoStateFilename;
@@ -1574,16 +1573,16 @@ export class RushConfiguration {
   }
 
   /**
-   * Gets the absolute path for "pnpmfile.js" for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * Gets the absolute path for "pnpmfile.js" for a specific subspace.
+   * @param subspace - The name of the current subspace in use by the active command.
    * @remarks
    * The file path is returned even if PNPM is not configured as the package manager.
    */
-  public getPnpmfilePath(subspaceName: string | undefined, variant?: string | undefined): string {
-    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(subspaceName, variant);
+  public getPnpmfilePath(subspaceName?: string | undefined): string {
+    const subspaceConfigFolderPath: string = this.getCommonRushConfigFolder(subspaceName);
 
     return path.join(
-      variantConfigFolderPath,
+      subspaceConfigFolderPath,
       (this.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
     );
   }
@@ -1669,27 +1668,5 @@ export class RushConfiguration {
       }
     }
     return undefined;
-  }
-
-  private _getVariantConfigFolderPath(
-    subspaceName: string | undefined,
-    variant?: string | undefined
-  ): string {
-    if (variant) {
-      if (!this._variants.has(variant)) {
-        throw new Error(
-          `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
-            `one of the following from rush.json: ` +
-            `${Array.from(this._variants.values())
-              .map((name: string) => `"${name}"`)
-              .join(', ')}.`
-        );
-      }
-    }
-
-    return path.join(
-      this.getCommonRushConfigFolder(subspaceName),
-      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
-    );
   }
 }

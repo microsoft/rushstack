@@ -1075,14 +1075,14 @@ export class RushConfiguration {
     getCommonVersionsFilePath(subspaceName?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPackageManagerToolFilename(subspaceName?: string | undefined): string;
-    getPnpmfilePath(subspaceName: string | undefined, variant?: string | undefined): string;
+    getPnpmfilePath(subspaceName?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
     getProjectsSubspaceSet(projects: Set<RushConfigurationProject>): string[];
     getProjectSubspace(project: RushConfigurationProject): string | undefined;
     getRepoState(subspaceName: string | undefined): RepoStateFile;
-    getRepoStateFilePath(subspaceName: string | undefined, variant?: string | undefined): string;
+    getRepoStateFilePath(subspaceName?: string | undefined): string;
     getSubspaceProjects(subspaceName: string): RushConfigurationProject[];
     // @beta
     getTempShrinkwrapFilename(subspaceName?: string | undefined): string;

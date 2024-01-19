@@ -124,10 +124,7 @@ export class PnpmfileConfiguration {
     };
 
     // Use the provided path if available. Otherwise, use the default path.
-    const userPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(
-      subspaceName,
-      options?.variant
-    );
+    const userPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(subspaceName);
     if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
       settings.userPnpmfilePath = userPnpmfilePath;
     }
