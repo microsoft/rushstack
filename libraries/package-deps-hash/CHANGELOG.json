@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "4.1.18",
+      "tag": "@rushstack/package-deps-hash_v4.1.18",
+      "date": "Thu, 18 Jan 2024 01:08:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle an edge case in `getRepoState` wherein it tries to asynchronously pipe data to `git hash-object` but the subprocess has already exited."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.1.17",
       "tag": "@rushstack/package-deps-hash_v4.1.17",
       "date": "Tue, 16 Jan 2024 18:30:11 GMT",

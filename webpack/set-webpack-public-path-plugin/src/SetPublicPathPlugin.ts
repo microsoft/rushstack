@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { VersionDetection } from '@rushstack/webpack-plugin-utilities';
-import { Text, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
+import { Text } from '@rushstack/node-core-library';
 
 import type webpack from 'webpack';
 
 import { type IInternalOptions, getSetPublicPathCode } from './codeGenerator';
+import { SetPublicPathPluginBase } from './SetPublicPathPluginBase';
 
 /**
  * The base options for setting the webpack public path at runtime.
@@ -106,10 +106,11 @@ const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b782
  *
  * @public
  */
-export class SetPublicPathPlugin implements webpack.WebpackPluginInstance {
+export class SetPublicPathPlugin extends SetPublicPathPluginBase {
   public readonly options: ISetWebpackPublicPathPluginOptions;
 
   public constructor(options: ISetWebpackPublicPathPluginOptions) {
+    super(PLUGIN_NAME);
     this.options = options;
 
     const scriptNameOptions: IScriptNameInternalOptions = options.scriptName;
@@ -120,134 +121,89 @@ export class SetPublicPathPlugin implements webpack.WebpackPluginInstance {
     }
   }
 
-  public apply(compiler: webpack.Compiler): void {
-    if (!VersionDetection.isWebpack5(compiler)) {
-      const thisPackageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
-      throw new Error(
-        `The ${SetPublicPathPlugin.name} plugin requires Webpack 5. Use major version 4 of ` +
-          `${thisPackageJson.name} for Webpack 4 support.`
-      );
+  protected _applyCompilation(thisWebpack: typeof webpack, compilation: webpack.Compilation): void {
+    class SetPublicPathRuntimeModule extends thisWebpack.RuntimeModule {
+      private readonly _pluginOptions: ISetWebpackPublicPathPluginOptions;
+
+      public constructor(pluginOptions: ISetWebpackPublicPathPluginOptions) {
+        super('publicPath', thisWebpack.RuntimeModule.STAGE_BASIC);
+        this._pluginOptions = pluginOptions;
+      }
+
+      public generate(): string {
+        const {
+          name: regexpName,
+          isTokenized: regexpIsTokenized,
+          useAssetName
+        } = this._pluginOptions.scriptName as IScriptNameInternalOptions;
+
+        let regexName: string;
+        if (regexpName) {
+          regexName = regexpName;
+          if (regexpIsTokenized) {
+            regexName = regexName
+              .replace(/\[name\]/g, Text.escapeRegExp(this.chunk.name))
+              .replace(/\[hash\]/g, this.chunk.renderedHash || '');
+          }
+        } else if (useAssetName) {
+          (this.chunk as IExtendedChunk)[SHOULD_REPLACE_ASSET_NAME_TOKEN] = true;
+
+          regexName = ASSET_NAME_TOKEN;
+        } else {
+          throw new Error('scriptName.name or scriptName.useAssetName must be set');
+        }
+
+        const moduleOptions: IInternalOptions = {
+          webpackPublicPathVariable: thisWebpack.RuntimeGlobals.publicPath,
+          regexName,
+          ...this._pluginOptions
+        };
+
+        return getSetPublicPathCode(moduleOptions);
+      }
     }
 
-    const thisWebpack: typeof webpack = compiler.webpack;
-
-    const initialOutputPublicPathSetting: typeof compiler.options.output.publicPath =
-      compiler.options.output.publicPath;
-
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: webpack.Compilation) => {
-      if (initialOutputPublicPathSetting) {
-        compilation.warnings.push(
-          new compiler.webpack.WebpackError(
-            `The "output.publicPath" option is set in the Webpack configuration. The ${SetPublicPathPlugin.name} ` +
-              'plugin may produce unexpected results. It is recommended that the "output.publicPath" configuration option ' +
-              'be unset when using this plugin.'
-          )
-        );
-      } else {
-        compilation.hooks.runtimeRequirementInTree.for(thisWebpack.RuntimeGlobals.publicPath).intercept({
-          name: PLUGIN_NAME,
-          register: (tap) => {
-            if (tap.name === 'RuntimePlugin') {
-              // Disable the default public path runtime plugin
-              return {
-                ...tap,
-                fn: () => {
-                  /* noop */
-                }
-              };
-            } else {
-              return tap;
-            }
-          }
-        });
-      }
-
-      class SetPublicPathRuntimeModule extends thisWebpack.RuntimeModule {
-        private readonly _pluginOptions: ISetWebpackPublicPathPluginOptions;
-
-        public constructor(pluginOptions: ISetWebpackPublicPathPluginOptions) {
-          super('publicPath', thisWebpack.RuntimeModule.STAGE_BASIC);
-          this._pluginOptions = pluginOptions;
-        }
-
-        public generate(): string {
-          const {
-            name: regexpName,
-            isTokenized: regexpIsTokenized,
-            useAssetName
-          } = this._pluginOptions.scriptName as IScriptNameInternalOptions;
-
-          let regexName: string;
-          if (regexpName) {
-            regexName = regexpName;
-            if (regexpIsTokenized) {
-              regexName = regexName
-                .replace(/\[name\]/g, Text.escapeRegExp(this.chunk.name))
-                .replace(/\[hash\]/g, this.chunk.renderedHash || '');
-            }
-          } else if (useAssetName) {
-            (this.chunk as IExtendedChunk)[SHOULD_REPLACE_ASSET_NAME_TOKEN] = true;
-
-            regexName = ASSET_NAME_TOKEN;
-          } else {
-            throw new Error('scriptName.name or scriptName.useAssetName must be set');
-          }
-
-          const moduleOptions: IInternalOptions = {
-            webpackPublicPathVariable: thisWebpack.RuntimeGlobals.publicPath,
-            regexName,
-            ...this._pluginOptions
-          };
-
-          return getSetPublicPathCode(moduleOptions);
-        }
-      }
-
-      compilation.hooks.runtimeRequirementInTree
-        .for(thisWebpack.RuntimeGlobals.publicPath)
-        .tap(PLUGIN_NAME, (chunk: webpack.Chunk, set: Set<string>) => {
-          compilation.addRuntimeModule(chunk, new SetPublicPathRuntimeModule(this.options));
-        });
-
-      compilation.hooks.processAssets.tap(PLUGIN_NAME, (assets) => {
-        for (const chunkGroup of compilation.chunkGroups) {
-          for (const chunk of chunkGroup.chunks) {
-            if ((chunk as IExtendedChunk)[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
-              for (const assetFilename of chunk.files) {
-                let escapedAssetFilename: string;
-                if (assetFilename.match(/\.map$/)) {
-                  // Trim the ".map" extension
-                  escapedAssetFilename = assetFilename.substr(
-                    0,
-                    assetFilename.length - 4 /* '.map'.length */
-                  );
-                  escapedAssetFilename = Text.escapeRegExp(escapedAssetFilename);
-                  // source in sourcemaps is JSON-encoded
-                  escapedAssetFilename = JSON.stringify(escapedAssetFilename);
-                  // Trim the quotes from the JSON encoding
-                  escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1);
-                } else {
-                  escapedAssetFilename = Text.escapeRegExp(assetFilename);
-                }
-
-                const asset: webpack.sources.Source = assets[assetFilename];
-
-                const newAsset: webpack.sources.ReplaceSource = new thisWebpack.sources.ReplaceSource(asset);
-                const sourceString: string = asset.source().toString();
-                for (
-                  let index: number = sourceString.indexOf(ASSET_NAME_TOKEN);
-                  index >= 0;
-                  index = sourceString.indexOf(ASSET_NAME_TOKEN, index + 1)
-                ) {
-                  newAsset.replace(index, index + ASSET_NAME_TOKEN.length - 1, escapedAssetFilename);
-                }
-
-                assets[assetFilename] = newAsset;
-              }
-            }
-          }
-        }
+    compilation.hooks.runtimeRequirementInTree
+      .for(thisWebpack.RuntimeGlobals.publicPath)
+      .tap(PLUGIN_NAME, (chunk: webpack.Chunk, set: Set<string>) => {
+        compilation.addRuntimeModule(chunk, new SetPublicPathRuntimeModule(this.options));
       });
+
+    compilation.hooks.processAssets.tap(PLUGIN_NAME, (assets) => {
+      for (const chunkGroup of compilation.chunkGroups) {
+        for (const chunk of chunkGroup.chunks) {
+          if ((chunk as IExtendedChunk)[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
+            for (const assetFilename of chunk.files) {
+              let escapedAssetFilename: string;
+              if (assetFilename.match(/\.map$/)) {
+                // Trim the ".map" extension
+                escapedAssetFilename = assetFilename.slice(0, -4 /* '.map'.length */);
+                escapedAssetFilename = Text.escapeRegExp(escapedAssetFilename);
+                // source in sourcemaps is JSON-encoded
+                escapedAssetFilename = JSON.stringify(escapedAssetFilename);
+                // Trim the quotes from the JSON encoding
+                escapedAssetFilename = escapedAssetFilename.slice(1, -1);
+              } else {
+                escapedAssetFilename = Text.escapeRegExp(assetFilename);
+              }
+
+              const asset: webpack.sources.Source = assets[assetFilename];
+
+              const newAsset: webpack.sources.ReplaceSource = new thisWebpack.sources.ReplaceSource(asset);
+              const sourceString: string = asset.source().toString();
+              for (
+                let index: number = sourceString.lastIndexOf(ASSET_NAME_TOKEN);
+                index >= 0;
+                index = sourceString.lastIndexOf(ASSET_NAME_TOKEN, index - 1)
+              ) {
+                newAsset.replace(index, index + ASSET_NAME_TOKEN.length - 1, escapedAssetFilename);
+              }
+
+              assets[assetFilename] = newAsset;
+            }
+          }
+        }
+      }
     });
   }
 }
