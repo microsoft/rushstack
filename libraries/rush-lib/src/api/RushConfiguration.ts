@@ -1153,20 +1153,6 @@ export class RushConfiguration {
   }
 
   /**
-   * The full path of the shrinkwrap file that is tracked by Git.  (The "rush install"
-   * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\pnpm-lock.yaml`
-   *
-   * @deprecated Use `getCommittedShrinkwrapFilename` instead, which gets the correct common
-   * shrinkwrap file name for a given active variant.
-   */
-  public get committedShrinkwrapFilename(): string {
-    return this.getCommittedShrinkwrapFilename();
-  }
-
-  /**
    * The folder where Rush's additional config files are stored.  This folder is always a
    * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
    * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,

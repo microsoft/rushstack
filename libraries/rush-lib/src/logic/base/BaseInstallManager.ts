@@ -94,7 +94,7 @@ export abstract class BaseInstallManager {
       for (const subspaceName of rushConfiguration.subspaceNames) {
         this.subspaceInstallFlags.set(
           subspaceName,
-          LastInstallFlagFactory.getCommonTempFlag(rushConfiguration, undefined, subspaceName)
+          LastInstallFlagFactory.getCommonTempFlag(rushConfiguration, subspaceName)
         );
       }
     }
@@ -189,8 +189,8 @@ export abstract class BaseInstallManager {
     // need to perform a clean install.  Otherwise, we can do an incremental install.
     const commonTempInstallFlag: LastInstallFlag = LastInstallFlagFactory.getCommonTempFlag(
       this.rushConfiguration,
-      { npmrcHash: npmrcHash || '<NO NPMRC>' },
-      subspaceName
+      subspaceName,
+      { npmrcHash: npmrcHash || '<NO NPMRC>' }
     );
     const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
       .configuration.cleanInstallAfterNpmrcChanges

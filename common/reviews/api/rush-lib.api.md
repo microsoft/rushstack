@@ -1046,8 +1046,6 @@ export class RushConfiguration {
     readonly allowMostlyStandardPackageNames: boolean;
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
     readonly changesFolder: string;
-    // @deprecated
-    get committedShrinkwrapFilename(): string;
     get commonAutoinstallersFolder(): string;
     readonly commonFolder: string;
     readonly commonRushConfigFolder: string;

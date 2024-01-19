@@ -162,8 +162,8 @@ export class LastInstallFlagFactory {
    */
   public static getCommonTempFlag(
     rushConfiguration: RushConfiguration,
-    extraState: Record<string, string> = {},
-    subspaceName: string | undefined
+    subspaceName: string | undefined,
+    extraState: Record<string, string> = {}
   ): LastInstallFlag {
     const currentState: JsonObject = {
       node: process.versions.node,

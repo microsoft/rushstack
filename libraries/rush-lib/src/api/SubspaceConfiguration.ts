@@ -12,7 +12,7 @@ import { RushConstants } from '../logic/RushConstants';
  * The allowed naming convention for subspace names.
  * Allows for names to be formed of letters, numbers, and hyphens (-)
  */
-export const SUBSPACE_NAME_REGEXP: RegExp = new RegExp(/^[a-z][a-z0-9]*([-][a-z0-9]+)*$/);
+export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-][a-z0-9]+)*$/;
 
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
