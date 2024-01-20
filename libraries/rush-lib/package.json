@@ -64,6 +64,7 @@
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/operation-graph": "workspace:*",
     "@rushstack/webpack-deep-imports-plugin": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
     "@types/cli-table": "0.3.0",
