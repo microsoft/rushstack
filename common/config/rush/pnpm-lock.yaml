@@ -3228,6 +3228,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/operation-graph':
+        specifier: workspace:*
+        version: link:../operation-graph
       '@rushstack/webpack-deep-imports-plugin':
         specifier: workspace:*
         version: link:../../webpack/webpack-deep-imports-plugin
@@ -8444,7 +8447,7 @@ packages:
     dependencies:
       '@jest/console': 29.7.0
       '@jest/types': 29.6.3
-      '@types/istanbul-lib-coverage': 2.0.4
+      '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.2(@types/node@18.17.15)
       jest-haste-map: 29.7.0
       jest-resolve: 29.7.0
@@ -25619,7 +25622,7 @@ packages:
     engines: {node: '>=10.12.0'}
     dependencies:
       '@jridgewell/trace-mapping': 0.3.21
-      '@types/istanbul-lib-coverage': 2.0.4
+      '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
   /validate-npm-package-license@3.0.4:
