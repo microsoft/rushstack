@@ -7,9 +7,16 @@ import { once } from 'node:events';
 import {
   TerminalProviderSeverity,
   type ITerminal,
-  type ITerminalProvider,
-  SubprocessTerminator
+  type ITerminalProvider
 } from '@rushstack/node-core-library';
+import type {
+  IAfterExecuteEventMessage,
+  IRequestRunEventMessage,
+  ISyncEventMessage,
+  IRunCommandMessage,
+  IExitCommandMessage
+} from '@rushstack/operation-graph';
+
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -27,30 +34,16 @@ export interface IIPCOperationRunnerOptions {
   persist: boolean;
 }
 
-interface IFinishedMessage {
-  type: 'finished';
-  status: OperationStatus;
+function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
+  return typeof message === 'object' && (message as IAfterExecuteEventMessage).event === 'after-execute';
 }
 
-interface IReadyMessage {
-  type: 'ready';
+function isRequestRunEventMessage(message: unknown): message is IRequestRunEventMessage {
+  return typeof message === 'object' && (message as IRequestRunEventMessage).event === 'requestRun';
 }
 
-interface IRequestRunMessage {
-  type: 'requestRun';
-  requestor?: string;
-}
-
-function isFinishedMessage(message: unknown): message is IFinishedMessage {
-  return typeof message === 'object' && (message as IFinishedMessage).type === 'finished';
-}
-
-function isRequestRunMessage(message: unknown): message is IRequestRunMessage {
-  return typeof message === 'object' && (message as IRequestRunMessage).type === 'requestRun';
-}
-
-function isReadyMessage(message: unknown): message is IReadyMessage {
-  return typeof message === 'object' && (message as IReadyMessage).type === 'ready';
+function isSyncEventMessage(message: unknown): message is ISyncEventMessage {
+  return typeof message === 'object' && (message as ISyncEventMessage).event === 'sync';
 }
 
 /**
@@ -99,11 +92,6 @@ export class IPCOperationRunner implements IOperationRunner {
             ipc: true
           });
 
-          // Ensure that Rush doesn't outlive its children
-          SubprocessTerminator.killProcessTreeOnExit(this._ipcProcess, {
-            detached: false
-          });
-
           let resolveReadyPromise!: () => void;
 
           this._processReadyPromise = new Promise<void>((resolve) => {
@@ -111,9 +99,9 @@ export class IPCOperationRunner implements IOperationRunner {
           });
 
           this._ipcProcess.on('message', (message: unknown) => {
-            if (isRequestRunMessage(message)) {
+            if (isRequestRunEventMessage(message)) {
               // TODO: Handle run requests
-            } else if (isReadyMessage(message)) {
+            } else if (isSyncEventMessage(message)) {
               resolveReadyPromise();
             }
           });
@@ -139,7 +127,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
         const status: OperationStatus = await new Promise((resolve, reject) => {
           function finishHandler(message: unknown): void {
-            if (isFinishedMessage(message)) {
+            if (isAfterExecuteEventMessage(message)) {
               terminal.writeLine('Received finish notification');
               subProcess.stdout?.off('data', onStdout);
               subProcess.stderr?.off('data', onStderr);
@@ -147,7 +135,8 @@ export class IPCOperationRunner implements IOperationRunner {
               subProcess.off('error', reject);
               subProcess.off('exit', onExit);
               terminal.writeLine('Disconnected from IPC process');
-              resolve(message.status);
+              // These types are currently distinct but have the same underlying values
+              resolve(message.status as unknown as OperationStatus);
             }
           }
 
@@ -174,12 +163,18 @@ export class IPCOperationRunner implements IOperationRunner {
           this._processReadyPromise!.then(() => {
             isConnected = true;
             terminal.writeLine('Child supports IPC protocol. Sending "run" command...');
-            subProcess.send('run');
+            const runCommand: IRunCommandMessage = {
+              command: 'run'
+            };
+            subProcess.send(runCommand);
           }, reject);
         });
 
         if (isConnected && !this._persist && typeof subProcess.exitCode !== 'number') {
-          subProcess.send('exit');
+          const exitCommand: IExitCommandMessage = {
+            command: 'exit'
+          };
+          subProcess.send(exitCommand);
           await once(subProcess, 'exit');
         }
 
