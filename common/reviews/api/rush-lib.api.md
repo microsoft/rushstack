@@ -588,7 +588,6 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
-    readonly changedProjectsOnly: boolean;
     collatedWriter: CollatedWriter;
     debugMode: boolean;
     error?: Error;

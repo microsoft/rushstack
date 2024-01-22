@@ -56,14 +56,6 @@ export interface IOperationRunnerContext {
   error?: Error;
 
   /**
-   * Normally the incremental build logic will rebuild changed projects as well as
-   * any projects that directly or indirectly depend on a changed project.
-   * If true, then the incremental build logic will only rebuild changed projects and
-   * ignore dependent projects.
-   */
-  readonly changedProjectsOnly: boolean;
-
-  /**
    * Invokes the specified callback with a terminal that is associated with this operation.
    *
    * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
