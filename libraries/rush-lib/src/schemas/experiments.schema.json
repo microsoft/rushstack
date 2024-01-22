@@ -53,6 +53,10 @@
     "forbidPhantomResolvableNodeModulesFolders": {
       "description": "If true, Rush will not allow node_modules in the repo folder or in parent folders.",
       "type": "boolean"
+    },
+    "enablePnpmSyncForInjectedDependenciesMeta": {
+      "description": "If true, Rush will use pnpm-sync to manage injected dependenciesMeta in PNPM.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false

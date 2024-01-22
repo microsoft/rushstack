@@ -76,6 +76,10 @@ export interface IExperimentsJson {
    * If true, Rush will not allow node_modules in the repo folder or in parent folders.
    */
   forbidPhantomResolvableNodeModulesFolders?: boolean;
+  /**
+   * If true, Rush will use pnpm-sync to manage the injected dependenciesMeta in PNPM.
+   */
+  enablePnpmSyncForInjectedDependenciesMeta?: boolean;
 }
 
 /**

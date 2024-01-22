@@ -35,6 +35,7 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
+import { pnpmSyncPrepare } from 'pnpm-sync-lib';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -493,6 +494,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       });
     } else {
       await doInstallInternalAsync(this.options);
+    }
+
+    // if enablePnpmSyncForInjectedDependenciesMeta is true
+    // the pnpm-sync will generate the pnpm-sync.json based on lockfile
+    if (
+      this.rushConfiguration.packageManager === 'pnpm' &&
+      experiments?.enablePnpmSyncForInjectedDependenciesMeta
+    ) {
+      const pnpmLockfilePath: string = this.rushConfiguration.tempShrinkwrapFilename;
+      const dotPnpmFolderPath: string = this.rushConfiguration.commonTempFolder + '/node_modules/.pnpm';
+      await pnpmSyncPrepare(pnpmLockfilePath, dotPnpmFolderPath);
     }
 
     // If all attempts fail we just terminate. No special handling needed.
