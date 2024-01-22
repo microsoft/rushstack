@@ -109,6 +109,8 @@
       "ts2.9",
       "ts3.9",
       "ts4.9"
-    ]
+    ],
+    // for "heft-storybook-react-tutorial" and "heft-storybook-react-tutorial-storykit"
+    "@babel/core": ["^7.22.0"]
   }
 }

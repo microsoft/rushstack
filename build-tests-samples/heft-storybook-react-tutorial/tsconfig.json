@@ -7,9 +7,9 @@
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
-    "declarationMap": true,
+    "declarationMap": false,
     "inlineSources": true,
     "experimentalDecorators": true,
     "strict": true,
@@ -18,8 +18,9 @@
     "noEmitOnError": false,
     "allowUnreachableCode": false,
     "importHelpers": true,
-
+    "noImplicitAny": false,
     "types": ["heft-jest", "webpack-env"],
+    "allowJs": true,
 
     "module": "esnext",
     "moduleResolution": "node",

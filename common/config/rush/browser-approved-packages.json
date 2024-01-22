@@ -47,6 +47,10 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@storybook/react-webpack5",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "axios",
       "allowedCategories": [ "libraries" ]
     },

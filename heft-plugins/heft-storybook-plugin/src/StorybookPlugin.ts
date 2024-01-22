@@ -131,9 +131,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       );
     }
 
-    if (!options.startupModulePath && !options.staticBuildModulePath) {
+    if (!options.startupModulePath) {
       throw new Error(
-        `The ${taskSession.taskName} task cannot start because the "startupModulePath" and the "staticBuildModulePath"` +
+        `The ${taskSession.taskName} task cannot start because the "startupModulePath"` +
           ` plugin options were not specified`
       );
     }
@@ -188,8 +188,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     heftConfiguration: HeftConfiguration,
     options: IStorybookPluginOptions
   ): Promise<IRunStorybookOptions> {
-    const { storykitPackageName, startupModulePath, staticBuildModulePath, staticBuildOutputFolder } =
-      options;
+    const { storykitPackageName, startupModulePath, staticBuildOutputFolder } = options;
     this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
 
     // Example: "/path/to/my-project/node_modules/my-storykit"
@@ -218,18 +217,17 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
 
     // We only want to specify a different output dir when operating in build mode
     const outputFolder: string | undefined = this._isServeMode ? undefined : staticBuildOutputFolder;
-    const modulePath: string | undefined = this._isServeMode ? startupModulePath : staticBuildModulePath;
-    if (!modulePath) {
+    if (!startupModulePath) {
       this._logger.terminal.writeVerboseLine(
         'No matching module path option specified in heft.json, so bundling will proceed without Storybook'
       );
     }
 
-    this._logger.terminal.writeVerboseLine(`Resolving modulePath "${modulePath}"`);
+    this._logger.terminal.writeVerboseLine(`Resolving modulePath "${startupModulePath}"`);
     let resolvedModulePath: string;
     try {
       resolvedModulePath = Import.resolveModule({
-        modulePath: modulePath!,
+        modulePath: startupModulePath!,
         baseFolderPath: storykitModuleFolderPath
       });
     } catch (ex) {
@@ -270,6 +268,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     this._logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
 
     const storybookArgs: string[] = [];
+
+    this._isServeMode ? storybookArgs.push('dev') : storybookArgs.push('build');
+
     if (outputFolder) {
       storybookArgs.push('--output-dir', outputFolder);
     }
