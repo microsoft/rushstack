@@ -142,7 +142,7 @@ export interface INodePackageJson {
   /**
    * The main entry point for the package.
    */
-  bin?: string;
+  bin?: string | Record<string, string>;
 
   /**
    * An array of dependencies that must always be installed for this package.

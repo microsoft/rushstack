@@ -550,7 +550,7 @@ export class Import {
 
 // @public
 export interface INodePackageJson {
-    bin?: string;
+    bin?: string | Record<string, string>;
     dependencies?: IPackageJsonDependencyTable;
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;

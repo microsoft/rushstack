@@ -12,9 +12,10 @@
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {
               "storykitPackageName": "heft-storybook-react-tutorial-storykit",
-              "staticBuildModulePath": "@storybook/react/bin/build.js",
+              "cliPackageName": "@storybook/react",
+              "cliCallingConvention": "storybook6",
               "staticBuildOutputFolder": "dist",
-              "storybookPackageNameTarget": "heft-storybook-react-tutorial"
+              "cwdPackageName": "heft-storybook-react-tutorial"
             }
           }
         }
