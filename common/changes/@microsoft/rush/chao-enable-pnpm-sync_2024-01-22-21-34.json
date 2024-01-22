@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Integrate pnpmSyncPrepare whenever rush calls `pnpm install` ",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
