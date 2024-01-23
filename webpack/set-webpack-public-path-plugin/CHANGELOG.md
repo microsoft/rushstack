@@ -1,6 +1,11 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Thu, 18 Jan 2024 05:07:01 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jan 2024 16:15:06 GMT and should not be manually modified.
+
+## 5.1.2
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
 
 ## 5.1.1
 Thu, 18 Jan 2024 05:07:01 GMT
