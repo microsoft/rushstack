@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as os from 'os';
 import * as path from 'path';
 import { EnvironmentMap } from './EnvironmentMap';
 
@@ -10,6 +9,8 @@ import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
 import { Text } from './Text';
 import { InternalError } from './InternalError';
+
+const OS_PLATFORM: NodeJS.Platform = process.platform;
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
@@ -253,15 +254,22 @@ export function parseProcessListOutput(output: Iterable<string | null>): Map<num
 // Name             ParentProcessId   ProcessId
 // process name     1234              5678
 // unix format:
-// COMMAND             PPID     PID
-// process name       51234   56784
+//  PPID     PID   COMMAND
+// 51234   56784   process name
 const NAME_GROUP: 'name' = 'name';
 const PROCESS_ID_GROUP: 'pid' = 'pid';
 const PARENT_PROCESS_ID_GROUP: 'ppid' = 'ppid';
 // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
-const PROCESS_LIST_ENTRY_REGEX: RegExp = new RegExp(
+const PROCESS_LIST_ENTRY_REGEX_WIN32: RegExp = new RegExp(
   `^(?<${NAME_GROUP}>.+?)\\s+(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s*$`
 );
+// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
+const PROCESS_LIST_ENTRY_REGEX_UNIX: RegExp = new RegExp(
+  `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>.+?)\\s*$`
+);
+const PROCESS_LIST_ENTRY_REGEX: RegExp = OS_PLATFORM === 'win32'
+  ? PROCESS_LIST_ENTRY_REGEX_WIN32
+  : PROCESS_LIST_ENTRY_REGEX_UNIX;
 
 function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number, IProcessInfo>): void {
   const match: RegExpMatchArray | null = line.match(PROCESS_LIST_ENTRY_REGEX);
@@ -326,8 +334,6 @@ function convertToProcessInfoByNameMap(
   return processInfoByNameMap;
 }
 
-const OS_PLATFORM: NodeJS.Platform = os.platform();
-
 function getProcessListProcessOptions(): ICommandLineOptions {
   let command: string;
   let args: string[];
@@ -338,10 +344,12 @@ function getProcessListProcessOptions(): ICommandLineOptions {
   } else {
     command = 'ps';
     // -A: Select all processes
+    // -w: Wide format
     // -o: User-defined format
-    // Order of declared properties impacts the order of the output, so match
-    // the order of wmic.exe output
-    args = ['-Ao', 'comm,ppid,pid'];
+    // Order of declared properties impacts the order of the output. We will
+    // need to request the "comm" property last in order to ensure that the
+    // process names are not truncated on certain platforms
+    args = ['-Awo', 'ppid,pid,comm'];
   }
   return { path: command, args };
 }
