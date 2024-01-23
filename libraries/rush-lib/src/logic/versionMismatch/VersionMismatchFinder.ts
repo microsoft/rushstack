@@ -150,7 +150,7 @@ export class VersionMismatchFinder {
           console.log(
             colors.red(
               `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
-                options.subspaceName && `in subspace: ${options.subspaceName}`
+                options.subspaceName ? `in subspace: ${options.subspaceName}` : ''
               }`
             )
           );

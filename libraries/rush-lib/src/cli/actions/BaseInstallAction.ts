@@ -134,6 +134,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
           subspaceName: subspaceName
         });
       }
+    } else if (this._subspaceParameter) {
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
+        variant: this._variant.value,
+        subspaceName: this._subspaceParameter.value
+      });
     } else {
       VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
         variant: this._variant.value
