@@ -144,8 +144,10 @@ export interface IStorybookPluginOptions {
    * but for distribution purposes it can be useful to split the TS library and storybook exports into two packages.
    *
    * @example
-   * If you create an 'my-storybook-ui-app' project for distribution purposes and the library holding
-   * the (storybook) sources is `my-storybook-ui-library`, then the storybook package name would be:
+   * If you create a storybook app project "my-ui-storybook-library-app" for the storybook preview distribution,
+   * and your main UI component library is my-ui-storybook-library.
+   *
+   * Your 'app' project is able to compile the 'library' storybook preview using the CWD target:
    *
    * `"cwdPackageName": "my-storybook-ui-library"`
    */
