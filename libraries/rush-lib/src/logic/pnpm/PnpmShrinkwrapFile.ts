@@ -34,6 +34,9 @@ const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
 }
+export interface IDependenciesMetaYaml {
+  injected?: boolean;
+}
 
 export type IPnpmV7VersionSpecifier = string;
 export interface IPnpmV8VersionSpecifier {
@@ -70,6 +73,8 @@ export interface IPnpmShrinkwrapImporterYaml {
   devDependencies?: Record<string, IPnpmVersionSpecifier>;
   /** The list of resolved version numbers for optional dependencies */
   optionalDependencies?: Record<string, IPnpmVersionSpecifier>;
+  /** The list of metadata for dependencies declared inside dependencies, optionalDependencies, and devDependencies. */
+  dependenciesMeta?: Record<string, IDependenciesMetaYaml>;
   /**
    * The list of specifiers used to resolve dependency versions
    *
