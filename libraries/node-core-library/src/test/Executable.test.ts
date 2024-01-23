@@ -341,22 +341,26 @@ describe('Executable process list', () => {
   ];
 
   const UNIX_PROCESS_LIST_OUTPUT: (string | null)[] = [
-    'COMMAND                PPID   PID\n',
+    'PPID   PID   COMMAND\n',
     // Test that the parser can handle referencing a parent that doesn't exist
-    'init                      0     1\n',
-    'process2           ',
+    '   0     1   init\n',
     // Test that the parser can handle a line that is truncated in the middle of a field
     // Test that the parser can handle an entry referencing a parent that hasn't been seen yet
-    '       2     4\n',
-    'process0                  1     2\n',
+    // Test that the parser can handle whitespace at the end of the process name.
+    '   2     4',
+    '   process2           \n',
+    '   1     2   process0\n',
     // Test that the parser can handle empty strings
     '',
     // Test children handling when multiple entries reference the same parent
-    'process1                  1     3\n'
+    '   1     3   process1\n'
   ];
 
   test('parses win32 output', () => {
-    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(WIN32_PROCESS_LIST_OUTPUT);
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(
+      WIN32_PROCESS_LIST_OUTPUT,
+      'win32'
+    );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 7 because we reference a parent that doesn't exist
@@ -379,7 +383,8 @@ describe('Executable process list', () => {
 
   test('parses win32 stream output', async () => {
     const processListMap: Map<number, IProcessInfo> = await parseProcessListOutputAsync(
-      Readable.from(WIN32_PROCESS_LIST_OUTPUT)
+      Readable.from(WIN32_PROCESS_LIST_OUTPUT),
+      'win32'
     );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
@@ -402,7 +407,10 @@ describe('Executable process list', () => {
   });
 
   test('parses unix output', () => {
-    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(UNIX_PROCESS_LIST_OUTPUT);
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(
+      UNIX_PROCESS_LIST_OUTPUT,
+      'linux'
+    );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 5 because we reference a parent that doesn't exist
@@ -423,7 +431,8 @@ describe('Executable process list', () => {
 
   test('parses unix stream output', async () => {
     const processListMap: Map<number, IProcessInfo> = await parseProcessListOutputAsync(
-      Readable.from(UNIX_PROCESS_LIST_OUTPUT)
+      Readable.from(UNIX_PROCESS_LIST_OUTPUT),
+      'linux'
     );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
