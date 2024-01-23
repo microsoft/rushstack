@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as os from 'os';
 import * as child_process from 'child_process';
 import * as path from 'path';
 import { EnvironmentMap } from './EnvironmentMap';
@@ -10,7 +11,7 @@ import { PosixModeBits } from './PosixModeBits';
 import { Text } from './Text';
 import { InternalError } from './InternalError';
 
-const OS_PLATFORM: NodeJS.Platform = process.platform;
+const OS_PLATFORM: NodeJS.Platform = os.platform();
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
@@ -222,7 +223,8 @@ export interface IProcessInfo {
 }
 
 export async function parseProcessListOutputAsync(
-  stream: NodeJS.ReadableStream
+  stream: NodeJS.ReadableStream,
+  platform: NodeJS.Platform = OS_PLATFORM
 ): Promise<Map<number, IProcessInfo>> {
   const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
   let seenHeaders: boolean = false;
@@ -230,21 +232,24 @@ export async function parseProcessListOutputAsync(
     if (!seenHeaders) {
       seenHeaders = true;
     } else {
-      parseProcessInfoEntry(line, processInfoById);
+      parseProcessInfoEntry(line, processInfoById, platform);
     }
   }
   return processInfoById;
 }
 
-// eslint-disable-next-line @rushstack/no-new-null
-export function parseProcessListOutput(output: Iterable<string | null>): Map<number, IProcessInfo> {
+export function parseProcessListOutput(
+  // eslint-disable-next-line @rushstack/no-new-null
+  output: Iterable<string | null>,
+  platform: NodeJS.Platform = OS_PLATFORM
+): Map<number, IProcessInfo> {
   const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
   let seenHeaders: boolean = false;
   for (const line of Text.readLinesFromIterable(output, { ignoreEmptyLines: true })) {
     if (!seenHeaders) {
       seenHeaders = true;
     } else {
-      parseProcessInfoEntry(line, processInfoById);
+      parseProcessInfoEntry(line, processInfoById, platform);
     }
   }
   return processInfoById;
@@ -267,12 +272,15 @@ const PROCESS_LIST_ENTRY_REGEX_WIN32: RegExp = new RegExp(
 const PROCESS_LIST_ENTRY_REGEX_UNIX: RegExp = new RegExp(
   `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>.+?)\\s*$`
 );
-const PROCESS_LIST_ENTRY_REGEX: RegExp = OS_PLATFORM === 'win32'
-  ? PROCESS_LIST_ENTRY_REGEX_WIN32
-  : PROCESS_LIST_ENTRY_REGEX_UNIX;
 
-function parseProcessInfoEntry(line: string, existingProcessInfoById: Map<number, IProcessInfo>): void {
-  const match: RegExpMatchArray | null = line.match(PROCESS_LIST_ENTRY_REGEX);
+function parseProcessInfoEntry(
+  line: string,
+  existingProcessInfoById: Map<number, IProcessInfo>,
+  platform: NodeJS.Platform
+): void {
+  const processListEntryRegex: RegExp =
+    platform === 'win32' ? PROCESS_LIST_ENTRY_REGEX_WIN32 : PROCESS_LIST_ENTRY_REGEX_UNIX;
+  const match: RegExpMatchArray | null = line.match(processListEntryRegex);
   if (!match?.groups) {
     throw new InternalError(`Invalid process list entry: ${line}`);
   }

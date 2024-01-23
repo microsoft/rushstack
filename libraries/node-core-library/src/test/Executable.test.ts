@@ -357,7 +357,10 @@ describe('Executable process list', () => {
   ];
 
   test('parses win32 output', () => {
-    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(WIN32_PROCESS_LIST_OUTPUT);
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(
+      WIN32_PROCESS_LIST_OUTPUT,
+      'win32'
+    );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 7 because we reference a parent that doesn't exist
@@ -380,7 +383,8 @@ describe('Executable process list', () => {
 
   test('parses win32 stream output', async () => {
     const processListMap: Map<number, IProcessInfo> = await parseProcessListOutputAsync(
-      Readable.from(WIN32_PROCESS_LIST_OUTPUT)
+      Readable.from(WIN32_PROCESS_LIST_OUTPUT),
+      'win32'
     );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
@@ -403,7 +407,10 @@ describe('Executable process list', () => {
   });
 
   test('parses unix output', () => {
-    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(UNIX_PROCESS_LIST_OUTPUT);
+    const processListMap: Map<number, IProcessInfo> = parseProcessListOutput(
+      UNIX_PROCESS_LIST_OUTPUT,
+      'linux'
+    );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
     // Expect 5 because we reference a parent that doesn't exist
@@ -424,7 +431,8 @@ describe('Executable process list', () => {
 
   test('parses unix stream output', async () => {
     const processListMap: Map<number, IProcessInfo> = await parseProcessListOutputAsync(
-      Readable.from(UNIX_PROCESS_LIST_OUTPUT)
+      Readable.from(UNIX_PROCESS_LIST_OUTPUT),
+      'linux'
     );
     const results: IProcessInfo[] = [...processListMap.values()].sort();
 
