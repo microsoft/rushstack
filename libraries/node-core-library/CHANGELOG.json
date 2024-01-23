@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.64.1",
+      "tag": "@rushstack/node-core-library_v3.64.1",
+      "date": "Tue, 23 Jan 2024 20:12:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Executable.getProcessInfoBy* methods truncating the process name on MacOS"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.64.0",
       "tag": "@rushstack/node-core-library_v3.64.0",
       "date": "Tue, 23 Jan 2024 16:15:05 GMT",
