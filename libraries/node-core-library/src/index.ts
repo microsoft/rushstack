@@ -34,7 +34,8 @@ export {
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
   IPackageJsonRepository,
-  IPeerDependenciesMetaTable
+  IPeerDependenciesMetaTable,
+  IDependenciesMetaTable
 } from './IPackageJson';
 export {
   Import,
