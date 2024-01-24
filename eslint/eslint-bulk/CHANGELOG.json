@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-bulk",
   "entries": [
     {
+      "version": "0.1.8",
+      "tag": "@rushstack/eslint-bulk_v0.1.8",
+      "date": "Wed, 24 Jan 2024 07:38:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.7",
       "tag": "@rushstack/eslint-bulk_v0.1.7",
       "date": "Tue, 23 Jan 2024 20:12:58 GMT",
