@@ -180,7 +180,7 @@ We will continue to maintain this patch as long as it is being widely used, but 
    npm install --save-dev @rushstack/eslint-patch
    ```
 
-7. Add a `require()` call to the to top of the **.eslintrc.js** file for each project that depends
+2. Add a `require()` call to the to top of the **.eslintrc.js** file for each project that depends
    on your shareable ESLint config, for example:
 
    **.eslintrc.js**
