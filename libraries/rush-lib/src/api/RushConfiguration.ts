@@ -243,6 +243,9 @@ export class RushConfiguration {
   // subspace -> common-versions configuration
   private _commonVersionsConfigurationsBySubspace: Map<string, CommonVersionsConfiguration> | undefined;
 
+  // subspaceName -> subspaceConfigFolder
+  private _subspaceConfigFolderBySubspace: Map<string, string>;
+
   /**
    * The name of the package manager being used to install dependencies
    */
@@ -630,6 +633,7 @@ export class RushConfiguration {
     this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromDefaultLocation(this);
 
     this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
+    this._subspaceConfigFolderBySubspace = new Map<string, string>();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -1162,6 +1166,9 @@ export class RushConfiguration {
    */
   public getCommonRushConfigFolder(subspaceName?: string | undefined): string {
     if (subspaceName) {
+      if (this._subspaceConfigFolderBySubspace.has(subspaceName)) {
+        return this._subspaceConfigFolderBySubspace.get(subspaceName) as string;
+      }
       this.validateSubspaceName(subspaceName);
 
       // If this subspace doesn't have a configuration folder, check if it is in the project folder itself
@@ -1185,6 +1192,8 @@ export class RushConfiguration {
           throw new Error(`The configuration folder for the ${subspaceName} subspace was not found.`);
         }
       }
+
+      this._subspaceConfigFolderBySubspace.set(subspaceName, subspaceConfigFolder);
 
       return subspaceConfigFolder;
     } else {
