@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "Add support for storybook 7, HMR, and breaking chages in the plugin configuration option. The \"startupModulePath\" and \"staticBuildModulePath\" have been removed in favour of \"cliCallingConvention\" and \"cliPackageName\". A new 'cwdPackageName' option provides the ability to set an alternative dependency name as (cwd) target for the storybook commands." ,
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}
