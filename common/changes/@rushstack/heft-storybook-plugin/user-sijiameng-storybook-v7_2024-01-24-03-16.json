@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "update storbyook plugin for storybook v7",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin"
+}
