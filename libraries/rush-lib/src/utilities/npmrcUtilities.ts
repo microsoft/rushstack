@@ -28,6 +28,7 @@ function _trimNpmrcFile(sourceNpmrcPath: string, extraLines: string[] = []): str
     return combinedNpmrcFromCache;
   }
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
+  npmrcFileLines.push(...extraLines);
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
 
@@ -73,8 +74,6 @@ function _trimNpmrcFile(sourceNpmrcPath: string, extraLines: string[] = []): str
       resultLines.push(line);
     }
   }
-
-  resultLines.push(...extraLines);
 
   const combinedNpmrc: string = resultLines.join('\n');
 

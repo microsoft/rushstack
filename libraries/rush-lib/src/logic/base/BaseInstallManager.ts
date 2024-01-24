@@ -416,6 +416,13 @@ export abstract class BaseInstallManager {
     const subspaceEnvironmentVariable: string = `_RUSH_SUBSPACE_${subspaceName}_TEMP_FOLDER`;
     const extraNpmrcLines: string[] = [];
     if (subspaceName) {
+      // Look for a global .npmrc-global file
+      const globalNpmrcPath: string = `${this.rushConfiguration.getCommonRushConfigFolder()}/.npmrc-global`;
+      if (FileSystem.exists(globalNpmrcPath)) {
+        const globalNpmrcFileLines: string[] = FileSystem.readFile(globalNpmrcPath).toString().split('\n');
+        extraNpmrcLines.push(...globalNpmrcFileLines);
+      }
+
       // _RUSH_SUBSPACE_TEMP_FOLDER is used in .npmrc for subspaces.
       process.env[subspaceEnvironmentVariable] = this.rushConfiguration.getCommonTempFolder(subspaceName);
       extraNpmrcLines.push(
