@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 23 Jan 2024 20:12:57 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Jan 2024 01:09:29 GMT and should not be manually modified.
+
+## 3.64.2
+Thu, 25 Jan 2024 01:09:29 GMT
+
+### Patches
+
+- Improve 'bin' definition in `IPackageJson` type
 
 ## 3.64.1
 Tue, 23 Jan 2024 20:12:57 GMT

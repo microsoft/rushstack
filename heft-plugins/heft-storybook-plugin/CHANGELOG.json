@@ -2,6 +2,35 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/heft-storybook-plugin_v0.5.0",
+      "date": "Thu, 25 Jan 2024 01:09:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for storybook 7, HMR, and breaking chages in the plugin configuration option. The \"startupModulePath\" and \"staticBuildModulePath\" have been removed in favour of \"cliCallingConvention\" and \"cliPackageName\". A new 'cwdPackageName' option provides the ability to set an alternative dependency name as (cwd) target for the storybook commands."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.64.2` to `^0.64.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.19",
       "tag": "@rushstack/heft-storybook-plugin_v0.4.19",
       "date": "Tue, 23 Jan 2024 20:12:57 GMT",

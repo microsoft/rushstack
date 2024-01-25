@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Tue, 23 Jan 2024 20:12:57 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Jan 2024 01:09:29 GMT and should not be manually modified.
+
+## 0.5.0
+Thu, 25 Jan 2024 01:09:29 GMT
+
+### Minor changes
+
+- Add support for storybook 7, HMR, and breaking chages in the plugin configuration option. The "startupModulePath" and "staticBuildModulePath" have been removed in favour of "cliCallingConvention" and "cliPackageName". A new 'cwdPackageName' option provides the ability to set an alternative dependency name as (cwd) target for the storybook commands.
 
 ## 0.4.19
 Tue, 23 Jan 2024 20:12:57 GMT
