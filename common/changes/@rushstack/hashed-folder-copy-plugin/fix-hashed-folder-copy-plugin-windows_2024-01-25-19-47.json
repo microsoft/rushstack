@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/hashed-folder-copy-plugin",
+      "comment": "Fix an issue where builds running on Windows and not on the C drive would not discover assets.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin"
+}
