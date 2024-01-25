@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock('node:path', () => {
+  const path: typeof import('path') = jest.requireActual('path');
+  return path.posix;
+});
+
 jest.mock(
   'fast-glob/out/providers/provider',
   () => {
-    const path: typeof import('path') = require('path');
+    const path: typeof import('path') = jest.requireActual('path');
     const { default: provider } = jest.requireActual('fast-glob/out/providers/provider');
     provider.prototype._getRootDirectory = function (task: { base: string }) {
       // fast-glob calls `path.resolve` which doesn't work correctly with the MemFS volume while running on Windows
