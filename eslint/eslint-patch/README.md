@@ -1,6 +1,6 @@
 # @rushstack/eslint-patch
 
-Enhance your [ESLint](https://eslint.org/) with better support for large scale monorepos!
+Enhance [ESLint](https://eslint.org/) with better support for large scale monorepos!
 
 This is a runtime patch that enables new/experimental features for ESLint.  It operates as a "monkey patch"
 that gets loaded with **.eslintrc.js** and modifies the ESLint engine in memory.  This approach works
@@ -9,19 +9,19 @@ companion tools such as the ESLint extensions for VS Code and WebStorm.
 
 This package provides several independently loadable features:
 
-- `eslint-bulk-suppressions` enables you to roll out new lint rules in your monorepo without having to
+- **eslint-bulk-suppressions**: enables you to roll out new lint rules in your monorepo without having to
   clutter up source files with thousands of machine-generated `// eslint-ignore-next-line` directives.
   Instead, the "bulk suppressions" for legacy violations are managed in a separate file called
   **.eslint-bulk-suppressions.json**.
 
-- `modern-module-resolution` allows an ESLint config package to provide plugin dependencies, avoiding the
+- **modern-module-resolution**: allows an ESLint config package to provide plugin dependencies, avoiding the
   problem where hundreds of projects in a monorepo need to copy+paste the same `"devDependencies"` in
   every **package.json** file.
 
-  > NOTE: ESLint 8.21.0 has now introduced a new `ESLINT_USE_FLAT_CONFIG` mode that may reduce the need
+  > **NOTE:** ESLint 8.21.0 has now introduced a new `ESLINT_USE_FLAT_CONFIG` mode that may reduce the need
   for the `modern-module-resolution` patch.
 
-- `custom-config-package-names` enables [rig packages](https://heft.rushstack.io/pages/intro/rig_packages/)
+- **custom-config-package-names**: enables [rig packages](https://heft.rushstack.io/pages/intro/rig_packages/)
   to provide shareable configs for ESLint, by removing the requirement that `eslint-config` must appear in
   the NPM package name.
 
