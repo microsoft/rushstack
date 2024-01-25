@@ -32,6 +32,7 @@ export interface IIPCOperationRunnerOptions {
   shellCommand: string;
   warningsAreAllowed: boolean;
   persist: boolean;
+  requestRun: (requestor?: string) => void;
 }
 
 function isAfterExecuteEventMessage(message: unknown): message is IAfterExecuteEventMessage {
@@ -60,6 +61,7 @@ export class IPCOperationRunner implements IOperationRunner {
   private readonly _shellCommand: string;
   private readonly _workingDirectory: string;
   private readonly _persist: boolean;
+  private readonly _requestRun: (requestor?: string) => void;
 
   private _ipcProcess: ChildProcess | undefined;
   private _processReadyPromise: Promise<void> | undefined;
@@ -70,6 +72,7 @@ export class IPCOperationRunner implements IOperationRunner {
     this._shellCommand = options.shellCommand;
     this._workingDirectory = options.project.projectFolder;
     this._persist = options.persist;
+    this._requestRun = options.requestRun;
     this.warningsAreAllowed = options.warningsAreAllowed;
   }
 
@@ -100,7 +103,7 @@ export class IPCOperationRunner implements IOperationRunner {
 
           this._ipcProcess.on('message', (message: unknown) => {
             if (isRequestRunEventMessage(message)) {
-              // TODO: Handle run requests
+              this._requestRun(message.requestor);
             } else if (isSyncEventMessage(message)) {
               resolveReadyPromise();
             }

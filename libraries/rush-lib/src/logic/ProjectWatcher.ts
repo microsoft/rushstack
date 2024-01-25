@@ -55,6 +55,7 @@ export class ProjectWatcher {
 
   private _initialState: ProjectChangeAnalyzer | undefined;
   private _previousState: ProjectChangeAnalyzer | undefined;
+  private _forceChangedProjects: Map<RushConfigurationProject, string> = new Map();
   private _resolveIfChanged: undefined | (() => Promise<void>);
 
   private _hasRenderedStatus: boolean;
@@ -91,6 +92,21 @@ export class ProjectWatcher {
     }
   }
 
+  public invalidateProject(project: RushConfigurationProject, reason: string): boolean {
+    if (this._forceChangedProjects.has(project)) {
+      return false;
+    }
+
+    this._forceChangedProjects.set(project, reason);
+    return true;
+  }
+
+  public invalidateAll(reason: string): void {
+    for (const project of this._projectsToWatch) {
+      this.invalidateProject(project, reason);
+    }
+  }
+
   /**
    * Waits for a change to the package-deps of one or more of the selected projects, since the previous invocation.
    * Will return immediately the first time it is invoked, since no state has been recorded.
@@ -102,6 +118,7 @@ export class ProjectWatcher {
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.state);
     if (initialChangeResult.changedProjects.size) {
+      this._forceChangedProjects.clear();
       return initialChangeResult;
     }
 
@@ -167,6 +184,7 @@ export class ProjectWatcher {
               this._setStatus(`Project watcher paused.`);
               return;
             }
+
             this._setStatus(`Evaluating changes to tracked files...`);
             const result: IProjectChangeResult = await this._computeChanged();
             this._setStatus(`Finished analyzing.`);
@@ -180,6 +198,14 @@ export class ProjectWatcher {
               }
 
               this._commitChanges(result.state);
+
+              const hasForcedChanges: boolean = this._forceChangedProjects.size > 0;
+              if (hasForcedChanges) {
+                this._setStatus(
+                  `Projects were invalidated: ${Array.from(new Set(this._forceChangedProjects.values()))}`
+                );
+              }
+              this._forceChangedProjects.clear();
 
               if (result.changedProjects.size) {
                 terminated = true;
@@ -353,6 +379,10 @@ export class ProjectWatcher {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
         changedProjects.add(project);
       }
+    }
+
+    for (const project of this._forceChangedProjects.keys()) {
+      changedProjects.add(project);
     }
 
     return {
