@@ -327,7 +327,7 @@ export abstract class BaseInstallManager {
     npmrcHash: string | undefined;
   }> {
     // Check the policies
-    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, this.options);
+    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, this.options, subspaceName);
 
     this._installGitHooks();
 

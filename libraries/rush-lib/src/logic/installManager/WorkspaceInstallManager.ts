@@ -271,6 +271,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // get the relative path from common temp folder to repo root folder
       const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
       for (const rushProject of this.rushConfiguration.projects) {
+        if (subspaceName && !SubspaceConfiguration.belongsInSubspace(rushProject, subspaceName)) {
+          // skip processing any project that isn't in this subspace
+          continue;
+        }
         const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
         const projectRelativeFolder: string = rushProject.projectRelativeFolder;
 
