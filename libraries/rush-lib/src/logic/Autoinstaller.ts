@@ -135,7 +135,7 @@ export class Autoinstaller {
         );
 
         Utilities.executeCommand({
-          command: this._rushConfiguration.getPackageManagerToolFilename(),
+          command: this._rushConfiguration.packageManagerToolFilename,
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
           keepEnvironment: true
@@ -214,7 +214,7 @@ export class Autoinstaller {
     Utilities.syncNpmrc(this._rushConfiguration.getCommonRushConfigFolder(), this.folderFullPath);
 
     Utilities.executeCommand({
-      command: this._rushConfiguration.getPackageManagerToolFilename(),
+      command: this._rushConfiguration.packageManagerToolFilename,
       args: ['install'],
       workingDirectory: this.folderFullPath,
       keepEnvironment: true
@@ -225,7 +225,7 @@ export class Autoinstaller {
     if (this._rushConfiguration.packageManager === 'npm') {
       this._logIfConsoleOutputIsNotRestricted(colors.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand({
-        command: this._rushConfiguration.getPackageManagerToolFilename(),
+        command: this._rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
         workingDirectory: this.folderFullPath,
         keepEnvironment: true

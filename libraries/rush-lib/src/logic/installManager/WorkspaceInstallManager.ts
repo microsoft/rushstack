@@ -364,7 +364,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    */
   protected async installAsync(cleanInstall: boolean, subspaceName: string | undefined): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const packageManagerFilename: string = this.rushConfiguration.getPackageManagerToolFilename(subspaceName);
+    const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 
     const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
       this.rushConfiguration,

@@ -1082,7 +1082,6 @@ export class RushConfiguration {
     getCommonVersions(subspaceName?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(subspaceName?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
-    getPackageManagerToolFilename(subspaceName?: string | undefined): string;
     getPnpmfilePath(subspaceName?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)

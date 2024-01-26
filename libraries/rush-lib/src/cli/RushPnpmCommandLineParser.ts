@@ -112,7 +112,7 @@ export class RushPnpmCommandLineParser {
       throw new AlreadyReportedError();
     }
 
-    if (!FileSystem.exists(rushConfiguration.getPackageManagerToolFilename())) {
+    if (!FileSystem.exists(rushConfiguration.packageManagerToolFilename)) {
       this._terminal.writeErrorLine('Error: The PNPM local binary has not been installed yet.');
       this._terminal.writeLine('\n' + Colors.cyan(`Do you need to run "rush install" or "rush update"?`));
       throw new AlreadyReportedError();
@@ -372,7 +372,7 @@ export class RushPnpmCommandLineParser {
     }
 
     const result: SpawnSyncReturns<string> = Executable.spawnSync(
-      rushConfiguration.getPackageManagerToolFilename(),
+      rushConfiguration.packageManagerToolFilename,
       this._pnpmArgs,
       {
         environmentMap: pnpmEnvironmentMap,

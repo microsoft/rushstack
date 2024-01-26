@@ -65,7 +65,7 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty(
       'packageManagerToolFilename',
-      rushConfiguration.getPackageManagerToolFilename(),
+      rushConfiguration.packageManagerToolFilename,
       './repo/common/temp/npm-local/node_modules/.bin/npm'
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
@@ -138,7 +138,7 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty(
       'packageManagerToolFilename',
-      rushConfiguration.getPackageManagerToolFilename(),
+      rushConfiguration.packageManagerToolFilename,
       './repo/common/temp/pnpm-local/node_modules/.bin/pnpm'
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
@@ -214,7 +214,7 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty(
       'packageManagerToolFilename',
-      rushConfiguration.getPackageManagerToolFilename(),
+      rushConfiguration.packageManagerToolFilename,
       `${expectedValue}/pnpm-local/node_modules/.bin/pnpm`
     );
   });

@@ -486,7 +486,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-    const packageManagerFilename: string = this.rushConfiguration.getPackageManagerToolFilename(subspaceName);
+    const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 
     const packageManagerEnv: NodeJS.ProcessEnv = InstallHelpers.getPackageManagerEnvironment(
       this.rushConfiguration,
@@ -635,7 +635,7 @@ export class RushInstallManager extends BaseInstallManager {
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options);
       Utilities.executeCommand({
-        command: this.rushConfiguration.getPackageManagerToolFilename(subspaceName),
+        command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
         workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName)
       });

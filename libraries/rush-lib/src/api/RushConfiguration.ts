@@ -1220,23 +1220,6 @@ export class RushConfiguration {
   }
 
   /**
-   * The absolute path to the locally package manager tool.  If "rush install" has not
-   * been run, then this file may not exist yet.
-   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
-   */
-  public getPackageManagerToolFilename(subspaceName?: string | undefined): string {
-    return path.resolve(
-      path.join(
-        this.getCommonTempFolder(subspaceName),
-        `${this.packageManager}-local`,
-        'node_modules',
-        '.bin',
-        `${this.packageManager}`
-      )
-    );
-  }
-
-  /**
    * Returns full path of the temporary shrinkwrap file for a specific subspace and returns the common workspace shrinkwrap if no subspaceName is provided..
    * @remarks
    * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
