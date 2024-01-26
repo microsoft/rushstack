@@ -387,6 +387,7 @@ export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
@@ -588,7 +589,6 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
-    readonly changedProjectsOnly: boolean;
     collatedWriter: CollatedWriter;
     debugMode: boolean;
     error?: Error;
@@ -596,7 +596,6 @@ export interface IOperationRunnerContext {
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
     status: OperationStatus;
-    stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
     withTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, createLogFile: boolean, logFileSuffix?: string): Promise<T>;
 }

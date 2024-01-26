@@ -92,6 +92,12 @@ export interface ICreateOperationsContext {
    * The Rush configuration
    */
   readonly rushConfiguration: RushConfiguration;
+  /**
+   * Marks an operation's result as invalid, potentially triggering a new build. Only applicable in watch mode.
+   * @param operation - The operation to invalidate
+   * @param reason - The reason for invalidating the operation
+   */
+  readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
 }
 
 /**

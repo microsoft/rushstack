@@ -9,8 +9,10 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import { IPCOperationRunner } from './IPCOperationRunner';
 import type { Operation } from './Operation';
+import { OperationStatus } from './OperationStatus';
 
 const PLUGIN_NAME: 'IPCOperationRunnerPlugin' = 'IPCOperationRunnerPlugin';
 
@@ -19,12 +21,18 @@ const PLUGIN_NAME: 'IPCOperationRunnerPlugin' = 'IPCOperationRunnerPlugin';
  */
 export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
+    // Workaround until the operation graph persists for the lifetime of the watch process
     const runnerCache: Map<string, IPCOperationRunner> = new Map();
+
+    const operationStatesByRunner: WeakMap<IPCOperationRunner, IOperationExecutionResult> = new WeakMap();
+
+    let currentContext: ICreateOperationsContext | undefined;
 
     hooks.createOperations.tapPromise(
       PLUGIN_NAME,
       async (operations: Set<Operation>, context: ICreateOperationsContext) => {
         const { projectConfigurations, isWatch } = context;
+        currentContext = context;
 
         for (const operation of operations) {
           const { associatedPhase: phase, associatedProject: project, runner } = operation;
@@ -44,24 +52,56 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
             const commandToRun: string = runner.getConfigHash();
 
             const operationName: string = getDisplayName(project, phase);
-            let ipcOperationRunner: IPCOperationRunner | undefined = runnerCache.get(operationName);
-            if (!ipcOperationRunner) {
-              ipcOperationRunner = new IPCOperationRunner({
-                phase,
-                project,
-                name: operationName,
-                shellCommand: commandToRun,
-                warningsAreAllowed: runner.warningsAreAllowed,
-                persist: isWatch
-              });
+            let maybeIpcOperationRunner: IPCOperationRunner | undefined = runnerCache.get(operationName);
+            if (!maybeIpcOperationRunner) {
+              const ipcOperationRunner: IPCOperationRunner = (maybeIpcOperationRunner =
+                new IPCOperationRunner({
+                  phase,
+                  project,
+                  name: operationName,
+                  shellCommand: commandToRun,
+                  warningsAreAllowed: runner.warningsAreAllowed,
+                  persist: isWatch,
+                  requestRun: (requestor?: string) => {
+                    const operationState: IOperationExecutionResult | undefined =
+                      operationStatesByRunner.get(ipcOperationRunner);
+                    if (!operationState) {
+                      return;
+                    }
+
+                    const status: OperationStatus = operationState.status;
+                    if (
+                      status === OperationStatus.Waiting ||
+                      status === OperationStatus.Ready ||
+                      status === OperationStatus.Queued
+                    ) {
+                      // Already pending. No-op.
+                      return;
+                    }
+
+                    currentContext?.invalidateOperation?.(operation, requestor || 'IPC');
+                  }
+                }));
               runnerCache.set(operationName, ipcOperationRunner);
             }
 
-            operation.runner = ipcOperationRunner;
+            operation.runner = maybeIpcOperationRunner;
           }
         }
 
         return operations;
+      }
+    );
+
+    hooks.beforeExecuteOperations.tap(
+      PLUGIN_NAME,
+      (records: Map<Operation, IOperationExecutionResult>, context: ICreateOperationsContext) => {
+        currentContext = context;
+        for (const [{ runner }, result] of records) {
+          if (runner instanceof IPCOperationRunner) {
+            operationStatesByRunner.set(runner, result);
+          }
+        }
       }
     );
   }
@@ -69,8 +109,8 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
 
 function getDisplayName(project: RushConfigurationProject, phase: IPhase): string {
   if (phase.isSynthetic) {
-    return `${project.packageName} - IPC`;
+    return project.packageName;
   }
 
-  return `${project.packageName} (${phase.name.replace(/^_phase:/g, '')}) - IPC`;
+  return `${project.packageName} (${phase.name.replace(/^_phase:/g, '')})`;
 }

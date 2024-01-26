@@ -478,6 +478,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
     const toggleWatcherKey: string = 'w';
     const buildOnceKey: string = 'b';
+    const invalidateKey: string = 'i';
 
     const terminal: ITerminal = this._terminal;
 
@@ -500,6 +501,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
             terminal.writeLine(`Building once...`);
             projectWatcher.resume();
             projectWatcher.pause();
+          }
+          break;
+        case invalidateKey:
+          terminal.writeLine(`Invalidating all operations...`);
+          projectWatcher.invalidateAll('manual trigger');
+          if (!projectWatcher.isPaused) {
+            projectWatcher.resume();
           }
           break;
         case '\u0003':
@@ -531,7 +539,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+    const projectWatcher: ProjectWatcher = new ProjectWatcher({
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
@@ -555,6 +563,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }. Press Ctrl+C to exit.`
       );
     };
+
+    function invalidateOperation(operation: Operation, reason: string): void {
+      const { associatedProject } = operation;
+      if (associatedProject) {
+        projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
+      }
+    }
 
     // Loop until Ctrl+C
     // eslint-disable-next-line no-constant-condition
@@ -583,7 +598,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         projectChangeAnalyzer: state,
         projectsInUnknownState: changedProjects,
         phaseOriginal,
-        phaseSelection
+        phaseSelection,
+        invalidateOperation
       };
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(
