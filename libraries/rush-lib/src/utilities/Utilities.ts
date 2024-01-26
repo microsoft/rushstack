@@ -11,7 +11,8 @@ import {
   type IPackageJson,
   FileSystem,
   FileConstants,
-  type FileSystemStats
+  type FileSystemStats,
+  SubprocessTerminator
 } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -90,6 +91,11 @@ export interface ILifecycleCommandOptions {
    * If true, attempt to establish a NodeJS IPC channel to the child process.
    */
   ipc?: boolean;
+
+  /**
+   * If true, wire up SubprocessTerminator to the child process.
+   */
+  connectSubprocessTerminator?: boolean;
 }
 
 export interface IEnvironmentPathOptions {
@@ -473,7 +479,15 @@ export class Utilities {
     command: string,
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
-    return Utilities._executeLifecycleCommandInternal(command, child_process.spawn, options);
+    const child: child_process.ChildProcess = Utilities._executeLifecycleCommandInternal(
+      command,
+      child_process.spawn,
+      options
+    );
+    if (options.connectSubprocessTerminator) {
+      SubprocessTerminator.killProcessTreeOnExit(child, SubprocessTerminator.RECOMMENDED_OPTIONS);
+    }
+    return child;
   }
 
   /**
@@ -603,12 +617,18 @@ export class Utilities {
       stdio.push('ipc');
     }
 
-    return spawnFunction(shellCommand, [commandFlags, command], {
+    const spawnOptions: child_process.SpawnOptions = {
       cwd: options.workingDirectory,
       shell: useShell,
       env: environment,
       stdio
-    });
+    };
+
+    if (options.connectSubprocessTerminator) {
+      Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
+    }
+
+    return spawnFunction(shellCommand, [commandFlags, command], spawnOptions);
   }
 
   /**

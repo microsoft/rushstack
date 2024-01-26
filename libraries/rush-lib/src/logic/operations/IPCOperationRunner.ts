@@ -92,7 +92,8 @@ export class IPCOperationRunner implements IOperationRunner {
             environmentPathOptions: {
               includeProjectBin: true
             },
-            ipc: true
+            ipc: true,
+            connectSubprocessTerminator: true
           });
 
           let resolveReadyPromise!: () => void;
