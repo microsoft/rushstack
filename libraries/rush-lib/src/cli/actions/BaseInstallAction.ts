@@ -115,7 +115,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     let subspaceNames: string[] | undefined;
     if (
       installManagerOptions.pnpmFilterArguments.length &&
-      this.rushConfiguration.subspaceConfiguration?.enabled
+      this.rushConfiguration.subspacesConfiguration?.enabled
     ) {
       const selectedProjects: Set<RushConfigurationProject> | undefined =
         await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);

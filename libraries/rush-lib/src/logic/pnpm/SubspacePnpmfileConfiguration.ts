@@ -9,7 +9,7 @@ import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities
 import type { IPnpmfileContext, ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { SubspaceConfiguration } from '../../api/SubspaceConfiguration';
+import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import { RushConstants } from '../RushConstants';
 
 /**
@@ -86,9 +86,9 @@ export class SubspacePnpmfileConfiguration {
         projectRelativeFolder,
         packageVersion: packageJson.version
       };
-      (SubspaceConfiguration.belongsInSubspace(project, subspaceName) ? subspaceProjects : workspaceProjects)[
-        packageName
-      ] = workspaceProjectInfo;
+      (SubspacesConfiguration.belongsInSubspace(project, subspaceName)
+        ? subspaceProjects
+        : workspaceProjects)[packageName] = workspaceProjectInfo;
     }
 
     const settings: ISubspacePnpmfileShimSettings = {

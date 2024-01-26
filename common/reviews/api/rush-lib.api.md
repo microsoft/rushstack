@@ -1143,9 +1143,9 @@ export class RushConfiguration {
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
     // @beta
-    readonly subspaceConfiguration?: SubspaceConfiguration;
-    // @beta
     get subspaceNames(): Iterable<string>;
+    // @beta
+    readonly subspacesConfiguration?: SubspacesConfiguration;
     // @beta
     subspaceShrinkwrapFilenames(subspaceName: string): string;
     readonly suppressNodeLtsWarning: boolean;
@@ -1332,7 +1332,7 @@ export class RushUserConfiguration {
 }
 
 // @beta
-export class SubspaceConfiguration {
+export class SubspacesConfiguration {
     // (undocumented)
     static belongsInSubspace(rushProject: RushConfigurationProject, subspaceName: string): boolean;
     readonly enabled: boolean;
@@ -1341,9 +1341,9 @@ export class SubspaceConfiguration {
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: Set<string>;
     // (undocumented)
-    static tryLoadFromConfigurationFile(subspaceJsonFilePath: string): SubspaceConfiguration | undefined;
+    static tryLoadFromConfigurationFile(subspaceJsonFilePath: string): SubspacesConfiguration | undefined;
     // (undocumented)
-    static tryLoadFromDefaultLocation(rushConfiguration: RushConfiguration): SubspaceConfiguration | undefined;
+    static tryLoadFromDefaultLocation(rushConfiguration: RushConfiguration): SubspacesConfiguration | undefined;
 }
 
 // @public

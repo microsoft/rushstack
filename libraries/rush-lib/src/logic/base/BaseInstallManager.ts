@@ -90,7 +90,7 @@ export abstract class BaseInstallManager {
     );
 
     this.subspaceInstallFlags = new Map();
-    if (rushConfiguration.subspaceConfiguration?.enabled) {
+    if (rushConfiguration.subspacesConfiguration?.enabled) {
       for (const subspaceName of rushConfiguration.subspaceNames) {
         this.subspaceInstallFlags.set(
           subspaceName,
@@ -128,7 +128,7 @@ export abstract class BaseInstallManager {
     // Ensure that subspaces is enabled
     const subspaceName: string | undefined = this.options.subspaceName;
 
-    if (this.rushConfiguration.subspaceConfiguration?.enabled && !this.options.subspaceName) {
+    if (this.rushConfiguration.subspacesConfiguration?.enabled && !this.options.subspaceName) {
       // Temporarily ensure that a subspace is provided
       // eslint-disable-next-line no-console
       console.log();
@@ -139,9 +139,9 @@ export abstract class BaseInstallManager {
         )
       );
       throw new AlreadyReportedError();
-    } else if (this.options.subspaceName && !this.rushConfiguration.subspaceConfiguration?.enabled) {
+    } else if (this.options.subspaceName && !this.rushConfiguration.subspacesConfiguration?.enabled) {
       // Ensure that subspaces is enabled
-      if (!this.rushConfiguration.subspaceConfiguration?.enabled) {
+      if (!this.rushConfiguration.subspacesConfiguration?.enabled) {
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console

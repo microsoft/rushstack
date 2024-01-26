@@ -42,7 +42,7 @@ import schemaJson from '../schemas/rush.schema.json';
 import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer';
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
-import { SubspaceConfiguration } from './SubspaceConfiguration';
+import { SubspacesConfiguration } from './SubspacesConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -353,7 +353,7 @@ export class RushConfiguration {
    * The object that specifies subspace configurations if they are provided in the rush workspace.
    * @beta
    */
-  public readonly subspaceConfiguration?: SubspaceConfiguration;
+  public readonly subspacesConfiguration?: SubspacesConfiguration;
 
   /**
    * The filename of the variant dependency data file.  By default this is
@@ -630,7 +630,7 @@ export class RushConfiguration {
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
     // Try getting a subspace configuration
-    this.subspaceConfiguration = SubspaceConfiguration.tryLoadFromDefaultLocation(this);
+    this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
 
     this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
     this._subspaceConfigFolderBySubspace = new Map<string, string>();
@@ -885,7 +885,7 @@ export class RushConfiguration {
         );
       }
       this._projectsByName.set(project.packageName, project);
-      if (this.subspaceConfiguration?.enabled) {
+      if (this.subspacesConfiguration?.enabled) {
         let subspaceName: string;
         if (projectJson.subspaceName) {
           subspaceName = projectJson.subspaceName;
@@ -1176,7 +1176,7 @@ export class RushConfiguration {
       let subspaceConfigFolder: string = `${this.commonFolder}/config/subspaces/${subspaceName}`;
       if (
         !FileSystem.exists(subspaceConfigFolder) &&
-        this.subspaceConfiguration?.splitWorkspaceCompatibility
+        this.subspacesConfiguration?.splitWorkspaceCompatibility
       ) {
         // Look in the project folder
         const rushProjectsInSubspace: RushConfigurationProject[] | undefined =
@@ -1258,10 +1258,10 @@ export class RushConfiguration {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    if (!this.subspaceConfiguration) {
+    if (!this.subspacesConfiguration) {
       throw new Error(`Subspaces is not enabled!`);
     }
-    if (!this.subspaceConfiguration.isValidSubspaceName(subspaceName)) {
+    if (!this.subspacesConfiguration.isValidSubspaceName(subspaceName)) {
       throw new Error(`Received an invalid subspace name: ${subspaceName}`);
     }
   }
@@ -1350,7 +1350,7 @@ export class RushConfiguration {
    * Returns the subspace name that a project belongs to. Returns undefined if subspaces is not enabled.
    */
   public getProjectSubspace(project: RushConfigurationProject): string | undefined {
-    if (!this.subspaceConfiguration?.enabled) {
+    if (!this.subspacesConfiguration?.enabled) {
       return undefined;
     }
     if (!this._projects) {
@@ -1367,7 +1367,7 @@ export class RushConfiguration {
    * Returns a list of unique subspace names that the given projects belong to
    */
   public getProjectsSubspaceSet(projects: Set<RushConfigurationProject>): string[] {
-    if (!this.subspaceConfiguration?.enabled) {
+    if (!this.subspacesConfiguration?.enabled) {
       return [];
     }
     if (!this._projects) {

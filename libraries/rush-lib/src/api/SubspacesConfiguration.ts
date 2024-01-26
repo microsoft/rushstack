@@ -18,7 +18,7 @@ export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([-+_a-z0-9]+)*$/;
  * This represents the JSON data structure for the "subspaces.json" configuration file.
  * See subspace.schema.json for documentation.
  */
-interface ISubspaceConfigurationJson {
+interface ISubspacesConfigurationJson {
   enabled: boolean;
   splitWorkspaceCompatibility?: boolean;
   subspaceNames: string[];
@@ -29,7 +29,7 @@ interface ISubspaceConfigurationJson {
  * configuration file.
  * @beta
  */
-export class SubspaceConfiguration {
+export class SubspacesConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
   /**
@@ -52,7 +52,7 @@ export class SubspaceConfiguration {
    */
   public readonly subspaceNames: Set<string>;
 
-  private constructor(configuration: Readonly<ISubspaceConfigurationJson>, subspaceJsonFilePath: string) {
+  private constructor(configuration: Readonly<ISubspacesConfigurationJson>, subspaceJsonFilePath: string) {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.enabled = configuration.enabled;
     this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
@@ -79,27 +79,27 @@ export class SubspaceConfiguration {
 
   public static tryLoadFromConfigurationFile(
     subspaceJsonFilePath: string
-  ): SubspaceConfiguration | undefined {
-    let configuration: Readonly<ISubspaceConfigurationJson> | undefined;
+  ): SubspacesConfiguration | undefined {
+    let configuration: Readonly<ISubspacesConfigurationJson> | undefined;
     try {
-      configuration = JsonFile.loadAndValidate(subspaceJsonFilePath, SubspaceConfiguration._jsonSchema);
+      configuration = JsonFile.loadAndValidate(subspaceJsonFilePath, SubspacesConfiguration._jsonSchema);
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
       }
     }
     if (configuration) {
-      return new SubspaceConfiguration(configuration, subspaceJsonFilePath);
+      return new SubspacesConfiguration(configuration, subspaceJsonFilePath);
     }
   }
 
   public static tryLoadFromDefaultLocation(
     rushConfiguration: RushConfiguration
-  ): SubspaceConfiguration | undefined {
+  ): SubspacesConfiguration | undefined {
     const commonRushConfigFolder: string = rushConfiguration.getCommonRushConfigFolder();
     if (commonRushConfigFolder) {
       const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
-      return SubspaceConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
+      return SubspacesConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
     }
   }
 

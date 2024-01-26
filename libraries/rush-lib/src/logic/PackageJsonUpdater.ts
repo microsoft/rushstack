@@ -242,7 +242,7 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      if (this._rushConfiguration.subspaceConfiguration?.enabled) {
+      if (this._rushConfiguration.subspacesConfiguration?.enabled) {
         const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(
           new Set(options.projects)
         );
@@ -272,7 +272,7 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      if (this._rushConfiguration.subspaceConfiguration?.enabled) {
+      if (this._rushConfiguration.subspacesConfiguration?.enabled) {
         const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(
           new Set(options.projects)
         );

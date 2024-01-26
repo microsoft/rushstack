@@ -33,7 +33,7 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
-import { SubspaceConfiguration } from '../../api/SubspaceConfiguration';
+import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 
@@ -152,7 +152,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
-      if (subspaceName && !SubspaceConfiguration.belongsInSubspace(rushProject, subspaceName)) {
+      if (subspaceName && !SubspacesConfiguration.belongsInSubspace(rushProject, subspaceName)) {
         // skip processing any project that isn't in this subspace
         continue;
       }
@@ -271,7 +271,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // get the relative path from common temp folder to repo root folder
       const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
       for (const rushProject of this.rushConfiguration.projects) {
-        if (subspaceName && !SubspaceConfiguration.belongsInSubspace(rushProject, subspaceName)) {
+        if (subspaceName && !SubspacesConfiguration.belongsInSubspace(rushProject, subspaceName)) {
           // skip processing any project that isn't in this subspace
           continue;
         }
