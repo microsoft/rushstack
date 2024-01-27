@@ -84,7 +84,7 @@ export class ApprovedPackagesPolicy {
 
     // Load browser-approved-packages.json
     const browserApprovedPackagesPath: string = path.join(
-      rushConfiguration.getCommonRushConfigFolder(),
+      rushConfiguration.commonRushConfigFolder,
       RushConstants.browserApprovedPackagesFilename
     );
     this.browserApprovedPackages = new ApprovedPackagesConfiguration(browserApprovedPackagesPath);
@@ -92,7 +92,7 @@ export class ApprovedPackagesPolicy {
 
     // Load nonbrowser-approved-packages.json
     const nonbrowserApprovedPackagesPath: string = path.join(
-      rushConfiguration.getCommonRushConfigFolder(),
+      rushConfiguration.commonRushConfigFolder,
       RushConstants.nonbrowserApprovedPackagesFilename
     );
     this.nonbrowserApprovedPackages = new ApprovedPackagesConfiguration(nonbrowserApprovedPackagesPath);

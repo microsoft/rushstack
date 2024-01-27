@@ -39,6 +39,7 @@ import type { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import type { BaseLinkManager } from '../base/BaseLinkManager';
 import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+import type { Subspace } from '../../api/Subspace';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
@@ -70,7 +71,10 @@ export class RushInstallManager extends BaseInstallManager {
     options: IInstallManagerOptions
   ) {
     super(rushConfiguration, rushGlobalFolder, purgeManager, options);
-    this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
+    this._tempProjectHelper = new TempProjectHelper(
+      this.rushConfiguration,
+      rushConfiguration.defaultSubspace
+    );
   }
 
   /**
@@ -82,14 +86,14 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   public async prepareCommonTempAsync(
-    subspaceName: string | undefined,
+    subspace: Subspace,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
     const tempProjectsFolder: string = path.join(
-      this.rushConfiguration.getCommonTempFolder(subspaceName),
+      this.rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName
     );
 
@@ -120,8 +124,8 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // dependency name --> version specifier
-    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration
-      .getCommonVersions(subspaceName)
+    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration.defaultSubspace
+      .getCommonVersions()
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
@@ -147,7 +151,7 @@ export class RushInstallManager extends BaseInstallManager {
       // If there are orphaned projects, we need to update
       const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
         this.rushConfiguration,
-        subspaceName
+        this.rushConfiguration.defaultSubspace
       );
 
       if (orphanedProjects.length > 0) {
@@ -176,7 +180,7 @@ export class RushInstallManager extends BaseInstallManager {
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-      const tarballFile: string = this._tempProjectHelper.getTarballFilePath(rushProject, subspaceName);
+      const tarballFile: string = this._tempProjectHelper.getTarballFilePath(rushProject);
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
       commonDependencies.set(
@@ -273,10 +277,7 @@ export class RushInstallManager extends BaseInstallManager {
       }
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
-      const tempProjectFolder: string = this._tempProjectHelper.getTempProjectFolder(
-        rushProject,
-        subspaceName
-      );
+      const tempProjectFolder: string = this._tempProjectHelper.getTempProjectFolder(rushProject);
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
@@ -313,7 +314,7 @@ export class RushInstallManager extends BaseInstallManager {
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
           // Delete the existing tarball and create a new one
-          this._tempProjectHelper.createTempProjectTarball(rushProject, subspaceName);
+          this._tempProjectHelper.createTempProjectTarball(rushProject);
 
           // eslint-disable-next-line no-console
           console.log(`Updating ${tarballFile}`);
@@ -336,8 +337,7 @@ export class RushInstallManager extends BaseInstallManager {
         const pnpmShrinkwrapFile: PnpmShrinkwrapFile = shrinkwrapFile as PnpmShrinkwrapFile;
         const tarballIntegrityValid: boolean = await this._validateRushProjectTarballIntegrityAsync(
           pnpmShrinkwrapFile,
-          rushProject,
-          subspaceName
+          rushProject
         );
         if (!tarballIntegrityValid) {
           shrinkwrapIsUpToDate = false;
@@ -362,7 +362,7 @@ export class RushInstallManager extends BaseInstallManager {
     // Remove the workspace file if it exists
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const workspaceFilePath: string = path.join(
-        this.rushConfiguration.getCommonTempFolder(),
+        this.rushConfiguration.commonTempFolder,
         'pnpm-workspace.yaml'
       );
       try {
@@ -375,7 +375,11 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, commonDependencies, subspaceName);
+    InstallHelpers.generateCommonPackageJson(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      commonDependencies
+    );
 
     stopwatch.stop();
     // eslint-disable-next-line no-console
@@ -407,8 +411,7 @@ export class RushInstallManager extends BaseInstallManager {
 
   private async _validateRushProjectTarballIntegrityAsync(
     shrinkwrapFile: PnpmShrinkwrapFile | undefined,
-    rushProject: RushConfigurationProject,
-    subspaceName: string | undefined
+    rushProject: RushConfigurationProject
   ): Promise<boolean> {
     if (shrinkwrapFile) {
       const tempProjectDependencyKey: string | undefined = shrinkwrapFile.getTempProjectDependencyKey(
@@ -421,9 +424,7 @@ export class RushInstallManager extends BaseInstallManager {
       const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
         shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
       const newIntegrity: string = (
-        await ssri.fromStream(
-          fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject, subspaceName))
-        )
+        await ssri.fromStream(fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject)))
       ).toString();
 
       if (!parentShrinkwrapEntry.resolution || parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
@@ -438,8 +439,8 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected canSkipInstall(lastModifiedDate: Date, subspaceName: string | undefined): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspaceName)) {
+  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
+    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
       return false;
     }
 
@@ -450,7 +451,7 @@ export class RushInstallManager extends BaseInstallManager {
     // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
     potentiallyChangedFiles.push(
       ...this.rushConfiguration.projects.map((x) => {
-        return this._tempProjectHelper.getTarballFilePath(x, subspaceName);
+        return this._tempProjectHelper.getTarballFilePath(x);
       })
     );
 
@@ -462,12 +463,12 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async installAsync(cleanInstall: boolean, subspaceName: string | undefined): Promise<void> {
+  protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
     for (const rushProject of this.rushConfiguration.projects) {
-      this._tempProjectHelper.createTempProjectTarball(rushProject, subspaceName);
+      this._tempProjectHelper.createTempProjectTarball(rushProject);
     }
 
     // NOTE: The PNPM store is supposed to be transactionally safe, so we don't delete it automatically.
@@ -494,7 +495,7 @@ export class RushInstallManager extends BaseInstallManager {
     );
 
     const commonNodeModulesFolder: string = path.join(
-      this.rushConfiguration.getCommonTempFolder(subspaceName),
+      this.rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName
     );
 
@@ -519,16 +520,16 @@ export class RushInstallManager extends BaseInstallManager {
           // eslint-disable-next-line no-console
           console.log(
             `Running "${this.rushConfiguration.packageManager} prune"` +
-              ` in ${this.rushConfiguration.getCommonTempFolder(subspaceName)}`
+              ` in ${this.rushConfiguration.commonTempFolder}`
           );
           const args: string[] = ['prune'];
-          this.pushConfigurationArgs(args, this.options);
+          this.pushConfigurationArgs(args, this.options, subspace);
 
           Utilities.executeCommandWithRetry(
             {
               command: packageManagerFilename,
               args: args,
-              workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName),
+              workingDirectory: this.rushConfiguration.commonTempFolder,
               environment: packageManagerEnv
             },
             this.options.maxInstallAttempts
@@ -580,14 +581,14 @@ export class RushInstallManager extends BaseInstallManager {
 
     // Run "npm install" in the common folder
     const installArgs: string[] = ['install'];
-    this.pushConfigurationArgs(installArgs, this.options);
+    this.pushConfigurationArgs(installArgs, this.options, subspace);
 
     // eslint-disable-next-line no-console
     console.log(
       '\n' +
         colors.bold(
           `Running "${this.rushConfiguration.packageManager} install" in` +
-            ` ${this.rushConfiguration.getCommonTempFolder(subspaceName)}`
+            ` ${this.rushConfiguration.commonTempFolder}`
         ) +
         '\n'
     );
@@ -609,7 +610,7 @@ export class RushInstallManager extends BaseInstallManager {
       {
         command: packageManagerFilename,
         args: installArgs,
-        workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName),
+        workingDirectory: this.rushConfiguration.commonTempFolder,
         environment: packageManagerEnv,
         suppressOutput: false
       },
@@ -633,23 +634,23 @@ export class RushInstallManager extends BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log('\n' + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
-      this.pushConfigurationArgs(npmArgs, this.options);
+      this.pushConfigurationArgs(npmArgs, this.options, subspace);
       Utilities.executeCommand({
         command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
-        workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName)
+        workingDirectory: this.rushConfiguration.commonTempFolder
       });
       // eslint-disable-next-line no-console
       console.log('"npm shrinkwrap" completed\n');
 
-      await this._fixupNpm5RegressionAsync(subspaceName);
+      await this._fixupNpm5RegressionAsync();
     }
   }
 
-  protected async postInstallAsync(subspaceName: string | undefined): Promise<void> {
+  protected async postInstallAsync(subspace: Subspace): Promise<void> {
     if (!this.options.noLink) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
-      await linkManager.createSymlinksForProjects(false, subspaceName);
+      await linkManager.createSymlinksForProjects(false);
     } else {
       // eslint-disable-next-line no-console
       console.log(
@@ -672,9 +673,9 @@ export class RushInstallManager extends BaseInstallManager {
    * Our workaround is to rewrite the package.json files for each of the @rush-temp projects
    * in the node_modules folder, after "npm install" completes.
    */
-  private async _fixupNpm5RegressionAsync(subspaceName: string | undefined): Promise<void> {
+  private async _fixupNpm5RegressionAsync(): Promise<void> {
     const pathToDeleteWithoutStar: string = path.join(
-      this.rushConfiguration.getCommonTempFolder(subspaceName),
+      this.rushConfiguration.commonTempFolder,
       'node_modules',
       RushConstants.rushTempNpmScope
     );

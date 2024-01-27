@@ -13,6 +13,7 @@ import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
 import type { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -115,7 +116,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public findOrphanedProjects(
     rushConfiguration: RushConfiguration,
-    subspaceName: string | undefined
+    subspace: Subspace
   ): ReadonlyArray<string> {
     const orphanedProjectNames: string[] = [];
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
@@ -148,7 +149,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspaceName: string | undefined,
+    subspace: Subspace,
     variant?: string
   ): Promise<boolean>;
 

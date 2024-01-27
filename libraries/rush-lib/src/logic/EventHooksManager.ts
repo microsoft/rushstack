@@ -18,7 +18,7 @@ export class EventHooksManager {
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
     this._eventHooks = rushConfiguration.eventHooks;
-    this._commonTempFolder = rushConfiguration.getCommonTempFolder();
+    this._commonTempFolder = rushConfiguration.commonTempFolder;
   }
 
   public handle(event: Event, isDebug: boolean, ignoreHooks: boolean): void {

@@ -67,9 +67,7 @@ export class SetupChecks {
     const seenFolders: Set<string> = new Set<string>();
 
     // Check from the real parent of the common/temp folder
-    const commonTempParent: string = path.dirname(
-      FileSystem.getRealPath(rushConfiguration.getCommonTempFolder())
-    );
+    const commonTempParent: string = path.dirname(FileSystem.getRealPath(rushConfiguration.commonTempFolder));
     SetupChecks._collectPhantomFoldersUpwards(commonTempParent, phantomFolders, seenFolders);
 
     // Check from the real folder containing rush.json

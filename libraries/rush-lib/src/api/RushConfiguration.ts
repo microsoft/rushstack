@@ -12,7 +12,8 @@ import {
   Path,
   FileSystem,
   type PackageNameParser,
-  type FileSystemStats
+  type FileSystemStats,
+  InternalError
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -23,7 +24,7 @@ import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import { EventHooks } from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
-import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
+import type { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import type { PackageManagerName, PackageManager } from './packageManager/PackageManager';
 import { NpmPackageManager } from './packageManager/NpmPackageManager';
@@ -31,7 +32,7 @@ import { YarnPackageManager } from './packageManager/YarnPackageManager';
 import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
-import { RepoStateFile } from '../logic/RepoStateFile';
+import type { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
@@ -43,6 +44,7 @@ import type * as DependencyAnalyzerModuleType from '../logic/DependencyAnalyzer'
 import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BasePackageManagerOptionsConfiguration';
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 import { SubspacesConfiguration } from './SubspacesConfiguration';
+import { Subspace } from './Subspace';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -234,17 +236,11 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByTag() getter is called.
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
-  // Subspace projects
-  private _rushProjectsBySubspaceName: Map<string, RushConfigurationProject[]>;
-
   // variant -> common-versions configuration
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
 
-  // subspace -> common-versions configuration
-  private _commonVersionsConfigurationsBySubspace: Map<string, CommonVersionsConfiguration> | undefined;
-
-  // subspaceName -> subspaceConfigFolder
-  private _subspaceConfigFolderBySubspace: Map<string, string>;
+  // subspaceName -> subspace
+  private _subspacesByName: Map<string, Subspace>;
 
   /**
    * The name of the package manager being used to install dependencies
@@ -353,7 +349,12 @@ export class RushConfiguration {
    * The object that specifies subspace configurations if they are provided in the rush workspace.
    * @beta
    */
-  public readonly subspacesConfiguration?: SubspacesConfiguration;
+  public readonly subspacesConfiguration: SubspacesConfiguration | undefined;
+
+  /**
+   * Returns true if subspaces.json is present with "enabled=true".
+   */
+  public readonly subspacesFeatureEnabled: boolean;
 
   /**
    * The filename of the variant dependency data file.  By default this is
@@ -631,9 +632,9 @@ export class RushConfiguration {
 
     // Try getting a subspace configuration
     this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
+    this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.enabled;
 
-    this._rushProjectsBySubspaceName = new Map<string, RushConfigurationProject[]>();
-    this._subspaceConfigFolderBySubspace = new Map<string, string>();
+    this._subspacesByName = new Map();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -853,7 +854,37 @@ export class RushConfiguration {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
 
-    // We sort the projects array in alphabetical order.  This ensures that the packages
+    // Build the subspaces map
+    const subspaceNames: string[] = [];
+    let splitWorkspaceCompatibility: boolean = false;
+    if (this.subspacesConfiguration?.enabled) {
+      splitWorkspaceCompatibility = this.subspacesConfiguration.splitWorkspaceCompatibility;
+
+      subspaceNames.push(...this.subspacesConfiguration.subspaceNames);
+    }
+    if (subspaceNames.indexOf(RushConstants.defaultSubspaceName) < 0) {
+      subspaceNames.push(RushConstants.defaultSubspaceName);
+    }
+
+    // Sort the subspaces in alphabetical order.  This ensures that they are processed
+    // in a deterministic order by the various Rush algorithms.
+    subspaceNames.sort();
+    for (const subspaceName of subspaceNames) {
+      const subspace: Subspace = new Subspace({
+        subspaceName,
+        rushConfiguration: this,
+        splitWorkspaceCompatibility
+      });
+      this._subspacesByName.set(subspaceName, subspace);
+    }
+    const defaultSubspace: Subspace | undefined = this._subspacesByName.get(
+      RushConstants.defaultSubspaceName
+    );
+    if (!defaultSubspace) {
+      throw new InternalError('The default subspace was not created');
+    }
+
+    // Sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
     const sortedProjectJsons: IRushConfigurationProjectJson[] = this.rushConfigurationJson.projects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
@@ -870,12 +901,31 @@ export class RushConfiguration {
         projectJson,
         usedTempNames
       );
+
+      let subspace: Subspace | undefined = undefined;
+      if (this.subspacesFeatureEnabled) {
+        if (projectJson.subspaceName) {
+          subspace = this._subspacesByName.get(projectJson.subspaceName);
+          if (subspace === undefined) {
+            throw new Error(
+              `The project "${projectJson.packageName}" in rush.json references` +
+                ` a nonexistent subspace "${projectJson.subspaceName}"`
+            );
+          }
+        }
+      }
+      if (subspace === undefined) {
+        subspace = defaultSubspace;
+      }
+
       const project: RushConfigurationProject = new RushConfigurationProject({
         projectJson,
         rushConfiguration: this,
         tempProjectName,
-        allowedProjectTags
+        allowedProjectTags,
+        subspace
       });
+      subspace._addProject(project);
 
       this._projects.push(project);
       if (this._projectsByName.has(project.packageName)) {
@@ -885,22 +935,6 @@ export class RushConfiguration {
         );
       }
       this._projectsByName.set(project.packageName, project);
-      if (this.subspacesConfiguration?.enabled) {
-        let subspaceName: string;
-        if (projectJson.subspaceName) {
-          subspaceName = projectJson.subspaceName;
-        } else {
-          // Default subspace
-          subspaceName = RushConstants.defaultSubspaceName;
-        }
-        const projectsForSubspace: RushConfigurationProject[] | undefined =
-          this._rushProjectsBySubspaceName.get(subspaceName);
-        if (projectsForSubspace) {
-          projectsForSubspace.push(project);
-        } else {
-          this._rushProjectsBySubspaceName.set(subspaceName, [project]);
-        }
-      }
     }
 
     for (const project of this._projects) {
@@ -1157,134 +1191,6 @@ export class RushConfiguration {
   }
 
   /**
-   * The folder where Rush's additional config files are stored.  This folder is always a
-   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
-   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
-   * Rush will report an error if this this folder contains any unrecognized files.
-   *
-   * Example: `C:\MyRepo\common\config\rush`
-   */
-  public getCommonRushConfigFolder(subspaceName?: string | undefined): string {
-    if (subspaceName) {
-      if (this._subspaceConfigFolderBySubspace.has(subspaceName)) {
-        return this._subspaceConfigFolderBySubspace.get(subspaceName) as string;
-      }
-      this.validateSubspaceName(subspaceName);
-
-      // If this subspace doesn't have a configuration folder, check if it is in the project folder itself
-      // if the splitWorkspaceCompatibility option is enabled in the subspace configuration
-      let subspaceConfigFolder: string = `${this.commonFolder}/config/subspaces/${subspaceName}`;
-      if (
-        !FileSystem.exists(subspaceConfigFolder) &&
-        this.subspacesConfiguration?.splitWorkspaceCompatibility
-      ) {
-        // Look in the project folder
-        const rushProjectsInSubspace: RushConfigurationProject[] | undefined =
-          this._rushProjectsBySubspaceName.get(subspaceName);
-        if (!rushProjectsInSubspace || rushProjectsInSubspace.length > 1) {
-          throw new Error(
-            `The subspace contains more than one package and no configuration folder was found in common/config/subspaces/${subspaceName}`
-          );
-        }
-        const rushProject: RushConfigurationProject = rushProjectsInSubspace[0];
-        subspaceConfigFolder = `${rushProject.projectFolder}/subspace/${subspaceName}`;
-        if (!FileSystem.exists(subspaceConfigFolder)) {
-          throw new Error(`The configuration folder for the ${subspaceName} subspace was not found.`);
-        }
-      }
-
-      this._subspaceConfigFolderBySubspace.set(subspaceName, subspaceConfigFolder);
-
-      return subspaceConfigFolder;
-    } else {
-      return path.join(this.commonFolder, 'config', 'rush');
-    }
-  }
-
-  /**
-   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
-   * under the common folder.
-   * Example: `C:\MyRepo\common\temp`
-   */
-  public getCommonTempFolder(subspaceName?: string | undefined): string {
-    const commonTempFolder: string =
-      EnvironmentConfiguration.rushTempFolderOverride ||
-      path.join(this.commonFolder, RushConstants.rushTempFolderName);
-    if (subspaceName) {
-      this.validateSubspaceName(subspaceName);
-
-      return `${commonTempFolder}/${subspaceName}`;
-    } else {
-      return commonTempFolder;
-    }
-  }
-
-  /**
-   * Returns full path of the temporary shrinkwrap file for a specific subspace and returns the common workspace shrinkwrap if no subspaceName is provided..
-   * @remarks
-   * This function takes the subspace name, and returns the full path for the subspace's shrinkwrap file.
-   * This function also consults the deprecated option to allow for shrinkwraps to be stored under a package folder.
-   * This shrinkwrap file is used during "rush install", and may be rewritten by the package manager during installation
-   * This property merely reports the filename, the file itself may not actually exist.
-   * example: `C:\MyRepo\common\<subspace_name>\pnpm-lock.yaml`
-   * @beta
-   */
-  public getTempShrinkwrapFilename(subspaceName?: string | undefined): string {
-    if (subspaceName) {
-      const fullSubspacePath: string = `${this.getCommonTempFolder(subspaceName)}/${this.shrinkwrapFilename}`;
-      return fullSubspacePath;
-    } else {
-      return path.join(this.getCommonTempFolder(subspaceName), this.shrinkwrapFilename);
-    }
-  }
-
-  /**
-   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
-   * before installation begins, and can be compared to determine how the package manager
-   * modified tempShrinkwrapFilename.
-   * @remarks
-   * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
-   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
-   */
-  public getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string {
-    /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
-    const parsedPath: path.ParsedPath = path.parse(this.getTempShrinkwrapFilename(subspaceName));
-    return path.join(parsedPath.dir, parsedPath.name + '-preinstall' + parsedPath.ext);
-  }
-
-  public validateSubspaceName(subspaceName: string): void {
-    // Validate that subspace configuration has been initialized
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
-    }
-    if (!this.subspacesConfiguration) {
-      throw new Error(`Subspaces is not enabled!`);
-    }
-    if (!this.subspacesConfiguration.isValidSubspaceName(subspaceName)) {
-      throw new Error(`Received an invalid subspace name: ${subspaceName}`);
-    }
-  }
-
-  /**
-   * The filename (without any path) of the shrinkwrap file used for individual subspaces, used by the package manager.
-   * @remarks
-   * This property merely reports the filename; The file itself may not actually exist.
-   * Example: From "pnpm-lock.yaml" to "subspace-pnpm-lock.yaml"
-   * @beta
-   */
-  public subspaceShrinkwrapFilenames(subspaceName: string): string {
-    const lastSlashIndex: number = Math.max(
-      this.shrinkwrapFilename.lastIndexOf('/'),
-      this.shrinkwrapFilename.lastIndexOf('\\')
-    );
-    return `${this.shrinkwrapFilename.substring(
-      0,
-      lastSlashIndex
-    )}/${subspaceName}-${this.shrinkwrapFilename.substring(lastSlashIndex + 1)}`;
-  }
-
-  /**
    * Returns an English phrase such as "shrinkwrap file" that can be used in logging messages
    * to refer to the shrinkwrap file using appropriate terminology for the currently selected
    * package manager.
@@ -1326,68 +1232,76 @@ export class RushConfiguration {
   }
 
   /**
+   * @beta
+   */
+  public get defaultSubspace(): Subspace {
+    // TODO: Enable the default subspace to be obtained without initializing the full set of all projects
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    const defaultSubspace: Subspace | undefined = this.tryGetSubspace(RushConstants.defaultSubspaceName);
+    if (!defaultSubspace) {
+      throw new InternalError('Default subspace was not created');
+    }
+    return defaultSubspace;
+  }
+
+  /**
    * A list of all the available subspaces in this workspace.
    * @beta
    */
-  public get subspaceNames(): Iterable<string> {
+  public get subspaces(): readonly Subspace[] {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return this._rushProjectsBySubspaceName.keys();
-  }
-
-  /**
-   * Returns a list of rush projects that belong to a subspace
-   */
-  public getSubspaceProjects(subspaceName: string): RushConfigurationProject[] {
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
-    }
-    return this._rushProjectsBySubspaceName.get(subspaceName) || [];
-  }
-
-  /**
-   * Returns the subspace name that a project belongs to. Returns undefined if subspaces is not enabled.
-   */
-  public getProjectSubspace(project: RushConfigurationProject): string | undefined {
-    if (!this.subspacesConfiguration?.enabled) {
-      return undefined;
-    }
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
-    }
-    if (project.subspaceName) {
-      return project.subspaceName;
-    } else {
-      return RushConstants.defaultSubspaceName;
-    }
-  }
-
-  /**
-   * Returns a list of unique subspace names that the given projects belong to
-   */
-  public getProjectsSubspaceSet(projects: Set<RushConfigurationProject>): string[] {
-    if (!this.subspacesConfiguration?.enabled) {
-      return [];
-    }
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
-    }
-    const subspaceSet: Set<string> = new Set<string>();
-    for (const project of projects) {
-      if (project.subspaceName) {
-        subspaceSet.add(project.subspaceName);
-      } else {
-        subspaceSet.add(RushConstants.defaultSubspaceName);
-      }
-    }
-    return Array.from(subspaceSet);
+    return Array.from(this._subspacesByName.values());
   }
 
   /**
    * @beta
    */
-  public get projectsByName(): Map<string, RushConfigurationProject> {
+  public tryGetSubspace(subspaceName: string): Subspace | undefined {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    const subspace: Subspace | undefined = this._subspacesByName.get(subspaceName);
+    if (!subspace) {
+      // If the name is not even valid, that is more important information than if the subspace doesn't exist
+      SubspacesConfiguration.requireValidSubspaceName(subspaceName);
+    }
+    return subspace;
+  }
+
+  /**
+   * @beta
+   */
+  public getSubspace(subspaceName: string): Subspace {
+    const subspace: Subspace | undefined = this.tryGetSubspace(subspaceName);
+    if (!subspace) {
+      throw new Error(`The specified subspace "${subspaceName}" does not exist`);
+    }
+    return subspace;
+  }
+
+  /**
+   * Returns the set of subspaces that the given projects belong to
+   * @beta
+   */
+  public getProjectsSubspaceSet(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace> {
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+    const subspaceSet: Set<Subspace> = new Set();
+    for (const project of projects) {
+      subspaceSet.add(project.subspace);
+    }
+    return subspaceSet;
+  }
+
+  /**
+   * @beta
+   */
+  public get projectsByName(): ReadonlyMap<string, RushConfigurationProject> {
     if (!this._projectsByName) {
       this._initializeAndValidateLocalProjects();
     }
@@ -1427,7 +1341,7 @@ export class RushConfiguration {
    * for a given active variant.
    */
   public get commonVersions(): CommonVersionsConfiguration {
-    return this.getCommonVersions();
+    return this.defaultSubspace.getCommonVersions();
   }
 
   /**
@@ -1449,56 +1363,17 @@ export class RushConfiguration {
   }
 
   /**
-   * Gets the path to the common-versions.json config file for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * @deprecated Use {@link Subspace.getCommonVersionsFilePath} instead
    */
-  public getCommonVersionsFilePath(subspaceName?: string | undefined): string {
-    const commonVersionsFilename: string = path.join(
-      this.getCommonRushConfigFolder(subspaceName),
-      RushConstants.commonVersionsFilename
-    );
-    return commonVersionsFilename;
+  public getCommonVersionsFilePath(subspace?: Subspace): string {
+    return (subspace ?? this.defaultSubspace).getCommonVersionsFilePath();
   }
 
   /**
-   * Returns `true` if the subspaces feature is enabled and at least one subspaces is defined
-   * in the `subspaces.json` config file.
-   * @beta
+   * @deprecated Use {@link Subspace.getCommonVersions} instead
    */
-  public get hasSubspaces(): boolean {
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
-    }
-    return this._rushProjectsBySubspaceName.size > 0;
-  }
-
-  /**
-   * Gets the settings from the common-versions.json config file for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
-   */
-  public getCommonVersions(subspaceName?: string | undefined): CommonVersionsConfiguration {
-    if (!this._commonVersionsConfigurationsByVariant) {
-      this._commonVersionsConfigurationsByVariant = new Map();
-    }
-    if (!this._commonVersionsConfigurationsBySubspace) {
-      this._commonVersionsConfigurationsBySubspace = new Map();
-    }
-
-    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
-    // with a variant created by the user
-    const subspaceKey: string = subspaceName || '';
-    let commonVersionsConfiguration: CommonVersionsConfiguration | undefined =
-      this._commonVersionsConfigurationsBySubspace.get(subspaceKey);
-
-    if (!commonVersionsConfiguration) {
-      const commonVersionsFilename: string = this.getCommonVersionsFilePath(subspaceName);
-      commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
-      if (subspaceName) {
-        this._commonVersionsConfigurationsBySubspace.set(subspaceName, commonVersionsConfiguration);
-      }
-    }
-
-    return commonVersionsConfiguration;
+  public getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration {
+    return (subspace ?? this.defaultSubspace).getCommonVersions();
   }
 
   /**
@@ -1519,50 +1394,31 @@ export class RushConfiguration {
   }
 
   /**
-   * Gets the path to the repo-state.json file for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * @deprecated Use {@link Subspace.getRepoStateFilePath} instead
    */
-  public getRepoStateFilePath(subspaceName?: string | undefined): string {
-    const repoStateFilename: string = path.join(
-      this.getCommonRushConfigFolder(subspaceName),
-      RushConstants.repoStateFilename
-    );
-    return repoStateFilename;
+  public getRepoStateFilePath(subspace?: Subspace): string {
+    return (subspace ?? this.defaultSubspace).getRepoStateFilePath();
   }
 
   /**
-   * Gets the contents from the repo-state.json file for a specific variant.
-   * @param subspaceName - The name of the subspace in use by the active command.
-   * @param variant - The name of the current variant in use by the active command.
+   * @deprecated Use {@link Subspace.getRepoState} instead
    */
-  public getRepoState(subspaceName: string | undefined): RepoStateFile {
-    const repoStateFilename: string = this.getRepoStateFilePath(subspaceName);
-    return RepoStateFile.loadFromFile(repoStateFilename, subspaceName);
+  public getRepoState(subspace?: Subspace): RepoStateFile {
+    return (subspace ?? this.defaultSubspace).getRepoState();
   }
 
   /**
-   * Gets the committed shrinkwrap file name for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * @deprecated Use {@link Subspace.getCommittedShrinkwrapFilename} instead
    */
-  public getCommittedShrinkwrapFilename(subspaceName?: string | undefined): string {
-    const subspaceConfigFolderPath: string = this.getCommonRushConfigFolder(subspaceName);
-
-    return path.join(subspaceConfigFolderPath, this.shrinkwrapFilename);
+  public getCommittedShrinkwrapFilename(subspace?: Subspace): string {
+    return (subspace ?? this.defaultSubspace).getCommittedShrinkwrapFilename();
   }
 
   /**
-   * Gets the absolute path for "pnpmfile.js" for a specific subspace.
-   * @param subspace - The name of the current subspace in use by the active command.
-   * @remarks
-   * The file path is returned even if PNPM is not configured as the package manager.
+   * @deprecated Use {@link Subspace.getRepoStateFilePath} instead
    */
-  public getPnpmfilePath(subspaceName?: string | undefined): string {
-    const subspaceConfigFolderPath: string = this.getCommonRushConfigFolder(subspaceName);
-
-    return path.join(
-      subspaceConfigFolderPath,
-      (this.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-    );
+  public getPnpmfilePath(subspace?: Subspace): string {
+    return (subspace ?? this.defaultSubspace).getPnpmfilePath();
   }
 
   /**

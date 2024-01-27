@@ -159,7 +159,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
     const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
       rushConfiguration: this.rushConfiguration,
       workingDirectory: this.rushConfiguration.rushJsonFolder,
-      initCwd: this.rushConfiguration.getCommonTempFolder(),
+      initCwd: this.rushConfiguration.commonTempFolder,
       handleOutput: false,
       environmentPathOptions: {
         includeRepoBin: true,

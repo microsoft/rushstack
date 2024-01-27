@@ -163,7 +163,7 @@ export class BuildCacheConfiguration {
    * Gets the absolute path to the build-cache.json file in the specified rush workspace.
    */
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
-    return path.resolve(rushConfiguration.getCommonRushConfigFolder(), RushConstants.buildCacheFilename);
+    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
   }
 
   private static async _loadAsync(

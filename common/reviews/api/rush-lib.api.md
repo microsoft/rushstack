@@ -1033,10 +1033,10 @@ export class ProjectChangeAnalyzer {
 export class RepoStateFile {
     readonly filePath: string;
     get isValid(): boolean;
-    static loadFromFile(jsonFilename: string, subspaceName: string | undefined): RepoStateFile;
+    static loadFromFile(jsonFilename: string): RepoStateFile;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
-    refreshState(rushConfiguration: RushConfiguration): boolean;
+    refreshState(rushConfiguration: RushConfiguration, commonVersions: CommonVersionsConfiguration | undefined): boolean;
 }
 
 // @public
@@ -1069,6 +1069,8 @@ export class RushConfiguration {
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // @beta
     readonly customTipsConfigurationFilePath: string;
+    // @beta (undocumented)
+    get defaultSubspace(): Subspace;
     readonly ensureConsistentVersions: boolean;
     // @beta
     readonly eventHooks: EventHooks;
@@ -1076,32 +1078,32 @@ export class RushConfiguration {
     readonly experimentsConfiguration: ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-    getCommittedShrinkwrapFilename(subspaceName?: string | undefined): string;
-    getCommonRushConfigFolder(subspaceName?: string | undefined): string;
-    getCommonTempFolder(subspaceName?: string | undefined): string;
-    getCommonVersions(subspaceName?: string | undefined): CommonVersionsConfiguration;
-    getCommonVersionsFilePath(subspaceName?: string | undefined): string;
+    // @deprecated (undocumented)
+    getCommittedShrinkwrapFilename(subspace?: Subspace): string;
+    // @deprecated (undocumented)
+    getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration;
+    // @deprecated (undocumented)
+    getCommonVersionsFilePath(subspace?: Subspace): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
-    getPnpmfilePath(subspaceName?: string | undefined): string;
+    // @deprecated (undocumented)
+    getPnpmfilePath(subspace?: Subspace): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
-    getProjectsSubspaceSet(projects: Set<RushConfigurationProject>): string[];
-    getProjectSubspace(project: RushConfigurationProject): string | undefined;
-    getRepoState(subspaceName: string | undefined): RepoStateFile;
-    getRepoStateFilePath(subspaceName?: string | undefined): string;
-    getSubspaceProjects(subspaceName: string): RushConfigurationProject[];
     // @beta
-    getTempShrinkwrapFilename(subspaceName?: string | undefined): string;
-    getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
+    getProjectsSubspaceSet(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace>;
+    // @deprecated (undocumented)
+    getRepoState(subspace?: Subspace): RepoStateFile;
+    // @deprecated (undocumented)
+    getRepoStateFilePath(subspace?: Subspace): string;
+    // @beta (undocumented)
+    getSubspace(subspaceName: string): Subspace;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
-    // @beta
-    get hasSubspaces(): boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -1122,7 +1124,7 @@ export class RushConfiguration {
     // (undocumented)
     get projects(): RushConfigurationProject[];
     // @beta (undocumented)
-    get projectsByName(): Map<string, RushConfigurationProject>;
+    get projectsByName(): ReadonlyMap<string, RushConfigurationProject>;
     // @beta
     get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>>;
     readonly repositoryDefaultBranch: string;
@@ -1143,20 +1145,19 @@ export class RushConfiguration {
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
     // @beta
-    get subspaceNames(): Iterable<string>;
+    get subspaces(): readonly Subspace[];
     // @beta
-    readonly subspacesConfiguration?: SubspacesConfiguration;
-    // @beta
-    subspaceShrinkwrapFilenames(subspaceName: string): string;
+    readonly subspacesConfiguration: SubspacesConfiguration | undefined;
+    readonly subspacesFeatureEnabled: boolean;
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
+    // @beta (undocumented)
+    tryGetSubspace(subspaceName: string): Subspace | undefined;
     // (undocumented)
     static tryLoadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration | undefined;
-    // (undocumented)
-    validateSubspaceName(subspaceName: string): void;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     // @beta (undocumented)
@@ -1171,6 +1172,8 @@ export class RushConfigurationProject {
     //
     // @internal
     constructor(options: IRushConfigurationProjectOptions);
+    // @beta
+    readonly configuredSubspaceName: string | undefined;
     get consumingProjects(): ReadonlySet<RushConfigurationProject>;
     // @deprecated
     get cyclicDependencyProjects(): Set<string>;
@@ -1195,8 +1198,7 @@ export class RushConfigurationProject {
     readonly rushConfiguration: RushConfiguration;
     get shouldPublish(): boolean;
     readonly skipRushCheck: boolean;
-    // @beta
-    readonly subspaceName: string | undefined;
+    readonly subspace: Subspace;
     // @beta
     readonly tags: ReadonlySet<string>;
     readonly tempProjectName: string;
@@ -1331,15 +1333,50 @@ export class RushUserConfiguration {
     static initializeAsync(): Promise<RushUserConfiguration>;
 }
 
+// @public
+export class Subspace {
+    // Warning: (ae-forgotten-export) The symbol "ISubspaceOptions" needs to be exported by the entry point index.d.ts
+    constructor(options: ISubspaceOptions);
+    // @internal (undocumented)
+    _addProject(project: RushConfigurationProject): void;
+    // @beta
+    contains(project: RushConfigurationProject): boolean;
+    // @beta
+    getCommittedShrinkwrapFilename(): string;
+    // @beta
+    getCommonVersions(): CommonVersionsConfiguration;
+    // @beta
+    getCommonVersionsFilePath(): string;
+    // @beta
+    getPnpmfilePath(): string;
+    // @beta
+    getProjects(): RushConfigurationProject[];
+    // @beta
+    getRepoState(): RepoStateFile;
+    // @beta
+    getRepoStateFilePath(): string;
+    // @beta
+    getSubspaceConfigFolder(): string;
+    // @beta
+    getSubspaceTempFolder(): string;
+    // @beta
+    getTempShrinkwrapFilename(): string;
+    // @beta
+    getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
+    // (undocumented)
+    readonly subspaceName: string;
+}
+
 // @beta
 export class SubspacesConfiguration {
     // (undocumented)
     static belongsInSubspace(rushProject: RushConfigurationProject, subspaceName: string): boolean;
     readonly enabled: boolean;
-    isValidSubspaceName(subspaceName: string): boolean;
+    static explainIfInvalidSubspaceName(subspaceName: string): string | undefined;
+    static requireValidSubspaceName(subspaceName: string): void;
     readonly splitWorkspaceCompatibility: boolean;
     readonly subspaceJsonFilePath: string;
-    readonly subspaceNames: Set<string>;
+    readonly subspaceNames: ReadonlySet<string>;
     // (undocumented)
     static tryLoadFromConfigurationFile(subspaceJsonFilePath: string): SubspacesConfiguration | undefined;
     // (undocumented)
@@ -1375,7 +1412,7 @@ export class VersionPolicyConfiguration {
     bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
     getVersionPolicy(policyName: string): VersionPolicy;
     update(versionPolicyName: string, newVersion: string, shouldCommit?: boolean): void;
-    validate(projectsByName: Map<string, RushConfigurationProject>): void;
+    validate(projectsByName: ReadonlyMap<string, RushConfigurationProject>): void;
     readonly versionPolicies: Map<string, VersionPolicy>;
 }
 

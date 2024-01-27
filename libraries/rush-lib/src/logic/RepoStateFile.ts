@@ -36,7 +36,6 @@ interface IRepoStateJson {
 export class RepoStateFile {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _subspaceName: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
   private _isValid: boolean;
@@ -47,14 +46,8 @@ export class RepoStateFile {
    */
   public readonly filePath: string;
 
-  private constructor(
-    repoStateJson: IRepoStateJson | undefined,
-    isValid: boolean,
-    filePath: string,
-    subspaceName: string | undefined
-  ) {
+  private constructor(repoStateJson: IRepoStateJson | undefined, isValid: boolean, filePath: string) {
     this.filePath = filePath;
-    this._subspaceName = subspaceName;
     this._isValid = isValid;
 
     if (repoStateJson) {
@@ -91,7 +84,7 @@ export class RepoStateFile {
    * @param jsonFilename - The path to the repo-state.json file.
    * @param variant - The variant currently being used by Rush.
    */
-  public static loadFromFile(jsonFilename: string, subspaceName: string | undefined): RepoStateFile {
+  public static loadFromFile(jsonFilename: string): RepoStateFile {
     let fileContents: string | undefined;
     try {
       fileContents = FileSystem.readFile(jsonFilename);
@@ -131,7 +124,7 @@ export class RepoStateFile {
       }
     }
 
-    return new RepoStateFile(repoStateJson, !foundMergeConflictMarker, jsonFilename, subspaceName);
+    return new RepoStateFile(repoStateJson, !foundMergeConflictMarker, jsonFilename);
   }
 
   /**
@@ -142,7 +135,10 @@ export class RepoStateFile {
    *
    * @returns true if the file was modified, otherwise false.
    */
-  public refreshState(rushConfiguration: RushConfiguration): boolean {
+  public refreshState(
+    rushConfiguration: RushConfiguration,
+    commonVersions: CommonVersionsConfiguration | undefined
+  ): boolean {
     // Only support saving the pnpm shrinkwrap hash if it was enabled
     const preventShrinkwrapChanges: boolean =
       rushConfiguration.packageManager === 'pnpm' &&
@@ -169,12 +165,7 @@ export class RepoStateFile {
     }
 
     // Currently, only support saving the preferred versions hash if using workspaces
-    const useWorkspaces: boolean =
-      rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.useWorkspaces;
-    if (useWorkspaces) {
-      const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(
-        this._subspaceName
-      );
+    if (commonVersions) {
       const preferredVersionsHash: string = commonVersions.getPreferredVersionsHash();
       if (this._preferredVersionsHash !== preferredVersionsHash) {
         this._preferredVersionsHash = preferredVersionsHash;

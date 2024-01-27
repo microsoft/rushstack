@@ -143,7 +143,7 @@ export class Telemetry {
     this._store = [];
 
     const folderName: string = 'telemetry';
-    this._dataFolder = path.join(this._rushConfiguration.getCommonTempFolder(), folderName);
+    this._dataFolder = path.join(this._rushConfiguration.commonTempFolder, folderName);
   }
 
   public log(telemetryData: ITelemetryData): void {

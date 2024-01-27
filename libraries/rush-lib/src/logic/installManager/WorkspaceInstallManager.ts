@@ -33,9 +33,9 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
-import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -69,7 +69,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * @override
    */
   protected async prepareCommonTempAsync(
-    subspaceName: string | undefined,
+    subspace: Subspace,
     shrinkwrapFile: (PnpmShrinkwrapFile & BaseShrinkwrapFile) | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     // Block use of the RUSH_TEMP_FOLDER environment variable
@@ -81,10 +81,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // eslint-disable-next-line no-console
-    console.log(
-      '\n' +
-        colors.bold('Updating workspace files in ' + this.rushConfiguration.getCommonTempFolder(subspaceName))
-    );
+    console.log('\n' + colors.bold('Updating workspace files in ' + subspace.getSubspaceTempFolder()));
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -111,7 +108,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // If there are orphaned projects, we need to update
       const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
         this.rushConfiguration,
-        subspaceName
+        subspace
       );
 
       if (orphanedProjects.length > 0) {
@@ -127,15 +124,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // If preferred versions have been updated, or if the repo-state.json is invalid,
     // we can't be certain of the state of the shrinkwrap
-    const repoState: RepoStateFile = this.rushConfiguration.getRepoState(subspaceName);
+    const repoState: RepoStateFile = subspace.getRepoState();
     if (!repoState.isValid) {
       shrinkwrapWarnings.push(
         `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker in the file.`
       );
       shrinkwrapIsUpToDate = false;
     } else {
-      const commonVersions: CommonVersionsConfiguration =
-        this.rushConfiguration.getCommonVersions(subspaceName);
+      const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions();
       if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
         shrinkwrapWarnings.push(
           `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
@@ -146,13 +142,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(
-      path.join(this.rushConfiguration.getCommonTempFolder(subspaceName), 'pnpm-workspace.yaml')
+      path.join(subspace.getSubspaceTempFolder(), 'pnpm-workspace.yaml')
     );
 
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
-      if (subspaceName && !SubspacesConfiguration.belongsInSubspace(rushProject, subspaceName)) {
+      if (!subspace.contains(rushProject)) {
         // skip processing any project that isn't in this subspace
         continue;
       }
@@ -250,7 +246,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Now validate that the shrinkwrap file matches what is in the package.json
       if (
-        await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspaceName, this.options.variant)
+        await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace, this.options.variant)
       ) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
@@ -271,7 +267,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // get the relative path from common temp folder to repo root folder
       const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
       for (const rushProject of this.rushConfiguration.projects) {
-        if (subspaceName && !SubspacesConfiguration.belongsInSubspace(rushProject, subspaceName)) {
+        if (subspace.contains(rushProject)) {
           // skip processing any project that isn't in this subspace
           continue;
         }
@@ -314,7 +310,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, undefined, subspaceName);
+    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined);
 
     // Save the generated workspace file. Don't update the file timestamp unless the content has changed,
     // since "rush install" will consider this timestamp
@@ -323,8 +319,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
-  protected canSkipInstall(lastModifiedDate: Date, subspaceName?: string | undefined): boolean {
-    if (!super.canSkipInstall(lastModifiedDate, subspaceName)) {
+  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
+    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
       return false;
     }
 
@@ -333,7 +329,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
-        this.rushConfiguration.getCommonTempFolder(subspaceName),
+        subspace.getSubspaceTempFolder(),
         'pnpm-workspace.yaml'
       );
 
@@ -362,7 +358,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  protected async installAsync(cleanInstall: boolean, subspaceName: string | undefined): Promise<void> {
+  protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
     const packageManagerFilename: string = this.rushConfiguration.packageManagerToolFilename;
 
@@ -375,7 +371,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const commonNodeModulesFolder: string = path.join(
-      this.rushConfiguration.getCommonTempFolder(subspaceName),
+      subspace.getSubspaceTempFolder(),
       RushConstants.nodeModulesFolderName
     );
 
@@ -400,14 +396,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // To ensure that the output is always colored, set the option "--color=always", even when it's piped.
       // Without this argument, certain text that should be colored (such as red) will appear white.
       const installArgs: string[] = ['install'];
-      this.pushConfigurationArgs(installArgs, options);
+      this.pushConfigurationArgs(installArgs, options, subspace);
 
       // eslint-disable-next-line no-console
       console.log(
         '\n' +
           colors.bold(
             `Running "${this.rushConfiguration.packageManager} install" in` +
-              ` ${this.rushConfiguration.getCommonTempFolder(subspaceName)}`
+              ` ${subspace.getSubspaceTempFolder()}`
           ) +
           '\n'
       );
@@ -460,7 +456,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           {
             command: packageManagerFilename,
             args: installArgs,
-            workingDirectory: this.rushConfiguration.getCommonTempFolder(subspaceName),
+            workingDirectory: subspace.getSubspaceTempFolder(),
             environment: packageManagerEnv,
             suppressOutput: false
           },
@@ -515,10 +511,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
     // to determine if the install can be skipped
     const projectNodeModulesFolders: string[] = [
-      path.join(
-        this.rushConfiguration.getCommonTempFolder(subspaceName),
-        RushConstants.nodeModulesFolderName
-      ),
+      path.join(subspace.getSubspaceTempFolder(), RushConstants.nodeModulesFolderName),
       ...this.rushConfiguration.projects.map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       })
@@ -532,7 +525,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log('');
   }
 
-  protected async postInstallAsync(subspaceName?: string | undefined): Promise<void> {
+  protected async postInstallAsync(subspace: Subspace): Promise<void> {
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
     // Note that if there are no projects, or if we're in PNPM workspace mode and there are no
@@ -540,15 +533,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       this.rushConfiguration.packageManager,
       this.rushConfiguration.pnpmOptions,
-      this.rushConfiguration.getTempShrinkwrapFilename(subspaceName)
+      subspace.getTempShrinkwrapFilename()
     );
 
     if (tempShrinkwrapFile) {
       // Write or delete all project shrinkwraps related to the install
       await Async.forEachAsync(
-        subspaceName
-          ? this.rushConfiguration.getSubspaceProjects(subspaceName)
-          : this.rushConfiguration.projects,
+        subspace.getProjects(),
         async (project) => {
           await tempShrinkwrapFile.getProjectShrinkwrap(project)?.updateProjectShrinkwrapAsync();
         },
@@ -561,9 +552,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
       // there are no dependencies. Generate empty shrinkwrap files for all projects.
       await Async.forEachAsync(
-        subspaceName
-          ? this.rushConfiguration.getSubspaceProjects(subspaceName)
-          : this.rushConfiguration.projects,
+        subspace.getProjects(),
         async (project) => {
           await BaseProjectShrinkwrapFile.saveEmptyProjectShrinkwrapFileAsync(project);
         },
@@ -578,15 +567,15 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration, subspaceName).create();
+    LastLinkFlagFactory.getCommonTempFlag(subspace).create();
   }
 
   /**
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
-  protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
-    super.pushConfigurationArgs(args, options);
+  protected pushConfigurationArgs(args: string[], options: IInstallManagerOptions, subspace: Subspace): void {
+    super.pushConfigurationArgs(args, options, subspace);
 
     // Add workspace-specific args
     if (this.rushConfiguration.packageManager === 'pnpm') {

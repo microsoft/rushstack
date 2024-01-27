@@ -12,12 +12,13 @@ import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
   variant?: string | undefined;
-  subspaceName?: string | undefined;
+  subspace?: Subspace;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
@@ -99,9 +100,9 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
-    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(
-      options.subspaceName
-    );
+    const commonVersions: CommonVersionsConfiguration = (
+      options.subspace ?? rushConfiguration.defaultSubspace
+    ).getCommonVersions();
 
     const projects: VersionMismatchFinderEntity[] = [];
 
@@ -111,8 +112,8 @@ export class VersionMismatchFinder {
 
     // If subspace is specified, only go through projects in that subspace
     let projectsToParse: RushConfigurationProject[] = [];
-    if (options.subspaceName) {
-      projectsToParse = rushConfiguration.getSubspaceProjects(options.subspaceName);
+    if (options.subspace) {
+      projectsToParse = options.subspace.getProjects();
     } else {
       projectsToParse = rushConfiguration.projects;
     }

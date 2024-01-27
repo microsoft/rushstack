@@ -200,7 +200,7 @@ export class RushXCommandLine {
       workingDirectory: packageFolder,
       // If there is a rush.json then use its .npmrc from the temp folder.
       // Otherwise look for npmrc in the project folder.
-      initCwd: rushConfiguration ? rushConfiguration.getCommonTempFolder() : packageFolder,
+      initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
       handleOutput: false,
       environmentPathOptions: {
         includeProjectBin: true

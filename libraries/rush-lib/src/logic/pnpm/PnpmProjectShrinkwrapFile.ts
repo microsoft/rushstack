@@ -12,6 +12,7 @@ import type {
 } from './PnpmShrinkwrapFile';
 import type { DependencySpecifier } from '../DependencySpecifier';
 import { RushConstants } from '../RushConstants';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  *
@@ -72,11 +73,10 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
 
   protected generateWorkspaceProjectShrinkwrapMap(): Map<string, string> | undefined {
     // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
-    const subspaceName: string | undefined =
-      this.project.rushConfiguration.getProjectSubspace &&
-      this.project.rushConfiguration.getProjectSubspace(this.project);
+    const subspace: Subspace = this.project.subspace;
+
     const importerKey: string = this.shrinkwrapFile.getImporterKeyByPath(
-      this.project.rushConfiguration.getCommonTempFolder(subspaceName),
+      subspace.getSubspaceTempFolder(),
       this.project.projectFolder
     );
 

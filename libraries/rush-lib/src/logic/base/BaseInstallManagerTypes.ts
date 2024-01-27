@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { Subspace } from '../../api/Subspace';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -94,7 +96,8 @@ export interface IInstallManagerOptions {
   beforeInstallAsync?: () => Promise<void>;
 
   /**
-   * The subspace to install for
+   * The specific subspace to install.  If `undefined`, then the `--subspace parameter was not supplied
+   * on the command line.
    */
-  subspaceName?: string;
+  selectedSubspace: Subspace | undefined;
 }
