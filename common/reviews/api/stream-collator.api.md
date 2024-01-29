@@ -25,9 +25,7 @@ export class CollatedWriter extends TerminalWritable {
     // @internal (undocumented)
     _flushBufferedChunks(): void;
     get isActive(): boolean;
-    // (undocumented)
     onClose(): void;
-    // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     readonly taskName: string;
