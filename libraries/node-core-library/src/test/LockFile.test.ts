@@ -16,6 +16,7 @@ const libTestFolder: string = path.resolve(__dirname, '../../lib/test');
 
 describe(LockFile.name, () => {
   afterEach(() => {
+    jest.restoreAllMocks();
     setLockFileGetProcessStartTime(getProcessStartTime);
   });
 
