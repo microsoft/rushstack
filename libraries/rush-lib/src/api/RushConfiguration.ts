@@ -1191,6 +1191,45 @@ export class RushConfiguration {
   }
 
   /**
+   * The full path of the temporary shrinkwrap file that is used during "rush install".
+   * This file may get rewritten by the package manager during installation.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\pnpm-lock.yaml`
+   *
+   * @deprecated Introduced with subspaces is subspace specific tempShrinkwrapFilename accessible from the Subspace class.
+   */
+  public get tempShrinkwrapFilename(): string {
+    if (this.subspacesFeatureEnabled) {
+      throw new Error(
+        'tempShrinkwrapFilename() is not available when using subspaces. Use the subspace specific temp shrinkwrap filename.'
+      );
+    }
+    return path.join(this.commonTempFolder, this.shrinkwrapFilename);
+  }
+
+  /**
+   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
+   * before installation begins, and can be compared to determine how the package manager
+   * modified tempShrinkwrapFilename.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
+   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
+   *
+   * @deprecated Introduced with subspaces is subspace specific tempShrinkwrapPreinstallFilename accessible from the Subspace class.
+   */
+  public get tempShrinkwrapPreinstallFilename(): string {
+    if (this.subspacesFeatureEnabled) {
+      throw new Error(
+        'tempShrinkwrapPreinstallFilename() is not available when using subspaces. Use the subspace specific temp shrinkwrap preinstall filename.'
+      );
+    }
+    const parsedPath: path.ParsedPath = path.parse(this.tempShrinkwrapFilename);
+    return path.join(parsedPath.dir, parsedPath.name + '-preinstall' + parsedPath.ext);
+  }
+
+  /**
    * Returns an English phrase such as "shrinkwrap file" that can be used in logging messages
    * to refer to the shrinkwrap file using appropriate terminology for the currently selected
    * package manager.

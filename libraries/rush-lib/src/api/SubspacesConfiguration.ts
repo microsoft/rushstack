@@ -14,7 +14,7 @@ import { RushConstants } from '../logic/RushConstants';
  *
  * Example: "my-subspace"
  */
-export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-][a-z0-9]+)*$/;
+export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([+_a-z0-9]+)*$/;
 
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
@@ -78,10 +78,10 @@ export class SubspacesConfiguration {
     if (subspaceName.length === 0) {
       return `The subspace name cannot be empty`;
     }
-    if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
+    if (!SUBSPACE_NAME_REGEXP.test(subspaceName)) {
       return (
         `Invalid name "${subspaceName}". ` +
-        `Subspace names must consist of lowercase letters and numbers separated by hyphens.`
+        `Subspace names must consist of lowercase letters and numbers separated by hyphens or underscores.`
       );
     }
 

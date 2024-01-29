@@ -16,10 +16,6 @@ import type { Subspace } from '../../api/Subspace';
  * optionally utilizing a pnpmfile shim to inject preferred versions.
  */
 export class SubspacePnpmfileConfiguration {
-  private constructor() {
-    // not used
-  }
-
   /**
    * Split workspace use global pnpmfile, because in split workspace, user may set `shared-workspace-lockfile=false`.
    * That means each project owns their individual pnpmfile under project folder. While the global pnpmfile could be

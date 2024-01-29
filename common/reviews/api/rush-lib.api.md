@@ -1152,6 +1152,10 @@ export class RushConfiguration {
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
+    // @deprecated
+    get tempShrinkwrapFilename(): string;
+    // @deprecated
+    get tempShrinkwrapPreinstallFilename(): string;
     static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)

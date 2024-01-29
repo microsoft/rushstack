@@ -410,7 +410,7 @@ export abstract class BaseInstallManager {
     const extraNpmrcLines: string[] = [];
     if (this.options.selectedSubspace) {
       // Look for a global .npmrc-global file
-      const globalNpmrcPath: string = `${subspace.getSubspaceConfigFolder()}/.npmrc-global`;
+      const globalNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc-global`;
       if (FileSystem.exists(globalNpmrcPath)) {
         const globalNpmrcFileLines: string[] = FileSystem.readFile(globalNpmrcPath).toString().split('\n');
         extraNpmrcLines.push(...globalNpmrcFileLines);

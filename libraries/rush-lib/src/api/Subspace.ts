@@ -13,12 +13,6 @@ import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 
 /**
- * The allowed naming convention for subspace names.
- * Allows for names to be formed of letters, numbers, and hyphens (-)
- */
-export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([-+_a-z0-9]+)*$/;
-
-/**
  * @internal
  */
 export interface ISubspaceOptions {
@@ -76,7 +70,7 @@ export class Subspace {
 
         subspaceConfigFolder = standardSubspaceConfigFolder;
 
-        if (this._splitWorkspaceCompatibility && this.subspaceName.startsWith('split-')) {
+        if (this._splitWorkspaceCompatibility && this.subspaceName.startsWith('split_')) {
           if (FileSystem.exists(standardSubspaceConfigFolder + '/pnpm-lock.yaml')) {
             throw new Error(
               `The split workspace subspace "${this.subspaceName}" cannot use a common/config folder: ` +
@@ -91,7 +85,7 @@ export class Subspace {
             );
           }
           const project: RushConfigurationProject = this._projects[0];
-          subspaceConfigFolder = project.projectFolder;
+          subspaceConfigFolder = `${project.projectFolder}/subspace/${this.subspaceName}`;
         }
 
         if (!FileSystem.exists(subspaceConfigFolder)) {
@@ -112,7 +106,7 @@ export class Subspace {
       let subspaceTempFolder: string;
       if (rushConfiguration.subspacesFeatureEnabled) {
         // Example: C:\MyRepo\common\temp\my-subspace
-        subspaceTempFolder = path.join(commonTempFolder, RushConstants.rushTempFolderName, this.subspaceName);
+        subspaceTempFolder = path.join(commonTempFolder, this.subspaceName);
       } else {
         // Example: C:\MyRepo\common\temp
         subspaceTempFolder = commonTempFolder;
