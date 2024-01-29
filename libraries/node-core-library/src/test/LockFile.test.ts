@@ -201,6 +201,20 @@ describe(LockFile.name, () => {
         // this lock should be undefined since there is an existing lock
         expect(lock).toBeUndefined();
       });
+
+      test('gracefully handles failure to read lock file statistics', () => {
+        const testFolder: string = path.join(libTestFolder, '4');
+        const resourceName: string = 'test';
+
+        // simulate failure; see https://github.com/microsoft/rushstack/issues/4491
+        jest.spyOn(FileSystem, 'getStatistics').mockImplementation(() => {
+          throw new Error();
+        });
+
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        expect(lock).toBeUndefined();
+      });
     });
   }
 

@@ -257,14 +257,23 @@ export class LockFile {
 
     let lockFile: LockFile;
 
-    try {
-      // open in write mode since if this file exists, it cannot be from the current process
-      // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
-      // We should ideally maintain a dictionary of normalized acquired filenames
-      lockFileHandle = FileWriter.open(pidLockFilePath);
-      lockFileHandle.write(startTime);
+    let currentBirthTimeMs: number;
 
-      const currentBirthTimeMs: number = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
+    try {
+      try {
+        // open in write mode since if this file exists, it cannot be from the current process
+        // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
+        // We should ideally maintain a dictionary of normalized acquired filenames
+        lockFileHandle = FileWriter.open(pidLockFilePath);
+        lockFileHandle.write(startTime);
+        currentBirthTimeMs = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
+      } catch (error) {
+        // sometimes FileSystem.getStatistics leads to failure when multiple processes try to acquire
+        // lock for the same resource, so if we get an error, gracefully exit.
+        // see https://github.com/microsoft/rushstack/issues/4491
+        lockFileHandle?.close();
+        return undefined;
+      }
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
