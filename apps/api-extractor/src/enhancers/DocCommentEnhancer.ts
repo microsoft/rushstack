@@ -143,9 +143,9 @@ export class DocCommentEnhancer {
           // If the API item has a summary comment block (with at least 10 characters), mark it as "documented".
           metadata.undocumented = false;
         } else if (metadata.tsdocComment.inheritDocTag) {
-          // If the API item doesn't have a summary comment block, it may still have an `@inheritDoc` tag,
-          // so we can't say if the item is "documented" or not.
-          metadata.undocumented = undefined;
+          // If the API item doesn't have a summary comment block, but has an `@inheritDoc` tag,
+          // we can't say if the item is "documented" or not. To be safe, mark it as "documented".
+          metadata.undocumented = false;
         } else {
           // If the API item has neither a summary comment block, nor an `@inheritDoc` comment, mark it as "undocumented".
           metadata.undocumented = true;
