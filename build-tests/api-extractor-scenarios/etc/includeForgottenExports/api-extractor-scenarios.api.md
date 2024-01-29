@@ -29,7 +29,7 @@ class ForgottenExport1 {
 
 // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "api-extractor-scenarios" does not have an export "ForgottenExport1"
 //
-// @public
+// @public (undocumented)
 type ForgottenExport2 = number;
 
 // @public (undocumented)
