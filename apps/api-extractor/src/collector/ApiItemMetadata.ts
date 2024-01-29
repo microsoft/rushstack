@@ -75,8 +75,35 @@ export class ApiItemMetadata {
    */
   public tsdocComment: tsdoc.DocComment | undefined;
 
-  // Assigned by DocCommentEnhancer
-  public undocumented: boolean = true;
+  /**
+   * Whether or not the associated API item is "documented".
+   * I.e. contains a summary comment block or is an `@inheritDoc` comment which resolves to some other summary
+   * comment block.
+   * Will be false if this cannot be determined (e.g. if an `@inheritDoc` comment points to an external API member).
+   */
+  public get undocumented(): boolean {
+    return this._undocumented ?? false;
+  }
+  public set undocumented(value: boolean | undefined) {
+    this._undocumented = value;
+  }
+
+  // TODO: "enum"
+  /**
+   * Tracks whether or not the associated API item is "documented".
+   * I.e. contains a summary comment block or is an `@inheritDoc` comment which resolves to some other summary
+   * comment block.
+   *
+   * true => "undocumented"
+   *
+   * false => "documented"
+   *
+   * undefined => "unknown" (e.g. if an `@inheritDoc` comment points to an external API member, whose documentation we
+   * can't parse)
+   *
+   * @remarks Assigned by {@link DocCommentEnhancer}.
+   */
+  private _undocumented: boolean | undefined = undefined;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 

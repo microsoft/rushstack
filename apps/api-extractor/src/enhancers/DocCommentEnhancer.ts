@@ -131,16 +131,29 @@ export class DocCommentEnhancer {
         );
       }
       return;
-    }
-
-    if (metadata.tsdocComment) {
-      // Require the summary to contain at least 10 non-spacing characters
-      metadata.undocumented = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        metadata.tsdocComment.summarySection,
-        10
-      );
     } else {
-      metadata.undocumented = true;
+      // For non-constructor items, we will determine whether or not the item is documented as follows:
+      // 1. If it contains a summary section with at least 10 characters, then it is considered "documented".
+      // 2. If it contains an @inheritDoc tag, then it *may* be considered "documented", depending on whether or not
+      //    the tag resolves to a "documented" API member.
+      //    - Note: for external members, we cannot currently determine this, so we will consider the "documented"
+      //      status to be unknown.
+      if (metadata.tsdocComment) {
+        if (tsdoc.PlainTextEmitter.hasAnyTextContent(metadata.tsdocComment.summarySection, 10)) {
+          // If the API item has a summary comment block (with at least 10 characters), mark it as "documented".
+          metadata.undocumented = false;
+        } else if (metadata.tsdocComment.inheritDocTag) {
+          // If the API item doesn't have a summary comment block, it may still have an `@inheritDoc` tag,
+          // so we can't say if the item is "documented" or not.
+          metadata.undocumented = undefined;
+        } else {
+          // If the API item has neither a summary comment block, nor an `@inheritDoc` comment, mark it as "undocumented".
+          metadata.undocumented = true;
+        }
+      } else {
+        // If there is no tsdoc comment at all, mark "undocumented".
+        metadata.undocumented = true;
+      }
     }
   }
 
