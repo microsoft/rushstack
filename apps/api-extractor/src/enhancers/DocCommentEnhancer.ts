@@ -170,10 +170,7 @@ export class DocCommentEnhancer {
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
         // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
-        if (
-          node.codeDestination.packageName === undefined ||
-          node.codeDestination.packageName === this._collector.workingPackage.name
-        ) {
+        if (this._isReferenceInWorkingPackage(node.codeDestination)) {
           const referencedAstDeclaration: AstDeclaration | ResolverFailure =
             this._collector.astReferenceResolver.resolve(node.codeDestination);
 
@@ -209,14 +206,8 @@ export class DocCommentEnhancer {
       return;
     }
 
-    // Is it referring to the working package?
-    if (
-      !(
-        inheritDocTag.declarationReference.packageName === undefined ||
-        inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name
-      )
-    ) {
-      // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
+    if (!this._isReferenceInWorkingPackage(inheritDocTag.declarationReference)) {
+      // The `@inheritDoc` tag is referencing an external package. Skip it, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
       // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
       return;
@@ -261,5 +252,15 @@ export class DocCommentEnhancer {
     targetDocComment.returnsBlock = sourceDocComment.returnsBlock;
 
     targetDocComment.inheritDocTag = undefined;
+  }
+
+  /**
+   * Determines whether or not the provided declaration reference points to an item in the working package.
+   */
+  private _isReferenceInWorkingPackage(declarationReference: tsdoc.DocDeclarationReference): boolean {
+    return (
+      declarationReference.packageName === undefined ||
+      declarationReference.packageName === this._collector.workingPackage.name
+    );
   }
 }
