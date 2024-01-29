@@ -496,12 +496,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       await doInstallInternalAsync(this.options);
     }
 
-    // if enablePnpmSyncForInjectedDependenciesMeta is true
+    // if usePnpmSyncForInjectedDependencies is true
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
-    if (
-      this.rushConfiguration.packageManager === 'pnpm' &&
-      experiments?.enablePnpmSyncForInjectedDependenciesMeta
-    ) {
+    if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = this.rushConfiguration.tempShrinkwrapFilename;
       const dotPnpmFolderPath: string = this.rushConfiguration.commonTempFolder + '/node_modules/.pnpm';
       await pnpmSyncPrepare(pnpmLockfilePath, dotPnpmFolderPath);

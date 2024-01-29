@@ -76,10 +76,19 @@ export interface IExperimentsJson {
    * If true, Rush will not allow node_modules in the repo folder or in parent folders.
    */
   forbidPhantomResolvableNodeModulesFolders?: boolean;
+
   /**
-   * If true, Rush will use pnpm-sync to manage the injected dependenciesMeta in PNPM.
+   * (UNDER DEVELOPMENT) For certain installation problems involving peer dependencies, PNPM cannot
+   * correctly satisfy versioning requirements without installing duplicate copies of a package inside the
+   * node_modules folder. This poses a problem for "workspace:*" dependencies, as they are normally
+   * installed by making a symlink to the local project source folder. PNPM's "injected dependencies"
+   * feature provides a model for copying the local project folder into node_modules, however copying
+   * must occur AFTER the dependency project is built and BEFORE the consuming project starts to build.
+   * The "pnpm-sync" tool manages this operation; see its documentation for details.
+   * Enable this experiment if you want "rush" and "rushx" commands to resync injected dependencies
+   * by invoking "pnpm-sync" during the build.
    */
-  enablePnpmSyncForInjectedDependenciesMeta?: boolean;
+  usePnpmSyncForInjectedDependencies?: boolean;
 }
 
 /**

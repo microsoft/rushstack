@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Integrate pnpmSyncPrepare whenever rush calls `pnpm install` ",
+      "comment": "(EXPERIMENTAL) Add `enablePnpmSyncForInjectedDependenciesMeta` to experiments.json; it is part of an upcoming feature for managing PNPM \"injected\" dependencies: https://www.npmjs.com/package/pnpm-sync",
       "type": "none"
     }
   ],
