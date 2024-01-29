@@ -146,8 +146,9 @@ export class DocCommentEnhancer {
           if (this._isReferenceInWorkingPackage(metadata.tsdocComment.inheritDocTag.declarationReference)) {
             // If the API item has an `@inheritDoc` comment that points to an API item in the working package,
             // then the documentation contents should have already been copied from the target via `_applyInheritDoc`.
-            // The continued existence of the tag indicates that an error occurred while resolving the declaration
-            // reference.
+            // The continued existence of the tag indicates that the declaration reference was invalid, and not
+            // documentation contents could be copied.
+            // An analyzer issue will have already been logged for this.
             // We will treat such an API as "undocumented".
             metadata.undocumented = true;
           } else {
