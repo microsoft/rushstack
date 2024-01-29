@@ -143,9 +143,18 @@ export class DocCommentEnhancer {
           // If the API item has a summary comment block (with at least 10 characters), mark it as "documented".
           metadata.undocumented = false;
         } else if (metadata.tsdocComment.inheritDocTag) {
-          // If the API item doesn't have a summary comment block, but has an `@inheritDoc` tag,
-          // we can't say if the item is "documented" or not. To be safe, mark it as "documented".
-          metadata.undocumented = false;
+          if (this._isReferenceInWorkingPackage(metadata.tsdocComment.inheritDocTag.declarationReference)) {
+            // If the API item has an `@inheritDoc` comment that points to an API item in the working package,
+            // then the documentation contents should have already been copied from the target via `_applyInheritDoc`.
+            // The continued existence of the tag indicates that an error occurred while resolving the declaration
+            // reference.
+            // We will treat such an API as "undocumented".
+            metadata.undocumented = true;
+          } else {
+            // If the API item has an `@inheritDoc` comment that points to an external API item, we cannot currently
+            // determine whether or not the target is "documented", so we cannot say definitively that this is "undocumented".
+            metadata.undocumented = false;
+          }
         } else {
           // If the API item has neither a summary comment block, nor an `@inheritDoc` comment, mark it as "undocumented".
           metadata.undocumented = true;
@@ -257,9 +266,11 @@ export class DocCommentEnhancer {
   /**
    * Determines whether or not the provided declaration reference points to an item in the working package.
    */
-  private _isReferenceInWorkingPackage(declarationReference: tsdoc.DocDeclarationReference): boolean {
+  private _isReferenceInWorkingPackage(
+    declarationReference: tsdoc.DocDeclarationReference | undefined
+  ): boolean {
     return (
-      declarationReference.packageName === undefined ||
+      declarationReference?.packageName === undefined ||
       declarationReference.packageName === this._collector.workingPackage.name
     );
   }
