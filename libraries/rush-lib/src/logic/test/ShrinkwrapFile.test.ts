@@ -154,7 +154,10 @@ describe(PnpmShrinkwrapFile.name, () => {
             projectRushTempFolder: `${projectName}/.rush/temp`,
             projectFolder: projectName,
             rushConfiguration: {
-              getCommonTempFolder: () => 'common/temp'
+              commonTempFolder: 'common/temp'
+            },
+            subspace: {
+              getSubspaceTempFolder: () => 'common/temp'
             }
           } as RushConfigurationProject;
 

@@ -92,7 +92,7 @@ export class DeployScenarioConfiguration {
       scenarioFileName = `deploy.json`;
     }
 
-    return path.join(rushConfiguration.getCommonRushConfigFolder(), scenarioFileName);
+    return path.join(rushConfiguration.commonRushConfigFolder, scenarioFileName);
   }
 
   public static loadFromFile(

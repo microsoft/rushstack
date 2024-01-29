@@ -51,10 +51,10 @@ describe(RushConfiguration.name, () => {
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
     assertPathProperty(
       'commonRushConfigFolder',
-      rushConfiguration.getCommonRushConfigFolder(),
+      rushConfiguration.commonRushConfigFolder,
       './repo/common/config/rush'
     );
-    assertPathProperty('commonTempFolder', rushConfiguration.getCommonTempFolder(), './repo/common/temp');
+    assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, './repo/common/temp');
     assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
     expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -124,10 +124,10 @@ describe(RushConfiguration.name, () => {
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
     assertPathProperty(
       'commonRushConfigFolder',
-      rushConfiguration.getCommonRushConfigFolder(),
+      rushConfiguration.commonRushConfigFolder,
       './repo/common/config/rush'
     );
-    assertPathProperty('commonTempFolder', rushConfiguration.getCommonTempFolder(), './repo/common/temp');
+    assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, './repo/common/temp');
     assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
     expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -198,7 +198,7 @@ describe(RushConfiguration.name, () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
-    assertPathProperty('commonTempFolder', rushConfiguration.getCommonTempFolder(), expectedValue);
+    assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, expectedValue);
     assertPathProperty(
       'npmCacheFolder',
       rushConfiguration.npmCacheFolder,

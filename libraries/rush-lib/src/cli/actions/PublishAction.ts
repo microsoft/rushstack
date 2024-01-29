@@ -212,15 +212,19 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected async runAsync(): Promise<void> {
-    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, { bypassPolicy: false });
+    await PolicyValidator.validatePolicyAsync(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      { bypassPolicy: false }
+    );
 
     // Example: "common\temp\publish-home"
-    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.getCommonTempFolder(), 'publish-home');
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
     // Example: "common\temp\publish-home\.npmrc"
     this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
 
-    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
       // eslint-disable-next-line no-console
@@ -268,7 +272,7 @@ export class PublishAction extends BaseRushAction {
   private async _publishChangesAsync(
     git: Git,
     publishGit: PublishGit,
-    allPackages: Map<string, RushConfigurationProject>
+    allPackages: ReadonlyMap<string, RushConfigurationProject>
   ): Promise<void> {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
     await changeManager.loadAsync(
@@ -348,7 +352,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _publishAll(git: PublishGit, allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishAll(git: PublishGit, allPackages: ReadonlyMap<string, RushConfigurationProject>): void {
     // eslint-disable-next-line no-console
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
@@ -524,7 +528,7 @@ export class PublishAction extends BaseRushAction {
       const tarballPath: string = path.join(project.publishFolder, tarballName);
       const destFolder: string = this._releaseFolder.value
         ? this._releaseFolder.value
-        : path.join(this.rushConfiguration.getCommonTempFolder(), 'artifacts', 'packages');
+        : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
       FileSystem.move({
         sourcePath: tarballPath,
@@ -576,11 +580,7 @@ export class PublishAction extends BaseRushAction {
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
     // Copy down the committed "common\config\rush\.npmrc-publish" file, if there is one
-    Utilities.syncNpmrc(
-      this.rushConfiguration.getCommonRushConfigFolder(),
-      this._targetNpmrcPublishFolder,
-      true
-    );
+    Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._targetNpmrcPublishFolder, true);
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {

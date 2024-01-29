@@ -12,6 +12,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { PackageNameParsers } from './PackageNameParsers';
 import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
 import { SaveCallbackPackageJsonEditor } from './SaveCallbackPackageJsonEditor';
+import type { Subspace } from './Subspace';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -50,6 +51,11 @@ export interface IRushConfigurationProjectOptions {
    * If specified, validate project tags against this list.
    */
   allowedProjectTags: Set<string> | undefined;
+
+  /**
+   * The containing subspace.
+   */
+  subspace: Subspace;
 }
 
 /**
@@ -105,6 +111,12 @@ export class RushConfigurationProject {
    * The Rush configuration for the monorepo that the project belongs to.
    */
   public readonly rushConfiguration: RushConfiguration;
+
+  /**
+   * Returns the subspace name that a project belongs to.
+   * If subspaces is not enabled, returns the default subspace.
+   */
+  public readonly subspace: Subspace;
 
   /**
    * The review category name, or undefined if no category was assigned.
@@ -186,17 +198,13 @@ export class RushConfigurationProject {
   public readonly tags: ReadonlySet<string>;
 
   /**
-   * Returns the name of the subspace that this project belongs to, as assigned by the `"subspaceName"`
-   * property in `rush.json`.
-   *
-   * @remarks
-   * If the Rush subspaces feature is disabled, the value is still return.
-   * When the Rush subspaces feature is enabled, an undefined `subspaceName` specifies that
-   * the project belongs to the default subspace (whose name is `"default"`).
+   * Returns the subspace name specified in the `"subspaceName"` field in `rush.json`.
+   * Note that this field may be undefined, if the `default` subspace is being used,
+   * and this field may be ignored if the subspaces feature is disabled.
    *
    * @beta
    */
-  public readonly subspaceName: string | undefined;
+  public readonly configuredSubspaceName: string | undefined;
 
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
@@ -339,7 +347,8 @@ export class RushConfigurationProject {
       this.tags = new Set(projectJson.tags);
     }
 
-    this.subspaceName = projectJson.subspaceName;
+    this.configuredSubspaceName = projectJson.subspaceName;
+    this.subspace = options.subspace;
   }
 
   /**

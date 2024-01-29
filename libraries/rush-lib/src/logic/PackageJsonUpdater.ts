@@ -33,6 +33,7 @@ import {
   type IPackageJsonUpdaterRushRemoveOptions,
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
+import type { Subspace } from '../api/Subspace';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -242,15 +243,15 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      if (this._rushConfiguration.subspacesConfiguration?.enabled) {
-        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(
+      if (this._rushConfiguration.subspacesFeatureEnabled) {
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getProjectsSubspaceSet(
           new Set(options.projects)
         );
-        for (const subspaceName of subspaceNames) {
-          await this._doUpdate(debugInstall, variant, subspaceName);
+        for (const subspace of subspaceSet) {
+          await this._doUpdate(debugInstall, subspace, variant);
         }
       } else {
-        await this._doUpdate(debugInstall, variant);
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
     }
   }
@@ -272,23 +273,23 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      if (this._rushConfiguration.subspacesConfiguration?.enabled) {
-        const subspaceNames: string[] = this._rushConfiguration.getProjectsSubspaceSet(
+      if (this._rushConfiguration.subspacesFeatureEnabled) {
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getProjectsSubspaceSet(
           new Set(options.projects)
         );
-        for (const subspaceName of subspaceNames) {
-          await this._doUpdate(debugInstall, variant, subspaceName);
+        for (const subspace of subspaceSet) {
+          await this._doUpdate(debugInstall, subspace, variant);
         }
       } else {
-        await this._doUpdate(debugInstall, variant);
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
     }
   }
 
   private async _doUpdate(
     debugInstall: boolean,
-    variant: string | undefined,
-    subspaceName?: string | undefined
+    subspace: Subspace,
+    variant: string | undefined
   ): Promise<void> {
     this._terminal.writeLine();
     this._terminal.writeLine(Colors.green('Running "rush update"'));
@@ -309,7 +310,7 @@ export class PackageJsonUpdater {
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,
-      subspaceName
+      selectedSubspace: subspace
     };
 
     const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
@@ -665,7 +666,7 @@ export class PackageJsonUpdater {
         const allVersions: string = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
-          this._rushConfiguration.getCommonTempFolder()
+          this._rushConfiguration.commonTempFolder
         );
 
         let versionList: string[];
@@ -726,7 +727,7 @@ export class PackageJsonUpdater {
         selectedVersion = Utilities.executeCommandAndCaptureOutput(
           this._rushConfiguration.packageManagerToolFilename,
           commandArgs,
-          this._rushConfiguration.getCommonTempFolder()
+          this._rushConfiguration.commonTempFolder
         ).trim();
       }
 

@@ -19,6 +19,7 @@ import { Utilities } from '../../utilities/Utilities';
 import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { merge } from '../../utilities/objectUtilities';
+import type { Subspace } from '../../api/Subspace';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {
@@ -34,8 +35,8 @@ interface ICommonPackageJson extends IPackageJson {
 export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
-    dependencies: Map<string, string> = new Map<string, string>(),
-    subspaceName: string | undefined
+    subspace: Subspace,
+    dependencies: Map<string, string> = new Map<string, string>()
   ): void {
     const commonPackageJson: ICommonPackageJson = {
       dependencies: {},
@@ -87,7 +88,7 @@ export class InstallHelpers {
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(
-      rushConfiguration.getCommonTempFolder(subspaceName),
+      subspace.getSubspaceTempFolder(),
       FileConstants.PackageJson
     );
 
@@ -129,7 +130,6 @@ export class InstallHelpers {
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder,
     maxInstallAttempts: number,
-    subspaceName?: string | undefined,
     restrictConsoleOutput?: boolean
   ): Promise<void> {
     let logIfConsoleOutputIsNotRestricted: (message?: string) => void;
@@ -187,7 +187,7 @@ export class InstallHelpers {
         // In particular, we'll assume that two different NPM registries cannot have two
         // different implementations of the same version of the same package.
         // This was needed for: https://github.com/microsoft/rushstack/issues/691
-        commonRushConfigFolder: rushConfiguration.getCommonRushConfigFolder(subspaceName)
+        commonRushConfigFolder: rushConfiguration.commonRushConfigFolder
       });
 
       logIfConsoleOutputIsNotRestricted(
@@ -202,11 +202,11 @@ export class InstallHelpers {
     packageManagerMarker.create();
 
     // Example: "C:\MyRepo\common\temp"
-    FileSystem.ensureFolder(rushConfiguration.getCommonTempFolder(subspaceName));
+    FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
 
     // Example: "C:\MyRepo\common\temp\pnpm-local"
     const localPackageManagerToolFolder: string = path.join(
-      rushConfiguration.getCommonTempFolder(subspaceName),
+      rushConfiguration.commonTempFolder,
       `${packageManager}-local`
     );
 

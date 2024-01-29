@@ -68,7 +68,7 @@ export class VersionPolicyConfiguration {
   /**
    * Validate the version policy configuration against the rush config
    */
-  public validate(projectsByName: Map<string, RushConfigurationProject>): void {
+  public validate(projectsByName: ReadonlyMap<string, RushConfigurationProject>): void {
     if (!this.versionPolicies) {
       return;
     }

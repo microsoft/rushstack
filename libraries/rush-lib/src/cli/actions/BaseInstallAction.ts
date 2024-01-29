@@ -23,6 +23,7 @@ import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -112,32 +113,33 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
-    let subspaceNames: string[] | undefined;
-    if (
-      installManagerOptions.pnpmFilterArguments.length &&
-      this.rushConfiguration.subspacesConfiguration?.enabled
-    ) {
+    let selectedSubspaces: ReadonlySet<Subspace> | undefined;
+    if (installManagerOptions.pnpmFilterArguments.length && this.rushConfiguration.subspacesFeatureEnabled) {
       const selectedProjects: Set<RushConfigurationProject> | undefined =
         await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
       if (selectedProjects) {
-        subspaceNames = this.rushConfiguration.getProjectsSubspaceSet(selectedProjects);
+        selectedSubspaces = this.rushConfiguration.getProjectsSubspaceSet(selectedProjects);
       } else {
         throw new Error('Specified filter arguments resolved in no projects being selected.');
       }
     }
 
-    if (subspaceNames) {
+    if (selectedSubspaces) {
       // Check each subspace for version inconsistencies
-      for (const subspaceName of subspaceNames) {
+      for (const subspace of selectedSubspaces) {
         VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
           variant: this._variant.value,
-          subspaceName: subspaceName
+          subspace
         });
       }
     } else if (this._subspaceParameter) {
+      const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(
+        this._subspaceParameter.value ?? ''
+      );
+
       VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
         variant: this._variant.value,
-        subspaceName: this._subspaceParameter.value
+        subspace: selectedSubspace
       });
     } else {
       VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
@@ -193,12 +195,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
     let installSuccessful: boolean = true;
 
     try {
-      if (subspaceNames) {
+      if (selectedSubspaces) {
         // Run the install for each affected subspace
-        for (const subspaceName of subspaceNames) {
-          installManagerOptions.subspaceName = subspaceName;
+        for (const selectedSubspace of selectedSubspaces) {
+          installManagerOptions.selectedSubspace = selectedSubspace;
           // eslint-disable-next-line no-console
-          console.log(colors.green(`Installing for subspace: ${subspaceName}`));
+          console.log(colors.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
         }
       } else {

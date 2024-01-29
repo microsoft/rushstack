@@ -12,6 +12,7 @@ import * as pnpmfile from './PnpmfileShim';
 import { pnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
 import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * Options used when generating the pnpmfile shim settings file.
@@ -36,7 +37,7 @@ export class PnpmfileConfiguration {
 
   public static async initializeAsync(
     rushConfiguration: RushConfiguration,
-    subspaceName: string | undefined,
+    subspace: Subspace,
     pnpmfileShimOptions?: IPnpmfileShimOptions
   ): Promise<PnpmfileConfiguration> {
     if (rushConfiguration.packageManager !== 'pnpm') {
@@ -50,7 +51,7 @@ export class PnpmfileConfiguration {
       log: (message: string) => {},
       pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
         rushConfiguration,
-        subspaceName,
+        subspace,
         pnpmfileShimOptions
       )
     };
@@ -61,7 +62,7 @@ export class PnpmfileConfiguration {
   public static async writeCommonTempPnpmfileShimAsync(
     rushConfiguration: RushConfiguration,
     targetDir: string,
-    subspaceName: string | undefined,
+    subspace: Subspace,
     options?: IPnpmfileShimOptions
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
@@ -82,7 +83,7 @@ export class PnpmfileConfiguration {
     });
 
     const pnpmfileShimSettings: IPnpmfileShimSettings =
-      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspaceName, options);
+      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspace, options);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
@@ -92,7 +93,7 @@ export class PnpmfileConfiguration {
 
   private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
-    subspaceName: string | undefined,
+    subspace: Subspace,
     options?: IPnpmfileShimOptions
   ): Promise<IPnpmfileShimSettings> {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
@@ -101,8 +102,7 @@ export class PnpmfileConfiguration {
 
     // Only workspaces shims in the common versions using pnpmfile
     if ((rushConfiguration.packageManagerOptions as PnpmOptionsConfiguration).useWorkspaces) {
-      const commonVersionsConfiguration: CommonVersionsConfiguration =
-        rushConfiguration.getCommonVersions(subspaceName);
+      const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
       const preferredVersions: Map<string, string> = new Map();
       MapExtensions.mergeFromMap(preferredVersions, commonVersionsConfiguration.getAllPreferredVersions());
       MapExtensions.mergeFromMap(preferredVersions, rushConfiguration.getImplicitlyPreferredVersions());
@@ -124,7 +124,7 @@ export class PnpmfileConfiguration {
     };
 
     // Use the provided path if available. Otherwise, use the default path.
-    const userPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(subspaceName);
+    const userPnpmfilePath: string | undefined = subspace.getPnpmfilePath();
     if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
       settings.userPnpmfilePath = userPnpmfilePath;
     }

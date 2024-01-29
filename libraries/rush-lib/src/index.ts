@@ -10,6 +10,7 @@ export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export { RushConfiguration, ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
 
+export { Subspace } from './api/Subspace';
 export { SubspacesConfiguration } from './api/SubspacesConfiguration';
 
 export {

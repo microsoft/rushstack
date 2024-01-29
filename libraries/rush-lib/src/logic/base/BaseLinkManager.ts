@@ -189,15 +189,15 @@ export abstract class BaseLinkManager {
    * @param force - Normally the operation will be skipped if the links are already up to date;
    *   if true, this option forces the links to be recreated.
    */
-  public async createSymlinksForProjects(force: boolean, subspaceName?: string | undefined): Promise<void> {
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
     // eslint-disable-next-line no-console
     console.log('\n' + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    await this._linkProjects(subspaceName);
+    await this._linkProjects();
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).create();
 
     stopwatch.stop();
     // eslint-disable-next-line no-console
@@ -206,5 +206,5 @@ export abstract class BaseLinkManager {
     console.log('\nNext you should probably run "rush build" or "rush rebuild"');
   }
 
-  protected abstract _linkProjects(subspaceName: string | undefined): Promise<void>;
+  protected abstract _linkProjects(): Promise<void>;
 }

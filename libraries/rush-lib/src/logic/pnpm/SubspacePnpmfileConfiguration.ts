@@ -2,38 +2,22 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Import, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
-import * as subspaceGlobalPnpmfile from './SubspaceGlobalPnpmfileShim';
+import { FileSystem, Import, JsonFile } from '@rushstack/node-core-library';
 import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
-import type { IPnpmfileContext, ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
+import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
-import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import { RushConstants } from '../RushConstants';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
  * optionally utilizing a pnpmfile shim to inject preferred versions.
  */
 export class SubspacePnpmfileConfiguration {
-  private _context: IPnpmfileContext | undefined;
-
-  public constructor(rushConfiguration: RushConfiguration) {
-    if (rushConfiguration.packageManager !== 'pnpm') {
-      throw new Error(
-        `PnpmfileConfiguration cannot be used with package manager "${rushConfiguration.packageManager}"`
-      );
-    }
-
-    // Set the context to swallow log output and store our settings
-    this._context = {
-      log: (message: string) => {},
-      subspacePnpmfileShimSettings: SubspacePnpmfileConfiguration._getSubspacePnpmfileShimSettings(
-        rushConfiguration,
-        ''
-      )
-    };
+  private constructor() {
+    // not used
   }
 
   /**
@@ -43,7 +27,7 @@ export class SubspacePnpmfileConfiguration {
    */
   public static async writeCommonTempSubspaceGlobalPnpmfileAsync(
     rushConfiguration: RushConfiguration,
-    subspaceName: string
+    subspace: Subspace
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
@@ -51,7 +35,7 @@ export class SubspacePnpmfileConfiguration {
       );
     }
 
-    const targetDir: string = rushConfiguration.getCommonTempFolder(subspaceName);
+    const targetDir: string = subspace.getSubspaceTempFolder();
     const subspaceGlobalPnpmfilePath: string = path.join(targetDir, RushConstants.pnpmfileGlobalFilename);
 
     // Write the shim itself
@@ -61,7 +45,7 @@ export class SubspacePnpmfileConfiguration {
     });
 
     const subspaceGlobalPnpmfileShimSettings: ISubspacePnpmfileShimSettings =
-      SubspacePnpmfileConfiguration._getSubspacePnpmfileShimSettings(rushConfiguration, subspaceName);
+      SubspacePnpmfileConfiguration._getSubspacePnpmfileShimSettings(rushConfiguration, subspace);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(
@@ -75,7 +59,7 @@ export class SubspacePnpmfileConfiguration {
 
   private static _getSubspacePnpmfileShimSettings(
     rushConfiguration: RushConfiguration,
-    subspaceName: string
+    subspace: Subspace
   ): ISubspacePnpmfileShimSettings {
     const workspaceProjects: Record<string, IWorkspaceProjectInfo> = {};
     const subspaceProjects: Record<string, IWorkspaceProjectInfo> = {};
@@ -86,9 +70,7 @@ export class SubspacePnpmfileConfiguration {
         projectRelativeFolder,
         packageVersion: packageJson.version
       };
-      (SubspacesConfiguration.belongsInSubspace(project, subspaceName)
-        ? subspaceProjects
-        : workspaceProjects)[packageName] = workspaceProjectInfo;
+      (subspace.contains(project) ? subspaceProjects : workspaceProjects)[packageName] = workspaceProjectInfo;
     }
 
     const settings: ISubspacePnpmfileShimSettings = {
@@ -99,7 +81,7 @@ export class SubspacePnpmfileConfiguration {
 
     // common/config/rush/.pnpmfile-split-workspace.cjs
     const userPnpmfilePath: string = path.join(
-      rushConfiguration.getCommonRushConfigFolder(subspaceName),
+      subspace.getSubspaceConfigFolder(),
       (rushConfiguration.packageManagerWrapper as PnpmPackageManager).subspacePnpmfileFilename
     );
     if (FileSystem.exists(userPnpmfilePath)) {
@@ -107,17 +89,5 @@ export class SubspacePnpmfileConfiguration {
     }
 
     return settings;
-  }
-
-  /**
-   * Transform a package.json file using the pnpmfile.js hook.
-   * @returns the tranformed object, or the original input if pnpmfile.js was not found.
-   */
-  public transform(packageJson: IPackageJson): IPackageJson {
-    if (!subspaceGlobalPnpmfile.hooks?.readPackage || !this._context) {
-      return packageJson;
-    } else {
-      return subspaceGlobalPnpmfile.hooks.readPackage(packageJson, this._context);
-    }
   }
 }

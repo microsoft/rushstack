@@ -105,7 +105,7 @@ export class CobuildConfiguration {
   }
 
   public static getCobuildConfigFilePath(rushConfiguration: RushConfiguration): string {
-    return `${rushConfiguration.getCommonRushConfigFolder()}/${RushConstants.cobuildFilename}`;
+    return `${rushConfiguration.commonRushConfigFolder}/${RushConstants.cobuildFilename}`;
   }
 
   private static async _loadAsync(

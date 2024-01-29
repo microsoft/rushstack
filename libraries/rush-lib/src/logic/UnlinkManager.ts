@@ -40,7 +40,7 @@ export class UnlinkManager {
       throw new AlreadyReportedError();
     }
 
-    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).clear();
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).clear();
     return this._deleteProjectFiles();
   }
 

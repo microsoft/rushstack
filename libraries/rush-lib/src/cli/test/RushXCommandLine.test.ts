@@ -60,9 +60,9 @@ describe(RushXCommandLine.name, () => {
       } as RushConfigurationProject
     ];
     rushConfiguration = {
-      getCommonRushConfigFolder: () => '',
+      commonRushConfigFolder: '',
       rushJsonFolder: '',
-      getCommonTempFolder: () => 'common/temp',
+      commonTempFolder: 'common/temp',
       projects,
       tryGetProjectForPath(path: string): RushConfigurationProject | undefined {
         return projects.find((project) => project.projectFolder === path);

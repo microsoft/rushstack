@@ -10,9 +10,11 @@ import { RushConstants } from '../logic/RushConstants';
 
 /**
  * The allowed naming convention for subspace names.
- * Allows for names to be formed of letters, numbers, and hyphens (-)
+ * Allows for names to be formed of identifiers separated by hyphens (-)
+ *
+ * Example: "my-subspace"
  */
-export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([-+_a-z0-9]+)*$/;
+export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-][a-z0-9]+)*$/;
 
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
@@ -50,31 +52,53 @@ export class SubspacesConfiguration {
   /**
    * A set of the available subspaces
    */
-  public readonly subspaceNames: Set<string>;
+  public readonly subspaceNames: ReadonlySet<string>;
 
   private constructor(configuration: Readonly<ISubspacesConfigurationJson>, subspaceJsonFilePath: string) {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.enabled = configuration.enabled;
     this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
-    this.subspaceNames = new Set();
+    const subspaceNames: Set<string> = new Set();
     for (const subspaceName of configuration.subspaceNames) {
-      if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
-        this.subspaceNames.add(subspaceName);
-      } else {
-        throw new Error(
-          `Invalid subspace name: ${subspaceName}. Subspace names must only consist of lowercase letters, numbers, hyphens (-), plus-signs (+), or underscores (_).`
-        );
-      }
+      SubspacesConfiguration.requireValidSubspaceName(subspaceName);
+      subspaceNames.add(subspaceName);
     }
-    // Add the default subspace
-    this.subspaceNames.add(RushConstants.defaultSubspaceName);
+    // Add the default subspace if it wasn't explicitly declared
+    subspaceNames.add(RushConstants.defaultSubspaceName);
+    this.subspaceNames = subspaceNames;
   }
 
   /**
-   * Checks if the given subspace name is a registered subspace in the subspaces.json file.
+   * Checks whether the provided string could be used as a subspace name.
+   * Returns `undefined` if the name is valid; otherwise returns an error message.
+   * @remarks
+   * This is a syntax check only; it does not test whether the subspace is actually defined in the Rush configuration.
    */
-  public isValidSubspaceName(subspaceName: string): boolean {
-    return this.subspaceNames.has(subspaceName);
+  public static explainIfInvalidSubspaceName(subspaceName: string): string | undefined {
+    if (subspaceName.length === 0) {
+      return `The subspace name cannot be empty`;
+    }
+    if (SUBSPACE_NAME_REGEXP.test(subspaceName)) {
+      return (
+        `Invalid name "${subspaceName}". ` +
+        `Subspace names must consist of lowercase letters and numbers separated by hyphens.`
+      );
+    }
+
+    return undefined; // name is okay
+  }
+
+  /**
+   * Checks whether the provided string could be used as a subspace name.
+   * If not, an exception is thrown.
+   * @remarks
+   * This is a syntax check only; it does not test whether the subspace is actually defined in the Rush configuration.
+   */
+  public static requireValidSubspaceName(subspaceName: string): void {
+    const message: string | undefined = SubspacesConfiguration.explainIfInvalidSubspaceName(subspaceName);
+    if (message) {
+      throw new Error(message);
+    }
   }
 
   public static tryLoadFromConfigurationFile(
@@ -96,17 +120,15 @@ export class SubspacesConfiguration {
   public static tryLoadFromDefaultLocation(
     rushConfiguration: RushConfiguration
   ): SubspacesConfiguration | undefined {
-    const commonRushConfigFolder: string = rushConfiguration.getCommonRushConfigFolder();
-    if (commonRushConfigFolder) {
-      const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
-      return SubspacesConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
-    }
+    const commonRushConfigFolder: string = rushConfiguration.commonRushConfigFolder;
+    const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
+    return SubspacesConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
   }
 
   public static belongsInSubspace(rushProject: RushConfigurationProject, subspaceName: string): boolean {
     return (
-      rushProject.subspaceName === subspaceName ||
-      (!rushProject.subspaceName && subspaceName === RushConstants.defaultSubspaceName)
+      rushProject.configuredSubspaceName === subspaceName ||
+      (!rushProject.configuredSubspaceName && subspaceName === RushConstants.defaultSubspaceName)
     );
   }
 }

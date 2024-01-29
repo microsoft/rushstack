@@ -95,10 +95,14 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    await PolicyValidator.validatePolicyAsync(this.rushConfiguration, {
-      bypassPolicyAllowed: true,
-      bypassPolicy: this._bypassPolicy.value
-    });
+    await PolicyValidator.validatePolicyAsync(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      {
+        bypassPolicyAllowed: true,
+        bypassPolicy: this._bypassPolicy.value
+      }
+    );
     const git: Git = new Git(this.rushConfiguration);
     const userEmail: string = git.getGitEmail();
 

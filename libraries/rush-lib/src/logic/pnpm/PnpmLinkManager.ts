@@ -39,7 +39,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   /**
    * @override
    */
-  public async createSymlinksForProjects(force: boolean, subspaceName?: string | undefined): Promise<void> {
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {
@@ -53,25 +53,25 @@ export class PnpmLinkManager extends BaseLinkManager {
       throw new AlreadyReportedError();
     }
 
-    await super.createSymlinksForProjects(force, subspaceName);
+    await super.createSymlinksForProjects(force);
   }
 
-  protected async _linkProjects(subspaceName: string | undefined): Promise<void> {
+  protected async _linkProjects(): Promise<void> {
     if (this._rushConfiguration.projects.length > 0) {
       // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
       // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        this._rushConfiguration.getTempShrinkwrapFilename(subspaceName)
+        this._rushConfiguration.defaultSubspace.getTempShrinkwrapFilename()
       );
 
       if (!pnpmShrinkwrapFile) {
         throw new InternalError(
-          `Cannot load shrinkwrap at "${this._rushConfiguration.getTempShrinkwrapFilename(subspaceName)}"`
+          `Cannot load shrinkwrap at "${this._rushConfiguration.defaultSubspace.getTempShrinkwrapFilename()}"`
         );
       }
 
       for (const rushProject of this._rushConfiguration.projects) {
-        await this._linkProject(rushProject, pnpmShrinkwrapFile, subspaceName);
+        await this._linkProject(rushProject, pnpmShrinkwrapFile);
       }
     } else {
       // eslint-disable-next-line no-console
@@ -91,8 +91,7 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   private async _linkProject(
     project: RushConfigurationProject,
-    pnpmShrinkwrapFile: PnpmShrinkwrapFile,
-    subspaceName: string | undefined
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
     // eslint-disable-next-line no-console
     console.log(`\nLINKING: ${project.packageName}`);
@@ -105,7 +104,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // Example: "C:\MyRepo\common\temp\projects\project1
     const extractedFolder: string = path.join(
-      this._rushConfiguration.getCommonTempFolder(subspaceName),
+      this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName,
       unscopedTempProjectName
     );
@@ -115,7 +114,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
     const installFolderName: string = path.join(
-      this._rushConfiguration.getCommonTempFolder(subspaceName),
+      this._rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName,
       RushConstants.rushTempNpmScope,
       unscopedTempProjectName
@@ -201,7 +200,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
     const absolutePathToTgzFile: string = path.resolve(
-      this._rushConfiguration.getCommonTempFolder(subspaceName),
+      this._rushConfiguration.commonTempFolder,
       relativePathToTgzFile
     );
 
@@ -230,8 +229,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const pathToLocalInstallation: string = await this._getPathToLocalInstallationAsync(
       tarballEntry,
       absolutePathToTgzFile,
-      folderNameSuffix,
-      subspaceName
+      folderNameSuffix
     );
 
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
@@ -291,8 +289,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   private async _getPathToLocalInstallationAsync(
     tarballEntry: string,
     absolutePathToTgzFile: string,
-    folderSuffix: string,
-    subspaceName: string | undefined
+    folderSuffix: string
   ): Promise<string> {
     if (this._pnpmVersion.major === 6) {
       // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
@@ -316,7 +313,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
 
       return path.join(
-        this._rushConfiguration.getCommonTempFolder(subspaceName),
+        this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         folderName,
@@ -331,7 +328,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       //   file+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       const folderName: string = depPathToFilename(`${tarballEntry}${folderSuffix}`);
       return path.join(
-        this._rushConfiguration.getCommonTempFolder(subspaceName),
+        this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         folderName,
@@ -346,7 +343,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       const escapedLocalPath: string = depPathToFilename(tarballEntry);
       const folderName: string = `${escapedLocalPath}${folderSuffix}`;
       return path.join(
-        this._rushConfiguration.getCommonTempFolder(subspaceName),
+        this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         folderName,
@@ -362,7 +359,7 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
       return path.join(
-        this._rushConfiguration.getCommonTempFolder(subspaceName),
+        this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         'local',

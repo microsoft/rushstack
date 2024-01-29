@@ -144,7 +144,7 @@ export class ShellOperationRunner implements IOperationRunner {
         {
           rushConfiguration: this._rushConfiguration,
           workingDirectory: projectFolder,
-          initCwd: this._rushConfiguration.getCommonTempFolder(),
+          initCwd: this._rushConfiguration.commonTempFolder,
           handleOutput: true,
           environmentPathOptions: {
             includeProjectBin: true

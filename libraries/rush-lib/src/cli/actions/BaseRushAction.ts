@@ -64,7 +64,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
 
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
-        if (!LockFile.tryAcquire(this.rushConfiguration.getCommonTempFolder(), 'rush')) {
+        if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
           // eslint-disable-next-line no-console
           console.log(colors.red(`Another Rush command is already running in this repository.`));
           process.exit(1);
@@ -90,7 +90,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
       // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
       environmentPath =
-        path.join(this.rushConfiguration.getCommonTempFolder(), 'node_modules', '.bin') +
+        path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
         path.delimiter +
         environmentPath;
       // eslint-disable-next-line dot-notation
