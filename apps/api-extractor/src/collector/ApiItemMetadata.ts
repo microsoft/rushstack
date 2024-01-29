@@ -88,7 +88,7 @@ export class ApiItemMetadata {
    *
    * @remarks Assigned by {@link DocCommentEnhancer}.
    */
-  public undocumented: boolean = false;
+  public undocumented: boolean = true;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 
