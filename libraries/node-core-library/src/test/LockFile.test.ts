@@ -208,7 +208,7 @@ describe(LockFile.name, () => {
         const resourceName: string = 'test';
 
         // simulate failure; see https://github.com/microsoft/rushstack/issues/4491
-        jest.spyOn(FileSystem, 'getStatistics').mockImplementation(() => {
+        jest.spyOn(FileWriter.prototype, 'getStatistics').mockImplementation(() => {
           throw new Error();
         });
 

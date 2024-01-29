@@ -266,7 +266,7 @@ export class LockFile {
         // We should ideally maintain a dictionary of normalized acquired filenames
         lockFileHandle = FileWriter.open(pidLockFilePath);
         lockFileHandle.write(startTime);
-        currentBirthTimeMs = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
+        currentBirthTimeMs = lockFileHandle.getStatistics().birthtime.getTime();
       } catch (error) {
         // sometimes FileSystem.getStatistics leads to failure when multiple processes try to acquire
         // lock for the same resource, so if we get an error, gracefully exit.
