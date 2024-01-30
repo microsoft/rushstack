@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.113.0",
+      "tag": "@microsoft/rush_v5.113.0",
+      "date": "Tue, 30 Jan 2024 22:58:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush does not detect changes to the `dependenciesMeta` field in project's `package.json` files, so may incorrectly skip updating/installation."
+          },
+          {
+            "comment": "Add ability to enable IPC channels in `Utilities#executeLifeCycleCommand`."
+          },
+          {
+            "comment": "Update `rush init` template to document the \"buildSkipWithAllowWarningsInSuccessfulBuild\" experiment"
+          },
+          {
+            "comment": "(BREAKING CHANGE) Begin removal of APIs for the deprecated \"installation variants\" feature, since subspaces are a more robust solution for that problem"
+          },
+          {
+            "comment": "(EXPERIMENTAL) Implement installation for the not-yet-released \"subspaces\" feature (GitHub #4230)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.112.2",
       "tag": "@microsoft/rush_v5.112.2",
       "date": "Tue, 12 Dec 2023 00:20:51 GMT",

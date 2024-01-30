@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 12 Dec 2023 00:20:51 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Jan 2024 22:58:52 GMT and should not be manually modified.
+
+## 5.113.0
+Tue, 30 Jan 2024 22:58:52 GMT
+
+### Updates
+
+- Fix an issue where Rush does not detect changes to the `dependenciesMeta` field in project's `package.json` files, so may incorrectly skip updating/installation.
+- Add ability to enable IPC channels in `Utilities#executeLifeCycleCommand`.
+- Update `rush init` template to document the "buildSkipWithAllowWarningsInSuccessfulBuild" experiment
+- (BREAKING CHANGE) Begin removal of APIs for the deprecated "installation variants" feature, since subspaces are a more robust solution for that problem
+- (EXPERIMENTAL) Implement installation for the not-yet-released "subspaces" feature (GitHub #4230)
 
 ## 5.112.2
 Tue, 12 Dec 2023 00:20:51 GMT
