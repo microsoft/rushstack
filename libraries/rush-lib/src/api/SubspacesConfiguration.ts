@@ -14,7 +14,7 @@ import { RushConstants } from '../logic/RushConstants';
  * Example: "my-subspace"
  */
 export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
-export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([+_\-a-z0-9]+)*$/;
+export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9][+_\-a-z0-9]*$/;
 
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
