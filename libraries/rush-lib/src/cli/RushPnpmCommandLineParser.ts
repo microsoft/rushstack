@@ -444,7 +444,7 @@ export class RushPnpmCommandLineParser {
 
   private async _doRushUpdateAsync(): Promise<void> {
     if (this._rushConfiguration.subspacesFeatureEnabled) {
-      this._terminal.writeLine(Colors.red('Rush Pnpm is currently unsupported with subspaces.'));
+      this._terminal.writeLine(Colors.red('The rush-pnpm command is not yet supported for subspaces.'));
       throw new AlreadyReportedError();
     }
 
