@@ -244,7 +244,7 @@ export class PackageJsonUpdater {
 
     if (!skipUpdate) {
       if (this._rushConfiguration.subspacesFeatureEnabled) {
-        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getProjectsSubspaceSet(
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
           new Set(options.projects)
         );
         for (const subspace of subspaceSet) {
@@ -274,7 +274,7 @@ export class PackageJsonUpdater {
 
     if (!skipUpdate) {
       if (this._rushConfiguration.subspacesFeatureEnabled) {
-        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getProjectsSubspaceSet(
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
           new Set(options.projects)
         );
         for (const subspace of subspaceSet) {

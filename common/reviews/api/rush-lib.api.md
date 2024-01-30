@@ -1090,14 +1090,14 @@ export class RushConfiguration {
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
-    // @beta
-    getProjectsSubspaceSet(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace>;
     // @deprecated (undocumented)
     getRepoState(subspace?: Subspace): RepoStateFile;
     // @deprecated (undocumented)
     getRepoStateFilePath(subspace?: Subspace): string;
     // @beta (undocumented)
     getSubspace(subspaceName: string): Subspace;
+    // @beta
+    getSubspacesForProjects(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace>;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitChangefilesCommitMessage: string | undefined;
     readonly gitChangeLogUpdateCommitMessage: string | undefined;

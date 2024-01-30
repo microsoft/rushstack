@@ -118,7 +118,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       const selectedProjects: Set<RushConfigurationProject> | undefined =
         await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
       if (selectedProjects) {
-        selectedSubspaces = this.rushConfiguration.getProjectsSubspaceSet(selectedProjects);
+        selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
       } else {
         throw new Error('Specified filter arguments resolved in no projects being selected.');
       }

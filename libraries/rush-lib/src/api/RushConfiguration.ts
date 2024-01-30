@@ -1330,7 +1330,7 @@ export class RushConfiguration {
    * Returns the set of subspaces that the given projects belong to
    * @beta
    */
-  public getProjectsSubspaceSet(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace> {
+  public getSubspacesForProjects(projects: ReadonlySet<RushConfigurationProject>): ReadonlySet<Subspace> {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
