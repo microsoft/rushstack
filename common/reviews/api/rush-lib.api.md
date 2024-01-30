@@ -1373,9 +1373,11 @@ export class Subspace {
 
 // @beta
 export class SubspacesConfiguration {
+    // (undocumented)
+    static convertNameToEnvironmentVariable(subspaceName: string, splitWorkspaceCompatibility?: boolean): string;
     readonly enabled: boolean;
-    static explainIfInvalidSubspaceName(subspaceName: string): string | undefined;
-    static requireValidSubspaceName(subspaceName: string): void;
+    static explainIfInvalidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): string | undefined;
+    static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;
     readonly splitWorkspaceCompatibility: boolean;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: ReadonlySet<string>;

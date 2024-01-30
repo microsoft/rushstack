@@ -7,7 +7,6 @@ import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import type { Subspace } from '../../api/Subspace';
 
 export class UpdateAction extends BaseInstallAction {
@@ -77,7 +76,6 @@ export class UpdateAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const selectedSubspace: Subspace | undefined = this._subspaceParameter.value
       ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
       : undefined;
@@ -98,7 +96,8 @@ export class UpdateAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: (await this._selectionParameters?.getPnpmFilterArgumentsAsync(terminal)) || [],
+      pnpmFilterArguments:
+        (await this._selectionParameters?.getPnpmFilterArgumentsAsync(this._terminal)) || [],
       checkOnly: false,
       selectedSubspace,
 

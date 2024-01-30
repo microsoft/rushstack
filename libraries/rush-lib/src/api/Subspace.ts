@@ -85,6 +85,7 @@ export class Subspace {
             );
           }
           const project: RushConfigurationProject = this._projects[0];
+
           subspaceConfigFolder = `${project.projectFolder}/subspace/${this.subspaceName}`;
         }
 

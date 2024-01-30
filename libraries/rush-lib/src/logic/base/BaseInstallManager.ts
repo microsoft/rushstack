@@ -47,6 +47,7 @@ import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -405,8 +406,10 @@ export abstract class BaseInstallManager {
       console.log(colors.bold('Using the default variant for installation.'));
     }
 
-    const subspaceNameAllCaps: string = subspace.subspaceName.toUpperCase();
-    const subspaceEnvironmentVariable: string = `_RUSH_SUBSPACE_${subspaceNameAllCaps}_TEMP_FOLDER`;
+    const subspaceEnvironmentVariable: string = `_RUSH_SUBSPACE_${SubspacesConfiguration.convertNameToEnvironmentVariable(
+      subspace.subspaceName,
+      this.rushConfiguration.subspacesFeatureEnabled
+    )}_TEMP_FOLDER`;
     const extraNpmrcLines: string[] = [];
     if (this.options.selectedSubspace) {
       // Look for a global .npmrc-global file
