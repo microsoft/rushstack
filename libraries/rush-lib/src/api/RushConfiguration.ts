@@ -240,7 +240,8 @@ export class RushConfiguration {
   private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
 
   // subspaceName -> subspace
-  private _subspacesByName: Map<string, Subspace>;
+  private readonly _subspacesByName: Map<string, Subspace>;
+  private readonly _subspaces: Subspace[] = [];
 
   /**
    * The name of the package manager being used to install dependencies
@@ -853,6 +854,8 @@ export class RushConfiguration {
   private _initializeAndValidateLocalProjects(): void {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
+    this._subspacesByName.clear();
+    this._subspaces.length = 0;
 
     // Build the subspaces map
     const subspaceNames: string[] = [];
@@ -876,6 +879,7 @@ export class RushConfiguration {
         splitWorkspaceCompatibility
       });
       this._subspacesByName.set(subspaceName, subspace);
+      this._subspaces.push(subspace);
     }
     const defaultSubspace: Subspace | undefined = this._subspacesByName.get(
       RushConstants.defaultSubspaceName
@@ -1293,7 +1297,7 @@ export class RushConfiguration {
     if (!this._projects) {
       this._initializeAndValidateLocalProjects();
     }
-    return Array.from(this._subspacesByName.values());
+    return this._subspaces;
   }
 
   /**
