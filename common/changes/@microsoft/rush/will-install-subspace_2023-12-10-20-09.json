@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add ability to customize where rush looks for configuration files.",
+      "comment": "(EXPERIMENTAL) Implement installation for the not-yet-released \"subspaces\" feature (GitHub #4230)",
       "type": "none"
     }
   ],
