@@ -2,6 +2,63 @@
   "name": "@rushstack/hashed-folder-copy-plugin",
   "entries": [
     {
+      "version": "1.0.12",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.12",
+      "date": "Thu, 25 Jan 2024 23:03:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where builds running on Windows and not on the C drive would not discover assets."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.11",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.11",
+      "date": "Thu, 25 Jan 2024 01:09:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.10",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.10",
+      "date": "Tue, 23 Jan 2024 20:12:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.9",
+      "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.9",
+      "date": "Tue, 23 Jan 2024 16:15:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.8",
       "tag": "@rushstack/hashed-folder-copy-plugin_v1.0.8",
       "date": "Tue, 16 Jan 2024 18:30:10 GMT",

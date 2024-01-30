@@ -1,6 +1,27 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 03 Jan 2024 00:31:18 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Jan 2024 01:09:29 GMT and should not be manually modified.
+
+## 3.64.2
+Thu, 25 Jan 2024 01:09:29 GMT
+
+### Patches
+
+- Improve 'bin' definition in `IPackageJson` type
+
+## 3.64.1
+Tue, 23 Jan 2024 20:12:57 GMT
+
+### Patches
+
+- Fix Executable.getProcessInfoBy* methods truncating the process name on MacOS
+
+## 3.64.0
+Tue, 23 Jan 2024 16:15:05 GMT
+
+### Minor changes
+
+- Add the `dependenciesMeta` property to the `INodePackageJson` interface.
 
 ## 3.63.0
 Wed, 03 Jan 2024 00:31:18 GMT

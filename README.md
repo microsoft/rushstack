@@ -123,6 +123,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-serverless-stack-tutorial](./build-tests-samples/heft-serverless-stack-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-storybook-react-tutorial](./build-tests-samples/heft-storybook-react-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
+| [/build-tests-samples/heft-storybook-react-tutorial-app](./build-tests-samples/heft-storybook-react-tutorial-app/) | Building this project is a regression test for heft-storybook-plugin |
 | [/build-tests-samples/heft-storybook-react-tutorial-storykit](./build-tests-samples/heft-storybook-react-tutorial-storykit/) | Storybook build dependencies for heft-storybook-react-tutorial |
 | [/build-tests-samples/heft-web-rig-app-tutorial](./build-tests-samples/heft-web-rig-app-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-web-rig-library-tutorial](./build-tests-samples/heft-web-rig-library-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |

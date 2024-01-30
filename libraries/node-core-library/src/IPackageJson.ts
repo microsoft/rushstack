@@ -61,6 +61,17 @@ export interface IPeerDependenciesMetaTable {
 }
 
 /**
+ * This interface is part of the {@link IPackageJson} file format. It is used for the
+ * "dependenciesMeta" field.
+ * @public
+ */
+export interface IDependenciesMetaTable {
+  [dependencyName: string]: {
+    injected?: boolean;
+  };
+}
+
+/**
  * An interface for accessing common fields from a package.json file whose version field may be missing.
  *
  * @remarks
@@ -142,7 +153,7 @@ export interface INodePackageJson {
   /**
    * The main entry point for the package.
    */
-  bin?: string;
+  bin?: string | Record<string, string>;
 
   /**
    * An array of dependencies that must always be installed for this package.
@@ -165,6 +176,12 @@ export interface INodePackageJson {
    * but which will not be automatically installed by this package.
    */
   peerDependencies?: IPackageJsonDependencyTable;
+
+  /**
+   * An array of metadata for dependencies declared inside dependencies, optionalDependencies, and devDependencies.
+   * https://pnpm.io/package_json#dependenciesmeta
+   */
+  dependenciesMeta?: IDependenciesMetaTable;
 
   /**
    * An array of metadata about peer dependencies.

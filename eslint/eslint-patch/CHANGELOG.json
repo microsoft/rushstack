@@ -2,6 +2,30 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.7.2",
+      "tag": "@rushstack/eslint-patch_v1.7.2",
+      "date": "Thu, 25 Jan 2024 23:03:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Some minor documentation updates"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.1",
+      "tag": "@rushstack/eslint-patch_v1.7.1",
+      "date": "Wed, 24 Jan 2024 07:38:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.0",
       "tag": "@rushstack/eslint-patch_v1.7.0",
       "date": "Tue, 16 Jan 2024 18:30:10 GMT",

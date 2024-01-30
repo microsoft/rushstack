@@ -1,29 +1,41 @@
 # @rushstack/eslint-bulk
 
-This is a companion package for @rushstack/eslint-patch that should be installed globally as follows:
-```bash
-npm i -g @rushstack/eslint-bulk
-```
+This package provides the command-line interface (CLI) for the **ESLint bulk suppressions**
+feature from `@rushstack/eslint-patch`.
 
-The **eslint-bulk** package is a set of command line tools to use with the ESLint bulk suppressions patch.
-eslint-bulk commands must be run in the same current working directory containing your package's pertaining
-.eslintrc.js or .eslintrc.cjs file.
+### Setting it up
 
-## eslint-bulk suppress
+👉 Before using this tool, you will first need to install and configure the
+[@rushstack/eslint-patch](https://www.npmjs.com/package/@rushstack/eslint-patch) package.
 
-Use this command to automatically generate bulk suppressions for the given files and given rules.
-Supply the paths as the main argument. The paths argument is a glob pattern that follows the same
-rules as the "files" argument in the "eslint" command.
+See the [eslint-bulk-suppressions documentation](https://www.npmjs.com/package/@rushstack/eslint-patch#eslint-bulk-suppressions-feature)
+for details.
+
+### Typical workflow
+
+1. Checkout your `main` branch, which is in a clean state where ESLint reports no violations.
+2. Update your configuration to enable the latest lint rules; ESLint now reports thousands of legacy violations.
+3. Run `eslint-bulk suppress --all ./src` to update **.eslint-bulk-suppressions.json.**
+4. ESLint now no longer reports violations, so commit the results to Git and merge your pull request.
+5. Over time, engineers may improve some of the suppressed code, in which case the associated suppressions are no longer needed.
+6. Run `eslint-bulk prune` periodically to find and remove unnecessary suppressions from **.eslint-bulk-suppressions.json**, ensuring that new violations will now get caught in those scopes.
+
+### "eslint-bulk suppress" command
 
 ```bash
 eslint-bulk suppress --rule NAME1 [--rule NAME2...] PATH1 [PATH2...]
 eslint-bulk suppress --all PATH1 [PATH2...]
 ```
 
-## eslint-bulk prune
+Use this command to automatically generate bulk suppressions for the specified lint rules and file paths.
+The path argument is a [glob pattern](https://en.wikipedia.org/wiki/Glob_(programming)) with the same syntax
+as path arguments for the `eslint` command.
 
-Use this command to automatically delete all unused suppression entries in all .eslint-bulk-suppressions.json
-files under the current working directory.
+
+### "eslint-bulk prune" command
+
+Use this command to automatically delete all unnecessary suppression entries in all
+**.eslint-bulk-suppressions.json** files under the current working directory.
 
 ```bash
 eslint-bulk prune
@@ -33,5 +45,8 @@ eslint-bulk prune
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/eslint/eslint-bulk/CHANGELOG.md) - Find
   out what's new in the latest version
+
+- [`@rushstack/eslint-patch`](https://www.npmjs.com/package/@rushstack/eslint-patch) required companion package
+
 
 `@rushstack/eslint-bulk` is part of the [Rush Stack](https://rushstack.io/) family of projects.
