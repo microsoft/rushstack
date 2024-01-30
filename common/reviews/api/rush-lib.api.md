@@ -1373,8 +1373,6 @@ export class Subspace {
 
 // @beta
 export class SubspacesConfiguration {
-    // (undocumented)
-    static belongsInSubspace(rushProject: RushConfigurationProject, subspaceName: string): boolean;
     readonly enabled: boolean;
     static explainIfInvalidSubspaceName(subspaceName: string): string | undefined;
     static requireValidSubspaceName(subspaceName: string): void;
