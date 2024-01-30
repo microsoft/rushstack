@@ -11,6 +11,7 @@ import {
   PackageName
 } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
+import minimatch from 'minimatch';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
@@ -157,9 +158,9 @@ export class Collector {
   }
 
   /**
-   * Searches the provided package.json for dependencies that match the provided package names and/or RegExp patterns
+   * Searches the provided package.json for dependencies that match the provided package names and/or glob patterns
    * in `bundledPackages`.
-   * @param bundledPackages - The list of package names and/or RegExp patterns to search for in the package.json.
+   * @param bundledPackages - The list of package names and/or glob patterns to search for in the package.json.
    * @param packageJson - The package.json of the package being processed.
    * @returns The set of matching package names.
    */
@@ -167,19 +168,16 @@ export class Collector {
     bundledPackages: string[],
     packageJson: INodePackageJson | undefined
   ): ReadonlySet<string> {
-    // The set to be built up and returned
-    const packageNames: Set<string> = new Set<string>();
-
     if (bundledPackages.length === 0) {
       // If no `bundledPackages` were specified, then there is nothing to resolve.
       // Return an empty set.
-      return packageNames;
+      return new Set<string>();
     }
 
     if (packageJson === undefined) {
       // If no package.json is present, then there are no possible package matches.
       // Return an empty set.
-      return packageNames;
+      return new Set<string>();
     }
 
     const dependencyNames: string[] = Object.keys(packageJson.dependencies ?? {});
@@ -187,8 +185,11 @@ export class Collector {
     if (dependencyNames.length === 0) {
       // If there are no dependencies, then there are no possible package matches.
       // Return an empty set.
-      return packageNames;
+      return new Set<string>();
     }
+
+    // The set of resolved package names to be populated and returned
+    const packageNames: Set<string> = new Set<string>();
 
     for (const packageNameOrPattern of bundledPackages) {
       // If the string is an exact package name, search for exact match
@@ -197,16 +198,17 @@ export class Collector {
           packageNames.add(packageNameOrPattern);
         }
       } else {
-        // If the entry isn't an exact package name, assume RegExp and search for matches
-        const regexp: RegExp = new RegExp(packageNameOrPattern);
-        const matches: string[] = dependencyNames.filter((dependencyName) => regexp.test(dependencyName));
+        // If the entry isn't an exact package name, assume glob pattern and search for matches
+        const matches: string[] = dependencyNames.filter((dependencyName) =>
+          minimatch(dependencyName, packageNameOrPattern)
+        );
         matches.forEach((match) => packageNames.add(match));
       }
     }
     return packageNames;
   }
 
-  /**
+  /**a
    * Returns a list of names (e.g. "example-library") that should appear in a reference like this:
    *
    * ```

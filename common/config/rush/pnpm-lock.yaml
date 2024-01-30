@@ -76,6 +76,9 @@ importers:
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
+      minimatch:
+        specifier: ~3.0.3
+        version: 3.0.8
       resolve:
         specifier: ~1.22.1
         version: 1.22.4
@@ -101,6 +104,9 @@ importers:
       '@types/lodash':
         specifier: 4.14.116
         version: 4.14.116
+      '@types/minimatch':
+        specifier: 3.0.5
+        version: 3.0.5
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
@@ -1778,7 +1784,7 @@ importers:
         version: 29.5.11
       '@types/node':
         specifier: ts4.9
-        version: 20.11.5
+        version: 20.11.11
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -11539,8 +11545,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.11.5:
-    resolution: {integrity: sha512-g557vgQjUUfN76MZAN/dt1z3dzcUsimuysco0KeluHgrPdJXkP/XdAURgyO2W9fZWHRtRBiVKzKn8vyOAwlG+w==}
+  /@types/node@20.11.11:
+    resolution: {integrity: sha512-PlJCXfb57Jrman0H1BxO2+Q7qwih2Mwk7T6Gvixj+SK4mqs4RWOGMMoP6p/LFa3UrP2CZOO6ai6otd7J/TB6Ug==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -16262,7 +16268,7 @@ packages:
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       natural-compare: 1.4.0
       optionator: 0.9.3
       progress: 2.0.3
@@ -24822,7 +24828,7 @@ packages:
       diff: 4.0.2
       glob: 7.2.3
       js-yaml: 3.13.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       mkdirp: 0.5.6
       resolve: 1.22.4
       semver: 5.7.2
@@ -24845,7 +24851,7 @@ packages:
       diff: 4.0.2
       glob: 7.2.3
       js-yaml: 3.13.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       mkdirp: 0.5.6
       resolve: 1.22.4
       semver: 5.7.2
@@ -24868,7 +24874,7 @@ packages:
       diff: 4.0.2
       glob: 7.2.3
       js-yaml: 3.13.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       mkdirp: 0.5.6
       resolve: 1.22.4
       semver: 5.7.2
@@ -24891,7 +24897,7 @@ packages:
       diff: 4.0.2
       glob: 7.2.3
       js-yaml: 3.13.1
-      minimatch: 3.1.2
+      minimatch: 3.0.8
       mkdirp: 0.5.6
       resolve: 1.22.4
       semver: 5.7.2

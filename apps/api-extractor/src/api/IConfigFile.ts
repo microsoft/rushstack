@@ -376,7 +376,8 @@ export interface IConfigFile {
 
   /**
    * A list of NPM package names whose exports should be treated as part of this package.
-   * Supports regular expressions.
+   *
+   * @remarks Also supports glob patterns.
    *
    * @example
    *

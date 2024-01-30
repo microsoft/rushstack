@@ -837,7 +837,8 @@ export class ExtractorConfig {
       }
 
       const bundledPackages: string[] = configObject.bundledPackages || [];
-      // Note: we cannot fully validate package name pattern, as the string may be a RegExp pattern.
+
+      // Note: we cannot fully validate package name patterns, as the strings may contain wildcards.
       // We won't know if the entries are valid until we can compare them against the package.json "dependencies" contents.
 
       const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens(
