@@ -13,7 +13,7 @@ import { RushConstants } from '../logic/RushConstants';
  *
  * Example: "my-subspace"
  */
-export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-][a-z0-9]+)*$/;
+export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([+_\-a-z0-9]+)*$/;
 
 /**
@@ -92,12 +92,12 @@ export class SubspacesConfiguration {
       if (splitWorkspaceCompatibility) {
         return (
           `Invalid name "${subspaceName}". ` +
-          `Subspace names must consist of lowercase letters and numbers separated by hyphens, underscores, or plus-signs.`
+          `Subspace names must consist of lowercase letters and numbers separated by hyphens, underscores, or plus signs.`
         );
       }
       return (
         `Invalid name "${subspaceName}". ` +
-        `Subspace names must consist of lowercase letters and numbers separated by hyphens or underscores.`
+        `Subspace names must consist of lowercase letters and numbers separated by hyphens.`
       );
     }
 
@@ -153,12 +153,12 @@ export class SubspacesConfiguration {
   ): string {
     if (splitWorkspaceCompatibility) {
       // Convert all special characters according to utf-8character map
-      let formattedSubspaceName: string = subspaceName.replace(/_/gi, '_x45');
-      formattedSubspaceName = formattedSubspaceName.replace(/\+/gi, '_x43');
-      formattedSubspaceName = formattedSubspaceName.replace(/-/gi, '_x95');
+      let formattedSubspaceName: string = subspaceName.replace(/_/g, '_x45');
+      formattedSubspaceName = formattedSubspaceName.replace(/\+/g, '_x43');
+      formattedSubspaceName = formattedSubspaceName.replace(/-/g, '_x95');
       return formattedSubspaceName.toUpperCase();
     } else {
-      return subspaceName.replace(/-/gi, '_').toUpperCase();
+      return subspaceName.replace(/-/g, '_').toUpperCase();
     }
   }
 }
