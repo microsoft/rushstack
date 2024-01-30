@@ -8,7 +8,12 @@ import type {
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
+import {
+  ConsoleTerminalProvider,
+  type ITerminal,
+  Terminal,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -110,6 +115,40 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
 
+  protected getTargetSubspace(): Subspace {
+    const parameterValue: string | undefined = this._subspaceParameter.value;
+
+    if (this.rushConfiguration.subspacesFeatureEnabled) {
+      if (!parameterValue) {
+        // Temporarily ensure that a subspace is provided
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          colors.red(
+            `The subspaces feature currently only supports installing for a specified set of subspace,` +
+              ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+      return this.rushConfiguration.getSubspace(parameterValue);
+    } else {
+      if (parameterValue) {
+        // eslint-disable-next-line no-console
+        console.log();
+        // eslint-disable-next-line no-console
+        console.log(
+          colors.red(
+            `The "--subspace" parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+      return this.rushConfiguration.defaultSubspace;
+    }
+  }
+
   protected async runAsync(): Promise<void> {
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
@@ -133,14 +172,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
           subspace
         });
       }
-    } else if (this._subspaceParameter) {
-      const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(
-        this._subspaceParameter.value ?? ''
-      );
-
+    } else if (this._subspaceParameter.value) {
+      const subspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
       VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
         variant: this._variant.value,
-        subspace: selectedSubspace
+        subspace: subspace
       });
     } else {
       VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
@@ -199,7 +235,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       if (selectedSubspaces) {
         // Run the install for each affected subspace
         for (const selectedSubspace of selectedSubspaces) {
-          installManagerOptions.selectedSubspace = selectedSubspace;
+          installManagerOptions.subspace = selectedSubspace;
           // eslint-disable-next-line no-console
           console.log(colors.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);

@@ -51,6 +51,12 @@ describe('BaseInstallManager Test', () => {
       RushConfiguration.loadFromConfigurationFile(rushJsonFilePnpmV6);
     const rushConfigurationV7: RushConfiguration =
       RushConfiguration.loadFromConfigurationFile(rushJsonFilePnpmV7);
+    const options6: IInstallManagerOptions = {
+      subspace: rushConfigurationV6.defaultSubspace
+    } as IInstallManagerOptions;
+    const options7: IInstallManagerOptions = {
+      subspace: rushConfigurationV7.defaultSubspace
+    } as IInstallManagerOptions;
     const purgeManager6: typeof PurgeManager.prototype = new PurgeManager(
       rushConfigurationV6,
       rushGlobalFolder
@@ -59,34 +65,33 @@ describe('BaseInstallManager Test', () => {
       rushConfigurationV7,
       rushGlobalFolder
     );
-    const options: IInstallManagerOptions = {} as IInstallManagerOptions;
 
     const fakeBaseInstallManager6: FakeBaseInstallManager = new FakeBaseInstallManager(
       rushConfigurationV6,
       rushGlobalFolder,
       purgeManager6,
-      options
+      options6
     );
 
     const fakeBaseInstallManager7: FakeBaseInstallManager = new FakeBaseInstallManager(
       rushConfigurationV7,
       rushGlobalFolder,
       purgeManager7,
-      options
+      options7
     );
 
     const mockWrite = jest.fn();
     jest.spyOn(ConsoleTerminalProvider.prototype, 'write').mockImplementation(mockWrite);
 
     const argsPnpmV6: string[] = [];
-    fakeBaseInstallManager6.pushConfigurationArgs(argsPnpmV6, options, rushConfigurationV7.defaultSubspace);
+    fakeBaseInstallManager6.pushConfigurationArgs(argsPnpmV6, options6, rushConfigurationV7.defaultSubspace);
     expect(argsPnpmV6).not.toContain(pnpmIgnoreCompatibilityDbParameter);
     expect(mockWrite.mock.calls[0][0]).toContain(
       "Warning: Your rush.json specifies a pnpmVersion with a known issue that may cause unintended version selections. It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. For details see: https://rushjs.io/link/pnpm-issue-5132"
     );
 
     const argsPnpmV7: string[] = [];
-    fakeBaseInstallManager7.pushConfigurationArgs(argsPnpmV7, options, rushConfigurationV7.defaultSubspace);
+    fakeBaseInstallManager7.pushConfigurationArgs(argsPnpmV7, options7, rushConfigurationV7.defaultSubspace);
     expect(argsPnpmV7).not.toContain(pnpmIgnoreCompatibilityDbParameter);
     expect(mockWrite.mock.calls[0][0]).toContain(
       "Warning: Your rush.json specifies a pnpmVersion with a known issue that may cause unintended version selections. It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. For details see: https://rushjs.io/link/pnpm-issue-5132"
@@ -97,7 +102,9 @@ describe('BaseInstallManager Test', () => {
     const rushJsonFile: string = path.resolve(__dirname, 'ignoreCompatibilityDb/rush3.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
     const purgeManager: typeof PurgeManager.prototype = new PurgeManager(rushConfiguration, rushGlobalFolder);
-    const options: IInstallManagerOptions = {} as IInstallManagerOptions;
+    const options: IInstallManagerOptions = {
+      subspace: rushConfiguration.defaultSubspace
+    } as IInstallManagerOptions;
 
     const fakeBaseInstallManager: FakeBaseInstallManager = new FakeBaseInstallManager(
       rushConfiguration,

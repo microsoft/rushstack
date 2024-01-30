@@ -469,7 +469,7 @@ export class RushPnpmCommandLineParser {
       pnpmFilterArguments: [],
       checkOnly: false,
       // TODO: Support subspaces
-      selectedSubspace: undefined
+      subspace: this._rushConfiguration.defaultSubspace
     };
 
     const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(

@@ -96,8 +96,7 @@ export interface IInstallManagerOptions {
   beforeInstallAsync?: () => Promise<void>;
 
   /**
-   * The specific subspace to install.  If `undefined`, then the `--subspace parameter was not supplied
-   * on the command line.
+   * The specific subspace to install.
    */
-  selectedSubspace: Subspace | undefined;
+  subspace: Subspace;
 }

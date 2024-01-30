@@ -7,7 +7,6 @@ import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import type { Subspace } from '../../api/Subspace';
 
 export class InstallAction extends BaseInstallAction {
   private readonly _checkOnlyParameter: CommandLineFlagParameter;
@@ -45,9 +44,6 @@ export class InstallAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
-    const selectedSubspace: Subspace | undefined = this._subspaceParameter.value
-      ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
-      : undefined;
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -66,7 +62,7 @@ export class InstallAction extends BaseInstallAction {
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(this._terminal),
       checkOnly: this._checkOnlyParameter.value,
-      selectedSubspace,
+      subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }

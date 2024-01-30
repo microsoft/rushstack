@@ -86,8 +86,7 @@ export abstract class BaseInstallManager {
     this.installRecycler = purgeManager.commonTempFolderRecycler;
     this.options = options;
 
-    const mainSubspace: Subspace = options.selectedSubspace ?? rushConfiguration.defaultSubspace;
-    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(mainSubspace);
+    this._commonTempLinkFlag = LastLinkFlagFactory.getCommonTempFlag(options.subspace);
 
     this.subspaceInstallFlags = new Map();
     if (rushConfiguration.subspacesFeatureEnabled) {
@@ -121,36 +120,10 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    // Ensure that subspaces is enabled
-
-    if (this.rushConfiguration.subspacesFeatureEnabled && !this.options.selectedSubspace) {
-      // Temporarily ensure that a subspace is provided
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          `The subspaces feature currently only supports installing for a specified set of subspace,` +
-            ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
-        )
-      );
-      throw new AlreadyReportedError();
-    } else if (this.options.selectedSubspace && !this.rushConfiguration.subspacesFeatureEnabled) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          `The "--subspace" parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
-        )
-      );
-      throw new AlreadyReportedError();
-    }
-
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
       // Allow partial update when there are subspace projects
-      if (!this.options.selectedSubspace) {
+      if (!this.rushConfiguration.subspacesFeatureEnabled) {
         // eslint-disable-next-line no-console
         console.log();
         // eslint-disable-next-line no-console
@@ -164,7 +137,7 @@ export abstract class BaseInstallManager {
       }
     }
 
-    const subspace: Subspace = this.options.selectedSubspace ?? this.rushConfiguration.defaultSubspace;
+    const subspace: Subspace = this.options.subspace;
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync(subspace);
 
@@ -401,7 +374,7 @@ export abstract class BaseInstallManager {
     }
 
     const extraNpmrcLines: string[] = [];
-    if (this.options.selectedSubspace) {
+    if (this.rushConfiguration.subspacesFeatureEnabled) {
       const subspaceEnvironmentVariable: string = SubspacesConfiguration._convertNameToEnvironmentVariable(
         subspace.subspaceName,
         this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility ?? false
@@ -461,7 +434,7 @@ export abstract class BaseInstallManager {
         this.options
       );
 
-      if (this.options.selectedSubspace) {
+      if (this.rushConfiguration.subspacesFeatureEnabled) {
         await SubspacePnpmfileConfiguration.writeCommonTempSubspaceGlobalPnpmfileAsync(
           this.rushConfiguration,
           subspace
