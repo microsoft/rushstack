@@ -175,7 +175,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!inheritsFromExternal:var",
-          "docComment": "/**\n * {@inheritDoc some-external-library#foo}\n */\n",
+          "docComment": "/**\n * {@inheritDoc some-external-library#foo}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -202,7 +202,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!inheritsFromInternal:var",
-          "docComment": "/**\n * An API item with its own documentation.\n */\n",
+          "docComment": "/**\n * An API item with its own documentation.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -229,7 +229,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!inheritsFromInvalidInternal:var",
-          "docComment": "/**\n * {@inheritDoc nonExistentTarget}\n */\n",
+          "docComment": "/**\n * {@inheritDoc nonExistentTarget}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -256,7 +256,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!withOwnDocs:var",
-          "docComment": "/**\n * An API item with its own documentation.\n */\n",
+          "docComment": "/**\n * An API item with its own documentation.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
