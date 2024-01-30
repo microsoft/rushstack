@@ -102,8 +102,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
-      argumentName: 'SUBSPACE',
-      description: 'The subspace to install for.'
+      argumentName: 'SUBSPACE_NAME',
+      description:
+        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.'
     });
   }
 
@@ -120,7 +121,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       if (selectedProjects) {
         selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
       } else {
-        throw new Error('Specified filter arguments resolved in no projects being selected.');
+        throw new Error('The specified filter arguments resulted in no projects being selected.');
       }
     }
 
