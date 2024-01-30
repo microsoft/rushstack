@@ -13,7 +13,8 @@ import { RushConstants } from '../logic/RushConstants';
  *
  * Example: "my-subspace"
  */
-export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([+_a-z0-9]+)*$/;
+export const SUBSPACE_NAME_REGEXP: RegExp = /^[a-z][a-z0-9]*([-][a-z0-9]+)*$/;
+export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9]*([+_\-a-z0-9]+)*$/;
 
 /**
  * This represents the JSON data structure for the "subspaces.json" configuration file.
@@ -59,7 +60,8 @@ export class SubspacesConfiguration {
     this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
     const subspaceNames: Set<string> = new Set();
     for (const subspaceName of configuration.subspaceNames) {
-      SubspacesConfiguration.requireValidSubspaceName(subspaceName);
+      SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.enabled);
+
       subspaceNames.add(subspaceName);
     }
     // Add the default subspace if it wasn't explicitly declared
@@ -73,11 +75,26 @@ export class SubspacesConfiguration {
    * @remarks
    * This is a syntax check only; it does not test whether the subspace is actually defined in the Rush configuration.
    */
-  public static explainIfInvalidSubspaceName(subspaceName: string): string | undefined {
+  public static explainIfInvalidSubspaceName(
+    subspaceName: string,
+    splitWorkspaceCompatibility: boolean = false
+  ): string | undefined {
     if (subspaceName.length === 0) {
       return `The subspace name cannot be empty`;
     }
-    if (!SUBSPACE_NAME_REGEXP.test(subspaceName)) {
+    let regexToUse: RegExp;
+    if (splitWorkspaceCompatibility) {
+      regexToUse = SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP;
+    } else {
+      regexToUse = SUBSPACE_NAME_REGEXP;
+    }
+    if (!regexToUse.test(subspaceName)) {
+      if (splitWorkspaceCompatibility) {
+        return (
+          `Invalid name "${subspaceName}". ` +
+          `Subspace names must consist of lowercase letters and numbers separated by hyphens, underscores, or plus-signs.`
+        );
+      }
       return (
         `Invalid name "${subspaceName}". ` +
         `Subspace names must consist of lowercase letters and numbers separated by hyphens or underscores.`
@@ -93,8 +110,14 @@ export class SubspacesConfiguration {
    * @remarks
    * This is a syntax check only; it does not test whether the subspace is actually defined in the Rush configuration.
    */
-  public static requireValidSubspaceName(subspaceName: string): void {
-    const message: string | undefined = SubspacesConfiguration.explainIfInvalidSubspaceName(subspaceName);
+  public static requireValidSubspaceName(
+    subspaceName: string,
+    splitWorkspaceCompatibility: boolean = false
+  ): void {
+    const message: string | undefined = SubspacesConfiguration.explainIfInvalidSubspaceName(
+      subspaceName,
+      splitWorkspaceCompatibility
+    );
     if (message) {
       throw new Error(message);
     }
@@ -122,5 +145,20 @@ export class SubspacesConfiguration {
     const commonRushConfigFolder: string = rushConfiguration.commonRushConfigFolder;
     const subspaceJsonLocation: string = `${commonRushConfigFolder}/${RushConstants.subspacesConfigFilename}`;
     return SubspacesConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
+  }
+
+  public static convertNameToEnvironmentVariable(
+    subspaceName: string,
+    splitWorkspaceCompatibility: boolean = false
+  ): string {
+    if (splitWorkspaceCompatibility) {
+      // Convert all special characters according to utf-8character map
+      let formattedSubspaceName: string = subspaceName.replace(/_/gi, '_x45');
+      formattedSubspaceName = formattedSubspaceName.replace(/\+/gi, '_x43');
+      formattedSubspaceName = formattedSubspaceName.replace(/-/gi, '_x95');
+      return formattedSubspaceName.toUpperCase();
+    } else {
+      return subspaceName.replace(/-/gi, '_').toUpperCase();
+    }
   }
 }
