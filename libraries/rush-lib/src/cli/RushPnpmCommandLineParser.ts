@@ -443,6 +443,11 @@ export class RushPnpmCommandLineParser {
   }
 
   private async _doRushUpdateAsync(): Promise<void> {
+    if (this._rushConfiguration.subspacesFeatureEnabled) {
+      this._terminal.writeLine(Colors.red('The rush-pnpm command is not yet supported for subspaces.'));
+      throw new AlreadyReportedError();
+    }
+
     this._terminal.writeLine();
     this._terminal.writeLine(Colors.green('Running "rush update"'));
     this._terminal.writeLine();
@@ -462,7 +467,9 @@ export class RushPnpmCommandLineParser {
       variant: undefined,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
-      checkOnly: false
+      checkOnly: false,
+      // TODO: Support subspaces
+      subspace: this._rushConfiguration.defaultSubspace
     };
 
     const installManagerFactoryModule: typeof import('../logic/InstallManagerFactory') = await import(

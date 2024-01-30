@@ -231,10 +231,7 @@ export class ProjectChangeAnalyzer {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
-      // Determine the current variant from the link JSON.
-      const variant: string | undefined = rushConfiguration.currentInstalledVariant;
-
-      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename(variant);
+      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename();
 
       const shrinkwrapFile: string = Path.convertToSlashes(path.relative(repoRoot, fullShrinkwrapPath));
       const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(shrinkwrapFile);
@@ -352,12 +349,9 @@ export class ProjectChangeAnalyzer {
 
     // Currently, only pnpm handles project shrinkwraps
     if (this._rushConfiguration.packageManager !== 'pnpm') {
-      // Determine the current variant from the link JSON.
-      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
-
       // Add the shrinkwrap file to every project's dependencies
       const shrinkwrapFile: string = Path.convertToSlashes(
-        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
+        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename())
       );
 
       const shrinkwrapHash: string | undefined = repoDeps.get(shrinkwrapFile);

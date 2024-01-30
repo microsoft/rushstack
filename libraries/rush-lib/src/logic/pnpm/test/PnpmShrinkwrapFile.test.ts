@@ -133,7 +133,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v5/not-modified.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(false);
       });
 
       it('can detect modified', async () => {
@@ -141,7 +146,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v5/modified.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(true);
       });
 
       it('can detect overrides', async () => {
@@ -149,7 +159,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v5/overrides-not-modified.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(false);
       });
     });
 
@@ -159,7 +174,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/not-modified.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(false);
       });
 
       it('can detect modified', async () => {
@@ -167,7 +187,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/modified.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(true);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(true);
       });
 
       it('can detect overrides', async () => {
@@ -175,7 +200,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/overrides-not-modified.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(false);
       });
 
       it('can handle the inconsistent version of a package declared in dependencies and devDependencies', async () => {
@@ -183,7 +213,12 @@ describe(PnpmShrinkwrapFile.name, () => {
         const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
           `${__dirname}/yamlFiles/pnpm-lock-v6/inconsistent-dep-devDep.yaml`
         );
-        await expect(pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(project)).resolves.toBe(false);
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace
+          )
+        ).resolves.toBe(false);
       });
     });
   });

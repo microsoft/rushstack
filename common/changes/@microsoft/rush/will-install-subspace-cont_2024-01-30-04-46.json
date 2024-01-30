@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Begin removal of APIs for the deprecated \"installation variants\" feature, since subspaces are a more robust solution for that problem",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

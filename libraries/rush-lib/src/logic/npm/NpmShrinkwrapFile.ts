@@ -7,6 +7,7 @@ import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import type { Subspace } from '../../api/Subspace';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -133,6 +134,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
+    subspace: Subspace,
     variant?: string
   ): Promise<boolean> {
     throw new InternalError('Not implemented');

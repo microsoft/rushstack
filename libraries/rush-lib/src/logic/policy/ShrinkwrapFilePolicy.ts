@@ -6,6 +6,7 @@ import type { IPolicyValidatorOptions } from './PolicyValidator';
 import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import type { RepoStateFile } from '../RepoStateFile';
+import type { Subspace } from '../../api/Subspace';
 
 export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorOptions {
   repoState: RepoStateFile;
@@ -14,13 +15,17 @@ export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorO
 /**
  *  A policy that validates shrinkwrap files used by package managers.
  */
-export function validate(rushConfiguration: RushConfiguration, options: IPolicyValidatorOptions): void {
+export function validate(
+  rushConfiguration: RushConfiguration,
+  subspace: Subspace,
+  options: IPolicyValidatorOptions
+): void {
   // eslint-disable-next-line no-console
   console.log('Validating package manager shrinkwrap file.\n');
   const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
     rushConfiguration.packageManager,
     rushConfiguration.packageManagerOptions,
-    rushConfiguration.getCommittedShrinkwrapFilename(options.shrinkwrapVariant)
+    subspace.getCommittedShrinkwrapFilename()
   );
 
   if (!shrinkwrapFile) {
@@ -34,7 +39,7 @@ export function validate(rushConfiguration: RushConfiguration, options: IPolicyV
     rushConfiguration.packageManagerOptions,
     {
       ...options,
-      repoState: rushConfiguration.getRepoState(options.shrinkwrapVariant)
+      repoState: subspace.getRepoState()
     },
     rushConfiguration.experimentsConfiguration.configuration
   );

@@ -197,7 +197,7 @@ export abstract class BaseLinkManager {
     await this._linkProjects();
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).create();
 
     stopwatch.stop();
     // eslint-disable-next-line no-console

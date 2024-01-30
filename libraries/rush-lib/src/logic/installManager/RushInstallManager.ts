@@ -39,6 +39,7 @@ import type { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import type { BaseLinkManager } from '../base/BaseLinkManager';
 import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+import type { Subspace } from '../../api/Subspace';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
@@ -70,7 +71,10 @@ export class RushInstallManager extends BaseInstallManager {
     options: IInstallManagerOptions
   ) {
     super(rushConfiguration, rushGlobalFolder, purgeManager, options);
-    this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
+    this._tempProjectHelper = new TempProjectHelper(
+      this.rushConfiguration,
+      rushConfiguration.defaultSubspace
+    );
   }
 
   /**
@@ -82,6 +86,7 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   public async prepareCommonTempAsync(
+    subspace: Subspace,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -119,8 +124,8 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // dependency name --> version specifier
-    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration
-      .getCommonVersions(this.options.variant)
+    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration.defaultSubspace
+      .getCommonVersions()
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
@@ -145,8 +150,10 @@ export class RushInstallManager extends BaseInstallManager {
 
       // If there are orphaned projects, we need to update
       const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
-        this.rushConfiguration
+        this.rushConfiguration,
+        this.rushConfiguration.defaultSubspace
       );
+
       if (orphanedProjects.length > 0) {
         for (const orhpanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
@@ -368,7 +375,11 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, commonDependencies);
+    InstallHelpers.generateCommonPackageJson(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      commonDependencies
+    );
 
     stopwatch.stop();
     // eslint-disable-next-line no-console
@@ -428,8 +439,8 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected canSkipInstall(lastModifiedDate: Date): boolean {
-    if (!super.canSkipInstall(lastModifiedDate)) {
+  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
+    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
       return false;
     }
 
@@ -452,7 +463,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async installAsync(cleanInstall: boolean): Promise<void> {
+  protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -512,7 +523,7 @@ export class RushInstallManager extends BaseInstallManager {
               ` in ${this.rushConfiguration.commonTempFolder}`
           );
           const args: string[] = ['prune'];
-          this.pushConfigurationArgs(args, this.options);
+          this.pushConfigurationArgs(args, this.options, subspace);
 
           Utilities.executeCommandWithRetry(
             {
@@ -570,7 +581,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     // Run "npm install" in the common folder
     const installArgs: string[] = ['install'];
-    this.pushConfigurationArgs(installArgs, this.options);
+    this.pushConfigurationArgs(installArgs, this.options, subspace);
 
     // eslint-disable-next-line no-console
     console.log(
@@ -623,7 +634,7 @@ export class RushInstallManager extends BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log('\n' + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
-      this.pushConfigurationArgs(npmArgs, this.options);
+      this.pushConfigurationArgs(npmArgs, this.options, subspace);
       Utilities.executeCommand({
         command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
@@ -636,7 +647,7 @@ export class RushInstallManager extends BaseInstallManager {
     }
   }
 
-  protected async postInstallAsync(): Promise<void> {
+  protected async postInstallAsync(subspace: Subspace): Promise<void> {
     if (!this.options.noLink) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
       await linkManager.createSymlinksForProjects(false);

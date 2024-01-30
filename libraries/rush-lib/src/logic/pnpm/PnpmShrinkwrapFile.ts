@@ -27,6 +27,8 @@ import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
 import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
 import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
+import type { Subspace } from '../../api/Subspace';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -585,17 +587,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+  public findOrphanedProjects(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace
+  ): ReadonlyArray<string> {
     // The base shrinkwrap handles orphaned projects the same across all package managers,
     // but this is only valid for non-workspace installs
     if (!this.isWorkspaceCompatible) {
-      return super.findOrphanedProjects(rushConfiguration);
+      return super.findOrphanedProjects(rushConfiguration, subspace);
     }
 
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(rushConfiguration.commonTempFolder, importerKey);
+      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolder(), importerKey);
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -673,12 +678,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
+    subspace: Subspace,
     variant?: string
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      project.rushConfiguration.commonTempFolder,
+      subspace.getSubspaceTempFolder(),
       project.projectFolder
     );
+
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
     if (!importer) {
       return true;
@@ -689,15 +696,75 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Initialize the pnpmfile if it doesn't exist
     if (!this._pnpmfileConfiguration) {
-      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(project.rushConfiguration, {
-        variant
-      });
+      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
+        project.rushConfiguration,
+        subspace,
+        {
+          variant
+        }
+      );
+    }
+
+    let transformedPackageJson: IPackageJson = packageJson;
+
+    let subspacePnpmfile: IPnpmfile | undefined;
+    if (project.rushConfiguration.subspacesFeatureEnabled) {
+      // Get the pnpmfile
+      const subspacePnpmfilePath: string = path.join(
+        subspace.getSubspaceTempFolder(),
+        RushConstants.pnpmfileGlobalFilename
+      );
+
+      if (FileSystem.exists(subspacePnpmfilePath)) {
+        try {
+          subspacePnpmfile = require(subspacePnpmfilePath);
+        } catch (err) {
+          if (err instanceof SyntaxError) {
+            // eslint-disable-next-line no-console
+            console.error(
+              colors.red(
+                `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${subspacePnpmfilePath}\n`
+              )
+            );
+          } else {
+            // eslint-disable-next-line no-console
+            console.error(
+              colors.red(
+                `Error during pnpmfile execution. pnpmfile: "${subspacePnpmfilePath}". Error: "${err.message}".` +
+                  '\n'
+              )
+            );
+          }
+        }
+      }
+
+      if (subspacePnpmfile) {
+        const individualContext: IPnpmfileContext = {
+          log: (message: string) => {
+            // eslint-disable-next-line no-console
+            console.log(message);
+          }
+        };
+        try {
+          transformedPackageJson =
+            subspacePnpmfile.hooks?.readPackage?.(transformedPackageJson, individualContext) ||
+            transformedPackageJson;
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(
+            colors.red(
+              `Error during readPackage hook execution. pnpmfile: "${subspacePnpmfilePath}". Error: "${err.message}".` +
+                '\n'
+            )
+          );
+        }
+      }
     }
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
     const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
-      this._pnpmfileConfiguration.transform(packageJson),
+      this._pnpmfileConfiguration.transform(transformedPackageJson),
       project.packageJsonEditor.filePath
     );
 

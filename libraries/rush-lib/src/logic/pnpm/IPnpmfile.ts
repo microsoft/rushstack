@@ -4,6 +4,7 @@
 import type { LogBase } from '@pnpm/logger';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
@@ -20,6 +21,22 @@ export interface IPnpmfileShimSettings {
   userPnpmfilePath?: string;
 }
 
+export interface IWorkspaceProjectInfo
+  extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
+  packageVersion: RushConfigurationProject['packageJson']['version'];
+}
+
+/**
+ * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
+ * {@link IPnpmfileShim.hooks.afterAllResolved}.
+ */
+export interface ISubspacePnpmfileShimSettings {
+  semverPath: string;
+  workspaceProjects: Record<string, IWorkspaceProjectInfo>;
+  subspaceProjects: Record<string, IWorkspaceProjectInfo>;
+  userPnpmfilePath?: string;
+}
+
 /**
  * The `context` parameter passed to {@link IPnpmfile.hooks.readPackage}, as defined by the
  * pnpmfile API contract.
@@ -27,6 +44,7 @@ export interface IPnpmfileShimSettings {
 export interface IPnpmfileContext {
   log: (message: string) => void;
   pnpmfileShimSettings?: IPnpmfileShimSettings;
+  subspacePnpmfileShimSettings?: ISubspacePnpmfileShimSettings;
 }
 
 /**

@@ -8,22 +8,25 @@ import * as path from 'path';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from './RushConstants';
+import type { Subspace } from '../api/Subspace';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 /* eslint-disable no-bitwise */
 
 export class TempProjectHelper {
   private _rushConfiguration: RushConfiguration;
+  private _subspace: Subspace;
 
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration, subspace: Subspace) {
     this._rushConfiguration = rushConfiguration;
+    this._subspace = subspace;
   }
 
   /**
    * Deletes the existing tarball and creates a tarball for the given rush project
    */
   public createTempProjectTarball(rushProject: RushConfigurationProject): void {
-    FileSystem.ensureFolder(path.resolve(this._rushConfiguration.commonTempFolder, 'projects'));
+    FileSystem.ensureFolder(path.resolve(this._subspace.getSubspaceTempFolder(), 'projects'));
     const tarballFile: string = this.getTarballFilePath(rushProject);
     const tempProjectFolder: string = this.getTempProjectFolder(rushProject);
 
@@ -61,7 +64,7 @@ export class TempProjectHelper {
    */
   public getTarballFilePath(project: RushConfigurationProject): string {
     return path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._subspace.getSubspaceTempFolder(),
       RushConstants.rushTempProjectsFolderName,
       `${project.unscopedTempProjectName}.tgz`
     );
@@ -70,7 +73,7 @@ export class TempProjectHelper {
   public getTempProjectFolder(rushProject: RushConfigurationProject): string {
     const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
     return path.join(
-      this._rushConfiguration.commonTempFolder,
+      this._subspace.getSubspaceTempFolder(),
       RushConstants.rushTempProjectsFolderName,
       unscopedTempProjectName
     );
