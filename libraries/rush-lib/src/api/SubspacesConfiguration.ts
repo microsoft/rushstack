@@ -147,18 +147,27 @@ export class SubspacesConfiguration {
     return SubspacesConfiguration.tryLoadFromConfigurationFile(subspaceJsonLocation);
   }
 
-  public static convertNameToEnvironmentVariable(
+  /**
+   * Returns a name of the form `_RUSH_SUBSPACE_XYZ_TEMP_FOLDER` where `XYZ` is
+   * derived from the subspace name.
+   *
+   * @internal
+   */
+  public static _convertNameToEnvironmentVariable(
     subspaceName: string,
-    splitWorkspaceCompatibility: boolean = false
+    splitWorkspaceCompatibility: boolean
   ): string {
+    let formattedSubspaceName: string;
     if (splitWorkspaceCompatibility) {
       // Convert all special characters according to utf-8character map
-      let formattedSubspaceName: string = subspaceName.replace(/_/g, '_x45');
+      formattedSubspaceName = subspaceName.replace(/_/g, '_x45');
       formattedSubspaceName = formattedSubspaceName.replace(/\+/g, '_x43');
       formattedSubspaceName = formattedSubspaceName.replace(/-/g, '_x95');
-      return formattedSubspaceName.toUpperCase();
+      formattedSubspaceName = formattedSubspaceName.toUpperCase();
     } else {
-      return subspaceName.replace(/-/g, '_').toUpperCase();
+      formattedSubspaceName = subspaceName.replace(/-/g, '_').toUpperCase();
     }
+
+    return `_RUSH_SUBSPACE_${formattedSubspaceName}_TEMP_FOLDER`;
   }
 }

@@ -1373,8 +1373,8 @@ export class Subspace {
 
 // @beta
 export class SubspacesConfiguration {
-    // (undocumented)
-    static convertNameToEnvironmentVariable(subspaceName: string, splitWorkspaceCompatibility?: boolean): string;
+    // @internal
+    static _convertNameToEnvironmentVariable(subspaceName: string, splitWorkspaceCompatibility: boolean): string;
     readonly enabled: boolean;
     static explainIfInvalidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): string | undefined;
     static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;

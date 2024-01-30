@@ -46,7 +46,6 @@ import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
-import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 
 /**
@@ -401,12 +400,13 @@ export abstract class BaseInstallManager {
       console.log(colors.bold('Using the default variant for installation.'));
     }
 
-    const subspaceEnvironmentVariable: string = `_RUSH_SUBSPACE_${SubspacesConfiguration.convertNameToEnvironmentVariable(
-      subspace.subspaceName,
-      this.rushConfiguration.subspacesFeatureEnabled
-    )}_TEMP_FOLDER`;
     const extraNpmrcLines: string[] = [];
     if (this.options.selectedSubspace) {
+      const subspaceEnvironmentVariable: string = SubspacesConfiguration._convertNameToEnvironmentVariable(
+        subspace.subspaceName,
+        this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility ?? false
+      );
+
       // Look for a global .npmrc-global file
       const globalNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc-global`;
       if (FileSystem.exists(globalNpmrcPath)) {
