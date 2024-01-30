@@ -246,12 +246,7 @@ export abstract class BaseInstallManager {
 
       // Always update the state file if running "rush update"
       if (this.options.allowShrinkwrapUpdates) {
-        // Currently, only support saving the preferred versions hash if using workspaces
-        const commonVersions: CommonVersionsConfiguration | undefined = useWorkspaces
-          ? subspace.getCommonVersions()
-          : undefined;
-
-        if (subspace.getRepoState().refreshState(this.rushConfiguration, commonVersions)) {
+        if (subspace.getRepoState().refreshState(this.rushConfiguration, subspace)) {
           // eslint-disable-next-line no-console
           console.log(
             colors.yellow(

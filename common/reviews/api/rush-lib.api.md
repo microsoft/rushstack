@@ -1036,7 +1036,7 @@ export class RepoStateFile {
     static loadFromFile(jsonFilename: string): RepoStateFile;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
-    refreshState(rushConfiguration: RushConfiguration, commonVersions: CommonVersionsConfiguration | undefined): boolean;
+    refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined): boolean;
 }
 
 // @public
