@@ -9,7 +9,7 @@
   /**
    * Set this flag to "true" to enable usage of subspaces.
    */
-  "enabled": false,
+  "subspacesEnabled": false,
 
   /**
    * (DEPRECATED) This is a temporary workaround for migrating from an earlier prototype
