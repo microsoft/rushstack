@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 31 Jan 2024 22:25:55 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Jan 2024 22:49:17 GMT and should not be manually modified.
+
+## 5.113.4
+Wed, 31 Jan 2024 22:49:17 GMT
+
+### Updates
+
+- Introduce an explicit warning message during `rush install` or `rush update` about `dependenciesMeta` not being up-to-date.
 
 ## 5.113.3
 Wed, 31 Jan 2024 22:25:55 GMT

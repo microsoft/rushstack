@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.113.4",
+      "tag": "@microsoft/rush_v5.113.4",
+      "date": "Wed, 31 Jan 2024 22:49:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Introduce an explicit warning message during `rush install` or `rush update` about `dependenciesMeta` not being up-to-date."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.113.3",
       "tag": "@microsoft/rush_v5.113.3",
       "date": "Wed, 31 Jan 2024 22:25:55 GMT",
