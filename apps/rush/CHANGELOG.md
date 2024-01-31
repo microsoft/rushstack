@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 31 Jan 2024 07:07:50 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Jan 2024 18:45:33 GMT and should not be manually modified.
+
+## 5.113.2
+Wed, 31 Jan 2024 18:45:33 GMT
+
+### Updates
+
+- Fix some minor issues when the experimental subspaces feature is enabled
 
 ## 5.113.1
 Wed, 31 Jan 2024 07:07:50 GMT
