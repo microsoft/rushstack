@@ -145,6 +145,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       path.join(subspace.getSubspaceTempFolder(), 'pnpm-workspace.yaml')
     );
 
+    // For pnpm pacakge manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
+    // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
+    // Build a object for dependenciesMeta settings in projects' package.jsons
+    // key is the package path, value is the dependenciesMeta info for that package
+    const expectedDependenciesMetaByProjectRelativePath: Record<string, IDependenciesMetaTable> = {};
+    const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
+    const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
+    // get the relative path from common temp folder to repo root folder
+    const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
+
     // Loop through the projects and add them to the workspace file. While we're at it, also validate that
     // referenced workspace projects are valid, and check if the shrinkwrap file is already up-to-date.
     for (const rushProject of this.rushConfiguration.projects) {
@@ -253,61 +263,44 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
         shrinkwrapIsUpToDate = false;
       }
-    }
 
-    // For pnpm pacakge manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
-    // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      // First, build a object for dependenciesMeta settings in package.json
-      // key is the package path, value is the dependenciesMeta info for that package
-      const packagePathToDependenciesMetaInPackageJson: { [key: string]: IDependenciesMetaTable } = {};
-      const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
-      const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
-
-      // get the relative path from common temp folder to repo root folder
-      const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);
-      for (const rushProject of this.rushConfiguration.projects) {
-        if (!subspace.contains(rushProject)) {
-          // skip processing any project that isn't in this subspace
-          continue;
+      const dependencyMetaList: ReadonlyArray<PackageJsonDependencyMeta> = packageJson.dependencyMetaList;
+      if (dependencyMetaList.length !== 0) {
+        const dependenciesMeta: IDependenciesMetaTable = {};
+        for (const dependencyMeta of dependencyMetaList) {
+          dependenciesMeta[dependencyMeta.name] = {
+            injected: dependencyMeta.injected
+          };
         }
-        const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
-        const projectRelativeFolder: string = rushProject.projectRelativeFolder;
 
         // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
-        const relativePathFromTempFolderToPackageFolder: string =
-          relativeFromTempFolderToRootFolder + '/' + projectRelativeFolder;
-        const dependencyMetaList: ReadonlyArray<PackageJsonDependencyMeta> = packageJson.dependencyMetaList;
+        const relativePathFromTempFolderToPackageFolder: string = `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`;
+        expectedDependenciesMetaByProjectRelativePath[relativePathFromTempFolderToPackageFolder] =
+          dependenciesMeta;
+      }
+    }
 
-        if (dependencyMetaList.length !== 0) {
-          const dependenciesMeta: IDependenciesMetaTable = {};
-          for (const dependencyMeta of dependencyMetaList) {
-            dependenciesMeta[dependencyMeta.name] = {
-              injected: dependencyMeta.injected
-            };
-          }
-          packagePathToDependenciesMetaInPackageJson[relativePathFromTempFolderToPackageFolder] =
-            dependenciesMeta;
+    // Build a object for dependenciesMeta settings in pnpm-lock.yaml
+    // key is the package path, value is the dependenciesMeta info for that package
+    const lockfileDependenciesMetaByProjectRelativePath: { [key: string]: IDependenciesMetaTable } = {};
+    if (shrinkwrapFile?.importers !== undefined) {
+      for (const [key, value] of shrinkwrapFile?.importers) {
+        if (value.dependenciesMeta !== undefined) {
+          lockfileDependenciesMetaByProjectRelativePath[key] = value.dependenciesMeta;
         }
       }
+    }
 
-      // Second, build a object for dependenciesMeta settings in pnpm-lock.yaml
-      // key is the package path, value is the dependenciesMeta info for that package
-      const packagePathToDependenciesMetaInShrinkwrapFile: { [key: string]: IDependenciesMetaTable } = {};
-      if (shrinkwrapFile?.importers !== undefined) {
-        for (const [key, value] of shrinkwrapFile?.importers) {
-          if (value.dependenciesMeta !== undefined) {
-            packagePathToDependenciesMetaInShrinkwrapFile[key] = value.dependenciesMeta;
-          }
-        }
-      }
-
-      // Now, we compare these two objects to see if they are equal or not
-      shrinkwrapIsUpToDate =
-        objectsAreDeepEqual(
-          packagePathToDependenciesMetaInPackageJson,
-          packagePathToDependenciesMetaInShrinkwrapFile
-        ) && shrinkwrapIsUpToDate;
+    // Now, we compare these two objects to see if they are equal or not
+    const dependenciesMetaAreEqual: boolean = objectsAreDeepEqual(
+      expectedDependenciesMetaByProjectRelativePath,
+      lockfileDependenciesMetaByProjectRelativePath
+    );
+    if (!dependenciesMetaAreEqual) {
+      shrinkwrapWarnings.push(
+        "The dependenciesMeta settings in one or more package.json don't match the current shrinkwrap."
+      );
+      shrinkwrapIsUpToDate = false;
     }
 
     // Write the common package.json
