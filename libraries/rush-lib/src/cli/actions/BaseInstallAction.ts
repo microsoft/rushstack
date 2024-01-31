@@ -167,6 +167,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
                 ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
             )
           );
+          throw new AlreadyReportedError();
         }
       }
     }
