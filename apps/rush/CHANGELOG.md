@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 31 Jan 2024 18:45:33 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Jan 2024 22:25:55 GMT and should not be manually modified.
+
+## 5.113.3
+Wed, 31 Jan 2024 22:25:55 GMT
+
+### Updates
+
+- Fix an issue where `rush update` would sometimes not correctly sync the `pnpm-lock.yaml` file back to `common/config/rush/` after a project's `package.json` has been updated.
 
 ## 5.113.2
 Wed, 31 Jan 2024 18:45:33 GMT
