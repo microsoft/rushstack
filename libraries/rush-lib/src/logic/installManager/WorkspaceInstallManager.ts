@@ -303,10 +303,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now, we compare these two objects to see if they are equal or not
-      shrinkwrapIsUpToDate = objectsAreDeepEqual(
-        packagePathToDependenciesMetaInPackageJson,
-        packagePathToDependenciesMetaInShrinkwrapFile
-      );
+      shrinkwrapIsUpToDate =
+        objectsAreDeepEqual(
+          packagePathToDependenciesMetaInPackageJson,
+          packagePathToDependenciesMetaInShrinkwrapFile
+        ) && shrinkwrapIsUpToDate;
     }
 
     // Write the common package.json
