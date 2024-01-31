@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Minor fixes for subspaces",
+      "comment": "Fix some minor issues when the experimental subspaces feature is enabled",
       "type": "none"
     }
   ],
