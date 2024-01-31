@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix issues with subspace targeted installs",
+      "comment": "(EXPERIMENTAL) Enable filtered installs of subspaces and add a \"preventSelectingAllSubspaces\" setting",
       "type": "none"
     }
   ],
