@@ -292,11 +292,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // Now, we compare these two objects to see if they are equal or not
-    shrinkwrapIsUpToDate =
-      objectsAreDeepEqual(
-        expectedDependenciesMetaByProjectRelativePath,
-        lockfileDependenciesMetaByProjectRelativePath
-      ) && shrinkwrapIsUpToDate;
+    const dependenciesMetaAreEqual: boolean = objectsAreDeepEqual(
+      expectedDependenciesMetaByProjectRelativePath,
+      lockfileDependenciesMetaByProjectRelativePath
+    );
+    if (!dependenciesMetaAreEqual) {
+      shrinkwrapWarnings.push(
+        "The dependenciesMeta settings in one or more package.json don't match the current shrinkwrap."
+      );
+      shrinkwrapIsUpToDate = false;
+    }
 
     // Write the common package.json
     InstallHelpers.generateCommonPackageJson(this.rushConfiguration, subspace, undefined);
