@@ -1,0 +1,4 @@
+# This project's outputs are tracked to surface changes to API Extractor rollups during PRs
+!dist
+dist/*
+!dist/*.d.ts

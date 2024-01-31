@@ -960,6 +960,42 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
+  ../../build-tests/api-extractor-lib4-test:
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@types/jest':
+        specifier: 29.2.5
+        version: 29.2.5
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      fs-extra:
+        specifier: ~7.0.1
+        version: 7.0.1
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+
+  ../../build-tests/api-extractor-lib5-test:
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@types/jest':
+        specifier: 29.2.5
+        version: 29.2.5
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      fs-extra:
+        specifier: ~7.0.1
+        version: 7.0.1
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+
   ../../build-tests/api-extractor-scenarios:
     dependencies:
       api-extractor-lib1-test:
@@ -971,6 +1007,12 @@ importers:
       api-extractor-lib3-test:
         specifier: workspace:*
         version: link:../api-extractor-lib3-test
+      api-extractor-lib4-test:
+        specifier: workspace:*
+        version: link:../api-extractor-lib4-test
+      api-extractor-lib5-test:
+        specifier: workspace:*
+        version: link:../api-extractor-lib5-test
     devDependencies:
       '@microsoft/api-extractor':
         specifier: workspace:*
@@ -1784,7 +1826,7 @@ importers:
         version: 29.5.11
       '@types/node':
         specifier: ts4.9
-        version: 20.11.11
+        version: 20.11.13
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -11545,8 +11587,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.11.11:
-    resolution: {integrity: sha512-PlJCXfb57Jrman0H1BxO2+Q7qwih2Mwk7T6Gvixj+SK4mqs4RWOGMMoP6p/LFa3UrP2CZOO6ai6otd7J/TB6Ug==}
+  /@types/node@20.11.13:
+    resolution: {integrity: sha512-5G4zQwdiQBSWYTDAH1ctw2eidqdhMJaNsiIDKHFr55ihz5Trl2qqR8fdrT732yPBho5gkNxXm67OxWFBqX9aPg==}
     dependencies:
       undici-types: 5.26.5
     dev: true

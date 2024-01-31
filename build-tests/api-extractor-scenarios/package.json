@@ -12,7 +12,9 @@
   "dependencies": {
     "api-extractor-lib1-test": "workspace:*",
     "api-extractor-lib2-test": "workspace:*",
-    "api-extractor-lib3-test": "workspace:*"
+    "api-extractor-lib3-test": "workspace:*",
+    "api-extractor-lib4-test": "workspace:*",
+    "api-extractor-lib5-test": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",

@@ -1,7 +1,7 @@
 import { Lib3Class } from 'api-extractor-lib3-test/lib/index';
 
 /** @public */
-export declare function f(arg1: Lib1Class, arg2: Lib2Class, arg3: Lib3Class): void;
+export declare function f(arg1: Lib1Class, arg2: Lib2Class, arg3: Lib3Class, arg4: Lib4Enum): void;
 
 /** @public */
 export declare class Lib1Class extends Lib1ForgottenExport {
@@ -18,5 +18,15 @@ export declare class Lib2Class {
 }
 
 export { Lib3Class }
+
+/** @public */
+export declare enum Lib4Enum {
+    Foo = "Foo",
+    Bar = "Bar",
+    Baz = "Baz"
+}
+
+/** @public */
+export declare function lib5Function(): number;
 
 export { }

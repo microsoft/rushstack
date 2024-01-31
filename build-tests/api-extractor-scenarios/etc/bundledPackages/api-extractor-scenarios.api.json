@@ -206,6 +206,15 @@
             },
             {
               "kind": "Content",
+              "text": ", arg4: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Lib4Enum",
+              "canonicalReference": "api-extractor-scenarios!Lib4Enum:enum"
+            },
+            {
+              "kind": "Content",
               "text": "): "
             },
             {
@@ -219,8 +228,8 @@
           ],
           "fileUrlPath": "src/bundledPackages/index.ts",
           "returnTypeTokenRange": {
-            "startIndex": 7,
-            "endIndex": 8
+            "startIndex": 9,
+            "endIndex": 10
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
@@ -246,6 +255,14 @@
               "parameterTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "arg4",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 8
               },
               "isOptional": false
             }
@@ -392,6 +409,114 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Enum",
+          "canonicalReference": "api-extractor-scenarios!Lib4Enum:enum",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare enum Lib4Enum "
+            }
+          ],
+          "fileUrlPath": "../api-extractor-lib4-test/src/index.ts",
+          "releaseTag": "Public",
+          "name": "Lib4Enum",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!Lib4Enum.Bar:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "Bar = "
+                },
+                {
+                  "kind": "Content",
+                  "text": "\"Bar\""
+                }
+              ],
+              "initializerTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "name": "Bar"
+            },
+            {
+              "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!Lib4Enum.Baz:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "Baz = "
+                },
+                {
+                  "kind": "Content",
+                  "text": "\"Baz\""
+                }
+              ],
+              "initializerTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "name": "Baz"
+            },
+            {
+              "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!Lib4Enum.Foo:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "Foo = "
+                },
+                {
+                  "kind": "Content",
+                  "text": "\"Foo\""
+                }
+              ],
+              "initializerTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "name": "Foo"
+            }
+          ]
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!lib5Function:function(1)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function lib5Function(): "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "../api-extractor-lib5-test/src/index.ts",
+          "returnTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "lib5Function"
         }
       ]
     }
