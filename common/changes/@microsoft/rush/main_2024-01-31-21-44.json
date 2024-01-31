@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush update` would sometimes not correctly sync the `pnpm-lock.yaml` file back to `common/config/rush/` after a project's `package.json` has been updated.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
