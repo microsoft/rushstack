@@ -123,7 +123,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       // eslint-disable-next-line no-console
       console.log(
         colors.red(
-          `The "--subspace" parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+          `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
         )
       );
       throw new AlreadyReportedError();

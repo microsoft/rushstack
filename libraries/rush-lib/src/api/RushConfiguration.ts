@@ -353,7 +353,7 @@ export class RushConfiguration {
   public readonly subspacesConfiguration: SubspacesConfiguration | undefined;
 
   /**
-   * Returns true if subspaces.json is present with "enabled=true".
+   * Returns true if subspaces.json is present with "subspacesEnabled=true".
    */
   public readonly subspacesFeatureEnabled: boolean;
 
