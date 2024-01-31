@@ -151,7 +151,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         }
       } else if (this._subspaceParameter.value) {
         // Selecting a single subspace
-        const selectedSubspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
+        const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
         selectedSubspaces = new Set<Subspace>([selectedSubspace]);
       } else {
         // Selecting all subspaces if preventSelectingAllSubspaces is not enabled in subspaces.json
