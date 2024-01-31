@@ -2483,7 +2483,7 @@ packages:
     hasBin: true
 
   /json-buffer@3.0.0:
-    resolution: {integrity: sha512-CuUqjv0FUZIdXkHPI8MezCnFCdaTAacej1TZYulLoAg1h/PhwkdXFN4V/gzY4g+fMBCOV2xF+rp7t2XD2ns/NQ==}
+    resolution: {integrity: sha1-Wx85evx11ne96Lz8Dkfh+aPZqJg=}
 
   /json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
@@ -4254,10 +4254,10 @@ packages:
     dependencies:
       '@pnpm/dependency-path': 2.1.2
       '@pnpm/link-bins': 5.3.25
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.14.7.tgz(@types/node@18.17.15)
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.64.2.tgz(@types/node@18.17.15)
-      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.1.21.tgz(@types/node@18.17.15)
-      '@rushstack/package-extractor': file:../temp/tarballs/rushstack-package-extractor-0.6.23.tgz(@types/node@18.17.15)
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.14.4.tgz(@types/node@18.17.15)
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.63.0.tgz(@types/node@18.17.15)
+      '@rushstack/package-deps-hash': file:../temp/tarballs/rushstack-package-deps-hash-4.1.18.tgz(@types/node@18.17.15)
+      '@rushstack/package-extractor': file:../temp/tarballs/rushstack-package-extractor-0.6.20.tgz(@types/node@18.17.15)
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.5.1.tgz
       '@rushstack/stream-collator': file:../temp/tarballs/rushstack-stream-collator-4.1.21.tgz(@types/node@18.17.15)
       '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.7.20.tgz(@types/node@18.17.15)
@@ -4277,6 +4277,7 @@ packages:
       inquirer: 7.3.3
       js-yaml: 3.13.1
       node-fetch: 2.6.7
+      normalize-path: 3.0.0
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
       read-package-tree: 5.1.6
@@ -4550,11 +4551,11 @@ packages:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.64.2.tgz(@types/node@18.17.15)
     dev: true
 
-  file:../temp/tarballs/rushstack-package-deps-hash-4.1.21.tgz(@types/node@18.17.15):
-    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.1.21.tgz}
-    id: file:../temp/tarballs/rushstack-package-deps-hash-4.1.21.tgz
+  file:../temp/tarballs/rushstack-package-deps-hash-4.1.18.tgz(@types/node@18.17.15):
+    resolution: {tarball: file:../temp/tarballs/rushstack-package-deps-hash-4.1.18.tgz}
+    id: file:../temp/tarballs/rushstack-package-deps-hash-4.1.18.tgz
     name: '@rushstack/package-deps-hash'
-    version: 4.1.21
+    version: 4.1.18
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.64.2.tgz(@types/node@18.17.15)
     transitivePeerDependencies:

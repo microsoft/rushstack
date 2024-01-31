@@ -6,6 +6,7 @@ import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class UpdateAction extends BaseInstallAction {
   private readonly _fullParameter: CommandLineFlagParameter;
@@ -30,6 +31,17 @@ export class UpdateAction extends BaseInstallAction {
         ' -- for details, see the command help for "rush install".',
       parser
     });
+
+    if (this.rushConfiguration?.subspacesFeatureEnabled) {
+      // Partial update is supported only when subspaces is enabled.
+      this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+        // Include lockfile processing since this expands the selection, and we need to select
+        // at least the same projects selected with the same query to "rush build"
+        includeExternalDependencies: true,
+        // Disable filtering because rush-project.json is riggable and therefore may not be available
+        enableFiltering: false
+      });
+    }
 
     this._fullParameter = this.defineFlagParameter({
       parameterLongName: '--full',
@@ -78,8 +90,11 @@ export class UpdateAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      pnpmFilterArguments: [],
+      // These are derived independently of the selection for command line brevity
+      pnpmFilterArguments:
+        (await this._selectionParameters?.getPnpmFilterArgumentsAsync(this._terminal)) || [],
       checkOnly: false,
+      subspace: this.getTargetSubspace(),
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };

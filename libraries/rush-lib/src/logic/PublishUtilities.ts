@@ -37,7 +37,7 @@ interface IAddChangeOptions {
   change: IChangeInfo;
   changeFilePath?: string;
   allChanges: IChangeRequests;
-  allPackages: Map<string, RushConfigurationProject>;
+  allPackages: ReadonlyMap<string, RushConfigurationProject>;
   rushConfiguration: RushConfiguration;
   prereleaseToken?: PrereleaseToken;
   projectsToExclude?: Set<string>;
@@ -50,7 +50,7 @@ export class PublishUtilities {
    * @returns Dictionary of all change requests, keyed by package name.
    */
   public static async findChangeRequestsAsync(
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
@@ -196,7 +196,7 @@ export class PublishUtilities {
    */
   public static updatePackages(
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
@@ -378,7 +378,7 @@ export class PublishUtilities {
   private static _writePackageChanges(
     change: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
@@ -456,7 +456,7 @@ export class PublishUtilities {
   }
 
   private static _isCyclicDependency(
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     packageName: string,
     dependencyName: string
   ): boolean {
@@ -468,7 +468,7 @@ export class PublishUtilities {
     packageName: string,
     dependencies: { [key: string]: string } | undefined,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
@@ -700,7 +700,7 @@ export class PublishUtilities {
   private static _updateDownstreamDependencies(
     change: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
@@ -750,7 +750,7 @@ export class PublishUtilities {
     dependencies: { [packageName: string]: string } | undefined,
     change: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
@@ -831,7 +831,7 @@ export class PublishUtilities {
     dependencyName: string,
     dependencyChange: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
     let currentDependencyVersion: string | undefined = dependencies[dependencyName];

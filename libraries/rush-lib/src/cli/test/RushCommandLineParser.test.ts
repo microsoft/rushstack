@@ -103,7 +103,8 @@ async function getCommandLineParserInstanceAsync(
 
   // Bulk tasks are hard-coded to expect install to have been completed. So, ensure the last-link.flag
   // file exists and is valid
-  LastLinkFlagFactory.getCommonTempFlag(parser.rushConfiguration).create();
+  // TODO: Support subspaces
+  LastLinkFlagFactory.getCommonTempFlag(parser.rushConfiguration.defaultSubspace).create();
 
   // Mock the command
   process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];
