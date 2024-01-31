@@ -1310,7 +1310,10 @@ export class RushConfiguration {
     const subspace: Subspace | undefined = this._subspacesByName.get(subspaceName);
     if (!subspace) {
       // If the name is not even valid, that is more important information than if the subspace doesn't exist
-      SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.subspacesFeatureEnabled);
+      SubspacesConfiguration.requireValidSubspaceName(
+        subspaceName,
+        this.subspacesConfiguration?.splitWorkspaceCompatibility
+      );
     }
     return subspace;
   }

@@ -67,7 +67,7 @@ export class SubspacesConfiguration {
     this.preventSelectingAllSubspaces = !!configuration.preventSelectingAllSubspaces;
     const subspaceNames: Set<string> = new Set();
     for (const subspaceName of configuration.subspaceNames) {
-      SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.subspacesEnabled);
+      SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.splitWorkspaceCompatibility);
 
       subspaceNames.add(subspaceName);
     }
