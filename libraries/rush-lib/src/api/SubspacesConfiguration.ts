@@ -23,6 +23,7 @@ export const SPLIT_WORKSPACE_SUBSPACE_NAME_REGEXP: RegExp = /^[a-z0-9][+_\-a-z0-
 interface ISubspacesConfigurationJson {
   enabled: boolean;
   splitWorkspaceCompatibility?: boolean;
+  preventSelectingAllSubspaces?: boolean;
   subspaceNames: string[];
 }
 
@@ -50,6 +51,11 @@ export class SubspacesConfiguration {
   public readonly splitWorkspaceCompatibility: boolean;
 
   /**
+   * This determines if selectors are required when installing and building
+   */
+  public readonly preventSelectingAllSubspaces: boolean;
+
+  /**
    * A set of the available subspaces
    */
   public readonly subspaceNames: ReadonlySet<string>;
@@ -58,6 +64,7 @@ export class SubspacesConfiguration {
     this.subspaceJsonFilePath = subspaceJsonFilePath;
     this.enabled = configuration.enabled;
     this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
+    this.preventSelectingAllSubspaces = !!configuration.preventSelectingAllSubspaces;
     const subspaceNames: Set<string> = new Set();
     for (const subspaceName of configuration.subspaceNames) {
       SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.enabled);

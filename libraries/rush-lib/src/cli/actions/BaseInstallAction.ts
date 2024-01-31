@@ -8,7 +8,12 @@ import type {
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
+import {
+  ConsoleTerminalProvider,
+  type ITerminal,
+  Terminal,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -112,6 +117,17 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected getTargetSubspace(): Subspace {
     const parameterValue: string | undefined = this._subspaceParameter.value;
+    if (parameterValue && !this.rushConfiguration.subspacesFeatureEnabled) {
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(
+        colors.red(
+          `The "--subspace" parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
+        )
+      );
+      throw new AlreadyReportedError();
+    }
     const selectedSubspace: Subspace | undefined = parameterValue
       ? this.rushConfiguration.getSubspace(parameterValue)
       : this.rushConfiguration.defaultSubspace;
@@ -123,13 +139,35 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
-    if (installManagerOptions.pnpmFilterArguments.length && this.rushConfiguration.subspacesFeatureEnabled) {
-      const selectedProjects: Set<RushConfigurationProject> | undefined =
-        await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
-      if (selectedProjects) {
-        selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
+    if (this.rushConfiguration.subspacesFeatureEnabled) {
+      if (installManagerOptions.pnpmFilterArguments.length) {
+        // Selecting a set of subspaces
+        const selectedProjects: Set<RushConfigurationProject> | undefined =
+          await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
+        if (selectedProjects) {
+          selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
+        } else {
+          throw new Error('The specified filter arguments resulted in no projects being selected.');
+        }
+      } else if (this._subspaceParameter.value) {
+        // Selecting a single subspace
+        const selectedSubspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
+        selectedSubspaces = new Set<Subspace>([selectedSubspace]);
       } else {
-        throw new Error('The specified filter arguments resulted in no projects being selected.');
+        // Selecting all subspaces if preventSelectingAllSubspaces is not enabled in subspaces.json
+        if (!this.rushConfiguration.subspacesConfiguration?.preventSelectingAllSubspaces) {
+          selectedSubspaces = new Set<Subspace>(this.rushConfiguration.subspaces);
+        } else {
+          // eslint-disable-next-line no-console
+          console.log();
+          // eslint-disable-next-line no-console
+          console.log(
+            colors.red(
+              `The subspaces preventSelectingAllSubspaces configuration is enabled, which enforces installation for a specified set of subspace,` +
+                ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
+            )
+          );
+        }
       }
     }
 
@@ -141,12 +179,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
           subspace
         });
       }
-    } else if (this._subspaceParameter.value) {
-      const subspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
-      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
-        variant: this._variant.value,
-        subspace: subspace
-      });
     } else {
       VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
         variant: this._variant.value

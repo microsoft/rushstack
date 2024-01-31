@@ -1377,6 +1377,7 @@ export class SubspacesConfiguration {
     static _convertNameToEnvironmentVariable(subspaceName: string, splitWorkspaceCompatibility: boolean): string;
     readonly enabled: boolean;
     static explainIfInvalidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): string | undefined;
+    readonly preventSelectingAllSubspaces: boolean;
     static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;
     readonly splitWorkspaceCompatibility: boolean;
     readonly subspaceJsonFilePath: string;

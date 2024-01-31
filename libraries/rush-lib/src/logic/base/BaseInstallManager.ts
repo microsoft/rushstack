@@ -119,31 +119,6 @@ export abstract class BaseInstallManager {
       );
       throw new AlreadyReportedError();
     }
-    // Ensure that subspaces is enabled
-
-    if (this.rushConfiguration.subspacesFeatureEnabled && !this.options.subspace) {
-      // Temporarily ensure that a subspace is provided
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          `The subspaces feature currently only supports installing for a specified set of subspace,` +
-            ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
-        )
-      );
-      throw new AlreadyReportedError();
-    } else if (this.options.subspace && !this.rushConfiguration.subspacesFeatureEnabled) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(
-        colors.red(
-          `The "--subspace" parameter can only be passed if the "enabled" option is enabled in subspaces.json.`
-        )
-      );
-      throw new AlreadyReportedError();
-    }
 
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
     if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
