@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.113.1",
+      "tag": "@microsoft/rush_v5.113.1",
+      "date": "Wed, 31 Jan 2024 07:07:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Enable filtered installs of subspaces and add a \"preventSelectingAllSubspaces\" setting"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.113.0",
       "tag": "@microsoft/rush_v5.113.0",
       "date": "Tue, 30 Jan 2024 22:58:52 GMT",

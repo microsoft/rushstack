@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 30 Jan 2024 22:58:52 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Jan 2024 07:07:50 GMT and should not be manually modified.
+
+## 5.113.1
+Wed, 31 Jan 2024 07:07:50 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Enable filtered installs of subspaces and add a "preventSelectingAllSubspaces" setting
 
 ## 5.113.0
 Tue, 30 Jan 2024 22:58:52 GMT
