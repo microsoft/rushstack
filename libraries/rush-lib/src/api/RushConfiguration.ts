@@ -353,7 +353,7 @@ export class RushConfiguration {
   public readonly subspacesConfiguration: SubspacesConfiguration | undefined;
 
   /**
-   * Returns true if subspaces.json is present with "enabled=true".
+   * Returns true if subspaces.json is present with "subspacesEnabled=true".
    */
   public readonly subspacesFeatureEnabled: boolean;
 
@@ -633,7 +633,7 @@ export class RushConfiguration {
 
     // Try getting a subspace configuration
     this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
-    this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.enabled;
+    this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.subspacesEnabled;
 
     this._subspacesByName = new Map();
 
@@ -860,7 +860,7 @@ export class RushConfiguration {
     // Build the subspaces map
     const subspaceNames: string[] = [];
     let splitWorkspaceCompatibility: boolean = false;
-    if (this.subspacesConfiguration?.enabled) {
+    if (this.subspacesConfiguration?.subspacesEnabled) {
       splitWorkspaceCompatibility = this.subspacesConfiguration.splitWorkspaceCompatibility;
 
       subspaceNames.push(...this.subspacesConfiguration.subspaceNames);
@@ -1310,7 +1310,10 @@ export class RushConfiguration {
     const subspace: Subspace | undefined = this._subspacesByName.get(subspaceName);
     if (!subspace) {
       // If the name is not even valid, that is more important information than if the subspace doesn't exist
-      SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.subspacesFeatureEnabled);
+      SubspacesConfiguration.requireValidSubspaceName(
+        subspaceName,
+        this.subspacesConfiguration?.splitWorkspaceCompatibility
+      );
     }
     return subspace;
   }

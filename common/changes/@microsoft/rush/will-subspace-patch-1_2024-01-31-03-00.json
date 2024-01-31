@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(EXPERIMENTAL) Enable filtered installs of subspaces and add a \"preventSelectingAllSubspaces\" setting",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
