@@ -633,7 +633,7 @@ export class RushConfiguration {
 
     // Try getting a subspace configuration
     this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
-    this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.enabled;
+    this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.subspacesEnabled;
 
     this._subspacesByName = new Map();
 
@@ -860,7 +860,7 @@ export class RushConfiguration {
     // Build the subspaces map
     const subspaceNames: string[] = [];
     let splitWorkspaceCompatibility: boolean = false;
-    if (this.subspacesConfiguration?.enabled) {
+    if (this.subspacesConfiguration?.subspacesEnabled) {
       splitWorkspaceCompatibility = this.subspacesConfiguration.splitWorkspaceCompatibility;
 
       subspaceNames.push(...this.subspacesConfiguration.subspaceNames);
