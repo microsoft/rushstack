@@ -20,22 +20,22 @@ Object {
   "entrypoints": Object {
     "main": Object {
       "localizedAssets": Object {
-        "LOCALE1": "main-LOCALE1-83f6b4313f770492c48c.js",
-        "LOCALE2": "main-LOCALE2-83f6b4313f770492c48c.js",
+        "LOCALE1": "main-LOCALE1-3cbc930b5f99a71a9557.js",
+        "LOCALE2": "main-LOCALE2-ba8327e9cbb975e3da43.js",
       },
     },
   },
   "namedChunkGroups": Object {
     "asyncLoc1": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc1-LOCALE1-3bacd1d3213fe0fdaab4.js",
-        "LOCALE2": "chunks/asyncLoc1-LOCALE2-3bacd1d3213fe0fdaab4.js",
+        "LOCALE1": "chunks/asyncLoc1-LOCALE1-168f848b770aa62ad17d.js",
+        "LOCALE2": "chunks/asyncLoc1-LOCALE2-14e0a3b5691b9628be91.js",
       },
     },
     "asyncLoc2": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc2-LOCALE1-97e541e9dcd77c08a0f9.js",
-        "LOCALE2": "chunks/asyncLoc2-LOCALE2-97e541e9dcd77c08a0f9.js",
+        "LOCALE1": "chunks/asyncLoc2-LOCALE1-e442ade75ccc8ccb7d2f.js",
+        "LOCALE2": "chunks/asyncLoc2-LOCALE2-fd29172ccf479e97aa94.js",
       },
     },
   },
@@ -792,22 +792,22 @@ Object {
   "entrypoints": Object {
     "main": Object {
       "localizedAssets": Object {
-        "LOCALE1": "main-LOCALE1-d9e3bbcd50f1fb4d6390.js",
-        "LOCALE2": "main-LOCALE2-d9e3bbcd50f1fb4d6390.js",
+        "LOCALE1": "main-LOCALE1-53cd5b4b8031fdd624b7.js",
+        "LOCALE2": "main-LOCALE2-b233e0d532d0327ed6a8.js",
       },
     },
   },
   "namedChunkGroups": Object {
     "asyncLoc1": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc1-LOCALE1-5491741ac467873e0e20.js",
-        "LOCALE2": "chunks/asyncLoc1-LOCALE2-5491741ac467873e0e20.js",
+        "LOCALE1": "chunks/asyncLoc1-LOCALE1-40f629a47fce31f71795.js",
+        "LOCALE2": "chunks/asyncLoc1-LOCALE2-47968ebc87e0937a22bc.js",
       },
     },
     "asyncLoc2": Object {
       "localizedAssets": Object {
-        "LOCALE1": "chunks/asyncLoc2-LOCALE1-cd7bb284d09a7eab49e4.js",
-        "LOCALE2": "chunks/asyncLoc2-LOCALE2-cd7bb284d09a7eab49e4.js",
+        "LOCALE1": "chunks/asyncLoc2-LOCALE1-e928396bee55883d3b7a.js",
+        "LOCALE2": "chunks/asyncLoc2-LOCALE2-92ed268b2fc76b31ee2a.js",
       },
     },
   },

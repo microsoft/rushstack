@@ -289,12 +289,13 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           const locales: Set<string> = new Set(this._resolvedLocalizedStrings.keys());
 
           const { chunkGraph, chunks } = compilation;
+          const { localizationStats: statsOptions } = this._options;
 
-          const filesByChunkName: Map<string, Record<string, string>> = new Map();
+          const filesByChunkName: Map<string, Record<string, string>> | undefined = statsOptions
+            ? new Map()
+            : undefined;
           const localizedEntryPointNames: string[] = [];
           const localizedChunkNames: string[] = [];
-
-          const { localizationStats: statsOptions } = this._options;
 
           for (const chunk of chunks) {
             const isLocalized: boolean = _chunkHasLocalizedModules(
@@ -334,11 +335,9 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 filenameTemplate: template
               });
 
-              if (statsOptions) {
-                if (chunk.name) {
-                  filesByChunkName.set(chunk.name, localizedAssets);
-                  (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
-                }
+              if (filesByChunkName && chunk.name) {
+                filesByChunkName.set(chunk.name, localizedAssets);
+                (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
               }
             } else {
               processNonLocalizedAsset({
@@ -356,11 +355,16 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           }
 
           if (hashFn) {
-            updateAssetHashes({ thisWebpack, compilation, hashFn });
+            updateAssetHashes({
+              thisWebpack,
+              compilation,
+              hashFn,
+              filesByChunkName
+            });
           }
 
           // Since the stats generation doesn't depend on content, do it immediately
-          if (statsOptions) {
+          if (statsOptions && filesByChunkName) {
             const localizationStats: ILocalizationStats = {
               entrypoints: {},
               namedChunkGroups: {}

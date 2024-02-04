@@ -71,9 +71,15 @@ export interface IUpdateAssetHashesOptions {
   thisWebpack: typeof webpack;
   compilation: Compilation;
   hashFn: HashFn;
+  filesByChunkName?: Map<string, Record<string, string>>;
 }
 
-export function updateAssetHashes({ thisWebpack, compilation, hashFn }: IUpdateAssetHashesOptions): void {
+export function updateAssetHashes({
+  thisWebpack,
+  compilation,
+  hashFn,
+  filesByChunkName
+}: IUpdateAssetHashesOptions): void {
   const unprocessedDependenciesByChunk: Map<Chunk, Set<Chunk>> = new Map();
   const dependenciesByChunk: Map<Chunk, Set<Chunk>> = new Map();
   const dependentsByChunk: Map<Chunk, Set<Chunk>> = new Map();
@@ -233,7 +239,18 @@ export function updateAssetHashes({ thisWebpack, compilation, hashFn }: IUpdateA
                 if (jsAssetName.includes(existingHash)) {
                   const trueHash: string = hashFn(assetSource.buffer());
                   if (trueHash !== existingHash) {
-                    compilation.renameAsset(jsAssetName, jsAssetName.replace(existingHash, trueHash));
+                    const newAssetName: string = jsAssetName.replace(existingHash, trueHash);
+                    compilation.renameAsset(jsAssetName, newAssetName);
+
+                    if (locale) {
+                      const filesForChunkName: Record<string, string> | undefined = filesByChunkName?.get(
+                        chunk.name
+                      );
+                      if (filesForChunkName) {
+                        filesForChunkName[locale] = newAssetName;
+                      }
+                    }
+
                     return trueHash;
                   }
                 }
