@@ -257,15 +257,13 @@ export class LockFile {
 
     let lockFile: LockFile;
 
-    let currentBirthTimeMs: number;
-
     try {
       // open in write mode since if this file exists, it cannot be from the current process
       // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
       // We should ideally maintain a dictionary of normalized acquired filenames
       lockFileHandle = FileWriter.open(pidLockFilePath);
       lockFileHandle.write(startTime);
-      currentBirthTimeMs = lockFileHandle.getStatistics().birthtime.getTime();
+      const currentBirthTimeMs: number = lockFileHandle.getStatistics().birthtime.getTime();
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
