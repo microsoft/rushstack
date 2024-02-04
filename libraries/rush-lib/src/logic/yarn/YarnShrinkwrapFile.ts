@@ -13,6 +13,7 @@ import type { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * @yarnpkg/lockfile doesn't have types
@@ -285,6 +286,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
+    subspace: Subspace,
     variant?: string
   ): Promise<boolean> {
     throw new InternalError('Not implemented');

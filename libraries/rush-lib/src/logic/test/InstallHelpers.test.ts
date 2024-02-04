@@ -23,7 +23,11 @@ describe('InstallHelpers', () => {
       const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfig/rush.json`;
       const rushConfiguration: RushConfiguration =
         RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
-      InstallHelpers.generateCommonPackageJson(rushConfiguration);
+      InstallHelpers.generateCommonPackageJson(
+        rushConfiguration,
+        rushConfiguration.defaultSubspace,
+        undefined
+      );
       const packageJson: IPackageJson = mockJsonFileSave.mock.calls[0][0];
       expect(packageJson).toEqual(
         expect.objectContaining({

@@ -33,6 +33,7 @@ import {
   type IPackageJsonUpdaterRushRemoveOptions,
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
+import type { Subspace } from '../api/Subspace';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -242,37 +243,15 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      this._terminal.writeLine();
-      this._terminal.writeLine(colors.green('Running "rush update"'));
-      this._terminal.writeLine();
-
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: debugInstall,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        offline: false,
-        networkConcurrency: undefined,
-        collectLogFile: false,
-        variant: variant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        pnpmFilterArguments: [],
-        checkOnly: false
-      };
-
-      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
-        this._rushConfiguration,
-        this._rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        await purgeManager.startDeleteAllAsync();
+      if (this._rushConfiguration.subspacesFeatureEnabled) {
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
+          new Set(options.projects)
+        );
+        for (const subspace of subspaceSet) {
+          await this._doUpdate(debugInstall, subspace, variant);
+        }
+      } else {
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
     }
   }
@@ -294,38 +273,56 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      this._terminal.writeLine();
-      this._terminal.writeLine(Colors.green('Running "rush update"'));
-      this._terminal.writeLine();
-
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: debugInstall,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        networkConcurrency: undefined,
-        offline: false,
-        collectLogFile: false,
-        variant: variant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        pnpmFilterArguments: [],
-        checkOnly: false
-      };
-
-      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
-        this._rushConfiguration,
-        this._rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        await purgeManager.startDeleteAllAsync();
+      if (this._rushConfiguration.subspacesFeatureEnabled) {
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
+          new Set(options.projects)
+        );
+        for (const subspace of subspaceSet) {
+          await this._doUpdate(debugInstall, subspace, variant);
+        }
+      } else {
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
+    }
+  }
+
+  private async _doUpdate(
+    debugInstall: boolean,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
+    this._terminal.writeLine();
+    this._terminal.writeLine(Colors.green('Running "rush update"'));
+    this._terminal.writeLine();
+
+    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+    const installManagerOptions: IInstallManagerOptions = {
+      debug: debugInstall,
+      allowShrinkwrapUpdates: true,
+      bypassPolicy: false,
+      noLink: false,
+      fullUpgrade: false,
+      recheckShrinkwrap: false,
+      networkConcurrency: undefined,
+      offline: false,
+      collectLogFile: false,
+      variant: variant,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      pnpmFilterArguments: [],
+      checkOnly: false,
+      subspace: subspace
+    };
+
+    const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      purgeManager,
+      installManagerOptions
+    );
+    try {
+      await installManager.doInstallAsync();
+    } finally {
+      await purgeManager.startDeleteAllAsync();
     }
   }
 
