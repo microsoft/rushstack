@@ -1300,6 +1300,12 @@
       "projectFolder": "webpack/webpack5-localization-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/webpack5-true-hash-plugin",
+      "projectFolder": "webpack/webpack5-true-hash-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     }
   ]
 }
