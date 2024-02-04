@@ -304,13 +304,10 @@ export type FileSystemStats = fs.Stats;
 export class FileWriter {
     close(): void;
     readonly filePath: string;
-    getStatistics(): FileWriterStats;
+    getStatistics(): FileSystemStats;
     static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
-
-// @public
-export type FileWriterStats = fs.Stats;
 
 // @public
 export enum FolderConstants {

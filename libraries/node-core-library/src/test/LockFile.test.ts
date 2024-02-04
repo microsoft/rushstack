@@ -262,14 +262,14 @@ describe(LockFile.name, () => {
         });
 
         const originalReadFile = FileSystem.readFile;
-        jest.spyOn(FileSystem, 'readFile').mockImplementation((path: string) => {
-          if (path === otherPidLockFileName) {
+        jest.spyOn(FileSystem, 'readFile').mockImplementation((filePath: string) => {
+          if (filePath === otherPidLockFileName) {
             // simulate other process lock release right before the current process reads
             // other process lockfile to decide on next steps for acquiring the lock
-            FileSystem.deleteFile(path);
+            FileSystem.deleteFile(filePath);
           }
 
-          return originalReadFile(path);
+          return originalReadFile(filePath);
         });
 
         const deleteFileSpy = jest.spyOn(FileSystem, 'deleteFile');

@@ -98,7 +98,7 @@ export {
   IFileSystemUpdateTimeParameters,
   IFileSystemWriteFileOptions
 } from './FileSystem';
-export { FileWriter, FileWriterStats, IFileWriterFlags } from './FileWriter';
+export { FileWriter, IFileWriterFlags } from './FileWriter';
 export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';
 export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
