@@ -22,6 +22,7 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import { ProjectImpactGraphGenerator } from '../../logic/ProjectImpactGraphGenerator';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -194,6 +195,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this.parser.isDebug,
         this._ignoreHooksParameter.value
       );
+      if (
+        this.actionName === 'update' &&
+        this.rushConfiguration.experimentsConfiguration.configuration
+          .useProjectImpactGraphGeneratorAfterRushUpdate
+      ) {
+        const projectImpactGraphGenerator: ProjectImpactGraphGenerator = new ProjectImpactGraphGenerator(
+          this.rushConfiguration
+        );
+        projectImpactGraphGenerator.generate();
+      }
     }
   }
 

@@ -460,6 +460,7 @@ export interface IExperimentsJson {
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
+    useProjectImpactGraphGeneratorAfterRushUpdate?: boolean;
 }
 
 // @beta

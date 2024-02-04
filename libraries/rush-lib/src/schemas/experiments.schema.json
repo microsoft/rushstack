@@ -53,6 +53,10 @@
     "forbidPhantomResolvableNodeModulesFolders": {
       "description": "If true, Rush will not allow node_modules in the repo folder or in parent folders.",
       "type": "boolean"
+    },
+    "useProjectImpactGraphGeneratorAfterRushUpdate": {
+      "description": "If true, Rush will generate project-impact-graph.yaml at repositoryRoot after `rush update` finished.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false
