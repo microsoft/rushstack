@@ -203,18 +203,84 @@ describe(LockFile.name, () => {
         expect(lock).toBeUndefined();
       });
 
-      test('gracefully handles failure to read lock file statistics', () => {
+      test('deletes other hanging lockfiles if corresponding processes are not running anymore', () => {
+        // ensure test folder is clean
         const testFolder: string = path.join(libTestFolder, '4');
+        FileSystem.ensureEmptyFolder(testFolder);
+
         const resourceName: string = 'test';
 
-        // simulate failure; see https://github.com/microsoft/rushstack/issues/4491
-        jest.spyOn(FileWriter.prototype, 'getStatistics').mockImplementation(() => {
-          throw new Error();
+        const otherPid: number = 999999999;
+        const otherPidInitialStartTime: string = '2012-01-02 12:53:12';
+
+        // simulate a hanging lockfile that was not cleaned by other process
+        const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+        lockFileHandle.write(otherPidInitialStartTime);
+        lockFileHandle.close();
+        FileSystem.updateTimes(otherPidLockFileName, {
+          accessedTime: 10000,
+          modifiedTime: 10000
         });
 
-        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+        // return undefined as if the process was not running anymore
+        setLockFileGetProcessStartTime((pid: number) => {
+          return pid === otherPid ? undefined : getProcessStartTime(pid);
+        });
 
-        expect(lock).toBeUndefined();
+        const deleteFileSpy = jest.spyOn(FileSystem, 'deleteFile');
+        LockFile.tryAcquire(testFolder, resourceName);
+
+        expect(deleteFileSpy).toHaveBeenCalledTimes(1);
+        expect(deleteFileSpy).toHaveBeenNthCalledWith(1, otherPidLockFileName);
+      });
+
+      test('doesn’t attempt deleting other process lockfile if it is released in the middle of acquiring process', () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(libTestFolder, '5');
+        FileSystem.ensureEmptyFolder(testFolder);
+
+        const resourceName: string = 'test';
+
+        const otherPid: number = 999999999;
+        const otherPidStartTime: string = '2012-01-02 12:53:12';
+
+        const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+
+        // create an open lockfile for other process
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+        lockFileHandle.write(otherPidStartTime);
+        lockFileHandle.close();
+        FileSystem.updateTimes(otherPidLockFileName, {
+          accessedTime: 10000,
+          modifiedTime: 10000
+        });
+
+        // return other process start time as if it was still running
+        setLockFileGetProcessStartTime((pid: number) => {
+          return pid === otherPid ? otherPidStartTime : getProcessStartTime(pid);
+        });
+
+        const originalReadFile = FileSystem.readFile;
+        jest.spyOn(FileSystem, 'readFile').mockImplementation((path: string) => {
+          if (path === otherPidLockFileName) {
+            // simulate other process lock release right before the current process reads
+            // other process lockfile to decide on next steps for acquiring the lock
+            FileSystem.deleteFile(path);
+          }
+
+          return originalReadFile(path);
+        });
+
+        const deleteFileSpy = jest.spyOn(FileSystem, 'deleteFile');
+
+        LockFile.tryAcquire(testFolder, resourceName);
+
+        // Ensure there were no other FileSystem.deleteFile calls after our lock release simulation.
+        // An extra attempt to delete the lockfile might lead to unexpectedly deleting a new lockfile
+        // created by another process right after releasing/deleting the previous lockfile
+        expect(deleteFileSpy).toHaveBeenCalledTimes(1);
+        expect(deleteFileSpy).toHaveBeenNthCalledWith(1, otherPidLockFileName);
       });
     });
   }

@@ -260,20 +260,12 @@ export class LockFile {
     let currentBirthTimeMs: number;
 
     try {
-      try {
-        // open in write mode since if this file exists, it cannot be from the current process
-        // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
-        // We should ideally maintain a dictionary of normalized acquired filenames
-        lockFileHandle = FileWriter.open(pidLockFilePath);
-        lockFileHandle.write(startTime);
-        currentBirthTimeMs = lockFileHandle.getStatistics().birthtime.getTime();
-      } catch (error) {
-        // sometimes FileSystem.getStatistics leads to failure when multiple processes try to acquire
-        // lock for the same resource, so if we get an error, gracefully exit.
-        // see https://github.com/microsoft/rushstack/issues/4491
-        lockFileHandle?.close();
-        return undefined;
-      }
+      // open in write mode since if this file exists, it cannot be from the current process
+      // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
+      // We should ideally maintain a dictionary of normalized acquired filenames
+      lockFileHandle = FileWriter.open(pidLockFilePath);
+      lockFileHandle.write(startTime);
+      currentBirthTimeMs = lockFileHandle.getStatistics().birthtime.getTime();
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
@@ -306,8 +298,11 @@ export class LockFile {
             otherPidOldStartTime = FileSystem.readFile(fileInFolderPath);
             // check the timestamp of the file
             otherBirthtimeMs = FileSystem.getStatistics(fileInFolderPath).birthtime.getTime();
-          } catch (err) {
-            // this means the file is probably deleted already
+          } catch (error) {
+            if (FileSystem.isNotExistError(error)) {
+              // the file is already deleted by other process, skip it
+              continue;
+            }
           }
 
           // if the otherPidOldStartTime is invalid, then we should look at the timestamp,
