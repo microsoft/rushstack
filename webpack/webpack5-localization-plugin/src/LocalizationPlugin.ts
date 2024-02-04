@@ -29,6 +29,7 @@ import type {
 import type { IAssetPathOptions } from './webpackInterfaces';
 import { markEntity, getMark } from './utilities/EntityMarker';
 import { processLocalizedAsset, processNonLocalizedAsset } from './AssetProcessor';
+import { getHashFunction, type HashFn, updateAssetHashes } from './TrueHashPlugin';
 
 /**
  * @public
@@ -129,10 +130,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       }
     }
 
+    const { webpack: thisWebpack } = compiler;
     const {
       WebpackError,
       runtime: { GetChunkFilenameRuntimeModule }
-    } = compiler.webpack;
+    } = thisWebpack;
 
     // Side-channel for async chunk URL generator chunk, since the actual chunk is completely inaccessible
     // from the assetPath hook below when invoked to build the async URL generator
@@ -157,6 +159,19 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     const { runtimeLocaleExpression } = this._options;
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
+      let hashFn: HashFn | undefined;
+      if (this._options.useTrueHashes) {
+        if (runtimeLocaleExpression) {
+          compilation.errors.push(
+            new WebpackError(
+              `The "useTrueHashes" option cannot be used in conjunction with "runtimeLocaleExpression".`
+            )
+          );
+        } else {
+          hashFn = getHashFunction({ thisWebpack, compilation });
+        }
+      }
+
       compilation.hooks.assetPath.tap(
         PLUGIN_NAME,
         (assetPath: string, options: IAssetPathOptions): string => {
@@ -338,6 +353,10 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 fileName: defaultAssetName
               });
             }
+          }
+
+          if (hashFn) {
+            updateAssetHashes({ thisWebpack, compilation, hashFn });
           }
 
           // Since the stats generation doesn't depend on content, do it immediately

@@ -10,7 +10,6 @@ import { Volume } from 'memfs/lib/volume';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import type { ILocalizationPluginOptions } from '../interfaces';
-import { TrueHashPlugin } from '../TrueHashPlugin';
 import { MemFSPlugin } from './MemFSPlugin';
 
 async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
@@ -27,8 +26,6 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     },
     '/'
   );
-
-  const trueHashPlugin: TrueHashPlugin = new TrueHashPlugin({});
 
   const resJsonLoader: string = resolve(__dirname, '../loaders/resjson-loader.js');
   const options: ILocalizationPluginOptions = {
@@ -57,7 +54,8 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     },
     localizationStats: {
       dropPath: 'localization-stats.json'
-    }
+    },
+    useTrueHashes: true
   };
 
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
@@ -88,7 +86,7 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     },
     context: '/',
     mode: 'production',
-    plugins: [localizationPlugin, trueHashPlugin, new MemFSPlugin(memoryFileSystem)]
+    plugins: [localizationPlugin, new MemFSPlugin(memoryFileSystem)]
   });
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();

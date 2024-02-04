@@ -60,6 +60,7 @@ export interface ILocalizationPluginOptions {
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
     runtimeLocaleExpression?: string;
+    useTrueHashes?: boolean;
 }
 
 // @public (undocumented)
@@ -165,6 +166,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 // @public (undocumented)
 export class TrueHashPlugin implements WebpackPluginInstance {
     constructor(options: ITrueHashPluginOptions);
+    // (undocumented)
     apply(compiler: Compiler): void;
 }
 
