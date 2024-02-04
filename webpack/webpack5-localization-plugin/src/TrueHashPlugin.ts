@@ -19,6 +19,7 @@ import type {
   ITrueHashPluginOptions,
   WebpackHash
 } from './interfaces';
+import { LocalizationPlugin } from './LocalizationPlugin';
 
 const PLUGIN_NAME: 'true-hash' = 'true-hash';
 
@@ -325,21 +326,42 @@ export class TrueHashPlugin implements WebpackPluginInstance {
   public apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
       const { webpack: thisWebpack } = compiler;
-      const { stageOverride: processAssetsStage = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
-        this._options as IHashAlgorithmOptions & ICustomHashFunctionOptions;
-      const hashFn: (contents: string | Buffer) => string = getHashFunction({
-        thisWebpack,
-        compilation,
-        options: this._options
-      });
 
-      compilation.hooks.processAssets.tap(
-        {
-          name: PLUGIN_NAME,
-          stage: processAssetsStage
-        },
-        () => updateAssetHashes({ thisWebpack, compilation, hashFn })
-      );
+      let hasLocalizationPluginTrueHashOption: boolean = false;
+      if (compiler.options.plugins) {
+        for (const plugin of compiler.options.plugins) {
+          if (plugin instanceof LocalizationPlugin && plugin._options.useTrueHashes) {
+            hasLocalizationPluginTrueHashOption = true;
+            break;
+          }
+        }
+      }
+
+      if (hasLocalizationPluginTrueHashOption) {
+        compilation.warnings.push(
+          new thisWebpack.WebpackError(
+            `The ${TrueHashPlugin.name} is not compatible with the LocalizationPlugin's "useTrueHashes" option. ` +
+              `Because the LocalizationPlugin is already handling true hashes, the ${TrueHashPlugin.name} plugin ` +
+              'will have no effect.'
+          )
+        );
+      } else {
+        const { stageOverride: processAssetsStage = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
+          this._options as IHashAlgorithmOptions & ICustomHashFunctionOptions;
+        const hashFn: (contents: string | Buffer) => string = getHashFunction({
+          thisWebpack,
+          compilation,
+          options: this._options
+        });
+
+        compilation.hooks.processAssets.tap(
+          {
+            name: PLUGIN_NAME,
+            stage: processAssetsStage
+          },
+          () => updateAssetHashes({ thisWebpack, compilation, hashFn })
+        );
+      }
     });
   }
 }

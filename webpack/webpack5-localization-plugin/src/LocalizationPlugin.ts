@@ -81,7 +81,10 @@ export function getPluginInstance(compiler: Compiler | undefined): LocalizationP
 export class LocalizationPlugin implements WebpackPluginInstance {
   public readonly stringKeys: Map<string, IStringPlaceholder> = new Map();
 
-  private readonly _options: ILocalizationPluginOptions;
+  /**
+   * @internal
+   */
+  public readonly _options: ILocalizationPluginOptions;
   private readonly _resolvedTranslatedStringsFromOptions: Map<
     string,
     Map<string, ILocaleFileObject | string | ReadonlyMap<string, string>>
