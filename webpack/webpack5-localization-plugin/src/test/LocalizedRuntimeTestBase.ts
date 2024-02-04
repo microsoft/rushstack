@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { resolve } from 'path';
 import { promisify } from 'util';
 
 import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
-import { LocalizationPlugin } from '@rushstack/webpack5-localization-plugin';
-import { Import } from '@rushstack/node-core-library';
 
-import { type ITrueHashPluginOptions, TrueHashPlugin } from '../TrueHashPlugin';
+import { TrueHashPlugin } from '../TrueHashPlugin';
 import { MemFSPlugin } from './MemFSPlugin';
+import type { ILocalizationPluginOptions, ITrueHashPluginOptions } from '../interfaces';
+import { LocalizationPlugin } from '../LocalizationPlugin';
 
 export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): void {
   async function testLocalizedRuntimeInner(minimize: boolean): Promise<void> {
@@ -19,7 +20,8 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
         '/a/package.json': '{ "name": "a", "sideEffects": ["entry.js", "async.js"] }',
         '/a/async1.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);`,
         '/a/async2.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test + strings2.another);`,
-        '/a/entry.js': `import(/* webpackChunkName: 'async1' */ './async1');import(/* webpackChunkName: 'async2' */ './async2');`,
+        '/a/entrySingleChunk.js': `import(/* webpackChunkName: 'async1' */ './async1');`,
+        '/a/entryTwoChunks.js': `import(/* webpackChunkName: 'async1' */ './async1');import(/* webpackChunkName: 'async2' */ './async2');`,
         '/a/strings1.resjson': `{"test":"blah","_test.comment":"A string"}`,
         '/a/strings2.resjson': `{"another":"something else","_another.comment":"Another string"}`
       },
@@ -28,11 +30,8 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
 
     const trueHashPlugin: TrueHashPlugin = new TrueHashPlugin(trueHashPluginOptions);
 
-    const resJsonLoader: string = Import.resolveModule({
-      modulePath: '@rushstack/webpack5-localization-plugin/lib/loaders/resjson-loader.js',
-      baseFolderPath: __dirname
-    });
-    const localizationPlugin: LocalizationPlugin = new LocalizationPlugin({
+    const resJsonLoader: string = resolve(__dirname, '../loaders/resjson-loader.js');
+    const options: ILocalizationPluginOptions = {
       localizedData: {
         defaultLocale: {
           localeName: 'LOCALE1'
@@ -48,16 +47,19 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
           }
         }
       }
-    });
+    };
+
+    const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
 
     const compiler: Compiler = webpack({
       entry: {
-        main: '/a/entry.js'
+        mainSingleChunk: '/a/entrySingleChunk.js',
+        mainTwoChunks: '/a/entryTwoChunks.js'
       },
       output: {
         path: '/release',
-        filename: '[name]_[locale]_[contenthash].js',
-        chunkFilename: 'chunks/[name]_[locale]_[contenthash].js'
+        filename: '[name]-[locale]-[contenthash].js',
+        chunkFilename: 'chunks/[name]-[locale]-[contenthash].js'
       },
       module: {
         rules: [
@@ -93,7 +95,7 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
     expect(results).toMatchSnapshot('Content');
   }
 
-  describe(TrueHashPlugin.name, () => {
+  describe(LocalizationPlugin.name, () => {
     it('Handles async localized chunks (unminified)', async () => {
       await testLocalizedRuntimeInner(false);
     });

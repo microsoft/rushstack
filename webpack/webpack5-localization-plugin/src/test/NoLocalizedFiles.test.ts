@@ -7,6 +7,7 @@ import { promisify } from 'util';
 import webpack, { type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
+import { TrueHashPlugin } from '../TrueHashPlugin';
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import { MemFSPlugin } from './MemFSPlugin';
 
@@ -22,6 +23,8 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
     },
     '/src'
   );
+
+  const trueHashPlugin: TrueHashPlugin = new TrueHashPlugin({});
 
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin({
     localizedData: {
@@ -47,7 +50,7 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
       moduleIds: 'named'
     },
     mode: 'production',
-    plugins: [localizationPlugin, new MemFSPlugin(memoryFileSystem)]
+    plugins: [localizationPlugin, trueHashPlugin, new MemFSPlugin(memoryFileSystem)]
   });
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();

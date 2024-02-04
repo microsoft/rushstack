@@ -1,61 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  default as webpack,
-  Compilation,
-  Compiler,
-  WebpackPluginInstance,
-  Chunk,
-  Asset,
-  sources
-} from 'webpack';
-import type { ILocalizedWebpackChunk } from '@rushstack/webpack5-localization-plugin';
+import type { Compilation, Compiler, WebpackPluginInstance, Chunk, Asset, sources } from 'webpack';
 import { Text } from '@rushstack/node-core-library';
 
-const PLUGIN_NAME: 'true-hash' = 'true-hash';
+import type { ILocalizedWebpackChunk } from './webpackInterfaces';
+import type {
+  ICustomHashFunctionOptions,
+  IHashAlgorithmOptions,
+  ITrueHashPluginOptions,
+  WebpackHash
+} from './interfaces';
 
-type WebpackHash = Parameters<typeof webpack.util.createHash>[0];
+const PLUGIN_NAME: 'true-hash' = 'true-hash';
 
 interface IHashReplacement {
   existingHash: string;
   trueHashByLocale: string | Record<string, string>;
 }
-
-/**
- * @public
- */
-export interface ITrueHashPluginOptionsBase {
-  stageOverride?: number;
-}
-
-/**
- * @public
- */
-export interface IHashAlgorithmOptions extends ITrueHashPluginOptionsBase {
-  /**
-   * The name of the hash algorithm to use, e.g. 'sha256', or a webpack Hash object.
-   *
-   * @defaultValue
-   * 'sha256'
-   */
-  hash?: WebpackHash;
-}
-
-/**
- * @public
- */
-export interface ICustomHashFunctionOptions extends ITrueHashPluginOptionsBase {
-  /**
-   * A function that takes the contents of a file and returns a hash.
-   */
-  hashFunction: (contents: string | Buffer) => string;
-}
-
-/**
- * @public
- */
-export type ITrueHashPluginOptions = IHashAlgorithmOptions | ICustomHashFunctionOptions;
 
 /**
  * @public

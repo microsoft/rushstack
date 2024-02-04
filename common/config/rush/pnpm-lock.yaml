@@ -1774,10 +1774,10 @@ importers:
         version: link:../../heft-plugins/heft-typescript-plugin
       '@types/jest':
         specifier: ts4.9
-        version: 29.5.12
+        version: 29.5.11
       '@types/node':
         specifier: ts4.9
-        version: 20.11.16
+        version: 20.11.5
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -4345,28 +4345,6 @@ importers:
       '@rushstack/module-minifier':
         specifier: workspace:*
         version: link:../../libraries/module-minifier
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
-      memfs:
-        specifier: 3.4.3
-        version: 3.4.3
-      webpack:
-        specifier: ~5.82.1
-        version: 5.82.1
-
-  ../../webpack/webpack5-true-hash-plugin:
-    dependencies:
-      '@rushstack/node-core-library':
-        specifier: workspace:*
-        version: link:../../libraries/node-core-library
-    devDependencies:
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      '@rushstack/webpack5-localization-plugin':
-        specifier: workspace:*
-        version: link:../webpack5-localization-plugin
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -11447,8 +11425,8 @@ packages:
       expect: 29.6.2
       pretty-format: 29.6.2
 
-  /@types/jest@29.5.12:
-    resolution: {integrity: sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==}
+  /@types/jest@29.5.11:
+    resolution: {integrity: sha512-S2mHmYIVe13vrm6q4kN6fLYYAka15ALQki/vgDC3mIukEOx8WJlv0kQPM+d4w8Gp6u0uSdKND04IlTXBv0rwnQ==}
     dependencies:
       expect: 29.6.2
       pretty-format: 29.6.2
@@ -11560,8 +11538,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.11.16:
-    resolution: {integrity: sha512-gKb0enTmRCzXSSUJDq6/sPcqrfCv2mkkG6Jt/clpn5eiCbKTY+SgZUxo+p8ZKMof5dCp9vHQUAB7wOUTod22wQ==}
+  /@types/node@20.11.5:
+    resolution: {integrity: sha512-g557vgQjUUfN76MZAN/dt1z3dzcUsimuysco0KeluHgrPdJXkP/XdAURgyO2W9fZWHRtRBiVKzKn8vyOAwlG+w==}
     dependencies:
       undici-types: 5.26.5
     dev: true

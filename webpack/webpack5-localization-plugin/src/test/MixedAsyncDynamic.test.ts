@@ -10,6 +10,7 @@ import { Volume } from 'memfs/lib/volume';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import type { ILocalizationPluginOptions } from '../interfaces';
+import { TrueHashPlugin } from '../TrueHashPlugin';
 import { MemFSPlugin } from './MemFSPlugin';
 
 async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
@@ -28,6 +29,8 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
     },
     '/'
   );
+
+  const trueHashPlugin: TrueHashPlugin = new TrueHashPlugin({});
 
   const loader: string = resolve(__dirname, '../loaders/locjson-loader.js');
   const options: ILocalizationPluginOptions = {
@@ -79,7 +82,7 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
     },
     context: '/',
     mode: 'production',
-    plugins: [localizationPlugin, new MemFSPlugin(memoryFileSystem)]
+    plugins: [localizationPlugin, trueHashPlugin, new MemFSPlugin(memoryFileSystem)]
   });
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();

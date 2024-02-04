@@ -10,6 +10,7 @@ import { Volume } from 'memfs/lib/volume';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
 import type { ILocalizationPluginOptions, ILocalizationStats } from '../interfaces';
+import { TrueHashPlugin } from '../TrueHashPlugin';
 import { MemFSPlugin } from './MemFSPlugin';
 
 async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> {
@@ -26,6 +27,8 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
     },
     '/'
   );
+
+  const trueHashPlugin: TrueHashPlugin = new TrueHashPlugin({});
 
   let localizationStats: ILocalizationStats | undefined;
   function statsCallback(stats: ILocalizationStats): void {
@@ -85,7 +88,7 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
     },
     context: '/',
     mode: 'production',
-    plugins: [localizationPlugin, new MemFSPlugin(memoryFileSystem)]
+    plugins: [localizationPlugin, trueHashPlugin, new MemFSPlugin(memoryFileSystem)]
   });
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();

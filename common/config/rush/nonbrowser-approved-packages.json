@@ -275,10 +275,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@rushstack/webpack5-localization-plugin",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@rushstack/webpack5-module-minifier-plugin",
       "allowedCategories": [ "tests" ]
     },
