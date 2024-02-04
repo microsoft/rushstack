@@ -230,9 +230,6 @@ export interface ITrueHashPluginOptionsBase {
 export interface IHashAlgorithmOptions extends ITrueHashPluginOptionsBase {
   /**
    * The name of the hash algorithm to use, e.g. 'sha256', or a webpack Hash object.
-   *
-   * @defaultValue
-   * 'sha256'
    */
   hash?: WebpackHash;
 }
