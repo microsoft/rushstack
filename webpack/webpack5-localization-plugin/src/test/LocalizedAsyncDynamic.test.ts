@@ -17,8 +17,10 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
   memoryFileSystem.fromJSON(
     {
       '/a/package.json': '{ "name": "a", "sideEffects": ["entry.js", "async.js"] }',
-      '/a/async.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);`,
-      '/a/entry.js': `import(/* webpackChunkName: 'async' */ './async');`,
+      '/a/async1.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);`,
+      '/a/async2.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test + strings2.another);`,
+      '/a/entrySingleChunk.js': `import(/* webpackChunkName: 'async1' */ './async1');`,
+      '/a/entryTwoChunks.js': `import(/* webpackChunkName: 'async1' */ './async1');import(/* webpackChunkName: 'async2' */ './async2');`,
       '/a/strings1.resjson': `{"test":"blah","_test.comment":"A string"}`,
       '/a/strings2.resjson': `{"another":"something else","_another.comment":"Another string"}`
     },
@@ -34,10 +36,10 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {
-        localeName: 'en-us'
+        localeName: 'LOCALE1'
       },
       translatedStrings: {
-        foo: {
+        LOCALE2: {
           '/a/strings1.resjson': {
             test: 'baz'
           },
@@ -57,12 +59,13 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
 
   const compiler: Compiler = webpack({
     entry: {
-      main: '/a/entry.js'
+      mainSingleChunk: '/a/entrySingleChunk.js',
+      mainTwoChunks: '/a/entryTwoChunks.js'
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale].js',
-      chunkFilename: 'chunks/[name]-[locale].js'
+      filename: '[name]-[locale]-[contenthash].js',
+      chunkFilename: 'chunks/[name]-[locale]-[contenthash].js'
     },
     module: {
       rules: [

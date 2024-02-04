@@ -8,14 +8,17 @@ import webpack, { type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
+import { MemFSPlugin } from './MemFSPlugin';
 
 async function testNonLocalizedInner(minimize: boolean): Promise<void> {
   const memoryFileSystem: Volume = new Volume();
   memoryFileSystem.fromJSON(
     {
       '/package.json': '{}',
-      '/entry.js': `console.log("Do stuff");import(/* webpackChunkName: 'async' */ './async.js').then(mod => mod.foo());`,
-      '/async.js': `export function foo() { console.log('foo'); }`
+      '/entrySingleChunk.js': `console.log("Do stuff");import(/* webpackChunkName: 'async1' */ './async1.js').then(mod => mod.foo());`,
+      '/entryTwoChunks.js': `console.log("Do stuff");import(/* webpackChunkName: 'async1' */ './async1.js').then(mod => mod.foo());import(/* webpackChunkName: 'async2' */ './async2.js').then(mod => mod.foo());`,
+      '/async1.js': `export function foo() { console.log('foo1'); }`,
+      '/async2.js': `export function foo() { console.log('foo2'); }`
     },
     '/src'
   );
@@ -23,7 +26,7 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin({
     localizedData: {
       defaultLocale: {
-        localeName: 'en-us'
+        localeName: 'LOCALE1'
       },
       translatedStrings: {}
     }
@@ -31,11 +34,12 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
 
   const compiler: webpack.Compiler = webpack({
     entry: {
-      main: '/entry.js'
+      mainSingleChunk: '/entrySingleChunk.js',
+      mainTwoChunks: '/entryTwoChunks.js'
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale].js'
+      filename: '[name]-[locale]-[contenthash].js'
     },
     context: '/',
     optimization: {
@@ -43,11 +47,8 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
       moduleIds: 'named'
     },
     mode: 'production',
-    plugins: [localizationPlugin]
+    plugins: [localizationPlugin, new MemFSPlugin(memoryFileSystem)]
   });
-
-  compiler.inputFileSystem = memoryFileSystem;
-  compiler.outputFileSystem = memoryFileSystem;
 
   const stats: Stats | undefined = await promisify(compiler.run.bind(compiler))();
   await promisify(compiler.close.bind(compiler))();

@@ -31,11 +31,11 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {
-        localeName: 'en-us',
+        localeName: 'LOCALE1',
         fillMissingTranslationStrings: true
       },
       translatedStrings: {
-        foo: {
+        LOCALE2: {
           '/a/strings1.resjson': {
             test: `return:\r,newline:\n,tab:\t,backslash:\\,apos:',quote:"`
           }

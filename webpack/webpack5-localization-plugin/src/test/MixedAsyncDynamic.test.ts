@@ -17,9 +17,12 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
   memoryFileSystem.fromJSON(
     {
       '/a/package.json': '{ "name": "a", "sideEffects": ["entry.js", "async.js", "asyncLoc.js"] }',
-      '/a/async.js': `console.log("blah");`,
-      '/a/asyncLoc.js': `import strings1 from './strings1.loc.json'; import strings2 from './strings2.loc.json'; console.log(strings1.test, strings2.another);`,
-      '/a/entry.js': `import(/* webpackChunkName: 'asyncLoc' */ './asyncLoc');import(/* webpackChunkName: 'async' */ './async');`,
+      '/a/async1.js': `console.log("blah1");`,
+      '/a/async2.js': `console.log("blah2");`,
+      '/a/asyncLoc1.js': `import strings1 from './strings1.loc.json'; import strings2 from './strings2.loc.json'; console.log(strings1.test, strings2.another);`,
+      '/a/asyncLoc2.js': `import strings1 from './strings1.loc.json'; import strings2 from './strings2.loc.json'; console.log(strings1.test + strings2.another);`,
+      '/a/entryTwoChunks.js': `import(/* webpackChunkName: 'asyncLoc1' */ './asyncLoc1');import(/* webpackChunkName: 'asyncLoc2' */ './asyncLoc2');`,
+      '/a/entryFourChunks.js': `import(/* webpackChunkName: 'asyncLoc1' */ './asyncLoc1');import(/* webpackChunkName: 'asyncLoc2' */ './asyncLoc2');import(/* webpackChunkName: 'async1' */ './async1');import(/* webpackChunkName: 'async2' */ './async2');`,
       '/a/strings1.loc.json': `{"test":{"value":"blah","comment":"A string"}}`,
       '/a/strings2.loc.json': `{"another":{"value":"something else","comment":"Another string" }}`
     },
@@ -30,10 +33,10 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {
-        localeName: 'en-us'
+        localeName: 'LOCALE1'
       },
       translatedStrings: {
-        foo: {
+        LOCALE2: {
           '/a/strings1.loc.json': {
             test: 'baz'
           },
@@ -50,12 +53,13 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
 
   const compiler: Compiler = webpack({
     entry: {
-      main: '/a/entry.js'
+      mainTwoChunks: '/a/entryTwoChunks.js',
+      mainFourChunks: '/a/entryFourChunks.js'
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale].js',
-      chunkFilename: 'chunks/[name]-[locale].js'
+      filename: '[name]-[locale]-[contenthash].js',
+      chunkFilename: 'chunks/[name]-[locale]-[contenthash].js'
     },
     module: {
       rules: [
