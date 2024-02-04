@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type * as fs from 'fs';
+import type { FileSystemStats } from './FileSystem';
 import { Import } from './Import';
 
 const fsx: typeof import('fs-extra') = Import.lazy('fs-extra', require);
@@ -33,15 +33,6 @@ export interface IFileWriterFlags {
    */
   exclusive?: boolean;
 }
-
-/**
- * An alias for the Node.js `fs.Stats` object.
- *
- * @remarks
- * This avoids the need to import the `fs` package when using the {@link FileWriter} API.
- * @public
- */
-export type FileWriterStats = fs.Stats;
 
 /**
  * API for interacting with file handles.
@@ -117,7 +108,7 @@ export class FileWriter {
    * Gets the statistics for the given file handle. Throws if the file handle has been closed.
    * Behind the scenes it uses `fs.statSync()`.
    */
-  public getStatistics(): FileWriterStats {
+  public getStatistics(): FileSystemStats {
     if (!this._fileDescriptor) {
       throw new Error(`Cannot get file statistics, file descriptor has already been released.`);
     }
