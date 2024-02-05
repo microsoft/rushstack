@@ -9,7 +9,7 @@ import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
 import { LocalizationPlugin } from '../LocalizationPlugin';
-import type { ILocalizationPluginOptions } from '../interfaces';
+import type { ILocalizationPluginOptions, ILocalizationStats } from '../interfaces';
 import { MemFSPlugin } from './MemFSPlugin';
 
 async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
@@ -29,6 +29,11 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
     '/'
   );
 
+  let localizationStats: ILocalizationStats | undefined;
+  function statsCallback(stats: ILocalizationStats): void {
+    localizationStats = stats;
+  }
+
   const loader: string = resolve(__dirname, '../loaders/locjson-loader.js');
   const options: ILocalizationPluginOptions = {
     localizedData: {
@@ -45,6 +50,9 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
           }
         }
       }
+    },
+    localizationStats: {
+      callback: statsCallback
     },
     runtimeLocaleExpression: 'self.__locale'
   };
@@ -93,6 +101,8 @@ async function testMixedAsyncDynamicInner(minimize: boolean): Promise<void> {
 
   const results: {} = memoryFileSystem.toJSON('/release');
   expect(results).toMatchSnapshot('Content');
+
+  expect(localizationStats).toMatchSnapshot('Localization Stats');
 
   expect(errors).toHaveLength(0);
   expect(warnings).toHaveLength(0);
