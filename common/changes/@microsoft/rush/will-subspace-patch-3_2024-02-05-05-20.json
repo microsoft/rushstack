@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixed issue related to pnpm filter arguments and subspaces",
+      "comment": "Fix an issue with filtered installs when the experimental subspaces feature is enabled",
       "type": "none"
     }
   ],
