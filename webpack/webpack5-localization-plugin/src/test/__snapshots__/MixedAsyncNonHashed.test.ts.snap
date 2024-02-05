@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (minified): Content 1`] = `Object {}`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (minified): Errors 1`] = `
+Array [
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 989.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 989.",
+  },
+]
+`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (minified): Localization Stats 1`] = `
+Object {
+  "entrypoints": Object {
+    "main": Object {
+      "localizedAssets": Object {
+        "LOCALE1": "main-LOCALE1.js",
+        "LOCALE2": "main-LOCALE2.js",
+      },
+    },
+  },
+  "namedChunkGroups": Object {
+    "asyncLoc1": Object {
+      "localizedAssets": Object {
+        "LOCALE1": "chunks/asyncLoc1-LOCALE1.js",
+        "LOCALE2": "chunks/asyncLoc1-LOCALE2.js",
+      },
+    },
+    "asyncLoc2": Object {
+      "localizedAssets": Object {
+        "LOCALE1": "chunks/asyncLoc2-LOCALE1.js",
+        "LOCALE2": "chunks/asyncLoc2-LOCALE2.js",
+      },
+    },
+  },
+}
+`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (minified): Warnings 1`] = `Array []`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (unminified): Content 1`] = `Object {}`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (unminified): Errors 1`] = `
+Array [
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 989.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 989.",
+  },
+]
+`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (unminified): Localization Stats 1`] = `
+Object {
+  "entrypoints": Object {
+    "main": Object {
+      "localizedAssets": Object {
+        "LOCALE1": "main-LOCALE1.js",
+        "LOCALE2": "main-LOCALE2.js",
+      },
+    },
+  },
+  "namedChunkGroups": Object {
+    "asyncLoc1": Object {
+      "localizedAssets": Object {
+        "LOCALE1": "chunks/asyncLoc1-LOCALE1.js",
+        "LOCALE2": "chunks/asyncLoc1-LOCALE2.js",
+      },
+    },
+    "asyncLoc2": Object {
+      "localizedAssets": Object {
+        "LOCALE1": "chunks/asyncLoc2-LOCALE1.js",
+        "LOCALE2": "chunks/asyncLoc2-LOCALE2.js",
+      },
+    },
+  },
+}
+`;
+
+exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (unminified): Warnings 1`] = `Array []`;

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (minified): Content 1`] = `Object {}`;
+
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (minified): Errors 1`] = `
+Array [
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 989.",
+  },
+]
+`;
+
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (minified): Warnings 1`] = `Array []`;
+
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (unminified): Content 1`] = `Object {}`;
+
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (unminified): Errors 1`] = `
+Array [
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 515.",
+  },
+  Object {
+    "message": "Could not find hash replacements for chunk 989.",
+  },
+]
+`;
+
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (unminified): Warnings 1`] = `Array []`;
