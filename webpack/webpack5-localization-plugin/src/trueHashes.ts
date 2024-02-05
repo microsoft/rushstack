@@ -126,7 +126,6 @@ export function updateAssetHashes({
                 if (chunkDependencies!.size > 0) {
                   const relevantHashReplacements: Map<string, string> = new Map();
                   let hasAnyReplacements: boolean = false;
-                  let allReplacementsAreTheSameLengthAsOriginals: boolean = true;
                   for (const dependency of chunkDependencies!) {
                     const asyncChunkHashReplacements: IHashReplacement | undefined =
                       hashReplacementsByChunk.get(dependency);
@@ -157,8 +156,6 @@ export function updateAssetHashes({
                             )
                           );
                         } else {
-                          allReplacementsAreTheSameLengthAsOriginals &&=
-                            replacementHash.length === otherChunkExistingHash.length;
                           relevantHashReplacements.set(otherChunkExistingHash, replacementHash);
                           hasAnyReplacements = true;
                         }
@@ -173,48 +170,19 @@ export function updateAssetHashes({
                       assetName
                     );
 
-                    if (allReplacementsAreTheSameLengthAsOriginals) {
-                      // If all of the replacements are the same length as the originals, we can walk the string
-                      // in non-reverse order.
-                      const regexp: RegExp = new RegExp(
-                        Array.from(relevantHashReplacements.keys())
-                          .map((hashToReplace) => Text.escapeRegExp(hashToReplace))
-                          .join('|'),
-                        'g'
-                      );
-                      let match: RegExpMatchArray | null;
-                      while ((match = regexp.exec(sourceString)) !== null) {
-                        const { 0: originalHash, index } = match;
-                        const matchStart: number = index!;
-                        const matchEnd: number = matchStart + originalHash.length - 1;
-                        const replacement: string = relevantHashReplacements.get(originalHash)!;
-                        replaceSource.replace(matchStart, matchEnd, replacement);
-                      }
-                    } else {
-                      // If the replacements are not the same length as the originals, we need to reverse the
-                      // string and walk it in reverse order to keep the indices correct.
-                      const reversedSourceString: string = Text.reverse(sourceString);
-                      const sourceStringLength: number = sourceString.length;
-                      const regexp: RegExp = new RegExp(
-                        Array.from(relevantHashReplacements.keys())
-                          .map((hashToReplace) => Text.escapeRegExp(Text.reverse(hashToReplace)))
-                          .join('|'),
-                        'g'
-                      );
-                      let match: RegExpMatchArray | null;
-                      while ((match = regexp.exec(reversedSourceString)) !== null) {
-                        const { 0: reverseOriginalHash, index } = match;
-                        const matchStart: number = index!;
-                        const matchEnd: number = matchStart + reverseOriginalHash.length - 1;
-                        const replacement: string = relevantHashReplacements.get(
-                          Text.reverse(reverseOriginalHash)
-                        )!;
-
-                        // Figure out the location in the original string
-                        const reversedMatchStart: number = sourceStringLength - matchEnd - 1;
-                        const reversedMatchEnd: number = sourceStringLength - matchStart - 1;
-                        replaceSource.replace(reversedMatchStart, reversedMatchEnd, replacement);
-                      }
+                    const regexp: RegExp = new RegExp(
+                      Array.from(relevantHashReplacements.keys())
+                        .map((hashToReplace) => Text.escapeRegExp(hashToReplace))
+                        .join('|'),
+                      'g'
+                    );
+                    let match: RegExpMatchArray | null;
+                    while ((match = regexp.exec(sourceString)) !== null) {
+                      const { 0: originalHash, index } = match;
+                      const matchStart: number = index!;
+                      const matchEnd: number = matchStart + originalHash.length - 1;
+                      const replacement: string = relevantHashReplacements.get(originalHash)!;
+                      replaceSource.replace(matchStart, matchEnd, replacement);
                     }
 
                     assetSource = replaceSource;
