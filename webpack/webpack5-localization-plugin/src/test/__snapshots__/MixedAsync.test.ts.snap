@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (minified): Content 1`] = `
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (minified): Content 1`] = `
 Object {
   "/release/chunks/async1-none-601040199af8b30e4f45.js": "(self.webpackChunk=self.webpackChunk||[]).push([[515],{\\"./a/async1.js\\":()=>{console.log(\\"blah1\\")}}]);",
   "/release/chunks/async2-none-e2b5ccff78b9ee8b0269.js": "(self.webpackChunk=self.webpackChunk||[]).push([[989],{\\"./a/async2.js\\":()=>{console.log(\\"blah2\\")}}]);",
@@ -13,9 +13,9 @@ Object {
 }
 `;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (minified): Errors 1`] = `Array []`;
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (minified): Errors 1`] = `Array []`;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (minified): Localization Stats 1`] = `
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (minified): Localization Stats 1`] = `
 Object {
   "entrypoints": Object {
     "main": Object {
@@ -42,9 +42,9 @@ Object {
 }
 `;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (minified): Warnings 1`] = `Array []`;
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (minified): Warnings 1`] = `Array []`;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (unminified): Content 1`] = `
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (unminified): Content 1`] = `
 Object {
   "/release/chunks/async1-none-e1cb569a2a326e82328e.js": "(self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[515],{
 
@@ -785,9 +785,9 @@ __webpack_require__.e(/* import() | asyncLoc1 */ 14).then(__webpack_require__.bi
 }
 `;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (unminified): Errors 1`] = `Array []`;
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (unminified): Errors 1`] = `Array []`;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (unminified): Localization Stats 1`] = `
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (unminified): Localization Stats 1`] = `
 Object {
   "entrypoints": Object {
     "main": Object {
@@ -814,4 +814,4 @@ Object {
 }
 `;
 
-exports[`LocalizationPlugin Handles async localized and non-localized chunks with a runtime locale expression (unminified): Warnings 1`] = `Array []`;
+exports[`LocalizationPlugin Handles async localized and non-localized chunks (unminified): Warnings 1`] = `Array []`;

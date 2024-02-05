@@ -107,11 +107,11 @@ async function testMixedAsyncInner(minimize: boolean): Promise<void> {
 }
 
 describe(LocalizationPlugin.name, () => {
-  it('Handles async localized and non-localized chunks with a runtime locale expression (unminified)', async () => {
+  it('Handles async localized and non-localized chunks (unminified)', async () => {
     await testMixedAsyncInner(false);
   });
 
-  it('Handles async localized and non-localized chunks with a runtime locale expression (minified)', async () => {
+  it('Handles async localized and non-localized chunks (minified)', async () => {
     await testMixedAsyncInner(true);
   });
 });
