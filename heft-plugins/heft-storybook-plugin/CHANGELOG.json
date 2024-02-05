@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@rushstack/heft-storybook-plugin_v0.5.1",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.65.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.64.3` to `^0.64.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/heft-storybook-plugin_v0.5.0",
       "date": "Thu, 25 Jan 2024 01:09:29 GMT",

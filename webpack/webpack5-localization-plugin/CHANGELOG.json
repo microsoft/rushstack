@@ -2,6 +2,32 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.7.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.7.0",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include an option called `realContentHash` that updates \"[contenthash]\" hashes to the actual hashes of chunks."
+          },
+          {
+            "comment": "Add a warning if `optimization.realContentHash` is set."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/localization-utilities\" to `0.9.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.65.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.4",
       "tag": "@rushstack/webpack5-localization-plugin_v0.6.4",
       "date": "Thu, 25 Jan 2024 01:09:30 GMT",

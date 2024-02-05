@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.65.0",
+      "tag": "@rushstack/node-core-library_v3.65.0",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Inclue a `Text.reverse` API for reversing a string."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.64.2",
       "tag": "@rushstack/node-core-library_v3.64.2",
       "date": "Thu, 25 Jan 2024 01:09:29 GMT",

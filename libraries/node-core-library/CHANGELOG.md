@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 25 Jan 2024 01:09:29 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Feb 2024 23:46:52 GMT and should not be manually modified.
+
+## 3.65.0
+Mon, 05 Feb 2024 23:46:52 GMT
+
+### Minor changes
+
+- Inclue a `Text.reverse` API for reversing a string.
 
 ## 3.64.2
 Thu, 25 Jan 2024 01:09:29 GMT
