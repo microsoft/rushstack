@@ -97,23 +97,39 @@ export function updateAssetHashes({
       dependenciesByChunk.set(chunk, dependencies);
     }
 
-    for (const asyncChunk of chunk.getAllAsyncChunks()) {
-      unprocessedDependencies.add(asyncChunk);
-      dependencies.add(asyncChunk);
+    if (chunk.hasRuntime()) {
+      for (const asyncChunk of chunk.getAllAsyncChunks()) {
+        unprocessedDependencies.add(asyncChunk);
+        dependencies.add(asyncChunk);
 
-      let dependents: Set<Chunk> | undefined = dependentsByChunk.get(asyncChunk);
-      if (!dependents) {
-        dependents = new Set();
-        dependentsByChunk.set(asyncChunk, dependents);
+        let dependents: Set<Chunk> | undefined = dependentsByChunk.get(asyncChunk);
+        if (!dependents) {
+          dependents = new Set();
+          dependentsByChunk.set(asyncChunk, dependents);
+        }
+
+        dependents.add(chunk);
       }
-
-      dependents.add(chunk);
     }
   }
 
   const hashReplacementsByChunk: Map<Chunk, IHashReplacement> = new Map();
   const unprocessedChunks: Set<Chunk> = new Set(compilation.chunks);
+  let previousSize: number = -1;
   while (unprocessedChunks.size > 0) {
+    const currentSize: number = unprocessedChunks.size;
+    if (currentSize === previousSize) {
+      compilation.errors.push(
+        new thisWebpack.WebpackError(
+          `Detected a cycle in the chunk dependencies. This should not be possible.`
+        )
+      );
+
+      break;
+    }
+
+    previousSize = currentSize;
+
     for (const chunk of unprocessedChunks) {
       if (unprocessedDependenciesByChunk.get(chunk)?.size === 0) {
         // TODO: do we need to check if the chunk is rendered?
