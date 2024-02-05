@@ -75,6 +75,11 @@ export interface IUpdateAssetHashesOptions {
   filesByChunkName?: Map<string, Record<string, string>>;
 }
 
+interface IProcessChunkAssetResult {
+  trueHash: string;
+  newJsFilename: string;
+}
+
 export function updateAssetHashes({
   thisWebpack,
   compilation,
@@ -145,7 +150,10 @@ export function updateAssetHashes({
               new thisWebpack.WebpackError(`Could not find dependencies for chunk ${chunk.id}.`)
             );
           } else {
-            function processChunkAsset(jsAssetName: string, locale: string | undefined): string | undefined {
+            function processChunkAsset(
+              jsAssetName: string,
+              locale: string | undefined
+            ): IProcessChunkAssetResult | undefined {
               const asset: Readonly<Asset> | undefined = compilation.getAsset(jsAssetName);
               if (!asset) {
                 compilation.errors.push(
@@ -256,19 +264,22 @@ export function updateAssetHashes({
                 if (jsAssetName.includes(existingHash)) {
                   const trueHash: string = hashFn(assetSource.buffer());
                   if (trueHash !== existingHash) {
-                    const newAssetName: string = jsAssetName.replace(existingHash, trueHash);
-                    compilation.renameAsset(jsAssetName, newAssetName);
+                    const newJsFilename: string = jsAssetName.replace(existingHash, trueHash);
+                    compilation.renameAsset(jsAssetName, newJsFilename);
 
                     if (locale) {
                       const filesForChunkName: Record<string, string> | undefined = filesByChunkName?.get(
                         chunk.name
                       );
                       if (filesForChunkName) {
-                        filesForChunkName[locale] = newAssetName;
+                        filesForChunkName[locale] = newJsFilename;
                       }
                     }
 
-                    return trueHash;
+                    return {
+                      trueHash,
+                      newJsFilename
+                    };
                   }
                 }
               }
@@ -283,9 +294,14 @@ export function updateAssetHashes({
                 trueHashByLocale
               });
               for (const [locale, jsAssetName] of Object.entries(localizedFiles)) {
-                const trueHash: string | undefined = processChunkAsset(jsAssetName, locale);
-                if (trueHash) {
+                const processAssetResult: IProcessChunkAssetResult | undefined = processChunkAsset(
+                  jsAssetName,
+                  locale
+                );
+                if (processAssetResult) {
+                  const { trueHash, newJsFilename } = processAssetResult;
                   trueHashByLocale[locale] = trueHash;
+                  localizedFiles[locale] = newJsFilename;
                 }
               }
             } else {
@@ -308,8 +324,12 @@ export function updateAssetHashes({
                   new thisWebpack.WebpackError(`Could not find a .js asset for chunk ${chunk.id}.`)
                 );
               } else {
-                const trueHash: string | undefined = processChunkAsset(jsAssetName, undefined);
+                const { trueHash, newJsFilename } = processChunkAsset(jsAssetName, undefined) ?? {};
                 hashReplacementsByChunk.set(chunk, { existingHash, trueHashByLocale: trueHash });
+                if (newJsFilename) {
+                  chunk.files.delete(jsAssetName);
+                  chunk.files.add(newJsFilename);
+                }
               }
             }
           }
