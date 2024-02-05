@@ -50,6 +50,9 @@ ruleTester.run('typedef-var', typedefVar, {
       code: 'const x = 1 as const;'
     },
     {
+      code: 'const x: number = 1;'
+    },
+    {
       // prettier-ignore
       code: [
         'let { a , b } = {',
