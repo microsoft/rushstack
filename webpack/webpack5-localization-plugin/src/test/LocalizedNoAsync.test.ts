@@ -55,7 +55,7 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     localizationStats: {
       dropPath: 'localization-stats.json'
     },
-    useTrueHashes: true
+    realContentHash: true
   };
 
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);

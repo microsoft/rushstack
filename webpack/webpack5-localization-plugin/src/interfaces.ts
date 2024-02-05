@@ -148,7 +148,7 @@ export interface ILocalizationPluginOptions {
   /**
    * If set to true, update usages of [contenthash] to use the true hash of the file contents
    */
-  useTrueHashes?: boolean;
+  realContentHash?: boolean;
 }
 
 /**

@@ -29,7 +29,7 @@ export class TrueHashPlugin implements WebpackPluginInstance {
       let hasLocalizationPluginTrueHashOption: boolean = false;
       if (compiler.options.plugins) {
         for (const plugin of compiler.options.plugins) {
-          if (plugin instanceof LocalizationPlugin && plugin._options.useTrueHashes) {
+          if (plugin instanceof LocalizationPlugin && plugin._options.realContentHash) {
             hasLocalizationPluginTrueHashOption = true;
             break;
           }
@@ -39,7 +39,7 @@ export class TrueHashPlugin implements WebpackPluginInstance {
       if (hasLocalizationPluginTrueHashOption) {
         compilation.warnings.push(
           new thisWebpack.WebpackError(
-            `The ${TrueHashPlugin.name} is not compatible with the LocalizationPlugin's "useTrueHashes" option. ` +
+            `The ${TrueHashPlugin.name} is not compatible with the LocalizationPlugin's "realContentHash" option. ` +
               `Because the LocalizationPlugin is already handling true hashes, the ${TrueHashPlugin.name} plugin ` +
               'will have no effect.'
           )

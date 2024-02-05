@@ -163,11 +163,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
       let hashFn: HashFn | undefined;
-      if (this._options.useTrueHashes) {
+      if (this._options.realContentHash) {
         if (runtimeLocaleExpression) {
           compilation.errors.push(
             new WebpackError(
-              `The "useTrueHashes" option cannot be used in conjunction with "runtimeLocaleExpression".`
+              `The "realContentHash" option cannot be used in conjunction with "runtimeLocaleExpression".`
             )
           );
         } else {

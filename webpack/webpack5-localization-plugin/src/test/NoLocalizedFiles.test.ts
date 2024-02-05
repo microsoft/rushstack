@@ -30,7 +30,7 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
       },
       translatedStrings: {}
     },
-    useTrueHashes: true
+    realContentHash: true
   });
 
   const compiler: webpack.Compiler = webpack({

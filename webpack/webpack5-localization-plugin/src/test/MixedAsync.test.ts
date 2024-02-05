@@ -53,7 +53,7 @@ async function testMixedAsyncInner(minimize: boolean): Promise<void> {
     localizationStats: {
       callback: statsCallback
     },
-    useTrueHashes: true
+    realContentHash: true
   };
 
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);

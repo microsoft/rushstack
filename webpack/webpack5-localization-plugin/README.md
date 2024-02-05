@@ -41,7 +41,7 @@ import { LocalizationPlugin } from '@rushstack/webpack5-localization-plugin';
 }
 ```
 
-**_A note about the dev server:_** When Webpack is being run by the Webpack dev server, this plugin pipes
+***A note about the dev server:*** When Webpack is being run by the Webpack dev server, this plugin pipes
 the strings in the loc files in the source (the `.loc.json` and the `.resx` files) to the output without
 any translations.
 
@@ -201,7 +201,7 @@ The file has the following format:
 This option is used to specify a callback to be called with the stats data that would be dropped at
 [`localizationStats.dropPath`](#localizationStats.DropPath--) after compilation completes.
 
-### `useTrueHashes: true | false`
+### `realContentHash: true | false`
 
 If this option is set to `true`, the plugin will update `[contenthash]` tokens in the output filenames to
 use the true hash of the content, rather than an intermediate hash that is shared between all locales.

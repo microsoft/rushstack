@@ -45,8 +45,8 @@ export interface ILocalizationPluginOptions {
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
+    realContentHash?: boolean;
     runtimeLocaleExpression?: string;
-    useTrueHashes?: boolean;
 }
 
 // @public (undocumented)

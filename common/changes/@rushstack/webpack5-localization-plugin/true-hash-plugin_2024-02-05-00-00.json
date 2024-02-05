@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack5-localization-plugin",
-      "comment": "Include an option called `useTrueHashes` that updates \"[contenthash]\" hashes to the actual hashes of chunks.",
+      "comment": "Include an option called `realContentHash` that updates \"[contenthash]\" hashes to the actual hashes of chunks.",
       "type": "minor"
     }
   ],
