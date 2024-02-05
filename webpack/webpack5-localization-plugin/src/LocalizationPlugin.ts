@@ -173,6 +173,14 @@ export class LocalizationPlugin implements WebpackPluginInstance {
         } else {
           hashFn = getHashFunction({ thisWebpack, compilation });
         }
+      } else if (compiler.options.optimization?.realContentHash) {
+        compilation.errors.push(
+          new thisWebpack.WebpackError(
+            `The \`optimization.realContentHash\` option is set and the ${LocalizationPlugin.name}'s ` +
+              '`realContentHash` option is not set. This will likely produce invalid results. Consider setting the ' +
+              `\`realContentHash\` option in the ${LocalizationPlugin.name} plugin.`
+          )
+        );
       }
 
       compilation.hooks.assetPath.tap(

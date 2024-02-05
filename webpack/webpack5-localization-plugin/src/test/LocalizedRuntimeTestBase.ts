@@ -75,7 +75,8 @@ export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): vo
       },
       optimization: {
         minimize,
-        moduleIds: 'named'
+        moduleIds: 'named',
+        realContentHash: false
       },
       context: '/',
       mode: 'production',
