@@ -215,6 +215,9 @@ export interface ILocalizationStats {
   namedChunkGroups: { [name: string]: ILocalizationStatsChunkGroup };
 }
 
+/**
+ * @public
+ */
 export type WebpackHash = Parameters<typeof webpack.util.createHash>[0];
 
 /**

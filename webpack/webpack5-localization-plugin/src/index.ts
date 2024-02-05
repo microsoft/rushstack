@@ -5,7 +5,9 @@ export { LocalizationPlugin, type IStringPlaceholder as _IStringPlaceholder } fr
 export { TrueHashPlugin } from './TrueHashPlugin';
 
 export {
+  ICustomHashFunctionOptions,
   IDefaultLocaleOptions,
+  IHashAlgorithmOptions,
   ILocaleData,
   ILocaleElementMap,
   ILocaleFileData,
@@ -21,9 +23,8 @@ export {
   IPseudolocalesOptions,
   IResolvedMissingTranslations,
   ITrueHashPluginOptions,
-  ICustomHashFunctionOptions,
-  IHashAlgorithmOptions,
-  ITrueHashPluginOptionsBase
+  ITrueHashPluginOptionsBase,
+  WebpackHash
 } from './interfaces';
 
 export { ILocalizedWebpackChunk } from './webpackInterfaces';

@@ -27,7 +27,6 @@ export interface IDefaultLocaleOptions {
 
 // @public (undocumented)
 export interface IHashAlgorithmOptions extends ITrueHashPluginOptionsBase {
-    // Warning: (ae-forgotten-export) The symbol "WebpackHash" needs to be exported by the entry point index.d.ts
     hash?: WebpackHash;
 }
 
@@ -171,6 +170,9 @@ export class TrueHashPlugin implements WebpackPluginInstance {
     // (undocumented)
     apply(compiler: Compiler): void;
 }
+
+// @public (undocumented)
+export type WebpackHash = Parameters<typeof default_2.util.createHash>[0];
 
 // (No @packageDocumentation comment for this package)
 
