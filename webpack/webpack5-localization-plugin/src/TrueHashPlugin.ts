@@ -25,7 +25,7 @@ const PLUGIN_NAME: 'true-hash' = 'true-hash';
 
 interface IHashReplacement {
   existingHash: string;
-  trueHashByLocale: string | Record<string, string>;
+  trueHashByLocale: string | Record<string, string> | undefined;
 }
 
 export type HashFn = (contents: string | Buffer) => string;
@@ -293,9 +293,7 @@ export function updateAssetHashes({
                 );
               } else {
                 const trueHash: string | undefined = processChunkAsset(jsAssetName, undefined);
-                if (trueHash) {
-                  hashReplacementsByChunk.set(chunk, { existingHash, trueHashByLocale: trueHash });
-                }
+                hashReplacementsByChunk.set(chunk, { existingHash, trueHashByLocale: trueHash });
               }
             }
           }
