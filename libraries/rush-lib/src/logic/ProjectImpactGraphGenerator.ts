@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import fs from 'fs';
+import { FileSystem } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 import path from 'path';
 import colors from 'colors/safe';
@@ -28,22 +28,22 @@ export interface IFileSchema {
   };
 }
 
+/**
+ * Default global excluded globs
+ * Only used if the `<repository_root>/.mergequeueignore` does not exist
+ */
+const DefaultGlobalExcludedGlobs: string[] = ['common/autoinstallers/**'];
+
 export class ProjectImpactGraphGenerator {
   /**
    * Full path of repository root
    */
-  private _repositoryRoot: string;
+  private readonly _repositoryRoot: string;
 
   /**
    * Projects within the Rush configuration
    */
-  private _projects: RushConfigurationProject[];
-
-  /**
-   * Default global excluded globs
-   * Only used if the `<repository_root>/.mergequeueignore` does not exist
-   */
-  private _DefaultGlobalExcludedGlobs: string[] = ['common/autoinstallers/**'];
+  private readonly _projects: RushConfigurationProject[];
 
   /**
    * Get repositoryRoot and load projects within the rush.json
@@ -59,8 +59,8 @@ export class ProjectImpactGraphGenerator {
    */
   private _loadGlobalExcludedGlobs(repositoryRoot: string): string[] | undefined {
     const filePath: string = path.join(repositoryRoot, '.mergequeueignore');
-    if (fs.existsSync(filePath)) {
-      const globs: string[] = fs.readFileSync(filePath).toString().split('\n');
+    if (FileSystem.exists(filePath)) {
+      const globs: string[] = FileSystem.readFile(filePath).toString().split('\n');
       return globs;
     }
   }
@@ -71,8 +71,8 @@ export class ProjectImpactGraphGenerator {
    */
   private _loadProjectExcludedGlobs(projectRootRelativePath: string): string[] | undefined {
     const filePath: string = path.join(this._repositoryRoot, projectRootRelativePath, '.mergequeueignore');
-    if (fs.existsSync(filePath)) {
-      const globs: string[] = fs.readFileSync(filePath).toString().split('\n');
+    if (FileSystem.exists(filePath)) {
+      const globs: string[] = FileSystem.readFile(filePath).toString().split('\n');
       return globs.map((glob) => path.join(projectRootRelativePath, glob));
     }
   }
@@ -84,7 +84,7 @@ export class ProjectImpactGraphGenerator {
     const stopwatch: Stopwatch = Stopwatch.start();
     const content: IFileSchema = {} as IFileSchema;
     content.globalExcludedGlobs =
-      this._loadGlobalExcludedGlobs(this._repositoryRoot) || this._DefaultGlobalExcludedGlobs;
+      this._loadGlobalExcludedGlobs(this._repositoryRoot) || DefaultGlobalExcludedGlobs;
     content.projects = {};
     this._projects.forEach((project) => {
       // ignore the top project
@@ -106,7 +106,10 @@ export class ProjectImpactGraphGenerator {
       }
     });
 
-    fs.writeFileSync(path.join(this._repositoryRoot, 'project-impact-graph.yaml'), yaml.safeDump(content));
+    FileSystem.writeFile(
+      path.join(this._repositoryRoot, 'project-impact-graph.yaml'),
+      yaml.safeDump(content)
+    );
     stopwatch.stop();
     // eslint-disable-next-line no-console
     console.log('\n' + colors.green(`Generate project impact graph successfully. (${stopwatch.toString()})`));
