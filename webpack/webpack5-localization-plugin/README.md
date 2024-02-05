@@ -41,7 +41,7 @@ import { LocalizationPlugin } from '@rushstack/webpack5-localization-plugin';
 }
 ```
 
-***A note about the dev server:*** When Webpack is being run by the Webpack dev server, this plugin pipes
+**_A note about the dev server:_** When Webpack is being run by the Webpack dev server, this plugin pipes
 the strings in the loc files in the source (the `.loc.json` and the `.resx` files) to the output without
 any translations.
 
@@ -208,34 +208,6 @@ use the true hash of the content, rather than an intermediate hash that is share
 
 Note that this option is not compatible with the `runtimeLocaleExpression` option and will cause an error if
 both are set.
-
-#### `TrueHashPlugin`
-
-There is another plugin exported from this package called `TrueHashPlugin`. This plugin can be used with
-or independent of the `LocalizationPlugin`. It does the same thing as setting `useTrueHashes` to `true` in
-the `LocalizationPlugin` options, but if used with the `LocalizationPlugin` and the `localizationStats` option
-is set, stats may contain incorrect filenames.
-
-This plugin takes a few options:
-
-##### `stageOverride: number`
-
-If this option is set, override the stage of the `processAssets` hook at which the plugin runs. The default
-stage is `PROCESS_ASSETS_STAGE_SUMMARIZE`.
-
-##### `hash: string | Hash`
-
-This option is used to specify the hash function to use. It can be a string specifying the name of a hash
-function, or a webpack Hash object. It cannot be used with the `hashFunction` option.
-
-If neither `hash` nor `hashFunction` is set, the plugin will use the hash options from the webpack config.
-
-##### `hashFunction: (contents: string | Buffer) => string`
-
-This option is used to specify a custom hash function to use. This function should take a string or buffer
-and return a string. It cannot be used with the `hash` option.
-
-If neither `hash` nor `hashFunction` is set, the plugin will use the hash options from the webpack config.
 
 ## Links
 

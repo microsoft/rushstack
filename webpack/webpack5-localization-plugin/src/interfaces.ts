@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { LoaderContext, default as webpack } from 'webpack';
+import type { LoaderContext } from 'webpack';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 
 /**
@@ -214,40 +214,3 @@ export interface ILocalizationStats {
   entrypoints: { [name: string]: ILocalizationStatsEntrypoint };
   namedChunkGroups: { [name: string]: ILocalizationStatsChunkGroup };
 }
-
-/**
- * @public
- */
-export type WebpackHash = Parameters<typeof webpack.util.createHash>[0];
-
-/**
- * @public
- */
-export interface ITrueHashPluginOptionsBase {
-  stageOverride?: number;
-}
-
-/**
- * @public
- */
-export interface IHashAlgorithmOptions extends ITrueHashPluginOptionsBase {
-  /**
-   * The name of the hash algorithm to use, e.g. 'sha256', or a webpack Hash object.
-   */
-  hash?: WebpackHash;
-}
-
-/**
- * @public
- */
-export interface ICustomHashFunctionOptions extends ITrueHashPluginOptionsBase {
-  /**
-   * A function that takes the contents of a file and returns a hash.
-   */
-  hashFunction: (contents: string | Buffer) => string;
-}
-
-/**
- * @public
- */
-export type ITrueHashPluginOptions = IHashAlgorithmOptions | ICustomHashFunctionOptions;

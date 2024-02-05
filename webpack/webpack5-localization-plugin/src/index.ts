@@ -2,12 +2,9 @@
 // See LICENSE in the project root for license information.
 
 export { LocalizationPlugin, type IStringPlaceholder as _IStringPlaceholder } from './LocalizationPlugin';
-export { TrueHashPlugin } from './TrueHashPlugin';
 
 export {
-  ICustomHashFunctionOptions,
   IDefaultLocaleOptions,
-  IHashAlgorithmOptions,
   ILocaleData,
   ILocaleElementMap,
   ILocaleFileData,
@@ -21,10 +18,7 @@ export {
   ILocalizedStrings,
   IPassthroughLocaleOptions,
   IPseudolocalesOptions,
-  IResolvedMissingTranslations,
-  ITrueHashPluginOptions,
-  ITrueHashPluginOptionsBase,
-  WebpackHash
+  IResolvedMissingTranslations
 } from './interfaces';
 
 export { ILocalizedWebpackChunk } from './webpackInterfaces';

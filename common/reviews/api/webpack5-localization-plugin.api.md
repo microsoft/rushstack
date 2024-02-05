@@ -4,30 +4,17 @@
 
 ```ts
 
-/// <reference types="node" />
-
 import type { Chunk } from 'webpack';
 import type { Compiler } from 'webpack';
-import type { default as default_2 } from 'webpack';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
 import type { LoaderContext } from 'webpack';
 import type { WebpackPluginInstance } from 'webpack';
 
 // @public (undocumented)
-export interface ICustomHashFunctionOptions extends ITrueHashPluginOptionsBase {
-    hashFunction: (contents: string | Buffer) => string;
-}
-
-// @public (undocumented)
 export interface IDefaultLocaleOptions {
     fillMissingTranslationStrings?: boolean;
     localeName: string;
-}
-
-// @public (undocumented)
-export interface IHashAlgorithmOptions extends ITrueHashPluginOptionsBase {
-    hash?: WebpackHash;
 }
 
 // @public (undocumented)
@@ -139,15 +126,6 @@ export interface _IStringPlaceholder {
     valuesByLocale: Map<string, string>;
 }
 
-// @public (undocumented)
-export type ITrueHashPluginOptions = IHashAlgorithmOptions | ICustomHashFunctionOptions;
-
-// @public (undocumented)
-export interface ITrueHashPluginOptionsBase {
-    // (undocumented)
-    stageOverride?: number;
-}
-
 // @public
 export class LocalizationPlugin implements WebpackPluginInstance {
     constructor(options: ILocalizationPluginOptions);
@@ -163,16 +141,6 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     // (undocumented)
     readonly stringKeys: Map<string, _IStringPlaceholder>;
 }
-
-// @public (undocumented)
-export class TrueHashPlugin implements WebpackPluginInstance {
-    constructor(options?: ITrueHashPluginOptions);
-    // (undocumented)
-    apply(compiler: Compiler): void;
-}
-
-// @public (undocumented)
-export type WebpackHash = Parameters<typeof default_2.util.createHash>[0];
 
 // (No @packageDocumentation comment for this package)
 

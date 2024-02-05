@@ -29,7 +29,7 @@ import type {
 import type { IAssetPathOptions } from './webpackInterfaces';
 import { markEntity, getMark } from './utilities/EntityMarker';
 import { processLocalizedAsset, processNonLocalizedAsset } from './AssetProcessor';
-import { getHashFunction, type HashFn, updateAssetHashes } from './TrueHashPlugin';
+import { getHashFunction, type HashFn, updateAssetHashes } from './trueHashes';
 
 /**
  * @public

@@ -1,27 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  default as webpack,
-  Compilation,
-  Compiler,
-  WebpackPluginInstance,
-  Chunk,
-  Asset,
-  sources
-} from 'webpack';
+import type { default as webpack, Compilation, Chunk, Asset, sources } from 'webpack';
 import { Text } from '@rushstack/node-core-library';
 
 import type { ILocalizedWebpackChunk } from './webpackInterfaces';
-import type {
-  ICustomHashFunctionOptions,
-  IHashAlgorithmOptions,
-  ITrueHashPluginOptions,
-  WebpackHash
-} from './interfaces';
-import { LocalizationPlugin } from './LocalizationPlugin';
-
-const PLUGIN_NAME: 'true-hash' = 'true-hash';
 
 interface IHashReplacement {
   existingHash: string;
@@ -33,39 +16,17 @@ export type HashFn = (contents: string | Buffer) => string;
 export interface IGetHashFunctionOptions {
   thisWebpack: typeof webpack;
   compilation: Compilation;
-  options?: ITrueHashPluginOptions;
 }
 
-export function getHashFunction({ thisWebpack, compilation, options = {} }: IGetHashFunctionOptions): HashFn {
-  const { hash, hashFunction } = options as Partial<IHashAlgorithmOptions & ICustomHashFunctionOptions>;
-  let hashFn: (contents: string | Buffer) => string;
-  if (hashFunction) {
-    hashFn = hashFunction;
-    if (hash) {
-      compilation.errors.push(
-        new thisWebpack.WebpackError(
-          `The TrueHashPlugin was configured with both "hash" and "hashFunction". ` +
-            `Only one of these options can be specified. Falling back to the custom hash function.`
-        )
-      );
-    }
-  } else {
-    const {
-      hashFunction: hashFunctionFromOptions = 'md5',
-      hashDigest = 'hex',
-      hashDigestLength
-    } = compilation.outputOptions;
-    const hashToUse: WebpackHash = hash ?? hashFunctionFromOptions;
-    hashFn = (contents: string | Buffer) =>
-      thisWebpack.util
-        .createHash(hashToUse)
-        .update(contents)
-        .digest(hashDigest)
-        .toString()
-        .slice(0, hashDigestLength);
-  }
-
-  return hashFn;
+export function getHashFunction({ thisWebpack, compilation }: IGetHashFunctionOptions): HashFn {
+  const { hashFunction = 'md5', hashDigest = 'hex', hashDigestLength } = compilation.outputOptions;
+  return (contents: string | Buffer) =>
+    thisWebpack.util
+      .createHash(hashFunction)
+      .update(contents)
+      .digest(hashDigest)
+      .toString()
+      .slice(0, hashDigestLength);
 }
 
 export interface IUpdateAssetHashesOptions {
@@ -344,58 +305,5 @@ export function updateAssetHashes({
         }
       }
     }
-  }
-}
-
-/**
- * @public
- */
-export class TrueHashPlugin implements WebpackPluginInstance {
-  private readonly _options: ITrueHashPluginOptions;
-
-  public constructor(options: ITrueHashPluginOptions = {}) {
-    this._options = options;
-  }
-
-  public apply(compiler: Compiler): void {
-    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
-      const { webpack: thisWebpack } = compiler;
-
-      let hasLocalizationPluginTrueHashOption: boolean = false;
-      if (compiler.options.plugins) {
-        for (const plugin of compiler.options.plugins) {
-          if (plugin instanceof LocalizationPlugin && plugin._options.useTrueHashes) {
-            hasLocalizationPluginTrueHashOption = true;
-            break;
-          }
-        }
-      }
-
-      if (hasLocalizationPluginTrueHashOption) {
-        compilation.warnings.push(
-          new thisWebpack.WebpackError(
-            `The ${TrueHashPlugin.name} is not compatible with the LocalizationPlugin's "useTrueHashes" option. ` +
-              `Because the LocalizationPlugin is already handling true hashes, the ${TrueHashPlugin.name} plugin ` +
-              'will have no effect.'
-          )
-        );
-      } else {
-        const { stageOverride: processAssetsStage = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
-          this._options as IHashAlgorithmOptions & ICustomHashFunctionOptions;
-        const hashFn: (contents: string | Buffer) => string = getHashFunction({
-          thisWebpack,
-          compilation,
-          options: this._options
-        });
-
-        compilation.hooks.processAssets.tap(
-          {
-            name: PLUGIN_NAME,
-            stage: processAssetsStage
-          },
-          () => updateAssetHashes({ thisWebpack, compilation, hashFn })
-        );
-      }
-    });
   }
 }

@@ -7,10 +7,10 @@ import { promisify } from 'util';
 import webpack, { type Compiler, type Stats } from 'webpack';
 import { Volume } from 'memfs/lib/volume';
 
-import { TrueHashPlugin } from '../TrueHashPlugin';
 import { MemFSPlugin } from './MemFSPlugin';
-import type { ILocalizationPluginOptions, ITrueHashPluginOptions } from '../interfaces';
+import type { ILocalizationPluginOptions } from '../interfaces';
 import { LocalizationPlugin } from '../LocalizationPlugin';
+import { type ITrueHashPluginOptions, TrueHashPlugin } from './TrueHashPlugin';
 
 export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): void {
   async function testLocalizedRuntimeInner(minimize: boolean): Promise<void> {
