@@ -149,6 +149,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         } else {
           throw new Error('The specified filter arguments resulted in no projects being selected.');
         }
+        // Remove the filter arguments as we already have the selected subspaces
+        installManagerOptions.pnpmFilterArguments = [];
       } else if (this._subspaceParameter.value) {
         // Selecting a single subspace
         const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
