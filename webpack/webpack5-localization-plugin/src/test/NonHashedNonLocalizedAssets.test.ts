@@ -32,7 +32,7 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale].js'
+      filename: '[name].js'
     },
     context: '/',
     optimization: {
