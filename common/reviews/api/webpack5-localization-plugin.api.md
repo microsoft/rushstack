@@ -167,7 +167,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
 
 // @public (undocumented)
 export class TrueHashPlugin implements WebpackPluginInstance {
-    constructor(options: ITrueHashPluginOptions);
+    constructor(options?: ITrueHashPluginOptions);
     // (undocumented)
     apply(compiler: Compiler): void;
 }

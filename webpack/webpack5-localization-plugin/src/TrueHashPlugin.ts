@@ -319,7 +319,7 @@ export function updateAssetHashes({
 export class TrueHashPlugin implements WebpackPluginInstance {
   private readonly _options: ITrueHashPluginOptions;
 
-  public constructor(options: ITrueHashPluginOptions) {
+  public constructor(options: ITrueHashPluginOptions = {}) {
     this._options = options;
   }
 
