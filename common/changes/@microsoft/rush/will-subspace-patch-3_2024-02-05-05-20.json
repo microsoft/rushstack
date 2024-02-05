@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixed issue related to pnpm filter arguments and subspaces",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
