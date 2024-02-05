@@ -144,6 +144,11 @@ export interface ILocalizationPluginOptions {
    * runtimeLocaleExpression produces the same output as formatLocaleForFilename.
    */
   formatLocaleForFilename?: (locale: string) => string;
+
+  /**
+   * If set to true, update usages of [contenthash] to use the true hash of the file contents
+   */
+  realContentHash?: boolean;
 }
 
 /**

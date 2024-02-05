@@ -45,6 +45,7 @@ export interface ILocalizationPluginOptions {
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
+    realContentHash?: boolean;
     runtimeLocaleExpression?: string;
 }
 
@@ -135,6 +136,8 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     getDataForSerialNumber(serialNumber: string): _IStringPlaceholder | undefined;
     // (undocumented)
     getPlaceholder(localizedFileKey: string, stringName: string): _IStringPlaceholder | undefined;
+    // @internal (undocumented)
+    readonly _options: ILocalizationPluginOptions;
     // (undocumented)
     readonly stringKeys: Map<string, _IStringPlaceholder>;
 }

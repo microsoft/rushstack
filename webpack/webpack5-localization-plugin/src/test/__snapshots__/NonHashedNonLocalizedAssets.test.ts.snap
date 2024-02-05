@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LocalizationPlugin Handles non-localized compilations (minified): Content 1`] = `
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (minified): Content 1`] = `
 Object {
-  "/release/async1-none-48a722dc54a6c9ffce23.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[515],{\\"./async1.js\\":(o,s,c)=>{function e(){console.log(\\"foo1\\")}c.r(s),c.d(s,{foo:()=>e})}}]);",
-  "/release/async2-none-533c236877cb65c0fb15.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[989],{\\"./async2.js\\":(o,s,c)=>{function e(){console.log(\\"foo2\\")}c.r(s),c.d(s,{foo:()=>e})}}]);",
-  "/release/mainSingleChunk-none-7d6f7e2f26055818203c.js": "(()=>{var e,r={},t={};function o(e){var n=t[e];if(void 0!==n)return n.exports;var i=t[e]={exports:{}};return r[e](i,i.exports,o),i.exports}o.m=r,o.d=(e,r)=>{for(var t in r)o.o(r,t)&&!o.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:r[t]})},o.f={},o.e=e=>Promise.all(Object.keys(o.f).reduce(((r,t)=>(o.f[t](e,r),r)),[])),o.u=e=>\\"async1-none-48a722dc54a6c9ffce23.js\\",o.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),o.o=(e,r)=>Object.prototype.hasOwnProperty.call(e,r),e={},o.l=(r,t,n,i)=>{if(e[r])e[r].push(t);else{var a,l;if(void 0!==n)for(var u=document.getElementsByTagName(\\"script\\"),c=0;c<u.length;c++){var s=u[c];if(s.getAttribute(\\"src\\")==r){a=s;break}}a||(l=!0,(a=document.createElement(\\"script\\")).charset=\\"utf-8\\",a.timeout=120,o.nc&&a.setAttribute(\\"nonce\\",o.nc),a.src=r),e[r]=[t];var d=(t,o)=>{a.onerror=a.onload=null,clearTimeout(p);var n=e[r];if(delete e[r],a.parentNode&&a.parentNode.removeChild(a),n&&n.forEach((e=>e(o))),t)return t(o)},p=setTimeout(d.bind(null,void 0,{type:\\"timeout\\",target:a}),12e4);a.onerror=d.bind(null,a.onerror),a.onload=d.bind(null,a.onload),l&&document.head.appendChild(a)}},o.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;o.g.importScripts&&(e=o.g.location+\\"\\");var r=o.g.document;if(!e&&r&&(r.currentScript&&(e=r.currentScript.src),!e)){var t=r.getElementsByTagName(\\"script\\");if(t.length)for(var n=t.length-1;n>-1&&!e;)e=t[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),o.p=e})(),(()=>{var e={315:0};o.f.j=(r,t)=>{var n=o.o(e,r)?e[r]:void 0;if(0!==n)if(n)t.push(n[2]);else{var i=new Promise(((t,o)=>n=e[r]=[t,o]));t.push(n[2]=i);var a=o.p+o.u(r),l=new Error;o.l(a,(t=>{if(o.o(e,r)&&(0!==(n=e[r])&&(e[r]=void 0),n)){var i=t&&(\\"load\\"===t.type?\\"missing\\":t.type),a=t&&t.target&&t.target.src;l.message=\\"Loading chunk \\"+r+\\" failed.\\\\n(\\"+i+\\": \\"+a+\\")\\",l.name=\\"ChunkLoadError\\",l.type=i,l.request=a,n[1](l)}}),\\"chunk-\\"+r,r)}};var r=(r,t)=>{var n,i,[a,l,u]=t,c=0;if(a.some((r=>0!==e[r]))){for(n in l)o.o(l,n)&&(o.m[n]=l[n]);u&&u(o)}for(r&&r(t);c<a.length;c++)i=a[c],o.o(e,i)&&e[i]&&e[i][0](),e[i]=0},t=self.webpackChunk=self.webpackChunk||[];t.forEach(r.bind(null,0)),t.push=r.bind(null,t.push.bind(t))})(),console.log(\\"Do stuff\\"),o.e(515).then(o.bind(o,\\"./async1.js\\")).then((e=>e.foo()))})();",
-  "/release/mainTwoChunks-none-e08b212d84344c842772.js": "(()=>{var e,r={},t={};function o(e){var n=t[e];if(void 0!==n)return n.exports;var i=t[e]={exports:{}};return r[e](i,i.exports,o),i.exports}o.m=r,o.d=(e,r)=>{for(var t in r)o.o(r,t)&&!o.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:r[t]})},o.f={},o.e=e=>Promise.all(Object.keys(o.f).reduce(((r,t)=>(o.f[t](e,r),r)),[])),o.u=e=>({515:\\"async1\\",989:\\"async2\\"}[e]+\\"-none-\\"+{515:\\"48a722dc54a6c9ffce23\\",989:\\"533c236877cb65c0fb15\\"}[e]+\\".js\\"),o.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),o.o=(e,r)=>Object.prototype.hasOwnProperty.call(e,r),e={},o.l=(r,t,n,i)=>{if(e[r])e[r].push(t);else{var a,c;if(void 0!==n)for(var l=document.getElementsByTagName(\\"script\\"),s=0;s<l.length;s++){var u=l[s];if(u.getAttribute(\\"src\\")==r){a=u;break}}a||(c=!0,(a=document.createElement(\\"script\\")).charset=\\"utf-8\\",a.timeout=120,o.nc&&a.setAttribute(\\"nonce\\",o.nc),a.src=r),e[r]=[t];var d=(t,o)=>{a.onerror=a.onload=null,clearTimeout(f);var n=e[r];if(delete e[r],a.parentNode&&a.parentNode.removeChild(a),n&&n.forEach((e=>e(o))),t)return t(o)},f=setTimeout(d.bind(null,void 0,{type:\\"timeout\\",target:a}),12e4);a.onerror=d.bind(null,a.onerror),a.onload=d.bind(null,a.onload),c&&document.head.appendChild(a)}},o.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;o.g.importScripts&&(e=o.g.location+\\"\\");var r=o.g.document;if(!e&&r&&(r.currentScript&&(e=r.currentScript.src),!e)){var t=r.getElementsByTagName(\\"script\\");if(t.length)for(var n=t.length-1;n>-1&&!e;)e=t[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),o.p=e})(),(()=>{var e={903:0};o.f.j=(r,t)=>{var n=o.o(e,r)?e[r]:void 0;if(0!==n)if(n)t.push(n[2]);else{var i=new Promise(((t,o)=>n=e[r]=[t,o]));t.push(n[2]=i);var a=o.p+o.u(r),c=new Error;o.l(a,(t=>{if(o.o(e,r)&&(0!==(n=e[r])&&(e[r]=void 0),n)){var i=t&&(\\"load\\"===t.type?\\"missing\\":t.type),a=t&&t.target&&t.target.src;c.message=\\"Loading chunk \\"+r+\\" failed.\\\\n(\\"+i+\\": \\"+a+\\")\\",c.name=\\"ChunkLoadError\\",c.type=i,c.request=a,n[1](c)}}),\\"chunk-\\"+r,r)}};var r=(r,t)=>{var n,i,[a,c,l]=t,s=0;if(a.some((r=>0!==e[r]))){for(n in c)o.o(c,n)&&(o.m[n]=c[n]);l&&l(o)}for(r&&r(t);s<a.length;s++)i=a[s],o.o(e,i)&&e[i]&&e[i][0](),e[i]=0},t=self.webpackChunk=self.webpackChunk||[];t.forEach(r.bind(null,0)),t.push=r.bind(null,t.push.bind(t))})(),console.log(\\"Do stuff\\"),o.e(515).then(o.bind(o,\\"./async1.js\\")).then((e=>e.foo())),o.e(989).then(o.bind(o,\\"./async2.js\\")).then((e=>e.foo()))})();",
+  "/release/async1.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[515],{\\"./async1.js\\":(o,s,c)=>{function e(){console.log(\\"foo1\\")}c.r(s),c.d(s,{foo:()=>e})}}]);",
+  "/release/async2.js": "\\"use strict\\";(self.webpackChunk=self.webpackChunk||[]).push([[989],{\\"./async2.js\\":(o,s,c)=>{function e(){console.log(\\"foo2\\")}c.r(s),c.d(s,{foo:()=>e})}}]);",
+  "/release/mainSingleChunk.js": "(()=>{var e,r={},t={};function o(e){var n=t[e];if(void 0!==n)return n.exports;var i=t[e]={exports:{}};return r[e](i,i.exports,o),i.exports}o.m=r,o.d=(e,r)=>{for(var t in r)o.o(r,t)&&!o.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:r[t]})},o.f={},o.e=e=>Promise.all(Object.keys(o.f).reduce(((r,t)=>(o.f[t](e,r),r)),[])),o.u=e=>\\"async1.js\\",o.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),o.o=(e,r)=>Object.prototype.hasOwnProperty.call(e,r),e={},o.l=(r,t,n,i)=>{if(e[r])e[r].push(t);else{var a,l;if(void 0!==n)for(var u=document.getElementsByTagName(\\"script\\"),c=0;c<u.length;c++){var s=u[c];if(s.getAttribute(\\"src\\")==r){a=s;break}}a||(l=!0,(a=document.createElement(\\"script\\")).charset=\\"utf-8\\",a.timeout=120,o.nc&&a.setAttribute(\\"nonce\\",o.nc),a.src=r),e[r]=[t];var p=(t,o)=>{a.onerror=a.onload=null,clearTimeout(d);var n=e[r];if(delete e[r],a.parentNode&&a.parentNode.removeChild(a),n&&n.forEach((e=>e(o))),t)return t(o)},d=setTimeout(p.bind(null,void 0,{type:\\"timeout\\",target:a}),12e4);a.onerror=p.bind(null,a.onerror),a.onload=p.bind(null,a.onload),l&&document.head.appendChild(a)}},o.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;o.g.importScripts&&(e=o.g.location+\\"\\");var r=o.g.document;if(!e&&r&&(r.currentScript&&(e=r.currentScript.src),!e)){var t=r.getElementsByTagName(\\"script\\");if(t.length)for(var n=t.length-1;n>-1&&!e;)e=t[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),o.p=e})(),(()=>{var e={315:0};o.f.j=(r,t)=>{var n=o.o(e,r)?e[r]:void 0;if(0!==n)if(n)t.push(n[2]);else{var i=new Promise(((t,o)=>n=e[r]=[t,o]));t.push(n[2]=i);var a=o.p+o.u(r),l=new Error;o.l(a,(t=>{if(o.o(e,r)&&(0!==(n=e[r])&&(e[r]=void 0),n)){var i=t&&(\\"load\\"===t.type?\\"missing\\":t.type),a=t&&t.target&&t.target.src;l.message=\\"Loading chunk \\"+r+\\" failed.\\\\n(\\"+i+\\": \\"+a+\\")\\",l.name=\\"ChunkLoadError\\",l.type=i,l.request=a,n[1](l)}}),\\"chunk-\\"+r,r)}};var r=(r,t)=>{var n,i,[a,l,u]=t,c=0;if(a.some((r=>0!==e[r]))){for(n in l)o.o(l,n)&&(o.m[n]=l[n]);u&&u(o)}for(r&&r(t);c<a.length;c++)i=a[c],o.o(e,i)&&e[i]&&e[i][0](),e[i]=0},t=self.webpackChunk=self.webpackChunk||[];t.forEach(r.bind(null,0)),t.push=r.bind(null,t.push.bind(t))})(),console.log(\\"Do stuff\\"),o.e(515).then(o.bind(o,\\"./async1.js\\")).then((e=>e.foo()))})();",
+  "/release/mainTwoChunks.js": "(()=>{var e,r={},t={};function o(e){var n=t[e];if(void 0!==n)return n.exports;var i=t[e]={exports:{}};return r[e](i,i.exports,o),i.exports}o.m=r,o.d=(e,r)=>{for(var t in r)o.o(r,t)&&!o.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:r[t]})},o.f={},o.e=e=>Promise.all(Object.keys(o.f).reduce(((r,t)=>(o.f[t](e,r),r)),[])),o.u=e=>({515:\\"async1\\",989:\\"async2\\"}[e]+\\".js\\"),o.g=function(){if(\\"object\\"==typeof globalThis)return globalThis;try{return this||new Function(\\"return this\\")()}catch(e){if(\\"object\\"==typeof window)return window}}(),o.o=(e,r)=>Object.prototype.hasOwnProperty.call(e,r),e={},o.l=(r,t,n,i)=>{if(e[r])e[r].push(t);else{var a,l;if(void 0!==n)for(var s=document.getElementsByTagName(\\"script\\"),c=0;c<s.length;c++){var u=s[c];if(u.getAttribute(\\"src\\")==r){a=u;break}}a||(l=!0,(a=document.createElement(\\"script\\")).charset=\\"utf-8\\",a.timeout=120,o.nc&&a.setAttribute(\\"nonce\\",o.nc),a.src=r),e[r]=[t];var d=(t,o)=>{a.onerror=a.onload=null,clearTimeout(p);var n=e[r];if(delete e[r],a.parentNode&&a.parentNode.removeChild(a),n&&n.forEach((e=>e(o))),t)return t(o)},p=setTimeout(d.bind(null,void 0,{type:\\"timeout\\",target:a}),12e4);a.onerror=d.bind(null,a.onerror),a.onload=d.bind(null,a.onload),l&&document.head.appendChild(a)}},o.r=e=>{\\"undefined\\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\\"Module\\"}),Object.defineProperty(e,\\"__esModule\\",{value:!0})},(()=>{var e;o.g.importScripts&&(e=o.g.location+\\"\\");var r=o.g.document;if(!e&&r&&(r.currentScript&&(e=r.currentScript.src),!e)){var t=r.getElementsByTagName(\\"script\\");if(t.length)for(var n=t.length-1;n>-1&&!e;)e=t[n--].src}if(!e)throw new Error(\\"Automatic publicPath is not supported in this browser\\");e=e.replace(/#.*$/,\\"\\").replace(/\\\\?.*$/,\\"\\").replace(/\\\\/[^\\\\/]+$/,\\"/\\"),o.p=e})(),(()=>{var e={903:0};o.f.j=(r,t)=>{var n=o.o(e,r)?e[r]:void 0;if(0!==n)if(n)t.push(n[2]);else{var i=new Promise(((t,o)=>n=e[r]=[t,o]));t.push(n[2]=i);var a=o.p+o.u(r),l=new Error;o.l(a,(t=>{if(o.o(e,r)&&(0!==(n=e[r])&&(e[r]=void 0),n)){var i=t&&(\\"load\\"===t.type?\\"missing\\":t.type),a=t&&t.target&&t.target.src;l.message=\\"Loading chunk \\"+r+\\" failed.\\\\n(\\"+i+\\": \\"+a+\\")\\",l.name=\\"ChunkLoadError\\",l.type=i,l.request=a,n[1](l)}}),\\"chunk-\\"+r,r)}};var r=(r,t)=>{var n,i,[a,l,s]=t,c=0;if(a.some((r=>0!==e[r]))){for(n in l)o.o(l,n)&&(o.m[n]=l[n]);s&&s(o)}for(r&&r(t);c<a.length;c++)i=a[c],o.o(e,i)&&e[i]&&e[i][0](),e[i]=0},t=self.webpackChunk=self.webpackChunk||[];t.forEach(r.bind(null,0)),t.push=r.bind(null,t.push.bind(t))})(),console.log(\\"Do stuff\\"),o.e(515).then(o.bind(o,\\"./async1.js\\")).then((e=>e.foo())),o.e(989).then(o.bind(o,\\"./async2.js\\")).then((e=>e.foo()))})();",
 }
 `;
 
-exports[`LocalizationPlugin Handles non-localized compilations (minified): Errors 1`] = `Array []`;
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (minified): Errors 1`] = `Array []`;
 
-exports[`LocalizationPlugin Handles non-localized compilations (minified): Warnings 1`] = `Array []`;
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (minified): Warnings 1`] = `Array []`;
 
-exports[`LocalizationPlugin Handles non-localized compilations (unminified): Content 1`] = `
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (unminified): Content 1`] = `
 Object {
-  "/release/async1-none-a138af13bd80cae8310a.js": "\\"use strict\\";
+  "/release/async1.js": "\\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[515],{
 
 /***/ \\"./async1.js\\":
@@ -30,7 +30,7 @@ function foo() { console.log('foo1'); }
 /***/ })
 
 }]);",
-  "/release/async2-none-0c142ab36ce8fdb6d445.js": "\\"use strict\\";
+  "/release/async2.js": "\\"use strict\\";
 (self[\\"webpackChunk\\"] = self[\\"webpackChunk\\"] || []).push([[989],{
 
 /***/ \\"./async2.js\\":
@@ -45,7 +45,7 @@ function foo() { console.log('foo2'); }
 /***/ })
 
 }]);",
-  "/release/mainSingleChunk-none-508ef9a361c3744d4242.js": "/******/ (() => { // webpackBootstrap
+  "/release/mainSingleChunk.js": "/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
 /******/ 	// The module cache
@@ -106,7 +106,7 @@ function foo() { console.log('foo2'); }
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return \\"\\" + \\"async1\\" + \\"-none-\\" + \\"a138af13bd80cae8310a\\" + \\".js\\";
+/******/ 			return \\"\\" + \\"async1\\" + \\".js\\";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -301,7 +301,7 @@ var __webpack_exports__ = {};
 console.log(\\"Do stuff\\");__webpack_require__.e(/* import() | async1 */ 515).then(__webpack_require__.bind(__webpack_require__, \\"./async1.js\\")).then(mod => mod.foo());
 /******/ })()
 ;",
-  "/release/mainTwoChunks-none-b149e5d15775d7f6fd87.js": "/******/ (() => { // webpackBootstrap
+  "/release/mainTwoChunks.js": "/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({});
 /************************************************************************/
 /******/ 	// The module cache
@@ -362,7 +362,7 @@ console.log(\\"Do stuff\\");__webpack_require__.e(/* import() | async1 */ 515).t
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return \\"\\" + {\\"515\\":\\"async1\\",\\"989\\":\\"async2\\"}[chunkId] + \\"-none-\\" + {\\"515\\":\\"a138af13bd80cae8310a\\",\\"989\\":\\"0c142ab36ce8fdb6d445\\"}[chunkId] + \\".js\\";
+/******/ 			return \\"\\" + {\\"515\\":\\"async1\\",\\"989\\":\\"async2\\"}[chunkId] + \\".js\\";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -560,6 +560,6 @@ console.log(\\"Do stuff\\");__webpack_require__.e(/* import() | async1 */ 515).t
 }
 `;
 
-exports[`LocalizationPlugin Handles non-localized compilations (unminified): Errors 1`] = `Array []`;
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (unminified): Errors 1`] = `Array []`;
 
-exports[`LocalizationPlugin Handles non-localized compilations (unminified): Warnings 1`] = `Array []`;
+exports[`TrueHashPlugin Handles non-localized non-hashed compilations (unminified): Warnings 1`] = `Array []`;

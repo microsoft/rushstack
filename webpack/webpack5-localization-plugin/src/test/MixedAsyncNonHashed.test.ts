@@ -12,18 +12,18 @@ import { LocalizationPlugin } from '../LocalizationPlugin';
 import type { ILocalizationPluginOptions, ILocalizationStats } from '../interfaces';
 import { MemFSPlugin } from './MemFSPlugin';
 
-async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> {
+async function testMixedAsyncInner(minimize: boolean): Promise<void> {
   const memoryFileSystem: Volume = new Volume();
   memoryFileSystem.fromJSON(
     {
-      '/a/package.json': '{ "name": "a", "sideEffects": ["entry.js", "async.js"] }',
-      '/a/async1.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);`,
-      '/a/async2.js': `import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test + strings2.another);`,
-      '/a/entrySingleChunk.js': `import(/* webpackChunkName: 'async1' */ './async1');`,
-      '/a/entryTwoChunks.js': `import(/* webpackChunkName: 'async1' */ './async1');import(/* webpackChunkName: 'async2' */ './async2');`,
-      '/a/strings1.resjson': `{"test":"blah","_test.comment":"A string"}`,
-      '/a/strings2.resjson': `{"another":"something else","_another.comment":"Another string"}`,
-      '/b/entry.js': `console.log('hello world');`
+      '/a/package.json': '{ "name": "a", "sideEffects": ["entry.js", "async.js", "asyncLoc.js"] }',
+      '/a/async1.js': `console.log("blah1");`,
+      '/a/async2.js': `console.log("blah2");`,
+      '/a/asyncLoc1.js': `import strings1 from './strings1.loc.json'; import strings2 from './strings2.loc.json'; console.log(strings1.test, strings2.another);`,
+      '/a/asyncLoc2.js': `import strings1 from './strings1.loc.json'; import strings2 from './strings2.loc.json'; console.log(strings1.test + strings2.another);`,
+      '/a/entry.js': `import(/* webpackChunkName: 'asyncLoc1' */ './asyncLoc1');import(/* webpackChunkName: 'asyncLoc2' */ './asyncLoc2');import(/* webpackChunkName: 'async1' */ './async1');import(/* webpackChunkName: 'async2' */ './async2');`,
+      '/a/strings1.loc.json': `{"test":{"value":"blah","comment":"A string"}}`,
+      '/a/strings2.loc.json': `{"another":{"value":"something else","comment":"Another string" }}`
     },
     '/'
   );
@@ -33,7 +33,7 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
     localizationStats = stats;
   }
 
-  const resJsonLoader: string = resolve(__dirname, '../loaders/resjson-loader.js');
+  const loader: string = resolve(__dirname, '../loaders/locjson-loader.js');
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {
@@ -41,57 +41,47 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
       },
       translatedStrings: {
         LOCALE2: {
-          '/a/strings1.resjson': {
+          '/a/strings1.loc.json': {
             test: 'baz'
           },
-          '/a/strings2.resjson': {
+          '/a/strings2.loc.json': {
             another: 'some random translation'
           }
         }
       }
     },
-    runtimeLocaleExpression: 'self.__locale + "/"',
     localizationStats: {
       callback: statsCallback
     },
-    formatLocaleForFilename: (locale: string) => {
-      if (locale === 'none') {
-        return '';
-      } else {
-        return `${locale}/`;
-      }
-    }
+    realContentHash: true
   };
 
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
 
   const compiler: Compiler = webpack({
     entry: {
-      mainSingleChunk: '/a/entrySingleChunk.js',
-      mainTwoChunks: '/a/entryTwoChunks.js',
-      other: '/b/entry.js'
+      main: '/a/entry.js'
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale]-[contenthash].js',
-      chunkFilename: 'chunks/[name]-[locale]-[contenthash].js'
+      filename: '[name]-[locale].js',
+      chunkFilename: 'chunks/[name]-[locale].js'
     },
     module: {
       rules: [
         {
-          test: /\.resjson$/,
+          test: /\.loc.json$/,
           use: {
-            loader: resJsonLoader
+            loader
           },
-          type: 'json',
+          type: 'javascript/esm',
           sideEffects: false
         }
       ]
     },
     optimization: {
       minimize,
-      moduleIds: 'named',
-      realContentHash: false
+      moduleIds: 'named'
     },
     context: '/',
     mode: 'production',
@@ -107,8 +97,6 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
   expect(errors).toMatchSnapshot('Errors');
   expect(warnings).toMatchSnapshot('Warnings');
 
-  expect(stats.compilation.assets).toMatchSnapshot('Assets');
-
   const results: {} = memoryFileSystem.toJSON('/release');
   expect(results).toMatchSnapshot('Content');
 
@@ -119,11 +107,11 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
 }
 
 describe(LocalizationPlugin.name, () => {
-  it('Handles async localized chunks with a runtime locale expression (unminified)', async () => {
-    await testLocalizedAsyncDynamicInner(false);
+  it('Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (unminified)', async () => {
+    await testMixedAsyncInner(false);
   });
 
-  it('Handles async localized chunks with a runtime locale expression (minified)', async () => {
-    await testLocalizedAsyncDynamicInner(true);
+  it('Handles async localized and non-localized chunks with a runtime locale expression and without an asset filename hash (minified)', async () => {
+    await testMixedAsyncInner(true);
   });
 });
