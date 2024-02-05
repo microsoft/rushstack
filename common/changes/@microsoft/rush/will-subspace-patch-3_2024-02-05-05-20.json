@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue with filtered installs when the experimental subspaces feature is enabled",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
