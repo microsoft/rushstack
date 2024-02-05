@@ -62,6 +62,9 @@ async function testNonLocalizedInner(minimize: boolean): Promise<void> {
 
   const results: {} = memoryFileSystem.toJSON('/release');
   expect(results).toMatchSnapshot('Content');
+
+  expect(errors).toHaveLength(0);
+  expect(warnings).toHaveLength(0);
 }
 
 describe(LocalizationPlugin.name, () => {

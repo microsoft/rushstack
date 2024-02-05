@@ -112,6 +112,9 @@ async function testLocalizedAsyncDynamicInner(minimize: boolean): Promise<void> 
   expect(results).toMatchSnapshot('Content');
 
   expect(localizationStats).toMatchSnapshot('Localization Stats');
+
+  expect(errors).toHaveLength(0);
+  expect(warnings).toHaveLength(0);
 }
 
 describe(LocalizationPlugin.name, () => {
