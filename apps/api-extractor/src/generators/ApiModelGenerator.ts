@@ -250,12 +250,26 @@ export class ApiModelGenerator {
         break;
 
       case ts.SyntaxKind.VariableDeclaration:
-        this._processApiVariable(astDeclaration, context);
+        // check for arrow functions in variable declaration
+        const functionDeclaration: ts.FunctionDeclaration | undefined =
+          this._hasFunctionDeclaration(astDeclaration);
+        if (functionDeclaration) {
+          this._processApiFunction(astDeclaration, context, functionDeclaration);
+        } else {
+          this._processApiVariable(astDeclaration, context);
+        }
         break;
 
       default:
       // ignore unknown types
     }
+  }
+
+  private _hasFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
+    const children: ts.Node[] = astDeclaration.declaration.getChildren(
+      astDeclaration.declaration.getSourceFile()
+    );
+    return children.find(ts.isFunctionTypeNode) as ts.FunctionDeclaration | undefined;
   }
 
   private _processChildDeclarations(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
@@ -544,7 +558,11 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiFunction(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  private _processApiFunction(
+    astDeclaration: AstDeclaration,
+    context: IProcessAstEntityContext,
+    altFunctionDeclaration?: ts.FunctionDeclaration
+  ): void {
     const { name, isExported, parentApiItem } = context;
 
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
@@ -554,7 +572,7 @@ export class ApiModelGenerator {
 
     if (apiFunction === undefined) {
       const functionDeclaration: ts.FunctionDeclaration =
-        astDeclaration.declaration as ts.FunctionDeclaration;
+        altFunctionDeclaration ?? (astDeclaration.declaration as ts.FunctionDeclaration);
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
