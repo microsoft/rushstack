@@ -50,6 +50,9 @@ ruleTester.run('typedef-var', typedefVar, {
       code: 'const x = 1 as const;'
     },
     {
+      code: 'const x: 1 = 1;'
+    },
+    {
       code: 'const x: number = 1;'
     },
     {
