@@ -47,21 +47,21 @@ any translations.
 
 ## Options
 
-### `localizedData = { }`
+### `localizedData: { }`
 
-#### `localizedData.defaultLocale = { }`
+#### `localizedData.defaultLocale: { }`
 
 This option has a required property (`localeName`), to specify the name of the locale used in the
 `.resx` and `.loc.json` files in the source.
 
-##### `localizedData.defaultLocale.fillMissingTranslationStrings = true | false`
+##### `localizedData.defaultLocale.fillMissingTranslationStrings: true | false`
 
 If this option is set to `true`, strings that are missing from `localizedData.translatedStrings` will be
 provided by the default locale (the strings in the `.resx` and `.loc.json` files in the source). If
 this option is unset or set to `false`, an error will be emitted if a string is missing from
 `localizedData.translatedStrings`.
 
-#### `localizedData.translatedStrings = { }`
+#### `localizedData.translatedStrings: { }`
 
 This option is used to specify the localization data to be used in the build. This object has the following
 structure:
@@ -101,7 +101,7 @@ translatedStrings: {
 }
 ```
 
-#### `localizedData.resolveMissingTranslatedStrings = (locales: string[], filePath: string, context: LoaderContext<{}>) => { ... }`
+#### `localizedData.resolveMissingTranslatedStrings: (locales: string[], filePath: string, context: LoaderContext<{}>) => { ... }`
 
 This optional option can be used to resolve translated data that is missing from data that is provided
 in the `localizedData.translatedStrings` option. Set this option with a function expecting two parameters:
@@ -120,7 +120,7 @@ If the function returns data that is missing locales or individual strings, the 
 default locale if `localizedData.defaultLocale.fillMissingTranslationStrings` is set to `true`. If
 `localizedData.defaultLocale.fillMissingTranslationStrings` is set to `false`, an error will result.
 
-#### `localizedData.passthroughLocale = { }`
+#### `localizedData.passthroughLocale: { }`
 
 This option is used to specify how and if a passthrough locale should be generated. A passthrough locale
 is a generated locale in which each string's value is its name. This is useful for debugging and for identifying
@@ -128,34 +128,34 @@ cases where a locale is missing.
 
 This option takes two optional properties:
 
-##### `localizedData.passthroughLocale.usePassthroughLocale = true | false`
+##### `localizedData.passthroughLocale.usePassthroughLocale: true | false`
 
 If `passthroughLocale.usePassthroughLocale` is set to `true`, a passthrough locale will be included in the output.
 By default, the passthrough locale's name is "passthrough."
 
-##### `localizedData.passthroughLocale.passthroughLocaleName = '...'`
+##### `localizedData.passthroughLocale.passthroughLocaleName: '...'`
 
 If `passthroughLocale.usePassthroughLocale` is set to `true`, the "passthrough" locale name can be overridden
 by setting a value on `passthroughLocale.passthroughLocaleName`.
 
-#### `localizedData.pseudolocales = { }`
+#### `localizedData.pseudolocales: { }`
 
 This option allows pseudolocales to be generated from the strings in the default locale. This option takes
 an option with pseudolocales as keys and options for the
 [pseudolocale package](https://www.npmjs.com/package/pseudolocale) as values.
 
-### `noStringsLocaleName = '...'`
+### `noStringsLocaleName: '...'`
 
 The value to replace the `[locale]` token with for chunks without localized strings. Defaults to "none"
 
-### `runtimeLocaleExpression = '...'`
+### `runtimeLocaleExpression: '...'`
 
 A chunk of raw ECMAScript to inject into the webpack runtime to resolve the current locale at execution time. Allows
 multiple locales to share the same runtime chunk if it does not directly contain localized strings.
 
-### `localizationStats = { }`
+### `localizationStats: { }`
 
-#### `localizationStats.dropPath = '...'`
+#### `localizationStats.dropPath: '...'`
 
 This option is used to designate a path at which a JSON file describing the localized assets produced should be
 written. If this property is omitted, the stats file won't be written.
@@ -196,10 +196,18 @@ The file has the following format:
 
 ```
 
-#### `localizationStats.callback = (stats) => { ... }`
+#### `localizationStats.callback: (stats) => { ... }`
 
 This option is used to specify a callback to be called with the stats data that would be dropped at
 [`localizationStats.dropPath`](#localizationStats.DropPath--) after compilation completes.
+
+### `realContentHash: true | false`
+
+If this option is set to `true`, the plugin will update `[contenthash]` tokens in the output filenames to
+use the true hash of the content, rather than an intermediate hash that is shared between all locales.
+
+Note that this option is not compatible with the `runtimeLocaleExpression` option and will cause an error if
+both are set.
 
 ## Links
 

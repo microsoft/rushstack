@@ -33,7 +33,7 @@ export class ChangelogGenerator {
    */
   public static updateChangelogs(
     allChanges: IChangeRequests,
-    allProjects: Map<string, RushConfigurationProject>,
+    allProjects: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean
   ): IChangelog[] {
@@ -64,7 +64,7 @@ export class ChangelogGenerator {
    * Fully regenerate the markdown files based on the current json files.
    */
   public static regenerateChangelogs(
-    allProjects: Map<string, RushConfigurationProject>,
+    allProjects: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
     allProjects.forEach((project) => {

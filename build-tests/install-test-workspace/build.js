@@ -1,4 +1,3 @@
-const path = require('path');
 const { RushConfiguration } = require('@microsoft/rush-lib');
 const { Executable, FileSystem, JsonFile } = require('@rushstack/node-core-library');
 
@@ -44,9 +43,11 @@ if (!currentProject) {
 const allDependencyProjects = new Set();
 collect(currentProject);
 
-const tarballFolder = path.join(__dirname, 'temp/tarballs');
+const tempFolderPath = `${__dirname}/temp`;
+const tarballFolder = `${tempFolderPath}/tarballs`;
 
 if (!skipPack) {
+  FileSystem.ensureEmptyFolder(tempFolderPath);
   FileSystem.ensureEmptyFolder(tarballFolder);
 
   const tarballsJson = {};
@@ -55,7 +56,7 @@ if (!skipPack) {
     if (project.versionPolicy || project.shouldPublish) {
       console.log('Invoking "pnpm pack" in ' + project.publishFolder);
 
-      const packageJsonFilename = path.join(project.projectFolder, 'package.json');
+      const packageJsonFilename = `${project.projectFolder}/package.json`;
       const packageJson = FileSystem.readFile(packageJsonFilename);
 
       let result;
@@ -79,14 +80,14 @@ if (!skipPack) {
       if (!tarballFilename) {
         throw new Error('Failed to parse "pnpm pack" output');
       }
-      const tarballPath = path.join(project.publishFolder, tarballFilename);
+      const tarballPath = `${project.publishFolder}/${tarballFilename}`;
       if (!FileSystem.exists(tarballPath)) {
         throw new Error('Expecting a tarball: ' + tarballPath);
       }
 
       tarballsJson[project.packageName] = tarballFilename;
 
-      const targetPath = path.join(tarballFolder, tarballFilename);
+      const targetPath = `${tarballFolder}/${tarballFilename}`;
       FileSystem.move({
         sourcePath: tarballPath,
         destinationPath: targetPath,
@@ -95,28 +96,28 @@ if (!skipPack) {
     }
   }
 
-  JsonFile.save(tarballsJson, path.join(tarballFolder, 'tarballs.json'));
+  JsonFile.save(tarballsJson, `${tarballFolder}/tarballs.json`);
 }
 
 // Look for folder names like this:
 //   local+C++Git+rushstack+build-tests+install-test-wo_7efa61ad1cd268a0ef451c2450ca0351
 //
 // This caches the tarball contents, ignoring the integrity hashes.
-const dotPnpmFolderPath = path.resolve(__dirname, 'workspace/node_modules/.pnpm');
+const dotPnpmFolderPath = `${__dirname}/workspace/node_modules/.pnpm`;
 
 console.log('\nCleaning cached tarballs...');
 if (FileSystem.exists(dotPnpmFolderPath)) {
   for (const filename of FileSystem.readFolderItemNames(dotPnpmFolderPath)) {
     if (filename.startsWith('local+')) {
-      const filePath = path.join(dotPnpmFolderPath, filename);
+      const filePath = `${dotPnpmFolderPath}/${filename}`;
       console.log('  Deleting ' + filePath);
       FileSystem.deleteFolder(filePath);
     }
   }
 }
 
-const pnpmLockBeforePath = path.join(__dirname, 'workspace/common/pnpm-lock.yaml');
-const pnpmLockAfterPath = path.join(__dirname, 'workspace/pnpm-lock.yaml');
+const pnpmLockBeforePath = `${__dirname}/workspace/common/pnpm-lock.yaml`;
+const pnpmLockAfterPath = `${__dirname}/workspace/pnpm-lock.yaml`;
 let pnpmLockBeforeContent = '';
 
 if (FileSystem.exists(pnpmLockBeforePath)) {
@@ -134,7 +135,7 @@ if (FileSystem.exists(pnpmLockBeforePath)) {
 const pnpmInstallArgs = [
   'install',
   '--store',
-  rushConfiguration.pnpmOptions.pnpmStorePath,
+  `${__dirname}/temp/pnpm-store`,
   '--strict-peer-dependencies',
   '--recursive',
   '--link-workspace-packages=false',
@@ -151,7 +152,7 @@ console.log('  pnpm ' + pnpmInstallArgs.join(' '));
 
 checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, pnpmInstallArgs, {
-    currentWorkingDirectory: path.join(__dirname, 'workspace'),
+    currentWorkingDirectory: `${__dirname}/workspace`,
     stdio: ['ignore', 'inherit', 'inherit']
   }),
   'pnpm install'
@@ -190,7 +191,7 @@ console.log('\nBuilding projects...\n');
 
 checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['run', '--recursive', 'build'], {
-    currentWorkingDirectory: path.join(__dirname, 'workspace'),
+    currentWorkingDirectory: `${__dirname}/workspace`,
     stdio: ['ignore', 'inherit', 'inherit']
   }),
   'pnpm run'

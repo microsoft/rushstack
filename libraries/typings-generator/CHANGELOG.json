@@ -2,6 +2,36 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.12.21",
+      "tag": "@rushstack/typings-generator_v0.12.21",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.65.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.20",
+      "tag": "@rushstack/typings-generator_v0.12.20",
+      "date": "Thu, 25 Jan 2024 01:09:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.19",
       "tag": "@rushstack/typings-generator_v0.12.19",
       "date": "Tue, 23 Jan 2024 20:12:58 GMT",

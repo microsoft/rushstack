@@ -19,6 +19,7 @@ import { Utilities } from '../../utilities/Utilities';
 import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { merge } from '../../utilities/objectUtilities';
+import type { Subspace } from '../../api/Subspace';
 
 interface ICommonPackageJson extends IPackageJson {
   pnpm?: {
@@ -34,6 +35,7 @@ interface ICommonPackageJson extends IPackageJson {
 export class InstallHelpers {
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
+    subspace: Subspace,
     dependencies: Map<string, string> = new Map<string, string>()
   ): void {
     const commonPackageJson: ICommonPackageJson = {
@@ -86,7 +88,7 @@ export class InstallHelpers {
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(
-      rushConfiguration.commonTempFolder,
+      subspace.getSubspaceTempFolder(),
       FileConstants.PackageJson
     );
 

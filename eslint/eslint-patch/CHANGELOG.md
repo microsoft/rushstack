@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Wed, 24 Jan 2024 07:38:34 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Jan 2024 23:03:57 GMT and should not be manually modified.
+
+## 1.7.2
+Thu, 25 Jan 2024 23:03:57 GMT
+
+### Patches
+
+- Some minor documentation updates
 
 ## 1.7.1
 Wed, 24 Jan 2024 07:38:34 GMT

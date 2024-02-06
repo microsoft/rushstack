@@ -11,11 +11,14 @@ import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity'
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
   variant?: string | undefined;
+  subspace?: Subspace;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
@@ -97,7 +100,9 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
-    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
+    const commonVersions: CommonVersionsConfiguration = (
+      options.subspace ?? rushConfiguration.defaultSubspace
+    ).getCommonVersions();
 
     const projects: VersionMismatchFinderEntity[] = [];
 
@@ -105,7 +110,14 @@ export class VersionMismatchFinder {
     // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    for (const project of rushConfiguration.projects) {
+    // If subspace is specified, only go through projects in that subspace
+    let projectsToParse: RushConfigurationProject[] = [];
+    if (options.subspace) {
+      projectsToParse = options.subspace.getProjects();
+    } else {
+      projectsToParse = rushConfiguration.projects;
+    }
+    for (const project of projectsToParse) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
@@ -117,6 +129,7 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
+      subspaceName?: string | undefined;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
@@ -135,7 +148,13 @@ export class VersionMismatchFinder {
 
         if (mismatchFinder.numberOfMismatches > 0) {
           // eslint-disable-next-line no-console
-          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          console.log(
+            colors.red(
+              `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
+                options.subspaceName ? `in subspace: ${options.subspaceName}` : ''
+              }`
+            )
+          );
           rushConfiguration.customTipsConfiguration._showErrorTip(
             options.terminal,
             CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS

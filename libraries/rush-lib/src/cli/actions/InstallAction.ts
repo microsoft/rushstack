@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
@@ -45,7 +44,6 @@ export class InstallAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -62,9 +60,9 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
+      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(this._terminal),
       checkOnly: this._checkOnlyParameter.value,
-
+      subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }

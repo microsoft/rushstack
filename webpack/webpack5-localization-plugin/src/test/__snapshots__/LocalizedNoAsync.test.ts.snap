@@ -2,11 +2,11 @@
 
 exports[`LocalizationPlugin Handles localized compilation with no async chunks (minified): Content 1`] = `
 Object {
-  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default.js\\",\\"foo\\":\\"main-foo.js\\",\\"en-us\\":\\"main-en-us.js\\",\\"qps-ploc\\":\\"main-qps-ploc.js\\"}}},\\"namedChunkGroups\\":{}}",
-  "/release/main-default.js": "(()=>{\\"use strict\\";console.log(\\"test\\",\\"another\\")})();",
-  "/release/main-en-us.js": "(()=>{\\"use strict\\";console.log(\\"blah\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022\\",\\"something else\\")})();",
-  "/release/main-foo.js": "(()=>{\\"use strict\\";console.log(\\"return:\\\\r,newline:\\\\n,tab:\\\\t,backslash:\\\\\\\\,apos:\\\\u0027,quote:\\\\u0022\\",\\"something else\\")})();",
-  "/release/main-qps-ploc.js": "(()=>{\\"use strict\\";console.log(\\"!--ƀĺàĥ\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022-|-\\",\\"!--śōmēţĥĩńĝ ēĺśē-|-\\")})();",
+  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default-83f4ee1ad53822d08923.js\\",\\"LOCALE2\\":\\"main-LOCALE2-53db16ce65a171b2d58d.js\\",\\"LOCALE1\\":\\"main-LOCALE1-d0826e06031981558e87.js\\",\\"qps-ploc\\":\\"main-qps-ploc-d917b232cbcc8f9aec8d.js\\"}}},\\"namedChunkGroups\\":{}}",
+  "/release/main-LOCALE1-d0826e06031981558e87.js": "(()=>{\\"use strict\\";console.log(\\"blah\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022\\",\\"something else\\")})();",
+  "/release/main-LOCALE2-53db16ce65a171b2d58d.js": "(()=>{\\"use strict\\";console.log(\\"return:\\\\r,newline:\\\\n,tab:\\\\t,backslash:\\\\\\\\,apos:\\\\u0027,quote:\\\\u0022\\",\\"something else\\")})();",
+  "/release/main-default-83f4ee1ad53822d08923.js": "(()=>{\\"use strict\\";console.log(\\"test\\",\\"another\\")})();",
+  "/release/main-qps-ploc-d917b232cbcc8f9aec8d.js": "(()=>{\\"use strict\\";console.log(\\"!--ƀĺàĥ\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022-|-\\",\\"!--śōmēţĥĩńĝ ēĺśē-|-\\")})();",
 }
 `;
 
@@ -16,22 +16,8 @@ exports[`LocalizationPlugin Handles localized compilation with no async chunks (
 
 exports[`LocalizationPlugin Handles localized compilation with no async chunks (unminified): Content 1`] = `
 Object {
-  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default.js\\",\\"foo\\":\\"main-foo.js\\",\\"en-us\\":\\"main-en-us.js\\",\\"qps-ploc\\":\\"main-qps-ploc.js\\"}}},\\"namedChunkGroups\\":{}}",
-  "/release/main-default.js": "/******/ (() => { // webpackBootstrap
-/******/ 	\\"use strict\\";
-var __webpack_exports__ = {};
-
-;// CONCATENATED MODULE: ./a/strings1.resjson
-const strings = {\\"test\\":\\"test\\"};
-/* harmony default export */ const strings1_resjson = (strings);
-;// CONCATENATED MODULE: ./a/strings2.resjson
-const strings2_resjson_strings = {\\"another\\":\\"another\\"};
-/* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
-;// CONCATENATED MODULE: ./a/entry.js
-  console.log(strings1_resjson.test, strings2_resjson.another);
-/******/ })()
-;",
-  "/release/main-en-us.js": "/******/ (() => { // webpackBootstrap
+  "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default-fc50d2a48e11f2b086ea.js\\",\\"LOCALE2\\":\\"main-LOCALE2-a314aaef0a110988940c.js\\",\\"LOCALE1\\":\\"main-LOCALE1-5ebe1f1f7b993dda2dc3.js\\",\\"qps-ploc\\":\\"main-qps-ploc-7e43fa8e6919d74fccb9.js\\"}}},\\"namedChunkGroups\\":{}}",
+  "/release/main-LOCALE1-5ebe1f1f7b993dda2dc3.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
 var __webpack_exports__ = {};
 
@@ -45,7 +31,7 @@ const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
-  "/release/main-foo.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-LOCALE2-a314aaef0a110988940c.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
 var __webpack_exports__ = {};
 
@@ -59,7 +45,21 @@ const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
-  "/release/main-qps-ploc.js": "/******/ (() => { // webpackBootstrap
+  "/release/main-default-fc50d2a48e11f2b086ea.js": "/******/ (() => { // webpackBootstrap
+/******/ 	\\"use strict\\";
+var __webpack_exports__ = {};
+
+;// CONCATENATED MODULE: ./a/strings1.resjson
+const strings = {\\"test\\":\\"test\\"};
+/* harmony default export */ const strings1_resjson = (strings);
+;// CONCATENATED MODULE: ./a/strings2.resjson
+const strings2_resjson_strings = {\\"another\\":\\"another\\"};
+/* harmony default export */ const strings2_resjson = (strings2_resjson_strings);
+;// CONCATENATED MODULE: ./a/entry.js
+  console.log(strings1_resjson.test, strings2_resjson.another);
+/******/ })()
+;",
+  "/release/main-qps-ploc-7e43fa8e6919d74fccb9.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
 var __webpack_exports__ = {};
 

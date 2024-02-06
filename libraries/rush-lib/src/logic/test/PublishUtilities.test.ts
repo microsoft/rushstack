@@ -10,7 +10,7 @@ import { ChangeFiles } from '../ChangeFiles';
 /* eslint-disable dot-notation */
 
 function generateChangeSnapshot(
-  allPackages: Map<string, RushConfigurationProject>,
+  allPackages: ReadonlyMap<string, RushConfigurationProject>,
   allChanges: IChangeRequests
 ): string {
   const unchangedLines: string[] = [];
@@ -82,7 +82,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns no changes in an empty change folder', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -94,7 +95,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 1 change when changing a leaf package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -109,7 +111,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 6 changes when patching a root package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -142,7 +145,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 8 changes when hotfixing a root package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -173,7 +177,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 9 changes when major bumping a root package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -206,7 +211,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('updates policy project dependencies when updating a lockstep version policy with no nextBump', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -239,7 +245,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 2 changes when bumping cyclic dependencies', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -270,7 +277,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns error when mixing hotfix and non-hotfix changes', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     await expect(
       async () =>
         await PublishUtilities.findChangeRequestsAsync(
@@ -282,7 +290,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns error when adding hotfix with config disabled', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
     (packagesRushConfiguration as unknown as Record<string, boolean>).hotfixChangeEnabled = false;
 
@@ -297,7 +306,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can resolve multiple changes requests on the same package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -330,7 +340,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can resolve multiple reverse-ordered changes requests on the same package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -363,7 +374,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can resolve multiple hotfix changes', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -394,7 +406,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can update an explicit dependency', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -425,7 +438,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can exclude lock step projects', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       repoRushConfiguration,
@@ -465,7 +478,7 @@ describe(PublishUtilities.sortChangeRequests.name, () => {
   });
 
   it('can return a sorted array of the change requests to be published in the correct order', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = rushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> = rushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       rushConfiguration,
@@ -553,7 +566,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns no changes in an empty change folder', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -565,7 +579,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 1 change when changing a leaf package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -580,7 +595,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 6 changes when patching a root package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -613,7 +629,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 8 changes when hotfixing a root package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -644,7 +661,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 9 changes when major bumping a root package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -677,7 +695,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns 2 changes when bumping cyclic dependencies', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -708,7 +727,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns error when mixing hotfix and non-hotfix changes', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     await expect(
       async () =>
         await PublishUtilities.findChangeRequestsAsync(
@@ -720,7 +740,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('returns error when adding hotfix with config disabled', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
     (packagesRushConfiguration as unknown as Record<string, boolean>).hotfixChangeEnabled = false;
 
@@ -735,7 +756,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can resolve multiple changes requests on the same package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -768,7 +790,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can resolve multiple reverse-ordered changes requests on the same package', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -801,7 +824,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can resolve multiple hotfix changes', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -832,7 +856,8 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can update an explicit dependency', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> =
+      packagesRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       packagesRushConfiguration,
@@ -850,7 +875,7 @@ describe(PublishUtilities.findChangeRequestsAsync.name, () => {
   });
 
   it('can exclude lock step projects', async () => {
-    const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
+    const allPackages: ReadonlyMap<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
     const allChanges: IChangeRequests = await PublishUtilities.findChangeRequestsAsync(
       allPackages,
       repoRushConfiguration,

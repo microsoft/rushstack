@@ -92,6 +92,11 @@ export class RushConstants {
   public static readonly pnpmfileV6Filename: string = '.pnpmfile.cjs';
 
   /**
+   * The filename ("global-pnpmfile.cjs") used to add custom configuration to subspaces
+   */
+  public static readonly pnpmfileGlobalFilename: string = 'global-pnpmfile.cjs';
+
+  /**
    * The folder name used to store patch files for pnpm
    * Example: `C:\MyRepo\common\config\pnpm-patches`
    * Example: `C:\MyRepo\common\temp\patches`
@@ -182,6 +187,11 @@ export class RushConstants {
    * The subspaces.json configuration file name
    */
   public static readonly subspacesConfigFilename: string = 'subspaces.json';
+
+  /**
+   * The name of the default subspace if one isn't specified but subspaces is enabled.
+   */
+  public static readonly defaultSubspaceName: string = 'default';
 
   /**
    * Build cache configuration file.

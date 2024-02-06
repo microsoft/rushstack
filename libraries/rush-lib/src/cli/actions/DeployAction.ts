@@ -146,7 +146,8 @@ export class DeployAction extends BaseRushAction {
     let pnpmInstallFolder: string | undefined;
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
-        this.rushConfiguration
+        this.rushConfiguration,
+        this.rushConfiguration.defaultSubspace
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
       if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {

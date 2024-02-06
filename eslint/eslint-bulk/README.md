@@ -1,11 +1,15 @@
 # @rushstack/eslint-bulk
 
 This package provides the command-line interface (CLI) for the **ESLint bulk suppressions**
-feature from
-[`@rushstack/eslint-patch`](https://www.npmjs.com/package/@rushstack/eslint-patch).
+feature from `@rushstack/eslint-patch`.
 
-> 👉 See the `@rushstack/eslint-patch` [documentation](https://www.npmjs.com/package/@rushstack/eslint-patch)
-> for details.
+### Setting it up
+
+👉 Before using this tool, you will first need to install and configure the
+[@rushstack/eslint-patch](https://www.npmjs.com/package/@rushstack/eslint-patch) package.
+
+See the [eslint-bulk-suppressions documentation](https://www.npmjs.com/package/@rushstack/eslint-patch#eslint-bulk-suppressions-feature)
+for details.
 
 ### Typical workflow
 

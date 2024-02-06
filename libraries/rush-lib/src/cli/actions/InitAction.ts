@@ -177,6 +177,7 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/experiments.json',
       'common/config/rush/pnpm-config.json',
       'common/config/rush/rush-plugins.json',
+      'common/config/rush/subspaces.json',
       'common/config/rush/version-policies.json',
 
       'common/git-hooks/commit-msg.sample',

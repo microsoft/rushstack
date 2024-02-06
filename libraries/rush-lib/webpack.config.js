@@ -106,6 +106,10 @@ module.exports = () => {
         import: `${__dirname}/lib-esnext/logic/pnpm/PnpmfileShim.js`,
         ...SCRIPT_ENTRY_OPTIONS
       },
+      [PathConstants.subspacePnpmfileShimFilename]: {
+        import: `${__dirname}/lib-esnext/logic/pnpm/SubspaceGlobalPnpmfileShim.js`,
+        ...SCRIPT_ENTRY_OPTIONS
+      },
       [PathConstants.installRunScriptFilename]: {
         import: `${__dirname}/lib-esnext/scripts/install-run.js`,
         ...SCRIPT_ENTRY_OPTIONS

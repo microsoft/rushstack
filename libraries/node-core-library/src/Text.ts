@@ -271,4 +271,12 @@ export class Text {
       yield remaining;
     }
   }
+
+  /**
+   * Returns a new string that is the input string with the order of characters reversed.
+   */
+  public static reverse(s: string): string {
+    // Benchmarks of several algorithms: https://jsbench.me/4bkfflcm2z
+    return s.split('').reduce((newString, char) => char + newString, '');
+  }
 }
