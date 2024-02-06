@@ -296,4 +296,9 @@ export class RushConstants {
    * The name of the parameter that can be used to bypass policies.
    */
   public static readonly bypassPolicyFlagLongName: '--bypass-policy' = '--bypass-policy';
+
+  /**
+   * Merge Queue ignore configuration file.
+   */
+  public static readonly mergeQueueIgnoreFileName: string = '.mergequeueignore';
 }

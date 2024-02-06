@@ -8,6 +8,7 @@ import colors from 'colors/safe';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Stopwatch } from '../utilities/Stopwatch';
+import { RushConstants } from './RushConstants';
 
 /**
  * Project property configuration
@@ -58,7 +59,7 @@ export class ProjectImpactGraphGenerator {
    * @param repositoryRoot
    */
   private _loadGlobalExcludedGlobs(repositoryRoot: string): string[] | undefined {
-    const filePath: string = path.join(repositoryRoot, '.mergequeueignore');
+    const filePath: string = `${repositoryRoot}/${RushConstants.mergeQueueIgnoreFileName}`;
     if (FileSystem.exists(filePath)) {
       const globs: string[] = FileSystem.readFile(filePath).toString().split('\n');
       return globs;
@@ -70,7 +71,7 @@ export class ProjectImpactGraphGenerator {
    * @param projectRootRelativePath - project root relative path
    */
   private _loadProjectExcludedGlobs(projectRootRelativePath: string): string[] | undefined {
-    const filePath: string = path.join(this._repositoryRoot, projectRootRelativePath, '.mergequeueignore');
+    const filePath: string = `${this._repositoryRoot}/${projectRootRelativePath}/${RushConstants.mergeQueueIgnoreFileName}`;
     if (FileSystem.exists(filePath)) {
       const globs: string[] = FileSystem.readFile(filePath).toString().split('\n');
       return globs.map((glob) => path.join(projectRootRelativePath, glob));
@@ -82,18 +83,20 @@ export class ProjectImpactGraphGenerator {
    */
   public generate(): void {
     const stopwatch: Stopwatch = Stopwatch.start();
-    const content: IFileSchema = {} as IFileSchema;
-    content.globalExcludedGlobs =
+
+    const globalExcludedGlobs: string[] =
       this._loadGlobalExcludedGlobs(this._repositoryRoot) || DefaultGlobalExcludedGlobs;
-    content.projects = {};
-    this._projects.forEach((project) => {
+    const projects: {
+      [key: string]: IProjectConfiguration;
+    } = {};
+    for (const project of this._projects) {
       // ignore the top project
       if (project.projectRelativeFolder !== '.') {
         const dependentList: string[] = [project.packageName];
         project.consumingProjects.forEach((item) => {
           dependentList.push(item.packageName);
         });
-        content.projects[`${project.packageName}`] = {
+        projects[`${project.packageName}`] = {
           includedGlobs: [`${project.projectRelativeFolder}/**`],
           dependentProjects: dependentList.sort()
         };
@@ -101,10 +104,11 @@ export class ProjectImpactGraphGenerator {
           project.projectRelativeFolder
         );
         if (projectExcludedGlobs) {
-          content.projects[`${project.packageName}`].excludedGlobs = projectExcludedGlobs;
+          projects[`${project.packageName}`].excludedGlobs = projectExcludedGlobs;
         }
       }
-    });
+    }
+    const content: IFileSchema = { globalExcludedGlobs, projects };
 
     FileSystem.writeFile(
       path.join(this._repositoryRoot, 'project-impact-graph.yaml'),

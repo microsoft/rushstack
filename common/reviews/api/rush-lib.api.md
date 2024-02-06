@@ -1235,6 +1235,7 @@ export class RushConstants {
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: string;
+    static readonly mergeQueueIgnoreFileName: string;
     static readonly nodeModulesFolderName: string;
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;
