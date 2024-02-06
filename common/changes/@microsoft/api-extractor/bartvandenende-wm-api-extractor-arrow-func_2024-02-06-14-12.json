@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "\"Classify arrow functions as 'function' kind in the doc model export\"",
+      "comment": "Classify arrow functions as `function` kind in the doc model export.",
       "type": "minor"
     }
   ],

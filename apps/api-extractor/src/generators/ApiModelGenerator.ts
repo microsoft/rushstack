@@ -252,7 +252,7 @@ export class ApiModelGenerator {
       case ts.SyntaxKind.VariableDeclaration:
         // check for arrow functions in variable declaration
         const functionDeclaration: ts.FunctionDeclaration | undefined =
-          this._hasFunctionDeclaration(astDeclaration);
+          this._tryFindFunctionDeclaration(astDeclaration);
         if (functionDeclaration) {
           this._processApiFunction(astDeclaration, context, functionDeclaration);
         } else {
@@ -265,7 +265,7 @@ export class ApiModelGenerator {
     }
   }
 
-  private _hasFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
+  private _tryFindFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
     const children: ts.Node[] = astDeclaration.declaration.getChildren(
       astDeclaration.declaration.getSourceFile()
     );
