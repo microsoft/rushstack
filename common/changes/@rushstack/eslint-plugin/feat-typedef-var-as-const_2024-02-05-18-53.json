@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/eslint-plugin",
       "comment": "Allow using `as const` in `typedef-var`",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/eslint-plugin"
