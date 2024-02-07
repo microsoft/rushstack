@@ -304,6 +304,7 @@ export type FileSystemStats = fs.Stats;
 export class FileWriter {
     close(): void;
     readonly filePath: string;
+    getStatistics(): FileSystemStats;
     static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }

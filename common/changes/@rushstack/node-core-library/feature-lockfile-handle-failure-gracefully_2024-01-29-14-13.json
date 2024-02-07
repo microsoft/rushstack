@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

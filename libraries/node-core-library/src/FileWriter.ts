@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { FileSystemStats } from './FileSystem';
 import { Import } from './Import';
 
 const fsx: typeof import('fs-extra') = Import.lazy('fs-extra', require);
@@ -101,5 +102,17 @@ export class FileWriter {
       this._fileDescriptor = undefined;
       fsx.closeSync(fd);
     }
+  }
+
+  /**
+   * Gets the statistics for the given file handle. Throws if the file handle has been closed.
+   * Behind the scenes it uses `fs.statSync()`.
+   */
+  public getStatistics(): FileSystemStats {
+    if (!this._fileDescriptor) {
+      throw new Error(`Cannot get file statistics, file descriptor has already been released.`);
+    }
+
+    return fsx.fstatSync(this._fileDescriptor);
   }
 }
