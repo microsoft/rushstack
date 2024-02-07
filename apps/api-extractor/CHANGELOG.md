@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 05 Feb 2024 23:46:52 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Feb 2024 01:11:18 GMT and should not be manually modified.
+
+## 7.40.0
+Wed, 07 Feb 2024 01:11:18 GMT
+
+### Minor changes
+
+- Classify arrow functions as `function` kind in the doc model export.
 
 ## 7.39.5
 Mon, 05 Feb 2024 23:46:52 GMT

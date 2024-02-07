@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.40.0",
+      "tag": "@microsoft/api-extractor_v7.40.0",
+      "date": "Wed, 07 Feb 2024 01:11:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Classify arrow functions as `function` kind in the doc model export."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.39.5",
       "tag": "@microsoft/api-extractor_v7.39.5",
       "date": "Mon, 05 Feb 2024 23:46:52 GMT",

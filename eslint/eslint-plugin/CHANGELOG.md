@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Feb 2024 01:11:18 GMT and should not be manually modified.
+
+## 0.15.0
+Wed, 07 Feb 2024 01:11:18 GMT
+
+### Minor changes
+
+- Allow using `as const` in `typedef-var`
 
 ## 0.14.0
 Tue, 16 Jan 2024 18:30:10 GMT
