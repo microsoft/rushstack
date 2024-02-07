@@ -44,6 +44,7 @@ import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 import type { ProjectWatcher } from '../../logic/ProjectWatcher';
+import { PnpmSyncCopyOperationPlugin } from '../../logic/operations/PnpmSyncCopyOperationPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -377,6 +378,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }).apply(this.hooks);
       } else {
         terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
+      }
+
+      const { configuration: experiments } = this.rushConfiguration?.experimentsConfiguration;
+      if (
+        this.rushConfiguration?.packageManager === 'pnpm' &&
+        experiments?.usePnpmSyncForInjectedDependencies
+      ) {
+        new PnpmSyncCopyOperationPlugin().apply(this.hooks);
       }
 
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this

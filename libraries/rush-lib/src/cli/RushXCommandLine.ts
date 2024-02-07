@@ -3,7 +3,7 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { PackageJsonLookup, type IPackageJson, Text } from '@rushstack/node-core-library';
+import { PackageJsonLookup, type IPackageJson, Text, FileSystem } from '@rushstack/node-core-library';
 import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
@@ -15,6 +15,7 @@ import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { pnpmSyncCopy } from 'pnpm-sync-lib';
 
 interface IRushXCommandLineArguments {
   /**
@@ -206,6 +207,18 @@ export class RushXCommandLine {
         includeProjectBin: true
       }
     });
+
+    if (rushConfiguration?.packageManager === 'pnpm' && rushConfiguration?.experimentsConfiguration) {
+      const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
+
+      //only `rushx build` command will trigger the pnpm-sync copy
+      if (experiments?.usePnpmSyncForInjectedDependencies && rushxArguments.commandName === 'build') {
+        const pnpmSyncJsonPath: string = packageFolder + '/node_modules/.pnpm-sync.json';
+        if (FileSystem.exists(pnpmSyncJsonPath)) {
+          void pnpmSyncCopy(pnpmSyncJsonPath);
+        }
+      }
+    }
 
     if (exitCode > 0) {
       throw new ProcessError(
