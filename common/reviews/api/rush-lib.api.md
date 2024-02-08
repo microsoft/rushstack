@@ -590,7 +590,6 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
-    readonly changedProjectsOnly: boolean;
     collatedWriter: CollatedWriter;
     debugMode: boolean;
     error?: Error;
@@ -598,7 +597,6 @@ export interface IOperationRunnerContext {
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
     status: OperationStatus;
-    stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
     withTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, createLogFile: boolean, logFileSuffix?: string): Promise<T>;
 }
