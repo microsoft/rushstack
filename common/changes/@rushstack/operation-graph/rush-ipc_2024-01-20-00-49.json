@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Fix memory leaks on abort controllers.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}
