@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { StdioSummarizer } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { ITerminal, ITerminalProvider } from '@rushstack/node-core-library';
 
@@ -28,10 +27,6 @@ export interface IOperationRunnerContext {
    */
   quietMode: boolean;
   /**
-   * Object used to report a summary at the end of the Rush invocation.
-   */
-  stdioSummarizer: StdioSummarizer;
-  /**
    * Object used to manage metadata of the operation.
    *
    * @internal
@@ -54,14 +49,6 @@ export interface IOperationRunnerContext {
    * it later (for example to re-print errors at end of execution).
    */
   error?: Error;
-
-  /**
-   * Normally the incremental build logic will rebuild changed projects as well as
-   * any projects that directly or indirectly depend on a changed project.
-   * If true, then the incremental build logic will only rebuild changed projects and
-   * ignore dependent projects.
-   */
-  readonly changedProjectsOnly: boolean;
 
   /**
    * Invokes the specified callback with a terminal that is associated with this operation.
