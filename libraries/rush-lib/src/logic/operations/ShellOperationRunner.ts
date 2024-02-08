@@ -6,15 +6,14 @@ import type * as child_process from 'node:child_process';
 import { Text } from '@rushstack/node-core-library';
 import { type ITerminal, type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
-import { Utilities } from '../../utilities/Utilities';
-import { OperationStatus } from './OperationStatus';
-import { OperationError } from './OperationError';
-import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IPhase } from '../../api/CommandLineConfiguration';
+import { Utilities } from '../../utilities/Utilities';
+import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
+import { OperationError } from './OperationError';
+import { OperationStatus } from './OperationStatus';
 
 export interface IOperationRunnerOptions {
   rushProject: RushConfigurationProject;
@@ -46,11 +45,11 @@ export class ShellOperationRunner implements IOperationRunner {
     const { phase } = options;
 
     this.name = options.displayName;
+    this.warningsAreAllowed =
+      EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
-    this.warningsAreAllowed =
-      EnvironmentConfiguration.allowWarningsInSuccessfulBuild || phase.allowWarningsOnSuccess || false;
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {

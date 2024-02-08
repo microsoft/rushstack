@@ -131,6 +131,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _watchParameter: CommandLineFlagParameter | undefined;
   private readonly _timelineParameter: CommandLineFlagParameter | undefined;
   private readonly _installParameter: CommandLineFlagParameter | undefined;
+  private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -228,6 +229,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         description:
           'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
           'Rush will automatically perform an install before processing the current command.'
+      });
+    }
+
+    if (
+      this._watchPhases.size > 0 &&
+      this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode
+    ) {
+      this._noIPCParameter = this.defineFlagParameter({
+        parameterLongName: '--no-ipc',
+        description:
+          'Disables the IPC feature for the current command (if applicable to selected operations). Operations will not look for a ":ipc" suffixed script.' +
+          'This feature only applies in watch mode and is enabled by default.'
       });
     }
 
@@ -348,6 +361,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
 
       const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
+
+      if (isWatch && this._noIPCParameter?.value === false) {
+        new (
+          await import(
+            /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
+          )
+        ).IPCOperationRunnerPlugin().apply(this.hooks);
+      }
 
       const customParametersByName: Map<string, CommandLineParameter> = new Map();
       for (const [configParameter, parserParameter] of this.customParameters) {
@@ -484,6 +505,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
     const toggleWatcherKey: string = 'w';
     const buildOnceKey: string = 'b';
+    const invalidateKey: string = 'i';
+    const shutdownKey: string = 'x';
 
     const terminal: ITerminal = this._terminal;
 
@@ -494,19 +517,31 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       switch (key) {
         case toggleWatcherKey:
           if (projectWatcher.isPaused) {
-            terminal.writeLine(`Resuming project watcher...`);
             projectWatcher.resume();
           } else {
-            terminal.writeLine(`Pausing project watcher...`);
             projectWatcher.pause();
           }
           break;
         case buildOnceKey:
           if (projectWatcher.isPaused) {
+            projectWatcher.clearStatus();
             terminal.writeLine(`Building once...`);
             projectWatcher.resume();
             projectWatcher.pause();
           }
+          break;
+        case invalidateKey:
+          projectWatcher.clearStatus();
+          terminal.writeLine(`Invalidating all operations...`);
+          projectWatcher.invalidateAll('manual trigger');
+          if (!projectWatcher.isPaused) {
+            projectWatcher.resume();
+          }
+          break;
+        case shutdownKey:
+          projectWatcher.clearStatus();
+          terminal.writeLine(`Shutting down long-lived child processes...`);
+          this.hooks.shutdown.call();
           break;
         case '\u0003':
           process.kill(process.pid, 'SIGINT');
@@ -537,7 +572,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+    const projectWatcher: ProjectWatcher = new ProjectWatcher({
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
@@ -561,6 +596,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }. Press Ctrl+C to exit.`
       );
     };
+
+    function invalidateOperation(operation: Operation, reason: string): void {
+      const { associatedProject } = operation;
+      if (associatedProject) {
+        projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
+      }
+    }
 
     // Loop until Ctrl+C
     // eslint-disable-next-line no-constant-condition
@@ -589,7 +631,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         projectChangeAnalyzer: state,
         projectsInUnknownState: changedProjects,
         phaseOriginal,
-        phaseSelection
+        phaseSelection,
+        invalidateOperation
       };
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(

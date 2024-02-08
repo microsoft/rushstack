@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds a new option `useIPCInWatchMode` to the `operationSettings` items of `rush-project.json`. Setting this value to `true` tells Rush to open an IPC channel to the created child process and attempt to keep it alive across incremental runs. If the process exits it will be restarted on the next execution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
