@@ -16,10 +16,17 @@
 				"--nolazy",
 				"--inspect-brk"
 			],
+      "skipFiles": ["<node_internals>/**"],
+      // Don't scan the file system on startup
+      "outFiles": [],
+      // Evaluate source maps for all workspace-local files
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
 			"env": {
 				"NODE_ENV": "development"
 			},
-			"sourceMaps": true
+			"sourceMaps": true,
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
 		},
 		{
 			"type": "node",
