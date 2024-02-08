@@ -76,6 +76,13 @@ export interface IExperimentsJson {
    * If true, Rush will not allow node_modules in the repo folder or in parent folders.
    */
   forbidPhantomResolvableNodeModulesFolders?: boolean;
+
+  /**
+   * If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead
+   * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
+   * across invocations.
+   */
+  useIPCScriptsInWatchMode?: boolean;
 }
 
 /**
