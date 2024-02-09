@@ -808,10 +808,22 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       ) {
         // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
         // there are individual workspace shrinkwrap for each project.
-        await Async.forEachAsync(
-          this.rushConfiguration.getFilteredProjects({
+
+        let selectedSplitWorkspaceProjects: RushConfigurationProject[] = [];
+        if (!this.options.selectedProjects) {
+          // full
+          selectedSplitWorkspaceProjects = this.rushConfiguration.getFilteredProjects({
             splitWorkspace: true
-          }),
+          });
+        } else {
+          this.options.selectedProjects.forEach((project) => {
+            if (project.splitWorkspace) {
+              selectedSplitWorkspaceProjects.push(project);
+            }
+          });
+        }
+        await Async.forEachAsync(
+          selectedSplitWorkspaceProjects,
           async (project: RushConfigurationProject) => {
             await PnpmProjectShrinkwrapFile.generateIndividualProjectShrinkwrapAsync(project);
           },
