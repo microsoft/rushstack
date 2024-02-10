@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Filter out non-JS chunks.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}
