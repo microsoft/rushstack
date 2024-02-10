@@ -3,18 +3,29 @@
 
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 
-import { LocalizationPlugin } from '../LocalizationPlugin';
-import { type HashFn, getHashFunction, updateAssetHashes } from '../trueHashes';
+import { type HashFn, getHashFunction, updateAssetHashes } from './trueHashes';
+import { LocalizationPlugin } from './LocalizationPlugin';
 
 const PLUGIN_NAME: 'true-hash' = 'true-hash';
 
+/**
+ * @public
+ */
 export interface ITrueHashPluginOptions {
   /**
    * A function that takes the contents of a file and returns a hash.
    */
   hashFunction?: (contents: string | Buffer) => string;
+
+  /**
+   * Optionally override the process assets stage for this plugin.
+   */
+  stageOverride?: number;
 }
 
+/**
+ * @public
+ */
 export class TrueHashPlugin implements WebpackPluginInstance {
   private readonly _options: ITrueHashPluginOptions;
 
@@ -45,7 +56,8 @@ export class TrueHashPlugin implements WebpackPluginInstance {
           )
         );
       } else {
-        const { hashFunction } = this._options;
+        const { hashFunction, stageOverride = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
+          this._options;
         const hashFn: HashFn =
           hashFunction ??
           getHashFunction({
@@ -56,7 +68,7 @@ export class TrueHashPlugin implements WebpackPluginInstance {
         compilation.hooks.processAssets.tap(
           {
             name: PLUGIN_NAME,
-            stage: thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE
+            stage: stageOverride
           },
           () => updateAssetHashes({ thisWebpack, compilation, hashFn })
         );
