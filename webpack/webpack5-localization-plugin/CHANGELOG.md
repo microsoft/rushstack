@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Sat, 10 Feb 2024 01:29:22 GMT and should not be manually modified.
+This log was last generated on Sat, 10 Feb 2024 01:40:49 GMT and should not be manually modified.
+
+## 0.8.0
+Sat, 10 Feb 2024 01:40:49 GMT
+
+### Minor changes
+
+- Export a `TrueHashPlugin` that performs what the `realContentHash` option does, but without validating the localization plugin's options.
 
 ## 0.7.3
 Sat, 10 Feb 2024 01:29:22 GMT

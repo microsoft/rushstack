@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-localization-plugin",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/webpack5-localization-plugin_v0.8.0",
+      "date": "Sat, 10 Feb 2024 01:40:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Export a `TrueHashPlugin` that performs what the `realContentHash` option does, but without validating the localization plugin's options."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.3",
       "tag": "@rushstack/webpack5-localization-plugin_v0.7.3",
       "date": "Sat, 10 Feb 2024 01:29:22 GMT",
