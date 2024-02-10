@@ -65,7 +65,8 @@ async function testMixedAsyncInner(minimize: boolean): Promise<void> {
     output: {
       path: '/release',
       filename: '[name]-[locale]-[contenthash].js',
-      chunkFilename: 'chunks/[name]-[locale]-[contenthash].js'
+      chunkFilename: 'chunks/[name]-[locale]-[contenthash].js',
+      hashSalt: '1'
     },
     module: {
       rules: [
