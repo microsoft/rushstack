@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Thu, 08 Feb 2024 01:09:21 GMT and should not be manually modified.
+This log was last generated on Sat, 10 Feb 2024 01:29:22 GMT and should not be manually modified.
+
+## 0.7.3
+Sat, 10 Feb 2024 01:29:22 GMT
+
+### Patches
+
+- Add support for the `output.hashSalt` option when the `realContentHashes` feature is enabled.
 
 ## 0.7.2
 Thu, 08 Feb 2024 01:09:21 GMT
