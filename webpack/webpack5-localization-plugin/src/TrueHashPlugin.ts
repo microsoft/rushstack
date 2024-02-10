@@ -4,7 +4,6 @@
 import type { Compilation, Compiler, WebpackPluginInstance } from 'webpack';
 
 import { type HashFn, getHashFunction, updateAssetHashes } from './trueHashes';
-import { LocalizationPlugin } from './LocalizationPlugin';
 
 const PLUGIN_NAME: 'true-hash' = 'true-hash';
 
@@ -36,43 +35,22 @@ export class TrueHashPlugin implements WebpackPluginInstance {
   public apply(compiler: Compiler): void {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
       const { webpack: thisWebpack } = compiler;
+      const { hashFunction, stageOverride = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
+        this._options;
+      const hashFn: HashFn =
+        hashFunction ??
+        getHashFunction({
+          thisWebpack,
+          compilation
+        });
 
-      let hasLocalizationPluginTrueHashOption: boolean = false;
-      if (compiler.options.plugins) {
-        for (const plugin of compiler.options.plugins) {
-          if (plugin instanceof LocalizationPlugin && plugin._options.realContentHash) {
-            hasLocalizationPluginTrueHashOption = true;
-            break;
-          }
-        }
-      }
-
-      if (hasLocalizationPluginTrueHashOption) {
-        compilation.warnings.push(
-          new thisWebpack.WebpackError(
-            `The ${TrueHashPlugin.name} is not compatible with the LocalizationPlugin's "realContentHash" option. ` +
-              `Because the LocalizationPlugin is already handling true hashes, the ${TrueHashPlugin.name} plugin ` +
-              'will have no effect.'
-          )
-        );
-      } else {
-        const { hashFunction, stageOverride = thisWebpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE } =
-          this._options;
-        const hashFn: HashFn =
-          hashFunction ??
-          getHashFunction({
-            thisWebpack,
-            compilation
-          });
-
-        compilation.hooks.processAssets.tap(
-          {
-            name: PLUGIN_NAME,
-            stage: stageOverride
-          },
-          () => updateAssetHashes({ thisWebpack, compilation, hashFn })
-        );
-      }
+      compilation.hooks.processAssets.tap(
+        {
+          name: PLUGIN_NAME,
+          stage: stageOverride
+        },
+        () => updateAssetHashes({ thisWebpack, compilation, hashFn })
+      );
     });
   }
 }
