@@ -32,6 +32,11 @@
       "title": "Specifies an NPM dependency name that is used as the CWD target for the storybook commands",
       "description": "By default the plugin executes the storybook commands in the local package context, but for distribution purposes it can be useful to split the TS library and storybook exports into two packages. For example, If you create a storybook 'app' project \"my-ui-storybook-library-app\" for the storybook preview distribution, and your main UI component `library` is my-ui-storybook-library. Your 'app' project is able to compile the 'library' storybook app using the CWD target: `\"cwdPackageName\": \"my-ui-storybook-library\"`",
       "type": "string"
+    },
+    "captureWebpackStats": {
+      "title": "Specifies whether to capture the webpack stats for storybook build.",
+      "description": "If this is true, then it will capture the webpack stats for storybook build. Defaults to false.",
+      "type": "boolean"
     }
   }
 }
