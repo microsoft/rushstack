@@ -211,8 +211,7 @@ export class RushXCommandLine {
     if (rushConfiguration?.packageManager === 'pnpm' && rushConfiguration?.experimentsConfiguration) {
       const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
-      //only `rushx build` command will trigger the pnpm-sync copy
-      if (experiments?.usePnpmSyncForInjectedDependencies && rushxArguments.commandName === 'build') {
+      if (experiments?.usePnpmSyncForInjectedDependencies) {
         const pnpmSyncJsonPath: string = packageFolder + '/node_modules/.pnpm-sync.json';
         if (FileSystem.exists(pnpmSyncJsonPath)) {
           void pnpmSyncCopy(pnpmSyncJsonPath);

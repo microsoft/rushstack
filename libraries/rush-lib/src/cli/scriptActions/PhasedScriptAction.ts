@@ -380,7 +380,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
       }
 
-      const { configuration: experiments } = this.rushConfiguration?.experimentsConfiguration;
+      const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
       if (
         this.rushConfiguration?.packageManager === 'pnpm' &&
         experiments?.usePnpmSyncForInjectedDependencies

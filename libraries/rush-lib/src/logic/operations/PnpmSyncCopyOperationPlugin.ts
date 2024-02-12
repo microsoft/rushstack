@@ -21,15 +21,10 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
         const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
         const {
           status,
-          operation: { associatedProject: project, associatedPhase: phase }
+          operation: { associatedProject: project }
         } = record;
 
-        //skip if phase is not build
-        if (phase?.name !== 'build') {
-          return;
-        }
-
-        //skip if `rush build` is skipped, from cache or no operation
+        //skip if the phase is skipped, from cache or no operation
         if (
           status === OperationStatus.Skipped ||
           status === OperationStatus.FromCache ||
