@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-storybook-plugin",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/heft-storybook-plugin_v0.6.0",
+      "date": "Mon, 12 Feb 2024 16:09:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where Webpack would run twice during static storybook builds."
+          },
+          {
+            "comment": "Introduce a `captureWebpackStats` configuration option that, when enabled, will pass the `--webpack-stats-json` parameter to Storybook."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.3",
       "tag": "@rushstack/heft-storybook-plugin_v0.5.3",
       "date": "Thu, 08 Feb 2024 01:09:21 GMT",
