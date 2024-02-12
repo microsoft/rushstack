@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-storybook-plugin",
-      "comment": "Fix an issue where Webpack would run twice during static storybook builds.",
+      "comment": "Introduce a `captureWebpackStats` configuration option that, when enabled, will pass the `--webpack-stats-json` parameter to Storybook.",
       "type": "minor"
     }
   ],
