@@ -269,7 +269,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           this._terminal,
           this.rushConfiguration
         );
-        projectImpactGraphGenerator.generate();
+        await projectImpactGraphGenerator.generateAsync();
       }
     }
 
