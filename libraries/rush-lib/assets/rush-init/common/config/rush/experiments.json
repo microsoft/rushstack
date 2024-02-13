@@ -74,5 +74,5 @@
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "useProjectImpactGraphGeneratorAfterRushUpdate": true
+  /*[LINE "HYPOTHETICAL"]*/ "generateProjectImpactGraphDuringRushUpdate": true
 }

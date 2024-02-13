@@ -54,7 +54,7 @@
       "description": "If true, Rush will not allow node_modules in the repo folder or in parent folders.",
       "type": "boolean"
     },
-    "useProjectImpactGraphGeneratorAfterRushUpdate": {
+    "generateProjectImpactGraphDuringRushUpdate": {
       "description": "If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.",
       "type": "boolean"
     }

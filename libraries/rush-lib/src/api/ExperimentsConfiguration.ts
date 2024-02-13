@@ -80,7 +80,7 @@ export interface IExperimentsJson {
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
-  useProjectImpactGraphGeneratorAfterRushUpdate?: boolean;
+  generateProjectImpactGraphDuringRushUpdate?: boolean;
 }
 
 /**

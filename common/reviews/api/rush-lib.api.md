@@ -453,6 +453,7 @@ export interface IExperimentsJson {
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
+    generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -460,7 +461,6 @@ export interface IExperimentsJson {
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
-    useProjectImpactGraphGeneratorAfterRushUpdate?: boolean;
 }
 
 // @beta
