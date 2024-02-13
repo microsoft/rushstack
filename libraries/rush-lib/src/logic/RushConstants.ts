@@ -301,4 +301,9 @@ export class RushConstants {
    * Merge Queue ignore configuration file.
    */
   public static readonly mergeQueueIgnoreFileName: string = '.mergequeueignore';
+
+  /**
+   * The filename ("project-impact-graph.yaml") for the project impact graph file.
+   */
+  public static readonly projectImpactGraphFilename: string = 'project-impact-graph.yaml';
 }

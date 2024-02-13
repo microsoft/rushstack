@@ -3,6 +3,7 @@
 
 import { Colors, FileSystem, Text, type ITerminal } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
+
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Stopwatch } from '../utilities/Stopwatch';
@@ -33,6 +34,21 @@ export interface IProjectImpactGraphFile {
  */
 const DEFAULT_GLOBAL_EXCLUDED_GLOBS: string[] = ['common/autoinstallers/**'];
 
+async function tryReadFileLinesAsync(filePath: string): Promise<string[] | undefined> {
+  let fileContents: string | undefined;
+  try {
+    fileContents = await FileSystem.readFileAsync(filePath);
+  } catch (error) {
+    if (!FileSystem.isNotExistError(error)) {
+      throw error;
+    }
+  }
+
+  if (fileContents) {
+    return Text.convertToLf(fileContents).split('\n');
+  }
+}
+
 export class ProjectImpactGraphGenerator {
   private readonly _terminal: ITerminal;
 
@@ -61,28 +77,20 @@ export class ProjectImpactGraphGenerator {
    */
   private async _loadGlobalExcludedGlobsAsync(repositoryRoot: string): Promise<string[] | undefined> {
     const filePath: string = `${repositoryRoot}/${RushConstants.mergeQueueIgnoreFileName}`;
-    let fileContents: string | undefined;
-    try {
-      fileContents = await FileSystem.readFileAsync(filePath);
-    } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
-        throw error;
-      }
-    }
-
-    if (fileContents) {
-      return Text.convertToLf(fileContents).split('\n');
-    }
+    return await tryReadFileLinesAsync(filePath);
   }
 
   /**
    * Load project excluded globs
    * @param projectRootRelativePath - project root relative path
    */
-  private _loadProjectExcludedGlobs(projectRootRelativePath: string): string[] | undefined {
+  private async _tryLoadProjectExcludedGlobsAsync(
+    projectRootRelativePath: string
+  ): Promise<string[] | undefined> {
     const filePath: string = `${this._repositoryRoot}/${projectRootRelativePath}/${RushConstants.mergeQueueIgnoreFileName}`;
-    if (FileSystem.exists(filePath)) {
-      const globs: string[] = FileSystem.readFile(filePath).toString().split('\n');
+
+    const globs: string[] | undefined = await tryReadFileLinesAsync(filePath);
+    if (globs) {
       for (let i: number = 0; i < globs.length; i++) {
         globs[i] = `${projectRootRelativePath}/${globs[i]}`;
       }
@@ -113,7 +121,7 @@ export class ProjectImpactGraphGenerator {
           includedGlobs: [`${project.projectRelativeFolder}/**`],
           dependentProjects: dependentList.sort()
         };
-        const projectExcludedGlobs: string[] | undefined = this._loadProjectExcludedGlobs(
+        const projectExcludedGlobs: string[] | undefined = await this._tryLoadProjectExcludedGlobsAsync(
           project.projectRelativeFolder
         );
         if (projectExcludedGlobs) {
@@ -124,7 +132,7 @@ export class ProjectImpactGraphGenerator {
 
     const content: IProjectImpactGraphFile = { globalExcludedGlobs, projects };
     await FileSystem.writeFileAsync(
-      `${this._repositoryRoot}/project-impact-graph.yaml`,
+      `${this._repositoryRoot}/${RushConstants.projectImpactGraphFilename}`,
       yaml.safeDump(content)
     );
 
