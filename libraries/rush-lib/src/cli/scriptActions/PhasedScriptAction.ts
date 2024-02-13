@@ -44,7 +44,6 @@ import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 import type { ProjectWatcher } from '../../logic/ProjectWatcher';
-import { PnpmSyncCopyOperationPlugin } from '../../logic/operations/PnpmSyncCopyOperationPlugin';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -385,6 +384,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.rushConfiguration?.packageManager === 'pnpm' &&
         experiments?.usePnpmSyncForInjectedDependencies
       ) {
+        const { PnpmSyncCopyOperationPlugin } = await import(
+          '../../logic/operations/PnpmSyncCopyOperationPlugin'
+        );
         new PnpmSyncCopyOperationPlugin().apply(this.hooks);
       }
 
