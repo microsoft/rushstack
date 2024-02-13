@@ -72,7 +72,7 @@
   /*[LINE "HYPOTHETICAL"]*/ "forbidPhantomResolvableNodeModulesFolders": true,
 
   /**
-   * If true, Rush will generate project-impact-graph.yaml at repositoryRoot after `rush update` finished.
+   * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
   /*[LINE "HYPOTHETICAL"]*/ "useProjectImpactGraphGeneratorAfterRushUpdate": true
 }

@@ -78,7 +78,7 @@ export interface IExperimentsJson {
   forbidPhantomResolvableNodeModulesFolders?: boolean;
 
   /**
-   * If true, Rush will generate project-impact-graph.yaml at repositoryRoot after `rush update` finished.
+   * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
   useProjectImpactGraphGeneratorAfterRushUpdate?: boolean;
 }
