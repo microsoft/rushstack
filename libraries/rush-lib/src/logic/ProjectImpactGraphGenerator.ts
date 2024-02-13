@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colors, FileSystem, Text, type ITerminal } from '@rushstack/node-core-library';
+import { Colors, FileSystem, Text, type ITerminal, Async } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -103,29 +103,37 @@ export class ProjectImpactGraphGenerator {
   public async generateAsync(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const globalExcludedGlobs: string[] =
-      (await this._loadGlobalExcludedGlobsAsync(this._repositoryRoot)) || DEFAULT_GLOBAL_EXCLUDED_GLOBS;
-    const projects: Record<string, IProjectImpactGraphProjectConfiguration> = {};
-    for (const project of this._projects) {
-      // ignore the top project
-      if (project.projectRelativeFolder !== '.') {
-        const dependentList: string[] = [project.packageName];
-        for (const consumingProject of project.consumingProjects) {
-          dependentList.push(consumingProject.packageName);
-        }
-        projects[project.packageName] = {
-          includedGlobs: [`${project.projectRelativeFolder}/**`],
-          dependentProjects: dependentList.sort()
-        };
-        const projectExcludedGlobs: string[] | undefined = await this._tryLoadProjectExcludedGlobsAsync(
-          project.projectRelativeFolder
-        );
-        if (projectExcludedGlobs) {
-          projects[project.packageName].excludedGlobs = projectExcludedGlobs;
-        }
-      }
-    }
+    const [globalExcludedGlobs = DEFAULT_GLOBAL_EXCLUDED_GLOBS, projectEntries] = await Promise.all([
+      this._loadGlobalExcludedGlobsAsync(this._repositoryRoot),
+      Async.mapAsync<RushConfigurationProject, [string, IProjectImpactGraphProjectConfiguration]>(
+        this._projects,
+        async ({ packageName, consumingProjects, projectRelativeFolder }) => {
+          const dependentList: string[] = [packageName];
+          for (const consumingProject of consumingProjects) {
+            dependentList.push(consumingProject.packageName);
+          }
 
+          const projectImpactGraphProjectConfiguration: IProjectImpactGraphProjectConfiguration = {
+            includedGlobs: [`${projectRelativeFolder}/**`],
+            dependentProjects: dependentList.sort()
+          };
+
+          const projectExcludedGlobs: string[] | undefined = await this._tryLoadProjectExcludedGlobsAsync(
+            projectRelativeFolder
+          );
+          if (projectExcludedGlobs) {
+            projectImpactGraphProjectConfiguration.excludedGlobs = projectExcludedGlobs;
+          }
+
+          return [packageName, projectImpactGraphProjectConfiguration];
+        },
+        { concurrency: 50 }
+      )
+    ]);
+
+    projectEntries.sort(([aName], [bName]) => aName.localeCompare(bName));
+    const projects: Record<string, IProjectImpactGraphProjectConfiguration> =
+      Object.fromEntries(projectEntries);
     const content: IProjectImpactGraphFile = { globalExcludedGlobs, projects };
     await FileSystem.writeFileAsync(
       `${this._repositoryRoot}/${RushConstants.projectImpactGraphFilename}`,
