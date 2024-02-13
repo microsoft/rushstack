@@ -11,7 +11,7 @@ import { RushConstants } from './RushConstants';
 /**
  * Project property configuration
  */
-export interface IProjectConfiguration {
+export interface IProjectImpactGraphProjectConfiguration {
   includedGlobs: string[];
   excludedGlobs?: string[];
   dependentProjects: string[];
@@ -20,10 +20,10 @@ export interface IProjectConfiguration {
 /**
  * The schema of `project-impact-graph.yaml`
  */
-export interface IFileSchema {
+export interface IProjectImpactGraphFile {
   globalExcludedGlobs: string[];
   projects: {
-    [key: string]: IProjectConfiguration;
+    [key: string]: IProjectImpactGraphProjectConfiguration;
   };
 }
 
@@ -100,7 +100,7 @@ export class ProjectImpactGraphGenerator {
     const globalExcludedGlobs: string[] =
       (await this._loadGlobalExcludedGlobsAsync(this._repositoryRoot)) || DEFAULT_GLOBAL_EXCLUDED_GLOBS;
     const projects: {
-      [key: string]: IProjectConfiguration;
+      [key: string]: IProjectImpactGraphProjectConfiguration;
     } = {};
     for (const project of this._projects) {
       // ignore the top project
@@ -121,12 +121,13 @@ export class ProjectImpactGraphGenerator {
         }
       }
     }
-    const content: IFileSchema = { globalExcludedGlobs, projects };
 
+    const content: IProjectImpactGraphFile = { globalExcludedGlobs, projects };
     await FileSystem.writeFileAsync(
       `${this._repositoryRoot}/project-impact-graph.yaml`,
       yaml.safeDump(content)
     );
+
     stopwatch.stop();
     this._terminal.writeLine();
     this._terminal.writeLine(
