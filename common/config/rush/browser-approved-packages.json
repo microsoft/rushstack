@@ -63,10 +63,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "pnpm-sync-lib",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
