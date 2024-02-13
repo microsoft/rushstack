@@ -263,9 +263,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
       if (
         this.actionName === 'update' &&
         this.rushConfiguration.experimentsConfiguration.configuration
-          .useProjectImpactGraphGeneratorAfterRushUpdate
+          .generateProjectImpactGraphDuringRushUpdate
       ) {
         const projectImpactGraphGenerator: ProjectImpactGraphGenerator = new ProjectImpactGraphGenerator(
+          this._terminal,
           this.rushConfiguration
         );
         projectImpactGraphGenerator.generate();

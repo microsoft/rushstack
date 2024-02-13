@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { Colors, FileSystem, type ITerminal } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 import path from 'path';
-import colors from 'colors/safe';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Stopwatch } from '../utilities/Stopwatch';
@@ -36,6 +35,8 @@ export interface IFileSchema {
 const DefaultGlobalExcludedGlobs: string[] = ['common/autoinstallers/**'];
 
 export class ProjectImpactGraphGenerator {
+  private readonly _terminal: ITerminal;
+
   /**
    * Full path of repository root
    */
@@ -49,7 +50,8 @@ export class ProjectImpactGraphGenerator {
   /**
    * Get repositoryRoot and load projects within the rush.json
    */
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(terminal: ITerminal, rushConfiguration: RushConfiguration) {
+    this._terminal = terminal;
     this._repositoryRoot = rushConfiguration.rushJsonFolder;
     this._projects = rushConfiguration.projects;
   }
@@ -115,7 +117,9 @@ export class ProjectImpactGraphGenerator {
       yaml.safeDump(content)
     );
     stopwatch.stop();
-    // eslint-disable-next-line no-console
-    console.log('\n' + colors.green(`Generate project impact graph successfully. (${stopwatch.toString()})`));
+    this._terminal.writeLine();
+    this._terminal.writeLine(
+      Colors.green(`Generate project impact graph successfully. (${stopwatch.toString()})`)
+    );
   }
 }
