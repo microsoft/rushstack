@@ -23,9 +23,7 @@ export interface IProjectImpactGraphProjectConfiguration {
  */
 export interface IProjectImpactGraphFile {
   globalExcludedGlobs: string[];
-  projects: {
-    [key: string]: IProjectImpactGraphProjectConfiguration;
-  };
+  projects: Record<string, IProjectImpactGraphProjectConfiguration>;
 }
 
 /**
@@ -107,9 +105,7 @@ export class ProjectImpactGraphGenerator {
 
     const globalExcludedGlobs: string[] =
       (await this._loadGlobalExcludedGlobsAsync(this._repositoryRoot)) || DEFAULT_GLOBAL_EXCLUDED_GLOBS;
-    const projects: {
-      [key: string]: IProjectImpactGraphProjectConfiguration;
-    } = {};
+    const projects: Record<string, IProjectImpactGraphProjectConfiguration> = {};
     for (const project of this._projects) {
       // ignore the top project
       if (project.projectRelativeFolder !== '.') {
