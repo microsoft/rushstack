@@ -180,7 +180,7 @@ Object {
 
 exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""workspacePackages""): Output file data 1`] = `
 "globalExcludedGlobs:
-  - common/autoinstallers/**
+  - common/config/version-policies.json
 projects:
   a:
     includedGlobs:
@@ -237,6 +237,8 @@ projects:
       - e/**
     dependentProjects:
       - e
+    excludedGlobs:
+      - e/src/**
   f:
     includedGlobs:
       - f/**

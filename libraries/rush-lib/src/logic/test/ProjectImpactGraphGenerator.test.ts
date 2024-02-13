@@ -1,10 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  PackageJsonLookup,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Stopwatch } from '../../utilities/Stopwatch';
+
+const PROJECT_FOLDER_PATH: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+const RELATIVE_DIRNAME: string = __dirname.replace(`${PROJECT_FOLDER_PATH}/`, '');
+const SRC_DIRNAME: string = `${PROJECT_FOLDER_PATH}/src/${RELATIVE_DIRNAME.substring(
+  RELATIVE_DIRNAME.indexOf('/') + 1
+)}`;
 
 describe(ProjectImpactGraphGenerator.name, () => {
   beforeEach(() => {
@@ -18,7 +29,7 @@ describe(ProjectImpactGraphGenerator.name, () => {
         .spyOn(FileSystem, 'writeFileAsync')
         .mockImplementation();
 
-      const repoBasePath: string = `${__dirname}/${repoName}`;
+      const repoBasePath: string = `${SRC_DIRNAME}/${repoName}`;
       const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
       const terminal: Terminal = new Terminal(terminalProvider);
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
