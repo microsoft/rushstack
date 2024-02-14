@@ -51,14 +51,14 @@ export class ProjectImpactGraphGenerator {
   private readonly _terminal: ITerminal;
 
   /**
+   * The Rush configuration
+   */
+  private readonly _rushConfiguration: RushConfiguration;
+
+  /**
    * Full path of repository root
    */
   private readonly _repositoryRoot: string;
-
-  /**
-   * Projects within the Rush configuration
-   */
-  private readonly _projects: RushConfigurationProject[];
 
   /**
    * Full path to `project-impact-graph.yaml`
@@ -68,10 +68,11 @@ export class ProjectImpactGraphGenerator {
   /**
    * Get repositoryRoot and load projects within the rush.json
    */
-  public constructor(terminal: ITerminal, { rushJsonFolder, projects }: RushConfiguration) {
+  public constructor(terminal: ITerminal, rushConfiguration: RushConfiguration) {
     this._terminal = terminal;
+    this._rushConfiguration = rushConfiguration;
+    const { rushJsonFolder } = rushConfiguration;
     this._repositoryRoot = rushJsonFolder;
-    this._projects = projects;
     this._projectImpactGraphFilePath = `${rushJsonFolder}/${RushConstants.projectImpactGraphFilename}`;
   }
 
@@ -111,7 +112,7 @@ export class ProjectImpactGraphGenerator {
     const [globalExcludedGlobs = DEFAULT_GLOBAL_EXCLUDED_GLOBS, projectEntries] = await Promise.all([
       this._loadGlobalExcludedGlobsAsync(),
       Async.mapAsync<RushConfigurationProject, [string, IProjectImpactGraphProjectConfiguration]>(
-        this._projects,
+        this._rushConfiguration.projects,
         async ({ packageName, consumingProjects, projectRelativeFolder }) => {
           const dependentList: string[] = [packageName];
           for (const consumingProject of consumingProjects) {
