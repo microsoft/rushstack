@@ -84,35 +84,23 @@ export class WatchLoop implements IWatchLoopState {
 
     abortSignal.addEventListener('abort', this._abortCurrent, { once: true });
 
-    let result: OperationStatus = OperationStatus.Ready;
+    try {
+      let result: OperationStatus = OperationStatus.Ready;
 
-    do {
-      // Always check the abort signal first, in case it was aborted in the async tick since the last executeAsync() call.
-      if (abortSignal.aborted) {
-        return OperationStatus.Aborted;
-      }
-
-      this._reset();
-
-      this._options.onBeforeExecute();
-      try {
-        this._isRunning = true;
-        result = await this._options.executeAsync(this);
-      } catch (err) {
-        if (!(err instanceof AlreadyReportedError)) {
-          throw err;
-        } else {
-          result = OperationStatus.Failure;
+      do {
+        // Always check the abort signal first, in case it was aborted in the async tick since the last executeAsync() call.
+        if (abortSignal.aborted) {
+          return OperationStatus.Aborted;
         }
-      } finally {
-        this._isRunning = false;
-      }
-    } while (this._runRequested);
 
-    abortSignal.removeEventListener('abort', this._abortCurrent);
+        result = await this._runIterationAsync();
+      } while (this._runRequested);
 
-    // Even if the run has finished, if the abort signal was aborted, we should return `Aborted` just in case.
-    return abortSignal.aborted ? OperationStatus.Aborted : result;
+      // Even if the run has finished, if the abort signal was aborted, we should return `Aborted` just in case.
+      return abortSignal.aborted ? OperationStatus.Aborted : result;
+    } finally {
+      abortSignal.removeEventListener('abort', this._abortCurrent);
+    }
   }
 
   /**
@@ -262,6 +250,28 @@ export class WatchLoop implements IWatchLoopState {
       this._requestRunPromise = new Promise<string | undefined>((resolve) => {
         this._resolveRequestRun = resolve;
       });
+    }
+  }
+
+  /**
+   * Runs a single iteration of the loop.
+   * @returns The status of the iteration.
+   */
+  private async _runIterationAsync(): Promise<OperationStatus> {
+    this._reset();
+
+    this._options.onBeforeExecute();
+    try {
+      this._isRunning = true;
+      return await this._options.executeAsync(this);
+    } catch (err) {
+      if (!(err instanceof AlreadyReportedError)) {
+        throw err;
+      } else {
+        return OperationStatus.Failure;
+      }
+    } finally {
+      this._isRunning = false;
     }
   }
 }
