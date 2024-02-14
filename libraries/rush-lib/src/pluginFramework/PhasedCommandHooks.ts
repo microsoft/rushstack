@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
+import {
+  AsyncParallelHook,
+  AsyncSeriesBailHook,
+  AsyncSeriesHook,
+  AsyncSeriesWaterfallHook,
+  SyncHook
+} from 'tapable';
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
@@ -152,7 +158,7 @@ export class PhasedCommandHooks {
   /**
    * Hook invoked to shutdown long-lived work in plugins.
    */
-  public readonly shutdown: SyncHook<void> = new SyncHook(undefined, 'shutdown');
+  public readonly shutdownAsync: AsyncParallelHook<void> = new AsyncParallelHook(undefined, 'shutdown');
 
   /**
    * Hook invoked after a run has finished and the command is watching for changes.

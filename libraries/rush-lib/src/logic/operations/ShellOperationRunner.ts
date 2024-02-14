@@ -119,7 +119,9 @@ export class ShellOperationRunner implements IOperationRunner {
 
         return status;
       },
-      true
+      {
+        createLogFile: true
+      }
     );
   }
 }

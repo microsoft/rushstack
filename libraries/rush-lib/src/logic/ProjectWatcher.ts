@@ -125,7 +125,13 @@ export class ProjectWatcher {
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.state);
     if (initialChangeResult.changedProjects.size) {
-      this._forceChangedProjects.clear();
+      // We can't call `clear()` here due to the async tick in the end of _computeChanged
+      for (const project of initialChangeResult.changedProjects) {
+        this._forceChangedProjects.delete(project);
+      }
+      // TODO: _forceChangedProjects might be non-empty here, which will result in an immediate rerun after the next
+      // run finishes. This is suboptimal, but the latency of _computeChanged is probably high enough that in practice
+      // all invalidations will have been picked up already.
       return initialChangeResult;
     }
 
@@ -202,6 +208,16 @@ export class ProjectWatcher {
                 // If another file has changed, wait for another pass.
                 this._setStatus(`More file changes detected, aborting.`);
                 return;
+              }
+
+              // Since there are multiple async ticks since the projects were enumerated in _computeChanged,
+              // more could have been added in the interaval. Check and debounce.
+              for (const project of this._forceChangedProjects.keys()) {
+                if (!result.changedProjects.has(project)) {
+                  this._setStatus(`More invalidations occurred, aborting.`);
+                  timeout = setTimeout(resolveIfChanged, debounceMs);
+                  return;
+                }
               }
 
               this._commitChanges(result.state);
@@ -344,25 +360,22 @@ export class ProjectWatcher {
   }
 
   private _setStatus(status: string): void {
+    const statusLines: string[] = [
+      `[${this.isPaused ? 'PAUSED' : 'WATCHING'}] Watch Status: ${status}`,
+      ...(this.isPaused
+        ? [`  Press <w> to resume.`, `  Press <b> to build once.`]
+        : [`  Press <w> to pause.`, `  Press <i> to invalidate all projects.`]),
+      `  Press <x> to reset child processes.`
+    ];
+
     if (this._hasRenderedStatus) {
       readline.cursorTo(process.stdout, 0);
-      readline.moveCursor(process.stdout, 0, -4);
+      readline.moveCursor(process.stdout, 0, -statusLines.length);
       readline.clearScreenDown(process.stdout);
     }
     this._hasRenderedStatus = true;
 
-    this._terminal.writeLine(
-      Colorize.bold(Colorize.cyan(`[${this.isPaused ? 'PAUSED' : 'WATCHING'}] Watch Status: ${status}`))
-    );
-    this._terminal.writeLine(
-      Colorize.bold(
-        Colorize.cyan(
-          this.isPaused
-            ? '  Press <w> to resume.\n  Press <b> to build once.\n  Press <x> to reset child processes.'
-            : '  Press <w> to pause.\n  Press <i> to invalidate all projects.\n  Press <x> to reset child processes.'
-        )
-      )
-    );
+    this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
   }
 
   /**

@@ -57,8 +57,10 @@ export interface IOperationRunnerContext {
    */
   withTerminalAsync<T>(
     callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
-    createLogFile: boolean,
-    logFileSuffix?: string
+    options: {
+      createLogFile: boolean;
+      logFileSuffix?: string;
+    }
   ): Promise<T>;
 }
 

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds a new option `useIPCInWatchMode` to the `operationSettings` items of `rush-project.json`. Setting this value to `true` tells Rush to open an IPC channel to the created child process and attempt to keep it alive across incremental runs. If the process exits it will be restarted on the next execution.",
+      "comment": "Adds a new experiment `useIPCScriptsInWatchMode`. When this flag is enabled and Rush is running in watch mode, it will check for npm scripts named `_phase:<phase-name>:ipc`, and if found, use them instead of the normal invocation of `_phase:<phase-name>`. When doing so, it will provide an IPC channel to the child process and expect the child to outlive the current build pass.",
       "type": "none"
     }
   ],

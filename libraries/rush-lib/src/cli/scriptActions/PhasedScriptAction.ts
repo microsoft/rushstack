@@ -541,7 +541,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         case shutdownKey:
           projectWatcher.clearStatus();
           terminal.writeLine(`Shutting down long-lived child processes...`);
-          this.hooks.shutdown.call();
+          // TODO: Inject this promise into the execution queue somewhere so that it gets waited on between runs
+          void this.hooks.shutdownAsync.promise();
           break;
         case '\u0003':
           process.kill(process.pid, 'SIGINT');
@@ -600,6 +601,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     function invalidateOperation(operation: Operation, reason: string): void {
       const { associatedProject } = operation;
       if (associatedProject) {
+        // Since ProjectWatcher only tracks entire projects, widen the operation to its project
+        // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
         projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
       }
     }

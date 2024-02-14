@@ -109,10 +109,8 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
       }
     );
 
-    hooks.shutdown.tap(PLUGIN_NAME, () => {
-      for (const runner of runnerCache.values()) {
-        runner.shutdown();
-      }
+    hooks.shutdownAsync.tapPromise(PLUGIN_NAME, async () => {
+      await Promise.all(Array.from(runnerCache.values(), (runner) => runner.shutdownAsync()));
     });
   }
 }

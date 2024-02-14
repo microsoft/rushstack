@@ -600,7 +600,10 @@ export interface IOperationRunnerContext {
     quietMode: boolean;
     status: OperationStatus;
     stopwatch: IStopwatchResult;
-    withTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, createLogFile: boolean, logFileSuffix?: string): Promise<T>;
+    withTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+        createLogFile: boolean;
+        logFileSuffix?: string;
+    }): Promise<T>;
 }
 
 // @alpha (undocumented)
@@ -981,7 +984,7 @@ export class PhasedCommandHooks {
     readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
-    readonly shutdown: SyncHook<void>;
+    readonly shutdownAsync: AsyncParallelHook<void>;
     readonly waitingForChanges: SyncHook<void>;
 }
 

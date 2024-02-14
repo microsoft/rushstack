@@ -185,10 +185,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
    */
   public async withTerminalAsync<T>(
     callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
-    createLogFile: boolean,
-    logFileSuffix: string = ''
+    options: {
+      createLogFile: boolean;
+      logFileSuffix: string;
+    }
   ): Promise<T> {
     const { associatedPhase, associatedProject, stdioSummarizer } = this;
+    const { createLogFile, logFileSuffix = '' } = options;
     const projectLogWritable: ProjectLogWritable | undefined =
       createLogFile && associatedProject && associatedPhase
         ? new ProjectLogWritable(

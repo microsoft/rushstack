@@ -178,15 +178,18 @@ export class IPCOperationRunner implements IOperationRunner {
         });
 
         if (isConnected && !this._persist) {
-          this.shutdown();
-          await once(subProcess, 'exit');
+          await this.shutdownAsync();
         }
 
+        // @rushstack/operation-graph does not currently have a concept of "Success with Warning"
+        // To match existing ShellOperationRunner behavior we treat any stderr as a warning.
         return status === OperationStatus.Success && hasWarningOrError
           ? OperationStatus.SuccessWithWarning
           : status;
       },
-      true
+      {
+        createLogFile: true
+      }
     );
   }
 
@@ -194,7 +197,7 @@ export class IPCOperationRunner implements IOperationRunner {
     return this._shellCommand;
   }
 
-  public shutdown(): void {
+  public async shutdownAsync(): Promise<void> {
     const { _ipcProcess: subProcess } = this;
     if (!subProcess) {
       return;
@@ -205,6 +208,7 @@ export class IPCOperationRunner implements IOperationRunner {
         command: 'exit'
       };
       subProcess.send(exitCommand);
+      await once(subProcess, 'exit');
     }
   }
 }
