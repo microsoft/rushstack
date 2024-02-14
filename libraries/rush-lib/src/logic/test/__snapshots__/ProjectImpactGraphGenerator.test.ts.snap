@@ -280,3 +280,13 @@ Object {
   "warning": "",
 }
 `;
+
+exports[`ProjectImpactGraphGenerator validateAsync Reports if the project-impact-graph.yaml file is missing (repo: ""workspacePackages""): Terminal Output 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "output": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
