@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { Async, FileSystem } from '@rushstack/node-core-library';
 
 import { OperationStatus } from './OperationStatus';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { pnpmSyncCopy } from 'pnpm-sync-lib';
+import { pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
@@ -33,9 +33,20 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
           return;
         }
 
-        const pnpmSyncJsonPath: string = project?.projectFolder + '/node_modules/.pnpm-sync.json';
-        if (FileSystem.exists(pnpmSyncJsonPath)) {
-          await pnpmSyncCopy(pnpmSyncJsonPath);
+        if (project) {
+          const pnpmSyncJsonPath: string = `${project.projectFolder}/node_modules/.pnpm-sync.json`;
+          if (await FileSystem.exists(pnpmSyncJsonPath)) {
+            const { PackageExtractor } = await import(
+              /* webpackChunkName: 'PackageExtractor' */
+              '@rushstack/package-extractor'
+            );
+            await pnpmSyncCopyAsync({
+              pnpmSyncJsonPath,
+              ensureFolder: FileSystem.ensureFolderAsync,
+              forEachAsyncWithConcurrency: Async.forEachAsync,
+              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync
+            });
+          }
         }
       }
     );

@@ -3,7 +3,7 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
-import { PackageJsonLookup, type IPackageJson, Text, FileSystem } from '@rushstack/node-core-library';
+import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async } from '@rushstack/node-core-library';
 import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
@@ -15,7 +15,7 @@ import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
-import { pnpmSyncCopy } from 'pnpm-sync-lib';
+import { pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 interface IRushXCommandLineArguments {
   /**
@@ -65,7 +65,7 @@ class ProcessError extends Error {
 }
 
 export class RushXCommandLine {
-  public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
+  public static async launchRushXAsync(launcherVersion: string, options: ILaunchOptions): Promise<void> {
     try {
       const rushxArguments: IRushXCommandLineArguments = RushXCommandLine._parseCommandLineArguments();
       const rushConfiguration: RushConfiguration | undefined = RushConfiguration.tryLoadFromDefaultLocation({
@@ -89,7 +89,7 @@ export class RushXCommandLine {
       // promise exception), so we start with the assumption that the exit code is 1
       // and set it to 0 only on success.
       process.exitCode = 1;
-      RushXCommandLine._launchRushXInternal(rushxArguments, rushConfiguration, options);
+      await RushXCommandLine._launchRushXInternalAsync(rushxArguments, rushConfiguration, options);
       if (attemptHooks) {
         try {
           eventHooksManager?.handle(Event.postRushx, rushxArguments.isDebug, rushxArguments.ignoreHooks);
@@ -112,11 +112,11 @@ export class RushXCommandLine {
     }
   }
 
-  private static _launchRushXInternal(
+  private static async _launchRushXInternalAsync(
     rushxArguments: IRushXCommandLineArguments,
     rushConfiguration: RushConfiguration | undefined,
     options: ILaunchOptions
-  ): void {
+  ): Promise<void> {
     if (!rushxArguments.quiet) {
       RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
@@ -213,8 +213,17 @@ export class RushXCommandLine {
 
       if (experiments?.usePnpmSyncForInjectedDependencies) {
         const pnpmSyncJsonPath: string = packageFolder + '/node_modules/.pnpm-sync.json';
-        if (FileSystem.exists(pnpmSyncJsonPath)) {
-          void pnpmSyncCopy(pnpmSyncJsonPath);
+        if (await FileSystem.existsAsync(pnpmSyncJsonPath)) {
+          const { PackageExtractor } = await import(
+            /* webpackChunkName: 'PackageExtractor' */
+            '@rushstack/package-extractor'
+          );
+          await pnpmSyncCopyAsync({
+            pnpmSyncJsonPath,
+            ensureFolder: FileSystem.ensureFolderAsync,
+            forEachAsyncWithConcurrency: Async.forEachAsync,
+            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync
+          });
         }
       }
     }
