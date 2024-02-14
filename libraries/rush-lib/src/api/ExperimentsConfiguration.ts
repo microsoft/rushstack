@@ -76,6 +76,11 @@ export interface IExperimentsJson {
    * If true, Rush will not allow node_modules in the repo folder or in parent folders.
    */
   forbidPhantomResolvableNodeModulesFolders?: boolean;
+
+  /**
+   * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
+   */
+  generateProjectImpactGraphDuringRushUpdate?: boolean;
 }
 
 /**

@@ -69,5 +69,10 @@
   /**
    * If true, Rush will not allow node_modules in the repo folder or in parent folders.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "forbidPhantomResolvableNodeModulesFolders": true
+  /*[LINE "HYPOTHETICAL"]*/ "forbidPhantomResolvableNodeModulesFolders": true,
+
+  /**
+   * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "generateProjectImpactGraphDuringRushUpdate": true
 }
