@@ -27,7 +27,6 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
-import { ProjectImpactGraphGenerator } from '../../logic/ProjectImpactGraphGenerator';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { Subspace } from '../../api/Subspace';
 
@@ -260,17 +259,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this.parser.isDebug,
         this._ignoreHooksParameter.value
       );
-      if (
-        this.actionName === 'update' &&
-        this.rushConfiguration.experimentsConfiguration.configuration
-          .generateProjectImpactGraphDuringRushUpdate
-      ) {
-        const projectImpactGraphGenerator: ProjectImpactGraphGenerator = new ProjectImpactGraphGenerator(
-          this._terminal,
-          this.rushConfiguration
-        );
-        await projectImpactGraphGenerator.generateAsync();
-      }
     }
 
     if (warnAboutScriptUpdate) {

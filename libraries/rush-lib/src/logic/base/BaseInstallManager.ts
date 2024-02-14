@@ -47,6 +47,7 @@ import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
+import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -103,6 +104,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstallAsync(): Promise<void> {
+    const { allowShrinkwrapUpdates } = this.options;
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
@@ -121,7 +123,7 @@ export abstract class BaseInstallManager {
     }
 
     // Prevent update when using a filter, as modifications to the shrinkwrap shouldn't be saved
-    if (this.options.allowShrinkwrapUpdates && isFilteredInstall) {
+    if (allowShrinkwrapUpdates && isFilteredInstall) {
       // Allow partial update when there are subspace projects
       if (!this.rushConfiguration.subspacesFeatureEnabled) {
         // eslint-disable-next-line no-console
@@ -139,7 +141,12 @@ export abstract class BaseInstallManager {
 
     const subspace: Subspace = this.options.subspace;
 
-    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash } = await this.prepareAsync(subspace);
+    const projectImpactGraphGenerator: ProjectImpactGraphGenerator | undefined = this.rushConfiguration
+      .experimentsConfiguration.configuration.generateProjectImpactGraphDuringRushUpdate
+      ? new ProjectImpactGraphGenerator(this._terminal, this.rushConfiguration)
+      : undefined;
+    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } =
+      await this.prepareAsync(subspace, projectImpactGraphGenerator);
 
     if (this.options.checkOnly) {
       return;
@@ -164,7 +171,7 @@ export abstract class BaseInstallManager {
     const cleanInstall: boolean =
       isFilteredInstall ||
       !commonTempInstallFlag.checkValidAndReportStoreIssues({
-        rushVerb: this.options.allowShrinkwrapUpdates ? 'update' : 'install',
+        rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
         statePropertiesToIgnore: optionsToIgnore
       });
 
@@ -175,7 +182,13 @@ export abstract class BaseInstallManager {
       return this.canSkipInstall(outputStats.mtime, subspace);
     };
 
-    if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
+    if (
+      cleanInstall ||
+      !shrinkwrapIsUpToDate ||
+      !variantIsUpToDate ||
+      !canSkipInstall() ||
+      !projectImpactGraphIsUpToDate
+    ) {
       // eslint-disable-next-line no-console
       console.log();
       await this.validateNpmSetup();
@@ -207,8 +220,12 @@ export abstract class BaseInstallManager {
         await this.options.beforeInstallAsync();
       }
 
-      // Perform the actual install
-      await this.installAsync(cleanInstall, subspace);
+      await Promise.all([
+        // Perform the actual install
+        this.installAsync(cleanInstall, subspace),
+        // If allowed, generate the project impact graph
+        allowShrinkwrapUpdates ? projectImpactGraphGenerator?.generateAsync() : undefined
+      ]);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
@@ -283,11 +300,17 @@ export abstract class BaseInstallManager {
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
-  protected async prepareAsync(subspace: Subspace): Promise<{
+  protected async prepareAsync(
+    subspace: Subspace,
+    projectImpactGraphGenerator: ProjectImpactGraphGenerator | undefined
+  ): Promise<{
     variantIsUpToDate: boolean;
     shrinkwrapIsUpToDate: boolean;
     npmrcHash: string | undefined;
+    projectImpactGraphIsUpToDate: boolean;
   }> {
+    const { allowShrinkwrapUpdates } = this.options;
+
     // Check the policies
     await PolicyValidator.validatePolicyAsync(this.rushConfiguration, subspace, this.options);
 
@@ -297,8 +320,8 @@ export abstract class BaseInstallManager {
       this.rushConfiguration
     );
     if (approvedPackagesChecker.approvedPackagesFilesAreOutOfDate) {
-      if (this.options.allowShrinkwrapUpdates) {
-        approvedPackagesChecker.rewriteConfigFiles();
+      approvedPackagesChecker.rewriteConfigFiles();
+      if (allowShrinkwrapUpdates) {
         // eslint-disable-next-line no-console
         console.log(
           colors.yellow(
@@ -321,12 +344,12 @@ export abstract class BaseInstallManager {
 
     // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
     if (!this.options.fullUpgrade) {
-      const commitedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
+      const committedShrinkwrapFileName: string = subspace.getCommittedShrinkwrapFilename();
       try {
         shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
           this.rushConfiguration.packageManager,
           this.rushConfiguration.packageManagerOptions,
-          commitedShrinkwrapFileName
+          committedShrinkwrapFileName
         );
       } catch (ex) {
         // eslint-disable-next-line no-console
@@ -336,7 +359,7 @@ export abstract class BaseInstallManager {
           `Unable to load the ${this.rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
         );
 
-        if (!this.options.allowShrinkwrapUpdates) {
+        if (!allowShrinkwrapUpdates) {
           // eslint-disable-next-line no-console
           console.log();
           // eslint-disable-next-line no-console
@@ -442,12 +465,13 @@ export abstract class BaseInstallManager {
       }
     }
 
-    // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
-    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(
-      subspace,
-      shrinkwrapFile
-    );
+    let [{ shrinkwrapIsUpToDate, shrinkwrapWarnings }, projectImpactGraphIsUpToDate = true] =
+      await Promise.all([
+        // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
+        this.prepareCommonTempAsync(subspace, shrinkwrapFile),
+        projectImpactGraphGenerator?.validateAsync()
+      ]);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
     this._syncTempShrinkwrap(subspace, shrinkwrapFile);
@@ -473,22 +497,31 @@ export abstract class BaseInstallManager {
       console.log();
     }
 
+    let hasErrors: boolean = false;
     // Force update if the shrinkwrap is out of date
-    if (!shrinkwrapIsUpToDate) {
-      if (!this.options.allowShrinkwrapUpdates) {
-        // eslint-disable-next-line no-console
-        console.log();
-        // eslint-disable-next-line no-console
-        console.log(
-          colors.red(
-            `The ${this.rushConfiguration.shrinkwrapFilePhrase} is out of date. You need to run "rush update".`
-          )
-        );
-        throw new AlreadyReportedError();
-      }
+    if (!shrinkwrapIsUpToDate && !allowShrinkwrapUpdates) {
+      this._terminal.writeErrorLine();
+      this._terminal.writeErrorLine(
+        `The ${this.rushConfiguration.shrinkwrapFilePhrase} is out of date. You need to run "rush update".`
+      );
+      hasErrors = true;
     }
 
-    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash };
+    if (!projectImpactGraphIsUpToDate && !allowShrinkwrapUpdates) {
+      hasErrors = true;
+      this._terminal.writeErrorLine();
+      this._terminal.writeErrorLine(
+        colors.red(
+          `The ${RushConstants.projectImpactGraphFilename} file is missing or out of date. You need to run "rush update".`
+        )
+      );
+    }
+
+    if (hasErrors) {
+      throw new AlreadyReportedError();
+    }
+
+    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate };
   }
 
   /**

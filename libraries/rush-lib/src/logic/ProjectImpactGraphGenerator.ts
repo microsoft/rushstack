@@ -61,12 +61,18 @@ export class ProjectImpactGraphGenerator {
   private readonly _projects: RushConfigurationProject[];
 
   /**
+   * Full path to `project-impact-graph.yaml`
+   */
+  private readonly _projectImpactGraphFilePath: string;
+
+  /**
    * Get repositoryRoot and load projects within the rush.json
    */
-  public constructor(terminal: ITerminal, rushConfiguration: RushConfiguration) {
+  public constructor(terminal: ITerminal, { rushJsonFolder, projects }: RushConfiguration) {
     this._terminal = terminal;
-    this._repositoryRoot = rushConfiguration.rushJsonFolder;
-    this._projects = rushConfiguration.projects;
+    this._repositoryRoot = rushJsonFolder;
+    this._projects = projects;
+    this._projectImpactGraphFilePath = `${rushJsonFolder}/${RushConstants.projectImpactGraphFilename}`;
   }
 
   /**
@@ -134,15 +140,17 @@ export class ProjectImpactGraphGenerator {
     const projects: Record<string, IProjectImpactGraphProjectConfiguration> =
       Object.fromEntries(projectEntries);
     const content: IProjectImpactGraphFile = { globalExcludedGlobs, projects };
-    await FileSystem.writeFileAsync(
-      `${this._repositoryRoot}/${RushConstants.projectImpactGraphFilename}`,
-      yaml.safeDump(content)
-    );
+    await FileSystem.writeFileAsync(this._projectImpactGraphFilePath, yaml.safeDump(content));
 
     stopwatch.stop();
     this._terminal.writeLine();
     this._terminal.writeLine(
       Colors.green(`Generate project impact graph successfully. (${stopwatch.toString()})`)
     );
+  }
+
+  public async validateAsync(): Promise<boolean> {
+    // TODO: More validation other than just existence
+    return await FileSystem.existsAsync(this._projectImpactGraphFilePath);
   }
 }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""packages""): Output file data 1`] = `
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Output file data 1`] = `
 "globalExcludedGlobs:
   - common/autoinstallers/**
 projects:
@@ -89,9 +89,9 @@ projects:
 "
 `;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""packages""): Output file path 1`] = `"/project-impact-graph.yaml"`;
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""packages""): Terminal Output 1`] = `
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Terminal Output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -101,7 +101,7 @@ Object {
 }
 `;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""repo""): Output file data 1`] = `
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Output file data 1`] = `
 "globalExcludedGlobs:
   - common/autoinstallers/**
 projects:
@@ -166,9 +166,9 @@ projects:
 "
 `;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""repo""): Output file path 1`] = `"/project-impact-graph.yaml"`;
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""repo""): Terminal Output 1`] = `
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Terminal Output 1`] = `
 Object {
   "debug": "",
   "error": "",
@@ -178,7 +178,7 @@ Object {
 }
 `;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""workspacePackages""): Output file data 1`] = `
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Output file data 1`] = `
 "globalExcludedGlobs:
   - common/config/version-policies.json
 projects:
@@ -269,9 +269,9 @@ projects:
 "
 `;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""workspacePackages""): Output file path 1`] = `"/project-impact-graph.yaml"`;
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
 
-exports[`ProjectImpactGraphGenerator Correctly generates a project impact graph (repo: ""workspacePackages""): Terminal Output 1`] = `
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Terminal Output 1`] = `
 Object {
   "debug": "",
   "error": "",
