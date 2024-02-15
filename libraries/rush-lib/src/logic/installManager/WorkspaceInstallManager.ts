@@ -509,9 +509,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
         storePath: pnpmStorePath,
-        readWantedLockfile: async (lockfilePath) => {
+        readWantedLockfile: async (pnpmLockFolderPath) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
-            lockfilePath,
+            pnpmLockFolderPath + 'pnpm-lock.yaml',
             { withCaching: true }
           );
 
