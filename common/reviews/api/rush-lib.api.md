@@ -453,6 +453,7 @@ export interface IExperimentsJson {
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
+    generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -1235,6 +1236,7 @@ export class RushConstants {
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: string;
+    static readonly mergeQueueIgnoreFileName: string;
     static readonly nodeModulesFolderName: string;
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;
@@ -1248,6 +1250,7 @@ export class RushConstants {
     static readonly pnpmfileV6Filename: string;
     static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
+    static readonly projectImpactGraphFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;
     static readonly rebuildCommandName: string;

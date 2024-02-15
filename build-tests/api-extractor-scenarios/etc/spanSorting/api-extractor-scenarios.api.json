@@ -375,27 +375,45 @@
           "implementsTokenRanges": []
         },
         {
-          "kind": "Variable",
-          "canonicalReference": "api-extractor-scenarios!exampleD:var",
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!exampleD:function(1)",
           "docComment": "/**\n * Outer description\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "exampleD: "
+              "text": "exampleD: (o: "
             },
             {
               "kind": "Content",
-              "text": "(o: {\n    a: number;\n    b(): string;\n}) => void"
+              "text": "{\n    a: number;\n    b(): string;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ") => "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
             }
           ],
           "fileUrlPath": "src/spanSorting/index.ts",
-          "isReadonly": true,
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
           "releaseTag": "Public",
-          "name": "exampleD",
-          "variableTypeTokenRange": {
-            "startIndex": 1,
-            "endIndex": 2
-          }
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "o",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isOptional": false
+            }
+          ],
+          "name": "exampleD"
         }
       ]
     }

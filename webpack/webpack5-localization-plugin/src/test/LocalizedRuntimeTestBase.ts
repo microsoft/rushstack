@@ -10,7 +10,7 @@ import { Volume } from 'memfs/lib/volume';
 import { MemFSPlugin } from './MemFSPlugin';
 import type { ILocalizationPluginOptions } from '../interfaces';
 import { LocalizationPlugin } from '../LocalizationPlugin';
-import { type ITrueHashPluginOptions, TrueHashPlugin } from './TrueHashPlugin';
+import { type ITrueHashPluginOptions, TrueHashPlugin } from '../TrueHashPlugin';
 
 export function runTests(trueHashPluginOptions: ITrueHashPluginOptions = {}): void {
   async function testLocalizedRuntimeInner(minimize: boolean): Promise<void> {

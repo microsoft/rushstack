@@ -2,6 +2,23 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.66.0",
+      "tag": "@rushstack/node-core-library_v3.66.0",
+      "date": "Thu, 08 Feb 2024 01:09:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add getStatistics() method to FileWriter instances"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.65.0",
       "tag": "@rushstack/node-core-library_v3.65.0",
       "date": "Mon, 05 Feb 2024 23:46:52 GMT",

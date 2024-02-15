@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.6.3",
+      "tag": "@rushstack/eslint-config_v3.6.3",
+      "date": "Wed, 07 Feb 2024 01:11:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.2",
       "tag": "@rushstack/eslint-config_v3.6.2",
       "date": "Thu, 25 Jan 2024 23:03:57 GMT",

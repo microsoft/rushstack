@@ -1,6 +1,16 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Mon, 05 Feb 2024 23:46:52 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Feb 2024 01:09:22 GMT and should not be manually modified.
+
+## 0.7.23
+Thu, 08 Feb 2024 01:09:22 GMT
+
+_Version update only_
+
+## 0.7.22
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
 
 ## 0.7.21
 Mon, 05 Feb 2024 23:46:52 GMT

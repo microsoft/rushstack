@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { default as webpack, Compilation, Chunk, Asset, sources } from 'webpack';
+import type { default as webpack, Compilation, Chunk, Asset, sources, util } from 'webpack';
 import { Text } from '@rushstack/node-core-library';
 
 import type { ILocalizedWebpackChunk } from './webpackInterfaces';
@@ -11,6 +11,8 @@ interface IHashReplacement {
   trueHashByLocale: string | Record<string, string> | undefined;
 }
 
+type WebpackHash = ReturnType<typeof util.createHash>;
+
 export type HashFn = (contents: string | Buffer) => string;
 
 export interface IGetHashFunctionOptions {
@@ -19,14 +21,15 @@ export interface IGetHashFunctionOptions {
 }
 
 export function getHashFunction({ thisWebpack, compilation }: IGetHashFunctionOptions): HashFn {
-  const { hashFunction = 'md5', hashDigest = 'hex', hashDigestLength } = compilation.outputOptions;
-  return (contents: string | Buffer) =>
-    thisWebpack.util
-      .createHash(hashFunction)
-      .update(contents)
-      .digest(hashDigest)
-      .toString()
-      .slice(0, hashDigestLength);
+  const { hashFunction = 'md5', hashDigest = 'hex', hashDigestLength, hashSalt } = compilation.outputOptions;
+  return (contents: string | Buffer) => {
+    const hash: WebpackHash = thisWebpack.util.createHash(hashFunction);
+    if (hashSalt) {
+      hash.update(hashSalt, 'utf-8');
+    }
+
+    return hash.update(contents).digest(hashDigest).toString().slice(0, hashDigestLength);
+  };
 }
 
 export interface IUpdateAssetHashesOptions {

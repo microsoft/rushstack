@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import type { Chunk } from 'webpack';
 import type { Compiler } from 'webpack';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
@@ -126,6 +128,12 @@ export interface _IStringPlaceholder {
     valuesByLocale: Map<string, string>;
 }
 
+// @public (undocumented)
+export interface ITrueHashPluginOptions {
+    hashFunction?: (contents: string | Buffer) => string;
+    stageOverride?: number;
+}
+
 // @public
 export class LocalizationPlugin implements WebpackPluginInstance {
     constructor(options: ILocalizationPluginOptions);
@@ -140,6 +148,13 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     readonly _options: ILocalizationPluginOptions;
     // (undocumented)
     readonly stringKeys: Map<string, _IStringPlaceholder>;
+}
+
+// @public (undocumented)
+export class TrueHashPlugin implements WebpackPluginInstance {
+    constructor(options?: ITrueHashPluginOptions);
+    // (undocumented)
+    apply(compiler: Compiler): void;
 }
 
 // (No @packageDocumentation comment for this package)

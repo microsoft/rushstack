@@ -1,6 +1,17 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 05 Feb 2024 23:46:52 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Feb 2024 01:09:21 GMT and should not be manually modified.
+
+## 3.66.0
+Thu, 08 Feb 2024 01:09:21 GMT
+
+### Minor changes
+
+- Add getStatistics() method to FileWriter instances
+
+### Patches
+
+- LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux
 
 ## 3.65.0
 Mon, 05 Feb 2024 23:46:52 GMT
