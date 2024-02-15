@@ -247,6 +247,7 @@ export function normalizePnpmVersionSpecifier(versionSpecifier: IPnpmVersionSpec
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
+  // TODO: Implement cache eviction when a lockfile is copied back
   private static _cacheByLockfilePath: Map<string, PnpmShrinkwrapFile | undefined> = new Map();
 
   public readonly shrinkwrapFileMajorVersion: number;
@@ -735,7 +736,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         RushConstants.pnpmfileGlobalFilename
       );
 
-      if (await FileSystem.exists(subspacePnpmfilePath)) {
+      if (await FileSystem.existsAsync(subspacePnpmfilePath)) {
         try {
           subspacePnpmfile = require(subspacePnpmfilePath);
         } catch (err) {
