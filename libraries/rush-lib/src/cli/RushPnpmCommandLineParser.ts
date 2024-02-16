@@ -406,7 +406,7 @@ export class RushPnpmCommandLineParser {
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
-          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+          const rushPnpmPatchesFolder: string = `${this._rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
           // Copy (or delete) common\temp\patches\ --> common\pnpm-patches\
           if (FileSystem.exists(commonTempPnpmPatchesFolder)) {
             FileSystem.ensureEmptyFolder(rushPnpmPatchesFolder);
@@ -433,7 +433,8 @@ export class RushPnpmCommandLineParser {
           await this._doRushUpdateAsync();
 
           this._terminal.writeWarningLine(
-            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the "common/pnpm/patches" folder.\n` +
+            `Rush refreshed the ${RushConstants.pnpmConfigFilename}, shrinkwrap file and patch files under the ` +
+              `"${RushConstants.commonFolderName}/${RushConstants.pnpmPatchesCommonFolderName}" folder.\n` +
               '  Please commit this change to Git.'
           );
         }
