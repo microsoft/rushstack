@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { CollatedTerminal } from '@rushstack/stream-collator';
-import { type ITerminalProvider, TerminalProviderSeverity,TerminalChunkKind } from '@rushstack/terminal';
+import { type ITerminalProvider, TerminalProviderSeverity, TerminalChunkKind } from '@rushstack/terminal';
 
 export interface ICollatedTerminalProviderOptions {
   debugEnabled: boolean;
