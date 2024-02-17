@@ -168,16 +168,16 @@ export interface IStringBufferOutputOptions {
 export interface ITerminal {
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: WriteParameters): void;
-    writeDebug(...messageParts: WriteParameters): void;
-    writeDebugLine(...messageParts: WriteParameters): void;
-    writeError(...messageParts: WriteParameters): void;
-    writeErrorLine(...messageParts: WriteParameters): void;
-    writeLine(...messageParts: WriteParameters): void;
-    writeVerbose(...messageParts: WriteParameters): void;
-    writeVerboseLine(...messageParts: WriteParameters): void;
-    writeWarning(...messageParts: WriteParameters): void;
-    writeWarningLine(...messageParts: WriteParameters): void;
+    write(...messageParts: TerminalWriteParameters): void;
+    writeDebug(...messageParts: TerminalWriteParameters): void;
+    writeDebugLine(...messageParts: TerminalWriteParameters): void;
+    writeError(...messageParts: TerminalWriteParameters): void;
+    writeErrorLine(...messageParts: TerminalWriteParameters): void;
+    writeLine(...messageParts: TerminalWriteParameters): void;
+    writeVerbose(...messageParts: TerminalWriteParameters): void;
+    writeVerboseLine(...messageParts: TerminalWriteParameters): void;
+    writeWarning(...messageParts: TerminalWriteParameters): void;
+    writeWarningLine(...messageParts: TerminalWriteParameters): void;
 }
 
 // @public
@@ -342,16 +342,16 @@ export class Terminal implements ITerminal {
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: WriteParameters): void;
-    writeDebug(...messageParts: WriteParameters): void;
-    writeDebugLine(...messageParts: WriteParameters): void;
-    writeError(...messageParts: WriteParameters): void;
-    writeErrorLine(...messageParts: WriteParameters): void;
-    writeLine(...messageParts: WriteParameters): void;
-    writeVerbose(...messageParts: WriteParameters): void;
-    writeVerboseLine(...messageParts: WriteParameters): void;
-    writeWarning(...messageParts: WriteParameters): void;
-    writeWarningLine(...messageParts: WriteParameters): void;
+    write(...messageParts: TerminalWriteParameters): void;
+    writeDebug(...messageParts: TerminalWriteParameters): void;
+    writeDebugLine(...messageParts: TerminalWriteParameters): void;
+    writeError(...messageParts: TerminalWriteParameters): void;
+    writeErrorLine(...messageParts: TerminalWriteParameters): void;
+    writeLine(...messageParts: TerminalWriteParameters): void;
+    writeVerbose(...messageParts: TerminalWriteParameters): void;
+    writeVerboseLine(...messageParts: TerminalWriteParameters): void;
+    writeWarning(...messageParts: TerminalWriteParameters): void;
+    writeWarningLine(...messageParts: TerminalWriteParameters): void;
 }
 
 // @public
@@ -408,6 +408,9 @@ export abstract class TerminalWritable {
     writeChunk(chunk: ITerminalChunk): void;
 }
 
+// @beta (undocumented)
+export type TerminalWriteParameters = string[] | [...string[], ITerminalWriteOptions];
+
 // @public
 export abstract class TextRewriter {
     abstract close(state: TextRewriterState): string;
@@ -428,8 +431,5 @@ export class TextRewriterTransform extends TerminalTransform {
     // (undocumented)
     readonly textRewriters: ReadonlyArray<TextRewriter>;
 }
-
-// @beta (undocumented)
-export type WriteParameters = string[] | [...string[], ITerminalWriteOptions];
 
 ```

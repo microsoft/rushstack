@@ -17,7 +17,7 @@ export interface ITerminalWriteOptions {
 /**
  * @beta
  */
-export type WriteParameters = string[] | [...string[], ITerminalWriteOptions];
+export type TerminalWriteParameters = string[] | [...string[], ITerminalWriteOptions];
 
 /**
  * @beta
@@ -36,12 +36,12 @@ export interface ITerminal {
   /**
    * Write a generic message to the terminal
    */
-  write(...messageParts: WriteParameters): void;
+  write(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a generic message to the terminal, followed by a newline
    */
-  writeLine(...messageParts: WriteParameters): void;
+  writeLine(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a warning message to the console with yellow text.
@@ -49,7 +49,7 @@ export interface ITerminal {
    * @remarks
    * The yellow color takes precedence over any other foreground colors set.
    */
-  writeWarning(...messageParts: WriteParameters): void;
+  writeWarning(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a warning message to the console with yellow text, followed by a newline.
@@ -57,7 +57,7 @@ export interface ITerminal {
    * @remarks
    * The yellow color takes precedence over any other foreground colors set.
    */
-  writeWarningLine(...messageParts: WriteParameters): void;
+  writeWarningLine(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write an error message to the console with red text.
@@ -65,7 +65,7 @@ export interface ITerminal {
    * @remarks
    * The red color takes precedence over any other foreground colors set.
    */
-  writeError(...messageParts: WriteParameters): void;
+  writeError(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write an error message to the console with red text, followed by a newline.
@@ -73,25 +73,25 @@ export interface ITerminal {
    * @remarks
    * The red color takes precedence over any other foreground colors set.
    */
-  writeErrorLine(...messageParts: WriteParameters): void;
+  writeErrorLine(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a verbose-level message.
    */
-  writeVerbose(...messageParts: WriteParameters): void;
+  writeVerbose(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a verbose-level message followed by a newline.
    */
-  writeVerboseLine(...messageParts: WriteParameters): void;
+  writeVerboseLine(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a debug-level message.
    */
-  writeDebug(...messageParts: WriteParameters): void;
+  writeDebug(...messageParts: TerminalWriteParameters): void;
 
   /**
    * Write a debug-level message followed by a newline.
    */
-  writeDebugLine(...messageParts: WriteParameters): void;
+  writeDebugLine(...messageParts: TerminalWriteParameters): void;
 }

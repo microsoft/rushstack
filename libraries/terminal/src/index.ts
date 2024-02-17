@@ -30,7 +30,7 @@ export { ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
 export { TextRewriterState, TextRewriter } from './TextRewriter';
 export { ITextRewriterTransformOptions, TextRewriterTransform } from './TextRewriterTransform';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './AnsiEscape';
-export { ITerminal, WriteParameters, ITerminalWriteOptions } from './ITerminal';
+export { ITerminal, TerminalWriteParameters, ITerminalWriteOptions } from './ITerminal';
 export { Terminal } from './Terminal';
 export { Colorize } from './Colorize';
 export { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
