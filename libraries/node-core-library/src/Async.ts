@@ -7,7 +7,7 @@
  * @remarks
  * Used with {@link Async.mapAsync} and {@link Async.forEachAsync}.
  *
- * @beta
+ * @public
  */
 export interface IAsyncParallelismOptions {
   /**
@@ -21,7 +21,7 @@ export interface IAsyncParallelismOptions {
  * @remarks
  * Used with {@link Async.runWithRetriesAsync}.
  *
- * @beta
+ * @public
  */
 export interface IRunWithRetriesOptions<TResult> {
   action: () => Promise<TResult> | TResult;
@@ -32,7 +32,7 @@ export interface IRunWithRetriesOptions<TResult> {
 /**
  * Utilities for parallel asynchronous operations, for use with the system `Promise` APIs.
  *
- * @beta
+ * @public
  */
 export class Async {
   /**

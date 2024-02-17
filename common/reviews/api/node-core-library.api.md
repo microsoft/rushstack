@@ -23,7 +23,7 @@ export class AlreadyReportedError extends Error {
     constructor();
 }
 
-// @beta
+// @public
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
     static getSignal(): [Promise<void>, () => void, (err: Error) => void];
@@ -181,10 +181,6 @@ export class FileSystem {
     static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
     static readFileToBuffer(filePath: string): Buffer;
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
-    // @deprecated (undocumented)
-    static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
-    // @deprecated (undocumented)
-    static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
@@ -224,7 +220,7 @@ export enum FolderConstants {
 // @public
 export type FolderItem = fs.Dirent;
 
-// @beta
+// @public
 export interface IAsyncParallelismOptions {
     concurrency?: number;
 }
@@ -556,7 +552,7 @@ export interface IReadLinesFromIterableOptions {
     ignoreEmptyLines?: boolean;
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export interface IRunWithRetriesOptions<TResult> {
     // (undocumented)
     action: () => Promise<TResult> | TResult;
@@ -653,8 +649,6 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
-    // @deprecated
-    static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
 }
 
 // @public
@@ -679,7 +673,7 @@ export class MapExtensions {
     };
 }
 
-// @beta
+// @public
 export class MinimumHeap<T> {
     constructor(comparator: (a: T, b: T) => number);
     peek(): T | undefined;
