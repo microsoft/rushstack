@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, Colors, type IColorableSequence, type ITerminal } from '@rushstack/node-core-library';
+import { Async } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
@@ -171,7 +172,7 @@ export class AmazonS3Client {
     });
   }
 
-  private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
+  private _writeDebugLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a debug message
     try {
       this._terminal.writeDebugLine(...messageParts);
@@ -180,7 +181,7 @@ export class AmazonS3Client {
     }
   }
 
-  private _writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+  private _writeWarningLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a warning message
     try {
       this._terminal.writeWarningLine(...messageParts);
@@ -203,7 +204,7 @@ export class AmazonS3Client {
     // the host can be e.g. https://s3.aws.com or http://localhost:9000
     const host: string = this._s3Endpoint.replace(protocolRegex, '');
     const canonicalUri: string = AmazonS3Client.UriEncode(`/${objectName}`);
-    this._writeDebugLine(Colors.bold('Canonical URI: '), canonicalUri);
+    this._writeDebugLine(Colorize.bold('Canonical URI: '), canonicalUri);
 
     if (this._credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
@@ -302,11 +303,11 @@ export class AmazonS3Client {
 
     const url: string = `${this._s3Endpoint}${canonicalUri}`;
 
-    this._writeDebugLine(Colors.bold(Colors.underline('Sending request to S3')));
-    this._writeDebugLine(Colors.bold('HOST: '), url);
-    this._writeDebugLine(Colors.bold('Headers: '));
+    this._writeDebugLine(Colorize.bold(Colorize.underline('Sending request to S3')));
+    this._writeDebugLine(Colorize.bold('HOST: '), url);
+    this._writeDebugLine(Colorize.bold('Headers: '));
     headers.forEach((value, name) => {
-      this._writeDebugLine(Colors.cyan(`\t${name}: ${value}`));
+      this._writeDebugLine(Colorize.cyan(`\t${name}: ${value}`));
     });
 
     const response: fetch.Response = await this._webClient.fetchAsync(url, webFetchOptions);
@@ -432,7 +433,7 @@ export class AmazonS3Client {
   ): Promise<T> {
     const response: RetryableRequestResponse<T> = await sendRequest();
 
-    const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
+    const log: (...messageParts: string[]) => void = this._writeDebugLine.bind(this);
 
     if (response.hasNetworkError) {
       if (storageRetryOptions && storageRetryOptions.maxTries > 1) {

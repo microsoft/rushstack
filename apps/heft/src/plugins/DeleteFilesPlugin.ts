@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type * as fs from 'fs';
-import { FileSystem, Async, type ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { Constants } from '../utilities/Constants';
 import {

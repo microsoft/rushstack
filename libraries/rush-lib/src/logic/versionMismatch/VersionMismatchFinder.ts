@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import { AlreadyReportedError, type ITerminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';

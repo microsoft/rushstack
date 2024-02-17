@@ -6,7 +6,7 @@
 
 /// <reference types="node" />
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 // @beta
 export type CommandMessageFromHost = ICancelCommandMessage | IExitCommandMessage | IRunCommandMessage | ISyncCommandMessage;

@@ -7,7 +7,7 @@
 import type { IgnoreStringFunction } from '@rushstack/localization-utilities';
 import { ILocalizationFile } from '@rushstack/localization-utilities';
 import type { IPseudolocaleOptions } from '@rushstack/localization-utilities';
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)

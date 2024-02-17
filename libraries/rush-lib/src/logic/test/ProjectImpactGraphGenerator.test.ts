@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Path, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { FileSystem, Path } from '@rushstack/node-core-library';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 const NORMALIZED_DIRNAME: string = Path.convertToSlashes(__dirname);
 

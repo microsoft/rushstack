@@ -3,15 +3,8 @@
 
 import path from 'node:path';
 
-import {
-  Async,
-  ColorValue,
-  FileSystem,
-  JsonFile,
-  type ITerminal,
-  type JsonObject
-} from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { Async, FileSystem, JsonFile, type JsonObject } from '@rushstack/node-core-library';
+import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
@@ -140,10 +133,9 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
               `Unable to calculate incremental state for ${record.operation.name}: ` +
                 (error as Error).toString()
             );
-            terminal.writeLine({
-              text: 'Rush will proceed without incremental execution and change detection.',
-              foregroundColor: ColorValue.Cyan
-            });
+            terminal.writeLine(
+              Colorize.cyan('Rush will proceed without incremental execution and change detection.')
+            );
           }
 
           stateMap.set(operation, {
@@ -156,13 +148,14 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         if (logGitWarning) {
           // To test this code path:
           // Remove the `.git` folder then run "rush build --verbose"
-          terminal.writeLine({
-            text: PrintUtilities.wrapWords(
-              'This workspace does not appear to be tracked by Git. ' +
-                'Rush will proceed without incremental execution, caching, and change detection.'
-            ),
-            foregroundColor: ColorValue.Cyan
-          });
+          terminal.writeLine(
+            Colorize.cyan(
+              PrintUtilities.wrapWords(
+                'This workspace does not appear to be tracked by Git. ' +
+                  'Rush will proceed without incremental execution, caching, and change detection.'
+              )
+            )
+          );
         }
       }
     );

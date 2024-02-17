@@ -4,7 +4,8 @@
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError, type ITerminal, Terminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { type ITerminal, Terminal } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
   CommandLineParameter,

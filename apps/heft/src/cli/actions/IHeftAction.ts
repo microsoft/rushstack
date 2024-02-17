@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineAction } from '@rushstack/ts-command-line';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import type { MetricsCollector } from '../../metrics/MetricsCollector';

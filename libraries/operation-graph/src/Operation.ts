@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, type ITerminal } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { Stopwatch } from './Stopwatch';
 import type {

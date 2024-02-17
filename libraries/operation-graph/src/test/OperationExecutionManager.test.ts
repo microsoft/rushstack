@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { type ITerminal, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { Operation } from '../Operation';
 import { OperationExecutionManager } from '../OperationExecutionManager';
 import { OperationStatus } from '../OperationStatus';

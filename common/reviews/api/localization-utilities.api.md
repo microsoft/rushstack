@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { ITypingsGeneratorBaseOptions } from '@rushstack/typings-generator';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';

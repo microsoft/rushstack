@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
 import * as redisAPI from '@redis/client';
 import type { RedisClientType } from '@redis/client';
 

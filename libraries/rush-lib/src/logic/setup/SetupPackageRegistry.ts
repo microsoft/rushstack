@@ -5,17 +5,14 @@ import * as path from 'path';
 import type * as child_process from 'child_process';
 import {
   AlreadyReportedError,
-  Colors,
-  ConsoleTerminalProvider,
   Executable,
   FileSystem,
   InternalError,
   type JsonObject,
   NewlineKind,
-  Terminal,
   Text
 } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { PrintUtilities, Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -240,7 +237,7 @@ export class SetupPackageRegistry {
         this._artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
 
       if (artifactoryWebsiteUrl) {
-        this._terminal.writeLine('  ', Colors.cyan(artifactoryWebsiteUrl));
+        this._terminal.writeLine('  ', Colorize.cyan(artifactoryWebsiteUrl));
         this._terminal.writeLine();
       }
     }
@@ -254,7 +251,7 @@ export class SetupPackageRegistry {
 
     artifactoryUser = artifactoryUser.trim();
     if (artifactoryUser.length === 0) {
-      this._terminal.writeLine(Colors.red('Operation aborted because the input was empty'));
+      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
       this._terminal.writeLine();
       throw new AlreadyReportedError();
     }
@@ -268,7 +265,7 @@ export class SetupPackageRegistry {
 
     artifactoryKey = artifactoryKey.trim();
     if (artifactoryKey.length === 0) {
-      this._terminal.writeLine(Colors.red('Operation aborted because the input was empty'));
+      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
       this._terminal.writeLine();
       throw new AlreadyReportedError();
     }
@@ -397,7 +394,7 @@ export class SetupPackageRegistry {
     }
 
     this._terminal.writeLine();
-    this._terminal.writeLine(Colors.green('Adding Artifactory token to: '), npmrcPath);
+    this._terminal.writeLine(Colorize.green('Adding Artifactory token to: '), npmrcPath);
 
     const npmrcLines: string[] = [];
 

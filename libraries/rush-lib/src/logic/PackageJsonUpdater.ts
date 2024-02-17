@@ -4,12 +4,7 @@
 import colors from 'colors/safe';
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
-import {
-  ConsoleTerminalProvider,
-  Terminal,
-  type ITerminalProvider,
-  Colors
-} from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal, type ITerminalProvider, Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { BaseInstallManager } from './base/BaseInstallManager';
@@ -268,7 +263,7 @@ export class PackageJsonUpdater {
     const { skipUpdate, debugInstall, variant } = options;
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
-        this._terminal.writeLine(Colors.green('Wrote'), project.filePath);
+        this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
       }
     }
 
@@ -292,7 +287,7 @@ export class PackageJsonUpdater {
     variant: string | undefined
   ): Promise<void> {
     this._terminal.writeLine();
-    this._terminal.writeLine(Colors.green('Running "rush update"'));
+    this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
 
     const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
@@ -368,9 +363,9 @@ export class PackageJsonUpdater {
 
       dependenciesToAddOrUpdate[packageName] = version;
       this._terminal.writeLine(
-        Colors.green('Updating projects to use'),
+        Colorize.green('Updating projects to use'),
         `${packageName}@`,
-        Colors.cyan(version)
+        Colorize.cyan(version)
       );
       this._terminal.writeLine();
 

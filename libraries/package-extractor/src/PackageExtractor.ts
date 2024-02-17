@@ -14,12 +14,11 @@ import {
   Path,
   FileSystem,
   Import,
-  Colors,
   JsonFile,
   AlreadyExistsBehavior,
-  type IPackageJson,
-  type ITerminal
+  type IPackageJson
 } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { ArchiveManager } from './ArchiveManager';
 import { SymlinkAnalyzer, type ILinkInfo, type PathNode } from './SymlinkAnalyzer';
@@ -305,8 +304,8 @@ export class PackageExtractor {
 
     await FileSystem.ensureFolderAsync(targetRootFolder);
 
-    terminal.writeLine(Colors.cyan(`Extracting to target folder:  ${targetRootFolder}`));
-    terminal.writeLine(Colors.cyan(`Main project for extraction: ${mainProjectName}`));
+    terminal.writeLine(Colorize.cyan(`Extracting to target folder:  ${targetRootFolder}`));
+    terminal.writeLine(Colorize.cyan(`Main project for extraction: ${mainProjectName}`));
 
     try {
       const existingExtraction: boolean =
@@ -392,7 +391,7 @@ export class PackageExtractor {
     }
 
     for (const { projectName, projectFolder } of includedProjectsSet) {
-      terminal.writeLine(Colors.cyan(`Analyzing project: ${projectName}`));
+      terminal.writeLine(Colorize.cyan(`Analyzing project: ${projectName}`));
       await this._collectFoldersAsync(projectFolder, options, state);
     }
 
@@ -1010,7 +1009,7 @@ export class PackageExtractor {
           extractedProjectNodeModulesFolder,
           extractedProjectBinFolder,
           {
-            warn: (msg: string) => terminal.writeLine(Colors.yellow(msg))
+            warn: (msg: string) => terminal.writeLine(Colorize.yellow(msg))
           }
         );
 

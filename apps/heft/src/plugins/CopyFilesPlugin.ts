@@ -3,7 +3,8 @@
 
 import type * as fs from 'fs';
 import * as path from 'path';
-import { AlreadyExistsBehavior, FileSystem, Async, type ITerminal } from '@rushstack/node-core-library';
+import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { Constants } from '../utilities/Constants';
 import {

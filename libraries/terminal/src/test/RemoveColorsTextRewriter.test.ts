@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors';
+import { AnsiEscape } from '../AnsiEscape';
 
 import { RemoveColorsTextRewriter } from '../RemoveColorsTextRewriter';
 import type { TextRewriterState } from '../TextRewriter';
-import { AnsiEscape } from '@rushstack/node-core-library';
 
 function testCase(inputs: string[]): void {
   const matcher: RemoveColorsTextRewriter = new RemoveColorsTextRewriter();

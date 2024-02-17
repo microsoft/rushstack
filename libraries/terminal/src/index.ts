@@ -11,18 +11,36 @@
  * @packageDocumentation
  */
 
-export * from './CallbackWritable';
-export * from './DiscardStdoutTransform';
-export * from './ITerminalChunk';
-export * from './MockWritable';
-export * from './NormalizeNewlinesTextRewriter';
-export * from './PrintUtilities';
-export * from './RemoveColorsTextRewriter';
-export * from './SplitterTransform';
-export * from './StdioLineTransform';
-export * from './StdioSummarizer';
-export * from './StdioWritable';
-export * from './TerminalTransform';
-export * from './TerminalWritable';
-export * from './TextRewriter';
-export * from './TextRewriterTransform';
+export { ICallbackWritableOptions, CallbackWritable } from './CallbackWritable';
+export { IDiscardStdoutTransformOptions, DiscardStdoutTransform } from './DiscardStdoutTransform';
+export { TerminalChunkKind, ITerminalChunk } from './ITerminalChunk';
+export { MockWritable } from './MockWritable';
+export {
+  INormalizeNewlinesTextRewriterOptions,
+  NormalizeNewlinesTextRewriter
+} from './NormalizeNewlinesTextRewriter';
+export { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from './PrintUtilities';
+export { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
+export { ISplitterTransformOptions, SplitterTransform } from './SplitterTransform';
+export { IStdioLineTransformOptions, StderrLineTransform } from './StdioLineTransform';
+export { IStdioSummarizerOptions, StdioSummarizer } from './StdioSummarizer';
+export { StdioWritable } from './StdioWritable';
+export { ITerminalTransformOptions, TerminalTransform } from './TerminalTransform';
+export { ITerminalWritableOptions, TerminalWritable } from './TerminalWritable';
+export { TextRewriterState, TextRewriter } from './TextRewriter';
+export { ITextRewriterTransformOptions, TextRewriterTransform } from './TextRewriterTransform';
+export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './AnsiEscape';
+export { ITerminal, TerminalWriteParameters, ITerminalWriteOptions } from './ITerminal';
+export { Terminal } from './Terminal';
+export { Colorize } from './Colorize';
+export { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
+export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './ConsoleTerminalProvider';
+export { StringBufferTerminalProvider, IStringBufferOutputOptions } from './StringBufferTerminalProvider';
+export {
+  PrefixProxyTerminalProvider,
+  IPrefixProxyTerminalProviderOptions,
+  IDynamicPrefixProxyTerminalProviderOptions,
+  IPrefixProxyTerminalProviderOptionsBase,
+  IStaticPrefixProxyTerminalProviderOptions
+} from './PrefixProxyTerminalProvider';
+export { TerminalStreamWritable, ITerminalStreamWritableOptions } from './TerminalStreamWritable';

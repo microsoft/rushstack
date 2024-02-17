@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  FileSystem,
-  NewlineKind,
-  StringBufferTerminalProvider,
-  Terminal
-} from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { IgnoreStringFunction } from '../../interfaces';
 import { type IParseResxOptions, parseResx } from '../parseResx';
 

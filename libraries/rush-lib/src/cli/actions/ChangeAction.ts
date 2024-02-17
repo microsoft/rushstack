@@ -10,13 +10,8 @@ import type {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import {
-  FileSystem,
-  AlreadyReportedError,
-  Terminal,
-  type ITerminal,
-  ConsoleTerminalProvider
-} from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Terminal, type ITerminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';

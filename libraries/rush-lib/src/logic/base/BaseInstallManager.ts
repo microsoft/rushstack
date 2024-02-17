@@ -14,12 +14,14 @@ import {
   NewlineKind,
   AlreadyReportedError,
   type FileSystemStats,
-  ConsoleTerminalProvider,
-  Terminal,
-  type ITerminalProvider,
   Path
 } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import {
+  PrintUtilities,
+  ConsoleTerminalProvider,
+  Terminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';

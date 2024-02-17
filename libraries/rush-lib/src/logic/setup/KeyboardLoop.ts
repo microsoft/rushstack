@@ -6,8 +6,8 @@ import * as readline from 'readline';
 import * as process from 'process';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
 
-// TODO: Integrate these into the AnsiEscape API in @rushstack/node-core-library
-// As part of that work we should generalize the "Colors" API to support more general
+// TODO: Integrate these into the AnsiEscape API in @rushstack/terminal
+// As part of that work we should generalize the "Colorize" API to support more general
 // terminal escapes, and simplify the interface for that API.
 const ANSI_ESCAPE_SHOW_CURSOR: string = '\u001B[?25l';
 const ANSI_ESCAPE_HIDE_CURSOR: string = '\u001B[?25h';

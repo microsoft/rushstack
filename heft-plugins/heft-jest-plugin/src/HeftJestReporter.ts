@@ -2,13 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  type ITerminal,
-  Colors,
-  InternalError,
-  Text,
-  type IColorableSequence
-} from '@rushstack/node-core-library';
+import { InternalError, Text } from '@rushstack/node-core-library';
+import { type ITerminal, Colorize } from '@rushstack/terminal';
 import type {
   Reporter,
   Test,
@@ -51,7 +46,7 @@ export default class HeftJestReporter implements Reporter {
 
   public async onTestStart(test: Test): Promise<void> {
     this._terminal.writeLine(
-      Colors.whiteBackground(Colors.black('START')),
+      Colorize.whiteBackground(Colorize.black('START')),
       ` ${this._getTestPath(test.path)}`
     );
   }
@@ -80,11 +75,14 @@ export default class HeftJestReporter implements Reporter {
       `(duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed${memUsage})`;
 
     if (numFailingTests > 0) {
-      this._terminal.writeLine(Colors.redBackground(Colors.black('FAIL')), message);
+      this._terminal.writeLine(Colorize.redBackground(Colorize.black('FAIL')), message);
     } else if (testExecError) {
-      this._terminal.writeLine(Colors.redBackground(Colors.black(`FAIL (${testExecError.type})`)), message);
+      this._terminal.writeLine(
+        Colorize.redBackground(Colorize.black(`FAIL (${testExecError.type})`)),
+        message
+      );
     } else {
-      this._terminal.writeLine(Colors.greenBackground(Colors.black('PASS')), message);
+      this._terminal.writeLine(Colorize.greenBackground(Colorize.black('PASS')), message);
     }
 
     if (failureMessage) {
@@ -169,7 +167,7 @@ export default class HeftJestReporter implements Reporter {
     const PAD_LENGTH: number = 13; // "console.error" is the longest label
 
     const paddedLabel: string = '|' + label.padStart(PAD_LENGTH) + '|';
-    const prefix: IColorableSequence = debug ? Colors.yellow(paddedLabel) : Colors.cyan(paddedLabel);
+    const prefix: string = debug ? Colorize.yellow(paddedLabel) : Colorize.cyan(paddedLabel);
 
     for (const line of lines) {
       this._terminal.writeLine(prefix, ' ' + line);
@@ -195,13 +193,13 @@ export default class HeftJestReporter implements Reporter {
     this._terminal.writeLine('Tests finished:');
 
     const successesText: string = `  Successes: ${numPassedTests}`;
-    this._terminal.writeLine(numPassedTests > 0 ? Colors.green(successesText) : successesText);
+    this._terminal.writeLine(numPassedTests > 0 ? Colorize.green(successesText) : successesText);
 
     const failText: string = `  Failures: ${numFailedTests}`;
-    this._terminal.writeLine(numFailedTests > 0 ? Colors.red(failText) : failText);
+    this._terminal.writeLine(numFailedTests > 0 ? Colorize.red(failText) : failText);
 
     if (numRuntimeErrorTestSuites) {
-      this._terminal.writeLine(Colors.red(`  Failed test suites: ${numRuntimeErrorTestSuites}`));
+      this._terminal.writeLine(Colorize.red(`  Failed test suites: ${numRuntimeErrorTestSuites}`));
     }
 
     this._terminal.writeLine(`  Total: ${numTotalTests}`);

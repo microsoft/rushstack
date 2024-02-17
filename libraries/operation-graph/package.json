@@ -16,7 +16,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",
