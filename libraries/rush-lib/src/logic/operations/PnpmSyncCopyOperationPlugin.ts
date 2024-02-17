@@ -12,8 +12,6 @@ import type { OperationExecutionRecord } from './OperationExecutionRecord';
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
 export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
-  public constructor() {}
-
   public apply(hooks: PhasedCommandHooks): void {
     hooks.afterExecuteOperation.tapPromise(
       PLUGIN_NAME,
