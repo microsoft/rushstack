@@ -5,7 +5,7 @@
  * Implements a standard heap data structure for items of type T and a custom comparator.
  * The root will always be the minimum value as determined by the comparator.
  *
- * @beta
+ * @public
  */
 export class MinimumHeap<T> {
   private readonly _items: T[] = [];

@@ -23,7 +23,7 @@ export class AlreadyReportedError extends Error {
     constructor();
 }
 
-// @beta
+// @public
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
     static getSignal(): [Promise<void>, () => void, (err: Error) => void];
@@ -224,7 +224,7 @@ export enum FolderConstants {
 // @public
 export type FolderItem = fs.Dirent;
 
-// @beta
+// @public
 export interface IAsyncParallelismOptions {
     concurrency?: number;
 }
@@ -556,7 +556,7 @@ export interface IReadLinesFromIterableOptions {
     ignoreEmptyLines?: boolean;
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export interface IRunWithRetriesOptions<TResult> {
     // (undocumented)
     action: () => Promise<TResult> | TResult;
@@ -679,7 +679,7 @@ export class MapExtensions {
     };
 }
 
-// @beta
+// @public
 export class MinimumHeap<T> {
     constructor(comparator: (a: T, b: T) => number);
     peek(): T | undefined;
