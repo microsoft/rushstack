@@ -181,10 +181,6 @@ export class FileSystem {
     static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
     static readFileToBuffer(filePath: string): Buffer;
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
-    // @deprecated (undocumented)
-    static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
-    // @deprecated (undocumented)
-    static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
@@ -653,8 +649,6 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
-    // @deprecated
-    static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
 }
 
 // @public
