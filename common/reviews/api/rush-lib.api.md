@@ -1247,6 +1247,7 @@ export class RushConstants {
     static readonly pnpmfileGlobalFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmPatchesCommonFolderName: string;
     static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectImpactGraphFilename: string;

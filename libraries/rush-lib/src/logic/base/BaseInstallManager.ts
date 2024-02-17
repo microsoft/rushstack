@@ -438,7 +438,7 @@ export abstract class BaseInstallManager {
       const commonTempPnpmPatchesFolder: string = `${subspace.getSubspaceTempFolder()}/${
         RushConstants.pnpmPatchesFolderName
       }`;
-      const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/pnpm-${RushConstants.pnpmPatchesFolderName}`;
+      const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
       if (FileSystem.exists(rushPnpmPatchesFolder)) {
         FileSystem.copyFiles({
           sourcePath: rushPnpmPatchesFolder,
