@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "(BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package.",
+      "comment": "(BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details.",
       "type": "major"
     }
   ],
