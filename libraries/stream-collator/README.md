@@ -52,6 +52,6 @@ all background streams which have been completed will be emitted.
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/stream-collator/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/stream-collator/)
+- [API Reference](https://api.rushstack.io/pages/stream-collator/)
 
 `@rushstack/stream-collator` is part of the [Rush Stack](https://rushstack.io/) family of projects.

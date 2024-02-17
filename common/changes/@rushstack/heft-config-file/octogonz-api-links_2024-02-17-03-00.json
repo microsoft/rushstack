@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix broken link to API documentation",
+      "type": "patch",
+      "packageName": "@rushstack/heft-config-file"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

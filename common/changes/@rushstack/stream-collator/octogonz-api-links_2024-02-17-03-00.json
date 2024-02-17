@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix broken link to API documentation",
+      "type": "patch",
+      "packageName": "@rushstack/stream-collator"
+    }
+  ],
+  "packageName": "@rushstack/stream-collator",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
