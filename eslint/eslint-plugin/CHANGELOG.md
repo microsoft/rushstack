@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 07 Feb 2024 01:11:18 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Feb 2024 06:24:34 GMT and should not be manually modified.
+
+## 0.15.1
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
 
 ## 0.15.0
 Wed, 07 Feb 2024 01:11:18 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.66.1",
+      "tag": "@rushstack/node-core-library_v3.66.1",
+      "date": "Sat, 17 Feb 2024 06:24:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.66.0",
       "tag": "@rushstack/node-core-library_v3.66.0",
       "date": "Thu, 08 Feb 2024 01:09:21 GMT",
