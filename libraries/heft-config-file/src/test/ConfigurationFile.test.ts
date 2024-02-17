@@ -2,15 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'path';
-import {
-  FileSystem,
-  JsonFile,
-  Path,
-  Text
-} from '@rushstack/node-core-library';
-import {
-StringBufferTerminalProvider,
-Terminal } from '@rushstack/terminal'
+import { FileSystem, JsonFile, Path, Text } from '@rushstack/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { ConfigurationFile, PathResolutionMethod, InheritanceType } from '../ConfigurationFile';
