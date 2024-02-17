@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { loader } from 'webpack';
-import { Terminal } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
 import type { LocalizationPlugin } from '../LocalizationPlugin';

@@ -7,7 +7,7 @@ import {
   AzureAuthorityHosts,
   type DeviceCodeCredentialOptions
 } from '@azure/identity';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { CredentialCache } from '@rushstack/rush-sdk';
 // Use a separate import line so the .d.ts file ends up with an `import type { ... }`
 // See https://github.com/microsoft/rushstack/issues/3432

@@ -8,7 +8,8 @@ import {
   PathResolutionMethod,
   type IJsonPathMetadataResolverOptions
 } from '@rushstack/heft-config-file';
-import { Import, PackageJsonLookup, type ITerminal, InternalError } from '@rushstack/node-core-library';
+import { Import, PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';

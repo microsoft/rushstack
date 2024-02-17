@@ -8,12 +8,8 @@ import type {
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
-import {
-  ConsoleTerminalProvider,
-  type ITerminal,
-  Terminal,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';

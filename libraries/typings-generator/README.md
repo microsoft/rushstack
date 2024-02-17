@@ -158,6 +158,6 @@ is set to `IExportStyles`. If not specified, the interface name will be `IExport
 
 - [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/libraries/typings-generator/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/typings-generator/)
+- [API Reference](https://api.rushstack.io/pages/typings-generator/)
 
 `@rushstack/typings-generator` is part of the [Rush Stack](https://rushstack.io/) family of projects.

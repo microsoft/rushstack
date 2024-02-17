@@ -2,17 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  StringBuilder,
-  Sort,
-  FileSystem,
-  Text,
-  Terminal,
-  ConsoleTerminalProvider,
-  AlreadyReportedError,
-  Colors,
-  type IColorableSequence
-} from '@rushstack/node-core-library';
+import { StringBuilder, Sort, FileSystem, Text, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
 import { RushConfiguration, type RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import * as Diff from 'diff';
@@ -163,16 +154,16 @@ export class ReadmeAction extends CommandLineAction {
         for (const change of diff) {
           const lines: string[] = change.value.trimEnd().split('\n');
           let linePrefix: string;
-          let colorizer: (text: string | IColorableSequence) => IColorableSequence;
+          let colorizer: (text: string) => string;
           if (change.added) {
             linePrefix = '+ ';
-            colorizer = Colors.green;
+            colorizer = Colorize.green;
           } else if (change.removed) {
             linePrefix = '- ';
-            colorizer = Colors.red;
+            colorizer = Colorize.red;
           } else {
             linePrefix = '  ';
-            colorizer = Colors.gray;
+            colorizer = Colorize.gray;
           }
 
           for (const line of lines) {
@@ -191,7 +182,7 @@ export class ReadmeAction extends CommandLineAction {
         terminal.writeLine(`Writing ${repoReadmePath}`);
         await FileSystem.writeFileAsync(repoReadmePath, readmeString);
         terminal.writeLine();
-        terminal.writeLine(Colors.green('\nSuccess.'));
+        terminal.writeLine(Colorize.green('\nSuccess.'));
       }
     } else {
       // eslint-disable-next-line no-console

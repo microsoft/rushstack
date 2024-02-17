@@ -4,11 +4,11 @@
 import {
   FileSystem,
   InternalError,
-  type ITerminal,
   JsonFile,
   type JsonObject,
   JsonSchema
 } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import * as path from 'path';
 
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';

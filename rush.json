@@ -1098,7 +1098,8 @@
       "packageName": "@rushstack/terminal",
       "projectFolder": "libraries/terminal",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/tree-pattern",

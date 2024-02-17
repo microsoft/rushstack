@@ -3,7 +3,8 @@
 
 import path from 'path';
 
-import { FileSystem, Terminal, StringBufferTerminalProvider } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
+import { Terminal, StringBufferTerminalProvider } from '@rushstack/terminal';
 import { PackageExtractor, type IExtractorProjectConfiguration } from '../PackageExtractor';
 
 // Do this work in the "temp/test.jest" directory since it gets cleaned on clean runs

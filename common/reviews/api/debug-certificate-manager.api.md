@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 // @public
 export class CertificateManager {

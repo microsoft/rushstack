@@ -224,6 +224,6 @@ Note that there are also async variants of the functions that access the filesys
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/rig-package/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/rig-package/)
+- [API Reference](https://api.rushstack.io/pages/rig-package/)
 
 `@rushstack/rig-package` is part of the [Rush Stack](https://rushstack.io/) family of projects.

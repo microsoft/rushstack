@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import {
-  Async,
-  FileSystem,
-  type IFileSystemCopyFileOptions,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { OperationStateFile } from './OperationStateFile';
 import { RushConstants } from '../RushConstants';

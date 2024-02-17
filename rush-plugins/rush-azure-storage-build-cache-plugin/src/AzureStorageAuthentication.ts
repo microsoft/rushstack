@@ -9,7 +9,7 @@ import {
   type SASQueryParameters,
   type ServiceGetUserDelegationKeyResponse
 } from '@azure/storage-blob';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import {
   AzureAuthenticationBase,
   type ICredentialResult,

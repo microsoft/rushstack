@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
 import type { CollatedTerminal } from '@rushstack/stream-collator';
-import { TerminalChunkKind } from '@rushstack/terminal';
+import { type ITerminalProvider, TerminalProviderSeverity, TerminalChunkKind } from '@rushstack/terminal';
 
 export interface ICollatedTerminalProviderOptions {
   debugEnabled: boolean;

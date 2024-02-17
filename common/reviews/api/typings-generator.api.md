@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/terminal';
 
 // @public (undocumented)
 export interface IStringValuesTypingsGeneratorBaseOptions {

@@ -5,7 +5,7 @@
 ```ts
 
 import type { HeftConfiguration } from '@rushstack/heft';
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
 import type * as TTypescript from 'typescript';
 

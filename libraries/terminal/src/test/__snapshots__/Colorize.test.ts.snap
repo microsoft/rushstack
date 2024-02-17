@@ -1,0 +1,199 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Colorize generates codes as expected: black 1`] = `"[30mx[39m"`;
+
+exports[`Colorize generates codes as expected: blackBackground 1`] = `"[40mx[49m"`;
+
+exports[`Colorize generates codes as expected: blink 1`] = `"[5mx[25m"`;
+
+exports[`Colorize generates codes as expected: blue 1`] = `"[34mx[39m"`;
+
+exports[`Colorize generates codes as expected: blueBackground 1`] = `"[44mx[49m"`;
+
+exports[`Colorize generates codes as expected: bold 1`] = `"[1mx[22m"`;
+
+exports[`Colorize generates codes as expected: cyan 1`] = `"[36mx[39m"`;
+
+exports[`Colorize generates codes as expected: cyanBackground 1`] = `"[46mx[49m"`;
+
+exports[`Colorize generates codes as expected: dim 1`] = `"[2mx[22m"`;
+
+exports[`Colorize generates codes as expected: gray 1`] = `"[90mx[39m"`;
+
+exports[`Colorize generates codes as expected: grayBackground 1`] = `"[100mx[49m"`;
+
+exports[`Colorize generates codes as expected: green 1`] = `"[32mx[39m"`;
+
+exports[`Colorize generates codes as expected: greenBackground 1`] = `"[42mx[49m"`;
+
+exports[`Colorize generates codes as expected: hidden 1`] = `"[8mx[28m"`;
+
+exports[`Colorize generates codes as expected: invertColor 1`] = `"[7mx[27m"`;
+
+exports[`Colorize generates codes as expected: magenta 1`] = `"[35mx[39m"`;
+
+exports[`Colorize generates codes as expected: magentaBackground 1`] = `"[45mx[49m"`;
+
+exports[`Colorize generates codes as expected: red 1`] = `"[31mx[39m"`;
+
+exports[`Colorize generates codes as expected: redBackground 1`] = `"[41mx[49m"`;
+
+exports[`Colorize generates codes as expected: underline 1`] = `"[4mx[24m"`;
+
+exports[`Colorize generates codes as expected: white 1`] = `"[37mx[39m"`;
+
+exports[`Colorize generates codes as expected: whiteBackground 1`] = `"[47mx[49m"`;
+
+exports[`Colorize generates codes as expected: yellow 1`] = `"[33mx[39m"`;
+
+exports[`Colorize generates codes as expected: yellowBackground 1`] = `"[43mx[49m"`;
+
+exports[`Colorize writes color grid correctly: line 0 1`] = `
+Array [
+  "X",
+  "[black]X[default]",
+  "[white]X[default]",
+  "[gray]X[default]",
+  "[magenta]X[default]",
+  "[red]X[default]",
+  "[yellow]X[default]",
+  "[green]X[default]",
+  "[cyan]X[default]",
+  "[blue]X[default]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 1 1`] = `
+Array [
+  "[black-bg]X[default-bg]",
+  "[black-bg][black]X[default][default-bg]",
+  "[black-bg][white]X[default][default-bg]",
+  "[black-bg][gray]X[default][default-bg]",
+  "[black-bg][magenta]X[default][default-bg]",
+  "[black-bg][red]X[default][default-bg]",
+  "[black-bg][yellow]X[default][default-bg]",
+  "[black-bg][green]X[default][default-bg]",
+  "[black-bg][cyan]X[default][default-bg]",
+  "[black-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 2 1`] = `
+Array [
+  "[white-bg]X[default-bg]",
+  "[white-bg][black]X[default][default-bg]",
+  "[white-bg][white]X[default][default-bg]",
+  "[white-bg][gray]X[default][default-bg]",
+  "[white-bg][magenta]X[default][default-bg]",
+  "[white-bg][red]X[default][default-bg]",
+  "[white-bg][yellow]X[default][default-bg]",
+  "[white-bg][green]X[default][default-bg]",
+  "[white-bg][cyan]X[default][default-bg]",
+  "[white-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 3 1`] = `
+Array [
+  "[gray-bg]X[default-bg]",
+  "[gray-bg][black]X[default][default-bg]",
+  "[gray-bg][white]X[default][default-bg]",
+  "[gray-bg][gray]X[default][default-bg]",
+  "[gray-bg][magenta]X[default][default-bg]",
+  "[gray-bg][red]X[default][default-bg]",
+  "[gray-bg][yellow]X[default][default-bg]",
+  "[gray-bg][green]X[default][default-bg]",
+  "[gray-bg][cyan]X[default][default-bg]",
+  "[gray-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 4 1`] = `
+Array [
+  "[magenta-bg]X[default-bg]",
+  "[magenta-bg][black]X[default][default-bg]",
+  "[magenta-bg][white]X[default][default-bg]",
+  "[magenta-bg][gray]X[default][default-bg]",
+  "[magenta-bg][magenta]X[default][default-bg]",
+  "[magenta-bg][red]X[default][default-bg]",
+  "[magenta-bg][yellow]X[default][default-bg]",
+  "[magenta-bg][green]X[default][default-bg]",
+  "[magenta-bg][cyan]X[default][default-bg]",
+  "[magenta-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 5 1`] = `
+Array [
+  "[red-bg]X[default-bg]",
+  "[red-bg][black]X[default][default-bg]",
+  "[red-bg][white]X[default][default-bg]",
+  "[red-bg][gray]X[default][default-bg]",
+  "[red-bg][magenta]X[default][default-bg]",
+  "[red-bg][red]X[default][default-bg]",
+  "[red-bg][yellow]X[default][default-bg]",
+  "[red-bg][green]X[default][default-bg]",
+  "[red-bg][cyan]X[default][default-bg]",
+  "[red-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 6 1`] = `
+Array [
+  "[yellow-bg]X[default-bg]",
+  "[yellow-bg][black]X[default][default-bg]",
+  "[yellow-bg][white]X[default][default-bg]",
+  "[yellow-bg][gray]X[default][default-bg]",
+  "[yellow-bg][magenta]X[default][default-bg]",
+  "[yellow-bg][red]X[default][default-bg]",
+  "[yellow-bg][yellow]X[default][default-bg]",
+  "[yellow-bg][green]X[default][default-bg]",
+  "[yellow-bg][cyan]X[default][default-bg]",
+  "[yellow-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 7 1`] = `
+Array [
+  "[green-bg]X[default-bg]",
+  "[green-bg][black]X[default][default-bg]",
+  "[green-bg][white]X[default][default-bg]",
+  "[green-bg][gray]X[default][default-bg]",
+  "[green-bg][magenta]X[default][default-bg]",
+  "[green-bg][red]X[default][default-bg]",
+  "[green-bg][yellow]X[default][default-bg]",
+  "[green-bg][green]X[default][default-bg]",
+  "[green-bg][cyan]X[default][default-bg]",
+  "[green-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 8 1`] = `
+Array [
+  "[cyan-bg]X[default-bg]",
+  "[cyan-bg][black]X[default][default-bg]",
+  "[cyan-bg][white]X[default][default-bg]",
+  "[cyan-bg][gray]X[default][default-bg]",
+  "[cyan-bg][magenta]X[default][default-bg]",
+  "[cyan-bg][red]X[default][default-bg]",
+  "[cyan-bg][yellow]X[default][default-bg]",
+  "[cyan-bg][green]X[default][default-bg]",
+  "[cyan-bg][cyan]X[default][default-bg]",
+  "[cyan-bg][blue]X[default][default-bg]",
+]
+`;
+
+exports[`Colorize writes color grid correctly: line 9 1`] = `
+Array [
+  "[blue-bg]X[default-bg]",
+  "[blue-bg][black]X[default][default-bg]",
+  "[blue-bg][white]X[default][default-bg]",
+  "[blue-bg][gray]X[default][default-bg]",
+  "[blue-bg][magenta]X[default][default-bg]",
+  "[blue-bg][red]X[default][default-bg]",
+  "[blue-bg][yellow]X[default][default-bg]",
+  "[blue-bg][green]X[default][default-bg]",
+  "[blue-bg][cyan]X[default][default-bg]",
+  "[blue-bg][blue]X[default][default-bg]",
+]
+`;

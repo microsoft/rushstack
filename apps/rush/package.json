@@ -39,7 +39,8 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "colors": "~1.2.1",
-    "semver": "~7.5.4"
+    "semver": "~7.5.4",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

@@ -7,7 +7,8 @@ import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
 import { trueCasePathSync } from 'true-case-path';
-import { Executable, AlreadyReportedError, Path, type ITerminal } from '@rushstack/node-core-library';
+import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';

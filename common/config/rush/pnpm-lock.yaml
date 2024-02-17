@@ -128,6 +128,9 @@ importers:
       '@rushstack/rig-package':
         specifier: workspace:*
         version: link:../../libraries/rig-package
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -297,6 +300,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       colors:
         specifier: ~1.2.1
         version: 1.2.5
@@ -1913,6 +1919,9 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
 
   ../../build-tests/localization-plugin-test-01:
     dependencies:
@@ -2069,6 +2078,10 @@ importers:
         version: link:../../libraries/node-core-library
 
   ../../build-tests/rush-amazon-s3-build-cache-plugin-integration-test:
+    dependencies:
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -2122,9 +2135,9 @@ importers:
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../../libraries/rush-lib
-      '@rushstack/node-core-library':
+      '@rushstack/terminal':
         specifier: workspace:*
-        version: link:../../libraries/node-core-library
+        version: link:../../libraries/terminal
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -2150,6 +2163,9 @@ importers:
       '@rushstack/rush-redis-cobuild-plugin':
         specifier: workspace:*
         version: link:../../rush-plugins/rush-redis-cobuild-plugin
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/http-proxy':
         specifier: ~1.17.8
         version: 1.17.11
@@ -2483,6 +2499,9 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.4.0
         version: 2.4.0(@rushstack/heft@..+apps+heft)(@types/node@18.17.15)(jest-environment-jsdom@29.5.0)
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -2560,6 +2579,9 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.4.0
         version: 2.4.0(@rushstack/heft@..+apps+heft)(@types/node@18.17.15)(jest-environment-jsdom@29.5.0)
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -2606,6 +2628,9 @@ importers:
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../heft-typescript-plugin
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/eslint':
         specifier: 8.2.0
         version: 8.2.0
@@ -2689,6 +2714,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -2727,6 +2755,9 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.4.0
         version: 2.4.0(@rushstack/heft@..+apps+heft)(@types/node@18.17.15)(jest-environment-jsdom@29.5.0)
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
@@ -2764,6 +2795,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/watchpack':
         specifier: 2.4.0
         version: 2.4.0
@@ -2801,6 +2835,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/watchpack':
         specifier: 2.4.0
         version: 2.4.0
@@ -2844,6 +2881,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       node-forge:
         specifier: ~1.3.1
         version: 1.3.1
@@ -2869,6 +2909,9 @@ importers:
       '@rushstack/rig-package':
         specifier: workspace:*
         version: link:../rig-package
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       jsonpath-plus:
         specifier: ~4.0.0
         version: 4.0.0
@@ -2903,6 +2946,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       '@rushstack/typings-generator':
         specifier: workspace:*
         version: link:../typings-generator
@@ -3005,6 +3051,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
     devDependencies:
       '@rushstack/heft':
         specifier: 0.64.0
@@ -3403,14 +3452,23 @@ importers:
         version: link:../node-core-library
     devDependencies:
       '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
+        specifier: 0.64.0
+        version: 0.64.0(@types/node@18.17.15)
+      '@rushstack/heft-node-rig':
+        specifier: 2.4.0
+        version: 2.4.0(@rushstack/heft@0.64.0)(@types/node@18.17.15)
+      '@types/heft-jest':
+        specifier: 1.0.1
+        version: 1.0.1
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
       colors:
         specifier: ~1.2.1
         version: 1.2.5
-      local-node-rig:
+      local-eslint-config:
         specifier: workspace:*
-        version: link:../../rigs/local-node-rig
+        version: link:../../eslint/local-eslint-config
 
   ../../libraries/tree-pattern:
     devDependencies:
@@ -3472,6 +3530,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       chokidar:
         specifier: ~3.4.0
         version: 3.4.3
@@ -3543,6 +3604,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -3756,6 +3820,9 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       https-proxy-agent:
         specifier: ~5.0.0
         version: 5.0.1
@@ -3825,6 +3892,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/node-fetch':
         specifier: 2.6.2
         version: 2.6.2
@@ -3840,6 +3910,9 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: link:../../libraries/rush-sdk
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -3866,6 +3939,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
@@ -3909,6 +3985,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/compression':
         specifier: ~1.7.2
         version: 1.7.2(@types/express@4.17.13)
@@ -4003,6 +4082,9 @@ importers:
       '@rushstack/rush-vscode-command-webview':
         specifier: workspace:*
         version: link:../rush-vscode-command-webview
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
@@ -4212,6 +4294,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
@@ -4313,6 +4398,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*

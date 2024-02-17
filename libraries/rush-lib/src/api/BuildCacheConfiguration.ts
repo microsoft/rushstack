@@ -7,9 +7,9 @@ import {
   JsonSchema,
   FileSystem,
   type JsonObject,
-  AlreadyReportedError,
-  type ITerminal
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';

@@ -104,6 +104,12 @@ export class RushConstants {
   public static readonly pnpmPatchesFolderName: string = 'patches';
 
   /**
+   * The folder name under `/common/temp` used to store checked-in patches.
+   * Example: `C:\MyRepo\common\pnpm-patches`
+   */
+  public static readonly pnpmPatchesCommonFolderName: string = `pnpm-${RushConstants.pnpmPatchesFolderName}`;
+
+  /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
    */
   public static readonly yarnShrinkwrapFilename: string = 'yarn.lock';

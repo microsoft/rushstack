@@ -7,6 +7,6 @@ A library for loading config files for use with the [Heft](https://rushstack.io/
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/heft-config-file/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/heft-config-file/)
+- [API Reference](https://api.rushstack.io/pages/heft-config-file/)
 
 Heft is part of the [Rush Stack](https://rushstack.io/) family of projects.

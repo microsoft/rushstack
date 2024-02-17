@@ -2,14 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  Terminal,
-  type ITerminalProvider,
-  type IPackageJson,
-  PackageJsonLookup,
-  InternalError,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { type IPackageJson, PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
+import { Terminal, type ITerminalProvider, type ITerminal } from '@rushstack/terminal';
 import { trueCasePathSync } from 'true-case-path';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 

@@ -6,7 +6,8 @@ import * as os from 'os';
 import * as readline from 'readline';
 import { once } from 'events';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
-import { Colors, Path, type ITerminal, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import { Path, type FileSystemStats, FileSystem } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { Git } from './Git';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
@@ -317,8 +318,8 @@ export class ProjectWatcher {
     }
 
     this._terminal.write(
-      Colors.bold(
-        Colors.cyan(
+      Colorize.bold(
+        Colorize.cyan(
           `[${this.isPaused ? 'PAUSED' : 'WATCHING'}] Watch Status: ${status} ${
             this.isPaused ? 'Press <w> to resume. Press <b> to build once.' : 'Press <w> to pause.'
           }`

@@ -11,14 +11,12 @@ import {
   type IParsedPackageNameOrError,
   PackageName,
   SubprocessTerminator,
-  TerminalWritable,
-  type ITerminal,
-  TerminalProviderSeverity,
   FileConstants,
   type IPackageJson,
   InternalError,
   JsonFile
 } from '@rushstack/node-core-library';
+import { TerminalStreamWritable, type ITerminal, TerminalProviderSeverity } from '@rushstack/terminal';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -450,7 +448,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       // We will output stderr to the normal stdout stream since all output is piped through
       // stdout. We have to rely on the exit code to determine if there was an error.
       const terminal: ITerminal = this._logger.terminal;
-      const terminalOutStream: TerminalWritable = new TerminalWritable({
+      const terminalOutStream: TerminalStreamWritable = new TerminalStreamWritable({
         terminal,
         severity: TerminalProviderSeverity.log
       });

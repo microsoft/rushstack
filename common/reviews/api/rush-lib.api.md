@@ -14,13 +14,13 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/node-core-library';
-import { ITerminalProvider } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/terminal';
+import type { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
-import { Terminal } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -1248,6 +1248,7 @@ export class RushConstants {
     static readonly pnpmfileGlobalFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmPatchesCommonFolderName: string;
     static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
     static readonly projectImpactGraphFilename: string;

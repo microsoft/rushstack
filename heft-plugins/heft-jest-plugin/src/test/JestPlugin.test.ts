@@ -5,7 +5,8 @@ import * as path from 'path';
 import type { Config } from '@jest/types';
 import type { IHeftTaskSession, HeftConfiguration, CommandLineParameter } from '@rushstack/heft';
 import type { ConfigurationFile } from '@rushstack/heft-config-file';
-import { Import, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { Import, JsonFile } from '@rushstack/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { default as JestPlugin, type IHeftJestConfiguration } from '../JestPlugin';
 

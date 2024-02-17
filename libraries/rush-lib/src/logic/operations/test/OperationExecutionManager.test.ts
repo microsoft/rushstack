@@ -6,7 +6,7 @@ jest.mock('../../../utilities/Utilities');
 
 import colors from 'colors/safe';
 
-import { Terminal } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 

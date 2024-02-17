@@ -11,7 +11,8 @@ import {
   getRepoStateAsync,
   type IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, FileSystem, type ITerminal, Async } from '@rushstack/node-core-library';
+import { Path, FileSystem, Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';

@@ -1,6 +1,11 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Feb 2024 06:24:34 GMT and should not be manually modified.
+
+## 0.9.1
+Sat, 17 Feb 2024 06:24:34 GMT
+
+_Version update only_
 
 ## 0.9.0
 Tue, 16 Jan 2024 18:30:10 GMT

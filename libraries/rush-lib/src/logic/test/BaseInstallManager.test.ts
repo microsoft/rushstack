@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { PurgeManager } from '../PurgeManager';
 import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';

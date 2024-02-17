@@ -3,12 +3,8 @@
 
 import * as path from 'path';
 
-import {
-  InternalError,
-  type IPackageJson,
-  type ITerminalProvider,
-  PackageJsonLookup
-} from '@rushstack/node-core-library';
+import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import type { ITerminalProvider } from '@rushstack/terminal';
 
 import '../utilities/SetRushLibPath';
 
