@@ -211,17 +211,17 @@ export interface ITerminalWritableOptions {
     preventAutoclose?: boolean;
 }
 
+// @beta (undocumented)
+export interface ITerminalWriteOptions {
+    doNotOverrideSgrCodes?: boolean;
+}
+
 // @public
 export interface ITextRewriterTransformOptions extends ITerminalTransformOptions {
     ensureNewlineAtEnd?: boolean;
     normalizeNewlines?: NewlineKind;
     removeColors?: boolean;
     textRewriters?: TextRewriter[];
-}
-
-// @beta (undocumented)
-export interface IWriteOptions {
-    doNotOverrideSgrCodes?: boolean;
 }
 
 // @beta
@@ -430,6 +430,6 @@ export class TextRewriterTransform extends TerminalTransform {
 }
 
 // @beta (undocumented)
-export type WriteParameters = string[] | [...string[], IWriteOptions];
+export type WriteParameters = string[] | [...string[], ITerminalWriteOptions];
 
 ```

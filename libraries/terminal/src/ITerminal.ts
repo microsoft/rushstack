@@ -6,7 +6,7 @@ import type { ITerminalProvider } from './ITerminalProvider';
 /**
  * @beta
  */
-export interface IWriteOptions {
+export interface ITerminalWriteOptions {
   /**
    * If set to true, SGR parameters will not be replaced by the terminal
    * standard (i.e. - red for errors, yellow for warnings).
@@ -17,7 +17,7 @@ export interface IWriteOptions {
 /**
  * @beta
  */
-export type WriteParameters = string[] | [...string[], IWriteOptions];
+export type WriteParameters = string[] | [...string[], ITerminalWriteOptions];
 
 /**
  * @beta

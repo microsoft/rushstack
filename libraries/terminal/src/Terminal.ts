@@ -3,7 +3,7 @@
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { Colorize, SgrParameterAttribute } from './Colorize';
-import type { ITerminal, IWriteOptions, WriteParameters } from './ITerminal';
+import type { ITerminal, ITerminalWriteOptions, WriteParameters } from './ITerminal';
 import { AnsiEscape } from './AnsiEscape';
 
 /**
@@ -418,12 +418,12 @@ export class Terminal implements ITerminal {
 
   private _normalizeWriteParameters(parameters: WriteParameters): {
     parts: string[];
-    options: IWriteOptions;
+    options: ITerminalWriteOptions;
   } {
     if (parameters.length === 0) {
       return { parts: [], options: {} };
     } else {
-      const lastParameter: string | IWriteOptions = parameters[parameters.length - 1];
+      const lastParameter: string | ITerminalWriteOptions = parameters[parameters.length - 1];
       if (typeof lastParameter === 'string') {
         return { parts: parameters as string[], options: {} };
       } else {
