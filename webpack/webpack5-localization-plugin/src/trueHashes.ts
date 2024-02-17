@@ -5,6 +5,7 @@ import type { default as webpack, Compilation, Chunk, Asset, sources, util } fro
 import { Text } from '@rushstack/node-core-library';
 
 import type { ILocalizedWebpackChunk } from './webpackInterfaces';
+import { chunkIsJs } from './utilities/chunkUtilities';
 
 interface IHashReplacement {
   existingHash: string;
@@ -53,6 +54,17 @@ export function updateAssetHashes({
   const unprocessedDependenciesByChunk: Map<Chunk, Set<Chunk>> = new Map();
   const dependenciesByChunk: Map<Chunk, Set<Chunk>> = new Map();
   const dependentsByChunk: Map<Chunk, Set<Chunk>> = new Map();
+  const unprocessedChunks: Set<Chunk> = new Set();
+  const nonJsChunks: Set<Chunk> = new Set();
+
+  for (const chunk of compilation.chunks) {
+    if (!chunkIsJs(chunk, compilation.chunkGraph)) {
+      nonJsChunks.add(chunk);
+    } else {
+      unprocessedChunks.add(chunk);
+    }
+  }
+
   for (const chunk of compilation.chunks) {
     let unprocessedDependencies: Set<Chunk> | undefined = unprocessedDependenciesByChunk.get(chunk);
     if (!unprocessedDependencies) {
@@ -68,22 +80,32 @@ export function updateAssetHashes({
 
     if (chunk.hasRuntime()) {
       for (const asyncChunk of chunk.getAllAsyncChunks()) {
-        unprocessedDependencies.add(asyncChunk);
-        dependencies.add(asyncChunk);
+        if (!nonJsChunks.has(asyncChunk)) {
+          unprocessedDependencies.add(asyncChunk);
+          dependencies.add(asyncChunk);
 
-        let dependents: Set<Chunk> | undefined = dependentsByChunk.get(asyncChunk);
-        if (!dependents) {
-          dependents = new Set();
-          dependentsByChunk.set(asyncChunk, dependents);
+          let dependents: Set<Chunk> | undefined = dependentsByChunk.get(asyncChunk);
+          if (!dependents) {
+            dependents = new Set();
+            dependentsByChunk.set(asyncChunk, dependents);
+          }
+
+          dependents.add(chunk);
+
+          if (!unprocessedChunks.has(asyncChunk)) {
+            compilation.errors.push(
+              new thisWebpack.WebpackError(
+                `Found an async chunk that was not included in the compilation: ${asyncChunk.id} ` +
+                  `(reason: ${asyncChunk.chunkReason}).`
+              )
+            );
+          }
         }
-
-        dependents.add(chunk);
       }
     }
   }
 
   const hashReplacementsByChunk: Map<Chunk, IHashReplacement> = new Map();
-  const unprocessedChunks: Set<Chunk> = new Set(compilation.chunks);
   let previousSize: number = -1;
   while (unprocessedChunks.size > 0) {
     const currentSize: number = unprocessedChunks.size;
