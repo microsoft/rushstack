@@ -33,6 +33,6 @@ demonstrated.  If in doubt, create your own NPM package.
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/node-core-library/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/node-core-library/)
+- [API Reference](https://api.rushstack.io/pages/node-core-library/)
 
 `@rushstack/node-core-library` is part of the [Rush Stack](https://rushstack.io/) family of projects.

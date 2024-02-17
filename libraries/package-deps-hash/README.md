@@ -34,6 +34,6 @@ if (_.isEqual(deps, existingDeps)) {
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/package-deps-hash/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/package-deps-hash/)
+- [API Reference](https://api.rushstack.io/pages/package-deps-hash/)
 
 `@rushstack/package-deps-hash` is part of the [Rush Stack](https://rushstack.io/) family of projects.

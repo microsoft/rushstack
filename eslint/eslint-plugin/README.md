@@ -81,7 +81,7 @@ If you are designing a new JSON file format, it's a good idea to avoid `null` en
 there are better representations that convey more information about an item that is unknown, omitted,
 or disabled.  If you do need to declare types for JSON structures containing `null`, rather than
 suppressing the lint rule, you can use a specialized
-[JsonNull](https://rushstack.io/pages/api/node-core-library.jsonnull/)
+[JsonNull](https://api.rushstack.io/pages/node-core-library.jsonnull/)
 type as provided by [@rushstack/node-core-library](https://www.npmjs.com/package/@rushstack/node-core-library).
 
 

@@ -240,7 +240,7 @@ You can also mix the two models.  For example, we could augment the `WidgetComma
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/ts-command-line/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/ts-command-line/)
+- [API Reference](https://api.rushstack.io/pages/ts-command-line/)
 
 Here are some real world GitHub projects that illustrate different use cases for **ts-command-line**:
 
