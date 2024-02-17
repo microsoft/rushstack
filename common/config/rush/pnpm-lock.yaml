@@ -1780,10 +1780,10 @@ importers:
         version: link:../../heft-plugins/heft-typescript-plugin
       '@types/jest':
         specifier: ts4.9
-        version: 29.5.11
+        version: 29.5.12
       '@types/node':
         specifier: ts4.9
-        version: 20.11.14
+        version: 20.11.19
       eslint:
         specifier: ~8.7.0
         version: 8.7.0
@@ -3256,6 +3256,9 @@ importers:
       npm-package-arg:
         specifier: ~6.1.0
         version: 6.1.1
+      pnpm-sync-lib:
+        specifier: 0.1.3
+        version: 0.1.3
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -11513,8 +11516,8 @@ packages:
       expect: 29.6.2
       pretty-format: 29.6.2
 
-  /@types/jest@29.5.11:
-    resolution: {integrity: sha512-S2mHmYIVe13vrm6q4kN6fLYYAka15ALQki/vgDC3mIukEOx8WJlv0kQPM+d4w8Gp6u0uSdKND04IlTXBv0rwnQ==}
+  /@types/jest@29.5.12:
+    resolution: {integrity: sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==}
     dependencies:
       expect: 29.6.2
       pretty-format: 29.6.2
@@ -11626,8 +11629,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.11.14:
-    resolution: {integrity: sha512-w3yWCcwULefjP9DmDDsgUskrMoOy5Z8MiwKHr1FvqGPtx7CvJzQvxD7eKpxNtklQxLruxSXWddyeRtyud0RcXQ==}
+  /@types/node@20.11.19:
+    resolution: {integrity: sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -21528,6 +21531,10 @@ packages:
     transitivePeerDependencies:
       - typescript
     dev: true
+
+  /pnpm-sync-lib@0.1.3:
+    resolution: {integrity: sha512-bNGuQmEnlIUSxrdtHTZHFt9JKEBqN39nU1QgTdMWjBeXIxCV7M99ylOoE4uH7KutHHacKlW7PD4+2ktApPUzog==}
+    dev: false
 
   /polished@4.2.2:
     resolution: {integrity: sha512-Sz2Lkdxz6F2Pgnpi9U5Ng/WdWAUZxmHrNPoVlm3aAemxoy2Qy7LGjQg4uf8qKelDAUW94F4np3iH2YPf2qefcQ==}

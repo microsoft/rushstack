@@ -380,6 +380,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
       }
 
+      const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+      if (
+        this.rushConfiguration?.packageManager === 'pnpm' &&
+        experiments?.usePnpmSyncForInjectedDependencies
+      ) {
+        const { PnpmSyncCopyOperationPlugin } = await import(
+          '../../logic/operations/PnpmSyncCopyOperationPlugin'
+        );
+        new PnpmSyncCopyOperationPlugin().apply(this.hooks);
+      }
+
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
         ._runsBeforeInstall
         ? new Map()

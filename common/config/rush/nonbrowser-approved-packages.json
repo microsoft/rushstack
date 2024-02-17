@@ -715,6 +715,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "pnpm-sync-lib",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "postcss",
       "allowedCategories": [ "libraries", "tests" ]
     },

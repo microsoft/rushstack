@@ -33,8 +33,9 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
-import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
+import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 
 /**
@@ -112,9 +113,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
 
       if (orphanedProjects.length > 0) {
-        for (const orhpanedProject of orphanedProjects) {
+        for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
-            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
               'which was not found in rush.json'
           );
         }
@@ -350,7 +351,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   /**
-   * Runs "npm install" in the common folder.
+   * Runs "pnpm install" in the common folder.
    */
   protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
@@ -498,6 +499,32 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       });
     } else {
       await doInstallInternalAsync(this.options);
+    }
+
+    // if usePnpmSyncForInjectedDependencies is true
+    // the pnpm-sync will generate the pnpm-sync.json based on lockfile
+    if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
+      const pnpmLockfilePath: string = this.rushConfiguration.tempShrinkwrapFilename;
+      const pnpmStorePath: string = `${this.rushConfiguration.commonTempFolder}/node_modules/.pnpm`;
+      await pnpmSyncPrepareAsync({
+        lockfilePath: pnpmLockfilePath,
+        storePath: pnpmStorePath,
+        readPnpmLockfile: async (lockfilePath: string) => {
+          const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
+            lockfilePath,
+            { withCaching: true }
+          );
+
+          if (!wantedPnpmLockfile) {
+            return undefined;
+          } else {
+            const result: ILockfile = {
+              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries())
+            };
+            return result;
+          }
+        }
+      });
     }
 
     // If all attempts fail we just terminate. No special handling needed.

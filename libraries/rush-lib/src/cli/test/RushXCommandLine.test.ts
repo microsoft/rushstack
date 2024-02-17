@@ -94,7 +94,7 @@ describe(RushXCommandLine.name, () => {
     jest.restoreAllMocks();
   });
 
-  describe(RushXCommandLine.launchRushX.name, () => {
+  describe(RushXCommandLine.launchRushXAsync.name, () => {
     it('prints usage info', () => {
       process.argv = ['node', 'startx.js', '--help'];
       executeLifecycleCommandMock!.mockReturnValue(0);

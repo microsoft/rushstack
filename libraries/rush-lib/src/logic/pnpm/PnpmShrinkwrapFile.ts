@@ -133,6 +133,10 @@ export interface IPnpmShrinkwrapYaml {
   overrides?: { [dependency: string]: string };
 }
 
+export interface ILoadFromFileOptions {
+  withCaching?: boolean;
+}
+
 /**
  * Given an encoded "dependency key" from the PNPM shrinkwrap file, this parses it into an equivalent
  * DependencySpecifier.
@@ -243,6 +247,9 @@ export function normalizePnpmVersionSpecifier(versionSpecifier: IPnpmVersionSpec
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
+  // TODO: Implement cache eviction when a lockfile is copied back
+  private static _cacheByLockfilePath: Map<string, PnpmShrinkwrapFile | undefined> = new Map();
+
   public readonly shrinkwrapFileMajorVersion: number;
   public readonly isWorkspaceCompatible: boolean;
   public readonly registry: string;
@@ -286,16 +293,30 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this._integrities = new Map();
   }
 
-  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
-    try {
-      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
-    } catch (error) {
-      if (FileSystem.isNotExistError(error as Error)) {
-        return undefined; // file does not exist
-      }
-      throw new Error(`Error reading "${shrinkwrapYamlFilename}":\n  ${(error as Error).message}`);
+  public static loadFromFile(
+    shrinkwrapYamlFilePath: string,
+    { withCaching }: ILoadFromFileOptions = {}
+  ): PnpmShrinkwrapFile | undefined {
+    let loaded: PnpmShrinkwrapFile | undefined;
+    if (withCaching) {
+      loaded = PnpmShrinkwrapFile._cacheByLockfilePath.get(shrinkwrapYamlFilePath);
     }
+
+    // TODO: Promisify this
+    loaded ??= (() => {
+      try {
+        const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
+        return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+      } catch (error) {
+        if (FileSystem.isNotExistError(error as Error)) {
+          return undefined; // file does not exist
+        }
+        throw new Error(`Error reading "${shrinkwrapYamlFilePath}":\n  ${(error as Error).message}`);
+      }
+    })();
+
+    PnpmShrinkwrapFile._cacheByLockfilePath.set(shrinkwrapYamlFilePath, loaded);
+    return loaded;
   }
 
   public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
@@ -715,7 +736,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         RushConstants.pnpmfileGlobalFilename
       );
 
-      if (FileSystem.exists(subspacePnpmfilePath)) {
+      if (await FileSystem.existsAsync(subspacePnpmfilePath)) {
         try {
           subspacePnpmfile = require(subspacePnpmfilePath);
         } catch (err) {

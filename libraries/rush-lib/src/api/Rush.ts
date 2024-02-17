@@ -105,7 +105,8 @@ export class Rush {
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
     Rush._assignRushInvokedFolder();
-    RushXCommandLine.launchRushX(launcherVersion, options);
+    // eslint-disable-next-line no-console
+    RushXCommandLine.launchRushXAsync(launcherVersion, options).catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
   /**
