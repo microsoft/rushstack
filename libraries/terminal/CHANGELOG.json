@@ -2,6 +2,23 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/terminal_v0.8.0",
+      "date": "Mon, 19 Feb 2024 21:54:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a Terminal, Colors, AsciEscape, and some related APIs. These APIs were previously in the @rushstack/node-core-library package. See https://github.com/microsoft/rushstack/pull/3176 for details."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.24",
       "tag": "@rushstack/terminal_v0.7.24",
       "date": "Sat, 17 Feb 2024 06:24:35 GMT",

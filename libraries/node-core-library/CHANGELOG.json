@@ -2,6 +2,26 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@rushstack/node-core-library_v4.0.0",
+      "date": "Mon, 19 Feb 2024 21:54:27 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details."
+          },
+          {
+            "comment": "Remove deprecated `FileSystem.readFolder`, `FileSystem.readFolderAsync`, and `LegacyAdapters.sortStable` APIs."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Graduate `Async` and `MinimumHeap` APIs from beta to public."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.66.1",
       "tag": "@rushstack/node-core-library_v3.66.1",
       "date": "Sat, 17 Feb 2024 06:24:35 GMT",

@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.40.3",
+      "tag": "@microsoft/api-extractor_v7.40.3",
+      "date": "Mon, 19 Feb 2024 21:54:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.40.2",
       "tag": "@microsoft/api-extractor_v7.40.2",
       "date": "Sat, 17 Feb 2024 06:24:34 GMT",

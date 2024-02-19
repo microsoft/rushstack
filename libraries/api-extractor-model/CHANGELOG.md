@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Sat, 17 Feb 2024 06:24:34 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Feb 2024 21:54:26 GMT and should not be manually modified.
+
+## 7.28.11
+Mon, 19 Feb 2024 21:54:26 GMT
+
+### Patches
+
+- Fix a formatting issue with the LICENSE.
 
 ## 7.28.10
 Sat, 17 Feb 2024 06:24:34 GMT

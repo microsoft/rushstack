@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 17 Feb 2024 06:24:35 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Feb 2024 21:54:27 GMT and should not be manually modified.
+
+## 4.0.0
+Mon, 19 Feb 2024 21:54:27 GMT
+
+### Breaking changes
+
+- (BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details.
+- Remove deprecated `FileSystem.readFolder`, `FileSystem.readFolderAsync`, and `LegacyAdapters.sortStable` APIs.
+
+### Minor changes
+
+- Graduate `Async` and `MinimumHeap` APIs from beta to public.
 
 ## 3.66.1
 Sat, 17 Feb 2024 06:24:35 GMT
