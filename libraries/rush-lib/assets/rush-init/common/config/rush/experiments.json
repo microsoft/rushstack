@@ -82,8 +82,8 @@
    * Enable this experiment if you want "rush" and "rushx" commands to resync injected dependencies
    * by invoking "pnpm-sync" during the build.
    */
-  /*[LINE "HYPOTHETICAL"]*/ "usePnpmSyncForInjectedDependencies": false,
-  
+  /*[LINE "HYPOTHETICAL"]*/ "usePnpmSyncForInjectedDependencies": true,
+
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
