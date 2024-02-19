@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-suppress-browserslist-warning-plugin",
-      "comment": "Inital project creation.",
+      "comment": "Initial project creation.",
       "type": "minor"
     }
   ],

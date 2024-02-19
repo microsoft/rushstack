@@ -1561,9 +1561,6 @@ importers:
 
   ../../build-tests/heft-sass-test:
     dependencies:
-      '@rushstack/heft-suppress-browserslist-warning-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-suppress-browserslist-warning-plugin
       buttono:
         specifier: ~1.0.2
         version: 1.0.4
@@ -1580,6 +1577,9 @@ importers:
       '@rushstack/heft-sass-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-sass-plugin
+      '@rushstack/heft-suppress-browserslist-warning-plugin':
+        specifier: workspace:*
+        version: link:../../heft-plugins/heft-suppress-browserslist-warning-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
