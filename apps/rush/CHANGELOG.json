@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.114.0",
+      "tag": "@microsoft/rush_v5.114.0",
+      "date": "Mon, 19 Feb 2024 21:54:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Add `enablePnpmSyncForInjectedDependenciesMeta` to experiments.json; it is part of an upcoming feature for managing PNPM \"injected\" dependencies: https://www.npmjs.com/package/pnpm-sync"
+          },
+          {
+            "comment": "Include a `pnpmPatchesCommonFolderName` constant for the folder name \"pnpm-patches\" that gets placed under \"common\"."
+          },
+          {
+            "comment": "Add a feature to generate a `project-impact-graph.yaml` file in the repo root. This feature is gated under the new `generateProjectImpactGraphDuringRushUpdate` experiment."
+          },
+          {
+            "comment": "Fix a formatting issue with the LICENSE."
+          },
+          {
+            "comment": "Fix an issue with filtered installs when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.113.4",
       "tag": "@microsoft/rush_v5.113.4",
       "date": "Wed, 31 Jan 2024 22:49:17 GMT",
