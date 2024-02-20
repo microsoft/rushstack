@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@microsoft/rush-lib": "*",
-    "colors": "^1.4.0"
+    "@rushstack/terminal": "*"
   },
   "devDependencies": {
     "@types/node": "18.17.15",
