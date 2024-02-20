@@ -2,6 +2,30 @@
   "name": "@rushstack/heft-serverless-stack-plugin",
   "entries": [
     {
+      "version": "0.3.27",
+      "tag": "@rushstack/heft-serverless-stack-plugin_v0.3.27",
+      "date": "Tue, 20 Feb 2024 21:45:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.10.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.65.0` to `^0.65.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.26",
       "tag": "@rushstack/heft-serverless-stack-plugin_v0.3.26",
       "date": "Tue, 20 Feb 2024 16:10:52 GMT",
