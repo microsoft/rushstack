@@ -87,7 +87,7 @@
       "additionalProperties": false
     },
     "pnpmOptions": {
-      "description": "Options that are only used when the PNPM pacakge manager is selected.",
+      "description": "Options that are only used when the PNPM package manager is selected.",
       "type": "object",
       "properties": {
         "pnpmStore": {
@@ -119,7 +119,7 @@
       "additionalProperties": false
     },
     "yarnOptions": {
-      "description": "Options that are only used when the Yarn pacakge manager is selected.",
+      "description": "Options that are only used when the Yarn package manager is selected.",
       "type": "object",
       "properties": {
         "ignoreEngines": {
@@ -213,6 +213,10 @@
         },
         "required": ["variantName", "description"]
       }
+    },
+    "rushPublishTakesPrecedence": {
+      "description": "Indicates whether `versionPolicyName` should be ignored when `shouldPublish` is set to `false` in package config when publishing packages.",
+      "type": "boolean"
     },
     "repository": {
       "description": "The repository location",

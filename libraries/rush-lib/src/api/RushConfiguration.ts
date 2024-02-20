@@ -181,6 +181,7 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
+  shouldPublishTakesPrecedence?: boolean;
 }
 
 /**
@@ -568,6 +569,14 @@ export class RushConfiguration {
   public readonly experimentsConfiguration: ExperimentsConfiguration;
 
   /**
+   * Indicates whether `versionPolicyName` should be ignored when
+   * `shouldPublish` is set to `false`.
+   *
+   * @beta
+   */
+  public readonly shouldPublishTakesPrecedence: boolean;
+
+  /**
    * @internal
    */
   public readonly _rushPluginsConfiguration: RushPluginsConfiguration;
@@ -847,6 +856,8 @@ export class RushConfiguration {
         this._variants.add(variantName);
       }
     }
+
+    this.shouldPublishTakesPrecedence = !!rushConfigurationJson.shouldPublishTakesPrecedence;
 
     this._pathTrees = new Map();
   }

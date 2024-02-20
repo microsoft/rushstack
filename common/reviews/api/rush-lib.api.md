@@ -1144,6 +1144,8 @@ export class RushConfiguration {
     //
     // @internal (undocumented)
     readonly _rushPluginsConfiguration: RushPluginsConfiguration;
+    // @beta
+    readonly shouldPublishTakesPrecedence: boolean;
     readonly shrinkwrapFilename: string;
     get shrinkwrapFilePhrase(): string;
     // @beta

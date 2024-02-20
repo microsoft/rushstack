@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "adds shouldPublishTakesPrecedence to rush.json config",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
