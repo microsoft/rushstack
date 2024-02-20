@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
-import type { IHeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
-import type { IHeftLifecyclePlugin } from '../pluginFramework/IHeftPlugin';
+import type { IHeftTaskSession } from '../pluginFramework/HeftTaskSession';
+import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 
 export const PLUGIN_NAME: string = 'set-environment-variables-plugin';
 
@@ -12,21 +12,21 @@ export interface ISetEnvironmentVariablesPluginOptions {
 }
 
 export default class SetEnvironmentVariablesPlugin
-  implements IHeftLifecyclePlugin<ISetEnvironmentVariablesPluginOptions>
+  implements IHeftTaskPlugin<ISetEnvironmentVariablesPluginOptions>
 {
   public apply(
-    lifecycleSession: IHeftLifecycleSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     { environmentVariablesToSet }: ISetEnvironmentVariablesPluginOptions
   ): void {
-    lifecycleSession.hooks.toolStart.tap(
+    taskSession.hooks.run.tap(
       {
         name: PLUGIN_NAME,
         stage: Number.MIN_SAFE_INTEGER
       },
       () => {
         for (const [key, value] of Object.entries(environmentVariablesToSet)) {
-          lifecycleSession.logger.terminal.writeLine(`Setting environment variable ${key}=${value}`);
+          taskSession.logger.terminal.writeLine(`Setting environment variable ${key}=${value}`);
           process.env[key] = value;
         }
       }

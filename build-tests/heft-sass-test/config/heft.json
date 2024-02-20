@@ -4,25 +4,25 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "heftPlugins": [
-    {
-      "pluginPackage": "@rushstack/heft",
-      "pluginName": "set-environment-variables-plugin",
-      "options": {
-        "environmentVariablesToSet": {
-          "BROWSERSLIST_IGNORE_OLD_DATA": "1"
-        }
-      }
-    }
-  ],
-
   // TODO: Add comments
   "phasesByName": {
     "build": {
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs", "temp"] }],
 
       "tasksByName": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
         "sass": {
+          "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-sass-plugin"
           }

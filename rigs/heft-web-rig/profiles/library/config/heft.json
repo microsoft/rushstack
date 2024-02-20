@@ -17,30 +17,30 @@
     }
   },
 
-  "heftPlugins": [
-    {
-      "pluginPackage": "@rushstack/heft",
-      "pluginName": "set-environment-variables-plugin",
-      "options": {
-        "environmentVariablesToSet": {
-          "BROWSERSLIST_IGNORE_OLD_DATA": "1"
-        }
-      }
-    }
-  ],
-
   "phasesByName": {
     "build": {
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-amd", "lib-commonjs", "lib-es6"] }],
 
       "tasksByName": {
-        "sass-typings": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
+        "sass": {
+          "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-sass-plugin"
           }
         },
         "typescript": {
-          "taskDependencies": ["sass-typings"],
+          "taskDependencies": ["sass"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
           }
