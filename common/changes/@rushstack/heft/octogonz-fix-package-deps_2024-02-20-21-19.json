@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Fix a recent regression causing `Error: Cannot find module 'colors/safe'` (GitHub #4525)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
