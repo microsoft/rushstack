@@ -1,6 +1,11 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Mon, 19 Feb 2024 21:54:26 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 16:10:53 GMT and should not be manually modified.
+
+## 0.3.9
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
 
 ## 0.3.8
 Mon, 19 Feb 2024 21:54:26 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 19 Feb 2024 21:54:26 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 16:10:52 GMT and should not be manually modified.
+
+## 0.65.0
+Tue, 20 Feb 2024 16:10:52 GMT
+
+### Minor changes
+
+- Add a built-in `set-environment-variables-plugin` task plugin to set environment variables.
 
 ## 0.64.8
 Mon, 19 Feb 2024 21:54:26 GMT

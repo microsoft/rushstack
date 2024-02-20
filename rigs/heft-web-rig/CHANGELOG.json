@@ -2,6 +2,47 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.21.0",
+      "tag": "@rushstack/heft-web-rig_v0.21.0",
+      "date": "Tue, 20 Feb 2024 16:10:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include the `set-environment-variables-plugin` plugin from the `@rushstack/heft` package to set the `BROWSERSLIST_IGNORE_OLD_DATA` environment variable to `1` to suppress the warning printed when the `browserslist` package decides it's out of date."
+          },
+          {
+            "comment": "Rename the `sass-typings` task in the \"library\" profile to `sass`, which more accurately describes what the task does and matches what's in the \"app\" profile."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.11.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.13.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.3.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `0.9.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.64.8` to `^0.65.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.10",
       "tag": "@rushstack/heft-web-rig_v0.20.10",
       "date": "Mon, 19 Feb 2024 21:54:27 GMT",
