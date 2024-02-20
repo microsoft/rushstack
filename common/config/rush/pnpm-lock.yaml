@@ -137,9 +137,6 @@ importers:
       '@types/tapable':
         specifier: 1.0.6
         version: 1.0.6
-      chokidar:
-        specifier: ~3.4.0
-        version: 3.4.3
       fast-glob:
         specifier: ~3.3.1
         version: 3.3.1
@@ -235,9 +232,6 @@ importers:
 
   ../../apps/lockfile-explorer-web:
     dependencies:
-      '@fluentui/react':
-        specifier: ^8.96.1
-        version: 8.110.12(@types/react-dom@17.0.25)(@types/react@17.0.74)(react-dom@17.0.2)(react@17.0.2)
       '@lifaon/path':
         specifier: ~2.1.0
         version: 2.1.0
@@ -2996,9 +2990,6 @@ importers:
 
   ../../libraries/node-core-library:
     dependencies:
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       fs-extra:
         specifier: ~7.0.1
         version: 7.0.1
@@ -3450,6 +3441,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      colors:
+        specifier: ~1.2.1
+        version: 1.2.5
     devDependencies:
       '@rushstack/heft':
         specifier: 0.64.0
@@ -3463,9 +3457,6 @@ importers:
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
