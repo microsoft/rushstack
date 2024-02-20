@@ -3278,6 +3278,9 @@ importers:
       '@rushstack/heft-webpack5-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack5-plugin
+      '@rushstack/operation-graph':
+        specifier: workspace:*
+        version: link:../operation-graph
       '@rushstack/webpack-deep-imports-plugin':
         specifier: workspace:*
         version: link:../../webpack/webpack-deep-imports-plugin
