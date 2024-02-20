@@ -77,23 +77,28 @@ export class CoreConfigFiles {
     rigConfig?: IRigConfig | undefined
   ): Promise<IHeftConfigurationJson> {
     if (!CoreConfigFiles._heftConfigFileLoader) {
+      let heftPluginPackageFolder: string | undefined;
+
       const pluginPackageResolver: (
         options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>
       ) => string = (options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>) => {
         const { propertyValue, configurationFilePath } = options;
-        if (propertyValue === '@rushstack/heft') {
+        if (propertyValue === Constants.heftPackageName) {
           // If the value is "@rushstack/heft", then resolve to the Heft package that is
           // installed in the project folder. This avoids issues with mismatched versions
           // between the project and the globally installed Heft. Use the PackageJsonLookup
           // class to find the package folder to avoid hardcoding the path for compatibility
           // with bundling.
-          const pluginPackageFolder: string | undefined =
-            PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
-          if (!pluginPackageFolder) {
+          if (!heftPluginPackageFolder) {
+            heftPluginPackageFolder = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
+          }
+
+          if (!heftPluginPackageFolder) {
             // This should never happen
             throw new InternalError('Unable to find the @rushstack/heft package folder');
           }
-          return pluginPackageFolder;
+
+          return heftPluginPackageFolder;
         } else {
           const configurationFileDirectory: string = path.dirname(configurationFilePath);
           return Import.resolvePackage({

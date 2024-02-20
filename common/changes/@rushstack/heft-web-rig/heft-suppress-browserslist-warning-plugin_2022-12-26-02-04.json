@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Include the `set-environment-variables-plugin` plugin from the `@rushstack/heft` package to set the `BROWSERSLIST_IGNORE_OLD_DATA` environment variable to `1` to suppress the warning printed when the `browserslist` package decides it's out of date.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

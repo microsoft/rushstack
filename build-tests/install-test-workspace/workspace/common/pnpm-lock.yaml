@@ -3176,6 +3176,9 @@ packages:
     dependencies:
       semver-compare: 1.0.0
 
+  /pnpm-sync-lib@0.1.3:
+    resolution: {integrity: sha512-bNGuQmEnlIUSxrdtHTZHFt9JKEBqN39nU1QgTdMWjBeXIxCV7M99ylOoE4uH7KutHHacKlW7PD4+2ktApPUzog==}
+
   /postcss@8.4.24:
     resolution: {integrity: sha512-M0RzbcI0sO/XJNucsGjvWU9ERWxb/ytp1w6dKtxTKgixdtQDq4rmx/g8W1hnaheq9jgwL/oyEdH5Bc4WwJKMqg==}
     engines: {node: ^10 || ^12 || >=14}
@@ -4272,6 +4275,7 @@ packages:
       node-fetch: 2.6.7
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
+      pnpm-sync-lib: 0.1.3
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.5.4
