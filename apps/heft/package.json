@@ -41,7 +41,6 @@
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@types/tapable": "1.0.6",
-    "chokidar": "~3.4.0",
     "fast-glob": "~3.3.1",
     "git-repo-info": "~2.1.0",
     "ignore": "~5.1.6",

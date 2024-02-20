@@ -16,7 +16,6 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
     "import-lazy": "~4.0.0",
     "jju": "~1.4.0",

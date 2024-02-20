@@ -13,9 +13,9 @@ importers:
       '@microsoft/rush-lib':
         specifier: file:microsoft-rush-lib-5.114.0.tgz
         version: file:../temp/tarballs/microsoft-rush-lib-5.114.0.tgz(@types/node@18.17.15)
-      '@rushstack/terminal':
-        specifier: file:rushstack-terminal-0.8.0.tgz
-        version: file:../temp/tarballs/rushstack-terminal-0.8.0.tgz(@types/node@18.17.15)
+      colors:
+        specifier: ^1.4.0
+        version: 1.4.0
     devDependencies:
       '@types/node':
         specifier: 18.17.15
@@ -30,8 +30,11 @@ importers:
   rush-sdk-test:
     dependencies:
       '@rushstack/rush-sdk':
-        specifier: '*'
-        version: 5.114.0(@types/node@18.17.15)
+        specifier: file:rushstack-rush-sdk-5.114.0.tgz
+        version: file:../temp/tarballs/rushstack-rush-sdk-5.114.0.tgz(@types/node@18.17.15)
+      colors:
+        specifier: ^1.4.0
+        version: 1.4.0
     devDependencies:
       '@microsoft/rush-lib':
         specifier: file:microsoft-rush-lib-5.114.0.tgz
@@ -418,16 +421,6 @@ packages:
       mz: 2.7.0
       write-file-atomic: 3.0.3
       write-yaml-file: 4.2.0
-
-  /@rushstack/rush-sdk@5.114.0(@types/node@18.17.15):
-    resolution: {integrity: sha512-GWxHabQ/khj4aCYJdVGwDMySbwTdE8b809aXhpz9WwOEt5Swt1zBJgwRi3CZN19Sacfnqxof5+T5W4FhqsnV4Q==}
-    dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-4.0.0.tgz(@types/node@18.17.15)
-      '@types/node-fetch': 2.6.2
-      tapable: 2.2.1
-    transitivePeerDependencies:
-      - '@types/node'
-    dev: false
 
   /@sindresorhus/is@0.14.0:
     resolution: {integrity: sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==}
@@ -1192,6 +1185,11 @@ packages:
   /colors@1.2.5:
     resolution: {integrity: sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==}
     engines: {node: '>=0.1.90'}
+
+  /colors@1.4.0:
+    resolution: {integrity: sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==}
+    engines: {node: '>=0.1.90'}
+    dev: false
 
   /combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -4460,7 +4458,6 @@ packages:
       '@rushstack/terminal': file:../temp/tarballs/rushstack-terminal-0.8.0.tgz(@types/node@18.17.15)
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.17.2.tgz
       '@types/tapable': 1.0.6
-      chokidar: 3.4.3
       fast-glob: 3.3.1
       git-repo-info: 2.1.1
       ignore: 5.1.9
@@ -4530,7 +4527,6 @@ packages:
         optional: true
     dependencies:
       '@types/node': 18.17.15
-      colors: 1.2.5
       fs-extra: 7.0.1
       import-lazy: 4.0.0
       jju: 1.4.0
@@ -4587,6 +4583,19 @@ packages:
       resolve: 1.22.1
       strip-json-comments: 3.1.1
 
+  file:../temp/tarballs/rushstack-rush-sdk-5.114.0.tgz(@types/node@18.17.15):
+    resolution: {tarball: file:../temp/tarballs/rushstack-rush-sdk-5.114.0.tgz}
+    id: file:../temp/tarballs/rushstack-rush-sdk-5.114.0.tgz
+    name: '@rushstack/rush-sdk'
+    version: 5.114.0
+    dependencies:
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-4.0.0.tgz(@types/node@18.17.15)
+      '@types/node-fetch': 2.6.2
+      tapable: 2.2.1
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: false
+
   file:../temp/tarballs/rushstack-stream-collator-4.1.27.tgz(@types/node@18.17.15):
     resolution: {tarball: file:../temp/tarballs/rushstack-stream-collator-4.1.27.tgz}
     id: file:../temp/tarballs/rushstack-stream-collator-4.1.27.tgz
@@ -4611,6 +4620,7 @@ packages:
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-4.0.0.tgz(@types/node@18.17.15)
       '@types/node': 18.17.15
+      colors: 1.2.5
 
   file:../temp/tarballs/rushstack-tree-pattern-0.3.3.tgz:
     resolution: {tarball: file:../temp/tarballs/rushstack-tree-pattern-0.3.3.tgz}
