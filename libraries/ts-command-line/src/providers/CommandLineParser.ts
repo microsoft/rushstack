@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as argparse from 'argparse';
-import colors from 'colors';
+import { Colorize } from '@rushstack/terminal';
 
 import type { CommandLineAction } from './CommandLineAction';
 import type { AliasCommandLineAction } from './AliasCommandLineAction';
@@ -78,7 +78,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       addHelp: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
-      epilog: colors.bold(
+      epilog: Colorize.bold(
         this._options.toolEpilog ??
           `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       )
@@ -178,7 +178,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // eslint-disable-next-line no-console
         console.error();
         // eslint-disable-next-line no-console
-        console.error(colors.red(message));
+        console.error(Colorize.red(message));
 
         if (!process.exitCode) {
           process.exitCode = 1;

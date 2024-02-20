@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { Interface } from 'readline';
-import colors from 'colors/safe';
+import { Colorize } from '@rushstack/terminal';
 
 // Modified from the choice list prompt in inquirer:
 // https://github.com/SBoudrias/Inquirer.js/blob/inquirer%407.3.3/packages/inquirer/lib/prompts/list.js
@@ -214,12 +214,12 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
     let bottomContent: string = '';
 
     if (this._firstRender) {
-      message += colors.dim(' (Use arrow keys)');
+      message += Colorize.dim(' (Use arrow keys)');
     }
 
     // Render choices or answer depending on the state
     if (this.status === 'answered') {
-      message += colors.cyan(this.opt.choices.getChoice(this._selected).short!);
+      message += Colorize.cyan(this.opt.choices.getChoice(this._selected).short!);
     } else {
       const choicesStr: string = listRender(this.opt.choices, this._selected);
       const indexPosition: number = this.opt.choices.indexOf(
@@ -254,13 +254,15 @@ export class SearchListPrompt extends BasePrompt<ListQuestion> {
         // eslint-disable-next-line no-bitwise
         realIndexPosition += ((line.length / process.stdout.columns!) | 0) + 1;
       }
-      message += `\n${colors.white(colors.bold('Start typing to filter:'))} ${colors.cyan(this._query)}`;
+      message += `\n${Colorize.white(Colorize.bold('Start typing to filter:'))} ${Colorize.cyan(
+        this._query
+      )}`;
       // @ts-expect-error Types are wrong
       message += '\n' + this._paginator.paginate(choicesStr, realIndexPosition, this.opt.pageSize!);
     }
 
     if (error) {
-      bottomContent = colors.red('>> ') + error;
+      bottomContent = Colorize.red('>> ') + error;
     }
 
     this.screen.render(message, bottomContent);
@@ -279,7 +281,7 @@ function listRender(choices: Choices, pointer: number): string {
     if (!choice.disabled) {
       const line: string = choice.name;
       if (i === pointer) {
-        output += colors.cyan(figures.pointer + line);
+        output += Colorize.cyan(figures.pointer + line);
       } else {
         output += ' ' + line;
       }

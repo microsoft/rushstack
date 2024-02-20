@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as semver from 'semver';
+import { Colorize } from '@rushstack/terminal';
 
 // Minimize dependencies to avoid compatibility errors that might be encountered before
 // NodeJsCompatibility.terminateIfVersionIsTooOld() gets to run.
@@ -52,7 +52,7 @@ export class NodeJsCompatibility {
     if (semver.satisfies(nodeVersion, '<14.18.0')) {
       // eslint-disable-next-line no-console
       console.error(
-        colors.red(
+        Colorize.red(
           `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush. ` +
             `Please upgrade to the latest Long-Term Support (LTS) version.\n`
         )
@@ -89,7 +89,7 @@ export class NodeJsCompatibility {
         if (options.isRushLib) {
           // eslint-disable-next-line no-console
           console.warn(
-            colors.yellow(
+            Colorize.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
                 `of the Rush engine. Please consider upgrading the "rushVersion" setting in rush.json, ` +
                 `or downgrading Node.js.\n`
@@ -98,7 +98,7 @@ export class NodeJsCompatibility {
         } else {
           // eslint-disable-next-line no-console
           console.warn(
-            colors.yellow(
+            Colorize.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
                 `of Rush. Please consider installing a newer version of the "@microsoft/rush" ` +
                 `package, or downgrading Node.js.\n`
@@ -117,7 +117,7 @@ export class NodeJsCompatibility {
     if (rushConfiguration && !rushConfiguration.suppressNodeLtsWarning && !NodeJsCompatibility.isLtsVersion) {
       // eslint-disable-next-line no-console
       console.warn(
-        colors.yellow(
+        Colorize.yellow(
           `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
             'These versions frequently have bugs. Please consider installing a stable release.\n'
         )
@@ -133,7 +133,7 @@ export class NodeJsCompatibility {
     if (NodeJsCompatibility.isOddNumberedVersion) {
       // eslint-disable-next-line no-console
       console.warn(
-        colors.yellow(
+        Colorize.yellow(
           `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +
             `These releases frequently have bugs. Please consider installing a Long Term Support (LTS) ` +
             `version instead.\n`

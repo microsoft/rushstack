@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
@@ -150,7 +149,7 @@ export class VersionMismatchFinder {
         if (mismatchFinder.numberOfMismatches > 0) {
           // eslint-disable-next-line no-console
           console.log(
-            colors.red(
+            Colorize.red(
               `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
                 options.subspaceName ? `in subspace: ${options.subspaceName}` : ''
               }`
@@ -172,7 +171,7 @@ export class VersionMismatchFinder {
         } else {
           if (options.isRushCheckCommand) {
             // eslint-disable-next-line no-console
-            console.log(colors.green(`Found no mis-matching dependencies!`));
+            console.log(Colorize.green(`Found no mis-matching dependencies!`));
           }
         }
       }
@@ -244,7 +243,7 @@ export class VersionMismatchFinder {
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     this.getMismatches().forEach((dependency: string) => {
       // eslint-disable-next-line no-console
-      console.log(colors.yellow(dependency));
+      console.log(Colorize.yellow(dependency));
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
         // eslint-disable-next-line no-console
         console.log(`  ${version}`);

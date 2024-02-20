@@ -5,10 +5,10 @@ import type child_process from 'child_process';
 import gitInfo from 'git-repo-info';
 import * as path from 'path';
 import * as url from 'url';
-import colors from 'colors/safe';
+
 import { trueCasePathSync } from 'true-case-path';
 import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
-import type { ITerminal } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';
@@ -369,14 +369,14 @@ export class Git {
               )}). `
             : `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `;
         // eslint-disable-next-line no-console
-        console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
+        console.log(Colorize.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }
     } else {
       // eslint-disable-next-line no-console
       console.log(
-        colors.yellow(
+        Colorize.yellow(
           'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
         )
       );

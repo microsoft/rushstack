@@ -83,6 +83,8 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
     debugEnabled: boolean;
     get eolCharacter(): string;
+    // (undocumented)
+    static readonly supportsColor: boolean;
     get supportsColor(): boolean;
     verboseEnabled: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;

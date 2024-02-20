@@ -187,8 +187,8 @@
             },
             {
               "kind": "Reference",
-              "text": "colors.zebra",
-              "canonicalReference": "colors!zebra:var"
+              "text": "Colorize.red",
+              "canonicalReference": "@rushstack/terminal!Colorize.red:member"
             },
             {
               "kind": "Content",

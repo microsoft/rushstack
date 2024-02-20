@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -3,8 +3,8 @@
 
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import { type ITerminal, PrintUtilities } from '@rushstack/terminal';
-import colors from 'colors/safe';
+import { type ITerminal, PrintUtilities, Colorize } from '@rushstack/terminal';
+
 import schemaJson from '../schemas/custom-tips.schema.json';
 
 /**
@@ -336,11 +336,11 @@ export class CustomTipsConfiguration {
       switch (severity) {
         case CustomTipSeverity.Error:
           writeFunction = terminal.writeErrorLine.bind(terminal);
-          prefix = colors.red('| ');
+          prefix = Colorize.red('| ');
           break;
         case CustomTipSeverity.Warning:
           writeFunction = terminal.writeWarningLine.bind(terminal);
-          prefix = colors.yellow('| ');
+          prefix = Colorize.yellow('| ');
           break;
         default:
           writeFunction = terminal.writeLine.bind(terminal);

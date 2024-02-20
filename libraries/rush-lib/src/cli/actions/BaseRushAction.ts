@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
 import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
 import { LockFile } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
@@ -66,7 +66,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
           // eslint-disable-next-line no-console
-          console.log(colors.red(`Another Rush command is already running in this repository.`));
+          console.log(Colorize.red(`Another Rush command is already running in this repository.`));
           process.exit(1);
         }
       }

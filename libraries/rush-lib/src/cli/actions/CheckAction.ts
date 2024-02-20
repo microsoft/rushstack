@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import type { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
@@ -49,7 +48,7 @@ export class CheckAction extends BaseRushAction {
     if (!this._variant.value && variant) {
       // eslint-disable-next-line no-console
       console.log(
-        colors.yellow(
+        Colorize.yellow(
           `Variant '${variant}' has been installed, but 'rush check' is currently checking the default variant. ` +
             `Use 'rush check --variant '${variant}' to check the current installation.`
         )

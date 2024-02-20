@@ -1,12 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-jest.mock('colors/safe', () => {
-  const colors = jest.requireActual('colors/safe');
-  colors.enabled = true;
-  return colors;
-});
-
 import { JsonFile } from '@rushstack/node-core-library';
 import { PrintUtilities, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
