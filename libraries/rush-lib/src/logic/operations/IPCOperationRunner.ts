@@ -4,11 +4,6 @@
 import type { ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 
-import {
-  TerminalProviderSeverity,
-  type ITerminal,
-  type ITerminalProvider
-} from '@rushstack/node-core-library';
 import type {
   IAfterExecuteEventMessage,
   IRequestRunEventMessage,
@@ -16,6 +11,7 @@ import type {
   IRunCommandMessage,
   IExitCommandMessage
 } from '@rushstack/operation-graph';
+import { TerminalProviderSeverity, type ITerminal, type ITerminalProvider } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
