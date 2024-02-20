@@ -16,15 +16,15 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "colors": "~1.2.1"
   },
   "devDependencies": {
     "@rushstack/heft": "0.64.0",
     "@rushstack/heft-node-rig": "2.4.0",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
-    "local-eslint-config": "workspace:*",
-    "colors": "~1.2.1"
+    "local-eslint-config": "workspace:*"
   },
   "peerDependencies": {
     "@types/node": "*"
