@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Rename the `sass-typings` task in the \"library\" profile to `sass`, which more accurately describes what the task does and matches what's in the \"app\" profile.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}
