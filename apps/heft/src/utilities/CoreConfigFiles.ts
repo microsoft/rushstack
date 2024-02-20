@@ -15,6 +15,10 @@ import type { IRigConfig } from '@rushstack/rig-package';
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
 import { Constants } from './Constants';
+import {
+  type ISetEnvironmentVariablesPluginOptions,
+  PLUGIN_NAME as setEnvVarsPluginName
+} from '../plugins/SetEnvironmentVariablesPlugin';
 
 export interface IHeftConfigurationJsonActionReference {
   actionName: string;
@@ -77,23 +81,24 @@ export class CoreConfigFiles {
     rigConfig?: IRigConfig | undefined
   ): Promise<IHeftConfigurationJson> {
     if (!CoreConfigFiles._heftConfigFileLoader) {
+      const heftPluginPackageFolder: string | undefined =
+        PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
+      if (!heftPluginPackageFolder) {
+        // This should never happen
+        throw new InternalError('Unable to find the @rushstack/heft package folder');
+      }
+
       const pluginPackageResolver: (
         options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>
       ) => string = (options: IJsonPathMetadataResolverOptions<IHeftConfigurationJson>) => {
         const { propertyValue, configurationFilePath } = options;
-        if (propertyValue === '@rushstack/heft') {
+        if (propertyValue === Constants.heftPackageName) {
           // If the value is "@rushstack/heft", then resolve to the Heft package that is
           // installed in the project folder. This avoids issues with mismatched versions
           // between the project and the globally installed Heft. Use the PackageJsonLookup
           // class to find the package folder to avoid hardcoding the path for compatibility
           // with bundling.
-          const pluginPackageFolder: string | undefined =
-            PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname);
-          if (!pluginPackageFolder) {
-            // This should never happen
-            throw new InternalError('Unable to find the @rushstack/heft package folder');
-          }
-          return pluginPackageFolder;
+          return heftPluginPackageFolder;
         } else {
           const configurationFileDirectory: string = path.dirname(configurationFilePath);
           return Import.resolvePackage({
@@ -111,6 +116,42 @@ export class CoreConfigFiles {
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
           object: { inheritanceType: InheritanceType.merge }
+        },
+        propertyInheritance: {
+          heftPlugins: {
+            inheritanceType: InheritanceType.custom,
+            inheritanceFunction: (current, parent) => {
+              if (!current) {
+                return parent;
+              } else if (!parent) {
+                return current;
+              } else {
+                // Special-case the "set-environment-variables-plugin" to merge the environment variables
+                // that are being set instead of including two copies of the plugin when there are multiple
+                // config files in the extends chain that reference the plugin.
+                let mergedEnvironmentVariablesToSet: Record<string, string> | undefined;
+                function processLifecyclePlugins(pluginList: IHeftConfigurationJsonPluginSpecifier[]): void {
+                  for (let i: number = 0; i < pluginList.length; i++) {
+                    const lifecyclePlugin: IHeftConfigurationJsonPluginSpecifier = pluginList[i];
+                    const { pluginName, pluginPackage, options } = lifecyclePlugin;
+                    if (pluginName === setEnvVarsPluginName && pluginPackage === heftPluginPackageFolder) {
+                      const { environmentVariablesToSet } = options as ISetEnvironmentVariablesPluginOptions;
+                      if (!mergedEnvironmentVariablesToSet) {
+                        mergedEnvironmentVariablesToSet = environmentVariablesToSet;
+                      } else {
+                        Object.assign(mergedEnvironmentVariablesToSet, environmentVariablesToSet);
+                        pluginList.splice(i, 1);
+                        i--;
+                      }
+                    }
+                  }
+                }
+                processLifecyclePlugins(parent);
+                processLifecyclePlugins(current);
+                return [...parent, ...current];
+              }
+            }
+          }
         },
         jsonPathMetadata: {
           // Use a custom resolver for the plugin packages, since the NodeResolve algorithm will resolve to the

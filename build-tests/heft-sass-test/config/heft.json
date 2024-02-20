@@ -6,7 +6,13 @@
 
   "heftPlugins": [
     {
-      "pluginPackage": "@rushstack/heft-suppress-browserslist-warning-plugin"
+      "pluginPackage": "@rushstack/heft",
+      "pluginName": "set-environment-variables-plugin",
+      "options": {
+        "environmentVariablesToSet": {
+          "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+        }
+      }
     }
   ],
 

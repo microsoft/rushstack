@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "@rushstack/heft-web-rig/profiles/app/config/heft.json",
+
+  "heftPlugins": [
+    {
+      "pluginPackage": "@rushstack/heft",
+      "pluginName": "set-environment-variables-plugin",
+      "options": {
+        "environmentVariablesToSet": {
+          "TEST_ENV_VAR": "ABC"
+        }
+      }
+    }
+  ]
+}

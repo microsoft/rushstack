@@ -1577,9 +1577,6 @@ importers:
       '@rushstack/heft-sass-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-sass-plugin
-      '@rushstack/heft-suppress-browserslist-warning-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-suppress-browserslist-warning-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
@@ -2734,15 +2731,6 @@ importers:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
 
-  ../../heft-plugins/heft-suppress-browserslist-warning-plugin:
-    devDependencies:
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: link:../../apps/heft
-      local-node-rig:
-        specifier: workspace:*
-        version: link:../../rigs/local-node-rig
-
   ../../heft-plugins/heft-typescript-plugin:
     dependencies:
       '@rushstack/heft-config-file':
@@ -3693,9 +3681,6 @@ importers:
       '@rushstack/heft-sass-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-sass-plugin
-      '@rushstack/heft-suppress-browserslist-warning-plugin':
-        specifier: workspace:*
-        version: link:../../heft-plugins/heft-suppress-browserslist-warning-plugin
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-typescript-plugin
