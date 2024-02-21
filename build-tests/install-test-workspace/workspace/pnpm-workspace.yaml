@@ -1,5 +1,0 @@
-packages:
-  - rush-lib-test
-  - rush-sdk-test
-  - typescript-newest-test
-  - typescript-v4-test

@@ -2,7 +2,7 @@
  * This configuration file allows repo maintainers to enable and disable experimental
  * Rush features.  More documentation is available on the Rush website: https://rushjs.io
  */
-{
+ {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/experiments.schema.json",
 
   /**
@@ -53,7 +53,7 @@
    * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
    * in common/config/rush/command-line.json.
    */
-  "phasedCommands": true
+  "phasedCommands": true,
 
   /**
    * If true, perform a clean install after when running `rush install` or `rush update` if the
@@ -82,7 +82,7 @@
    * Enable this experiment if you want "rush" and "rushx" commands to resync injected dependencies
    * by invoking "pnpm-sync" during the build.
    */
-  // "usePnpmSyncForInjectedDependencies": true,
+  "usePnpmSyncForInjectedDependencies": true
 
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
