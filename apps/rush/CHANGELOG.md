@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 21 Feb 2024 08:56:05 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2024 21:45:46 GMT and should not be manually modified.
+
+## 5.114.2
+Wed, 21 Feb 2024 21:45:46 GMT
+
+### Updates
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
 
 ## 5.114.1
 Wed, 21 Feb 2024 08:56:05 GMT
