@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Turn on usePnpmSyncForInjectedDependencies, and refactor install-test-workspace",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
