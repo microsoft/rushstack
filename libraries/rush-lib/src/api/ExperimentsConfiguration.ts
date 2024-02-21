@@ -89,7 +89,7 @@ export interface IExperimentsJson {
    * by invoking "pnpm-sync" during the build.
    */
   usePnpmSyncForInjectedDependencies?: boolean;
-
+  
   /**
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
