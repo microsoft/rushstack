@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a recent regression where `@rushstack/rush-sdk` did not declare its dependency on `@rushstack/terminal`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
