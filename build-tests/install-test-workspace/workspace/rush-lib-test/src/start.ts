@@ -18,3 +18,5 @@ import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 const terminal = new Terminal(new ConsoleTerminalProvider());
 VersionMismatchFinder.ensureConsistentVersions(config, terminal);
+
+console.log(new ConsoleTerminalProvider().supportsColor);
