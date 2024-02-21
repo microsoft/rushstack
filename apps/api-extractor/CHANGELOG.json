@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.40.5",
+      "tag": "@microsoft/api-extractor_v7.40.5",
+      "date": "Wed, 21 Feb 2024 08:55:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where imports were trimmed from external packages based when generating .d.ts rollups"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.40.4",
       "tag": "@microsoft/api-extractor_v7.40.4",
       "date": "Tue, 20 Feb 2024 21:45:10 GMT",

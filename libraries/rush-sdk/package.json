@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.114.0",
+  "version": "5.114.1",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@types/node-fetch": "2.6.2",
     "tapable": "2.2.1"
   },
@@ -38,7 +39,6 @@
     "local-node-rig": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@rushstack/terminal": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.0"
   }
