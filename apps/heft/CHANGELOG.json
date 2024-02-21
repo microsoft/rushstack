@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.65.2",
+      "tag": "@rushstack/heft_v0.65.2",
+      "date": "Wed, 21 Feb 2024 08:55:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.40.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.65.1",
       "tag": "@rushstack/heft_v0.65.1",
       "date": "Tue, 20 Feb 2024 21:45:10 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2024 08:55:47 GMT and should not be manually modified.
+
+## 7.40.5
+Wed, 21 Feb 2024 08:55:47 GMT
+
+### Patches
+
+- Fix an issue where imports were trimmed from external packages based when generating .d.ts rollups
 
 ## 7.40.4
 Tue, 20 Feb 2024 21:45:10 GMT
