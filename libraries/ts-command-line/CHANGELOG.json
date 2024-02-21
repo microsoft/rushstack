@@ -2,6 +2,23 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.17.3",
+      "tag": "@rushstack/ts-command-line_v4.17.3",
+      "date": "Wed, 21 Feb 2024 21:45:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.17.2",
       "tag": "@rushstack/ts-command-line_v4.17.2",
       "date": "Sat, 17 Feb 2024 06:24:35 GMT",

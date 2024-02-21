@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2024 21:45:28 GMT and should not be manually modified.
+
+## 4.0.2
+Wed, 21 Feb 2024 21:45:28 GMT
+
+### Patches
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
 
 ## 4.0.1
 Tue, 20 Feb 2024 21:45:10 GMT
