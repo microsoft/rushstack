@@ -377,7 +377,14 @@ export interface IConfigFile {
   /**
    * A list of NPM package names whose exports should be treated as part of this package.
    *
-   * @remarks Also supports glob patterns.
+   * @remarks
+   * Also supports glob patterns.
+   * Note: glob patterns will **only** be resolved against dependencies listed in the project's package.json file.
+   *
+   * * This is both a safety and a performance precaution.
+   *
+   * Exact package names will be applied against any dependency encountered while walking the type graph, regardless of
+   * dependencies listed in the package.json.
    *
    * @example
    *
