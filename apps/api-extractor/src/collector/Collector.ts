@@ -198,7 +198,7 @@ export class Collector {
         // If the entry isn't an exact package name, assume glob pattern and search for matches
         for (const dependencyName of dependencyNames) {
           if (minimatch(dependencyName, packageNameOrPattern)) {
-            resolvedPackageNames.add(packageNameOrPattern);
+            resolvedPackageNames.add(dependencyName);
           }
         }
       }
