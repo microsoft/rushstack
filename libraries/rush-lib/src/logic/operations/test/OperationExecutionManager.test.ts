@@ -4,7 +4,16 @@
 // The TaskExecutionManager prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import colors from 'colors/safe';
+jest.mock('@rushstack/terminal', () => {
+  const originalModule = jest.requireActual('@rushstack/terminal');
+  return {
+    ...originalModule,
+    ConsoleTerminalProvider: {
+      ...originalModule.ConsoleTerminalProvider,
+      supportsColor: true
+    }
+  };
+});
 
 import { Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
@@ -50,19 +59,6 @@ function createExecutionManager(
 describe(OperationExecutionManager.name, () => {
   let executionManager: OperationExecutionManager;
   let executionManagerOptions: IOperationExecutionManagerOptions;
-
-  let initialColorsEnabled: boolean;
-
-  beforeAll(() => {
-    initialColorsEnabled = colors.enabled;
-    colors.enable();
-  });
-
-  afterAll(() => {
-    if (!initialColorsEnabled) {
-      colors.disable();
-    }
-  });
 
   beforeEach(() => {
     jest.spyOn(PrintUtilities, 'getConsoleWidth').mockReturnValue(90);

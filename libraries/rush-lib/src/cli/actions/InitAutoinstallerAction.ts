@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
 import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileSystem, NewlineKind, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction } from './BaseRushAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
@@ -57,7 +56,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
     };
 
     // eslint-disable-next-line no-console
-    console.log(colors.green('Creating package: ') + autoinstaller.packageJsonPath);
+    console.log(Colorize.green('Creating package: ') + autoinstaller.packageJsonPath);
 
     JsonFile.save(packageJson, autoinstaller.packageJsonPath, {
       ensureFolderExists: true,

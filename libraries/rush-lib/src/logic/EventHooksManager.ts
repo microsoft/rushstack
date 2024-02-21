@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
+import { Colorize } from '@rushstack/terminal';
 
 import type { EventHooks } from '../api/EventHooks';
 import { type IEnvironment, Utilities } from '../utilities/Utilities';
@@ -36,7 +36,7 @@ export class EventHooksManager {
 
       const stopwatch: Stopwatch = Stopwatch.start();
       // eslint-disable-next-line no-console
-      console.log('\n' + colors.green(`Executing event hooks for ${Event[event]}`));
+      console.log('\n' + Colorize.green(`Executing event hooks for ${Event[event]}`));
 
       const printEventHooksOutputToConsole: boolean | undefined =
         isDebug ||
@@ -64,7 +64,7 @@ export class EventHooksManager {
           // eslint-disable-next-line no-console
           console.error(
             '\n' +
-              colors.yellow(
+              Colorize.yellow(
                 `Event hook "${script}" failed: ${error}\nRun "rush" with --debug` +
                   ` to see detailed error information.`
               )
@@ -77,7 +77,7 @@ export class EventHooksManager {
       });
       stopwatch.stop();
       // eslint-disable-next-line no-console
-      console.log('\n' + colors.green(`Event hooks finished. (${stopwatch.toString()})`));
+      console.log('\n' + Colorize.green(`Event hooks finished. (${stopwatch.toString()})`));
     }
   }
 }

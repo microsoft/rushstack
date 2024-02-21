@@ -27,11 +27,13 @@ export interface IConsoleTerminalProviderOptions {
 
 /**
  * Terminal provider that prints to STDOUT (for log- and verbose-level messages) and
- * STDERR (for warning- and error-level messsages).
+ * STDERR (for warning- and error-level messages).
  *
  * @beta
  */
 export class ConsoleTerminalProvider implements ITerminalProvider {
+  public static readonly supportsColor: boolean = supportsColor;
+
   /**
    * If true, verbose-level messages should be written to the console.
    */

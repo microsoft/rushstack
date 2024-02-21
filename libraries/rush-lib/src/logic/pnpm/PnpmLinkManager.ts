@@ -6,7 +6,6 @@ import * as crypto from 'crypto';
 import uriEncode from 'strict-uri-encode';
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
-import colors from 'colors/safe';
 
 import {
   AlreadyReportedError,
@@ -15,6 +14,7 @@ import {
   InternalError,
   Path
 } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
@@ -45,7 +45,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     if (useWorkspaces) {
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'Linking is not supported when using workspaces. Run "rush install" or "rush update" ' +
             'to restore project node_modules folders.'
         )
@@ -76,7 +76,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     } else {
       // eslint-disable-next-line no-console
       console.log(
-        colors.yellow(
+        Colorize.yellow(
           '\nWarning: Nothing to do. Please edit rush.json and add at least one project' +
             ' to the "projects" section.\n'
         )
@@ -281,7 +281,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     await pnpmLinkBins(projectFolder, projectBinFolder, {
       warn: (msg: string) => {
         // eslint-disable-next-line no-console
-        console.warn(colors.yellow(msg));
+        console.warn(Colorize.yellow(msg));
       }
     });
   }

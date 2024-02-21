@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineAction } from '@rushstack/ts-command-line';
+import { Colorize } from '@rushstack/terminal';
 
 import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';
@@ -27,12 +27,12 @@ export class InitAction extends CommandLineAction {
     const outputFilePath: string = path.resolve(ExtractorConfig.FILENAME);
 
     if (FileSystem.exists(outputFilePath)) {
-      console.log(colors.red('The output file already exists:'));
+      console.log(Colorize.red('The output file already exists:'));
       console.log('\n  ' + outputFilePath + '\n');
       throw new Error('Unable to write output file');
     }
 
-    console.log(colors.green('Writing file: ') + outputFilePath);
+    console.log(Colorize.green('Writing file: ') + outputFilePath);
     FileSystem.copyFile({
       sourcePath: inputFilePath,
       destinationPath: outputFilePath

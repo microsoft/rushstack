@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
-import { type ITerminal, Terminal } from '@rushstack/terminal';
+import { type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
   CommandLineParameter,
@@ -343,7 +342,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       if (!projectSelection.size) {
         terminal.writeLine(
-          colors.yellow(`The command line selection parameters did not match any projects.`)
+          Colorize.yellow(`The command line selection parameters did not match any projects.`)
         );
         return;
       }
@@ -580,7 +579,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
       const names: string[] = [...changedProjects].map((x) => x.packageName).sort();
       for (const name of names) {
-        terminal.writeLine(`    ${colors.cyan(name)}`);
+        terminal.writeLine(`    ${Colorize.cyan(name)}`);
       }
 
       // Account for consumer relationships
@@ -651,7 +650,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
       if (result.status === OperationStatus.Success) {
-        terminal.writeLine(colors.green(message));
+        terminal.writeLine(Colorize.green(message));
       } else {
         terminal.writeLine(message);
       }
@@ -670,7 +669,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
         }
 
-        terminal.writeErrorLine(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+        terminal.writeErrorLine(Colorize.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
       }
     }
 

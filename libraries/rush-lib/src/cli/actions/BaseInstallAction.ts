@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -118,7 +116,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       console.log();
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
         )
       );
@@ -160,7 +158,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           console.log();
           // eslint-disable-next-line no-console
           console.log(
-            colors.red(
+            Colorize.red(
               `The subspaces preventSelectingAllSubspaces configuration is enabled, which enforces installation for a specified set of subspace,` +
                 ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
             )
@@ -237,7 +235,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
           // eslint-disable-next-line no-console
-          console.log(colors.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
+          console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
         }
       } else {
@@ -263,7 +261,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       // eslint-disable-next-line no-console
       console.log(
         '\n' +
-          colors.yellow(
+          Colorize.yellow(
             'Rush refreshed some files in the "common/scripts" folder.' +
               '  Please commit this change to Git.'
           )
@@ -272,7 +270,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // eslint-disable-next-line no-console
     console.log(
-      '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+      '\n' + Colorize.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
     );
   }
 

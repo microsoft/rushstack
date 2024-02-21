@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import type {
@@ -10,6 +9,7 @@ import type {
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -251,7 +251,7 @@ export class PublishAction extends BaseRushAction {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.green('Rush publish finished successfully.'));
+    console.log('\n' + Colorize.green('Rush publish finished successfully.'));
   }
 
   /**

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import {
@@ -37,6 +36,7 @@ import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
+import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -50,7 +50,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.options.noLink) {
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
             'without specifying this argument.'
         )
@@ -82,7 +82,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold('Updating workspace files in ' + subspace.getSubspaceTempFolder()));
+    console.log('\n' + Colorize.bold('Updating workspace files in ' + subspace.getSubspaceTempFolder()));
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -98,7 +98,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         console.log();
         // eslint-disable-next-line no-console
         console.log(
-          colors.red(
+          Colorize.red(
             'The shrinkwrap file has not been updated to support workspaces. Run "rush update --full" to update ' +
               'the shrinkwrap file.'
           )
@@ -204,7 +204,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log();
             // eslint-disable-next-line no-console
             console.log(
-              colors.red(
+              Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists ` +
                   'within the workspace but cannot be fulfilled with the specified version range. Either ' +
                   'specify a valid version range, or add the package as a cyclic dependency.'
@@ -218,7 +218,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log();
             // eslint-disable-next-line no-console
             console.log(
-              colors.red(
+              Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
                   'the workspace. Run "rush update" to update workspace references for this package.'
               )
@@ -248,7 +248,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       if (packageJson.saveIfModified()) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             `"${rushProject.packageName}" depends on one or more workspace packages which did not use "workspace:" ` +
               'notation. The package.json has been modified and must be committed to source control.'
           )
@@ -361,7 +361,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       this.options
     );
-    if (colors.enabled) {
+    if (ConsoleTerminalProvider.supportsColor) {
       packageManagerEnv.FORCE_COLOR = '1';
     }
 
@@ -396,7 +396,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log(
         '\n' +
-          colors.bold(
+          Colorize.bold(
             `Running "${this.rushConfiguration.packageManager} install" in` +
               ` ${subspace.getSubspaceTempFolder()}`
           ) +
@@ -413,7 +413,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // eslint-disable-next-line no-console
         console.log(
           '\n' +
-            colors.green('Invoking package manager: ') +
+            Colorize.green('Invoking package manager: ') +
             FileSystem.getRealPath(packageManagerFilename) +
             ' ' +
             installArgs.join(' ') +

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors = require('colors');
+import { Colorize } from '@rushstack/terminal';
 
 /** @public */
-export function useColors(): typeof colors.zebra {
-  return colors.zebra;
+export function useColors(): typeof Colorize.red {
+  return Colorize.red;
 }

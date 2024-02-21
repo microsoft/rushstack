@@ -24,12 +24,12 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       js-yaml:
         specifier: ~3.13.1
         version: 3.13.1
@@ -67,12 +67,12 @@ importers:
       '@rushstack/rig-package':
         specifier: workspace:*
         version: link:../../libraries/rig-package
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
@@ -192,12 +192,12 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@types/express':
         specifier: 4.17.13
         version: 4.17.13
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       cors:
         specifier: ~2.8.5
         version: 2.8.5
@@ -303,9 +303,6 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       semver:
         specifier: ~7.5.4
         version: 7.5.4
@@ -337,12 +334,12 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../../libraries/ts-command-line
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       resolve:
         specifier: ~1.22.1
         version: 1.22.4
@@ -1014,6 +1011,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       api-extractor-lib2-test:
         specifier: workspace:*
         version: link:../api-extractor-lib2-test
@@ -3254,9 +3254,6 @@ importers:
       cli-table:
         specifier: ~0.3.1
         version: 0.3.11
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       dependency-path:
         specifier: ~9.2.8
         version: 9.2.8
@@ -3533,15 +3530,15 @@ importers:
 
   ../../libraries/ts-command-line:
     dependencies:
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       '@types/argparse':
         specifier: 1.0.38
         version: 1.0.38
       argparse:
         specifier: ~1.0.9
         version: 1.0.10
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
       string-argv:
         specifier: ~0.3.1
         version: 0.3.2

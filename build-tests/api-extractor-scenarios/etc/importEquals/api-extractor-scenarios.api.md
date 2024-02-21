@@ -4,10 +4,10 @@
 
 ```ts
 
-import colors = require('colors');
+import { Colorize } from '@rushstack/terminal';
 
 // @public (undocumented)
-export function useColors(): typeof colors.zebra;
+export function useColors(): typeof Colorize.red;
 
 // (No @packageDocumentation comment for this package)
 
