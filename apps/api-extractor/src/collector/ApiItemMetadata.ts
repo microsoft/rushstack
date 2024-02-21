@@ -76,7 +76,7 @@ export class ApiItemMetadata {
   public tsdocComment: tsdoc.DocComment | undefined;
 
   /**
-   * Tracks whether or not the associated API item is "undocumented".
+   * Tracks whether or not the associated API item is known to be missing sufficient documentation.
    *
    * @remarks
    *
