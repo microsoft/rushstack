@@ -8,7 +8,8 @@ import {
   FileConstants,
   AlreadyReportedError,
   Async,
-  type IDependenciesMetaTable
+  type IDependenciesMetaTable,
+  Path
 } from '@rushstack/node-core-library';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
@@ -275,7 +276,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
 
         // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
-        const relativePathFromTempFolderToPackageFolder: string = `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`;
+        const relativePathFromTempFolderToPackageFolder: string = Path.convertToSlashes(
+          `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`
+        );
         expectedDependenciesMetaByProjectRelativePath[relativePathFromTempFolderToPackageFolder] =
           dependenciesMeta;
       }
@@ -287,7 +290,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[key] = value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
         }
       }
     }
@@ -504,7 +507,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // if usePnpmSyncForInjectedDependencies is true
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
-      const pnpmLockfilePath: string = this.rushConfiguration.tempShrinkwrapFilename;
+      const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const pnpmStorePath: string = `${this.rushConfiguration.commonTempFolder}/node_modules/.pnpm`;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
