@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "fix: Don't trim imports from external packages based when generating rollups",
+      "comment": "Fix an issue where imports were trimmed from external packages based when generating .d.ts rollups",
       "type": "patch"
     }
   ],
