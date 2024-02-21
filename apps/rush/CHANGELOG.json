@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.114.1",
+      "tag": "@microsoft/rush_v5.114.1",
+      "date": "Wed, 21 Feb 2024 08:56:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve `rush scan` to analyze APIs such as `Import.lazy()` and `await import()`"
+          },
+          {
+            "comment": "Fix a recent regression where `@rushstack/rush-sdk` did not declare its dependency on `@rushstack/terminal`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.114.0",
       "tag": "@microsoft/rush_v5.114.0",
       "date": "Mon, 19 Feb 2024 21:54:44 GMT",

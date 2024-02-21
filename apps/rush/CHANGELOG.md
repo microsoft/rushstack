@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 19 Feb 2024 21:54:44 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2024 08:56:05 GMT and should not be manually modified.
+
+## 5.114.1
+Wed, 21 Feb 2024 08:56:05 GMT
+
+### Updates
+
+- Improve `rush scan` to analyze APIs such as `Import.lazy()` and `await import()`
+- Fix a recent regression where `@rushstack/rush-sdk` did not declare its dependency on `@rushstack/terminal`
 
 ## 5.114.0
 Mon, 19 Feb 2024 21:54:44 GMT
