@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 19 Feb 2024 21:54:27 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 4.0.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Remove a no longer needed dependency on the `colors` package
 
 ## 4.0.0
 Mon, 19 Feb 2024 21:54:27 GMT

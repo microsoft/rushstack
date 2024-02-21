@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 20 Feb 2024 16:10:52 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.65.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Fix a recent regression causing `Error: Cannot find module 'colors/safe'` (GitHub #4525)
+- Remove a no longer needed dependency on the `chokidar` package
 
 ## 0.65.0
 Tue, 20 Feb 2024 16:10:52 GMT
