@@ -39,7 +39,6 @@
     "local-node-rig": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@rushstack/terminal": "workspace:*",
     "@types/semver": "7.5.0",
     "@types/webpack-env": "1.18.0"
   }
