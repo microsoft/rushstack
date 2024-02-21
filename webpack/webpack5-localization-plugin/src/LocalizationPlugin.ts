@@ -29,6 +29,8 @@ import type {
 import type { IAssetPathOptions } from './webpackInterfaces';
 import { markEntity, getMark } from './utilities/EntityMarker';
 import { processLocalizedAsset, processNonLocalizedAsset } from './AssetProcessor';
+import { getHashFunction, type HashFn, updateAssetHashes } from './trueHashes';
+import { chunkIsJs } from './utilities/chunkUtilities';
 
 /**
  * @public
@@ -80,7 +82,10 @@ export function getPluginInstance(compiler: Compiler | undefined): LocalizationP
 export class LocalizationPlugin implements WebpackPluginInstance {
   public readonly stringKeys: Map<string, IStringPlaceholder> = new Map();
 
-  private readonly _options: ILocalizationPluginOptions;
+  /**
+   * @internal
+   */
+  public readonly _options: ILocalizationPluginOptions;
   private readonly _resolvedTranslatedStringsFromOptions: Map<
     string,
     Map<string, ILocaleFileObject | string | ReadonlyMap<string, string>>
@@ -129,10 +134,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       }
     }
 
+    const { webpack: thisWebpack } = compiler;
     const {
       WebpackError,
       runtime: { GetChunkFilenameRuntimeModule }
-    } = compiler.webpack;
+    } = thisWebpack;
 
     // Side-channel for async chunk URL generator chunk, since the actual chunk is completely inaccessible
     // from the assetPath hook below when invoked to build the async URL generator
@@ -157,6 +163,27 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     const { runtimeLocaleExpression } = this._options;
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
+      let hashFn: HashFn | undefined;
+      if (this._options.realContentHash) {
+        if (runtimeLocaleExpression) {
+          compilation.errors.push(
+            new WebpackError(
+              `The "realContentHash" option cannot be used in conjunction with "runtimeLocaleExpression".`
+            )
+          );
+        } else {
+          hashFn = getHashFunction({ thisWebpack, compilation });
+        }
+      } else if (compiler.options.optimization?.realContentHash) {
+        compilation.errors.push(
+          new thisWebpack.WebpackError(
+            `The \`optimization.realContentHash\` option is set and the ${LocalizationPlugin.name}'s ` +
+              '`realContentHash` option is not set. This will likely produce invalid results. Consider setting the ' +
+              `\`realContentHash\` option in the ${LocalizationPlugin.name} plugin.`
+          )
+        );
+      }
+
       compilation.hooks.assetPath.tap(
         PLUGIN_NAME,
         (assetPath: string, options: IAssetPathOptions): string => {
@@ -274,14 +301,19 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           const locales: Set<string> = new Set(this._resolvedLocalizedStrings.keys());
 
           const { chunkGraph, chunks } = compilation;
+          const { localizationStats: statsOptions } = this._options;
 
-          const filesByChunkName: Map<string, Record<string, string>> = new Map();
+          const filesByChunkName: Map<string, Record<string, string>> | undefined = statsOptions
+            ? new Map()
+            : undefined;
           const localizedEntryPointNames: string[] = [];
           const localizedChunkNames: string[] = [];
 
-          const { localizationStats: statsOptions } = this._options;
-
           for (const chunk of chunks) {
+            if (!chunkIsJs(chunk, chunkGraph)) {
+              continue;
+            }
+
             const isLocalized: boolean = _chunkHasLocalizedModules(
               chunkGraph,
               chunk,
@@ -319,11 +351,9 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 filenameTemplate: template
               });
 
-              if (statsOptions) {
-                if (chunk.name) {
-                  filesByChunkName.set(chunk.name, localizedAssets);
-                  (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
-                }
+              if (filesByChunkName && chunk.name) {
+                filesByChunkName.set(chunk.name, localizedAssets);
+                (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
               }
             } else {
               processNonLocalizedAsset({
@@ -340,8 +370,17 @@ export class LocalizationPlugin implements WebpackPluginInstance {
             }
           }
 
+          if (hashFn) {
+            updateAssetHashes({
+              thisWebpack,
+              compilation,
+              hashFn,
+              filesByChunkName
+            });
+          }
+
           // Since the stats generation doesn't depend on content, do it immediately
-          if (statsOptions) {
+          if (statsOptions && filesByChunkName) {
             const localizationStats: ILocalizationStats = {
               entrypoints: {},
               namedChunkGroups: {}

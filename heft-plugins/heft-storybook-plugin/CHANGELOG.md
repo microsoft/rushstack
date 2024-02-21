@@ -1,6 +1,49 @@
 # Change Log - @rushstack/heft-storybook-plugin
 
-This log was last generated on Thu, 25 Jan 2024 01:09:29 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.6.4
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.6.3
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
+
+## 0.6.2
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 0.6.1
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 0.6.0
+Mon, 12 Feb 2024 16:09:54 GMT
+
+### Minor changes
+
+- Fix an issue where Webpack would run twice during static storybook builds.
+- Introduce a `captureWebpackStats` configuration option that, when enabled, will pass the `--webpack-stats-json` parameter to Storybook.
+
+## 0.5.3
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 0.5.2
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.5.1
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
 
 ## 0.5.0
 Thu, 25 Jan 2024 01:09:29 GMT

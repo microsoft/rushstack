@@ -11,14 +11,12 @@ import {
   type IParsedPackageNameOrError,
   PackageName,
   SubprocessTerminator,
-  TerminalWritable,
-  type ITerminal,
-  TerminalProviderSeverity,
   FileConstants,
   type IPackageJson,
   InternalError,
   JsonFile
 } from '@rushstack/node-core-library';
+import { TerminalStreamWritable, type ITerminal, TerminalProviderSeverity } from '@rushstack/terminal';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -152,6 +150,10 @@ export interface IStorybookPluginOptions {
    * `"cwdPackageName": "my-storybook-ui-library"`
    */
   cwdPackageName?: string;
+  /**
+   * Specifies whether to capture the webpack stats for the storybook build by adding the `--webpack-stats-json` CLI flag.
+   */
+  captureWebpackStats?: boolean;
 }
 
 interface IRunStorybookOptions {
@@ -220,11 +222,11 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         '@rushstack/heft-webpack4-plugin',
         WEBPACK4_PLUGIN_NAME,
         (accessor: IWebpack4PluginAccessor) => {
-          // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
           if (accessor.parameters.isServeMode) {
             this._isServeMode = true;
-            accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
           }
+          // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
         }
       );
 
@@ -232,11 +234,11 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         '@rushstack/heft-webpack5-plugin',
         WEBPACK5_PLUGIN_NAME,
         (accessor: IWebpack5PluginAccessor) => {
-          // Discard Webpack's configuration to prevent Webpack from running only when starting a storybook server
           if (accessor.parameters.isServeMode) {
             this._isServeMode = true;
-            accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
           }
+          // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
         }
       );
 
@@ -400,6 +402,9 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     if (outputFolder) {
       storybookArgs.push('--output-dir', outputFolder);
     }
+    if (options.captureWebpackStats) {
+      storybookArgs.push('--webpack-stats-json');
+    }
     if (!verbose) {
       storybookArgs.push('--quiet');
     }
@@ -443,7 +448,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       // We will output stderr to the normal stdout stream since all output is piped through
       // stdout. We have to rely on the exit code to determine if there was an error.
       const terminal: ITerminal = this._logger.terminal;
-      const terminalOutStream: TerminalWritable = new TerminalWritable({
+      const terminalOutStream: TerminalStreamWritable = new TerminalStreamWritable({
         terminal,
         severity: TerminalProviderSeverity.log
       });

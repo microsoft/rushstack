@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, type ITerminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushUserConfiguration } from '../../api/RushUserConfiguration';

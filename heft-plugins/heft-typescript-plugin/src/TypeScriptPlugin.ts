@@ -5,7 +5,8 @@ import * as path from 'path';
 
 import type * as TTypescript from 'typescript';
 import { SyncHook } from 'tapable';
-import { FileSystem, Path, type ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, Path } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,

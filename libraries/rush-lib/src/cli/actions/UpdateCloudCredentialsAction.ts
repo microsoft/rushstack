@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';

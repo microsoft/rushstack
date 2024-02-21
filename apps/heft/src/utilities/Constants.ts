@@ -33,4 +33,6 @@ export class Constants {
   public static verboseParameterShortName: string = '-v';
 
   public static maxParallelism: number = 100;
+
+  public static heftPackageName: string = '@rushstack/heft';
 }

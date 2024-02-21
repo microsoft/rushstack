@@ -9,7 +9,7 @@ import { DeviceCodeCredential } from '@azure/identity';
 import { DeviceCodeCredentialOptions } from '@azure/identity';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 

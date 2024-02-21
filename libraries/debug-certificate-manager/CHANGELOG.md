@@ -1,6 +1,43 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Thu, 25 Jan 2024 01:09:30 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 1.3.27
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 1.3.26
+Tue, 20 Feb 2024 16:10:52 GMT
+
+_Version update only_
+
+## 1.3.25
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 1.3.24
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 1.3.23
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 1.3.22
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 1.3.21
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
 
 ## 1.3.20
 Thu, 25 Jan 2024 01:09:30 GMT

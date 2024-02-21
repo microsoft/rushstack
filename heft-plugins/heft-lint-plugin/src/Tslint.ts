@@ -5,7 +5,8 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import type * as TTslint from 'tslint';
 import type * as TTypescript from 'typescript';
-import { Import, JsonFile, FileError, FileSystem, type ITerminal } from '@rushstack/node-core-library';
+import { Import, JsonFile, FileError, FileSystem } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { LinterBase, type ILinterBaseOptions } from './LinterBase';
 import type { IExtendedLinter } from './internalTypings/TslintInternals';

@@ -6,7 +6,7 @@ import {
   type CommandLineFlagParameter,
   type CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { OperationStatus } from '@rushstack/operation-graph';
 
 import type { IHeftAction, IHeftActionOptions } from './IHeftAction';

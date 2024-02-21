@@ -14,13 +14,13 @@ import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/node-core-library';
-import { ITerminalProvider } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/terminal';
+import type { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
-import { Terminal } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -453,6 +453,7 @@ export interface IExperimentsJson {
     buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
     cleanInstallAfterNpmrcChanges?: boolean;
     forbidPhantomResolvableNodeModulesFolders?: boolean;
+    generateProjectImpactGraphDuringRushUpdate?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
@@ -460,6 +461,7 @@ export interface IExperimentsJson {
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
+    usePnpmSyncForInjectedDependencies?: boolean;
 }
 
 // @beta
@@ -1234,6 +1236,7 @@ export class RushConstants {
     static readonly experimentsFilename: string;
     static readonly globalCommandKind: 'global';
     static readonly hashDelimiter: string;
+    static readonly mergeQueueIgnoreFileName: string;
     static readonly nodeModulesFolderName: string;
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;
@@ -1245,8 +1248,10 @@ export class RushConstants {
     static readonly pnpmfileGlobalFilename: string;
     static readonly pnpmfileV1Filename: string;
     static readonly pnpmfileV6Filename: string;
+    static readonly pnpmPatchesCommonFolderName: string;
     static readonly pnpmPatchesFolderName: string;
     static readonly pnpmV3ShrinkwrapFilename: string;
+    static readonly projectImpactGraphFilename: string;
     static readonly projectRushFolderName: string;
     static readonly projectShrinkwrapFilename: string;
     static readonly rebuildCommandName: string;
@@ -1375,12 +1380,14 @@ export class Subspace {
 export class SubspacesConfiguration {
     // @internal
     static _convertNameToEnvironmentVariable(subspaceName: string, splitWorkspaceCompatibility: boolean): string;
-    readonly enabled: boolean;
     static explainIfInvalidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): string | undefined;
+    readonly preventSelectingAllSubspaces: boolean;
     static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;
     readonly splitWorkspaceCompatibility: boolean;
     readonly subspaceJsonFilePath: string;
     readonly subspaceNames: ReadonlySet<string>;
+    // (undocumented)
+    readonly subspacesEnabled: boolean;
     // (undocumented)
     static tryLoadFromConfigurationFile(subspaceJsonFilePath: string): SubspacesConfiguration | undefined;
     // (undocumented)

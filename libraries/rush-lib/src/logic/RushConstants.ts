@@ -104,6 +104,12 @@ export class RushConstants {
   public static readonly pnpmPatchesFolderName: string = 'patches';
 
   /**
+   * The folder name under `/common/temp` used to store checked-in patches.
+   * Example: `C:\MyRepo\common\pnpm-patches`
+   */
+  public static readonly pnpmPatchesCommonFolderName: string = `pnpm-${RushConstants.pnpmPatchesFolderName}`;
+
+  /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
    */
   public static readonly yarnShrinkwrapFilename: string = 'yarn.lock';
@@ -296,4 +302,14 @@ export class RushConstants {
    * The name of the parameter that can be used to bypass policies.
    */
   public static readonly bypassPolicyFlagLongName: '--bypass-policy' = '--bypass-policy';
+
+  /**
+   * Merge Queue ignore configuration file.
+   */
+  public static readonly mergeQueueIgnoreFileName: string = '.mergequeueignore';
+
+  /**
+   * The filename ("project-impact-graph.yaml") for the project impact graph file.
+   */
+  public static readonly projectImpactGraphFilename: string = 'project-impact-graph.yaml';
 }

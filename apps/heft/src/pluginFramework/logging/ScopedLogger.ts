@@ -6,7 +6,7 @@ import {
   Terminal,
   type ITerminalProvider,
   type ITerminal
-} from '@rushstack/node-core-library';
+} from '@rushstack/terminal';
 
 import { LoggingManager } from './LoggingManager';
 

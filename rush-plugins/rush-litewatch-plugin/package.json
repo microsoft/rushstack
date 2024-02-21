@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-sdk": "workspace:*"
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

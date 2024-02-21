@@ -47,6 +47,15 @@ ruleTester.run('typedef-var', typedefVar, {
       code: 'for (const x of []) { }'
     },
     {
+      code: 'const x = 1 as const;'
+    },
+    {
+      code: 'const x: 1 = 1;'
+    },
+    {
+      code: 'const x: number = 1;'
+    },
+    {
       // prettier-ignore
       code: [
         'let { a , b } = {',

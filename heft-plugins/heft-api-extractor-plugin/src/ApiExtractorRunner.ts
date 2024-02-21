@@ -3,7 +3,8 @@
 
 import * as semver from 'semver';
 import type { IScopedLogger } from '@rushstack/heft';
-import { type ITerminal, FileError, InternalError } from '@rushstack/node-core-library';
+import { FileError, InternalError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type * as TApiExtractor from '@microsoft/api-extractor';
 
 export interface IApiExtractorRunnerConfiguration {

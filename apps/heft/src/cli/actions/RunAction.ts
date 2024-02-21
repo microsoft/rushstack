@@ -6,7 +6,8 @@ import {
   type CommandLineParameterProvider,
   type CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { AlreadyReportedError, type ITerminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { Selection } from '../../utilities/Selection';
 import { HeftActionRunner } from '../HeftActionRunner';

@@ -2,6 +2,78 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.114.0",
+      "tag": "@microsoft/rush_v5.114.0",
+      "date": "Mon, 19 Feb 2024 21:54:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Add `enablePnpmSyncForInjectedDependenciesMeta` to experiments.json; it is part of an upcoming feature for managing PNPM \"injected\" dependencies: https://www.npmjs.com/package/pnpm-sync"
+          },
+          {
+            "comment": "Include a `pnpmPatchesCommonFolderName` constant for the folder name \"pnpm-patches\" that gets placed under \"common\"."
+          },
+          {
+            "comment": "Add a feature to generate a `project-impact-graph.yaml` file in the repo root. This feature is gated under the new `generateProjectImpactGraphDuringRushUpdate` experiment."
+          },
+          {
+            "comment": "Fix a formatting issue with the LICENSE."
+          },
+          {
+            "comment": "Fix an issue with filtered installs when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.113.4",
+      "tag": "@microsoft/rush_v5.113.4",
+      "date": "Wed, 31 Jan 2024 22:49:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Introduce an explicit warning message during `rush install` or `rush update` about `dependenciesMeta` not being up-to-date."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.113.3",
+      "tag": "@microsoft/rush_v5.113.3",
+      "date": "Wed, 31 Jan 2024 22:25:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush update` would sometimes not correctly sync the `pnpm-lock.yaml` file back to `common/config/rush/` after a project's `package.json` has been updated."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.113.2",
+      "tag": "@microsoft/rush_v5.113.2",
+      "date": "Wed, 31 Jan 2024 18:45:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix some minor issues when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.113.1",
+      "tag": "@microsoft/rush_v5.113.1",
+      "date": "Wed, 31 Jan 2024 07:07:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Enable filtered installs of subspaces and add a \"preventSelectingAllSubspaces\" setting"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.113.0",
       "tag": "@microsoft/rush_v5.113.0",
       "date": "Tue, 30 Jan 2024 22:58:52 GMT",

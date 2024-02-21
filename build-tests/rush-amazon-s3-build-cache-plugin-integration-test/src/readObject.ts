@@ -3,7 +3,7 @@
 
 import { AmazonS3Client } from '@rushstack/rush-amazon-s3-build-cache-plugin';
 import { WebClient } from '@rushstack/rush-amazon-s3-build-cache-plugin';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
 const webClient: WebClient = new WebClient();
 

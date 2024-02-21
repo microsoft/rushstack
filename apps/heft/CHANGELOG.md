@@ -1,6 +1,48 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 25 Jan 2024 01:09:30 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.65.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Fix a recent regression causing `Error: Cannot find module 'colors/safe'` (GitHub #4525)
+- Remove a no longer needed dependency on the `chokidar` package
+
+## 0.65.0
+Tue, 20 Feb 2024 16:10:52 GMT
+
+### Minor changes
+
+- Add a built-in `set-environment-variables-plugin` task plugin to set environment variables.
+
+## 0.64.8
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 0.64.7
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.64.6
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 0.64.5
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.64.4
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
 
 ## 0.64.3
 Thu, 25 Jan 2024 01:09:30 GMT

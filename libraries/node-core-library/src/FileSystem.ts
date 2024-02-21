@@ -31,7 +31,7 @@ export type FolderItem = fs.Dirent;
 /* eslint-disable no-bitwise */
 
 /**
- * The options for {@link FileSystem.readFolder}
+ * The options for {@link FileSystem.readFolderItems} and {@link FileSystem.readFolderItemNames}.
  * @public
  */
 export interface IFileSystemReadFolderOptions {
@@ -593,25 +593,6 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(() => {
       return fsx.ensureDir(folderPath);
     });
-  }
-
-  /**
-   * @deprecated
-   * Use {@link FileSystem.readFolderItemNames} instead.
-   */
-  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
-    return FileSystem.readFolderItemNames(folderPath, options);
-  }
-
-  /**
-   * @deprecated
-   * Use {@link FileSystem.readFolderItemNamesAsync} instead.
-   */
-  public static async readFolderAsync(
-    folderPath: string,
-    options?: IFileSystemReadFolderOptions
-  ): Promise<string[]> {
-    return await FileSystem.readFolderItemNamesAsync(folderPath, options);
   }
 
   /**
