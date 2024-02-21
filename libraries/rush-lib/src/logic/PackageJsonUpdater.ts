@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
 import { ConsoleTerminalProvider, Terminal, type ITerminalProvider, Colorize } from '@rushstack/terminal';
@@ -167,7 +166,7 @@ export class PackageJsonUpdater {
       }
 
       this._terminal.writeLine(
-        colors.green(`Updating projects to use `) + moduleName + '@' + colors.cyan(version)
+        Colorize.green(`Updating projects to use `) + moduleName + '@' + Colorize.cyan(version)
       );
       this._terminal.writeLine();
 
@@ -233,7 +232,7 @@ export class PackageJsonUpdater {
 
     for (const [filePath, project] of allPackageUpdates) {
       if (project.saveIfModified()) {
-        this._terminal.writeLine(colors.green('Wrote ') + filePath);
+        this._terminal.writeLine(Colorize.green('Wrote ') + filePath);
       }
     }
 
@@ -545,9 +544,9 @@ export class PackageJsonUpdater {
     explicitlyPreferredVersion: string | undefined,
     rangeStyle: SemVerStyle
   ): Promise<string> {
-    this._terminal.writeLine(colors.gray(`Determining new version for dependency: ${packageName}`));
+    this._terminal.writeLine(Colorize.gray(`Determining new version for dependency: ${packageName}`));
     if (initialSpec) {
-      this._terminal.writeLine(`Specified version selector: ${colors.cyan(initialSpec)}`);
+      this._terminal.writeLine(`Specified version selector: ${Colorize.cyan(initialSpec)}`);
     } else {
       this._terminal.writeLine(
         `No version selector was specified, so the version will be determined automatically.`
@@ -560,9 +559,9 @@ export class PackageJsonUpdater {
     if (initialSpec) {
       if (initialSpec === implicitlyPreferredVersion) {
         this._terminal.writeLine(
-          colors.green('Assigning "') +
-            colors.cyan(initialSpec) +
-            colors.green(
+          Colorize.green('Assigning "') +
+            Colorize.cyan(initialSpec) +
+            Colorize.green(
               `" for "${packageName}" because it matches what other projects are using in this repo.`
             )
         );
@@ -571,9 +570,9 @@ export class PackageJsonUpdater {
 
       if (initialSpec === explicitlyPreferredVersion) {
         this._terminal.writeLine(
-          colors.green('Assigning "') +
-            colors.cyan(initialSpec) +
-            colors.green(
+          Colorize.green('Assigning "') +
+            Colorize.cyan(initialSpec) +
+            Colorize.green(
               `" for "${packageName}" because it is the preferred version listed in ${RushConstants.commonVersionsFilename}.`
             )
         );
@@ -584,7 +583,7 @@ export class PackageJsonUpdater {
     if (this._rushConfiguration.ensureConsistentVersions && !initialSpec) {
       if (implicitlyPreferredVersion) {
         this._terminal.writeLine(
-          `Assigning the version "${colors.cyan(implicitlyPreferredVersion)}" for "${packageName}" ` +
+          `Assigning the version "${Colorize.cyan(implicitlyPreferredVersion)}" for "${packageName}" ` +
             'because it is already used by other projects in this repo.'
         );
         return implicitlyPreferredVersion;
@@ -592,7 +591,7 @@ export class PackageJsonUpdater {
 
       if (explicitlyPreferredVersion) {
         this._terminal.writeLine(
-          `Assigning the version "${colors.cyan(explicitlyPreferredVersion)}" for "${packageName}" ` +
+          `Assigning the version "${Colorize.cyan(explicitlyPreferredVersion)}" for "${packageName}" ` +
             `because it is the preferred version listed in ${RushConstants.commonVersionsFilename}.`
         );
         return explicitlyPreferredVersion;
@@ -625,7 +624,7 @@ export class PackageJsonUpdater {
     let selectedVersionPrefix: string = '';
 
     if (initialSpec && initialSpec !== 'latest') {
-      this._terminal.writeLine(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
+      this._terminal.writeLine(Colorize.gray('Finding versions that satisfy the selector: ') + initialSpec);
       this._terminal.writeLine();
 
       if (localProject !== undefined) {
@@ -671,13 +670,13 @@ export class PackageJsonUpdater {
           versionList = JSON.parse(allVersions);
         }
 
-        this._terminal.writeLine(colors.gray(`Found ${versionList.length} available versions.`));
+        this._terminal.writeLine(Colorize.gray(`Found ${versionList.length} available versions.`));
 
         for (const version of versionList) {
           if (semver.satisfies(version, initialSpec)) {
             selectedVersion = initialSpec;
             this._terminal.writeLine(
-              `Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`
+              `Found a version that satisfies ${initialSpec}: ${Colorize.cyan(version)}`
             );
             break;
           }
@@ -703,7 +702,7 @@ export class PackageJsonUpdater {
       } else {
         if (!this._rushConfiguration.ensureConsistentVersions) {
           this._terminal.writeLine(
-            colors.gray(
+            Colorize.gray(
               `The "ensureConsistentVersions" policy is NOT active, so we will assign the latest version.`
             )
           );
@@ -728,7 +727,7 @@ export class PackageJsonUpdater {
 
       this._terminal.writeLine();
 
-      this._terminal.writeLine(`Found latest version: ${colors.cyan(selectedVersion)}`);
+      this._terminal.writeLine(`Found latest version: ${Colorize.cyan(selectedVersion)}`);
     }
 
     this._terminal.writeLine();
@@ -764,7 +763,7 @@ export class PackageJsonUpdater {
 
     const normalizedVersion: string = selectedVersionPrefix + selectedVersion;
     this._terminal.writeLine(
-      colors.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
+      Colorize.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
     );
     return normalizedVersion;
   }

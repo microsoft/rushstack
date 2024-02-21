@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import {
   FileConstants,
@@ -10,6 +9,7 @@ import {
   JsonFile,
   LockFile
 } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { LastInstallFlag } from '../../api/LastInstallFlag';
 import type { PackageManagerName } from '../../api/packageManager/PackageManager';
@@ -171,7 +171,7 @@ export class InstallHelpers {
 
     if (!packageManagerMarker.isValid() || lock.dirtyWhenAcquired) {
       logIfConsoleOutputIsNotRestricted(
-        colors.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
+        Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
       );
 
       // note that this will remove the last-install flag from the directory
@@ -265,7 +265,7 @@ export class InstallHelpers {
             console.log(`Overriding the environment variable with the value set in rush.json.`);
           } else {
             // eslint-disable-next-line no-console
-            console.log(colors.yellow(`WARNING: Not overriding the value of the environment variable.`));
+            console.log(Colorize.yellow(`WARNING: Not overriding the value of the environment variable.`));
           }
         }
 

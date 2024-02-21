@@ -3,7 +3,7 @@
 exports[`RushXCommandLine launchRushXAsync executes a valid package script 1`] = `
 Array [
   Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+    "[1mRush Multi-Project Build Tool 40.40.40[33m[39m[22m - Node.js 12.12.12 (LTS)",
   ],
   Array [
     "> \\"an acme project build command\\"
@@ -17,7 +17,7 @@ exports[`RushXCommandLine launchRushXAsync executes a valid package script with 
 exports[`RushXCommandLine launchRushXAsync fails if the package does not contain a matching script 1`] = `
 Array [
   Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+    "[1mRush Multi-Project Build Tool 40.40.40[33m[39m[22m - Node.js 12.12.12 (LTS)",
   ],
 ]
 `;
@@ -25,7 +25,7 @@ Array [
 exports[`RushXCommandLine launchRushXAsync prints usage info 1`] = `
 Array [
   Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+    "[1mRush Multi-Project Build Tool 40.40.40[33m[39m[22m - Node.js 12.12.12 (LTS)",
   ],
   Array [
     "usage: rushx [-h]",

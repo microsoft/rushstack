@@ -36,7 +36,6 @@
     "@yarnpkg/lockfile": "~1.0.2",
     "builtin-modules": "~3.1.0",
     "cli-table": "~0.3.1",
-    "colors": "~1.2.1",
     "dependency-path": "~9.2.8",
     "fast-glob": "~3.3.1",
     "figures": "3.0.0",

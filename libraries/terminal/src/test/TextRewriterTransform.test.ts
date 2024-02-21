@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import { NewlineKind, Text } from '@rushstack/node-core-library';
 
+import { Colorize } from '../Colorize';
 import { TerminalChunkKind } from '../ITerminalChunk';
 import { MockWritable } from '../MockWritable';
 import { TextRewriterTransform } from '../TextRewriterTransform';
-import { NewlineKind, Text } from '@rushstack/node-core-library';
 
 describe(TextRewriterTransform.name, () => {
   it('should apply standard rewriters', () => {
@@ -19,7 +19,7 @@ describe(TextRewriterTransform.name, () => {
     });
 
     // This color code will be removed
-    transform.writeChunk({ text: colors.red('RED'), kind: TerminalChunkKind.Stderr });
+    transform.writeChunk({ text: Colorize.red('RED'), kind: TerminalChunkKind.Stderr });
     // These newlines will be converted to \n
     transform.writeChunk({ text: 'stderr 1\r\nstderr 2\r\n', kind: TerminalChunkKind.Stderr });
 

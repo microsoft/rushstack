@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { PackageJsonLookup } from '@rushstack/node-core-library';
-import * as colorsPackage from 'colors';
 
 import { Utilities } from '../../utilities/Utilities';
 import { Rush, type ILaunchOptions } from '../../api/Rush';
@@ -18,14 +17,8 @@ describe(RushXCommandLine.name, () => {
   let executeLifecycleCommandMock: jest.SpyInstance | undefined;
   let logMock: jest.SpyInstance | undefined;
   let rushConfiguration: RushConfiguration | undefined;
-  let colorsEnabled: boolean;
 
   beforeEach(() => {
-    colorsEnabled = colorsPackage.enabled;
-    if (!colorsEnabled) {
-      colorsPackage.enable();
-    }
-
     // Mock process
     $argv = process.argv;
     process.argv = [...process.argv];
@@ -80,10 +73,6 @@ describe(RushXCommandLine.name, () => {
   });
 
   afterEach(() => {
-    if (!colorsEnabled) {
-      colorsPackage.disable();
-    }
-
     process.argv = $argv;
     Object.defineProperty(process, 'versions', {
       value: $versions

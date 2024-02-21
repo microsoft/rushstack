@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import * as child_process from 'child_process';
-import colors from 'colors/safe';
 
 import type {
   CommandLineFlagParameter,
@@ -11,7 +10,7 @@ import type {
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
-import { Terminal, type ITerminal, ConsoleTerminalProvider } from '@rushstack/terminal';
+import { Terminal, type ITerminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -632,7 +631,7 @@ export class ChangeAction extends BaseRushAction {
         // eslint-disable-next-line no-console
         console.log(
           '\n' +
-            colors.yellow(
+            Colorize.yellow(
               'Warning: You have unstaged changes, which do not trigger prompting for change ' +
                 'descriptions.'
             )

@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { AnsiEscape } from '@rushstack/terminal';
-import * as colorsPackage from 'colors';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 describe('CommandLineHelp', () => {
   let oldCwd: string | undefined;
-  let colorsEnabled: boolean;
 
   let parser: RushCommandLineParser;
 
@@ -23,11 +21,6 @@ describe('CommandLineHelp', () => {
 
     process.chdir(localCwd);
 
-    colorsEnabled = colorsPackage.enabled;
-    if (!colorsEnabled) {
-      colorsPackage.enable();
-    }
-
     // This call may terminate the entire test run because it invokes process.exit()
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
@@ -39,10 +32,6 @@ describe('CommandLineHelp', () => {
   afterEach(() => {
     if (oldCwd) {
       process.chdir(oldCwd);
-    }
-
-    if (!colorsEnabled) {
-      colorsPackage.disable();
     }
   });
 

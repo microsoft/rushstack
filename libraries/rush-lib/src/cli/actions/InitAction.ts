@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import {
   FileSystem,
@@ -11,6 +10,7 @@ import {
   type FileSystemStats
 } from '@rushstack/node-core-library';
 import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
@@ -120,7 +120,7 @@ export class InitAction extends BaseConfiglessRushAction {
     if (this.rushConfiguration !== undefined) {
       // eslint-disable-next-line no-console
       console.error(
-        colors.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
+        Colorize.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
       );
       // eslint-disable-next-line no-console
       console.log(
@@ -142,14 +142,14 @@ export class InitAction extends BaseConfiglessRushAction {
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
         // eslint-disable-next-line no-console
-        console.error(colors.red(`ERROR: Found a subdirectory: "${itemName}"`));
+        console.error(Colorize.red(`ERROR: Found a subdirectory: "${itemName}"`));
         // eslint-disable-next-line no-console
         console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
         return false;
       } else {
         if (itemName.toLowerCase() === 'package.json') {
           // eslint-disable-next-line no-console
-          console.error(colors.red(`ERROR: Found a package.json file in this folder`));
+          console.error(Colorize.red(`ERROR: Found a package.json file in this folder`));
           // eslint-disable-next-line no-console
           console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
           return false;
@@ -250,14 +250,14 @@ export class InitAction extends BaseConfiglessRushAction {
     if (!this._overwriteParameter.value) {
       if (destinationFileExists) {
         // eslint-disable-next-line no-console
-        console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
+        console.log(Colorize.yellow('Not overwriting already existing file: ') + destinationPath);
         return;
       }
     }
 
     if (destinationFileExists) {
       // eslint-disable-next-line no-console
-      console.log(colors.yellow(`Overwriting: ${destinationPath}`));
+      console.log(Colorize.yellow(`Overwriting: ${destinationPath}`));
     } else {
       // eslint-disable-next-line no-console
       console.log(`Generating: ${destinationPath}`);

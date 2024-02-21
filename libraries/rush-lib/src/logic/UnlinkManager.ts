@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
@@ -32,7 +32,7 @@ export class UnlinkManager {
     if (!force && useWorkspaces) {
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'Unlinking is not supported when using workspaces. Run "rush purge" to remove ' +
             'project node_modules folders.'
         )

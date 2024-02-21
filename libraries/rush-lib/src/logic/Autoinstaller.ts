@@ -1,13 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
-import { FileSystem, type IPackageJson, JsonFile, LockFile, NewlineKind } from '@rushstack/node-core-library';
-import { Utilities } from '../utilities/Utilities';
+import {
+  FileSystem,
+  type IPackageJson,
+  JsonFile,
+  LockFile,
+  NewlineKind,
+  PackageName,
+  type IParsedPackageNameOrError
+} from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-import { PackageName, type IParsedPackageNameOrError } from '@rushstack/node-core-library';
+import { Utilities } from '../utilities/Utilities';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
 import { InstallHelpers } from './installManager/InstallHelpers';
@@ -221,7 +228,7 @@ export class Autoinstaller {
     this._logIfConsoleOutputIsNotRestricted();
 
     if (this._rushConfiguration.packageManager === 'npm') {
-      this._logIfConsoleOutputIsNotRestricted(colors.bold('Running "npm shrinkwrap"...'));
+      this._logIfConsoleOutputIsNotRestricted(Colorize.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand({
         command: this._rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
@@ -243,11 +250,11 @@ export class Autoinstaller {
     });
     if (oldFileContents !== newFileContents) {
       this._logIfConsoleOutputIsNotRestricted(
-        colors.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
+        Colorize.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
       );
       this._logIfConsoleOutputIsNotRestricted(`\n  ${this.shrinkwrapFilePath}`);
     } else {
-      this._logIfConsoleOutputIsNotRestricted(colors.green('Already up to date.'));
+      this._logIfConsoleOutputIsNotRestricted(Colorize.green('Already up to date.'));
     }
   }
 

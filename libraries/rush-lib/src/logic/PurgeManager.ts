@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
+import { Colorize } from '@rushstack/terminal';
 
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -93,7 +93,7 @@ export class PurgeManager {
       this._rushConfiguration.pnpmOptions.pnpmStorePath
     ) {
       // eslint-disable-next-line no-console
-      console.warn(colors.yellow(`Purging the global pnpm-store`));
+      console.warn(Colorize.yellow(`Purging the global pnpm-store`));
       this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
     }
   }
@@ -122,7 +122,7 @@ export class PurgeManager {
           // Warn that we won't dispose this folder
           // eslint-disable-next-line no-console
           console.log(
-            colors.yellow(
+            Colorize.yellow(
               "The active process's folder will not be deleted: " + path.join(folderToRecycle, firstPart)
             )
           );

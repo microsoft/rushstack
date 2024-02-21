@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import {
   CommandLineParser,
   type CommandLineFlagParameter,
@@ -9,6 +8,7 @@ import {
   type CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { InternalError } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { type ResolutionType, traceImport } from './traceImport';
 
@@ -80,7 +80,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
       if (this._debugParameter.value) {
         console.error('\n' + error.stack);
       } else {
-        console.error('\n' + colors.red('ERROR: ' + error.message.trim()));
+        console.error('\n' + Colorize.red('ERROR: ' + error.message.trim()));
       }
     }
   }
