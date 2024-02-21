@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Replace deprecated function, and fix a path bug in Windows env",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
