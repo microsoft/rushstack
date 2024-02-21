@@ -29,6 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@types/node-fetch": "2.6.2",
     "tapable": "2.2.1"
   },

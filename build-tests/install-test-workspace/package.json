@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/node-core-library": "workspace:*"
   }
 }

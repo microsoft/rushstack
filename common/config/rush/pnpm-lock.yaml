@@ -1910,6 +1910,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
 
   ../../build-tests/localization-plugin-test-01:
     dependencies:
@@ -3332,6 +3335,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../terminal
       '@types/node-fetch':
         specifier: 2.6.2
         version: 2.6.2
@@ -3348,9 +3354,6 @@ importers:
       '@rushstack/stream-collator':
         specifier: workspace:*
         version: link:../stream-collator
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../terminal
       '@rushstack/ts-command-line':
         specifier: workspace:*
         version: link:../ts-command-line
