@@ -9,7 +9,8 @@ import {
   FileConstants,
   AlreadyReportedError,
   Async,
-  type IDependenciesMetaTable
+  type IDependenciesMetaTable,
+  Path
 } from '@rushstack/node-core-library';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
@@ -275,10 +276,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
 
         // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
-        const relativePathFromTempFolderToPackageFolder: string = `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`;
-        expectedDependenciesMetaByProjectRelativePath[
-          relativePathFromTempFolderToPackageFolder.split(path.win32.sep).join(path.posix.sep)
-        ] = dependenciesMeta;
+        const relativePathFromTempFolderToPackageFolder: string = Path.convertToSlashes(
+          `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`
+        );
+        expectedDependenciesMetaByProjectRelativePath[relativePathFromTempFolderToPackageFolder] =
+          dependenciesMeta;
       }
     }
 
@@ -288,8 +290,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[key.split(path.win32.sep).join(path.posix.sep)] =
-            value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
         }
       }
     }
