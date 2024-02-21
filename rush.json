@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.109.1",
+  "rushVersion": "5.113.4",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -656,6 +656,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-storybook-react-tutorial-app",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-app",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-basic-tutorial",
       "projectFolder": "build-tests-samples/heft-webpack-basic-tutorial",
       "reviewCategory": "tests",
@@ -1092,7 +1098,8 @@
       "packageName": "@rushstack/terminal",
       "projectFolder": "libraries/terminal",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/tree-pattern",

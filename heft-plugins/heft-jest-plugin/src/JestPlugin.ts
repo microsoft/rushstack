@@ -30,14 +30,8 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import {
-  FileSystem,
-  Path,
-  Import,
-  JsonFile,
-  PackageName,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { FileSystem, Path, Import, JsonFile, PackageName } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';

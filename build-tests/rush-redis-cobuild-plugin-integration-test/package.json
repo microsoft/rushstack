@@ -15,6 +15,7 @@
     "local-node-rig": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-redis-cobuild-plugin": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@types/http-proxy": "~1.17.8",
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",

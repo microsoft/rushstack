@@ -10,7 +10,7 @@ import type {
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 
 const PLUGIN_NAME: 'ValidateOperationsPlugin' = 'ValidateOperationsPlugin';

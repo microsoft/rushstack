@@ -2,6 +2,60 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "3.6.4",
+      "tag": "@rushstack/eslint-config_v3.6.4",
+      "date": "Sat, 17 Feb 2024 06:24:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.15.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.9.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.3",
+      "tag": "@rushstack/eslint-config_v3.6.3",
+      "date": "Wed, 07 Feb 2024 01:11:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.2",
+      "tag": "@rushstack/eslint-config_v3.6.2",
+      "date": "Thu, 25 Jan 2024 23:03:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.1",
+      "tag": "@rushstack/eslint-config_v3.6.1",
+      "date": "Wed, 24 Jan 2024 07:38:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.7.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.0",
       "tag": "@rushstack/eslint-config_v3.6.0",
       "date": "Tue, 16 Jan 2024 18:30:10 GMT",

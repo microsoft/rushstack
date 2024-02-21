@@ -50,6 +50,16 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
           return;
         }
 
+        if (
+          node.init?.type === AST_NODE_TYPES.TSAsExpression &&
+          node.init.typeAnnotation.type === AST_NODE_TYPES.TSTypeReference &&
+          node.init.typeAnnotation.typeName.type === AST_NODE_TYPES.Identifier &&
+          node.init.typeAnnotation.typeName.name === 'const'
+        ) {
+          // An `as const` type declaration was provided
+          return;
+        }
+
         // These are @typescript-eslint/typedef exemptions
         if (
           node.id.type === AST_NODE_TYPES.ArrayPattern /* ArrayDestructuring */ ||

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-config-file",
-  "version": "0.14.4",
+  "version": "0.14.12",
   "description": "Configuration file loader for @rushstack/heft",
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "jsonpath-plus": "~4.0.0"
   },
   "devDependencies": {

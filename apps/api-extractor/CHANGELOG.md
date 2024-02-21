@@ -1,6 +1,55 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 03 Jan 2024 00:31:18 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 7.40.4
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 7.40.3
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 7.40.2
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 7.40.1
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 7.40.0
+Wed, 07 Feb 2024 01:11:18 GMT
+
+### Minor changes
+
+- Classify arrow functions as `function` kind in the doc model export.
+
+## 7.39.5
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 7.39.4
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 7.39.3
+Tue, 23 Jan 2024 20:12:57 GMT
+
+_Version update only_
+
+## 7.39.2
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
 
 ## 7.39.1
 Wed, 03 Jan 2024 00:31:18 GMT

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-utilities",
-  "version": "0.9.17",
+  "version": "0.9.27",
   "description": "This plugin contains some useful functions for localization.",
   "main": "lib/index.js",
   "typings": "dist/localization-utilities.d.ts",
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@rushstack/typings-generator": "workspace:*",
     "pseudolocale": "~1.1.0",
     "xmldoc": "~1.1.2"

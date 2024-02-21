@@ -1,6 +1,48 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Wed, 03 Jan 2024 00:31:18 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.14.12
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.14.11
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 0.14.10
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.14.9
+Thu, 08 Feb 2024 01:09:22 GMT
+
+_Version update only_
+
+## 0.14.8
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.14.7
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.14.6
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 0.14.5
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
 
 ## 0.14.4
 Wed, 03 Jan 2024 00:31:18 GMT

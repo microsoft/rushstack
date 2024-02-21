@@ -159,7 +159,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
             compilation.errors.push(new webpack.WebpackError(errorMessage));
             return renderError(errorMessage);
           } else {
-            resolvedGlobsBase = path.posix.resolve(context, globsBase);
+            resolvedGlobsBase = path.resolve(context, globsBase);
           }
         } else if (path.isAbsolute(globsBase)) {
           // This is an absolute path
@@ -213,7 +213,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
           }
 
           if (packagePath) {
-            resolvedGlobsBase = path.posix.join(packagePath, pathInsidePackage);
+            resolvedGlobsBase = path.join(packagePath, pathInsidePackage);
           } else {
             const errorMessage: string = `Unable to resolve package "${packageName}"`;
             compilation.errors.push(new webpack.WebpackError(errorMessage));

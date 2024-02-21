@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/eslint-patch",
-  "version": "1.7.0",
-  "description": "A patch that improves how ESLint loads plugins when working in a monorepo with a reusable toolchain",
+  "version": "1.7.2",
+  "description": "Enhance ESLint with better support for large scale monorepos",
   "main": "lib/usage.js",
   "license": "MIT",
   "repository": {
@@ -22,7 +22,12 @@
     "resolver",
     "plugin",
     "relative",
-    "package"
+    "package",
+    "bulk",
+    "suppressions",
+    "monorepo",
+    "monkey",
+    "patch"
   ],
   "devDependencies": {
     "@rushstack/heft": "0.64.0",

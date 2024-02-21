@@ -1,6 +1,63 @@
 # Change Log - @rushstack/hashed-folder-copy-plugin
 
-This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 1.0.19
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 1.0.18
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
+
+## 1.0.17
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 1.0.16
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 1.0.15
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 1.0.14
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 1.0.13
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 1.0.12
+Thu, 25 Jan 2024 23:03:57 GMT
+
+### Patches
+
+- Fix an issue where builds running on Windows and not on the C drive would not discover assets.
+
+## 1.0.11
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 1.0.10
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 1.0.9
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
 
 ## 1.0.8
 Tue, 16 Jan 2024 18:30:10 GMT

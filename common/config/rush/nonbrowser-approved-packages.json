@@ -240,7 +240,7 @@
     },
     {
       "name": "@rushstack/terminal",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/tree-pattern",
@@ -713,6 +713,10 @@
     {
       "name": "package-extractor-test-03",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "pnpm-sync-lib",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "postcss",

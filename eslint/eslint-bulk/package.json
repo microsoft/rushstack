@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/eslint-bulk",
-  "version": "0.1.5",
-  "description": "A set of helper CLIs to use with the rushstack ESLint toolchain",
+  "version": "0.1.17",
+  "description": "Roll out new ESLint rules in a large monorepo without cluttering up your code with \"eslint-ignore-next-line\"",
   "main": "index.js",
   "license": "MIT",
   "repository": {
@@ -26,7 +26,9 @@
     "retroactive",
     "disable",
     "ignore",
-    "suppression"
+    "suppression",
+    "monkey",
+    "patch"
   ],
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

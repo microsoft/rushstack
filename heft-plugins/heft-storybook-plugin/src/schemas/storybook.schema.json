@@ -4,6 +4,7 @@
   "description": "This schema describes the \"options\" field that can be specified in heft.json when loading \"@rushstack/heft-storybook-plugin\".",
   "type": "object",
   "additionalProperties": false,
+  "required": ["storykitPackageName"],
 
   "properties": {
     "storykitPackageName": {
@@ -11,23 +12,31 @@
       "description": "Storybook's conventional approach is for your app project to have direct dependencies on NPM packages such as `@storybook/react` and `@storybook/addon-essentials`.  These packages have heavyweight dependencies such as Babel, Webpack, and the associated loaders and plugins needed to build the Storybook app (which is bundled completely independently from Heft).  Naively adding these dependencies to your app's package.json muddies the waters of two radically different toolchains, and is likely to lead to dependency conflicts, for example if Heft installs Webpack 5 but `@storybook/react` installs Webpack 4. To solve this problem, `heft-storybook-plugin` introduces the concept of a separate \"storykit package\".  All of your Storybook NPM packages are moved to be dependencies of the storykit.  Storybook's browser API unfortunately isn't separated into dedicated NPM packages, but instead is exported by the Node.js toolchain packages such as `@storybook/react`.  For an even cleaner separation the storykit package can simply reexport such APIs.",
       "type": "string"
     },
-    "startupModulePath": {
-      "title": "The module entry point that Heft serve mode should use to launch the Storybook toolchain.",
-      "description": "Typically it is the path loaded the `start-storybook` shell script. For example, If you are using `@storybook/react`, then the startup path would be: `\"startupModulePath\": \"@storybook/react/bin/index.js\"`",
-      "type": "string",
-      "pattern": "[^\\\\]"
+    "cliCallingConvention": {
+      "title": "Specifies the calling convention of the storybook CLI based on the storybook version.",
+      "description": "Specify how the Storybook CLI should be invoked. Possible values: \"storybook6\" or \"storybook7\", defaults to \"storybook7\".",
+      "enum": ["storybook6", "storybook7"]
     },
-    "staticBuildModulePath": {
-      "title": "The module entry point that Heft non-serve mode should use to launch the Storybook toolchain.",
-      "description": "Typically it is the path loaded the `build-storybook` shell script. For example, If you are using `@storybook/react`, then the static build path would be: `\"staticBuildModulePath\": \"@storybook/react/bin/build.js\"`",
-      "type": "string",
-      "pattern": "[^\\\\]"
+    "cliPackageName": {
+      "title": "The NPM package that Heft should use to launch the Storybook toolchain.",
+      "description": "Specify the NPM package that provides the CLI binary to run. Defaults to `@storybook/cli` for storybook 7 and `@storybook/react` for storybook 6.",
+      "type": "string"
     },
     "staticBuildOutputFolder": {
       "title": "The customized output dir for storybook static build.",
       "description": "If this is empty, then it will use the storybook default output dir. If you want to change the static build output dir to staticBuildDir, then the static build output dir would be: `\"staticBuildOutputFolder\": \"staticBuildDir\"`",
       "type": "string",
       "pattern": "[^\\\\]"
+    },
+    "cwdPackageName": {
+      "title": "Specifies an NPM dependency name that is used as the CWD target for the storybook commands",
+      "description": "By default the plugin executes the storybook commands in the local package context, but for distribution purposes it can be useful to split the TS library and storybook exports into two packages. For example, If you create a storybook 'app' project \"my-ui-storybook-library-app\" for the storybook preview distribution, and your main UI component `library` is my-ui-storybook-library. Your 'app' project is able to compile the 'library' storybook app using the CWD target: `\"cwdPackageName\": \"my-ui-storybook-library\"`",
+      "type": "string"
+    },
+    "captureWebpackStats": {
+      "title": "Specifies whether to capture the webpack stats for storybook build.",
+      "description": "If this is true, then it will capture the webpack stats for storybook build. Defaults to false.",
+      "type": "boolean"
     }
   }
 }

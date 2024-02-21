@@ -2,17 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as crypto from 'crypto';
-import {
-  Async,
-  InternalError,
-  type ITerminal,
-  NewlineKind,
-  Sort,
-  Terminal
-} from '@rushstack/node-core-library';
+import { Async, InternalError, NewlineKind, Sort } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { DiscardStdoutTransform, TextRewriterTransform } from '@rushstack/terminal';
-import { SplitterTransform, type TerminalWritable } from '@rushstack/terminal';
+import { SplitterTransform, type TerminalWritable, type ITerminal, Terminal } from '@rushstack/terminal';
 
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import { OperationStatus } from './OperationStatus';

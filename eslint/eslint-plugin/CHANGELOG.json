@@ -2,6 +2,35 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.15.1",
+      "tag": "@rushstack/eslint-plugin_v0.15.1",
+      "date": "Sat, 17 Feb 2024 06:24:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.15.0",
+      "tag": "@rushstack/eslint-plugin_v0.15.0",
+      "date": "Wed, 07 Feb 2024 01:11:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow using `as const` in `typedef-var`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.0",
       "tag": "@rushstack/eslint-plugin_v0.14.0",
       "date": "Tue, 16 Jan 2024 18:30:10 GMT",

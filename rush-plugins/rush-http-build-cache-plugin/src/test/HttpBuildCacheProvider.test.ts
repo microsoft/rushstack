@@ -6,8 +6,8 @@ jest.mock('node-fetch', function () {
 });
 
 import fetch, { Response } from 'node-fetch';
-import { RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk';
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { type RushSession, EnvironmentConfiguration } from '@rushstack/rush-sdk';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { HttpBuildCacheProvider, type IHttpBuildCacheProviderOptions } from '../HttpBuildCacheProvider';
 

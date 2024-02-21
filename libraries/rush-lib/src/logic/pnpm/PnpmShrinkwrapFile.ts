@@ -27,11 +27,16 @@ import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
 import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
 import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
+import type { Subspace } from '../../api/Subspace';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
+}
+export interface IDependenciesMetaYaml {
+  injected?: boolean;
 }
 
 export type IPnpmV7VersionSpecifier = string;
@@ -69,6 +74,8 @@ export interface IPnpmShrinkwrapImporterYaml {
   devDependencies?: Record<string, IPnpmVersionSpecifier>;
   /** The list of resolved version numbers for optional dependencies */
   optionalDependencies?: Record<string, IPnpmVersionSpecifier>;
+  /** The list of metadata for dependencies declared inside dependencies, optionalDependencies, and devDependencies. */
+  dependenciesMeta?: Record<string, IDependenciesMetaYaml>;
   /**
    * The list of specifiers used to resolve dependency versions
    *
@@ -124,6 +131,10 @@ export interface IPnpmShrinkwrapYaml {
   specifiers: Record<string, string>;
   /** The list of override version number for dependencies */
   overrides?: { [dependency: string]: string };
+}
+
+export interface ILoadFromFileOptions {
+  withCaching?: boolean;
 }
 
 /**
@@ -236,6 +247,9 @@ export function normalizePnpmVersionSpecifier(versionSpecifier: IPnpmVersionSpec
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
+  // TODO: Implement cache eviction when a lockfile is copied back
+  private static _cacheByLockfilePath: Map<string, PnpmShrinkwrapFile | undefined> = new Map();
+
   public readonly shrinkwrapFileMajorVersion: number;
   public readonly isWorkspaceCompatible: boolean;
   public readonly registry: string;
@@ -279,16 +293,30 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this._integrities = new Map();
   }
 
-  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
-    try {
-      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
-    } catch (error) {
-      if (FileSystem.isNotExistError(error as Error)) {
-        return undefined; // file does not exist
-      }
-      throw new Error(`Error reading "${shrinkwrapYamlFilename}":\n  ${(error as Error).message}`);
+  public static loadFromFile(
+    shrinkwrapYamlFilePath: string,
+    { withCaching }: ILoadFromFileOptions = {}
+  ): PnpmShrinkwrapFile | undefined {
+    let loaded: PnpmShrinkwrapFile | undefined;
+    if (withCaching) {
+      loaded = PnpmShrinkwrapFile._cacheByLockfilePath.get(shrinkwrapYamlFilePath);
     }
+
+    // TODO: Promisify this
+    loaded ??= (() => {
+      try {
+        const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilePath);
+        return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+      } catch (error) {
+        if (FileSystem.isNotExistError(error as Error)) {
+          return undefined; // file does not exist
+        }
+        throw new Error(`Error reading "${shrinkwrapYamlFilePath}":\n  ${(error as Error).message}`);
+      }
+    })();
+
+    PnpmShrinkwrapFile._cacheByLockfilePath.set(shrinkwrapYamlFilePath, loaded);
+    return loaded;
   }
 
   public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
@@ -580,17 +608,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+  public findOrphanedProjects(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace
+  ): ReadonlyArray<string> {
     // The base shrinkwrap handles orphaned projects the same across all package managers,
     // but this is only valid for non-workspace installs
     if (!this.isWorkspaceCompatible) {
-      return super.findOrphanedProjects(rushConfiguration);
+      return super.findOrphanedProjects(rushConfiguration, subspace);
     }
 
     const orphanedProjectPaths: string[] = [];
     for (const importerKey of this.getImporterKeys()) {
       // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
-      const rushProjectPath: string = path.resolve(rushConfiguration.commonTempFolder, importerKey);
+      const rushProjectPath: string = path.resolve(subspace.getSubspaceTempFolder(), importerKey);
       if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
         orphanedProjectPaths.push(rushProjectPath);
       }
@@ -668,12 +699,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
+    subspace: Subspace,
     variant?: string
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
-      project.rushConfiguration.commonTempFolder,
+      subspace.getSubspaceTempFolder(),
       project.projectFolder
     );
+
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
     if (!importer) {
       return true;
@@ -684,15 +717,75 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Initialize the pnpmfile if it doesn't exist
     if (!this._pnpmfileConfiguration) {
-      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(project.rushConfiguration, {
-        variant
-      });
+      this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
+        project.rushConfiguration,
+        subspace,
+        {
+          variant
+        }
+      );
+    }
+
+    let transformedPackageJson: IPackageJson = packageJson;
+
+    let subspacePnpmfile: IPnpmfile | undefined;
+    if (project.rushConfiguration.subspacesFeatureEnabled) {
+      // Get the pnpmfile
+      const subspacePnpmfilePath: string = path.join(
+        subspace.getSubspaceTempFolder(),
+        RushConstants.pnpmfileGlobalFilename
+      );
+
+      if (await FileSystem.existsAsync(subspacePnpmfilePath)) {
+        try {
+          subspacePnpmfile = require(subspacePnpmfilePath);
+        } catch (err) {
+          if (err instanceof SyntaxError) {
+            // eslint-disable-next-line no-console
+            console.error(
+              colors.red(
+                `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${subspacePnpmfilePath}\n`
+              )
+            );
+          } else {
+            // eslint-disable-next-line no-console
+            console.error(
+              colors.red(
+                `Error during pnpmfile execution. pnpmfile: "${subspacePnpmfilePath}". Error: "${err.message}".` +
+                  '\n'
+              )
+            );
+          }
+        }
+      }
+
+      if (subspacePnpmfile) {
+        const individualContext: IPnpmfileContext = {
+          log: (message: string) => {
+            // eslint-disable-next-line no-console
+            console.log(message);
+          }
+        };
+        try {
+          transformedPackageJson =
+            subspacePnpmfile.hooks?.readPackage?.(transformedPackageJson, individualContext) ||
+            transformedPackageJson;
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(
+            colors.red(
+              `Error during readPackage hook execution. pnpmfile: "${subspacePnpmfilePath}". Error: "${err.message}".` +
+                '\n'
+            )
+          );
+        }
+      }
     }
 
     // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
     // found versions much simpler.
     const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
-      this._pnpmfileConfiguration.transform(packageJson),
+      this._pnpmfileConfiguration.transform(transformedPackageJson),
       project.packageJsonEditor.filePath
     );
 

@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/operation-graph",
-  "version": "0.2.3",
+  "version": "0.2.11",
   "description": "Library for managing and executing operations in a directed acyclic graph.",
   "main": "lib/index.js",
   "typings": "dist/operation-graph.d.ts",
@@ -16,7 +16,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "local-eslint-config": "workspace:*",

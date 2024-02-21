@@ -5,10 +5,10 @@ import * as path from 'path';
 import {
   PackageJsonLookup,
   Import,
-  type ITerminal,
   type INodePackageJson,
   type IPackageJson
 } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
 /**

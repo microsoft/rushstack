@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook } from 'tapable';
-import { InternalError, type ITerminal } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { IHeftPlugin } from './IHeftPlugin';

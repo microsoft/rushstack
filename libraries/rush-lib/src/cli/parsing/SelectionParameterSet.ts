@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  AlreadyReportedError,
-  PackageJsonLookup,
-  type IPackageJson,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type {
   CommandLineParameterProvider,
   CommandLineStringListParameter
@@ -23,6 +19,7 @@ import {
 import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
+import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -62,6 +59,7 @@ export class SelectionParameterSet {
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
 
     this._selectorParserByScope = selectorParsers;
 

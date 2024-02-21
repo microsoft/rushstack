@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

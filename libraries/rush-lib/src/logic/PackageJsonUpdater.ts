@@ -4,12 +4,7 @@
 import colors from 'colors/safe';
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
-import {
-  ConsoleTerminalProvider,
-  Terminal,
-  type ITerminalProvider,
-  Colors
-} from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal, type ITerminalProvider, Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { BaseInstallManager } from './base/BaseInstallManager';
@@ -33,6 +28,7 @@ import {
   type IPackageJsonUpdaterRushRemoveOptions,
   SemVerStyle
 } from './PackageJsonUpdaterTypes';
+import type { Subspace } from '../api/Subspace';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -242,37 +238,15 @@ export class PackageJsonUpdater {
     }
 
     if (!skipUpdate) {
-      this._terminal.writeLine();
-      this._terminal.writeLine(colors.green('Running "rush update"'));
-      this._terminal.writeLine();
-
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: debugInstall,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        offline: false,
-        networkConcurrency: undefined,
-        collectLogFile: false,
-        variant: variant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        pnpmFilterArguments: [],
-        checkOnly: false
-      };
-
-      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
-        this._rushConfiguration,
-        this._rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        await purgeManager.startDeleteAllAsync();
+      if (this._rushConfiguration.subspacesFeatureEnabled) {
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
+          new Set(options.projects)
+        );
+        for (const subspace of subspaceSet) {
+          await this._doUpdate(debugInstall, subspace, variant);
+        }
+      } else {
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
     }
   }
@@ -289,43 +263,61 @@ export class PackageJsonUpdater {
     const { skipUpdate, debugInstall, variant } = options;
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
-        this._terminal.writeLine(Colors.green('Wrote'), project.filePath);
+        this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
       }
     }
 
     if (!skipUpdate) {
-      this._terminal.writeLine();
-      this._terminal.writeLine(Colors.green('Running "rush update"'));
-      this._terminal.writeLine();
-
-      const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
-      const installManagerOptions: IInstallManagerOptions = {
-        debug: debugInstall,
-        allowShrinkwrapUpdates: true,
-        bypassPolicy: false,
-        noLink: false,
-        fullUpgrade: false,
-        recheckShrinkwrap: false,
-        networkConcurrency: undefined,
-        offline: false,
-        collectLogFile: false,
-        variant: variant,
-        maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-        pnpmFilterArguments: [],
-        checkOnly: false
-      };
-
-      const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
-        this._rushConfiguration,
-        this._rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-      try {
-        await installManager.doInstallAsync();
-      } finally {
-        await purgeManager.startDeleteAllAsync();
+      if (this._rushConfiguration.subspacesFeatureEnabled) {
+        const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
+          new Set(options.projects)
+        );
+        for (const subspace of subspaceSet) {
+          await this._doUpdate(debugInstall, subspace, variant);
+        }
+      } else {
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
       }
+    }
+  }
+
+  private async _doUpdate(
+    debugInstall: boolean,
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
+    this._terminal.writeLine();
+    this._terminal.writeLine(Colorize.green('Running "rush update"'));
+    this._terminal.writeLine();
+
+    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
+    const installManagerOptions: IInstallManagerOptions = {
+      debug: debugInstall,
+      allowShrinkwrapUpdates: true,
+      bypassPolicy: false,
+      noLink: false,
+      fullUpgrade: false,
+      recheckShrinkwrap: false,
+      networkConcurrency: undefined,
+      offline: false,
+      collectLogFile: false,
+      variant: variant,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      pnpmFilterArguments: [],
+      checkOnly: false,
+      subspace: subspace
+    };
+
+    const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      purgeManager,
+      installManagerOptions
+    );
+    try {
+      await installManager.doInstallAsync();
+    } finally {
+      await purgeManager.startDeleteAllAsync();
     }
   }
 
@@ -371,9 +363,9 @@ export class PackageJsonUpdater {
 
       dependenciesToAddOrUpdate[packageName] = version;
       this._terminal.writeLine(
-        Colors.green('Updating projects to use'),
+        Colorize.green('Updating projects to use'),
         `${packageName}@`,
-        Colors.cyan(version)
+        Colorize.cyan(version)
       );
       this._terminal.writeLine();
 

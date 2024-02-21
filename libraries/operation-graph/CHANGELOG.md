@@ -1,6 +1,48 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.2.11
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.2.10
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 0.2.9
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.2.8
+Thu, 08 Feb 2024 01:09:22 GMT
+
+_Version update only_
+
+## 0.2.7
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.2.6
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.2.5
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 0.2.4
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
 
 ## 0.2.3
 Tue, 16 Jan 2024 18:30:10 GMT

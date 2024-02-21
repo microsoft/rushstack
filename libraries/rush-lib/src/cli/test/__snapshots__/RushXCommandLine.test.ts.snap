@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RushXCommandLine launchRushX executes a valid package script 1`] = `
+exports[`RushXCommandLine launchRushXAsync executes a valid package script 1`] = `
 Array [
   Array [
     "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
@@ -12,9 +12,9 @@ Array [
 ]
 `;
 
-exports[`RushXCommandLine launchRushX executes a valid package script with no startup banner 1`] = `Array []`;
+exports[`RushXCommandLine launchRushXAsync executes a valid package script with no startup banner 1`] = `Array []`;
 
-exports[`RushXCommandLine launchRushX fails if the package does not contain a matching script 1`] = `
+exports[`RushXCommandLine launchRushXAsync fails if the package does not contain a matching script 1`] = `
 Array [
   Array [
     "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`RushXCommandLine launchRushX prints usage info 1`] = `
+exports[`RushXCommandLine launchRushXAsync prints usage info 1`] = `
 Array [
   Array [
     "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",

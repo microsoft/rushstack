@@ -1,6 +1,69 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.21.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.21.0
+Tue, 20 Feb 2024 16:10:52 GMT
+
+### Minor changes
+
+- Include the `set-environment-variables-plugin` plugin from the `@rushstack/heft` package to set the `BROWSERSLIST_IGNORE_OLD_DATA` environment variable to `1` to suppress the warning printed when the `browserslist` package decides it's out of date.
+- Rename the `sass-typings` task in the "library" profile to `sass`, which more accurately describes what the task does and matches what's in the "app" profile.
+
+## 0.20.10
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 0.20.9
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 0.20.8
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 0.20.7
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.20.6
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.20.5
+Thu, 25 Jan 2024 23:03:58 GMT
+
+_Version update only_
+
+## 0.20.4
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.20.3
+Wed, 24 Jan 2024 07:38:34 GMT
+
+_Version update only_
+
+## 0.20.2
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 0.20.1
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
 
 ## 0.20.0
 Tue, 16 Jan 2024 18:30:10 GMT

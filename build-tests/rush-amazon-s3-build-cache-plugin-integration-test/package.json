@@ -20,5 +20,8 @@
     "typescript": "~5.3.3",
     "http-proxy": "~1.18.1",
     "@types/http-proxy": "~1.17.8"
+  },
+  "dependencies": {
+    "@rushstack/terminal": "workspace:*"
   }
 }

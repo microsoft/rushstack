@@ -96,17 +96,4 @@ export class LegacyAdapters {
       return errorObject;
     }
   }
-
-  /**
-   * Prior to Node 11.x, the `Array.sort()` algorithm is not guaranteed to be stable.
-   * If you need a stable sort, you can use `sortStable()` as a workaround.
-   *
-   * @deprecated
-   * Use native Array.sort(), since Node &lt; 14 is no longer supported
-   * @remarks
-   * On NodeJS 11.x and later, this method simply calls the native `Array.sort()`.
-   */
-  public static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void {
-    Array.prototype.sort.call(array, compare);
-  }
 }

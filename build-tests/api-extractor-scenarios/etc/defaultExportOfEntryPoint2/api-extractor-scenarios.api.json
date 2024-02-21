@@ -173,27 +173,28 @@
       "preserveMemberOrder": false,
       "members": [
         {
-          "kind": "Variable",
-          "canonicalReference": "api-extractor-scenarios!defaultFunctionStatement:var",
+          "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!defaultFunctionStatement:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "defaultFunctionStatement: "
+              "text": "defaultFunctionStatement: () => "
             },
             {
               "kind": "Content",
-              "text": "() => void"
+              "text": "void"
             }
           ],
           "fileUrlPath": "src/defaultExportOfEntryPoint2/index.ts",
-          "isReadonly": true,
-          "releaseTag": "Public",
-          "name": "defaultFunctionStatement",
-          "variableTypeTokenRange": {
+          "returnTypeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
-          }
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [],
+          "name": "defaultFunctionStatement"
         }
       ]
     }

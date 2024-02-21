@@ -1,6 +1,57 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Tue, 16 Jan 2024 18:30:11 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 0.8.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Fix a recent regression causing `Error: Cannot find module 'colors/safe'` (GitHub #4525)
+
+## 0.8.0
+Mon, 19 Feb 2024 21:54:27 GMT
+
+### Minor changes
+
+- Introduce a Terminal, Colors, AsciEscape, and some related APIs. These APIs were previously in the @rushstack/node-core-library package. See https://github.com/microsoft/rushstack/pull/3176 for details.
+
+## 0.7.24
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.7.23
+Thu, 08 Feb 2024 01:09:22 GMT
+
+_Version update only_
+
+## 0.7.22
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.7.21
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.7.20
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.7.19
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 0.7.18
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
 
 ## 0.7.17
 Tue, 16 Jan 2024 18:30:11 GMT

@@ -2,6 +2,147 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.8.1",
+      "tag": "@rushstack/terminal_v0.8.1",
+      "date": "Tue, 20 Feb 2024 21:45:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a recent regression causing `Error: Cannot find module 'colors/safe'` (GitHub #4525)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@rushstack/terminal_v0.8.0",
+      "date": "Mon, 19 Feb 2024 21:54:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a Terminal, Colors, AsciEscape, and some related APIs. These APIs were previously in the @rushstack/node-core-library package. See https://github.com/microsoft/rushstack/pull/3176 for details."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.24",
+      "tag": "@rushstack/terminal_v0.7.24",
+      "date": "Sat, 17 Feb 2024 06:24:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.66.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.23",
+      "tag": "@rushstack/terminal_v0.7.23",
+      "date": "Thu, 08 Feb 2024 01:09:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.66.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.22",
+      "tag": "@rushstack/terminal_v0.7.22",
+      "date": "Wed, 07 Feb 2024 01:11:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.21",
+      "tag": "@rushstack/terminal_v0.7.21",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.65.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.20",
+      "tag": "@rushstack/terminal_v0.7.20",
+      "date": "Thu, 25 Jan 2024 01:09:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.19",
+      "tag": "@rushstack/terminal_v0.7.19",
+      "date": "Tue, 23 Jan 2024 20:12:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.18",
+      "tag": "@rushstack/terminal_v0.7.18",
+      "date": "Tue, 23 Jan 2024 16:15:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.64.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.64.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.17",
       "tag": "@rushstack/terminal_v0.7.17",
       "date": "Tue, 16 Jan 2024 18:30:11 GMT",

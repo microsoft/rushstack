@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
@@ -42,7 +42,8 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       collectLogFile: false,
       pnpmFilterArguments: [],
       maxInstallAttempts: 1,
-      networkConcurrency: undefined
+      networkConcurrency: undefined,
+      subspace: rushConfiguration.defaultSubspace
     }
   );
 

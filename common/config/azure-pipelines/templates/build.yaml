@@ -27,18 +27,10 @@ steps:
 
   - script: 'node common/scripts/install-run-rush.js retest --verbose --production ${{ parameters.BuildParameters }}'
     displayName: 'Rush retest (install-run-rush)'
-    env:
-      # Prevent time-based browserslist update warning
-      # See https://github.com/microsoft/rushstack/issues/2981
-      BROWSERSLIST_IGNORE_OLD_DATA: 1
 
   - ${{ if eq(parameters.PerformValidation, true) }}:
       - script: 'node apps/rush/lib/start-dev.js test --verbose --production --timeline ${{ parameters.BuildParameters }}'
         displayName: 'Rush test (rush-lib)'
-        env:
-          # Prevent time-based browserslist update warning
-          # See https://github.com/microsoft/rushstack/issues/2981
-          BROWSERSLIST_IGNORE_OLD_DATA: 1
 
       - script: 'node repo-scripts/repo-toolbox/lib/start.js readme --verify'
         displayName: 'Ensure repo README is up-to-date'

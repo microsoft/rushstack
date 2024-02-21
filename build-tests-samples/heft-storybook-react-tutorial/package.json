@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "heft build --clean --storybook",
+    "build": "heft build --clean",
     "start": "heft build-watch",
-    "storybook": "heft build-watch --storybook",
+    "storybook": "heft build-watch --serve --storybook",
     "build-storybook": "heft build --storybook",
-    "_phase:build": "heft run --only build -- --clean",
+    "_phase:build": "heft run --only build -- --clean --storybook",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

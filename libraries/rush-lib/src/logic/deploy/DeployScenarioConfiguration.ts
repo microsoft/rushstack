@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonSchema, Colors, type ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import schemaJson from '../../schemas/deploy-scenario.schema.json';
@@ -104,7 +105,7 @@ export class DeployScenarioConfiguration {
       throw new Error('The scenario config file was not found: ' + scenarioFilePath);
     }
 
-    terminal.writeLine(Colors.cyan(`Loading deployment scenario: ${scenarioFilePath}`));
+    terminal.writeLine(Colorize.cyan(`Loading deployment scenario: ${scenarioFilePath}`));
 
     const deployScenarioJson: IDeployScenarioJson = JsonFile.loadAndValidate(
       scenarioFilePath,

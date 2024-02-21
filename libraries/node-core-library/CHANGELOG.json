@@ -2,6 +2,115 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "4.0.1",
+      "tag": "@rushstack/node-core-library_v4.0.1",
+      "date": "Tue, 20 Feb 2024 21:45:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove a no longer needed dependency on the `colors` package"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@rushstack/node-core-library_v4.0.0",
+      "date": "Mon, 19 Feb 2024 21:54:27 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details."
+          },
+          {
+            "comment": "Remove deprecated `FileSystem.readFolder`, `FileSystem.readFolderAsync`, and `LegacyAdapters.sortStable` APIs."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Graduate `Async` and `MinimumHeap` APIs from beta to public."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.66.1",
+      "tag": "@rushstack/node-core-library_v3.66.1",
+      "date": "Sat, 17 Feb 2024 06:24:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.66.0",
+      "tag": "@rushstack/node-core-library_v3.66.0",
+      "date": "Thu, 08 Feb 2024 01:09:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add getStatistics() method to FileWriter instances"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.65.0",
+      "tag": "@rushstack/node-core-library_v3.65.0",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Inclue a `Text.reverse` API for reversing a string."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.64.2",
+      "tag": "@rushstack/node-core-library_v3.64.2",
+      "date": "Thu, 25 Jan 2024 01:09:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve 'bin' definition in `IPackageJson` type"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.64.1",
+      "tag": "@rushstack/node-core-library_v3.64.1",
+      "date": "Tue, 23 Jan 2024 20:12:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Executable.getProcessInfoBy* methods truncating the process name on MacOS"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.64.0",
+      "tag": "@rushstack/node-core-library_v3.64.0",
+      "date": "Tue, 23 Jan 2024 16:15:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the `dependenciesMeta` property to the `INodePackageJson` interface."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.63.0",
       "tag": "@rushstack/node-core-library_v3.63.0",
       "date": "Wed, 03 Jan 2024 00:31:18 GMT",
