@@ -143,7 +143,11 @@ export class DocCommentEnhancer {
           // If the API item has a summary comment block (with at least 10 characters), mark it as "documented".
           metadata.undocumented = false;
         } else if (metadata.tsdocComment.inheritDocTag) {
-          if (this._isReferenceInWorkingPackage(metadata.tsdocComment.inheritDocTag.declarationReference)) {
+          if (
+            this._refersToDeclarationInWorkingPackage(
+              metadata.tsdocComment.inheritDocTag.declarationReference
+            )
+          ) {
             // If the API item has an `@inheritDoc` comment that points to an API item in the working package,
             // then the documentation contents should have already been copied from the target via `_applyInheritDoc`.
             // The continued existence of the tag indicates that the declaration reference was invalid, and not
@@ -180,7 +184,7 @@ export class DocCommentEnhancer {
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
         // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
-        if (this._isReferenceInWorkingPackage(node.codeDestination)) {
+        if (this._refersToDeclarationInWorkingPackage(node.codeDestination)) {
           const referencedAstDeclaration: AstDeclaration | ResolverFailure =
             this._collector.astReferenceResolver.resolve(node.codeDestination);
 
@@ -216,7 +220,7 @@ export class DocCommentEnhancer {
       return;
     }
 
-    if (!this._isReferenceInWorkingPackage(inheritDocTag.declarationReference)) {
+    if (!this._refersToDeclarationInWorkingPackage(inheritDocTag.declarationReference)) {
       // The `@inheritDoc` tag is referencing an external package. Skip it, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
       // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
@@ -267,7 +271,7 @@ export class DocCommentEnhancer {
   /**
    * Determines whether or not the provided declaration reference points to an item in the working package.
    */
-  private _isReferenceInWorkingPackage(
+  private _refersToDeclarationInWorkingPackage(
     declarationReference: tsdoc.DocDeclarationReference | undefined
   ): boolean {
     return (
