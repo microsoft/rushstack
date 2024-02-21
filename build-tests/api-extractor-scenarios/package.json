@@ -10,18 +10,21 @@
     "_phase:build": "heft build --clean"
   },
   "dependencies": {
-    "api-extractor-lib1-test": "workspace:*",
-    "api-extractor-lib2-test": "workspace:*",
-    "api-extractor-lib3-test": "workspace:*",
-    "api-extractor-lib4-test": "workspace:*",
-    "api-extractor-lib5-test": "workspace:*"
+    "api-extractor-lib1-test": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@microsoft/teams-js": "1.3.0-beta.4",
     "@rushstack/node-core-library": "workspace:*",
+    "api-extractor-lib2-test": "workspace:*",
+    "api-extractor-lib3-test": "workspace:*",
+    "api-extractor-lib4-test": "workspace:*",
+    "api-extractor-lib5-test": "workspace:*",
     "colors": "~1.2.1",
     "@rushstack/heft": "workspace:*",
     "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "api-extractor-lib5-test": "workspace:*"
   }
 }
