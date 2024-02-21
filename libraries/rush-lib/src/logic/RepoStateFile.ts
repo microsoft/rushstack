@@ -7,6 +7,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 import schemaJson from '../schemas/repo-state.schema.json';
+import type { Subspace } from '../api/Subspace';
 
 /**
  * This interface represents the raw repo-state.json file
@@ -36,7 +37,6 @@ interface IRepoStateJson {
 export class RepoStateFile {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
   private _isValid: boolean;
@@ -47,14 +47,8 @@ export class RepoStateFile {
    */
   public readonly filePath: string;
 
-  private constructor(
-    repoStateJson: IRepoStateJson | undefined,
-    isValid: boolean,
-    filePath: string,
-    variant: string | undefined
-  ) {
+  private constructor(repoStateJson: IRepoStateJson | undefined, isValid: boolean, filePath: string) {
     this.filePath = filePath;
-    this._variant = variant;
     this._isValid = isValid;
 
     if (repoStateJson) {
@@ -91,7 +85,7 @@ export class RepoStateFile {
    * @param jsonFilename - The path to the repo-state.json file.
    * @param variant - The variant currently being used by Rush.
    */
-  public static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile {
+  public static loadFromFile(jsonFilename: string): RepoStateFile {
     let fileContents: string | undefined;
     try {
       fileContents = FileSystem.readFile(jsonFilename);
@@ -131,7 +125,7 @@ export class RepoStateFile {
       }
     }
 
-    return new RepoStateFile(repoStateJson, !foundMergeConflictMarker, jsonFilename, variant);
+    return new RepoStateFile(repoStateJson, !foundMergeConflictMarker, jsonFilename);
   }
 
   /**
@@ -139,10 +133,16 @@ export class RepoStateFile {
    * of the Rush repo, and save the file if changes were made.
    *
    * @param rushConfiguration - The Rush configuration for the repo.
+   * @param subspace - The subspace that repo-state.json was loaded from,
+   * or `undefined` for the default subspace.
    *
    * @returns true if the file was modified, otherwise false.
    */
-  public refreshState(rushConfiguration: RushConfiguration): boolean {
+  public refreshState(rushConfiguration: RushConfiguration, subspace: Subspace | undefined): boolean {
+    if (subspace === undefined) {
+      subspace = rushConfiguration.defaultSubspace;
+    }
+
     // Only support saving the pnpm shrinkwrap hash if it was enabled
     const preventShrinkwrapChanges: boolean =
       rushConfiguration.packageManager === 'pnpm' &&
@@ -150,7 +150,7 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        rushConfiguration.getCommittedShrinkwrapFilename(this._variant)
+        subspace.getCommittedShrinkwrapFilename()
       );
 
       if (pnpmShrinkwrapFile) {
@@ -172,7 +172,7 @@ export class RepoStateFile {
     const useWorkspaces: boolean =
       rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {
-      const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(this._variant);
+      const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions();
       const preferredVersionsHash: string = commonVersions.getPreferredVersionsHash();
       if (this._preferredVersionsHash !== preferredVersionsHash) {
         this._preferredVersionsHash = preferredVersionsHash;

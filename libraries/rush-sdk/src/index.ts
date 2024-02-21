@@ -7,10 +7,9 @@ import {
   type JsonObject,
   type IPackageJson,
   PackageJsonLookup,
-  Executable,
-  Terminal,
-  ConsoleTerminalProvider
+  Executable
 } from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 import type { SpawnSyncReturns } from 'child_process';
 import {
   RUSH_LIB_NAME,

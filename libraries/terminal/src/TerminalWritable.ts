@@ -26,7 +26,7 @@ export interface ITerminalWritableOptions {
 /**
  * The abstract base class for objects that can present, route, or process text output for
  * a console application.  This output is typically prepared using
- * the {@link @rushstack/node-core-library#Terminal} API.
+ * the {@link Terminal} API.
  *
  * @remarks
  *

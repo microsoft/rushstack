@@ -9,13 +9,8 @@ import {
   type CommandLineFlagParameter,
   CommandLineHelper
 } from '@rushstack/ts-command-line';
-import {
-  InternalError,
-  AlreadyReportedError,
-  ConsoleTerminalProvider,
-  Terminal
-} from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal, PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';

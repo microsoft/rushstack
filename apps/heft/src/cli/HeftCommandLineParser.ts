@@ -7,13 +7,8 @@ import {
   type CommandLineFlagParameter,
   type CommandLineAction
 } from '@rushstack/ts-command-line';
-import {
-  Terminal,
-  InternalError,
-  ConsoleTerminalProvider,
-  AlreadyReportedError,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';

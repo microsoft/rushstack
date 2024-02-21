@@ -1,6 +1,13 @@
 # Change Log - @rushstack/tree-pattern
 
-This log was last generated on Tue, 16 Jan 2024 18:30:10 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Feb 2024 06:24:35 GMT and should not be manually modified.
+
+## 0.3.3
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
 
 ## 0.3.2
 Tue, 16 Jan 2024 18:30:10 GMT

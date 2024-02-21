@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'child_process';
-import { Text, NewlineKind, InternalError, Terminal } from '@rushstack/node-core-library';
+import { Text, NewlineKind, InternalError } from '@rushstack/node-core-library';
 import {
+  Terminal,
   TerminalChunkKind,
   TextRewriterTransform,
   StderrLineTransform,

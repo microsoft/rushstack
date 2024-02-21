@@ -10,7 +10,23 @@
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs", "temp"] }],
 
       "tasksByName": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                // Suppress the "Browserslist: caniuse-lite is outdated" warning. Although the warning is
+                // potentially useful, the check is performed in a way that is nondeterministic and can cause
+                // Rush pipelines to fail. Moreover, the outdated version is often irrelevant and/or nontrivial
+                // to upgrade. See this thread for details: https://github.com/microsoft/rushstack/issues/2981
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
         "sass": {
+          "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-sass-plugin"
           }

@@ -4,7 +4,8 @@
 import type { pki } from 'node-forge';
 import * as path from 'path';
 import { EOL } from 'os';
-import { FileSystem, type ITerminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { runSudoAsync, type IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve `rush scan` to analyze APIs such as `Import.lazy()` and `await import()`",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

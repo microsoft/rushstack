@@ -4,7 +4,8 @@
 import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError, type ITerminal, Terminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { type ITerminal, Terminal } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
   CommandLineParameter,
@@ -263,8 +264,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     if (!this._runsBeforeInstall) {
       // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
-      const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
-      if (!lastLinkFlag.isValid()) {
+      const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(
+        this.rushConfiguration.defaultSubspace
+      );
+      // Only check for a valid link flag when subspaces is not enabled
+      if (!lastLinkFlag.isValid() && !this.rushConfiguration.subspacesFeatureEnabled) {
         const useWorkspaces: boolean =
           this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
         if (useWorkspaces) {
@@ -374,6 +378,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }).apply(this.hooks);
       } else {
         terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
+      }
+
+      const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+      if (
+        this.rushConfiguration?.packageManager === 'pnpm' &&
+        experiments?.usePnpmSyncForInjectedDependencies
+      ) {
+        const { PnpmSyncCopyOperationPlugin } = await import(
+          '../../logic/operations/PnpmSyncCopyOperationPlugin'
+        );
+        new PnpmSyncCopyOperationPlugin().apply(this.hooks);
       }
 
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this

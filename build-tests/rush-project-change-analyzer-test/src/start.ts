@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { RushConfiguration, ProjectChangeAnalyzer, type RushConfigurationProject } from '@microsoft/rush-lib';
-import { Terminal, ConsoleTerminalProvider } from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 async function runAsync(): Promise<void> {
   const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());

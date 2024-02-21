@@ -11,8 +11,6 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
 import { Constants } from './utilities/Constants';
 
-const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
-
 // Excerpted from PackageJsonLookup.tryGetPackageFolderFor()
 function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | undefined {
   // Two lookups are required, because get() cannot distinguish the undefined value
@@ -82,8 +80,8 @@ function tryStartLocalHeft(): boolean {
 
       // Does package.json have a dependency on Heft?
       if (
-        !(packageJson.dependencies && packageJson.dependencies[HEFT_PACKAGE_NAME]) &&
-        !(packageJson.devDependencies && packageJson.devDependencies[HEFT_PACKAGE_NAME])
+        !(packageJson.dependencies && packageJson.dependencies[Constants.heftPackageName]) &&
+        !(packageJson.devDependencies && packageJson.devDependencies[Constants.heftPackageName])
       ) {
         // No explicit dependency on Heft
         return false;
@@ -91,7 +89,7 @@ function tryStartLocalHeft(): boolean {
 
       // To avoid a loading the "resolve" NPM package, let's assume that the Heft dependency must be
       // installed as "<projectFolder>/node_modules/@rushstack/heft".
-      const heftFolder: string = path.join(projectFolder, 'node_modules', HEFT_PACKAGE_NAME);
+      const heftFolder: string = path.join(projectFolder, 'node_modules', Constants.heftPackageName);
 
       heftEntryPoint = path.join(heftFolder, 'lib', 'start.js');
       if (!fs.existsSync(heftEntryPoint)) {

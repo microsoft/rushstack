@@ -30,6 +30,11 @@
       "pluginName": "run-script-plugin",
       "entryPoint": "./lib/plugins/RunScriptPlugin",
       "optionsSchema": "./lib/schemas/run-script-options.schema.json"
+    },
+    {
+      "entryPoint": "./lib/plugins/SetEnvironmentVariablesPlugin",
+      "pluginName": "set-environment-variables-plugin",
+      "optionsSchema": "./lib/schemas/set-environment-variables-plugin.schema.json"
     }
   ]
 }

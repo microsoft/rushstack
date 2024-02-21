@@ -1,6 +1,50 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 25 Jan 2024 01:09:29 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+
+## 4.0.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Remove a no longer needed dependency on the `colors` package
+
+## 4.0.0
+Mon, 19 Feb 2024 21:54:27 GMT
+
+### Breaking changes
+
+- (BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details.
+- Remove deprecated `FileSystem.readFolder`, `FileSystem.readFolderAsync`, and `LegacyAdapters.sortStable` APIs.
+
+### Minor changes
+
+- Graduate `Async` and `MinimumHeap` APIs from beta to public.
+
+## 3.66.1
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 3.66.0
+Thu, 08 Feb 2024 01:09:21 GMT
+
+### Minor changes
+
+- Add getStatistics() method to FileWriter instances
+
+### Patches
+
+- LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux
+
+## 3.65.0
+Mon, 05 Feb 2024 23:46:52 GMT
+
+### Minor changes
+
+- Inclue a `Text.reverse` API for reversing a string.
 
 ## 3.64.2
 Thu, 25 Jan 2024 01:09:29 GMT

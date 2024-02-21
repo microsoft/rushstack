@@ -45,6 +45,6 @@ Attempts to locate a previously generated debug certificate and untrust it. Retu
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/debug-certificate-manager/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/debug-certificate-manager/)
+- [API Reference](https://api.rushstack.io/pages/debug-certificate-manager/)
 
 **@rushstack/debug-certificate-manager** is part of the [Rush Stack](https://rushstack.io/) family of projects.

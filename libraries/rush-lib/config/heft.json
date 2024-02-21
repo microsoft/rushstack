@@ -36,6 +36,11 @@
                   "sourcePath": "src/logic/pnpm/test",
                   "destinationFolders": ["lib-commonjs/logic/pnpm/test"],
                   "fileExtensions": [".yaml"]
+                },
+                {
+                  "sourcePath": "src/logic/test",
+                  "destinationFolders": ["lib-commonjs/logic/test"],
+                  "includeGlobs": ["**/.mergequeueignore"]
                 }
               ]
             }

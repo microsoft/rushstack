@@ -1,6 +1,56 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 12 Dec 2023 00:20:51 GMT and should not be manually modified.
+This log was last generated on Mon, 19 Feb 2024 21:54:44 GMT and should not be manually modified.
+
+## 5.114.0
+Mon, 19 Feb 2024 21:54:44 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Add `enablePnpmSyncForInjectedDependenciesMeta` to experiments.json; it is part of an upcoming feature for managing PNPM "injected" dependencies: https://www.npmjs.com/package/pnpm-sync
+- Include a `pnpmPatchesCommonFolderName` constant for the folder name "pnpm-patches" that gets placed under "common".
+- Add a feature to generate a `project-impact-graph.yaml` file in the repo root. This feature is gated under the new `generateProjectImpactGraphDuringRushUpdate` experiment.
+- Fix a formatting issue with the LICENSE.
+- Fix an issue with filtered installs when the experimental subspaces feature is enabled
+
+## 5.113.4
+Wed, 31 Jan 2024 22:49:17 GMT
+
+### Updates
+
+- Introduce an explicit warning message during `rush install` or `rush update` about `dependenciesMeta` not being up-to-date.
+
+## 5.113.3
+Wed, 31 Jan 2024 22:25:55 GMT
+
+### Updates
+
+- Fix an issue where `rush update` would sometimes not correctly sync the `pnpm-lock.yaml` file back to `common/config/rush/` after a project's `package.json` has been updated.
+
+## 5.113.2
+Wed, 31 Jan 2024 18:45:33 GMT
+
+### Updates
+
+- Fix some minor issues when the experimental subspaces feature is enabled
+
+## 5.113.1
+Wed, 31 Jan 2024 07:07:50 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Enable filtered installs of subspaces and add a "preventSelectingAllSubspaces" setting
+
+## 5.113.0
+Tue, 30 Jan 2024 22:58:52 GMT
+
+### Updates
+
+- Fix an issue where Rush does not detect changes to the `dependenciesMeta` field in project's `package.json` files, so may incorrectly skip updating/installation.
+- Add ability to enable IPC channels in `Utilities#executeLifeCycleCommand`.
+- Update `rush init` template to document the "buildSkipWithAllowWarningsInSuccessfulBuild" experiment
+- (BREAKING CHANGE) Begin removal of APIs for the deprecated "installation variants" feature, since subspaces are a more robust solution for that problem
+- (EXPERIMENTAL) Implement installation for the not-yet-released "subspaces" feature (GitHub #4230)
 
 ## 5.112.2
 Tue, 12 Dec 2023 00:20:51 GMT

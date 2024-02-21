@@ -74,7 +74,7 @@ export class DependencyAnalyzer {
    */
   private _getAnalysisInternal(variant: string | undefined): IDependencyAnalysis {
     const commonVersionsConfiguration: CommonVersionsConfiguration =
-      this._rushConfiguration.getCommonVersions(variant);
+      this._rushConfiguration.getCommonVersions();
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();
     const allowedAlternativeVersions: Map<
       string,

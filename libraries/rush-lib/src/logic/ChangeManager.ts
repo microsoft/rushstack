@@ -20,7 +20,7 @@ import { ChangelogGenerator } from './ChangelogGenerator';
 export class ChangeManager {
   private _prereleaseToken!: PrereleaseToken;
   private _orderedChanges!: IChangeInfo[];
-  private _allPackages!: Map<string, RushConfigurationProject>;
+  private _allPackages!: ReadonlyMap<string, RushConfigurationProject>;
   private _allChanges!: IChangeRequests;
   private _changeFiles!: ChangeFiles;
   private _rushConfiguration: RushConfiguration;
@@ -69,7 +69,7 @@ export class ChangeManager {
     return this._orderedChanges;
   }
 
-  public get allPackages(): Map<string, RushConfigurationProject> {
+  public get allPackages(): ReadonlyMap<string, RushConfigurationProject> {
     return this._allPackages;
   }
 

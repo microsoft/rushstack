@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { Subspace } from '../../api/Subspace';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -92,4 +94,9 @@ export interface IInstallManagerOptions {
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
   beforeInstallAsync?: () => Promise<void>;
+
+  /**
+   * The specific subspace to install.
+   */
+  subspace: Subspace;
 }

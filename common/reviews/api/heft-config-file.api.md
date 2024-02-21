@@ -5,7 +5,7 @@
 ```ts
 
 import type { IRigConfig } from '@rushstack/rig-package';
-import { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {

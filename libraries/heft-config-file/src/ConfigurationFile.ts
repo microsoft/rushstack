@@ -3,14 +3,8 @@
 
 import * as nodeJsPath from 'path';
 import { JSONPath } from 'jsonpath-plus';
-import {
-  JsonSchema,
-  JsonFile,
-  PackageJsonLookup,
-  Import,
-  FileSystem,
-  type ITerminal
-} from '@rushstack/node-core-library';
+import { JsonSchema, JsonFile, PackageJsonLookup, Import, FileSystem } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
 interface IConfigurationJson {

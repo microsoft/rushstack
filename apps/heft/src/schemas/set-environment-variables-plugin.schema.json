@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "CopyFiles Heft Task Event Options",
+  "description": "Defines configuration used by the \"copyFiles\" Heft task event.",
+  "type": "object",
+
+  "additionalProperties": false,
+  "required": ["environmentVariablesToSet"],
+
+  "properties": {
+    "environmentVariablesToSet": {
+      "type": "object",
+      "pattern": ".+",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -4,13 +4,8 @@
 import * as path from 'path';
 import * as crypto from 'crypto';
 
-import {
-  FileSystem,
-  type ITerminal,
-  type FolderItem,
-  InternalError,
-  Async
-} from '@rushstack/node-core-library';
+import { FileSystem, type FolderItem, InternalError, Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';

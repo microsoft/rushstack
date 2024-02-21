@@ -19,6 +19,7 @@ export const assetsFolderPath: string = `${rushLibFolderRootPath}/assets`;
 export const scriptsFolderName: string = 'scripts';
 
 export const pnpmfileShimFilename: string = 'PnpmfileShim.js';
+export const subspacePnpmfileShimFilename: string = 'SubspaceGlobalPnpmfileShim.js';
 export const installRunScriptFilename: string = 'install-run.js';
 export const installRunRushScriptFilename: string = 'install-run-rush.js';
 export const installRunRushxScriptFilename: string = 'install-run-rushx.js';

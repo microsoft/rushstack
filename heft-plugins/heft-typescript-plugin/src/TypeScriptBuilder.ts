@@ -7,7 +7,8 @@ import { Worker } from 'worker_threads';
 
 import * as semver from 'semver';
 import type * as TTypescript from 'typescript';
-import { type ITerminal, JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-core-library';
+import { JsonFile, type IPackageJson, Path, FileError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { IScopedLogger } from '@rushstack/heft';
 
 import type { ExtendedTypeScript, IExtendedSolutionBuilder } from './internalTypings/TypeScriptInternals';

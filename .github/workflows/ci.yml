@@ -51,17 +51,9 @@ jobs:
 
       - name: Rush retest (install-run-rush)
         run: node common/scripts/install-run-rush.js retest --verbose --production
-        env:
-          # Prevent time-based browserslist update warning
-          # See https://github.com/microsoft/rushstack/issues/2981
-          BROWSERSLIST_IGNORE_OLD_DATA: 1
 
       - name: Ensure repo README is up-to-date
         run: node repo-scripts/repo-toolbox/lib/start.js readme --verify
 
       - name: Rush test (rush-lib)
         run: node apps/rush/lib/start-dev.js test --verbose --production --timeline
-        env:
-          # Prevent time-based browserslist update warning
-          # See https://github.com/microsoft/rushstack/issues/2981
-          BROWSERSLIST_IGNORE_OLD_DATA: 1

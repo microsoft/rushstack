@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.8.1",
+      "tag": "@rushstack/eslint-plugin-security_v0.8.1",
+      "date": "Sat, 17 Feb 2024 06:24:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.0",
       "tag": "@rushstack/eslint-plugin-security_v0.8.0",
       "date": "Tue, 16 Jan 2024 18:30:10 GMT",

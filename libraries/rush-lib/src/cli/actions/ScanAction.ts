@@ -67,20 +67,24 @@ export class ScanAction extends BaseConfiglessRushAction {
 
     const requireRegExps: RegExp[] = [
       // Example: require('something')
-      /\brequire\s*\(\s*[']([^']+\s*)[']\)/,
-      /\brequire\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\brequire\s*\(\s*[']([^']+\s*)[']\s*\)/,
+      /\brequire\s*\(\s*["]([^"]+\s*)["]\s*\)/,
 
       // Example: require.ensure('something')
-      /\brequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
-      /\brequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\brequire\.ensure\s*\(\s*[']([^']+\s*)[']\s*\)/,
+      /\brequire\.ensure\s*\(\s*["]([^"]+\s*)["]\s*\)/,
 
       // Example: require.resolve('something')
-      /\brequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
-      /\brequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\brequire\.resolve\s*\(\s*[']([^']+\s*)[']\s*\)/,
+      /\brequire\.resolve\s*\(\s*["]([^"]+\s*)["]\s*\)/,
 
       // Example: System.import('something')
-      /\bSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
-      /\bSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
+      /\bSystem\.import\s*\(\s*[']([^']+\s*)[']\s*\)/,
+      /\bSystem\.import\s*\(\s*["]([^"]+\s*)["]\s*\)/,
+
+      // Example: Import.lazy('something', require);
+      /\bImport\.lazy\s*\(\s*[']([^']+\s*)[']/,
+      /\bImport\.lazy\s*\(\s*["]([^"]+\s*)["]/,
 
       // Example:
       //
@@ -93,6 +97,10 @@ export class ScanAction extends BaseConfiglessRushAction {
       // Example:  import 'something';
       /\bimport\s*[']([^']+)[']\s*\;/,
       /\bimport\s*["]([^"]+)["]\s*\;/,
+
+      // Example: await import('fast-glob')
+      /\bimport\s*\(\s*[']([^']+)[']\s*\)/,
+      /\bimport\s*\(\s*["]([^"]+)["]\s*\)/,
 
       // Example:
       // /// <reference types="something" />

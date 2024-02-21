@@ -31,11 +31,11 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
   const options: ILocalizationPluginOptions = {
     localizedData: {
       defaultLocale: {
-        localeName: 'en-us',
+        localeName: 'LOCALE1',
         fillMissingTranslationStrings: true
       },
       translatedStrings: {
-        foo: {
+        LOCALE2: {
           '/a/strings1.resjson': {
             test: `return:\r,newline:\n,tab:\t,backslash:\\,apos:',quote:"`
           }
@@ -54,7 +54,8 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     },
     localizationStats: {
       dropPath: 'localization-stats.json'
-    }
+    },
+    realContentHash: true
   };
 
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
@@ -65,7 +66,7 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
     },
     output: {
       path: '/release',
-      filename: '[name]-[locale].js'
+      filename: '[name]-[locale]-[contenthash].js'
     },
     module: {
       rules: [
@@ -99,6 +100,9 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
 
   const results: {} = memoryFileSystem.toJSON('/release');
   expect(results).toMatchSnapshot('Content');
+
+  expect(errors).toHaveLength(0);
+  expect(warnings).toHaveLength(0);
 }
 
 describe(LocalizationPlugin.name, () => {

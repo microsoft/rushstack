@@ -1,12 +1,17 @@
-import { ITerminal, Executable, Async } from '@rushstack/node-core-library';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { Executable, Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import {
-  ICloudBuildCacheProvider,
-  ICredentialCacheEntry,
+  type ICloudBuildCacheProvider,
+  type ICredentialCacheEntry,
   CredentialCache,
-  RushSession,
+  type RushSession,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
-import fetch, { BodyInit, Response } from 'node-fetch';
+import fetch, { type BodyInit, type Response } from 'node-fetch';
+import type { SpawnSyncReturns } from 'child_process';
 
 enum CredentialsOptions {
   Optional,
@@ -43,7 +48,7 @@ export interface IHttpBuildCacheProviderOptions {
 }
 
 const MAX_HTTP_CACHE_ATTEMPTS: number = 3;
-const DEFAULT_MIN_HTTP_RETRY_DELAY_MS = 2500;
+const DEFAULT_MIN_HTTP_RETRY_DELAY_MS: number = 2500;
 
 export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _pluginName: string;
@@ -81,7 +86,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     cacheId: string
   ): Promise<Buffer | undefined> {
     try {
-      const result = await this._http({
+      const result: boolean | Buffer = await this._http({
         terminal: terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: 'GET',
@@ -111,7 +116,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     terminal.writeDebugLine('Uploading object with cacheId: ', cacheId);
 
     try {
-      const result = await this._http({
+      const result: boolean | Buffer = await this._http({
         terminal: terminal,
         relUrl: `${this._cacheKeyPrefix}${cacheId}`,
         method: this._uploadMethod,
@@ -154,9 +159,13 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     const cmd: string = `${this._tokenHandler.exec} ${(this._tokenHandler.args || []).join(' ')}`;
     terminal.writeVerboseLine(`Running '${cmd}' to get credentials`);
-    const result = Executable.spawnSync(this._tokenHandler.exec, this._tokenHandler.args || [], {
-      currentWorkingDirectory: this._rushProjectRoot
-    });
+    const result: SpawnSyncReturns<string> = Executable.spawnSync(
+      this._tokenHandler.exec,
+      this._tokenHandler.args || [],
+      {
+        currentWorkingDirectory: this._rushProjectRoot
+      }
+    );
 
     terminal.writeErrorLine(result.stderr);
 
@@ -164,7 +173,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       throw new Error(`Could not obtain credentials. The command '${cmd}' failed.`);
     }
 
-    const credential = result.stdout.trim();
+    const credential: string = result.stdout.trim();
     terminal.writeVerboseLine('Got credentials');
 
     await this.updateCachedCredentialAsync(terminal, credential);
@@ -209,9 +218,9 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     credentialOptions?: CredentialsOptions;
   }): Promise<Buffer | boolean> {
     const { terminal, relUrl, method, body, warningText, readBody, credentialOptions } = options;
-    const safeCredentialOptions = credentialOptions ?? CredentialsOptions.Optional;
-    const credentials = await this._tryGetCredentials(safeCredentialOptions);
-    const url = new URL(relUrl, this._url).href;
+    const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
+    const credentials: string | undefined = await this._tryGetCredentials(safeCredentialOptions);
+    const url: string = new URL(relUrl, this._url).href;
 
     const headers: Record<string, string> = {};
     if (typeof credentials === 'string') {
@@ -224,11 +233,11 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       }
     }
 
-    const bodyLength = (body as { length: number })?.length || 'unknown';
+    const bodyLength: number | 'unknown' = (body as { length: number })?.length || 'unknown';
 
     terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLength} bytes`);
 
-    const response = await fetch(url, {
+    const response: Response = await fetch(url, {
       method: method,
       headers: headers,
       body: body,
@@ -236,7 +245,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     });
 
     if (!response.ok) {
-      const isNonCredentialResponse = response.status >= 500 && response.status < 600;
+      const isNonCredentialResponse: boolean = response.status >= 500 && response.status < 600;
 
       if (
         !isNonCredentialResponse &&
@@ -255,8 +264,8 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
         // Pause a bit before retrying in case the server is busy
         // Add some random jitter to the retry so we can spread out load on the remote service
         // A proper solution might add exponential back off in case the retry count is high (10 or more)
-        const factor = 1.0 + Math.random(); // A random number between 1.0 and 2.0
-        const retryDelay = Math.floor(factor * this._minHttpRetryDelayMs);
+        const factor: number = 1.0 + Math.random(); // A random number between 1.0 and 2.0
+        const retryDelay: number = Math.floor(factor * this._minHttpRetryDelayMs);
 
         await Async.sleep(retryDelay);
 

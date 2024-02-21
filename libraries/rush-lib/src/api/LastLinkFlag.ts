@@ -3,7 +3,7 @@
 
 import { LastInstallFlag } from './LastInstallFlag';
 import { type JsonObject, JsonFile, InternalError } from '@rushstack/node-core-library';
-import type { RushConfiguration } from './RushConfiguration';
+import type { Subspace } from './Subspace';
 
 export const LAST_LINK_FLAG_FILE_NAME: string = 'last-link.flag';
 
@@ -57,7 +57,7 @@ export class LastLinkFlagFactory {
    *
    * @internal
    */
-  public static getCommonTempFlag(rushConfiguration: RushConfiguration): LastLinkFlag {
-    return new LastLinkFlag(rushConfiguration.commonTempFolder, {});
+  public static getCommonTempFlag(subspace: Subspace): LastLinkFlag {
+    return new LastLinkFlag(subspace.getSubspaceTempFolder(), {});
   }
 }
