@@ -598,12 +598,12 @@ export interface IOperationRunnerContext {
     // @internal
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
-    status: OperationStatus;
-    stopwatch: IStopwatchResult;
-    withTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
         logFileSuffix?: string;
     }): Promise<T>;
+    status: OperationStatus;
+    stopwatch: IStopwatchResult;
 }
 
 // @alpha (undocumented)

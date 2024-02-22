@@ -12,10 +12,7 @@ import {
   Terminal,
   type TerminalWritable
 } from '@rushstack/terminal';
-import {
-  InternalError,
-  NewlineKind
-} from '@rushstack/node-core-library';
+import { InternalError, NewlineKind } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
 import { OperationStatus } from './OperationStatus';
@@ -181,9 +178,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   }
 
   /**
-   * {@inheritdoc IOperationRunnerContext.withTerminalAsync}
+   * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
-  public async withTerminalAsync<T>(
+  public async runWithTerminalAsync<T>(
     callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
     options: {
       createLogFile: boolean;

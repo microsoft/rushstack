@@ -76,7 +76,7 @@ export class IPCOperationRunner implements IOperationRunner {
   }
 
   public async executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    return await context.withTerminalAsync(
+    return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider): Promise<OperationStatus> => {
         let isConnected: boolean = false;
         if (!this._ipcProcess || typeof this._ipcProcess.exitCode === 'number') {

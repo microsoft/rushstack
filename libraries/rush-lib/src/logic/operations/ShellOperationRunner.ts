@@ -65,7 +65,7 @@ export class ShellOperationRunner implements IOperationRunner {
   }
 
   private async _executeAsync(context: IOperationRunnerContext): Promise<OperationStatus> {
-    return await context.withTerminalAsync(
+    return await context.runWithTerminalAsync(
       async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
         let hasWarningOrError: boolean = false;
         const projectFolder: string = this._rushProject.projectFolder;
