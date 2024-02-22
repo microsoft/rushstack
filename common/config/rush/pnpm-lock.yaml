@@ -2545,6 +2545,9 @@ importers:
       '@rushstack/node-core-library':
         specifier: workspace:*
         version: link:../../libraries/node-core-library
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: link:../../libraries/terminal
       jest-config:
         specifier: ~29.5.0
         version: 29.5.0(@types/node@18.17.15)
@@ -2567,9 +2570,6 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.4.0
         version: 2.4.0(@rushstack/heft@..+apps+heft)(@types/node@18.17.15)(jest-environment-jsdom@29.5.0)
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: link:../../libraries/terminal
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
