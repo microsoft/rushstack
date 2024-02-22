@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.11.14",
+      "tag": "@rushstack/heft-jest-plugin_v0.11.14",
+      "date": "Thu, 22 Feb 2024 05:54:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add a missing dependency on `@rushstack/terminal`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.13",
       "tag": "@rushstack/heft-jest-plugin_v0.11.13",
       "date": "Thu, 22 Feb 2024 01:36:09 GMT",
