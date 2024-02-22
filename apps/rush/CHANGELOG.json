@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.114.3",
+      "tag": "@microsoft/rush_v5.114.3",
+      "date": "Thu, 22 Feb 2024 00:10:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Replace deprecated function, and fix a path bug in Windows env"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.114.2",
       "tag": "@microsoft/rush_v5.114.2",
       "date": "Wed, 21 Feb 2024 21:45:46 GMT",

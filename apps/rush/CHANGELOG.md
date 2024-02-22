@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 21 Feb 2024 21:45:46 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Feb 2024 00:10:32 GMT and should not be manually modified.
+
+## 5.114.3
+Thu, 22 Feb 2024 00:10:32 GMT
+
+### Updates
+
+- Replace deprecated function, and fix a path bug in Windows env
 
 ## 5.114.2
 Wed, 21 Feb 2024 21:45:46 GMT
