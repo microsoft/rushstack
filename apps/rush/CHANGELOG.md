@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 22 Feb 2024 00:10:32 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Feb 2024 01:36:27 GMT and should not be manually modified.
+
+## 5.115.0
+Thu, 22 Feb 2024 01:36:27 GMT
+
+### Updates
+
+- Add a "runWithTerminalAsync" resource lifetime helper to `IOperationRunnerContext` to manage the creation and cleanup of logging for operation execution.
+- Adds a new experiment `useIPCScriptsInWatchMode`. When this flag is enabled and Rush is running in watch mode, it will check for npm scripts named `_phase:<phase-name>:ipc`, and if found, use them instead of the normal invocation of `_phase:<phase-name>`. When doing so, it will provide an IPC channel to the child process and expect the child to outlive the current build pass.
 
 ## 5.114.3
 Thu, 22 Feb 2024 00:10:32 GMT
