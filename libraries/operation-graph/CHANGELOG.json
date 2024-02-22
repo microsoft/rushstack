@@ -2,6 +2,18 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.13",
+      "tag": "@rushstack/operation-graph_v0.2.13",
+      "date": "Thu, 22 Feb 2024 01:36:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix memory leaks on abort controllers."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.12",
       "tag": "@rushstack/operation-graph_v0.2.12",
       "date": "Wed, 21 Feb 2024 21:45:28 GMT",
