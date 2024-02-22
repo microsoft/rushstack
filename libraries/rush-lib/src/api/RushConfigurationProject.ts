@@ -209,29 +209,33 @@ export class RushConfigurationProject {
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
+    const { packageName, projectFolder: projectRelativeFolder } = projectJson;
     this.rushConfiguration = rushConfiguration;
-    this.packageName = projectJson.packageName;
-    this.projectRelativeFolder = projectJson.projectFolder;
+    this.packageName = packageName;
+    this.projectRelativeFolder = projectRelativeFolder;
+
+    validateRelativePathField(projectRelativeFolder, 'projectFolder');
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
-    const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
+    const projectFolderDepth: number = projectRelativeFolder.split('/').length;
     if (projectFolderDepth < rushConfiguration.projectFolderMinDepth) {
       throw new Error(
         `To keep things organized, this repository has a projectFolderMinDepth policy` +
           ` requiring project folders to be at least ${rushConfiguration.projectFolderMinDepth} levels deep.` +
-          `  Problem folder: "${projectJson.projectFolder}"`
+          `  Problem folder: "${projectRelativeFolder}"`
       );
     }
     if (projectFolderDepth > rushConfiguration.projectFolderMaxDepth) {
       throw new Error(
         `To keep things organized, this repository has a projectFolderMaxDepth policy` +
           ` preventing project folders from being deeper than ${rushConfiguration.projectFolderMaxDepth} levels.` +
-          `  Problem folder:  "${projectJson.projectFolder}"`
+          `  Problem folder:  "${projectRelativeFolder}"`
       );
     }
 
-    this.projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
-    const packageJsonFilename: string = path.join(this.projectFolder, FileConstants.PackageJson);
+    const absoluteProjectFolder: string = path.join(rushConfiguration.rushJsonFolder, projectRelativeFolder);
+    this.projectFolder = absoluteProjectFolder;
+    const packageJsonFilename: string = path.join(absoluteProjectFolder, FileConstants.PackageJson);
 
     try {
       const packageJsonText: string = FileSystem.readFile(packageJsonFilename);
@@ -239,16 +243,14 @@ export class RushConfigurationProject {
       this._packageJson = JSON.parse(packageJsonText);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
-        throw new Error(
-          `Could not find package.json for ${projectJson.packageName} at ${packageJsonFilename}`
-        );
+        throw new Error(`Could not find package.json for ${packageName} at ${packageJsonFilename}`);
       }
       throw error;
     }
 
-    this.projectRushConfigFolder = path.join(this.projectFolder, 'config', 'rush');
+    this.projectRushConfigFolder = path.join(absoluteProjectFolder, 'config', 'rush');
     this.projectRushTempFolder = path.join(
-      this.projectFolder,
+      absoluteProjectFolder,
       RushConstants.projectRushFolderName,
       RushConstants.rushTempFolderName
     );
@@ -260,12 +262,12 @@ export class RushConfigurationProject {
       if (!projectJson.reviewCategory) {
         throw new Error(
           `The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
-            ` was not specified for the project "${projectJson.packageName}".`
+            ` was not specified for the project "${packageName}".`
         );
       }
       if (!rushConfiguration.approvedPackagesPolicy.reviewCategories.has(projectJson.reviewCategory)) {
         throw new Error(
-          `The project "${projectJson.packageName}" specifies its reviewCategory as` +
+          `The project "${packageName}" specifies its reviewCategory as` +
             `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`
         );
       }
@@ -321,28 +323,31 @@ export class RushConfigurationProject {
 
     if (this._shouldPublish && this.packageJson.private) {
       throw new Error(
-        `The project "${projectJson.packageName}" specifies "shouldPublish": true, ` +
+        `The project "${packageName}" specifies "shouldPublish": true, ` +
           `but the package.json file specifies "private": true.`
       );
     }
 
-    this.publishFolder = this.projectFolder;
-    if (projectJson.publishFolder) {
-      this.publishFolder = path.join(this.publishFolder, projectJson.publishFolder);
+    this.publishFolder = absoluteProjectFolder;
+    const { publishFolder } = projectJson;
+    if (publishFolder) {
+      validateRelativePathField(publishFolder, 'publishFolder');
+      this.publishFolder = path.join(this.publishFolder, publishFolder);
     }
 
     if (allowedProjectTags && projectJson.tags) {
-      this.tags = new Set();
+      const tags: Set<string> = new Set();
       for (const tag of projectJson.tags) {
         if (!allowedProjectTags.has(tag)) {
           throw new Error(
-            `The tag "${tag}" specified for project "${this.packageName}" is not listed in the ` +
+            `The tag "${tag}" specified for project "${packageName}" is not listed in the ` +
               `allowedProjectTags field in rush.json.`
           );
         } else {
-          (this.tags as Set<string>).add(tag);
+          tags.add(tag);
         }
       }
+      this.tags = tags;
     } else {
       this.tags = new Set(projectJson.tags);
     }
@@ -501,5 +506,31 @@ export class RushConfigurationProject {
       }
     }
     return isMain;
+  }
+}
+
+export function validateRelativePathField(relativePath: string, name: string): void {
+  if (path.posix.isAbsolute(relativePath) || path.win32.isAbsolute(relativePath)) {
+    throw new Error(`The value "${relativePath}" in the "${name}" field must be a relative path.`);
+  }
+
+  if (relativePath.includes('\\')) {
+    throw new Error(
+      `The value "${relativePath}" in the "${name}" field may not contain backslashes ('\\'), since they are interpreted differently` +
+        ` on POSIX and Windows. Paths must use '/' as the path separator.`
+    );
+  }
+
+  if (relativePath.endsWith('/')) {
+    throw new Error(
+      `The value "${relativePath}" in the "${name}" field may not end with a trailing '/' character.`
+    );
+  }
+
+  const normalized: string = path.posix.normalize(relativePath);
+  if (relativePath !== normalized) {
+    throw new Error(
+      `The value "${relativePath}" in the "${name}" field should be replaced with its normalized form "${normalized}".`
+    );
   }
 }
