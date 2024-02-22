@@ -33,6 +33,10 @@ export interface IProjectChangeResult {
   state: ProjectChangeAnalyzer;
 }
 
+export interface IPromptGeneratorFunction {
+  (isPaused: boolean): Iterable<string>;
+}
+
 interface IPathWatchOptions {
   recurse: boolean;
 }
@@ -58,8 +62,9 @@ export class ProjectWatcher {
   private _previousState: ProjectChangeAnalyzer | undefined;
   private _forceChangedProjects: Map<RushConfigurationProject, string> = new Map();
   private _resolveIfChanged: undefined | (() => Promise<void>);
+  private _getPromptLines: undefined | IPromptGeneratorFunction;
 
-  private _hasRenderedStatus: boolean;
+  private _renderedStatusLines: number;
 
   public isPaused: boolean = false;
 
@@ -77,7 +82,8 @@ export class ProjectWatcher {
     this._initialState = initialState;
     this._previousState = initialState;
 
-    this._hasRenderedStatus = false;
+    this._renderedStatusLines = 0;
+    this._getPromptLines = undefined;
   }
 
   public pause(): void {
@@ -111,7 +117,11 @@ export class ProjectWatcher {
   }
 
   public clearStatus(): void {
-    this._hasRenderedStatus = false;
+    this._renderedStatusLines = 0;
+  }
+
+  public setPromptGenerator(promptGenerator: IPromptGeneratorFunction): void {
+    this._getPromptLines = promptGenerator;
   }
 
   /**
@@ -184,7 +194,7 @@ export class ProjectWatcher {
 
         const debounceMs: number = this._debounceMs;
 
-        this._hasRenderedStatus = false;
+        this.clearStatus();
 
         const resolveIfChanged: () => Promise<void> = (this._resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
@@ -225,8 +235,11 @@ export class ProjectWatcher {
               const hasForcedChanges: boolean = this._forceChangedProjects.size > 0;
               if (hasForcedChanges) {
                 this._setStatus(
-                  `Projects were invalidated: ${Array.from(new Set(this._forceChangedProjects.values()))}`
+                  `Projects were invalidated: ${Array.from(new Set(this._forceChangedProjects.values())).join(
+                    ', '
+                  )}`
                 );
+                this.clearStatus();
               }
               this._forceChangedProjects.clear();
 
@@ -362,18 +375,15 @@ export class ProjectWatcher {
   private _setStatus(status: string): void {
     const statusLines: string[] = [
       `[${this.isPaused ? 'PAUSED' : 'WATCHING'}] Watch Status: ${status}`,
-      ...(this.isPaused
-        ? [`  Press <w> to resume.`, `  Press <b> to build once.`]
-        : [`  Press <w> to pause.`, `  Press <i> to invalidate all projects.`]),
-      `  Press <x> to reset child processes.`
+      ...(this._getPromptLines?.(this.isPaused) ?? [])
     ];
 
-    if (this._hasRenderedStatus) {
+    if (this._renderedStatusLines > 0) {
       readline.cursorTo(process.stdout, 0);
-      readline.moveCursor(process.stdout, 0, -statusLines.length);
+      readline.moveCursor(process.stdout, 0, -this._renderedStatusLines);
       readline.clearScreenDown(process.stdout);
     }
-    this._hasRenderedStatus = true;
+    this._renderedStatusLines = statusLines.length;
 
     this._terminal.writeLine(Colorize.bold(Colorize.cyan(statusLines.join('\n'))));
   }

@@ -503,12 +503,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   }
 
   private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
-    const toggleWatcherKey: string = 'w';
-    const buildOnceKey: string = 'b';
-    const invalidateKey: string = 'i';
-    const shutdownKey: string = 'x';
+    const toggleWatcherKey: 'w' = 'w';
+    const buildOnceKey: 'b' = 'b';
+    const invalidateKey: 'i' = 'i';
+    const shutdownKey: 'x' = 'x';
 
     const terminal: ITerminal = this._terminal;
+
+    projectWatcher.setPromptGenerator((isPaused: boolean) => {
+      const promptLines: string[] = [
+        `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
+        `  Press <${invalidateKey}> to invalidate all projects.`
+      ];
+      if (isPaused) {
+        promptLines.push(`  Press <${buildOnceKey}> to build once.`);
+      }
+      if (this._noIPCParameter?.value === false) {
+        promptLines.push(`  Press <${shutdownKey}> to reset child processes.`);
+      }
+      return promptLines;
+    });
 
     process.stdin.setRawMode(true);
     process.stdin.resume();
