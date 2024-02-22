@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.22.0",
+      "tag": "@rushstack/heft-web-rig_v0.22.0",
+      "date": "Thu, 22 Feb 2024 06:31:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update the \"asset/resource\" rule to include file extensions for font assets"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.21.5",
       "tag": "@rushstack/heft-web-rig_v0.21.5",
       "date": "Thu, 22 Feb 2024 05:54:17 GMT",
