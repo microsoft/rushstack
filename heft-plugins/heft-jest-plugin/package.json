@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-jest-plugin",
-  "version": "0.11.14",
+  "version": "0.11.13",
   "description": "Heft plugin for Jest",
   "repository": {
     "type": "git",
@@ -34,7 +34,6 @@
     "@jest/transform": "~29.5.0",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/terminal": "workspace:*",
     "jest-config": "~29.5.0",
     "jest-resolve": "~29.5.0",
     "jest-snapshot": "~29.5.0",
@@ -44,7 +43,8 @@
     "@jest/types": "29.5.0",
     "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.4.0",
+    "@rushstack/heft-node-rig": "2.4.16",
+    "@rushstack/terminal": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "18.17.15",

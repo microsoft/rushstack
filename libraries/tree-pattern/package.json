@@ -16,9 +16,9 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "3.6.0",
-    "@rushstack/heft": "0.64.0",
-    "@rushstack/heft-node-rig": "2.4.0",
+    "@rushstack/eslint-config": "3.6.4",
+    "@rushstack/heft": "0.65.4",
+    "@rushstack/heft-node-rig": "2.4.16",
     "@types/heft-jest": "1.0.1",
     "@types/node": "18.17.15",
     "eslint": "~8.7.0",
