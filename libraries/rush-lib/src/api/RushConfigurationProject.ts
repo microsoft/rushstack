@@ -510,6 +510,8 @@ export class RushConfigurationProject {
 }
 
 export function validateRelativePathField(relativePath: string, name: string): void {
+  // path.isAbsolute delegates depending on platform; however, path.posix.isAbsolute('C:/a') returns false,
+  // while path.win32.isAbsolute('C:/a') returns true. We want consistent validation across platforms.
   if (path.posix.isAbsolute(relativePath) || path.win32.isAbsolute(relativePath)) {
     throw new Error(`The value "${relativePath}" in the "${name}" field must be a relative path.`);
   }
