@@ -114,80 +114,86 @@ export class OperationExecutionManager {
     terminal.writeVerboseLine(`Executing a maximum of ${maxParallelism} simultaneous tasks...`);
 
     const workQueueAbortController: AbortController = new AbortController();
-    abortSignal.addEventListener('abort', () => workQueueAbortController.abort(), { once: true });
-    const workQueue: WorkQueue = new WorkQueue(workQueueAbortController.signal);
+    const abortHandler: () => void = () => workQueueAbortController.abort();
+    abortSignal.addEventListener('abort', abortHandler, { once: true });
+    try {
+      const workQueue: WorkQueue = new WorkQueue(workQueueAbortController.signal);
 
-    const executionContext: IExecuteOperationContext = {
-      terminal,
-      abortSignal,
+      const executionContext: IExecuteOperationContext = {
+        terminal,
+        abortSignal,
 
-      requestRun,
+        requestRun,
 
-      queueWork: (workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus> => {
-        return workQueue.pushAsync(workFn, priority);
-      },
+        queueWork: (workFn: () => Promise<OperationStatus>, priority: number): Promise<OperationStatus> => {
+          return workQueue.pushAsync(workFn, priority);
+        },
 
-      beforeExecute: (operation: Operation): void => {
-        // Initialize group if uninitialized and log the group name
-        const { groupName } = operation;
-        const groupRecord: OperationGroupRecord | undefined = groupName
-          ? groupRecords.get(groupName)
-          : undefined;
-        if (groupRecord && !startedGroups.has(groupRecord)) {
-          startedGroups.add(groupRecord);
-          groupRecord.startTimer();
-          terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
-        }
-      },
-
-      afterExecute: (operation: Operation, state: IOperationState): void => {
-        const { groupName } = operation;
-        const groupRecord: OperationGroupRecord | undefined = groupName
-          ? groupRecords.get(groupName)
-          : undefined;
-        if (groupRecord) {
-          groupRecord.setOperationAsComplete(operation, state);
-        }
-
-        if (state.status === OperationStatus.Failure) {
-          // This operation failed. Mark it as such and all reachable dependents as blocked.
-          // Failed operations get reported, even if silent.
-          // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
-          const message: string | undefined = state.error?.message;
-          if (message) {
-            terminal.writeErrorLine(message);
+        beforeExecute: (operation: Operation): void => {
+          // Initialize group if uninitialized and log the group name
+          const { groupName } = operation;
+          const groupRecord: OperationGroupRecord | undefined = groupName
+            ? groupRecords.get(groupName)
+            : undefined;
+          if (groupRecord && !startedGroups.has(groupRecord)) {
+            startedGroups.add(groupRecord);
+            groupRecord.startTimer();
+            terminal.writeLine(` ---- ${groupRecord.name} started ---- `);
           }
-          hasReportedFailures = true;
+        },
+
+        afterExecute: (operation: Operation, state: IOperationState): void => {
+          const { groupName } = operation;
+          const groupRecord: OperationGroupRecord | undefined = groupName
+            ? groupRecords.get(groupName)
+            : undefined;
+          if (groupRecord) {
+            groupRecord.setOperationAsComplete(operation, state);
+          }
+
+          if (state.status === OperationStatus.Failure) {
+            // This operation failed. Mark it as such and all reachable dependents as blocked.
+            // Failed operations get reported, even if silent.
+            // Generally speaking, silent operations shouldn't be able to fail, so this is a safety measure.
+            const message: string | undefined = state.error?.message;
+            if (message) {
+              terminal.writeErrorLine(message);
+            }
+            hasReportedFailures = true;
+          }
+
+          // Log out the group name and duration if it is the last operation in the group
+          if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
+            finishedGroups.add(groupRecord);
+            const finishedLoggingWord: string = groupRecord.hasFailures
+              ? 'encountered an error'
+              : groupRecord.hasCancellations
+              ? 'cancelled'
+              : 'finished';
+            terminal.writeLine(
+              ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
+            );
+          }
         }
+      };
 
-        // Log out the group name and duration if it is the last operation in the group
-        if (groupRecord?.finished && !finishedGroups.has(groupRecord)) {
-          finishedGroups.add(groupRecord);
-          const finishedLoggingWord: string = groupRecord.hasFailures
-            ? 'encountered an error'
-            : groupRecord.hasCancellations
-            ? 'cancelled'
-            : 'finished';
-          terminal.writeLine(
-            ` ---- ${groupRecord.name} ${finishedLoggingWord} (${groupRecord.duration.toFixed(3)}s) ---- `
-          );
+      const workQueuePromise: Promise<void> = Async.forEachAsync(
+        workQueue,
+        (workFn: () => Promise<void>) => workFn(),
+        {
+          concurrency: maxParallelism
         }
-      }
-    };
+      );
 
-    const workQueuePromise: Promise<void> = Async.forEachAsync(
-      workQueue,
-      (workFn: () => Promise<void>) => workFn(),
-      {
-        concurrency: maxParallelism
-      }
-    );
+      await Promise.all(this._operations.map((record: Operation) => record._executeAsync(executionContext)));
 
-    await Promise.all(this._operations.map((record: Operation) => record._executeAsync(executionContext)));
-
-    // Terminate queue execution.
-    workQueueAbortController.abort();
-    await workQueuePromise;
+      // Terminate queue execution.
+      workQueueAbortController.abort();
+      await workQueuePromise;
+    } finally {
+      // Cleanup resources
+      abortSignal.removeEventListener('abort', abortHandler);
+    }
 
     const finalStatus: OperationStatus =
       this._trackedOperationCount === 0

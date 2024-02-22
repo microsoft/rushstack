@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { StdioSummarizer } from '@rushstack/terminal';
+import type { ITerminal, ITerminalProvider } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
@@ -27,10 +27,6 @@ export interface IOperationRunnerContext {
    */
   quietMode: boolean;
   /**
-   * Object used to report a summary at the end of the Rush invocation.
-   */
-  stdioSummarizer: StdioSummarizer;
-  /**
    * Object used to manage metadata of the operation.
    *
    * @internal
@@ -55,12 +51,17 @@ export interface IOperationRunnerContext {
   error?: Error;
 
   /**
-   * Normally the incremental build logic will rebuild changed projects as well as
-   * any projects that directly or indirectly depend on a changed project.
-   * If true, then the incremental build logic will only rebuild changed projects and
-   * ignore dependent projects.
+   * Invokes the specified callback with a terminal that is associated with this operation.
+   *
+   * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
    */
-  readonly changedProjectsOnly: boolean;
+  runWithTerminalAsync<T>(
+    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    options: {
+      createLogFile: boolean;
+      logFileSuffix?: string;
+    }
+  ): Promise<T>;
 }
 
 /**

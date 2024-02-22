@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds a new experiment `useIPCScriptsInWatchMode`. When this flag is enabled and Rush is running in watch mode, it will check for npm scripts named `_phase:<phase-name>:ipc`, and if found, use them instead of the normal invocation of `_phase:<phase-name>`. When doing so, it will provide an IPC channel to the child process and expect the child to outlive the current build pass.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

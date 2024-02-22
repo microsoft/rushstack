@@ -55,7 +55,6 @@ export interface IWatchLoopState {
  */
 export class WatchLoop implements IWatchLoopState {
   private readonly _options: Readonly<IWatchLoopOptions>;
-  private readonly _outerSignals: WeakSet<AbortSignal>;
 
   private _abortController: AbortController;
   private _isRunning: boolean;
@@ -73,8 +72,6 @@ export class WatchLoop implements IWatchLoopState {
     this._requestRunPromise = new Promise<string | undefined>((resolve) => {
       this._resolveRequestRun = resolve;
     });
-
-    this._outerSignals = new WeakSet();
   }
 
   /**
@@ -85,39 +82,25 @@ export class WatchLoop implements IWatchLoopState {
       return OperationStatus.Aborted;
     }
 
-    if (!this._outerSignals.has(abortSignal)) {
-      // ESLINT: "Promises must be awaited, end with a call to .catch, end with a call to .then ..."
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      once(abortSignal, 'abort').finally(this._abortCurrent);
-    }
+    abortSignal.addEventListener('abort', this._abortCurrent, { once: true });
 
-    let result: OperationStatus = OperationStatus.Ready;
+    try {
+      let result: OperationStatus = OperationStatus.Ready;
 
-    do {
-      // Always check the abort signal first, in case it was aborted in the async tick since the last executeAsync() call.
-      if (abortSignal.aborted) {
-        return OperationStatus.Aborted;
-      }
-
-      this._reset();
-
-      this._options.onBeforeExecute();
-      try {
-        this._isRunning = true;
-        result = await this._options.executeAsync(this);
-      } catch (err) {
-        if (!(err instanceof AlreadyReportedError)) {
-          throw err;
-        } else {
-          result = OperationStatus.Failure;
+      do {
+        // Always check the abort signal first, in case it was aborted in the async tick since the last executeAsync() call.
+        if (abortSignal.aborted) {
+          return OperationStatus.Aborted;
         }
-      } finally {
-        this._isRunning = false;
-      }
-    } while (this._runRequested);
 
-    // Even if the run has finished, if the abort signal was aborted, we should return `Aborted` just in case.
-    return abortSignal.aborted ? OperationStatus.Aborted : result;
+        result = await this._runIterationAsync();
+      } while (this._runRequested);
+
+      // Even if the run has finished, if the abort signal was aborted, we should return `Aborted` just in case.
+      return abortSignal.aborted ? OperationStatus.Aborted : result;
+    } finally {
+      abortSignal.removeEventListener('abort', this._abortCurrent);
+    }
   }
 
   /**
@@ -267,6 +250,28 @@ export class WatchLoop implements IWatchLoopState {
       this._requestRunPromise = new Promise<string | undefined>((resolve) => {
         this._resolveRequestRun = resolve;
       });
+    }
+  }
+
+  /**
+   * Runs a single iteration of the loop.
+   * @returns The status of the iteration.
+   */
+  private async _runIterationAsync(): Promise<OperationStatus> {
+    this._reset();
+
+    this._options.onBeforeExecute();
+    try {
+      this._isRunning = true;
+      return await this._options.executeAsync(this);
+    } catch (err) {
+      if (!(err instanceof AlreadyReportedError)) {
+        throw err;
+      } else {
+        return OperationStatus.Failure;
+      }
+    } finally {
+      this._isRunning = false;
     }
   }
 }
