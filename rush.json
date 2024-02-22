@@ -102,7 +102,7 @@
    * and set projectFolderMaxDepth to a large number.
    */
   "projectFolderMinDepth": 2,
-  "projectFolderMaxDepth": 3,
+  "projectFolderMaxDepth": 2,
 
   /**
    * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
@@ -862,35 +862,27 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    /*
-    {
-      "packageName": "install-test-workspace",
-      "projectFolder": "build-tests/install-test-workspace",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    */
     {
       "packageName": "rush-lib-test",
-      "projectFolder": "build-tests/install-test-workspace/rush-lib-test",
+      "projectFolder": "build-tests-subspace/rush-lib-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
       "packageName": "rush-sdk-test",
-      "projectFolder": "build-tests/install-test-workspace/rush-sdk-test",
+      "projectFolder": "build-tests-subspace/rush-sdk-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
       "packageName": "typescript-newest-test",
-      "projectFolder": "build-tests/install-test-workspace/typescript-newest-test",
+      "projectFolder": "build-tests-subspace/typescript-newest-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
       "packageName": "typescript-v4-test",
-      "projectFolder": "build-tests/install-test-workspace/typescript-v4-test",
+      "projectFolder": "build-tests-subspace/typescript-v4-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

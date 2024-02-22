@@ -815,6 +815,120 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
+  ../../build-tests-subspace/rush-lib-test:
+    dependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: file:../../libraries/rush-lib
+      '@rushstack/terminal':
+        specifier: workspace:*
+        version: file:../../libraries/terminal(@types/node@18.17.15)
+      colors:
+        specifier: ~1.2.1
+        version: 1.2.5
+    devDependencies:
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+    dependenciesMeta:
+      '@microsoft/rush-lib':
+        injected: true
+      '@rushstack/terminal':
+        injected: true
+
+  ../../build-tests-subspace/rush-sdk-test:
+    dependencies:
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: file:../../libraries/rush-sdk
+      colors:
+        specifier: ~1.2.1
+        version: 1.2.5
+    devDependencies:
+      '@microsoft/rush-lib':
+        specifier: workspace:*
+        version: file:../../libraries/rush-lib
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+    dependenciesMeta:
+      '@microsoft/rush-lib':
+        injected: true
+      '@rushstack/rush-sdk':
+        injected: true
+
+  ../../build-tests-subspace/typescript-newest-test:
+    devDependencies:
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: file:../../eslint/eslint-config(eslint@8.7.0)(typescript@5.3.3)
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: file:../../apps/heft
+      '@rushstack/heft-lint-plugin':
+        specifier: workspace:*
+        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
+      '@rushstack/heft-typescript-plugin':
+        specifier: workspace:*
+        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0(supports-color@8.1.1)
+      tslint:
+        specifier: ~5.20.1
+        version: 5.20.1(typescript@5.3.3)
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+    dependenciesMeta:
+      '@rushstack/eslint-config':
+        injected: true
+      '@rushstack/heft':
+        injected: true
+      '@rushstack/heft-lint-plugin':
+        injected: true
+      '@rushstack/heft-typescript-plugin':
+        injected: true
+
+  ../../build-tests-subspace/typescript-v4-test:
+    devDependencies:
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: file:../../eslint/eslint-config(eslint@8.7.0)(typescript@4.9.5)
+      '@rushstack/heft':
+        specifier: workspace:*
+        version: file:../../apps/heft
+      '@rushstack/heft-lint-plugin':
+        specifier: workspace:*
+        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
+      '@rushstack/heft-typescript-plugin':
+        specifier: workspace:*
+        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0(supports-color@8.1.1)
+      tslint:
+        specifier: ~5.20.1
+        version: 5.20.1(typescript@4.9.5)
+      typescript:
+        specifier: ~4.9.5
+        version: 4.9.5
+    dependenciesMeta:
+      '@rushstack/eslint-config':
+        injected: true
+      '@rushstack/heft':
+        injected: true
+      '@rushstack/heft-lint-plugin':
+        injected: true
+      '@rushstack/heft-typescript-plugin':
+        injected: true
+
   ../../build-tests/api-documenter-scenarios:
     devDependencies:
       '@microsoft/api-documenter':
@@ -1898,126 +2012,6 @@ importers:
       webpack:
         specifier: ~5.82.1
         version: 5.82.1
-
-  ../../build-tests/install-test-workspace/rush-lib-test:
-    dependencies:
-      '@microsoft/rush-lib':
-        specifier: workspace:*
-        version: file:../../libraries/rush-lib
-      '@rushstack/terminal':
-        specifier: workspace:*
-        version: file:../../libraries/terminal(@types/node@18.17.15)
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
-    devDependencies:
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      rimraf:
-        specifier: ^4.1.2
-        version: 4.4.1
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-    dependenciesMeta:
-      '@microsoft/rush-lib':
-        injected: true
-      '@rushstack/terminal':
-        injected: true
-
-  ../../build-tests/install-test-workspace/rush-sdk-test:
-    dependencies:
-      '@rushstack/rush-sdk':
-        specifier: workspace:*
-        version: file:../../libraries/rush-sdk
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
-    devDependencies:
-      '@microsoft/rush-lib':
-        specifier: workspace:*
-        version: file:../../libraries/rush-lib
-      '@types/node':
-        specifier: 18.17.15
-        version: 18.17.15
-      rimraf:
-        specifier: ^4.1.2
-        version: 4.4.1
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-    dependenciesMeta:
-      '@microsoft/rush-lib':
-        injected: true
-      '@rushstack/rush-sdk':
-        injected: true
-
-  ../../build-tests/install-test-workspace/typescript-newest-test:
-    devDependencies:
-      '@rushstack/eslint-config':
-        specifier: workspace:*
-        version: file:../../eslint/eslint-config(eslint@8.7.0)(typescript@5.3.3)
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: file:../../apps/heft
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
-      eslint:
-        specifier: ~8.7.0
-        version: 8.7.0(supports-color@8.1.1)
-      tslint:
-        specifier: ~5.20.1
-        version: 5.20.1(typescript@5.3.3)
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
-    dependenciesMeta:
-      '@rushstack/eslint-config':
-        injected: true
-      '@rushstack/heft':
-        injected: true
-      '@rushstack/heft-lint-plugin':
-        injected: true
-      '@rushstack/heft-typescript-plugin':
-        injected: true
-
-  ../../build-tests/install-test-workspace/typescript-v4-test:
-    devDependencies:
-      '@rushstack/eslint-config':
-        specifier: workspace:*
-        version: file:../../eslint/eslint-config(eslint@8.7.0)(typescript@4.9.5)
-      '@rushstack/heft':
-        specifier: workspace:*
-        version: file:../../apps/heft
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
-      eslint:
-        specifier: ~8.7.0
-        version: 8.7.0(supports-color@8.1.1)
-      tslint:
-        specifier: ~5.20.1
-        version: 5.20.1(typescript@4.9.5)
-      typescript:
-        specifier: ~4.9.5
-        version: 4.9.5
-    dependenciesMeta:
-      '@rushstack/eslint-config':
-        injected: true
-      '@rushstack/heft':
-        injected: true
-      '@rushstack/heft-lint-plugin':
-        injected: true
-      '@rushstack/heft-typescript-plugin':
-        injected: true
 
   ../../build-tests/localization-plugin-test-01:
     dependencies:
@@ -17786,16 +17780,6 @@ packages:
       once: 1.4.0
       path-is-absolute: 1.0.1
 
-  /glob@9.3.5:
-    resolution: {integrity: sha512-e1LleDykUz2Iu+MTYdkSsuWX8lvAjAcs0Xef0lNIu0S2wOAzuTxCJtcd9S3cijlwYF18EsU3rzb8jPVobxDh9Q==}
-    engines: {node: '>=16 || 14 >=14.17'}
-    dependencies:
-      fs.realpath: 1.0.0
-      minimatch: 8.0.4
-      minipass: 4.2.8
-      path-scurry: 1.10.1
-    dev: true
-
   /global-dirs@3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
     engines: {node: '>=10'}
@@ -20306,11 +20290,6 @@ packages:
       highlight.js: 10.7.3
     dev: true
 
-  /lru-cache@10.2.0:
-    resolution: {integrity: sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==}
-    engines: {node: 14 || >=16.14}
-    dev: true
-
   /lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
     dependencies:
@@ -20698,13 +20677,6 @@ packages:
     dependencies:
       brace-expansion: 2.0.1
 
-  /minimatch@8.0.4:
-    resolution: {integrity: sha512-W0Wvr9HyFXZRGIDgCicunpQ299OKXs9RgZfaukz4qAW/pJhcpUfupc9c+OObPOFueNy8VSrZgEmDtk6Kh4WzDA==}
-    engines: {node: '>=16 || 14 >=14.17'}
-    dependencies:
-      brace-expansion: 2.0.1
-    dev: true
-
   /minimatch@9.0.3:
     resolution: {integrity: sha512-RHiac9mvaRw0x3AYRgDC1CxAP7HTcNrrECeA8YYJeWnpo+2Q5CegtZjaotWTWxDG3UeGA1coE05iH1mPjT/2mg==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -20766,11 +20738,6 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       yallist: 4.0.0
-
-  /minipass@4.2.8:
-    resolution: {integrity: sha512-fNzuVyifolSLFL4NzpF+wEF4qrgqaaKX0haXPQEdQ7NKAN+WecoKMHV09YcuL/DHxrUsYQOK3MiuDf7Ip2OXfQ==}
-    engines: {node: '>=8'}
-    dev: true
 
   /minipass@5.0.0:
     resolution: {integrity: sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==}
@@ -21703,14 +21670,6 @@ packages:
 
   /path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
-
-  /path-scurry@1.10.1:
-    resolution: {integrity: sha512-MkhCqzzBEpPvxxQ71Md0b1Kk51W01lrYvlMzSUaIzNsODdd7mqhiimSZlr+VegAz5Z6Vzt9Xg2ttE//XBhH3EQ==}
-    engines: {node: '>=16 || 14 >=14.17'}
-    dependencies:
-      lru-cache: 10.2.0
-      minipass: 7.0.4
-    dev: true
 
   /path-to-regexp@0.1.7:
     resolution: {integrity: sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==}
@@ -23474,14 +23433,6 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.2.3
-
-  /rimraf@4.4.1:
-    resolution: {integrity: sha512-Gk8NlF062+T9CqNGn6h4tls3k6T1+/nXdOcSZVikNVtlRdYpA7wRJJMoXmuvOnLW844rPjdQ7JgXCYM6PPC/og==}
-    engines: {node: '>=14'}
-    hasBin: true
-    dependencies:
-      glob: 9.3.5
-    dev: true
 
   /ripemd160@2.0.2:
     resolution: {integrity: sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA==}
