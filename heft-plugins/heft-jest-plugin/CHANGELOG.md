@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Thu, 22 Feb 2024 01:36:09 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Feb 2024 05:54:17 GMT and should not be manually modified.
+
+## 0.11.14
+Thu, 22 Feb 2024 05:54:17 GMT
+
+### Patches
+
+- Add a missing dependency on `@rushstack/terminal`
 
 ## 0.11.13
 Thu, 22 Feb 2024 01:36:09 GMT

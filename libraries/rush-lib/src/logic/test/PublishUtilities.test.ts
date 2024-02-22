@@ -913,7 +913,9 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
       a: 'workspace:~1.0.0',
       b: 'workspace:^1.0.0',
       c: 'workspace:>=1.0.0 <2.0.0',
-      d: 'workspace:*'
+      d: 'workspace:*',
+      e: 'workspace:~',
+      f: 'workspace:^'
     };
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.1.0')).toEqual('workspace:~1.1.0');
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'b', '1.2.0')).toEqual('workspace:^1.2.0');
@@ -921,6 +923,8 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
       'workspace:>=1.3.0 <2.0.0'
     );
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'd', '1.4.0')).toEqual('workspace:*');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'e', '1.5.0')).toEqual('workspace:~');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'f', '1.6.0')).toEqual('workspace:^');
   });
 
   it('can update dependency versions with prereleases', () => {
@@ -928,7 +932,9 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
       a: 'workspace:~1.0.0-pr.1',
       b: 'workspace:^1.0.0-pr.1',
       c: 'workspace:>=1.0.0-pr.1 <2.0.0',
-      d: 'workspace:*'
+      d: 'workspace:*',
+      e: 'workspace:~',
+      f: 'workspace:^'
     };
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.1.0-pr.1')).toEqual(
       'workspace:~1.1.0-pr.1'
@@ -940,6 +946,8 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
       'workspace:>=1.3.0-pr.3 <2.0.0'
     );
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'd', '1.3.0-pr.3')).toEqual('workspace:*');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'e', '1.5.0-pr.3')).toEqual('workspace:~');
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'f', '1.6.0-pr.3')).toEqual('workspace:^');
   });
 
   it('can update to prerelease', () => {
@@ -947,7 +955,9 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
       a: 'workspace:~1.0.0',
       b: 'workspace:^1.0.0',
       c: 'workspace:>=1.0.0 <2.0.0',
-      d: 'workspace:*'
+      d: 'workspace:*',
+      e: 'workspace:~',
+      f: 'workspace:^'
     };
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'a', '1.0.0-hotfix.0')).toEqual(
       'workspace:~1.0.0-hotfix.0'
@@ -960,6 +970,12 @@ describe(PublishUtilities.getNewDependencyVersion.name, () => {
     );
     expect(PublishUtilities.getNewDependencyVersion(dependencies, 'd', '1.0.0-hotfix.0')).toEqual(
       'workspace:*'
+    );
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'e', '1.0.0-hotfix.0')).toEqual(
+      'workspace:~'
+    );
+    expect(PublishUtilities.getNewDependencyVersion(dependencies, 'f', '1.0.0-hotfix.0')).toEqual(
+      'workspace:^'
     );
   });
 });

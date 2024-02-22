@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.21.5",
+      "tag": "@rushstack/heft-web-rig_v0.21.5",
+      "date": "Thu, 22 Feb 2024 05:54:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.11.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.21.4",
       "tag": "@rushstack/heft-web-rig_v0.21.4",
       "date": "Thu, 22 Feb 2024 01:36:09 GMT",
