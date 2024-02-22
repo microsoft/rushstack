@@ -43,7 +43,7 @@
     "@jest/types": "29.5.0",
     "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "2.4.15",
+    "@rushstack/heft-node-rig": "2.4.16",
     "@rushstack/terminal": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
