@@ -214,7 +214,7 @@ export class RushConfigurationProject {
     this.packageName = packageName;
     this.projectRelativeFolder = projectRelativeFolder;
 
-    validateRelativePathField(projectRelativeFolder, 'projectFolder');
+    validateRelativePathField(projectRelativeFolder, 'projectFolder', rushConfiguration.rushJsonFile);
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectRelativeFolder.split('/').length;
@@ -331,7 +331,7 @@ export class RushConfigurationProject {
     this.publishFolder = absoluteProjectFolder;
     const { publishFolder } = projectJson;
     if (publishFolder) {
-      validateRelativePathField(publishFolder, 'publishFolder');
+      validateRelativePathField(publishFolder, 'publishFolder', rushConfiguration.rushJsonFile);
       this.publishFolder = path.join(this.publishFolder, publishFolder);
     }
 
@@ -509,30 +509,32 @@ export class RushConfigurationProject {
   }
 }
 
-export function validateRelativePathField(relativePath: string, name: string): void {
+export function validateRelativePathField(relativePath: string, field: string, file: string): void {
   // path.isAbsolute delegates depending on platform; however, path.posix.isAbsolute('C:/a') returns false,
   // while path.win32.isAbsolute('C:/a') returns true. We want consistent validation across platforms.
   if (path.posix.isAbsolute(relativePath) || path.win32.isAbsolute(relativePath)) {
-    throw new Error(`The value "${relativePath}" in the "${name}" field must be a relative path.`);
+    throw new Error(
+      `The value "${relativePath}" in the "${field}" field in "${file}" must be a relative path.`
+    );
   }
 
   if (relativePath.includes('\\')) {
     throw new Error(
-      `The value "${relativePath}" in the "${name}" field may not contain backslashes ('\\'), since they are interpreted differently` +
+      `The value "${relativePath}" in the "${field}" field in "${file}" may not contain backslashes ('\\'), since they are interpreted differently` +
         ` on POSIX and Windows. Paths must use '/' as the path separator.`
     );
   }
 
   if (relativePath.endsWith('/')) {
     throw new Error(
-      `The value "${relativePath}" in the "${name}" field may not end with a trailing '/' character.`
+      `The value "${relativePath}" in the "${field}" field in "${file}" may not end with a trailing '/' character.`
     );
   }
 
   const normalized: string = path.posix.normalize(relativePath);
   if (relativePath !== normalized) {
     throw new Error(
-      `The value "${relativePath}" in the "${name}" field should be replaced with its normalized form "${normalized}".`
+      `The value "${relativePath}" in the "${field}" field in "${file}" should be replaced with its normalized form "${normalized}".`
     );
   }
 }
