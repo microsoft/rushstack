@@ -5,8 +5,9 @@
   "description": "A minimal example project that imports APIs from @rushstack/rush-sdk",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf ./lib/ && tsc",
-    "start": "node lib/start.js"
+    "build": "rimraf ./lib/ && tsc",
+    "start": "node lib/start.js",
+    "_phase:build": "rushx --quiet build"
   },
   "dependencies": {
     "@rushstack/rush-sdk": "workspace:*",
@@ -15,7 +16,8 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@types/node": "18.17.15",
-    "typescript": "~5.3.3"
+    "typescript": "~5.3.3",
+    "rimraf": "~5.0.5"
   },
   "dependenciesMeta": {
     "@microsoft/rush-lib": {

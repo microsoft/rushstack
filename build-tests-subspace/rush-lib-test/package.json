@@ -5,13 +5,15 @@
   "description": "A minimal example project that imports APIs from @rushstack/rush-lib",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf ./lib/ && tsc",
-    "start": "node lib/start.js"
+    "build": "rimraf ./lib/ && tsc",
+    "start": "node lib/start.js",
+    "_phase:build": "rushx --quiet build"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "colors": "~1.2.1"
+    "colors": "~1.2.1",
+    "rimraf": "~5.0.5"
   },
   "devDependencies": {
     "@types/node": "18.17.15",

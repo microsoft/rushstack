@@ -743,6 +743,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "rimraf",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "sass",
       "allowedCategories": [ "libraries", "tests" ]
     },
