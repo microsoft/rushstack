@@ -1108,6 +1108,8 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
+    // @internal @deprecated
+    readonly _hasVariantsField: boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)

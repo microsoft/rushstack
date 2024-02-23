@@ -196,6 +196,10 @@
       },
       "additionalProperties": false
     },
+    "variants": {
+      "description": "DEPRECATED",
+      "type": "array"
+    },
     "repository": {
       "description": "The repository location",
       "type": "object",

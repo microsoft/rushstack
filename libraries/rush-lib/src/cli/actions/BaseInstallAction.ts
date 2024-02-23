@@ -130,6 +130,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
+    if (this.rushConfiguration._hasVariantsField) {
+      this._terminal.writeLine(
+        Colorize.yellow(
+          `Warning: Please remove the obsolete "variants" field from your ${RushConstants.rushJsonFilename} ` +
+            'file. Installation variants have been replaced by the new Rush subspaces feature. ' +
+            'In the next major release, Rush will fail to execute if this field is present.'
+        )
+      );
+    }
+
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
     if (this.rushConfiguration.subspacesFeatureEnabled) {

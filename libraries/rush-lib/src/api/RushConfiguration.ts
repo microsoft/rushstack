@@ -171,6 +171,7 @@ export interface IRushConfigurationJson {
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
+  variants?: unknown;
 }
 
 /**
@@ -335,6 +336,14 @@ export class RushConfiguration {
    * Returns true if subspaces.json is present with "subspacesEnabled=true".
    */
   public readonly subspacesFeatureEnabled: boolean;
+
+  /**
+   * If true, the `variants` field is present in rush.json.
+   *
+   * @internal
+   * @deprecated - Remove when the field is removed from the rush.json schema.
+   */
+  public readonly _hasVariantsField: boolean;
 
   /**
    * The version of the locally package manager tool.  (Example: "1.2.3")
@@ -801,6 +810,8 @@ export class RushConfiguration {
       RushConstants.customTipsFilename
     );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
+
+    this._hasVariantsField = !!rushConfigurationJson.variants;
 
     this._pathTrees = new Map();
   }
