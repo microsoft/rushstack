@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "colors": "~1.2.1"
+    "supports-color": "~9.4.0"
   },
   "devDependencies": {
     "@rushstack/heft": "0.65.4",
