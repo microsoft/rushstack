@@ -154,10 +154,10 @@ export class RushInstallManager extends BaseInstallManager {
       );
 
       if (orphanedProjects.length > 0) {
-        for (const orhpanedProject of orphanedProjects) {
+        for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
-            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
-              'which was not found in rush.json'
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
+              `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
         shrinkwrapIsUpToDate = false;

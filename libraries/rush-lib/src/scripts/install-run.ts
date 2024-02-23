@@ -9,8 +9,9 @@ import * as os from 'os';
 import * as path from 'path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
+import type { RushConstants } from '../logic/RushConstants';
 
-export const RUSH_JSON_FILENAME: string = 'rush.json';
+export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
 const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
 const INSTALL_RUN_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_LOCKFILE_PATH' = 'INSTALL_RUN_LOCKFILE_PATH';
 const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
@@ -242,7 +243,7 @@ export function findRushJsonFolder(): string {
     } while (basePath !== (tempPath = path.dirname(basePath))); // Exit the loop when we hit the disk root
 
     if (!_rushJsonFolder) {
-      throw new Error('Unable to find rush.json.');
+      throw new Error(`Unable to find ${RUSH_JSON_FILENAME}.`);
     }
   }
 

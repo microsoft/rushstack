@@ -184,7 +184,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       '[dot]gitattributes',
       '[dot]gitignore',
-      'rush.json'
+      RushConstants.rushJsonFilename
     ];
 
     const experimentalTemplateFilePaths: string[] = [

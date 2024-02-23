@@ -12,6 +12,7 @@ import type {
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 import { Terminal, type ITerminal, ConsoleTerminalProvider, Colorize } from '@rushstack/terminal';
 import { getRepoRoot } from '@rushstack/package-deps-hash';
+import type * as InquirerType from 'inquirer';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { type IChangeFile, type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -27,8 +28,7 @@ import {
 } from '../../api/VersionPolicy';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Git } from '../../logic/Git';
-
-import type * as InquirerType from 'inquirer';
+import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 
 const BULK_LONG_NAME: string = '--bulk';
@@ -78,7 +78,7 @@ export class ChangeAction extends BaseRushAction {
       'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
         'specific older version of the package. When a hotfix change is added, ' +
         'other changes will not be able to increment the version number. ' +
-        "Enable this feature by setting 'hotfixChangeEnabled' in your rush.json.",
+        `Enable this feature by setting 'hotfixChangeEnabled' in your ${RushConstants.rushJsonFilename}.`,
       ''
     ].join('\n');
     super({
