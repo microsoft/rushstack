@@ -18,8 +18,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@microsoft/rush-lib": "workspace:*",
     "@types/node": "18.17.15",
-    "typescript": "~5.3.3",
-    "rimraf": "~5.0.5"
+    "typescript": "~5.3.3"
   },
   "dependenciesMeta": {
     "@microsoft/rush-lib": {
