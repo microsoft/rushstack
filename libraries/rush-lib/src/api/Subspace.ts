@@ -193,8 +193,7 @@ export class Subspace {
   }
 
   /**
-   * Gets the settings from the common-versions.json config file for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * Gets the settings from the common-versions.json config file.
    * @beta
    */
   public getCommonVersions(): CommonVersionsConfiguration {
@@ -206,8 +205,7 @@ export class Subspace {
   }
 
   /**
-   * Gets the path to the repo-state.json file for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * Gets the path to the repo-state.json file.
    * @beta
    */
   public getRepoStateFilePath(): string {
@@ -215,9 +213,8 @@ export class Subspace {
   }
 
   /**
-   * Gets the contents from the repo-state.json file for a specific variant.
+   * Gets the contents from the repo-state.json file.
    * @param subspaceName - The name of the subspace in use by the active command.
-   * @param variant - The name of the current variant in use by the active command.
    * @beta
    */
   public getRepoState(): RepoStateFile {
@@ -226,8 +223,7 @@ export class Subspace {
   }
 
   /**
-   * Gets the committed shrinkwrap file name for a specific variant.
-   * @param variant - The name of the current variant in use by the active command.
+   * Gets the committed shrinkwrap file name.
    * @beta
    */
   public getCommittedShrinkwrapFilename(): string {

@@ -17,12 +17,7 @@ import type { Subspace } from '../../api/Subspace';
 /**
  * Options used when generating the pnpmfile shim settings file.
  */
-export interface IPnpmfileShimOptions {
-  /**
-   * The variant that the client pnpmfile will be sourced from.
-   */
-  variant?: string;
-}
+export interface IPnpmfileShimOptions {}
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,

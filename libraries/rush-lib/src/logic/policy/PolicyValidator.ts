@@ -11,7 +11,6 @@ export interface IPolicyValidatorOptions {
   bypassPolicyAllowed?: boolean;
   bypassPolicy?: boolean;
   allowShrinkwrapUpdates?: boolean;
-  shrinkwrapVariant?: string;
 }
 
 export async function validatePolicyAsync(

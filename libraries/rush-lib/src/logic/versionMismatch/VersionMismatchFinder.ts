@@ -17,7 +17,6 @@ import type { Subspace } from '../../api/Subspace';
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
-  variant?: string | undefined;
   subspace?: Subspace;
 }
 
@@ -128,7 +127,6 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: {
       isRushCheckCommand: boolean;
-      variant?: string | undefined;
       subspaceName?: string | undefined;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
@@ -138,7 +136,7 @@ export class VersionMismatchFinder {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
         rushConfiguration,
-        options
+        {}
       );
 
       if (options.printAsJson) {

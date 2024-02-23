@@ -319,20 +319,17 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
-"usage: rush check [-h] [--variant VARIANT] [--json] [--verbose]
+"usage: rush check [-h] [--json] [--verbose]
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
 
 Optional arguments:
-  -h, --help         Show this help message and exit.
-  --variant VARIANT  Run command using a variant installation configuration. 
-                     This parameter may alternatively be specified via the 
-                     RUSH_VARIANT environment variable.
-  --json             If this flag is specified, output will be in JSON format.
-  --verbose          If this flag is specified, long lists of package names 
-                     will not be truncated. This has no effect if the --json 
-                     flag is also specified.
+  -h, --help  Show this help message and exit.
+  --json      If this flag is specified, output will be in JSON format.
+  --verbose   If this flag is specified, long lists of package names will not 
+              be truncated. This has no effect if the --json flag is also 
+              specified.
 "
 `;
 
@@ -576,10 +573,9 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--offline] [--variant VARIANT] [--subspace SUBSPACE_NAME]
-                    [-t PROJECT] [-T PROJECT] [-f PROJECT] [-o PROJECT]
-                    [-i PROJECT] [-I PROJECT]
-                    [--to-version-policy VERSION_POLICY_NAME]
+                    [--offline] [--subspace SUBSPACE_NAME] [-t PROJECT]
+                    [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
+                    [-I PROJECT] [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [--check-only]
                     
 
@@ -626,9 +622,6 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
-  --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively be 
-                        specified via the RUSH_VARIANT environment variable.
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
                         installed. Requires the feature to be enabled in 
@@ -1155,8 +1148,7 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--offline] [--variant VARIANT] [--subspace SUBSPACE_NAME]
-                   [--full] [--recheck]
+                   [--offline] [--subspace SUBSPACE_NAME] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1201,9 +1193,6 @@ Optional arguments:
                         necessary NPM packages cannot be obtained from the 
                         local cache. For details, see the documentation for 
                         PNPM's \\"--offline\\" parameter.
-  --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively be 
-                        specified via the RUSH_VARIANT environment variable.
   --subspace SUBSPACE_NAME
                         (EXPERIMENTAL) Specifies a Rush subspace to be 
                         installed. Requires the feature to be enabled in 

@@ -18,7 +18,6 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -29,7 +28,6 @@ import type { Subspace } from '../../api/Subspace';
  */
 export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _terminal: ITerminal;
-  protected readonly _variant: CommandLineStringParameter;
   protected readonly _purgeParameter: CommandLineFlagParameter;
   protected readonly _bypassPolicyParameter: CommandLineFlagParameter;
   protected readonly _noLinkParameter: CommandLineFlagParameter;
@@ -100,7 +98,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
         ` if the necessary NPM packages cannot be obtained from the local cache.` +
         ` For details, see the documentation for PNPM's "--offline" parameter.`
     });
-    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
@@ -174,14 +171,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       // Check each subspace for version inconsistencies
       for (const subspace of selectedSubspaces) {
         VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
-          variant: this._variant.value,
           subspace
         });
       }
     } else {
-      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
-        variant: this._variant.value
-      });
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {});
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();
