@@ -3,9 +3,8 @@
 
 // The "rush install" or "rush update" commands will copy this template to
 // "common/temp/<pnpmfile.js|.pnpmfile.cjs>" so that it can implement Rush-specific features such as
-// implicitly preferred versions. It reads its input data from "common/temp/pnpmfileSettings.json",
-// which includes the path to the user's pnpmfile for the currently selected variant. The pnpmfile is
-// required directly by this shim and is called after Rush's transformations are applied.
+// implicitly preferred versions. It reads its input data from "common/temp/pnpmfileSettings.json".
+// The pnpmfile is required directly by this shim and is called after Rush's transformations are applied.
 
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory

@@ -469,7 +469,6 @@ export class RushPnpmCommandLineParser {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
-      variant: undefined,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,

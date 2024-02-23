@@ -32,7 +32,7 @@ import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInst
 import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import type { PurgeManager } from '../PurgeManager';
-import type { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConstants } from '../RushConstants';
@@ -147,8 +147,10 @@ export abstract class BaseInstallManager {
       .experimentsConfiguration.configuration.generateProjectImpactGraphDuringRushUpdate
       ? new ProjectImpactGraphGenerator(this._terminal, this.rushConfiguration)
       : undefined;
-    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } =
-      await this.prepareAsync(subspace, projectImpactGraphGenerator);
+    const { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } = await this.prepareAsync(
+      subspace,
+      projectImpactGraphGenerator
+    );
 
     if (this.options.checkOnly) {
       return;
@@ -184,13 +186,7 @@ export abstract class BaseInstallManager {
       return this.canSkipInstall(outputStats.mtime, subspace);
     };
 
-    if (
-      cleanInstall ||
-      !shrinkwrapIsUpToDate ||
-      !variantIsUpToDate ||
-      !canSkipInstall() ||
-      !projectImpactGraphIsUpToDate
-    ) {
+    if (cleanInstall || !shrinkwrapIsUpToDate || !canSkipInstall() || !projectImpactGraphIsUpToDate) {
       // eslint-disable-next-line no-console
       console.log();
       await this.validateNpmSetup();
@@ -306,7 +302,6 @@ export abstract class BaseInstallManager {
     subspace: Subspace,
     projectImpactGraphGenerator: ProjectImpactGraphGenerator | undefined
   ): Promise<{
-    variantIsUpToDate: boolean;
     shrinkwrapIsUpToDate: boolean;
     npmrcHash: string | undefined;
     projectImpactGraphIsUpToDate: boolean;
@@ -373,31 +368,6 @@ export abstract class BaseInstallManager {
       }
     }
 
-    // Write a file indicating which variant is being installed.
-    // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
-    const currentVariantJsonFilename: string = this.rushConfiguration.currentVariantJsonFilename;
-    const currentVariantJson: ICurrentVariantJson = {
-      variant: this.options.variant || null
-    };
-
-    // Determine if the variant is already current by updating current-variant.json.
-    // If nothing is written, the variant has not changed.
-    const variantIsUpToDate: boolean = !JsonFile.save(currentVariantJson, currentVariantJsonFilename, {
-      onlyIfChanged: true
-    });
-
-    if (this.options.variant) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(Colorize.bold(`Using variant '${this.options.variant}' for installation.`));
-    } else if (!variantIsUpToDate && !this.options.variant) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(Colorize.bold('Using the default variant for installation.'));
-    }
-
     const extraNpmrcLines: string[] = [];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       const subspaceEnvironmentVariable: string = SubspacesConfiguration._convertNameToEnvironmentVariable(
@@ -449,14 +419,13 @@ export abstract class BaseInstallManager {
       }
     }
 
-    // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
+    // Shim support for pnpmfile in.
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
         subspace.getSubspaceTempFolder(),
-        subspace,
-        this.options
+        subspace
       );
 
       if (this.rushConfiguration.subspacesFeatureEnabled) {
@@ -523,7 +492,7 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate };
+    return { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate };
   }
 
   /**

@@ -53,10 +53,6 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
    * If specified, "rush update" will be run in debug mode.
    */
   debugInstall: boolean;
-  /**
-   * The variant to consider when performing installations and validating shrinkwrap updates.
-   */
-  variant?: string | undefined;
 }
 
 /**
@@ -116,7 +112,7 @@ export class PackageJsonUpdater {
    * "rush upgrade-interactive".
    */
   public async doRushUpgradeAsync(options: IPackageJsonUpdaterRushUpgradeOptions): Promise<void> {
-    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
+    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall } = options;
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
       './DependencyAnalyzer'
@@ -128,7 +124,7 @@ export class PackageJsonUpdater {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
 
     const dependenciesToUpdate: Record<string, string> = {};
     const devDependenciesToUpdate: Record<string, string> = {};
@@ -219,10 +215,7 @@ export class PackageJsonUpdater {
 
     if (updateOtherPackages) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-        this._rushConfiguration,
-        {
-          variant: variant
-        }
+        this._rushConfiguration
       );
       for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
         this.updateProject(update);
@@ -242,10 +235,10 @@ export class PackageJsonUpdater {
           new Set(options.projects)
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdate(debugInstall, subspace, variant);
+          await this._doUpdate(debugInstall, subspace);
         }
       } else {
-        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace);
       }
     }
   }
@@ -259,7 +252,7 @@ export class PackageJsonUpdater {
     } else {
       throw new Error('only accept "rush add" or "rush remove"');
     }
-    const { skipUpdate, debugInstall, variant } = options;
+    const { skipUpdate, debugInstall } = options;
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
         this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
@@ -272,19 +265,15 @@ export class PackageJsonUpdater {
           new Set(options.projects)
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdate(debugInstall, subspace, variant);
+          await this._doUpdate(debugInstall, subspace);
         }
       } else {
-        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace);
       }
     }
   }
 
-  private async _doUpdate(
-    debugInstall: boolean,
-    subspace: Subspace,
-    variant: string | undefined
-  ): Promise<void> {
+  private async _doUpdate(debugInstall: boolean, subspace: Subspace): Promise<void> {
     this._terminal.writeLine();
     this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
@@ -300,7 +289,6 @@ export class PackageJsonUpdater {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
-      variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,
@@ -326,8 +314,7 @@ export class PackageJsonUpdater {
   private async _doRushAddAsync(
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages, variant } =
-      options;
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
 
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
@@ -340,7 +327,7 @@ export class PackageJsonUpdater {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
 
     this._terminal.writeLine();
     const dependenciesToAddOrUpdate: Record<string, string> = {};
@@ -402,10 +389,7 @@ export class PackageJsonUpdater {
       // we need to do a mismatch check
       if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this._rushConfiguration,
-          {
-            variant: variant
-          }
+          this._rushConfiguration
         );
         otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }

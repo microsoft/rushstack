@@ -251,7 +251,6 @@ export const EnvironmentVariableNames: {
     readonly RUSH_PREVIEW_VERSION: "RUSH_PREVIEW_VERSION";
     readonly RUSH_ALLOW_UNSUPPORTED_NODEJS: "RUSH_ALLOW_UNSUPPORTED_NODEJS";
     readonly RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD";
-    readonly RUSH_VARIANT: "RUSH_VARIANT";
     readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
     readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
     readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
@@ -1070,8 +1069,6 @@ export class RushConfiguration {
     readonly commonTempFolder: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
-    get currentInstalledVariant(): string | undefined;
-    readonly currentVariantJsonFilename: string;
     // @beta
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // @beta
@@ -1091,7 +1088,7 @@ export class RushConfiguration {
     getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration;
     // @deprecated (undocumented)
     getCommonVersionsFilePath(subspace?: Subspace): string;
-    getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
+    getImplicitlyPreferredVersions(): Map<string, string>;
     // @deprecated (undocumented)
     getPnpmfilePath(subspace?: Subspace): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
@@ -1111,6 +1108,8 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
+    // @internal @deprecated
+    readonly _hasVariantsField: boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -1272,7 +1271,6 @@ export class RushConstants {
     static readonly rushTempNpmScope: '@rush-temp';
     static readonly rushTempProjectsFolderName: 'projects';
     static readonly rushUserConfigurationFolderName: '.rush-user';
-    static readonly rushVariantsFolderName: 'variants';
     static readonly rushWebSiteUrl: 'https://rushjs.io';
     static readonly subspacesConfigFilename: 'subspaces.json';
     // (undocumented)

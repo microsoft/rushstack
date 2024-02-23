@@ -66,13 +66,6 @@ export class RushConstants {
   public static readonly rushTempProjectsFolderName: 'projects' = 'projects';
 
   /**
-   * The folder name ("variants") under which named variant configurations for
-   * alternate dependency sets may be found.
-   * Example: `C:\MyRepo\common\config\rush\variants`
-   */
-  public static readonly rushVariantsFolderName: 'variants' = 'variants';
-
-  /**
    * The filename ("npm-shrinkwrap.json") used to store an installation plan for the NPM package manger.
    */
   public static readonly npmShrinkwrapFilename: 'npm-shrinkwrap.json' = 'npm-shrinkwrap.json';
