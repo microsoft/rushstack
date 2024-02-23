@@ -91,6 +91,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "rimraf",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "rxjs",
       "allowedCategories": [ "libraries" ]
     },

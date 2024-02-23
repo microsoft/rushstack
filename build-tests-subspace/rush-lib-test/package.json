@@ -5,17 +5,18 @@
   "description": "A minimal example project that imports APIs from @rushstack/rush-lib",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf ./lib/ && tsc",
+    "build": "heft build --clean",
     "start": "node lib/start.js",
-    "_phase:build": "rushx --quiet build"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "colors": "~1.2.1",
-    "rimraf": "~5.0.5"
+    "colors": "~1.2.1"
   },
   "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "18.17.15",
     "typescript": "~5.3.3"
   },
@@ -24,6 +25,12 @@
       "injected": true
     },
     "@rushstack/terminal": {
+      "injected": true
+    },
+    "@rushstack/heft": {
+      "injected": true
+    },
+    "@rushstack/heft-typescript-plugin": {
       "injected": true
     }
   }
