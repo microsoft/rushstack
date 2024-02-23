@@ -261,7 +261,7 @@ export class RushConfigurationProject {
       // by the reviewCategories array.
       if (!projectJson.reviewCategory) {
         throw new Error(
-          `The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
+          `The "approvedPackagesPolicy" feature is enabled ${RushConstants.rushJsonFilename}, but a reviewCategory` +
             ` was not specified for the project "${packageName}".`
         );
       }
@@ -276,7 +276,7 @@ export class RushConfigurationProject {
 
     if (this.packageJson.name !== this.packageName) {
       throw new Error(
-        `The package name "${this.packageName}" specified in rush.json does not` +
+        `The package name "${this.packageName}" specified in ${RushConstants.rushJsonFilename} does not` +
           ` match the name "${this.packageJson.name}" from package.json`
       );
     }
@@ -341,7 +341,7 @@ export class RushConfigurationProject {
         if (!allowedProjectTags.has(tag)) {
           throw new Error(
             `The tag "${tag}" specified for project "${packageName}" is not listed in the ` +
-              `allowedProjectTags field in rush.json.`
+              `allowedProjectTags field in ${RushConstants.rushJsonFilename}.`
           );
         } else {
           tags.add(tag);

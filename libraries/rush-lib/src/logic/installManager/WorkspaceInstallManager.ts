@@ -117,7 +117,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
             `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
-              'which was not found in rush.json'
+              `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
         shrinkwrapIsUpToDate = false;

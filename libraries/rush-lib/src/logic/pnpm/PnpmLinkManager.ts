@@ -77,7 +77,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       // eslint-disable-next-line no-console
       console.log(
         Colorize.yellow(
-          '\nWarning: Nothing to do. Please edit rush.json and add at least one project' +
+          `\nWarning: Nothing to do. Please edit ${RushConstants.rushJsonFilename} and add at least one project` +
             ' to the "projects" section.\n'
         )
       );

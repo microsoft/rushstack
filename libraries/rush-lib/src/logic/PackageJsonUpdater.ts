@@ -835,7 +835,8 @@ export class PackageJsonUpdater {
     if (project === foundProject) {
       throw new Error(
         'Unable to add a project as a dependency of itself unless the dependency is listed as a cyclic dependency ' +
-          `in rush.json. This command attempted to add "${foundProject.packageName}" as a dependency of itself.`
+          `in ${RushConstants.rushJsonFilename}. This command attempted to add "${foundProject.packageName}" ` +
+          `as a dependency of itself.`
       );
     }
 

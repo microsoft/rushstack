@@ -207,7 +207,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+      description:
+        `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
+        'Make sure you know what you are skipping.'
     });
 
     if (this._watchPhases.size > 0 && !this._alwaysWatch) {

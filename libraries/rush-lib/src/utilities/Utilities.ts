@@ -18,6 +18,7 @@ import {
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { syncNpmrc } from './npmrcUtilities';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { RushConstants } from '../logic/RushConstants';
 
 export type UNINITIALIZED = 'UNINITIALIZED';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -567,7 +568,7 @@ export class Utilities {
   }
 
   public static getRushConfigNotFoundError(): Error {
-    return new Error('Unable to find rush.json configuration file');
+    return new Error(`Unable to find ${RushConstants.rushJsonFilename} configuration file`);
   }
 
   public static async usingAsync<TDisposable extends IDisposable>(

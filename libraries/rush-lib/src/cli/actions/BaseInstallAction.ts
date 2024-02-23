@@ -57,7 +57,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
       parameterLongName: RushConstants.bypassPolicyFlagLongName,
-      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
+      description: `Overrides enforcement of the "gitPolicy" rules from ${RushConstants.rushJsonFilename} (use honorably!)`
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -89,7 +89,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+      description:
+        `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
+        'Make sure you know what you are skipping.'
     });
     this._offlineParameter = this.defineFlagParameter({
       parameterLongName: '--offline',
