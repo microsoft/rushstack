@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Upgrade pnpm-sync-lib version",
+      "comment": "Upgrade the `pnpm-sync-lib` dependency version.",
       "type": "none"
     }
   ],
