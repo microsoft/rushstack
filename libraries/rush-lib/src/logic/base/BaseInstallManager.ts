@@ -425,8 +425,7 @@ export abstract class BaseInstallManager {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
         subspace.getSubspaceTempFolder(),
-        subspace,
-        this.options
+        subspace
       );
 
       if (this.rushConfiguration.subspacesFeatureEnabled) {

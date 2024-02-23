@@ -58,6 +58,6 @@ export class LastLinkFlagFactory {
    * @internal
    */
   public static getCommonTempFlag(subspace: Subspace): LastLinkFlag {
-    return new LastLinkFlag(subspace.getSubspaceTempFolder(), {});
+    return new LastLinkFlag(subspace.getSubspaceTempFolder());
   }
 }

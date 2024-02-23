@@ -185,7 +185,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         });
       }
     } else {
-      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {});
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal);
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();

@@ -15,11 +15,6 @@ import type { IPnpmfileContext, IPnpmfileShimSettings } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 
 /**
- * Options used when generating the pnpmfile shim settings file.
- */
-export interface IPnpmfileShimOptions {}
-
-/**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
  * optionally utilizing a pnpmfile shim to inject preferred versions.
  */
@@ -32,8 +27,7 @@ export class PnpmfileConfiguration {
 
   public static async initializeAsync(
     rushConfiguration: RushConfiguration,
-    subspace: Subspace,
-    pnpmfileShimOptions?: IPnpmfileShimOptions
+    subspace: Subspace
   ): Promise<PnpmfileConfiguration> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
@@ -46,8 +40,7 @@ export class PnpmfileConfiguration {
       log: (message: string) => {},
       pnpmfileShimSettings: await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(
         rushConfiguration,
-        subspace,
-        pnpmfileShimOptions
+        subspace
       )
     };
 
@@ -57,8 +50,7 @@ export class PnpmfileConfiguration {
   public static async writeCommonTempPnpmfileShimAsync(
     rushConfiguration: RushConfiguration,
     targetDir: string,
-    subspace: Subspace,
-    options?: IPnpmfileShimOptions
+    subspace: Subspace
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
@@ -78,7 +70,7 @@ export class PnpmfileConfiguration {
     });
 
     const pnpmfileShimSettings: IPnpmfileShimSettings =
-      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspace, options);
+      await PnpmfileConfiguration._getPnpmfileShimSettingsAsync(rushConfiguration, subspace);
 
     // Write the settings file used by the shim
     await JsonFile.saveAsync(pnpmfileShimSettings, path.join(targetDir, 'pnpmfileSettings.json'), {
@@ -88,8 +80,7 @@ export class PnpmfileConfiguration {
 
   private static async _getPnpmfileShimSettingsAsync(
     rushConfiguration: RushConfiguration,
-    subspace: Subspace,
-    options?: IPnpmfileShimOptions
+    subspace: Subspace
   ): Promise<IPnpmfileShimSettings> {
     let allPreferredVersions: { [dependencyName: string]: string } = {};
     let allowedAlternativeVersions: { [dependencyName: string]: readonly string[] } = {};

@@ -134,10 +134,7 @@ export class VersionMismatchFinder {
     }
   ): void {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-        rushConfiguration,
-        {}
-      );
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration);
 
       if (options.printAsJson) {
         mismatchFinder.printAsJson();
