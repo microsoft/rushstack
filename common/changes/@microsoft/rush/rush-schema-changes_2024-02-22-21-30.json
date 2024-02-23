@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Validate that the \"projectFolder\" and \"publishFolder\" fields in the \"projects\" list in \"rush.json\" are normalized POSIX relative paths that do not end in trailing \"/\" or contain \"\\\\\".",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
