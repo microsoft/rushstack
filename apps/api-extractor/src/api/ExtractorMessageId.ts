@@ -11,7 +11,7 @@
  *
  * @public
  */
-export const enum ExtractorMessageId {
+export enum ExtractorMessageId {
   /**
    * "The doc comment should not contain more than one release tag."
    */
