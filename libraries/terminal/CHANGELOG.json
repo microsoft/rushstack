@@ -2,6 +2,21 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.10.0",
+      "tag": "@rushstack/terminal_v0.10.0",
+      "date": "Sat, 24 Feb 2024 23:02:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace the `colors` dependency with `supports-color` for detecting if STDOUT and STDERR support color."
+          },
+          {
+            "comment": "Add a `Colorize.rainbow` API."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.0",
       "tag": "@rushstack/terminal_v0.9.0",
       "date": "Wed, 21 Feb 2024 21:45:28 GMT",

@@ -1,6 +1,14 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Wed, 21 Feb 2024 21:45:28 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Feb 2024 23:02:51 GMT and should not be manually modified.
+
+## 0.10.0
+Sat, 24 Feb 2024 23:02:51 GMT
+
+### Minor changes
+
+- Replace the `colors` dependency with `supports-color` for detecting if STDOUT and STDERR support color.
+- Add a `Colorize.rainbow` API.
 
 ## 0.9.0
 Wed, 21 Feb 2024 21:45:28 GMT

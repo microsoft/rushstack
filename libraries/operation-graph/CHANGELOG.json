@@ -2,6 +2,18 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.2.14",
+      "tag": "@rushstack/operation-graph_v0.2.14",
+      "date": "Sat, 24 Feb 2024 23:02:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.13",
       "tag": "@rushstack/operation-graph_v0.2.13",
       "date": "Thu, 22 Feb 2024 01:36:09 GMT",

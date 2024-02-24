@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.41.0",
+      "tag": "@microsoft/api-extractor_v7.41.0",
+      "date": "Sat, 24 Feb 2024 23:02:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace const enums with conventional enums to allow for compatibility with JavaScript consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.40.6",
       "tag": "@microsoft/api-extractor_v7.40.6",
       "date": "Wed, 21 Feb 2024 21:45:28 GMT",

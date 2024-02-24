@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 21 Feb 2024 21:45:28 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Feb 2024 23:02:51 GMT and should not be manually modified.
+
+## 7.41.0
+Sat, 24 Feb 2024 23:02:51 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatibility with JavaScript consumers.
 
 ## 7.40.6
 Wed, 21 Feb 2024 21:45:28 GMT
