@@ -37,12 +37,12 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
   /**
    * If true, verbose-level messages should be written to the console.
    */
-  public readonly verboseEnabled: boolean;
+  public verboseEnabled: boolean;
 
   /**
    * If true, debug-level messages should be written to the console.
    */
-  public readonly debugEnabled: boolean;
+  public debugEnabled: boolean;
 
   /**
    * {@inheritDoc ITerminalProvider.supportsColor}
