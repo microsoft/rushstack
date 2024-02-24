@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Add a `Colorize.rainbow` API.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/terminal"
+}
