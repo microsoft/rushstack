@@ -6,7 +6,7 @@ import { Colorize } from '../Colorize';
 
 describe(AnsiEscape.name, () => {
   it('calls removeCodes() successfully', () => {
-    const coloredInput: string = Colorize.green('Hello, world!');
+    const coloredInput: string = Colorize.rainbow('Hello, world!');
     const decoloredInput: string = AnsiEscape.removeCodes(coloredInput);
     expect(coloredInput).not.toBe(decoloredInput);
     expect(decoloredInput).toBe('Hello, world!');

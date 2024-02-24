@@ -3168,8 +3168,8 @@ packages:
     dependencies:
       semver-compare: 1.0.0
 
-  /pnpm-sync-lib@0.1.3:
-    resolution: {integrity: sha512-bNGuQmEnlIUSxrdtHTZHFt9JKEBqN39nU1QgTdMWjBeXIxCV7M99ylOoE4uH7KutHHacKlW7PD4+2ktApPUzog==}
+  /pnpm-sync-lib@0.1.4:
+    resolution: {integrity: sha512-3xwsXcsu+lj2l1nTF0TcgjHuMrnPpQJqHioPj5DTL9gFU+RSsoND2nEMelOo9qAz+BlPelxXZOc5z1Tgs7gwiQ==}
 
   /postcss@8.4.24:
     resolution: {integrity: sha512-M0RzbcI0sO/XJNucsGjvWU9ERWxb/ytp1w6dKtxTKgixdtQDq4rmx/g8W1hnaheq9jgwL/oyEdH5Bc4WwJKMqg==}
@@ -3739,6 +3739,12 @@ packages:
     dependencies:
       has-flag: 4.0.0
 
+  /supports-color@8.1.1:
+    resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
+    engines: {node: '>=10'}
+    dependencies:
+      has-flag: 4.0.0
+
   /supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
@@ -4266,7 +4272,7 @@ packages:
       node-fetch: 2.6.7
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
-      pnpm-sync-lib: 0.1.3
+      pnpm-sync-lib: 0.1.4
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.5.4
@@ -4613,6 +4619,7 @@ packages:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-4.0.2.tgz(@types/node@18.17.15)
       '@types/node': 18.17.15
       colors: 1.2.5
+      supports-color: 8.1.1
 
   file:../temp/tarballs/rushstack-tree-pattern-0.3.3.tgz:
     resolution: {tarball: file:../temp/tarballs/rushstack-tree-pattern-0.3.3.tgz}

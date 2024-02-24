@@ -63,6 +63,8 @@ export class Colorize {
     // (undocumented)
     static magentaBackground(text: string): string;
     // (undocumented)
+    static rainbow(text: string): string;
+    // (undocumented)
     static red(text: string): string;
     // (undocumented)
     static redBackground(text: string): string;
