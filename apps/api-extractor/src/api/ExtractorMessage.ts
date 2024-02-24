@@ -28,7 +28,7 @@ export interface IExtractorMessageProperties {
  * Specifies a category of messages for use with {@link ExtractorMessage}.
  * @public
  */
-export const enum ExtractorMessageCategory {
+export enum ExtractorMessageCategory {
   /**
    * Messages originating from the TypeScript compiler.
    *
