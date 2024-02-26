@@ -96,7 +96,7 @@
     },
     {
       "name": "@rushstack/debug-certificate-manager",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
       "name": "@rushstack/eslint-config",
