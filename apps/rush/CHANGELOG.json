@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.0",
+      "tag": "@microsoft/rush_v5.117.0",
+      "date": "Mon, 26 Feb 2024 21:39:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include the ability to add `[os]` and `[arch]` tokens to cache entry name patterns."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the 'installation variants' feature and its related APIs, which have been superceded by the Subspaces feature."
+          },
+          {
+            "comment": "Extract the \"rush.json\" filename to a constant as `RushConstants.rushJsonFilename`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.116.0",
       "tag": "@microsoft/rush_v5.116.0",
       "date": "Mon, 26 Feb 2024 20:04:02 GMT",

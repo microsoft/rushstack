@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 26 Feb 2024 20:04:02 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Feb 2024 21:39:36 GMT and should not be manually modified.
+
+## 5.117.0
+Mon, 26 Feb 2024 21:39:36 GMT
+
+### Updates
+
+- Include the ability to add `[os]` and `[arch]` tokens to cache entry name patterns.
+- (BREAKING CHANGE) Remove the 'installation variants' feature and its related APIs, which have been superceded by the Subspaces feature.
+- Extract the "rush.json" filename to a constant as `RushConstants.rushJsonFilename`.
 
 ## 5.116.0
 Mon, 26 Feb 2024 20:04:02 GMT
