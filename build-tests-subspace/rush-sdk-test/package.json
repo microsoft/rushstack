@@ -10,11 +10,11 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
-    "@rushstack/rush-sdk": "workspace:*",
-    "colors": "~1.2.1"
+    "@rushstack/rush-sdk": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@microsoft/rush-lib": "workspace:*",
     "@types/node": "18.17.15",
@@ -28,6 +28,9 @@
       "injected": true
     },
     "@rushstack/heft": {
+      "injected": true
+    },
+    "@rushstack/heft-lint-plugin": {
       "injected": true
     },
     "@rushstack/heft-typescript-plugin": {

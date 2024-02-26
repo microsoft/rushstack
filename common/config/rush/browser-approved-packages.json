@@ -55,10 +55,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "colors",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },
@@ -89,10 +85,6 @@
     {
       "name": "redux",
       "allowedCategories": [ "libraries", "vscode-extensions" ]
-    },
-    {
-      "name": "rimraf",
-      "allowedCategories": [ "tests" ]
     },
     {
       "name": "rxjs",

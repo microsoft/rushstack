@@ -11,6 +11,12 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
           }
+        },
+        "lint": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft-lint-plugin"
+          }
         }
       }
     }

@@ -823,9 +823,6 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: file:../../libraries/terminal(@types/node@18.17.15)
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -854,9 +851,6 @@ importers:
       '@rushstack/rush-sdk':
         specifier: workspace:*
         version: file:../../libraries/rush-sdk
-      colors:
-        specifier: ~1.2.1
-        version: 1.2.5
     devDependencies:
       '@microsoft/rush-lib':
         specifier: workspace:*
@@ -864,6 +858,9 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: file:../../apps/heft
+      '@rushstack/heft-lint-plugin':
+        specifier: workspace:*
+        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
@@ -877,6 +874,8 @@ importers:
       '@microsoft/rush-lib':
         injected: true
       '@rushstack/heft':
+        injected: true
+      '@rushstack/heft-lint-plugin':
         injected: true
       '@rushstack/heft-typescript-plugin':
         injected: true
