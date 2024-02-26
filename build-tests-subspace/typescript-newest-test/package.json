@@ -10,6 +10,7 @@
     "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
+    "local-node-rig": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",

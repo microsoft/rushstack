@@ -1,7 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  // TODO: Add comments
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
   "phasesByName": {
     "build": {
       "cleanFiles": [{ "includeGlobs": ["lib", "dist"] }],

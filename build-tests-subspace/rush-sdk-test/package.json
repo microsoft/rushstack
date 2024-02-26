@@ -13,6 +13,8 @@
     "@rushstack/rush-sdk": "workspace:*"
   },
   "devDependencies": {
+    "local-node-rig": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",

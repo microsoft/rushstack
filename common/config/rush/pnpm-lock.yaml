@@ -824,15 +824,24 @@ importers:
         specifier: workspace:*
         version: file:../../libraries/terminal(@types/node@18.17.15)
     devDependencies:
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
       '@rushstack/heft':
         specifier: workspace:*
         version: file:../../apps/heft
+      '@rushstack/heft-lint-plugin':
+        specifier: workspace:*
+        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
         version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -840,6 +849,8 @@ importers:
       '@microsoft/rush-lib':
         injected: true
       '@rushstack/heft':
+        injected: true
+      '@rushstack/heft-lint-plugin':
         injected: true
       '@rushstack/heft-typescript-plugin':
         injected: true
@@ -855,6 +866,9 @@ importers:
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: file:../../libraries/rush-lib
+      '@rushstack/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint/eslint-config
       '@rushstack/heft':
         specifier: workspace:*
         version: file:../../apps/heft
@@ -867,6 +881,9 @@ importers:
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -899,6 +916,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
+      local-node-rig:
+        specifier: workspace:*
+        version: link:../../rigs/local-node-rig
       tslint:
         specifier: ~5.20.1
         version: 5.20.1(typescript@5.3.3)

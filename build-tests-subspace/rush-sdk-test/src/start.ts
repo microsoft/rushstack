@@ -7,7 +7,7 @@ console.log('rush-sdk-test loading Rush configuration...');
 // instead of the normal .d.ts rollup
 import { RushConfiguration } from '@rushstack/rush-sdk/lib/';
 
-const config = RushConfiguration.loadFromDefaultLocation();
+const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 console.log(config.commonFolder);
 
 console.log('Calling an internal API...');
