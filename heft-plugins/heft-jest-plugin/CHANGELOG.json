@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.11.15",
+      "tag": "@rushstack/heft-jest-plugin_v0.11.15",
+      "date": "Mon, 26 Feb 2024 16:10:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make `@rushstack/terminal` a dependency because the reporter has a runtime dependency on that package."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.14",
       "tag": "@rushstack/heft-jest-plugin_v0.11.14",
       "date": "Thu, 22 Feb 2024 05:54:17 GMT",
