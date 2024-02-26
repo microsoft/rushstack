@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 22 Feb 2024 01:36:27 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Feb 2024 20:04:02 GMT and should not be manually modified.
+
+## 5.116.0
+Mon, 26 Feb 2024 20:04:02 GMT
+
+### Updates
+
+- Upgrade the `pnpm-sync-lib` dependency version.
+- Handle `workspace:~` and `workspace:^` wildcard specifiers when publishing. They remain as-is in package.json but get converted to `~${current}` and `^${current}` in changelogs.
+- Validate that the "projectFolder" and "publishFolder" fields in the "projects" list in "rush.json" are normalized POSIX relative paths that do not end in trailing "/" or contain "\\".
 
 ## 5.115.0
 Thu, 22 Feb 2024 01:36:27 GMT

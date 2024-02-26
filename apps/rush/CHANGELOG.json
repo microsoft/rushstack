@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.116.0",
+      "tag": "@microsoft/rush_v5.116.0",
+      "date": "Mon, 26 Feb 2024 20:04:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade the `pnpm-sync-lib` dependency version."
+          },
+          {
+            "comment": "Handle `workspace:~` and `workspace:^` wildcard specifiers when publishing. They remain as-is in package.json but get converted to `~${current}` and `^${current}` in changelogs."
+          },
+          {
+            "comment": "Validate that the \"projectFolder\" and \"publishFolder\" fields in the \"projects\" list in \"rush.json\" are normalized POSIX relative paths that do not end in trailing \"/\" or contain \"\\\\\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.115.0",
       "tag": "@microsoft/rush_v5.115.0",
       "date": "Thu, 22 Feb 2024 01:36:27 GMT",
