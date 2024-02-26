@@ -1,6 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+jest.mock('node:process', () => {
+  return {
+    ...jest.requireActual('node:process'),
+    platform: 'dummyplatform',
+    arch: 'dummyarch'
+  };
+});
+
 import { CacheEntryId, type GetCacheEntryIdFunction } from '../CacheEntryId';
 
 describe(CacheEntryId.name, () => {
@@ -17,6 +25,7 @@ describe(CacheEntryId.name, () => {
         '[phaseName:trimPrefix]_[hash]',
         '[projectName:normalize]_[hash]',
         '[projectName:normalize]_[phaseName:normalize]_[hash]',
+        '[projectName:normalize]_[phaseName:normalize]_[hash]_[os]_[arch]',
         '[projectName:normalize]_[phaseName:trimPrefix]_[hash]',
         'prefix/[projectName:normalize]_[hash]',
         'prefix/[projectName:normalize]_[phaseName:normalize]_[hash]',
@@ -53,6 +62,8 @@ describe(CacheEntryId.name, () => {
       '[:attr1]',
       '[projectName:attr1:attr2]',
       '/[hash]',
+      '[os:attr]',
+      '[arch:attr]',
       '~'
     ])('Throws an exception for an invalid pattern (%s)', (pattern) => {
       expect(() => CacheEntryId.parsePattern(pattern)).toThrowErrorMatchingSnapshot();
