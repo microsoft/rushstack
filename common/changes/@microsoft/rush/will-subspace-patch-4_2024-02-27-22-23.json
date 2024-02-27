@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix issue where rush looks through all projects instead of subspace projects",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
