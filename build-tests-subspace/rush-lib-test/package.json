@@ -1,0 +1,42 @@
+{
+  "name": "rush-lib-test",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A minimal example project that imports APIs from @rushstack/rush-lib",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "node lib/start.js",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
+  },
+  "devDependencies": {
+    "local-node-rig": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "@types/node": "18.17.15",
+    "typescript": "~5.3.3"
+  },
+  "dependenciesMeta": {
+    "@microsoft/rush-lib": {
+      "injected": true
+    },
+    "@rushstack/terminal": {
+      "injected": true
+    },
+    "@rushstack/heft": {
+      "injected": true
+    },
+    "@rushstack/heft-lint-plugin": {
+      "injected": true
+    },
+    "@rushstack/heft-typescript-plugin": {
+      "injected": true
+    }
+  }
+}

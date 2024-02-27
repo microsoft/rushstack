@@ -129,6 +129,10 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests-samples/heft-web-rig-library-tutorial](./build-tests-samples/heft-web-rig-library-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-webpack-basic-tutorial](./build-tests-samples/heft-webpack-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/packlets-tutorial](./build-tests-samples/packlets-tutorial/) | (Copy of sample project) Building this project is a regression test for @rushstack/eslint-plugin-packlets |
+| [/build-tests-subspace/rush-lib-test](./build-tests-subspace/rush-lib-test/) | A minimal example project that imports APIs from @rushstack/rush-lib |
+| [/build-tests-subspace/rush-sdk-test](./build-tests-subspace/rush-sdk-test/) | A minimal example project that imports APIs from @rushstack/rush-sdk |
+| [/build-tests-subspace/typescript-newest-test](./build-tests-subspace/typescript-newest-test/) | Building this project tests Heft with the newest supported TypeScript compiler version |
+| [/build-tests-subspace/typescript-v4-test](./build-tests-subspace/typescript-v4-test/) | Building this project tests Heft with TypeScript v4 |
 | [/build-tests/api-documenter-scenarios](./build-tests/api-documenter-scenarios/) | Building this project is a regression test for api-documenter |
 | [/build-tests/api-documenter-test](./build-tests/api-documenter-test/) | Building this project is a regression test for api-documenter |
 | [/build-tests/api-extractor-d-cts-test](./build-tests/api-extractor-d-cts-test/) | Building this project is a regression test for api-extractor |
@@ -167,7 +171,6 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-web-rig-library-test](./build-tests/heft-web-rig-library-test/) | A test project for Heft that exercises the '@rushstack/heft-web-rig' package |
 | [/build-tests/heft-webpack4-everything-test](./build-tests/heft-webpack4-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 4 |
 | [/build-tests/heft-webpack5-everything-test](./build-tests/heft-webpack5-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 5 |
-| [/build-tests/install-test-workspace](./build-tests/install-test-workspace/) |  |
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |

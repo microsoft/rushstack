@@ -1,9 +1,0 @@
-{
-  "pnpm": {
-    "peerDependencyRules": {
-      "allowAny": [
-        "@rushstack/heft"
-      ]
-    }
-  }
-}

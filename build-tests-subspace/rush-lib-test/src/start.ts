@@ -7,7 +7,7 @@ console.log('rush-lib-test loading Rush configuration...');
 // instead of the normal .d.ts rollup
 import { RushConfiguration } from '@microsoft/rush-lib/lib/';
 
-const config = RushConfiguration.loadFromDefaultLocation();
+const config: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 console.log(config.commonFolder);
 
 console.log('Calling an internal API...');
@@ -16,7 +16,7 @@ console.log('Calling an internal API...');
 import { VersionMismatchFinder } from '@microsoft/rush-lib/lib/logic/versionMismatch/VersionMismatchFinder';
 import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-const terminal = new Terminal(new ConsoleTerminalProvider());
+const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 VersionMismatchFinder.ensureConsistentVersions(config, terminal);
 
 console.log(new ConsoleTerminalProvider().supportsColor);

@@ -1,0 +1,36 @@
+{
+  "name": "typescript-newest-test",
+  "description": "Building this project tests Heft with the newest supported TypeScript compiler version",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "devDependencies": {
+    "local-node-rig": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
+    "typescript": "~5.3.3",
+    "tslint": "~5.20.1",
+    "eslint": "~8.7.0"
+  },
+  "dependenciesMeta": {
+    "@rushstack/eslint-config": {
+      "injected": true
+    },
+    "@rushstack/heft": {
+      "injected": true
+    },
+    "@rushstack/heft-lint-plugin": {
+      "injected": true
+    },
+    "@rushstack/heft-typescript-plugin": {
+      "injected": true
+    }
+  }
+}

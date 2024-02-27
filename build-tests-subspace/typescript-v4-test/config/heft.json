@@ -1,7 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  // TODO: Add comments
   "phasesByName": {
     "build": {
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "temp"] }],
