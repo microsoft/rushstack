@@ -125,8 +125,7 @@ export class OperationExecutionManager {
       streamCollator: this._streamCollator,
       onOperationStatusChanged,
       debugMode,
-      quietMode,
-      changedProjectsOnly
+      quietMode
     };
 
     let totalOperations: number = 0;

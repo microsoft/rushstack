@@ -7,6 +7,7 @@ import { Colorize } from '@rushstack/terminal';
 // Minimize dependencies to avoid compatibility errors that might be encountered before
 // NodeJsCompatibility.terminateIfVersionIsTooOld() gets to run.
 import type { RushConfiguration } from '../api/RushConfiguration';
+import { RushConstants } from './RushConstants';
 
 /**
  * This constant is the major version of the next LTS node Node.js release. This constant should be updated when
@@ -91,7 +92,7 @@ export class NodeJsCompatibility {
           console.warn(
             Colorize.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
-                `of the Rush engine. Please consider upgrading the "rushVersion" setting in rush.json, ` +
+                `of the Rush engine. Please consider upgrading the "rushVersion" setting in ${RushConstants.rushJsonFilename}, ` +
                 `or downgrading Node.js.\n`
             )
           );

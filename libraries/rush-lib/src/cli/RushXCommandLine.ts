@@ -15,6 +15,7 @@ import { RushStartupBanner } from './RushStartupBanner';
 import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { RushConstants } from '../logic/RushConstants';
 
 interface IRushXCommandLineArguments {
   /**
@@ -145,7 +146,8 @@ export class RushXCommandLine {
       // eslint-disable-next-line no-console
       console.log(
         Colorize.yellow(
-          'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
+          'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in ' +
+            `${RushConstants.rushJsonFilename}.`
         )
       );
     }

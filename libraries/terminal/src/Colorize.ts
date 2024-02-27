@@ -45,6 +45,15 @@ export enum SgrParameterAttribute {
   HiddenOff = 28
 }
 
+const RAINBOW_SEQUENCE: SgrParameterAttribute[] = [
+  SgrParameterAttribute.RedForeground,
+  SgrParameterAttribute.YellowForeground,
+  SgrParameterAttribute.GreenForeground,
+  SgrParameterAttribute.CyanForeground,
+  SgrParameterAttribute.BlueForeground,
+  SgrParameterAttribute.MagentaForeground
+];
+
 /**
  * The static functions on this class are used to produce colored text
  * for use with a terminal that supports ANSI escape codes.
@@ -254,6 +263,20 @@ export class Colorize {
       SgrParameterAttribute.HiddenOff,
       text
     );
+  }
+
+  public static rainbow(text: string): string {
+    return Colorize._applyColorSequence(text, RAINBOW_SEQUENCE);
+  }
+
+  private static _applyColorSequence(text: string, sequence: SgrParameterAttribute[]): string {
+    let result: string = '';
+    const sequenceLength: number = sequence.length;
+    for (let i: number = 0; i < text.length; i++) {
+      result += AnsiEscape.getEscapeSequenceForAnsiCode(sequence[i % sequenceLength]) + text[i];
+    }
+
+    return result + AnsiEscape.getEscapeSequenceForAnsiCode(SgrParameterAttribute.DefaultForeground);
   }
 
   private static _wrapTextInAnsiEscapeCodes(startCode: number, endCode: number, text: string): string {

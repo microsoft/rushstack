@@ -16,6 +16,7 @@ import * as GitEmailPolicy from './policy/GitEmailPolicy';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { type IChangedGitStatusEntry, type IGitStatusEntry, parseGitStatus } from './GitStatusParser';
+import { RushConstants } from './RushConstants';
 
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 
@@ -377,7 +378,7 @@ export class Git {
       // eslint-disable-next-line no-console
       console.log(
         Colorize.yellow(
-          'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
+          `A git remote URL has not been specified in ${RushConstants.rushJsonFilename}. Setting the baseline remote URL is recommended.`
         )
       );
       return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;

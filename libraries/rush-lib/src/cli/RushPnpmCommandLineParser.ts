@@ -94,12 +94,13 @@ export class RushPnpmCommandLineParser {
 
     if (rushConfiguration.packageManager !== 'pnpm') {
       throw new Error(
-        'The "rush-pnpm" command requires your rush.json to be configured to use the PNPM package manager'
+        `The "rush-pnpm" command requires your ${RushConstants.rushJsonFilename} to be configured to use the PNPM package manager`
       );
     }
 
     if (!rushConfiguration.pnpmOptions.useWorkspaces) {
-      const pnpmConfigFilename: string = rushConfiguration.pnpmOptions.jsonFilename || 'rush.json';
+      const pnpmConfigFilename: string =
+        rushConfiguration.pnpmOptions.jsonFilename || RushConstants.rushJsonFilename;
       throw new Error(
         `The "rush-pnpm" command requires the "useWorkspaces" setting to be enabled in ${pnpmConfigFilename}`
       );
@@ -286,7 +287,7 @@ export class RushPnpmCommandLineParser {
             this._terminal.writeErrorLine(
               PrintUtilities.wrapWords(
                 `Error: The "pnpm patch" command is added after pnpm@7.4.0.` +
-                  ` Please update "pnpmVersion" >= 7.4.0 in rush.json file and run "rush update" to use this command.`
+                  ` Please update "pnpmVersion" >= 7.4.0 in ${RushConstants.rushJsonFilename} file and run "rush update" to use this command.`
               ) + '\n'
             );
             throw new AlreadyReportedError();
@@ -301,8 +302,8 @@ export class RushPnpmCommandLineParser {
           if (this._rushConfiguration.rushConfigurationJson.pnpmOptions) {
             this._terminal.writeErrorLine(
               PrintUtilities.wrapWords(
-                `Error: The "pnpm patch-commit" command is incompatible with specifying "pnpmOptions" in rush.json file.` +
-                  ` Please move the content of "pnpmOptions" in rush.json file to ${pnpmOptionsJsonFilename}`
+                `Error: The "pnpm patch-commit" command is incompatible with specifying "pnpmOptions" in ${RushConstants.rushJsonFilename} file.` +
+                  ` Please move the content of "pnpmOptions" in ${RushConstants.rushJsonFilename} file to ${pnpmOptionsJsonFilename}`
               ) + '\n'
             );
             throw new AlreadyReportedError();
@@ -468,7 +469,6 @@ export class RushPnpmCommandLineParser {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
-      variant: undefined,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,

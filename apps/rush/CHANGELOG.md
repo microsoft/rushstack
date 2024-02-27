@@ -1,6 +1,46 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 21 Feb 2024 08:56:05 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Feb 2024 21:39:36 GMT and should not be manually modified.
+
+## 5.117.0
+Mon, 26 Feb 2024 21:39:36 GMT
+
+### Updates
+
+- Include the ability to add `[os]` and `[arch]` tokens to cache entry name patterns.
+- (BREAKING CHANGE) Remove the 'installation variants' feature and its related APIs, which have been superceded by the Subspaces feature.
+- Extract the "rush.json" filename to a constant as `RushConstants.rushJsonFilename`.
+
+## 5.116.0
+Mon, 26 Feb 2024 20:04:02 GMT
+
+### Updates
+
+- Upgrade the `pnpm-sync-lib` dependency version.
+- Handle `workspace:~` and `workspace:^` wildcard specifiers when publishing. They remain as-is in package.json but get converted to `~${current}` and `^${current}` in changelogs.
+- Validate that the "projectFolder" and "publishFolder" fields in the "projects" list in "rush.json" are normalized POSIX relative paths that do not end in trailing "/" or contain "\\".
+
+## 5.115.0
+Thu, 22 Feb 2024 01:36:27 GMT
+
+### Updates
+
+- Add a "runWithTerminalAsync" resource lifetime helper to `IOperationRunnerContext` to manage the creation and cleanup of logging for operation execution.
+- Adds a new experiment `useIPCScriptsInWatchMode`. When this flag is enabled and Rush is running in watch mode, it will check for npm scripts named `_phase:<phase-name>:ipc`, and if found, use them instead of the normal invocation of `_phase:<phase-name>`. When doing so, it will provide an IPC channel to the child process and expect the child to outlive the current build pass.
+
+## 5.114.3
+Thu, 22 Feb 2024 00:10:32 GMT
+
+### Updates
+
+- Replace deprecated function, and fix a path bug in Windows env
+
+## 5.114.2
+Wed, 21 Feb 2024 21:45:46 GMT
+
+### Updates
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
 
 ## 5.114.1
 Wed, 21 Feb 2024 08:56:05 GMT

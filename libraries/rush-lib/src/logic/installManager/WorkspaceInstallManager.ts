@@ -8,7 +8,8 @@ import {
   FileConstants,
   AlreadyReportedError,
   Async,
-  type IDependenciesMetaTable
+  type IDependenciesMetaTable,
+  Path
 } from '@rushstack/node-core-library';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
@@ -116,7 +117,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
             `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
-              'which was not found in rush.json'
+              `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
         shrinkwrapIsUpToDate = false;
@@ -256,9 +257,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (
-        await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace, this.options.variant)
-      ) {
+      if (await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace)) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
         );
@@ -275,7 +274,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
 
         // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
-        const relativePathFromTempFolderToPackageFolder: string = `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`;
+        const relativePathFromTempFolderToPackageFolder: string = Path.convertToSlashes(
+          `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`
+        );
         expectedDependenciesMetaByProjectRelativePath[relativePathFromTempFolderToPackageFolder] =
           dependenciesMeta;
       }
@@ -287,7 +288,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[key] = value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
         }
       }
     }
@@ -504,7 +505,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // if usePnpmSyncForInjectedDependencies is true
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
-      const pnpmLockfilePath: string = this.rushConfiguration.tempShrinkwrapFilename;
+      const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const pnpmStorePath: string = `${this.rushConfiguration.commonTempFolder}/node_modules/.pnpm`;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,

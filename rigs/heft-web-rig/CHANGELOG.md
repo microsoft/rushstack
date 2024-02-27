@@ -1,6 +1,38 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Wed, 21 Feb 2024 08:55:47 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Feb 2024 16:10:56 GMT and should not be manually modified.
+
+## 0.22.2
+Mon, 26 Feb 2024 16:10:56 GMT
+
+_Version update only_
+
+## 0.22.1
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 0.22.0
+Thu, 22 Feb 2024 06:31:58 GMT
+
+### Minor changes
+
+- Update the "asset/resource" rule to include file extensions for font assets
+
+## 0.21.5
+Thu, 22 Feb 2024 05:54:17 GMT
+
+_Version update only_
+
+## 0.21.4
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.21.3
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
 
 ## 0.21.2
 Wed, 21 Feb 2024 08:55:47 GMT

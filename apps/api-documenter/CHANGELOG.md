@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 21 Feb 2024 08:55:47 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Feb 2024 23:02:51 GMT and should not be manually modified.
+
+## 7.23.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 7.23.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 7.23.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+### Patches
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
 
 ## 7.23.28
 Wed, 21 Feb 2024 08:55:47 GMT

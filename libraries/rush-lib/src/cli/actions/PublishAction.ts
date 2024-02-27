@@ -26,6 +26,7 @@ import type { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
+import { RushConstants } from '../../logic/RushConstants';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;
@@ -155,7 +156,7 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--include-all',
       parameterShortName: undefined,
       description:
-        'If this flag is specified, all packages with shouldPublish=true in rush.json ' +
+        `If this flag is specified, all packages with shouldPublish=true in ${RushConstants.rushJsonFilename} ` +
         'or with a specified version policy ' +
         'will be published if their version is newer than published version.'
     });

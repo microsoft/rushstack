@@ -1,6 +1,23 @@
 # Change Log - @rushstack/trace-import
 
-This log was last generated on Wed, 21 Feb 2024 08:55:47 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Feb 2024 23:02:51 GMT and should not be manually modified.
+
+## 0.3.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 0.3.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.3.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+### Patches
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
 
 ## 0.3.28
 Wed, 21 Feb 2024 08:55:47 GMT

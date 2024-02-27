@@ -2,6 +2,69 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.5.31",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.31",
+      "date": "Sat, 24 Feb 2024 23:02:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.4.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.30",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.30",
+      "date": "Thu, 22 Feb 2024 01:36:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.4.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.5.29",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.29",
+      "date": "Wed, 21 Feb 2024 21:45:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.4.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" to `0.4.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/module-minifier\" from `*` to `*`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.28",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.5.28",
       "date": "Wed, 21 Feb 2024 08:55:47 GMT",

@@ -7,5 +7,5 @@ exports[`AsyncOperationQueue detects cycles 1`] = `
   -> d
   -> b
   -> a
-Consider using the decoupledLocalDependencies option for rush.json."
+Consider using the decoupledLocalDependencies option in rush.json."
 `;

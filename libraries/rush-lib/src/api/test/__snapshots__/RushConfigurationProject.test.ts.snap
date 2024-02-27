@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateRelativePathField should throw an error if the path contains backslashes 1`] = `"The value \\"path\\\\to\\\\project\\" in the \\"someField\\" field in \\"/repo/rush.json\\" may not contain backslashes ('\\\\'), since they are interpreted differently on POSIX and Windows. Paths must use '/' as the path separator."`;
+
+exports[`validateRelativePathField should throw an error if the path contains backslashes 2`] = `"The value \\"path\\\\\\" in the \\"someOtherField\\" field in \\"/repo/rush.json\\" may not contain backslashes ('\\\\'), since they are interpreted differently on POSIX and Windows. Paths must use '/' as the path separator."`;
+
+exports[`validateRelativePathField should throw an error if the path ends in a trailing slash 1`] = `"The value \\"path/to/project/\\" in the \\"someField\\" field in \\"/repo/rush.json\\" may not end with a trailing '/' character."`;
+
+exports[`validateRelativePathField should throw an error if the path ends in a trailing slash 2`] = `"The value \\"p/\\" in the \\"someField\\" field in \\"/repo/rush.json\\" may not end with a trailing '/' character."`;
+
+exports[`validateRelativePathField should throw an error if the path is not normalized 1`] = `"The value \\"path/../to/project\\" in the \\"someField\\" field in \\"/repo/rush.json\\" should be replaced with its normalized form \\"to/project\\"."`;
+
+exports[`validateRelativePathField should throw an error if the path is not normalized 2`] = `"The value \\"path/./to/project\\" in the \\"someField\\" field in \\"/repo/rush.json\\" should be replaced with its normalized form \\"path/to/project\\"."`;
+
+exports[`validateRelativePathField should throw an error if the path is not normalized 3`] = `"The value \\"./path/to/project\\" in the \\"someField\\" field in \\"/repo/rush.json\\" should be replaced with its normalized form \\"path/to/project\\"."`;
+
+exports[`validateRelativePathField should throw an error if the path is not relative 1`] = `"The value \\"C:/path/to/project\\" in the \\"projectFolder\\" field in \\"/rush.json\\" must be a relative path."`;
+
+exports[`validateRelativePathField should throw an error if the path is not relative 2`] = `"The value \\"/path/to/project\\" in the \\"publishFolder\\" field in \\"/rush.json\\" must be a relative path."`;

@@ -22,6 +22,17 @@ function createWebpackConfig({ production }) {
       path: path.join(__dirname, 'dist'),
       filename: '[name].js'
     },
+    module: {
+      rules: [
+        {
+          test: /\.(jpeg|jpg|png|gif|svg|ico|woff|woff2|ttf|eot)$/,
+          // Allows import/require() to be used with an asset file. The file will be copied to the output folder,
+          // and the import statement will return its URL.
+          // https://webpack.js.org/guides/asset-modules/#resource-assets
+          type: 'asset/resource'
+        }
+      ]
+    },
     devServer: {
       host: 'localhost',
       port: 8080

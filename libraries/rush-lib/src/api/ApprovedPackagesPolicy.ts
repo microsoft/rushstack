@@ -76,7 +76,7 @@ export class ApprovedPackagesPolicy {
     if (this.enabled) {
       if (!this.reviewCategories.size) {
         throw new Error(
-          `The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories` +
+          `The "approvedPackagesPolicy" feature is enabled ${RushConstants.rushJsonFilename}, but the reviewCategories` +
             ` list is not configured.`
         );
       }

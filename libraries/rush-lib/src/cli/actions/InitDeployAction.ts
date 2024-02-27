@@ -10,6 +10,7 @@ import type { RushCommandLineParser } from '../RushCommandLineParser';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
 import { assetsFolderPath } from '../../utilities/PathConstants';
+import { RushConstants } from '../../logic/RushConstants';
 
 const CONFIG_TEMPLATE_PATH: string = `${assetsFolderPath}/rush-init-deploy/scenario-template.json`;
 
@@ -70,7 +71,9 @@ export class InitDeployAction extends BaseRushAction {
     const rushProject: RushConfigurationProject | undefined =
       this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {
-      throw new Error(`The specified project was not found in rush.json: "${shortProjectName}"`);
+      throw new Error(
+        `The specified project was not found in ${RushConstants.rushJsonFilename}: "${shortProjectName}"`
+      );
     }
 
     const templateContent: string = FileSystem.readFile(CONFIG_TEMPLATE_PATH);

@@ -427,10 +427,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "colors",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "compression",
       "allowedCategories": [ "libraries" ]
     },
@@ -804,6 +800,10 @@
     },
     {
       "name": "sudo",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "supports-color",
       "allowedCategories": [ "libraries" ]
     },
     {

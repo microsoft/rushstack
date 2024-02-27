@@ -1,6 +1,23 @@
 # Change Log - @rushstack/lockfile-explorer
 
-This log was last generated on Wed, 21 Feb 2024 08:55:47 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Feb 2024 23:02:51 GMT and should not be manually modified.
+
+## 1.2.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 1.2.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 1.2.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+### Patches
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
 
 ## 1.2.28
 Wed, 21 Feb 2024 08:55:47 GMT

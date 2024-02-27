@@ -43,7 +43,7 @@ export class SetupChecks {
     if (rushConfiguration.packageManager === 'pnpm') {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_PNPM_VERSION)) {
         return (
-          `The rush.json file requests PNPM version ` +
+          `The ${RushConstants.rushJsonFilename} file requests PNPM version ` +
           rushConfiguration.packageManagerToolVersion +
           `, but PNPM ${MINIMUM_SUPPORTED_PNPM_VERSION} is the minimum supported by Rush.`
         );
@@ -51,7 +51,7 @@ export class SetupChecks {
     } else if (rushConfiguration.packageManager === 'npm') {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_NPM_VERSION)) {
         return (
-          `The rush.json file requests NPM version ` +
+          `The ${RushConstants.rushJsonFilename} file requests NPM version ` +
           rushConfiguration.packageManagerToolVersion +
           `, but NPM ${MINIMUM_SUPPORTED_NPM_VERSION} is the minimum supported by Rush.`
         );
