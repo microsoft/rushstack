@@ -51,8 +51,8 @@
     "typescript": "5.3.3"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "2.4.16",
-    "@rushstack/heft": "0.65.4",
+    "@rushstack/heft-node-rig": "2.4.18",
+    "@rushstack/heft": "0.65.5",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "18.17.15",
