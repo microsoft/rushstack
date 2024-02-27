@@ -473,12 +473,9 @@ export interface IFileSystemBuildCacheProviderOptions {
 
 // @beta
 export interface IGenerateCacheEntryIdOptions {
-    // Warning: (ae-forgotten-export) The symbol "PHASE_NAME_PARAM_NAME" needs to be exported by the entry point index.d.ts
-    [PHASE_NAME_PARAM_NAME]: string;
-    // Warning: (ae-forgotten-export) The symbol "PROJECT_NAME_PARAM_NAME" needs to be exported by the entry point index.d.ts
-    [PROJECT_NAME_PARAM_NAME]: string;
-    // Warning: (ae-forgotten-export) The symbol "PROJECT_STATE_HASH_PARAM_NAME" needs to be exported by the entry point index.d.ts
-    [PROJECT_STATE_HASH_PARAM_NAME]: string;
+    phaseName: string;
+    projectName: string;
+    projectStateHash: string;
 }
 
 // @beta (undocumented)
