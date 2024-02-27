@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree from 'read-package-tree';
 import { FileSystem, FileConstants, LegacyAdapters } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { RushConstants } from '../../logic/RushConstants';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -180,7 +180,7 @@ export class NpmLinkManager extends BaseLinkManager {
 
             // eslint-disable-next-line no-console
             console.log(
-              colors.yellow(
+              Colorize.yellow(
                 `Rush will not locally link ${dependency.name} for ${localPackage.name}` +
                   ` because the requested version "${dependency.versionRange}" is incompatible` +
                   ` with the local version ${matchedVersion}`

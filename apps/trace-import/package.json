@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/trace-import",
-  "version": "0.3.27",
+  "version": "0.3.31",
   "description": "CLI tool for understanding how require() and \"import\" statements get resolved",
   "repository": {
     "type": "git",
@@ -19,16 +19,16 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "colors": "~1.2.1",
     "resolve": "~1.22.1",
     "semver": "~7.5.4",
     "typescript": "~5.3.3"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "local-node-rig": "workspace:*",
     "@types/resolve": "1.20.2",
-    "@types/semver": "7.5.0"
+    "@types/semver": "7.5.0",
+    "local-node-rig": "workspace:*"
   }
 }

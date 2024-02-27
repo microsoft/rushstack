@@ -83,7 +83,6 @@ export class RepoStateFile {
    * If the file has not been created yet, then an empty object is returned.
    *
    * @param jsonFilename - The path to the repo-state.json file.
-   * @param variant - The variant currently being used by Rush.
    */
   public static loadFromFile(jsonFilename: string): RepoStateFile {
     let fileContents: string | undefined;

@@ -6,6 +6,7 @@ import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
+import { RushConstants } from '../RushConstants';
 
 export class TagProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
@@ -23,7 +24,8 @@ export class TagProjectSelectorParser implements ISelectorParser<RushConfigurati
       this._rushConfiguration.projectsByTag.get(unscopedSelector);
     if (!selection) {
       terminal.writeErrorLine(
-        `The tag "${unscopedSelector}" passed to "${parameterName}" is not specified for any projects in rush.json.`
+        `The tag "${unscopedSelector}" passed to "${parameterName}" is not specified for any projects in ` +
+          `${RushConstants.rushJsonFilename}.`
       );
       throw new AlreadyReportedError();
     }

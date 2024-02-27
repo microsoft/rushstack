@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -34,7 +33,7 @@ export class SetupChecks {
 
     if (errorMessage) {
       // eslint-disable-next-line no-console
-      console.error(colors.red(PrintUtilities.wrapWords(errorMessage)));
+      console.error(Colorize.red(PrintUtilities.wrapWords(errorMessage)));
       throw new AlreadyReportedError();
     }
   }
@@ -44,7 +43,7 @@ export class SetupChecks {
     if (rushConfiguration.packageManager === 'pnpm') {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_PNPM_VERSION)) {
         return (
-          `The rush.json file requests PNPM version ` +
+          `The ${RushConstants.rushJsonFilename} file requests PNPM version ` +
           rushConfiguration.packageManagerToolVersion +
           `, but PNPM ${MINIMUM_SUPPORTED_PNPM_VERSION} is the minimum supported by Rush.`
         );
@@ -52,7 +51,7 @@ export class SetupChecks {
     } else if (rushConfiguration.packageManager === 'npm') {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_NPM_VERSION)) {
         return (
-          `The rush.json file requests NPM version ` +
+          `The ${RushConstants.rushJsonFilename} file requests NPM version ` +
           rushConfiguration.packageManagerToolVersion +
           `, but NPM ${MINIMUM_SUPPORTED_NPM_VERSION} is the minimum supported by Rush.`
         );
@@ -78,7 +77,7 @@ export class SetupChecks {
       if (phantomFolders.length === 1) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             PrintUtilities.wrapWords(
               'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against' +
                 ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
@@ -89,7 +88,7 @@ export class SetupChecks {
       } else {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             PrintUtilities.wrapWords(
               'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against' +
                 ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
@@ -100,7 +99,7 @@ export class SetupChecks {
       }
       for (const folder of phantomFolders) {
         // eslint-disable-next-line no-console
-        console.log(colors.yellow(`"${folder}"`));
+        console.log(Colorize.yellow(`"${folder}"`));
       }
       // eslint-disable-next-line no-console
       console.log(); // add a newline

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as semver from 'semver';
 import type * as NpmCheck from 'npm-check';
 import { ConsoleTerminalProvider, Terminal, type ITerminalProvider, Colorize } from '@rushstack/terminal';
@@ -54,10 +53,6 @@ export interface IPackageJsonUpdaterRushUpgradeOptions {
    * If specified, "rush update" will be run in debug mode.
    */
   debugInstall: boolean;
-  /**
-   * The variant to consider when performing installations and validating shrinkwrap updates.
-   */
-  variant?: string | undefined;
 }
 
 /**
@@ -117,7 +112,7 @@ export class PackageJsonUpdater {
    * "rush upgrade-interactive".
    */
   public async doRushUpgradeAsync(options: IPackageJsonUpdaterRushUpgradeOptions): Promise<void> {
-    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
+    const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall } = options;
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
       './DependencyAnalyzer'
@@ -129,7 +124,7 @@ export class PackageJsonUpdater {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
 
     const dependenciesToUpdate: Record<string, string> = {};
     const devDependenciesToUpdate: Record<string, string> = {};
@@ -167,7 +162,7 @@ export class PackageJsonUpdater {
       }
 
       this._terminal.writeLine(
-        colors.green(`Updating projects to use `) + moduleName + '@' + colors.cyan(version)
+        Colorize.green(`Updating projects to use `) + moduleName + '@' + Colorize.cyan(version)
       );
       this._terminal.writeLine();
 
@@ -220,10 +215,7 @@ export class PackageJsonUpdater {
 
     if (updateOtherPackages) {
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-        this._rushConfiguration,
-        {
-          variant: variant
-        }
+        this._rushConfiguration
       );
       for (const update of this._getUpdates(mismatchFinder, allDependenciesToUpdate)) {
         this.updateProject(update);
@@ -233,7 +225,7 @@ export class PackageJsonUpdater {
 
     for (const [filePath, project] of allPackageUpdates) {
       if (project.saveIfModified()) {
-        this._terminal.writeLine(colors.green('Wrote ') + filePath);
+        this._terminal.writeLine(Colorize.green('Wrote ') + filePath);
       }
     }
 
@@ -243,10 +235,10 @@ export class PackageJsonUpdater {
           new Set(options.projects)
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdate(debugInstall, subspace, variant);
+          await this._doUpdate(debugInstall, subspace);
         }
       } else {
-        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace);
       }
     }
   }
@@ -260,7 +252,7 @@ export class PackageJsonUpdater {
     } else {
       throw new Error('only accept "rush add" or "rush remove"');
     }
-    const { skipUpdate, debugInstall, variant } = options;
+    const { skipUpdate, debugInstall } = options;
     for (const { project } of allPackageUpdates) {
       if (project.saveIfModified()) {
         this._terminal.writeLine(Colorize.green('Wrote'), project.filePath);
@@ -273,19 +265,15 @@ export class PackageJsonUpdater {
           new Set(options.projects)
         );
         for (const subspace of subspaceSet) {
-          await this._doUpdate(debugInstall, subspace, variant);
+          await this._doUpdate(debugInstall, subspace);
         }
       } else {
-        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace, variant);
+        await this._doUpdate(debugInstall, this._rushConfiguration.defaultSubspace);
       }
     }
   }
 
-  private async _doUpdate(
-    debugInstall: boolean,
-    subspace: Subspace,
-    variant: string | undefined
-  ): Promise<void> {
+  private async _doUpdate(debugInstall: boolean, subspace: Subspace): Promise<void> {
     this._terminal.writeLine();
     this._terminal.writeLine(Colorize.green('Running "rush update"'));
     this._terminal.writeLine();
@@ -301,7 +289,6 @@ export class PackageJsonUpdater {
       networkConcurrency: undefined,
       offline: false,
       collectLogFile: false,
-      variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,
@@ -327,8 +314,7 @@ export class PackageJsonUpdater {
   private async _doRushAddAsync(
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages, variant } =
-      options;
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
 
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
@@ -341,7 +327,7 @@ export class PackageJsonUpdater {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(variant);
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
 
     this._terminal.writeLine();
     const dependenciesToAddOrUpdate: Record<string, string> = {};
@@ -403,10 +389,7 @@ export class PackageJsonUpdater {
       // we need to do a mismatch check
       if (updateOtherPackages) {
         const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this._rushConfiguration,
-          {
-            variant: variant
-          }
+          this._rushConfiguration
         );
         otherPackageUpdates = this._getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
       }
@@ -545,9 +528,9 @@ export class PackageJsonUpdater {
     explicitlyPreferredVersion: string | undefined,
     rangeStyle: SemVerStyle
   ): Promise<string> {
-    this._terminal.writeLine(colors.gray(`Determining new version for dependency: ${packageName}`));
+    this._terminal.writeLine(Colorize.gray(`Determining new version for dependency: ${packageName}`));
     if (initialSpec) {
-      this._terminal.writeLine(`Specified version selector: ${colors.cyan(initialSpec)}`);
+      this._terminal.writeLine(`Specified version selector: ${Colorize.cyan(initialSpec)}`);
     } else {
       this._terminal.writeLine(
         `No version selector was specified, so the version will be determined automatically.`
@@ -560,9 +543,9 @@ export class PackageJsonUpdater {
     if (initialSpec) {
       if (initialSpec === implicitlyPreferredVersion) {
         this._terminal.writeLine(
-          colors.green('Assigning "') +
-            colors.cyan(initialSpec) +
-            colors.green(
+          Colorize.green('Assigning "') +
+            Colorize.cyan(initialSpec) +
+            Colorize.green(
               `" for "${packageName}" because it matches what other projects are using in this repo.`
             )
         );
@@ -571,9 +554,9 @@ export class PackageJsonUpdater {
 
       if (initialSpec === explicitlyPreferredVersion) {
         this._terminal.writeLine(
-          colors.green('Assigning "') +
-            colors.cyan(initialSpec) +
-            colors.green(
+          Colorize.green('Assigning "') +
+            Colorize.cyan(initialSpec) +
+            Colorize.green(
               `" for "${packageName}" because it is the preferred version listed in ${RushConstants.commonVersionsFilename}.`
             )
         );
@@ -584,7 +567,7 @@ export class PackageJsonUpdater {
     if (this._rushConfiguration.ensureConsistentVersions && !initialSpec) {
       if (implicitlyPreferredVersion) {
         this._terminal.writeLine(
-          `Assigning the version "${colors.cyan(implicitlyPreferredVersion)}" for "${packageName}" ` +
+          `Assigning the version "${Colorize.cyan(implicitlyPreferredVersion)}" for "${packageName}" ` +
             'because it is already used by other projects in this repo.'
         );
         return implicitlyPreferredVersion;
@@ -592,7 +575,7 @@ export class PackageJsonUpdater {
 
       if (explicitlyPreferredVersion) {
         this._terminal.writeLine(
-          `Assigning the version "${colors.cyan(explicitlyPreferredVersion)}" for "${packageName}" ` +
+          `Assigning the version "${Colorize.cyan(explicitlyPreferredVersion)}" for "${packageName}" ` +
             `because it is the preferred version listed in ${RushConstants.commonVersionsFilename}.`
         );
         return explicitlyPreferredVersion;
@@ -625,7 +608,7 @@ export class PackageJsonUpdater {
     let selectedVersionPrefix: string = '';
 
     if (initialSpec && initialSpec !== 'latest') {
-      this._terminal.writeLine(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
+      this._terminal.writeLine(Colorize.gray('Finding versions that satisfy the selector: ') + initialSpec);
       this._terminal.writeLine();
 
       if (localProject !== undefined) {
@@ -671,13 +654,13 @@ export class PackageJsonUpdater {
           versionList = JSON.parse(allVersions);
         }
 
-        this._terminal.writeLine(colors.gray(`Found ${versionList.length} available versions.`));
+        this._terminal.writeLine(Colorize.gray(`Found ${versionList.length} available versions.`));
 
         for (const version of versionList) {
           if (semver.satisfies(version, initialSpec)) {
             selectedVersion = initialSpec;
             this._terminal.writeLine(
-              `Found a version that satisfies ${initialSpec}: ${colors.cyan(version)}`
+              `Found a version that satisfies ${initialSpec}: ${Colorize.cyan(version)}`
             );
             break;
           }
@@ -703,7 +686,7 @@ export class PackageJsonUpdater {
       } else {
         if (!this._rushConfiguration.ensureConsistentVersions) {
           this._terminal.writeLine(
-            colors.gray(
+            Colorize.gray(
               `The "ensureConsistentVersions" policy is NOT active, so we will assign the latest version.`
             )
           );
@@ -728,7 +711,7 @@ export class PackageJsonUpdater {
 
       this._terminal.writeLine();
 
-      this._terminal.writeLine(`Found latest version: ${colors.cyan(selectedVersion)}`);
+      this._terminal.writeLine(`Found latest version: ${Colorize.cyan(selectedVersion)}`);
     }
 
     this._terminal.writeLine();
@@ -764,7 +747,7 @@ export class PackageJsonUpdater {
 
     const normalizedVersion: string = selectedVersionPrefix + selectedVersion;
     this._terminal.writeLine(
-      colors.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
+      Colorize.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
     );
     return normalizedVersion;
   }
@@ -836,7 +819,8 @@ export class PackageJsonUpdater {
     if (project === foundProject) {
       throw new Error(
         'Unable to add a project as a dependency of itself unless the dependency is listed as a cyclic dependency ' +
-          `in rush.json. This command attempted to add "${foundProject.packageName}" as a dependency of itself.`
+          `in ${RushConstants.rushJsonFilename}. This command attempted to add "${foundProject.packageName}" ` +
+          `as a dependency of itself.`
       );
     }
 

@@ -1,6 +1,35 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 20 Feb 2024 21:45:10 GMT and should not be manually modified.
+This log was last generated on Mon, 26 Feb 2024 16:10:56 GMT and should not be manually modified.
+
+## 0.11.15
+Mon, 26 Feb 2024 16:10:56 GMT
+
+### Patches
+
+- Make `@rushstack/terminal` a dependency because the reporter has a runtime dependency on that package.
+
+## 0.11.14
+Thu, 22 Feb 2024 05:54:17 GMT
+
+### Patches
+
+- Add a missing dependency on `@rushstack/terminal`
+
+## 0.11.13
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.11.12
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 0.11.11
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
 
 ## 0.11.10
 Tue, 20 Feb 2024 21:45:10 GMT

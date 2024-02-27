@@ -2,6 +2,54 @@
   "name": "@rushstack/webpack-preserve-dynamic-require-plugin",
   "entries": [
     {
+      "version": "0.11.31",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.31",
+      "date": "Sat, 24 Feb 2024 23:02:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.30",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.30",
+      "date": "Thu, 22 Feb 2024 01:36:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.29",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.29",
+      "date": "Wed, 21 Feb 2024 21:45:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.11.28",
+      "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.28",
+      "date": "Wed, 21 Feb 2024 08:55:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.27",
       "tag": "@rushstack/webpack-preserve-dynamic-require-plugin_v0.11.27",
       "date": "Tue, 20 Feb 2024 21:45:10 GMT",

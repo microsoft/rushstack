@@ -3,7 +3,7 @@
 
 import npmCheck from 'npm-check';
 import type * as NpmCheck from 'npm-check';
-import colors from 'colors/safe';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../api/RushConfiguration';
 import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
@@ -56,7 +56,7 @@ export class InteractiveUpgrader {
         type: 'list',
         choices: projects.map((project) => {
           return {
-            name: colors.green(project.packageName),
+            name: Colorize.green(project.packageName),
             value: project
           };
         }),

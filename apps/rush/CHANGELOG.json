@@ -2,6 +2,96 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.0",
+      "tag": "@microsoft/rush_v5.117.0",
+      "date": "Mon, 26 Feb 2024 21:39:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Include the ability to add `[os]` and `[arch]` tokens to cache entry name patterns."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the 'installation variants' feature and its related APIs, which have been superceded by the Subspaces feature."
+          },
+          {
+            "comment": "Extract the \"rush.json\" filename to a constant as `RushConstants.rushJsonFilename`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.116.0",
+      "tag": "@microsoft/rush_v5.116.0",
+      "date": "Mon, 26 Feb 2024 20:04:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Upgrade the `pnpm-sync-lib` dependency version."
+          },
+          {
+            "comment": "Handle `workspace:~` and `workspace:^` wildcard specifiers when publishing. They remain as-is in package.json but get converted to `~${current}` and `^${current}` in changelogs."
+          },
+          {
+            "comment": "Validate that the \"projectFolder\" and \"publishFolder\" fields in the \"projects\" list in \"rush.json\" are normalized POSIX relative paths that do not end in trailing \"/\" or contain \"\\\\\"."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.115.0",
+      "tag": "@microsoft/rush_v5.115.0",
+      "date": "Thu, 22 Feb 2024 01:36:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"runWithTerminalAsync\" resource lifetime helper to `IOperationRunnerContext` to manage the creation and cleanup of logging for operation execution."
+          },
+          {
+            "comment": "Adds a new experiment `useIPCScriptsInWatchMode`. When this flag is enabled and Rush is running in watch mode, it will check for npm scripts named `_phase:<phase-name>:ipc`, and if found, use them instead of the normal invocation of `_phase:<phase-name>`. When doing so, it will provide an IPC channel to the child process and expect the child to outlive the current build pass."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.114.3",
+      "tag": "@microsoft/rush_v5.114.3",
+      "date": "Thu, 22 Feb 2024 00:10:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Replace deprecated function, and fix a path bug in Windows env"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.114.2",
+      "tag": "@microsoft/rush_v5.114.2",
+      "date": "Wed, 21 Feb 2024 21:45:46 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.114.1",
+      "tag": "@microsoft/rush_v5.114.1",
+      "date": "Wed, 21 Feb 2024 08:56:05 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve `rush scan` to analyze APIs such as `Import.lazy()` and `await import()`"
+          },
+          {
+            "comment": "Fix a recent regression where `@rushstack/rush-sdk` did not declare its dependency on `@rushstack/terminal`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.114.0",
       "tag": "@microsoft/rush_v5.114.0",
       "date": "Mon, 19 Feb 2024 21:54:44 GMT",

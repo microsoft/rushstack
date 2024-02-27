@@ -1,8 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-import { type TerminalWritable, StdioWritable, TextRewriterTransform } from '@rushstack/terminal';
+import {
+  type TerminalWritable,
+  StdioWritable,
+  TextRewriterTransform,
+  Colorize,
+  ConsoleTerminalProvider
+} from '@rushstack/terminal';
 import { StreamCollator, type CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import { NewlineKind, Async, InternalError } from '@rushstack/node-core-library';
 
@@ -107,7 +112,7 @@ export class OperationExecutionManager {
     this._colorsNewlinesTransform = new TextRewriterTransform({
       destination: this._outputWritable,
       normalizeNewlines: NewlineKind.OsDefault,
-      removeColors: !colors.enabled
+      removeColors: !ConsoleTerminalProvider.supportsColor
     });
     this._streamCollator = new StreamCollator({
       destination: this._colorsNewlinesTransform,
@@ -120,8 +125,7 @@ export class OperationExecutionManager {
       streamCollator: this._streamCollator,
       onOperationStatusChanged,
       debugMode,
-      quietMode,
-      changedProjectsOnly
+      quietMode
     };
 
     let totalOperations: number = 0;
@@ -169,12 +173,12 @@ export class OperationExecutionManager {
       // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
 
       // leftPart: "==[ @rushstack/the-long-thing "
-      const leftPart: string = colors.gray('==[') + ' ' + colors.cyan(writer.taskName) + ' ';
+      const leftPart: string = Colorize.gray('==[') + ' ' + Colorize.cyan(writer.taskName) + ' ';
       const leftPartLength: number = 4 + writer.taskName.length + 1;
 
       // rightPart: " 1 of 1000 ]=="
       const completedOfTotal: string = `${this._completedOperations} of ${this._totalOperations}`;
-      const rightPart: string = ' ' + colors.white(completedOfTotal) + ' ' + colors.gray(']==');
+      const rightPart: string = ' ' + Colorize.white(completedOfTotal) + ' ' + Colorize.gray(']==');
       const rightPartLength: number = 1 + completedOfTotal.length + 4;
 
       // middlePart: "]=================["
@@ -184,7 +188,7 @@ export class OperationExecutionManager {
         0
       );
 
-      const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
+      const middlePart: string = Colorize.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
 
       this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
 
@@ -314,7 +318,7 @@ export class OperationExecutionManager {
         if (message) {
           terminal.writeStderrLine(message);
         }
-        terminal.writeStderrLine(colors.red(`"${name}" failed to build.`));
+        terminal.writeStderrLine(Colorize.red(`"${name}" failed to build.`));
         const blockedQueue: Set<OperationExecutionRecord> = new Set(record.consumers);
 
         for (const blockedRecord of blockedQueue) {
@@ -350,7 +354,7 @@ export class OperationExecutionManager {
       case OperationStatus.FromCache: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
-            colors.green(`"${name}" was restored from the build cache.`)
+            Colorize.green(`"${name}" was restored from the build cache.`)
           );
         }
         break;
@@ -361,7 +365,7 @@ export class OperationExecutionManager {
        */
       case OperationStatus.Skipped: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(colors.green(`"${name}" was skipped.`));
+          record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${name}" was skipped.`));
         }
         break;
       }
@@ -371,7 +375,7 @@ export class OperationExecutionManager {
        */
       case OperationStatus.NoOp: {
         if (!silent) {
-          record.collatedWriter.terminal.writeStdoutLine(colors.gray(`"${name}" did not define any work.`));
+          record.collatedWriter.terminal.writeStdoutLine(Colorize.gray(`"${name}" did not define any work.`));
         }
         break;
       }
@@ -379,7 +383,7 @@ export class OperationExecutionManager {
       case OperationStatus.Success: {
         if (!silent) {
           record.collatedWriter.terminal.writeStdoutLine(
-            colors.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
+            Colorize.green(`"${name}" completed successfully in ${record.stopwatch.toString()}.`)
           );
         }
         break;
@@ -388,7 +392,7 @@ export class OperationExecutionManager {
       case OperationStatus.SuccessWithWarning: {
         if (!silent) {
           record.collatedWriter.terminal.writeStderrLine(
-            colors.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
+            Colorize.yellow(`"${name}" completed with warnings in ${record.stopwatch.toString()}.`)
           );
         }
         this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !runner.warningsAreAllowed;

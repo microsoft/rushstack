@@ -408,7 +408,7 @@ Array [
   },
   Object {
     "kind": "O",
-    "text": "[cyan]success with warnings (success)[default] [yellow]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![default] [white]0.2s[default]
+    "text": "[cyan]success with warnings (success)[default] [gray][default][yellow]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![default][gray][default] [white]0.2s[default]
 ",
   },
   Object {

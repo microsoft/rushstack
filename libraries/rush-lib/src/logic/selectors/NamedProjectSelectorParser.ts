@@ -6,6 +6,7 @@ import { AlreadyReportedError, PackageName } from '@rushstack/node-core-library'
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
+import { RushConstants } from '../RushConstants';
 
 export class NamedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
@@ -23,7 +24,8 @@ export class NamedProjectSelectorParser implements ISelectorParser<RushConfigura
       this._rushConfiguration.findProjectByShorthandName(unscopedSelector);
     if (!project) {
       terminal.writeErrorLine(
-        `The project name "${unscopedSelector}" passed to "${parameterName}" does not exist in rush.json.`
+        `The project name "${unscopedSelector}" passed to "${parameterName}" does not exist in ` +
+          `${RushConstants.rushJsonFilename}.`
       );
       throw new AlreadyReportedError();
     }

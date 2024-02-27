@@ -20,6 +20,7 @@ import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSe
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
 import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -357,7 +358,7 @@ export class SelectionParameterSet {
             selection.add(project);
           } else {
             terminal.writeErrorLine(
-              'Rush is not currently running in a project directory specified in rush.json. ' +
+              `Rush is not currently running in a project directory specified in ${RushConstants.rushJsonFilename}. ` +
                 `The "." value for the ${parameterName} parameter is not allowed.`
             );
             throw new AlreadyReportedError();

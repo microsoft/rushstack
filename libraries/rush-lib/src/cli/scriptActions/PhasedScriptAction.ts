@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
-import { type ITerminal, Terminal } from '@rushstack/terminal';
+import { type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 import type {
   CommandLineFlagParameter,
   CommandLineParameter,
@@ -132,6 +131,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _watchParameter: CommandLineFlagParameter | undefined;
   private readonly _timelineParameter: CommandLineFlagParameter | undefined;
   private readonly _installParameter: CommandLineFlagParameter | undefined;
+  private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
@@ -207,7 +207,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+      description:
+        `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
+        'Make sure you know what you are skipping.'
     });
 
     if (this._watchPhases.size > 0 && !this._alwaysWatch) {
@@ -229,6 +231,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         description:
           'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
           'Rush will automatically perform an install before processing the current command.'
+      });
+    }
+
+    if (
+      this._watchPhases.size > 0 &&
+      this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode
+    ) {
+      this._noIPCParameter = this.defineFlagParameter({
+        parameterLongName: '--no-ipc',
+        description:
+          'Disables the IPC feature for the current command (if applicable to selected operations). Operations will not look for a ":ipc" suffixed script.' +
+          'This feature only applies in watch mode and is enabled by default.'
       });
     }
 
@@ -343,12 +357,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       if (!projectSelection.size) {
         terminal.writeLine(
-          colors.yellow(`The command line selection parameters did not match any projects.`)
+          Colorize.yellow(`The command line selection parameters did not match any projects.`)
         );
         return;
       }
 
       const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
+
+      if (isWatch && this._noIPCParameter?.value === false) {
+        new (
+          await import(
+            /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
+          )
+        ).IPCOperationRunnerPlugin().apply(this.hooks);
+      }
 
       const customParametersByName: Map<string, CommandLineParameter> = new Map();
       for (const [configParameter, parserParameter] of this.customParameters) {
@@ -483,10 +505,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   }
 
   private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
-    const toggleWatcherKey: string = 'w';
-    const buildOnceKey: string = 'b';
+    const toggleWatcherKey: 'w' = 'w';
+    const buildOnceKey: 'b' = 'b';
+    const invalidateKey: 'i' = 'i';
+    const shutdownKey: 'x' = 'x';
 
     const terminal: ITerminal = this._terminal;
+
+    projectWatcher.setPromptGenerator((isPaused: boolean) => {
+      const promptLines: string[] = [
+        `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
+        `  Press <${invalidateKey}> to invalidate all projects.`
+      ];
+      if (isPaused) {
+        promptLines.push(`  Press <${buildOnceKey}> to build once.`);
+      }
+      if (this._noIPCParameter?.value === false) {
+        promptLines.push(`  Press <${shutdownKey}> to reset child processes.`);
+      }
+      return promptLines;
+    });
 
     process.stdin.setRawMode(true);
     process.stdin.resume();
@@ -495,19 +533,32 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       switch (key) {
         case toggleWatcherKey:
           if (projectWatcher.isPaused) {
-            terminal.writeLine(`Resuming project watcher...`);
             projectWatcher.resume();
           } else {
-            terminal.writeLine(`Pausing project watcher...`);
             projectWatcher.pause();
           }
           break;
         case buildOnceKey:
           if (projectWatcher.isPaused) {
+            projectWatcher.clearStatus();
             terminal.writeLine(`Building once...`);
             projectWatcher.resume();
             projectWatcher.pause();
           }
+          break;
+        case invalidateKey:
+          projectWatcher.clearStatus();
+          terminal.writeLine(`Invalidating all operations...`);
+          projectWatcher.invalidateAll('manual trigger');
+          if (!projectWatcher.isPaused) {
+            projectWatcher.resume();
+          }
+          break;
+        case shutdownKey:
+          projectWatcher.clearStatus();
+          terminal.writeLine(`Shutting down long-lived child processes...`);
+          // TODO: Inject this promise into the execution queue somewhere so that it gets waited on between runs
+          void this.hooks.shutdownAsync.promise();
           break;
         case '\u0003':
           process.kill(process.pid, 'SIGINT');
@@ -538,7 +589,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+    const projectWatcher: ProjectWatcher = new ProjectWatcher({
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
@@ -563,6 +614,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
     };
 
+    function invalidateOperation(operation: Operation, reason: string): void {
+      const { associatedProject } = operation;
+      if (associatedProject) {
+        // Since ProjectWatcher only tracks entire projects, widen the operation to its project
+        // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
+        projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
+      }
+    }
+
     // Loop until Ctrl+C
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -580,7 +640,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
       const names: string[] = [...changedProjects].map((x) => x.packageName).sort();
       for (const name of names) {
-        terminal.writeLine(`    ${colors.cyan(name)}`);
+        terminal.writeLine(`    ${Colorize.cyan(name)}`);
       }
 
       // Account for consumer relationships
@@ -590,7 +650,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         projectChangeAnalyzer: state,
         projectsInUnknownState: changedProjects,
         phaseOriginal,
-        phaseSelection
+        phaseSelection,
+        invalidateOperation
       };
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(
@@ -651,7 +712,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
       if (result.status === OperationStatus.Success) {
-        terminal.writeLine(colors.green(message));
+        terminal.writeLine(Colorize.green(message));
       } else {
         terminal.writeLine(message);
       }
@@ -670,7 +731,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
         }
 
-        terminal.writeErrorLine(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+        terminal.writeErrorLine(Colorize.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
       }
     }
 

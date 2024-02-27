@@ -63,6 +63,8 @@ export class Colorize {
     // (undocumented)
     static magentaBackground(text: string): string;
     // (undocumented)
+    static rainbow(text: string): string;
+    // (undocumented)
     static red(text: string): string;
     // (undocumented)
     static redBackground(text: string): string;
@@ -83,7 +85,9 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
     debugEnabled: boolean;
     get eolCharacter(): string;
-    get supportsColor(): boolean;
+    // (undocumented)
+    static readonly supportsColor: boolean;
+    readonly supportsColor: boolean;
     verboseEnabled: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }

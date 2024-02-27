@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors/safe';
+
 import type { AsyncSeriesHook } from 'tapable';
 
 import {
@@ -12,6 +12,7 @@ import {
   AlreadyReportedError,
   Text
 } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import type { IGlobalCommand } from '../../pluginFramework/RushLifeCycle';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
@@ -186,7 +187,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
 
     if (exitCode > 0) {
       // eslint-disable-next-line no-console
-      console.log('\n' + colors.red(`The script failed with exit code ${exitCode}`));
+      console.log('\n' + Colorize.red(`The script failed with exit code ${exitCode}`));
       throw new AlreadyReportedError();
     }
   }

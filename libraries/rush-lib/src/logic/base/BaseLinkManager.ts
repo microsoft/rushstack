@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
 import {
@@ -10,6 +9,7 @@ import {
   type IFileSystemCreateLinkOptions,
   InternalError
 } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -191,7 +191,7 @@ export abstract class BaseLinkManager {
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold('Linking local projects'));
+    console.log('\n' + Colorize.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
     await this._linkProjects();
@@ -201,7 +201,7 @@ export abstract class BaseLinkManager {
 
     stopwatch.stop();
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    console.log('\n' + Colorize.green(`Linking finished successfully. (${stopwatch.toString()})`));
     // eslint-disable-next-line no-console
     console.log('\nNext you should probably run "rush build" or "rush rebuild"');
   }

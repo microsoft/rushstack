@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import { enabled as supportsColor } from 'colors/safe';
+import supportsColor from 'supports-color';
 
 import { type ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 
@@ -27,20 +27,27 @@ export interface IConsoleTerminalProviderOptions {
 
 /**
  * Terminal provider that prints to STDOUT (for log- and verbose-level messages) and
- * STDERR (for warning- and error-level messsages).
+ * STDERR (for warning- and error-level messages).
  *
  * @beta
  */
 export class ConsoleTerminalProvider implements ITerminalProvider {
+  public static readonly supportsColor: boolean = !!supportsColor.stdout && !!supportsColor.stderr;
+
   /**
    * If true, verbose-level messages should be written to the console.
    */
-  public verboseEnabled: boolean = false;
+  public verboseEnabled: boolean;
 
   /**
    * If true, debug-level messages should be written to the console.
    */
-  public debugEnabled: boolean = false;
+  public debugEnabled: boolean;
+
+  /**
+   * {@inheritDoc ITerminalProvider.supportsColor}
+   */
+  public readonly supportsColor: boolean = ConsoleTerminalProvider.supportsColor;
 
   public constructor(options: Partial<IConsoleTerminalProviderOptions> = {}) {
     this.verboseEnabled = !!options.verboseEnabled;
@@ -85,12 +92,5 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
    */
   public get eolCharacter(): string {
     return EOL;
-  }
-
-  /**
-   * {@inheritDoc ITerminalProvider.supportsColor}
-   */
-  public get supportsColor(): boolean {
-    return supportsColor;
   }
 }

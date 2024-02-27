@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.114.0",
+  "version": "5.117.0",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -38,9 +38,8 @@
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "colors": "~1.2.1",
-    "semver": "~7.5.4",
-    "@rushstack/terminal": "workspace:*"
+    "@rushstack/terminal": "workspace:*",
+    "semver": "~7.5.4"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

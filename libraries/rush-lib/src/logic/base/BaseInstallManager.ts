@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import type * as fetch from 'node-fetch';
 import * as os from 'os';
 import * as path from 'path';
@@ -20,7 +19,8 @@ import {
   PrintUtilities,
   ConsoleTerminalProvider,
   Terminal,
-  type ITerminalProvider
+  type ITerminalProvider,
+  Colorize
 } from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
@@ -32,7 +32,7 @@ import { type LastInstallFlag, LastInstallFlagFactory } from '../../api/LastInst
 import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import type { PurgeManager } from '../PurgeManager';
-import type { RushConfiguration, ICurrentVariantJson } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { RushConstants } from '../RushConstants';
@@ -116,7 +116,7 @@ export abstract class BaseInstallManager {
       console.log();
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'Project filtering arguments can only be used when running in a workspace environment. Run the ' +
             'command again without specifying these arguments.'
         )
@@ -132,7 +132,7 @@ export abstract class BaseInstallManager {
         console.log();
         // eslint-disable-next-line no-console
         console.log(
-          colors.red(
+          Colorize.red(
             'Project filtering arguments cannot be used when running "rush update". Run the command again ' +
               'without specifying these arguments.'
           )
@@ -147,15 +147,17 @@ export abstract class BaseInstallManager {
       .experimentsConfiguration.configuration.generateProjectImpactGraphDuringRushUpdate
       ? new ProjectImpactGraphGenerator(this._terminal, this.rushConfiguration)
       : undefined;
-    const { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } =
-      await this.prepareAsync(subspace, projectImpactGraphGenerator);
+    const { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate } = await this.prepareAsync(
+      subspace,
+      projectImpactGraphGenerator
+    );
 
     if (this.options.checkOnly) {
       return;
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold(`Checking installation in "${subspace.getSubspaceTempFolder()}"`));
+    console.log('\n' + Colorize.bold(`Checking installation in "${subspace.getSubspaceTempFolder()}"`));
 
     // This marker file indicates that the last "rush install" completed successfully.
     // Always perform a clean install if filter flags were provided. Additionally, if
@@ -184,13 +186,7 @@ export abstract class BaseInstallManager {
       return this.canSkipInstall(outputStats.mtime, subspace);
     };
 
-    if (
-      cleanInstall ||
-      !shrinkwrapIsUpToDate ||
-      !variantIsUpToDate ||
-      !canSkipInstall() ||
-      !projectImpactGraphIsUpToDate
-    ) {
+    if (cleanInstall || !shrinkwrapIsUpToDate || !canSkipInstall() || !projectImpactGraphIsUpToDate) {
       // eslint-disable-next-line no-console
       console.log();
       await this.validateNpmSetup();
@@ -206,7 +202,7 @@ export abstract class BaseInstallManager {
       if (publishedRelease === false) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.')
+          Colorize.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.')
         );
       }
 
@@ -241,7 +237,7 @@ export abstract class BaseInstallManager {
         if (subspace.getRepoState().refreshState(this.rushConfiguration, subspace)) {
           // eslint-disable-next-line no-console
           console.log(
-            colors.yellow(
+            Colorize.yellow(
               `${RushConstants.repoStateFilename} has been modified and must be committed to source control.`
             )
           );
@@ -306,7 +302,6 @@ export abstract class BaseInstallManager {
     subspace: Subspace,
     projectImpactGraphGenerator: ProjectImpactGraphGenerator | undefined
   ): Promise<{
-    variantIsUpToDate: boolean;
     shrinkwrapIsUpToDate: boolean;
     npmrcHash: string | undefined;
     projectImpactGraphIsUpToDate: boolean;
@@ -326,7 +321,7 @@ export abstract class BaseInstallManager {
       if (allowShrinkwrapUpdates) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             'Approved package files have been updated. These updates should be committed to source control'
           )
         );
@@ -365,37 +360,12 @@ export abstract class BaseInstallManager {
           // eslint-disable-next-line no-console
           console.log();
           // eslint-disable-next-line no-console
-          console.log(colors.red('You need to run "rush update" to fix this problem'));
+          console.log(Colorize.red('You need to run "rush update" to fix this problem'));
           throw new AlreadyReportedError();
         }
 
         shrinkwrapFile = undefined;
       }
-    }
-
-    // Write a file indicating which variant is being installed.
-    // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
-    const currentVariantJsonFilename: string = this.rushConfiguration.currentVariantJsonFilename;
-    const currentVariantJson: ICurrentVariantJson = {
-      variant: this.options.variant || null
-    };
-
-    // Determine if the variant is already current by updating current-variant.json.
-    // If nothing is written, the variant has not changed.
-    const variantIsUpToDate: boolean = !JsonFile.save(currentVariantJson, currentVariantJsonFilename, {
-      onlyIfChanged: true
-    });
-
-    if (this.options.variant) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(colors.bold(`Using variant '${this.options.variant}' for installation.`));
-    } else if (!variantIsUpToDate && !this.options.variant) {
-      // eslint-disable-next-line no-console
-      console.log();
-      // eslint-disable-next-line no-console
-      console.log(colors.bold('Using the default variant for installation.'));
     }
 
     const extraNpmrcLines: string[] = [];
@@ -449,14 +419,13 @@ export abstract class BaseInstallManager {
       }
     }
 
-    // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
+    // Shim support for pnpmfile in.
     // Additionally when in workspaces, the shim implements support for common versions.
     if (this.rushConfiguration.packageManager === 'pnpm') {
       await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(
         this.rushConfiguration,
         subspace.getSubspaceTempFolder(),
-        subspace,
-        this.options
+        subspace
       );
 
       if (this.rushConfiguration.subspacesFeatureEnabled) {
@@ -484,7 +453,7 @@ export abstract class BaseInstallManager {
       console.log();
       // eslint-disable-next-line no-console
       console.log(
-        colors.yellow(
+        Colorize.yellow(
           PrintUtilities.wrapWords(
             `The ${this.rushConfiguration.shrinkwrapFilePhrase} contains the following issues:`
           )
@@ -493,7 +462,7 @@ export abstract class BaseInstallManager {
 
       for (const shrinkwrapWarning of shrinkwrapWarnings) {
         // eslint-disable-next-line no-console
-        console.log(colors.yellow('  ' + shrinkwrapWarning));
+        console.log(Colorize.yellow('  ' + shrinkwrapWarning));
       }
       // eslint-disable-next-line no-console
       console.log();
@@ -513,7 +482,7 @@ export abstract class BaseInstallManager {
       hasErrors = true;
       this._terminal.writeErrorLine();
       this._terminal.writeErrorLine(
-        colors.red(
+        Colorize.red(
           `The ${RushConstants.projectImpactGraphFilename} file is missing or out of date. You need to run "rush update".`
         )
       );
@@ -523,7 +492,7 @@ export abstract class BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    return { shrinkwrapIsUpToDate, variantIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate };
+    return { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate };
   }
 
   /**
@@ -540,10 +509,10 @@ export abstract class BaseInstallManager {
       const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
         // eslint-disable-next-line no-console
-        console.log('\n' + colors.bold('Found files in the "common/git-hooks" folder.'));
+        console.log('\n' + Colorize.bold('Found files in the "common/git-hooks" folder.'));
 
         if (!git.isHooksPathDefault()) {
-          const color: (str: string) => string = this.options.bypassPolicy ? colors.yellow : colors.red;
+          const color: (str: string) => string = this.options.bypassPolicy ? Colorize.yellow : Colorize.red;
           // eslint-disable-next-line no-console
           console.error(
             color(
@@ -801,7 +770,7 @@ ${gitLfsHookHandling}
         )
       ) {
         this._terminal.writeWarningLine(
-          'Warning: Your rush.json specifies a pnpmVersion with a known issue ' +
+          `Warning: Your ${RushConstants.rushJsonFilename} specifies a pnpmVersion with a known issue ` +
             'that may cause unintended version selections.' +
             " It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. " +
             'For details see: https://rushjs.io/link/pnpm-issue-5132'
@@ -977,12 +946,12 @@ ${gitLfsHookHandling}
         // eslint-disable-next-line no-console
         console.error();
         // eslint-disable-next-line no-console
-        console.error(colors.red('ERROR: NPM credentials are missing or expired'));
+        console.error(Colorize.red('ERROR: NPM credentials are missing or expired'));
         // eslint-disable-next-line no-console
         console.error();
         // eslint-disable-next-line no-console
         console.error(
-          colors.bold(
+          Colorize.bold(
             '==> Please run "rush setup" to update your NPM token. ' +
               `(Or append "${RushConstants.bypassPolicyFlagLongName}" to proceed anyway.)`
           )

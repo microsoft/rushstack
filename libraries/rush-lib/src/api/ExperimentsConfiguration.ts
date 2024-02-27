@@ -94,6 +94,13 @@ export interface IExperimentsJson {
    * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
    */
   generateProjectImpactGraphDuringRushUpdate?: boolean;
+
+  /**
+   * If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead
+   * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
+   * across invocations.
+   */
+  useIPCScriptsInWatchMode?: boolean;
 }
 
 /**

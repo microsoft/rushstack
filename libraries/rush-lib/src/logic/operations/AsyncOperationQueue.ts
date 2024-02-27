@@ -3,6 +3,7 @@
 
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import { OperationStatus } from './OperationStatus';
+import { RushConstants } from '../RushConstants';
 
 /**
  * When the queue returns an unassigned operation, it means there is at least one remote executing operation,
@@ -236,7 +237,7 @@ function calculateCriticalPathLength(
           .map((visitedTask) => visitedTask.name)
           .reverse()
           .join('\n  -> ') +
-        '\nConsider using the decoupledLocalDependencies option for rush.json.'
+        `\nConsider using the decoupledLocalDependencies option in ${RushConstants.rushJsonFilename}.`
     );
   }
 

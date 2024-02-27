@@ -2,6 +2,77 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.23.31",
+      "tag": "@microsoft/api-documenter_v7.23.31",
+      "date": "Sat, 24 Feb 2024 23:02:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.30",
+      "tag": "@microsoft/api-documenter_v7.23.30",
+      "date": "Thu, 22 Feb 2024 01:36:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.29",
+      "tag": "@microsoft/api-documenter_v7.23.29",
+      "date": "Wed, 21 Feb 2024 21:45:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.28.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `4.0.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.17.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.23.28",
+      "tag": "@microsoft/api-documenter_v7.23.28",
+      "date": "Wed, 21 Feb 2024 08:55:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.23.27",
       "tag": "@microsoft/api-documenter_v7.23.27",
       "date": "Tue, 20 Feb 2024 21:45:10 GMT",

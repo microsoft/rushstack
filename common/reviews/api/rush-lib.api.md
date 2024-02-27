@@ -251,7 +251,6 @@ export const EnvironmentVariableNames: {
     readonly RUSH_PREVIEW_VERSION: "RUSH_PREVIEW_VERSION";
     readonly RUSH_ALLOW_UNSUPPORTED_NODEJS: "RUSH_ALLOW_UNSUPPORTED_NODEJS";
     readonly RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD";
-    readonly RUSH_VARIANT: "RUSH_VARIANT";
     readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
     readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
     readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
@@ -387,6 +386,7 @@ export interface ICreateOperationsContext {
     readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
     readonly cobuildConfiguration: CobuildConfiguration | undefined;
     readonly customParameters: ReadonlyMap<string, CommandLineParameter>;
+    readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
     readonly isIncrementalBuildAllowed: boolean;
     readonly isInitial: boolean;
     readonly isWatch: boolean;
@@ -458,6 +458,7 @@ export interface IExperimentsJson {
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     phasedCommands?: boolean;
     printEventHooksOutputToConsole?: boolean;
+    useIPCScriptsInWatchMode?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
@@ -590,15 +591,17 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
-    readonly changedProjectsOnly: boolean;
     collatedWriter: CollatedWriter;
     debugMode: boolean;
     error?: Error;
     // @internal
     _operationMetadataManager?: _OperationMetadataManager;
     quietMode: boolean;
+    runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>, options: {
+        createLogFile: boolean;
+        logFileSuffix?: string;
+    }): Promise<T>;
     status: OperationStatus;
-    stdioSummarizer: StdioSummarizer;
     stopwatch: IStopwatchResult;
 }
 
@@ -980,6 +983,7 @@ export class PhasedCommandHooks {
     readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
     readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]>;
+    readonly shutdownAsync: AsyncParallelHook<void>;
     readonly waitingForChanges: SyncHook<void>;
 }
 
@@ -1065,8 +1069,6 @@ export class RushConfiguration {
     readonly commonTempFolder: string;
     // @deprecated
     get commonVersions(): CommonVersionsConfiguration;
-    get currentInstalledVariant(): string | undefined;
-    readonly currentVariantJsonFilename: string;
     // @beta
     readonly customTipsConfiguration: CustomTipsConfiguration;
     // @beta
@@ -1086,7 +1088,7 @@ export class RushConfiguration {
     getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration;
     // @deprecated (undocumented)
     getCommonVersionsFilePath(subspace?: Subspace): string;
-    getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
+    getImplicitlyPreferredVersions(): Map<string, string>;
     // @deprecated (undocumented)
     getPnpmfilePath(subspace?: Subspace): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
@@ -1106,6 +1108,8 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitTagSeparator: string | undefined;
     readonly gitVersionBumpCommitMessage: string | undefined;
+    // @internal @deprecated
+    readonly _hasVariantsField: boolean;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -1217,63 +1221,63 @@ export class RushConfigurationProject {
 
 // @beta
 export class RushConstants {
-    static readonly artifactoryFilename: string;
-    static readonly browserApprovedPackagesFilename: string;
-    static readonly buildCacheFilename: string;
-    static readonly buildCacheVersion: number;
-    static readonly buildCommandName: string;
+    static readonly artifactoryFilename: 'artifactory.json';
+    static readonly browserApprovedPackagesFilename: 'browser-approved-packages.json';
+    static readonly buildCacheFilename: 'build-cache.json';
+    static readonly buildCacheVersion: 1;
+    static readonly buildCommandName: 'build';
     static readonly bulkCommandKind: 'bulk';
     static readonly bypassPolicyFlagLongName: '--bypass-policy';
-    static readonly changeFilesFolderName: string;
-    static readonly cobuildFilename: string;
-    static readonly commandLineFilename: string;
-    static readonly commonFolderName: string;
-    static readonly commonVersionsFilename: string;
-    static readonly customTipsFilename: string;
-    static readonly defaultMaxInstallAttempts: number;
-    static readonly defaultSubspaceName: string;
-    static readonly defaultWatchDebounceMs: number;
-    static readonly experimentsFilename: string;
+    static readonly changeFilesFolderName: 'changes';
+    static readonly cobuildFilename: 'cobuild.json';
+    static readonly commandLineFilename: 'command-line.json';
+    static readonly commonFolderName: 'common';
+    static readonly commonVersionsFilename: 'common-versions.json';
+    static readonly customTipsFilename: 'custom-tips.json';
+    static readonly defaultMaxInstallAttempts: 1;
+    static readonly defaultSubspaceName: 'default';
+    static readonly defaultWatchDebounceMs: 1000;
+    static readonly experimentsFilename: 'experiments.json';
     static readonly globalCommandKind: 'global';
-    static readonly hashDelimiter: string;
-    static readonly mergeQueueIgnoreFileName: string;
-    static readonly nodeModulesFolderName: string;
-    static readonly nonbrowserApprovedPackagesFilename: string;
-    static readonly npmShrinkwrapFilename: string;
+    static readonly hashDelimiter: '|';
+    static readonly mergeQueueIgnoreFileName: '.mergequeueignore';
+    static readonly nodeModulesFolderName: 'node_modules';
+    static readonly nonbrowserApprovedPackagesFilename: 'nonbrowser-approved-packages.json';
+    static readonly npmShrinkwrapFilename: 'npm-shrinkwrap.json';
     static readonly phasedCommandKind: 'phased';
     static readonly phaseNamePrefix: '_phase:';
     // @deprecated
-    static readonly pinnedVersionsFilename: string;
-    static readonly pnpmConfigFilename: string;
-    static readonly pnpmfileGlobalFilename: string;
-    static readonly pnpmfileV1Filename: string;
-    static readonly pnpmfileV6Filename: string;
-    static readonly pnpmPatchesCommonFolderName: string;
-    static readonly pnpmPatchesFolderName: string;
-    static readonly pnpmV3ShrinkwrapFilename: string;
-    static readonly projectImpactGraphFilename: string;
-    static readonly projectRushFolderName: string;
-    static readonly projectShrinkwrapFilename: string;
-    static readonly rebuildCommandName: string;
-    static readonly repoStateFilename: string;
-    static readonly rushLogsFolderName: string;
-    static readonly rushPackageName: string;
-    static readonly rushPluginManifestFilename: string;
-    static readonly rushPluginsConfigFilename: string;
-    static readonly rushProjectConfigFilename: string;
-    static readonly rushRecyclerFolderName: string;
-    static readonly rushTempFolderName: string;
-    static readonly rushTempNpmScope: string;
-    static readonly rushTempProjectsFolderName: string;
-    static readonly rushUserConfigurationFolderName: string;
-    static readonly rushVariantsFolderName: string;
-    static readonly rushWebSiteUrl: string;
-    static readonly subspacesConfigFilename: string;
+    static readonly pinnedVersionsFilename: 'pinned-versions.json';
+    static readonly pnpmConfigFilename: 'pnpm-config.json';
+    static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs';
+    static readonly pnpmfileV1Filename: 'pnpmfile.js';
+    static readonly pnpmfileV6Filename: '.pnpmfile.cjs';
+    static readonly pnpmPatchesCommonFolderName: `pnpm-patches`;
+    static readonly pnpmPatchesFolderName: 'patches';
+    static readonly pnpmV3ShrinkwrapFilename: 'pnpm-lock.yaml';
+    static readonly projectImpactGraphFilename: 'project-impact-graph.yaml';
+    static readonly projectRushFolderName: '.rush';
+    static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json';
+    static readonly rebuildCommandName: 'rebuild';
+    static readonly repoStateFilename: 'repo-state.json';
+    static readonly rushJsonFilename: 'rush.json';
+    static readonly rushLogsFolderName: 'rush-logs';
+    static readonly rushPackageName: '@microsoft/rush';
+    static readonly rushPluginManifestFilename: 'rush-plugin-manifest.json';
+    static readonly rushPluginsConfigFilename: 'rush-plugins.json';
+    static readonly rushProjectConfigFilename: 'rush-project.json';
+    static readonly rushRecyclerFolderName: 'rush-recycler';
+    static readonly rushTempFolderName: 'temp';
+    static readonly rushTempNpmScope: '@rush-temp';
+    static readonly rushTempProjectsFolderName: 'projects';
+    static readonly rushUserConfigurationFolderName: '.rush-user';
+    static readonly rushWebSiteUrl: 'https://rushjs.io';
+    static readonly subspacesConfigFilename: 'subspaces.json';
     // (undocumented)
-    static readonly updateCloudCredentialsCommandName: string;
+    static readonly updateCloudCredentialsCommandName: 'update-cloud-credentials';
     // (undocumented)
-    static readonly versionPoliciesFilename: string;
-    static readonly yarnShrinkwrapFilename: string;
+    static readonly versionPoliciesFilename: 'version-policies.json';
+    static readonly yarnShrinkwrapFilename: 'yarn.lock';
 }
 
 // @internal

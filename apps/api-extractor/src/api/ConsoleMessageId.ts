@@ -11,7 +11,7 @@
  *
  * @public
  */
-export const enum ConsoleMessageId {
+export enum ConsoleMessageId {
   /**
    * "Analysis will use the bundled TypeScript version ___"
    */

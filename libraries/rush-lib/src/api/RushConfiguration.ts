@@ -8,7 +8,6 @@ import * as semver from 'semver';
 import {
   JsonFile,
   JsonSchema,
-  type JsonNull,
   Path,
   FileSystem,
   type PackageNameParser,
@@ -145,14 +144,6 @@ export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase
 export type IRushRepositoryJson = IRushRepositoryJsonSingleUrl | IRushRepositoryJsonMultipleUrls;
 
 /**
- * Options defining an allowed variant as part of IRushConfigurationJson.
- */
-export interface IRushVariantOptionsJson {
-  variantName: string;
-  description: string;
-}
-
-/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -180,14 +171,7 @@ export interface IRushConfigurationJson {
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
-  variants?: IRushVariantOptionsJson[];
-}
-
-/**
- * This represents the JSON data structure for the "current-variant.json" data file.
- */
-export interface ICurrentVariantJson {
-  variant: string | JsonNull;
+  variants?: unknown;
 }
 
 /**
@@ -224,7 +208,6 @@ export interface ITryFindRushJsonLocationOptions {
 export class RushConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
-  private _variants: Set<string>;
   private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   // Lazily loaded when the projects() getter is called.
@@ -235,9 +218,6 @@ export class RushConfiguration {
 
   // Lazily loaded when the projectsByTag() getter is called.
   private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
-
-  // variant -> common-versions configuration
-  private _commonVersionsConfigurationsByVariant: Map<string, CommonVersionsConfiguration> | undefined;
 
   // subspaceName -> subspace
   private readonly _subspacesByName: Map<string, Subspace>;
@@ -358,13 +338,12 @@ export class RushConfiguration {
   public readonly subspacesFeatureEnabled: boolean;
 
   /**
-   * The filename of the variant dependency data file.  By default this is
-   * called 'current-variant.json' resides in the Rush common folder.
-   * Its data structure is defined by ICurrentVariantJson.
+   * If true, the `variants` field is present in rush.json.
    *
-   * Example: `C:\MyRepo\common\temp\current-variant.json`
+   * @internal
+   * @deprecated - Remove when the field is removed from the rush.json schema.
    */
-  public readonly currentVariantJsonFilename: string;
+  public readonly _hasVariantsField: boolean;
 
   /**
    * The version of the locally package manager tool.  (Example: "1.2.3")
@@ -584,13 +563,13 @@ export class RushConfiguration {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error(
           'Error parsing the node-semver expression in the "nodeSupportedVersionRange"' +
-            ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`
+            ` field from ${RushConstants.rushJsonFilename}: "${rushConfigurationJson.nodeSupportedVersionRange}"`
         );
       }
       if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
         let message: string =
           `Your dev environment is running Node.js version ${process.version} which does` +
-          ` not meet the requirements for building this repository.  (The rush.json configuration` +
+          ` not meet the requirements for building this repository.  (The ${RushConstants.rushJsonFilename} configuration` +
           ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
 
         if (rushConfigurationJson.nodeSupportedVersionInstructions) {
@@ -625,8 +604,6 @@ export class RushConfiguration {
 
     this.changesFolder = path.join(this.commonFolder, RushConstants.changeFilesFolderName);
 
-    this.currentVariantJsonFilename = path.join(this.commonTempFolder, 'current-variant.json');
-
     this.suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
     this.ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
@@ -659,7 +636,7 @@ export class RushConfiguration {
       if (rushConfigurationJson.pnpmOptions) {
         throw new Error(
           'Because the new config file "common/config/rush/pnpm-config.json" is being used, ' +
-            'you must remove the old setting "pnpmOptions" from rush.json'
+            `you must remove the old setting "pnpmOptions" from ${RushConstants.rushJsonFilename}`
         );
       }
     } catch (error) {
@@ -694,13 +671,13 @@ export class RushConfiguration {
 
     if (packageManagerFields.length === 0) {
       throw new Error(
-        `The rush.json configuration must specify one of: npmVersion, pnpmVersion, or yarnVersion`
+        `The ${RushConstants.rushJsonFilename} configuration must specify one of: npmVersion, pnpmVersion, or yarnVersion`
       );
     }
 
     if (packageManagerFields.length > 1) {
       throw new Error(
-        `The rush.json configuration cannot specify both ${packageManagerFields[0]}` +
+        `The ${RushConstants.rushJsonFilename} configuration cannot specify both ${packageManagerFields[0]}` +
           ` and ${packageManagerFields[1]} `
       );
     }
@@ -769,7 +746,7 @@ export class RushConfiguration {
 
         if (this.gitSampleEmail.trim().length < 1) {
           throw new Error(
-            'The rush.json file is missing the "sampleEmail" option, ' +
+            `The ${RushConstants.rushJsonFilename} file is missing the "sampleEmail" option, ` +
               'which is required when using "allowedEmailRegExps"'
           );
         }
@@ -834,19 +811,7 @@ export class RushConfiguration {
     );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
 
-    this._variants = new Set<string>();
-
-    if (rushConfigurationJson.variants) {
-      for (const variantOptions of rushConfigurationJson.variants) {
-        const { variantName } = variantOptions;
-
-        if (this._variants.has(variantName)) {
-          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
-        }
-
-        this._variants.add(variantName);
-      }
-    }
+    this._hasVariantsField = !!rushConfigurationJson.variants;
 
     this._pathTrees = new Map();
   }
@@ -912,7 +877,7 @@ export class RushConfiguration {
           subspace = this._subspacesByName.get(projectJson.subspaceName);
           if (subspace === undefined) {
             throw new Error(
-              `The project "${projectJson.packageName}" in rush.json references` +
+              `The project "${projectJson.packageName}" in ${RushConstants.rushJsonFilename} references` +
                 ` a nonexistent subspace "${projectJson.subspaceName}"`
             );
           }
@@ -935,7 +900,7 @@ export class RushConfiguration {
       if (this._projectsByName.has(project.packageName)) {
         throw new Error(
           `The project name "${project.packageName}" was specified more than once` +
-            ` in the rush.json configuration file.`
+            ` in the ${RushConstants.rushJsonFilename} configuration file.`
         );
       }
       this._projectsByName.set(project.packageName, project);
@@ -945,7 +910,7 @@ export class RushConfiguration {
       project.decoupledLocalDependencies.forEach((decoupledLocalDependency: string) => {
         if (!this.getProjectByName(decoupledLocalDependency)) {
           throw new Error(
-            `In rush.json, the "${decoupledLocalDependency}" project does not exist,` +
+            `In ${RushConstants.rushJsonFilename}, the "${decoupledLocalDependency}" project does not exist,` +
               ` but was referenced by the decoupledLocalDependencies (previously cyclicDependencyProjects) for ${project.packageName}`
           );
         }
@@ -1049,7 +1014,7 @@ export class RushConfiguration {
 
     // Look upwards at parent folders until we find a folder containing rush.json
     for (let i: number = 0; i < 10; ++i) {
-      const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
+      const rushJsonFilename: string = path.join(currentFolder, RushConstants.rushJsonFilename);
 
       if (FileSystem.exists(rushJsonFilename)) {
         if (i > 0 && verbose) {
@@ -1383,29 +1348,10 @@ export class RushConfiguration {
    * Instead it will be initialized in an empty state, and calling CommonVersionsConfiguration.save()
    * will create the file.
    *
-   * @deprecated Use `getCommonVersions` instead, which gets the correct common version data
-   * for a given active variant.
+   * @deprecated Use `getCommonVersions` instead, which gets the correct common version data.
    */
   public get commonVersions(): CommonVersionsConfiguration {
     return this.defaultSubspace.getCommonVersions();
-  }
-
-  /**
-   * Gets the currently-installed variant, if an installation has occurred.
-   * For Rush operations which do not take a --variant parameter, this method
-   * determines which variant, if any, was last specified when performing "rush install"
-   * or "rush update".
-   */
-  public get currentInstalledVariant(): string | undefined {
-    let variant: string | undefined;
-
-    if (FileSystem.exists(this.currentVariantJsonFilename)) {
-      const currentVariantJson: ICurrentVariantJson = JsonFile.load(this.currentVariantJsonFilename);
-
-      variant = currentVariantJson.variant || undefined;
-    }
-
-    return variant;
   }
 
   /**
@@ -1424,18 +1370,17 @@ export class RushConfiguration {
 
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier.
-   * @param variant - The name of the current variant in use by the active command.
    *
    * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
    */
-  public getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string> {
+  public getImplicitlyPreferredVersions(): Map<string, string> {
     // TODO: During the next major release of Rush, replace this `require` call with a dynamic import, and
     // change this function to be async.
     const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer');
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =
-      dependencyAnalyzer.getAnalysis(variant);
+      dependencyAnalyzer.getAnalysis();
     return dependencyAnalysis.implicitlyPreferredVersionByPackageName;
   }
 

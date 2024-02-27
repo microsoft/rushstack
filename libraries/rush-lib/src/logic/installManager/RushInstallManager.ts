@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -15,7 +14,7 @@ import {
   InternalError,
   AlreadyReportedError
 } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
@@ -98,7 +97,7 @@ export class RushInstallManager extends BaseInstallManager {
     );
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold('Updating temp projects in ' + tempProjectsFolder));
+    console.log('\n' + Colorize.bold('Updating temp projects in ' + tempProjectsFolder));
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
@@ -115,7 +114,7 @@ export class RushInstallManager extends BaseInstallManager {
       console.log();
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
             'to update the shrinkwrap file.'
         )
@@ -155,10 +154,10 @@ export class RushInstallManager extends BaseInstallManager {
       );
 
       if (orphanedProjects.length > 0) {
-        for (const orhpanedProject of orphanedProjects) {
+        for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
-            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
-              'which was not found in rush.json'
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
+              `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
         shrinkwrapIsUpToDate = false;
@@ -168,7 +167,7 @@ export class RushInstallManager extends BaseInstallManager {
     // dependency name --> version specifier
     const commonDependencies: Map<string, string> = new Map([
       ...allExplicitPreferredVersions,
-      ...this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
+      ...this.rushConfiguration.getImplicitlyPreferredVersions()
     ]);
 
     // To make the common/package.json file more readable, sort alphabetically
@@ -320,7 +319,7 @@ export class RushInstallManager extends BaseInstallManager {
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.log(colors.yellow(error as string));
+          console.log(Colorize.yellow(error as string));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
@@ -351,7 +350,7 @@ export class RushInstallManager extends BaseInstallManager {
       if (packageJson.saveIfModified()) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             `"${rushProject.packageName}" depends on one or more local packages which used "workspace:" ` +
               'notation. The package.json has been modified and must be committed to source control.'
           )
@@ -586,7 +585,7 @@ export class RushInstallManager extends BaseInstallManager {
     // eslint-disable-next-line no-console
     console.log(
       '\n' +
-        colors.bold(
+        Colorize.bold(
           `Running "${this.rushConfiguration.packageManager} install" in` +
             ` ${this.rushConfiguration.commonTempFolder}`
         ) +
@@ -598,7 +597,7 @@ export class RushInstallManager extends BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log(
         '\n' +
-          colors.green('Invoking package manager: ') +
+          Colorize.green('Invoking package manager: ') +
           FileSystem.getRealPath(packageManagerFilename) +
           ' ' +
           installArgs.join(' ') +
@@ -618,7 +617,7 @@ export class RushInstallManager extends BaseInstallManager {
       () => {
         if (this.rushConfiguration.packageManager === 'pnpm') {
           // eslint-disable-next-line no-console
-          console.log(colors.yellow(`Deleting the "node_modules" folder`));
+          console.log(Colorize.yellow(`Deleting the "node_modules" folder`));
           this.installRecycler.moveFolder(commonNodeModulesFolder);
 
           // Leave the pnpm-store as is for the retry. This ensures that packages that have already
@@ -632,7 +631,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (this.rushConfiguration.packageManager === 'npm') {
       // eslint-disable-next-line no-console
-      console.log('\n' + colors.bold('Running "npm shrinkwrap"...'));
+      console.log('\n' + Colorize.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this.pushConfigurationArgs(npmArgs, this.options, subspace);
       Utilities.executeCommand({
@@ -654,7 +653,7 @@ export class RushInstallManager extends BaseInstallManager {
     } else {
       // eslint-disable-next-line no-console
       console.log(
-        '\n' + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+        '\n' + Colorize.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
       );
     }
   }
@@ -703,7 +702,9 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (anyChanges) {
       // eslint-disable-next-line no-console
-      console.log('\n' + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + '\n');
+      console.log(
+        '\n' + Colorize.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + '\n'
+      );
     }
   }
 
@@ -721,7 +722,7 @@ export class RushInstallManager extends BaseInstallManager {
         // eslint-disable-next-line no-console
         console.log(
           '\n' +
-            colors.yellow(
+            Colorize.yellow(
               PrintUtilities.wrapWords(
                 `Your ${this.rushConfiguration.shrinkwrapFilePhrase} is missing the project "${rushProject.packageName}".`
               )

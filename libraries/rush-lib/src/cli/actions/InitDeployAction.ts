@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
+import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
+import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { Colorize } from '@rushstack/terminal';
+
 import { BaseRushAction } from './BaseRushAction';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
-import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
 import { assetsFolderPath } from '../../utilities/PathConstants';
+import { RushConstants } from '../../logic/RushConstants';
 
 const CONFIG_TEMPLATE_PATH: string = `${assetsFolderPath}/rush-init-deploy/scenario-template.json`;
 
@@ -63,13 +65,15 @@ export class InitDeployAction extends BaseRushAction {
     }
 
     // eslint-disable-next-line no-console
-    console.log(colors.green('Creating scenario file: ') + scenarioFilePath);
+    console.log(Colorize.green('Creating scenario file: ') + scenarioFilePath);
 
     const shortProjectName: string = this._project.value!;
     const rushProject: RushConfigurationProject | undefined =
       this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {
-      throw new Error(`The specified project was not found in rush.json: "${shortProjectName}"`);
+      throw new Error(
+        `The specified project was not found in ${RushConstants.rushJsonFilename}: "${shortProjectName}"`
+      );
     }
 
     const templateContent: string = FileSystem.readFile(CONFIG_TEMPLATE_PATH);

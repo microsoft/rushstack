@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
-import colors from 'colors/safe';
+
 import {
   FileSystem,
   AlreadyReportedError,
@@ -13,6 +13,7 @@ import {
   type IPackageJson,
   InternalError
 } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -350,7 +351,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       if (!policyOptions.repoState.isValid) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.red(
+          Colorize.red(
             `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker ` +
               'in the file. You may need to run "rush update" to refresh its contents.'
           ) + '\n'
@@ -364,7 +365,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (!policyOptions.repoState.pnpmShrinkwrapHash) {
           // eslint-disable-next-line no-console
           console.log(
-            colors.red(
+            Colorize.red(
               'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
                 'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
             ) + '\n'
@@ -375,7 +376,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (this.getShrinkwrapHash(experimentsConfig) !== policyOptions.repoState.pnpmShrinkwrapHash) {
           // eslint-disable-next-line no-console
           console.log(
-            colors.red(
+            Colorize.red(
               'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
                 'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
                 'details.'
@@ -699,8 +700,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspace: Subspace,
-    variant?: string
+    subspace: Subspace
   ): Promise<boolean> {
     const importerKey: string = this.getImporterKeyByPath(
       subspace.getSubspaceTempFolder(),
@@ -719,10 +719,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._pnpmfileConfiguration) {
       this._pnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
         project.rushConfiguration,
-        subspace,
-        {
-          variant
-        }
+        subspace
       );
     }
 
@@ -743,14 +740,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           if (err instanceof SyntaxError) {
             // eslint-disable-next-line no-console
             console.error(
-              colors.red(
+              Colorize.red(
                 `A syntax error in the ${RushConstants.pnpmfileV6Filename} at ${subspacePnpmfilePath}\n`
               )
             );
           } else {
             // eslint-disable-next-line no-console
             console.error(
-              colors.red(
+              Colorize.red(
                 `Error during pnpmfile execution. pnpmfile: "${subspacePnpmfilePath}". Error: "${err.message}".` +
                   '\n'
               )
@@ -773,7 +770,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         } catch (err) {
           // eslint-disable-next-line no-console
           console.error(
-            colors.red(
+            Colorize.red(
               `Error during readPackage hook execution. pnpmfile: "${subspacePnpmfilePath}". Error: "${err.message}".` +
                 '\n'
             )

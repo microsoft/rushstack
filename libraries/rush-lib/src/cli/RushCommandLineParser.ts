@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
 import {
@@ -10,7 +9,7 @@ import {
   CommandLineHelper
 } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, Terminal, PrintUtilities } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, Terminal, PrintUtilities, Colorize } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -416,7 +415,7 @@ export class RushCommandLineParser extends CommandLineParser {
       // line individually.
       const message: string = PrintUtilities.wrapWords(prefix + error.message)
         .split(/\r?\n/)
-        .map((line) => colors.red(line))
+        .map((line) => Colorize.red(line))
         .join('\n');
       // eslint-disable-next-line no-console
       console.error(`\n${message}`);

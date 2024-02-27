@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as semver from 'semver';
+import { Colorize } from '@rushstack/terminal';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
@@ -143,14 +143,12 @@ export abstract class BaseShrinkwrapFile {
    * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
    *
    * @param project - the Rush project that is being validated against the shrinkwrap
-   * @param variant - the variant that is being validated
    *
    * @virtual
    */
   public abstract isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    subspace: Subspace,
-    variant?: string
+    subspace: Subspace
   ): Promise<boolean>;
 
   /** @virtual */
@@ -218,7 +216,7 @@ export abstract class BaseShrinkwrapFile {
           this._alreadyWarnedSpecs.add(projectDependency.versionSpecifier);
           // eslint-disable-next-line no-console
           console.log(
-            colors.yellow(
+            Colorize.yellow(
               `WARNING: Not validating ${projectDependency.specifierType}-based` +
                 ` specifier: "${projectDependency.versionSpecifier}"`
             )

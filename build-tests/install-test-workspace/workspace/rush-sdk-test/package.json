@@ -9,8 +9,7 @@
     "start": "node lib/start.js"
   },
   "dependencies": {
-    "@rushstack/rush-sdk": "*",
-    "colors": "^1.4.0"
+    "@rushstack/rush-sdk": "*"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "*",

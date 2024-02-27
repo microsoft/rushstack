@@ -3,8 +3,7 @@
 
 // The "rush install" or "rush update" commands will copy this template to
 // "common/temp-split/global-pnpmfile.js" so that it can implement Rush-specific features.
-// It reads its input data from "common/temp/pnpmfileSettings.json",
-// which includes the path to the user's pnpmfile for the currently selected variant. The pnpmfile is
+// It reads its input data from "common/temp/pnpmfileSettings.json". The pnpmfile is
 // required directly by this shim and is called after Rush's transformations are applied.
 
 import path from 'path';

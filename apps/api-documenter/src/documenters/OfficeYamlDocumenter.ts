@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
 import * as path from 'path';
 import yaml = require('js-yaml');
 
 import type { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import type { IYamlTocItem } from '../yaml/IYamlTocFile';
 import type { IYamlItem } from '../yaml/IYamlApiFile';
@@ -59,7 +59,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     // After we generate everything, check for any unused snippets
     console.log();
     for (const apiName of Object.keys(this._snippets)) {
-      console.error(colors.yellow('Warning: Unused snippet ' + apiName));
+      console.error(Colorize.yellow('Warning: Unused snippet ' + apiName));
     }
   }
 

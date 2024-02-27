@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import type {
@@ -10,6 +9,7 @@ import type {
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { type IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -26,6 +26,7 @@ import type { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../../logic/Git';
+import { RushConstants } from '../../logic/RushConstants';
 
 export class PublishAction extends BaseRushAction {
   private readonly _addCommitDetails: CommandLineFlagParameter;
@@ -155,7 +156,7 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--include-all',
       parameterShortName: undefined,
       description:
-        'If this flag is specified, all packages with shouldPublish=true in rush.json ' +
+        `If this flag is specified, all packages with shouldPublish=true in ${RushConstants.rushJsonFilename} ` +
         'or with a specified version policy ' +
         'will be published if their version is newer than published version.'
     });
@@ -251,7 +252,7 @@ export class PublishAction extends BaseRushAction {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.green('Rush publish finished successfully.'));
+    console.log('\n' + Colorize.green('Rush publish finished successfully.'));
   }
 
   /**

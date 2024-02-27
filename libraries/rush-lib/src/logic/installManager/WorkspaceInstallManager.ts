@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import {
@@ -9,7 +8,8 @@ import {
   FileConstants,
   AlreadyReportedError,
   Async,
-  type IDependenciesMetaTable
+  type IDependenciesMetaTable,
+  Path
 } from '@rushstack/node-core-library';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
@@ -37,6 +37,7 @@ import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
+import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -50,7 +51,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.options.noLink) {
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'The "--no-link" option was provided but is not supported when using workspaces. Run the command again ' +
             'without specifying this argument.'
         )
@@ -82,7 +83,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     // eslint-disable-next-line no-console
-    console.log('\n' + colors.bold('Updating workspace files in ' + subspace.getSubspaceTempFolder()));
+    console.log('\n' + Colorize.bold('Updating workspace files in ' + subspace.getSubspaceTempFolder()));
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -98,7 +99,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         console.log();
         // eslint-disable-next-line no-console
         console.log(
-          colors.red(
+          Colorize.red(
             'The shrinkwrap file has not been updated to support workspaces. Run "rush update --full" to update ' +
               'the shrinkwrap file.'
           )
@@ -116,7 +117,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
             `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
-              'which was not found in rush.json'
+              `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
         shrinkwrapIsUpToDate = false;
@@ -204,7 +205,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log();
             // eslint-disable-next-line no-console
             console.log(
-              colors.red(
+              Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists ` +
                   'within the workspace but cannot be fulfilled with the specified version range. Either ' +
                   'specify a valid version range, or add the package as a cyclic dependency.'
@@ -218,7 +219,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log();
             // eslint-disable-next-line no-console
             console.log(
-              colors.red(
+              Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
                   'the workspace. Run "rush update" to update workspace references for this package.'
               )
@@ -248,7 +249,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       if (packageJson.saveIfModified()) {
         // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             `"${rushProject.packageName}" depends on one or more workspace packages which did not use "workspace:" ` +
               'notation. The package.json has been modified and must be committed to source control.'
           )
@@ -256,9 +257,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (
-        await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace, this.options.variant)
-      ) {
+      if (await shrinkwrapFile?.isWorkspaceProjectModifiedAsync(rushProject, subspace)) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shrinkwrap.`
         );
@@ -275,7 +274,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         }
 
         // get the relative path from common temp folder to package folder, to align with the value in pnpm-lock.yaml
-        const relativePathFromTempFolderToPackageFolder: string = `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`;
+        const relativePathFromTempFolderToPackageFolder: string = Path.convertToSlashes(
+          `${relativeFromTempFolderToRootFolder}/${rushProject.projectRelativeFolder}`
+        );
         expectedDependenciesMetaByProjectRelativePath[relativePathFromTempFolderToPackageFolder] =
           dependenciesMeta;
       }
@@ -287,7 +288,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (shrinkwrapFile?.importers !== undefined) {
       for (const [key, value] of shrinkwrapFile?.importers) {
         if (value.dependenciesMeta !== undefined) {
-          lockfileDependenciesMetaByProjectRelativePath[key] = value.dependenciesMeta;
+          lockfileDependenciesMetaByProjectRelativePath[Path.convertToSlashes(key)] = value.dependenciesMeta;
         }
       }
     }
@@ -361,7 +362,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration,
       this.options
     );
-    if (colors.enabled) {
+    if (ConsoleTerminalProvider.supportsColor) {
       packageManagerEnv.FORCE_COLOR = '1';
     }
 
@@ -396,7 +397,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // eslint-disable-next-line no-console
       console.log(
         '\n' +
-          colors.bold(
+          Colorize.bold(
             `Running "${this.rushConfiguration.packageManager} install" in` +
               ` ${subspace.getSubspaceTempFolder()}`
           ) +
@@ -413,7 +414,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         // eslint-disable-next-line no-console
         console.log(
           '\n' +
-            colors.green('Invoking package manager: ') +
+            Colorize.green('Invoking package manager: ') +
             FileSystem.getRealPath(packageManagerFilename) +
             ' ' +
             installArgs.join(' ') +
@@ -504,7 +505,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // if usePnpmSyncForInjectedDependencies is true
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
-      const pnpmLockfilePath: string = this.rushConfiguration.tempShrinkwrapFilename;
+      const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const pnpmStorePath: string = `${this.rushConfiguration.commonTempFolder}/node_modules/.pnpm`;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,

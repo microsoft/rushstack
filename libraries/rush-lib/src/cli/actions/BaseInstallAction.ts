@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -20,7 +18,6 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
 import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -31,7 +28,6 @@ import type { Subspace } from '../../api/Subspace';
  */
 export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _terminal: ITerminal;
-  protected readonly _variant: CommandLineStringParameter;
   protected readonly _purgeParameter: CommandLineFlagParameter;
   protected readonly _bypassPolicyParameter: CommandLineFlagParameter;
   protected readonly _noLinkParameter: CommandLineFlagParameter;
@@ -59,7 +55,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
       parameterLongName: RushConstants.bypassPolicyFlagLongName,
-      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
+      description: `Overrides enforcement of the "gitPolicy" rules from ${RushConstants.rushJsonFilename} (use honorably!)`
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -91,7 +87,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+      description:
+        `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
+        'Make sure you know what you are skipping.'
     });
     this._offlineParameter = this.defineFlagParameter({
       parameterLongName: '--offline',
@@ -100,7 +98,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
         ` if the necessary NPM packages cannot be obtained from the local cache.` +
         ` For details, see the documentation for PNPM's "--offline" parameter.`
     });
-    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
     this._subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
@@ -118,7 +115,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       console.log();
       // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
         )
       );
@@ -132,6 +129,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
+
+    if (this.rushConfiguration._hasVariantsField) {
+      this._terminal.writeLine(
+        Colorize.yellow(
+          `Warning: Please remove the obsolete "variants" field from your ${RushConstants.rushJsonFilename} ` +
+            'file. Installation variants have been replaced by the new Rush subspaces feature. ' +
+            'In the next major release, Rush will fail to execute if this field is present.'
+        )
+      );
+    }
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
@@ -160,7 +167,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
           console.log();
           // eslint-disable-next-line no-console
           console.log(
-            colors.red(
+            Colorize.red(
               `The subspaces preventSelectingAllSubspaces configuration is enabled, which enforces installation for a specified set of subspace,` +
                 ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
             )
@@ -174,14 +181,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       // Check each subspace for version inconsistencies
       for (const subspace of selectedSubspaces) {
         VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
-          variant: this._variant.value,
           subspace
         });
       }
     } else {
-      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
-        variant: this._variant.value
-      });
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal);
     }
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -237,7 +241,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
           // eslint-disable-next-line no-console
-          console.log(colors.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
+          console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
         }
       } else {
@@ -263,7 +267,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       // eslint-disable-next-line no-console
       console.log(
         '\n' +
-          colors.yellow(
+          Colorize.yellow(
             'Rush refreshed some files in the "common/scripts" folder.' +
               '  Please commit this change to Git.'
           )
@@ -272,7 +276,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // eslint-disable-next-line no-console
     console.log(
-      '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+      '\n' + Colorize.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
     );
   }
 
