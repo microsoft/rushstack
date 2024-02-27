@@ -31,7 +31,7 @@
         },
         "cacheEntryNamePattern": {
           "type": "string",
-          "description": "Setting this property overrides the cache entry ID. If this property is set, it must contain a [hash] token. It may also contain a [projectName] or a [projectName:normalize] token."
+          "description": "Setting this property overrides the cache entry ID. If this property is set, it must contain a [hash] token. It may also contain one of the following tokens: [projectName], [projectName:normalize], [phaseName], [phaseName:normalize], [phaseName:trimPrefix], [os], and [arch]."
         },
         "azureBlobStorageConfiguration": {
           "type": "object",

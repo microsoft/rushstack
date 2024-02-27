@@ -52,11 +52,23 @@ export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
 
 interface IBuildCacheConfigurationOptions {
   buildCacheJson: IBuildCacheJson;
-  getCacheEntryId: GetCacheEntryIdFunction;
+  defaultGetCacheEntryId: GetCacheEntryIdFunction;
   rushConfiguration: RushConfiguration;
   rushUserConfiguration: RushUserConfiguration;
   rushSession: RushSession;
   cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+}
+
+const CACHE_ENTRY_ID_FUNCTION_CACHE: Map<string | undefined, GetCacheEntryIdFunction> = new Map();
+
+export function getCacheEntryIdFunction(pattern: string | undefined): GetCacheEntryIdFunction {
+  let result: GetCacheEntryIdFunction | undefined = CACHE_ENTRY_ID_FUNCTION_CACHE.get(pattern);
+  if (!result) {
+    result = CacheEntryId.parsePattern(pattern);
+    CACHE_ENTRY_ID_FUNCTION_CACHE.set(pattern, result);
+  }
+
+  return result;
 }
 
 /**
@@ -79,7 +91,7 @@ export class BuildCacheConfiguration {
   /**
    * Method to calculate the cache entry id for a project, phase, and project state.
    */
-  public readonly getCacheEntryId: GetCacheEntryIdFunction;
+  public readonly defaultGetCacheEntryId: GetCacheEntryIdFunction;
   /**
    * The provider for interacting with the local build cache.
    */
@@ -90,7 +102,7 @@ export class BuildCacheConfiguration {
   public readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
 
   private constructor({
-    getCacheEntryId,
+    defaultGetCacheEntryId,
     buildCacheJson,
     rushUserConfiguration,
     rushConfiguration,
@@ -100,7 +112,7 @@ export class BuildCacheConfiguration {
     this.cacheWriteEnabled =
       !!this.buildCacheEnabled && EnvironmentConfiguration.buildCacheWriteAllowed !== false;
 
-    this.getCacheEntryId = getCacheEntryId;
+    this.defaultGetCacheEntryId = defaultGetCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({
       rushUserConfiguration: rushUserConfiguration,
       rushConfiguration: rushConfiguration
@@ -178,9 +190,9 @@ export class BuildCacheConfiguration {
     );
     const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
 
-    let getCacheEntryId: GetCacheEntryIdFunction;
+    let defaultGetCacheEntryId: GetCacheEntryIdFunction;
     try {
-      getCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
+      defaultGetCacheEntryId = getCacheEntryIdFunction(buildCacheJson.cacheEntryNamePattern);
     } catch (e) {
       terminal.writeErrorLine(
         `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
@@ -201,7 +213,7 @@ export class BuildCacheConfiguration {
 
     return new BuildCacheConfiguration({
       buildCacheJson,
-      getCacheEntryId,
+      defaultGetCacheEntryId,
       rushConfiguration,
       rushUserConfiguration,
       rushSession,

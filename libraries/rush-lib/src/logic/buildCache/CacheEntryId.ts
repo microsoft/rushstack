@@ -3,7 +3,9 @@
 
 import process from 'node:process';
 
-const OPTIONS_ARGUMENT_NAME: string = 'options';
+const PROJECT_NAME_PARAM_NAME: 'projectName' = 'projectName';
+const PHASE_NAME_PARAM_NAME: 'phaseName' = 'phaseName';
+const PROJECT_STATE_HASH_PARAM_NAME: 'projectStateHash' = 'projectStateHash';
 
 /**
  * Options for generating the cache id for an operation.
@@ -13,15 +15,17 @@ export interface IGenerateCacheEntryIdOptions {
   /**
    * The name of the project
    */
-  projectName: string;
+  [PROJECT_NAME_PARAM_NAME]: string;
+
   /**
    * The name of the phase
    */
-  phaseName: string;
+  [PHASE_NAME_PARAM_NAME]: string;
+
   /**
    * A hash of the input files
    */
-  projectStateHash: string;
+  [PROJECT_STATE_HASH_PARAM_NAME]: string;
 }
 
 /**
@@ -88,17 +92,17 @@ export class CacheEntryId {
             }
 
             foundHashToken = true;
-            return `\${${OPTIONS_ARGUMENT_NAME}.projectStateHash}`;
+            return `\${${PROJECT_STATE_HASH_PARAM_NAME}}`;
           }
 
           case PROJECT_NAME_TOKEN_NAME: {
             switch (tokenAttribute) {
               case undefined: {
-                return `\${${OPTIONS_ARGUMENT_NAME}.projectName}`;
+                return `\${${PROJECT_NAME_PARAM_NAME}}`;
               }
 
               case 'normalize': {
-                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace('@','').replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
+                return `\${${PROJECT_NAME_PARAM_NAME}.replace('@','').replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
               }
 
               default: {
@@ -118,12 +122,12 @@ export class CacheEntryId {
 
               case 'normalize': {
                 // Replace colons with underscores.
-                return `\${${OPTIONS_ARGUMENT_NAME}.phaseName.replace(/:/g, '_')}`;
+                return `\${${PHASE_NAME_PARAM_NAME}.replace(/:/g, '_')}`;
               }
 
               case 'trimPrefix': {
                 // Trim the "_phase:" prefix from the phase name.
-                return `\${${OPTIONS_ARGUMENT_NAME}.phaseName.replace(/^_phase:/, '')}`;
+                return `\${${PHASE_NAME_PARAM_NAME}.replace(/^_phase:/, '')}`;
               }
 
               default: {
@@ -160,8 +164,8 @@ export class CacheEntryId {
 
       // eslint-disable-next-line no-new-func
       return new Function(
-        OPTIONS_ARGUMENT_NAME,
-        `"use strict"\nreturn \`${templateString}\`;`
+        `{ ${PROJECT_NAME_PARAM_NAME}, ${PHASE_NAME_PARAM_NAME}, ${PROJECT_STATE_HASH_PARAM_NAME} }`,
+        `return \`${templateString}\`;`
       ) as GetCacheEntryIdFunction;
     }
   }

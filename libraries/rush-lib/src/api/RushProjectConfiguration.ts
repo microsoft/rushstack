@@ -39,6 +39,19 @@ export interface IRushProjectJson {
    */
   disableBuildCacheForProject?: boolean;
 
+  /**
+   * Setting this property overrides the cache entry ID for the project. If this property is set, it must
+   * contain a `[hash]` token. It may also contain one of the following tokens:
+   * - `[projectName]`
+   * - `[projectName:normalize]`
+   * - `[phaseName]`
+   * - `[phaseName:normalize]`
+   * - `[phaseName:trimPrefix]`
+   * - `[os]`
+   * - `[arch]`
+   */
+  projectCacheEntryNamePattern?: string;
+
   operationSettings?: IOperationSettings[];
 }
 
@@ -211,6 +224,11 @@ export class RushProjectConfiguration {
    */
   public readonly disableBuildCacheForProject: boolean;
 
+  /**
+   * {@inheritdoc _IRushProjectJson.projectCacheEntryNamePattern}
+   */
+  public readonly overrideCacheEntryNamePattern: string | undefined;
+
   public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
   private readonly _validationCache: WeakSet<object> = new WeakSet();
@@ -223,6 +241,7 @@ export class RushProjectConfiguration {
     this.project = project;
     this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs || [];
     this.disableBuildCacheForProject = rushProjectJson.disableBuildCacheForProject || false;
+    this.overrideCacheEntryNamePattern = rushProjectJson.projectCacheEntryNamePattern;
     this.operationSettingsByOperationName = operationSettingsByOperationName;
   }
 

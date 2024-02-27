@@ -63,8 +63,8 @@ export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
     cacheWriteEnabled: boolean;
     readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
+    readonly defaultGetCacheEntryId: GetCacheEntryIdFunction;
     static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
-    readonly getCacheEntryId: GetCacheEntryIdFunction;
     static loadAndRequireEnabledAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration>;
     readonly localCacheProvider: FileSystemBuildCacheProvider;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration | undefined>;
@@ -473,9 +473,12 @@ export interface IFileSystemBuildCacheProviderOptions {
 
 // @beta
 export interface IGenerateCacheEntryIdOptions {
-    phaseName: string;
-    projectName: string;
-    projectStateHash: string;
+    // Warning: (ae-forgotten-export) The symbol "PHASE_NAME_PARAM_NAME" needs to be exported by the entry point index.d.ts
+    [PHASE_NAME_PARAM_NAME]: string;
+    // Warning: (ae-forgotten-export) The symbol "PROJECT_NAME_PARAM_NAME" needs to be exported by the entry point index.d.ts
+    [PROJECT_NAME_PARAM_NAME]: string;
+    // Warning: (ae-forgotten-export) The symbol "PROJECT_STATE_HASH_PARAM_NAME" needs to be exported by the entry point index.d.ts
+    [PROJECT_STATE_HASH_PARAM_NAME]: string;
 }
 
 // @beta (undocumented)
@@ -723,6 +726,7 @@ export interface _IRushProjectJson {
     incrementalBuildIgnoredGlobs?: string[];
     // (undocumented)
     operationSettings?: IOperationSettings[];
+    projectCacheEntryNamePattern?: string;
 }
 
 // @beta (undocumented)
@@ -1310,6 +1314,7 @@ export class RushProjectConfiguration {
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
+    readonly overrideCacheEntryNamePattern: string | undefined;
     // (undocumented)
     readonly project: RushConfigurationProject;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;

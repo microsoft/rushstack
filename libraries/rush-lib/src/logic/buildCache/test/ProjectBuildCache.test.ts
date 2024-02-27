@@ -6,7 +6,7 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
-import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
+import type { GetCacheEntryIdFunction, IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
 import { ProjectBuildCache } from '../ProjectBuildCache';
@@ -26,11 +26,11 @@ describe(ProjectBuildCache.name, () => {
       }
     } as unknown as ProjectChangeAnalyzer;
 
+    const getCacheEntryId: GetCacheEntryIdFunction = (opts: IGenerateCacheEntryIdOptions) =>
+      `${opts.projectName}/${opts.projectStateHash}`;
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
-        getCacheEntryId: (opts: IGenerateCacheEntryIdOptions) =>
-          `${opts.projectName}/${opts.projectStateHash}`,
         localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
         cloudCacheProvider: {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
@@ -45,7 +45,8 @@ describe(ProjectBuildCache.name, () => {
       configHash: 'build',
       projectChangeAnalyzer,
       terminal,
-      phaseName: 'build'
+      phaseName: 'build',
+      getCacheEntryId
     });
 
     return subject;
