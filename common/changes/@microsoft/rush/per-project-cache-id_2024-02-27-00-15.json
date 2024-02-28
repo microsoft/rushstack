@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add the ability to override a project's cache ID via a `projectCacheEntryNamePattern` property in `config/rush-project.json`.",
+      "comment": "",
       "type": "none"
     }
   ],
