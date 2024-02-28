@@ -503,7 +503,7 @@ function findRushJsonFolder() {
             }
         } while (basePath !== (tempPath = path__WEBPACK_IMPORTED_MODULE_3__.dirname(basePath))); // Exit the loop when we hit the disk root
         if (!_rushJsonFolder) {
-            throw new Error('Unable to find rush.json.');
+            throw new Error(`Unable to find ${RUSH_JSON_FILENAME}.`);
         }
     }
     return _rushJsonFolder;

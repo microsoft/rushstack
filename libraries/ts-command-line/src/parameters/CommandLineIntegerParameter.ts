@@ -5,7 +5,15 @@ import type { ICommandLineIntegerDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineIntegerParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.(defineIntegerParameter:2)}.
+ * @public
+ */
+export interface IRequiredCommandLineIntegerParameter extends CommandLineIntegerParameter {
+  value: number;
+}
+
+/**
+ * The data type returned by {@link CommandLineParameterProvider.(defineIntegerParameter:1)}.
  * @public
  */
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {

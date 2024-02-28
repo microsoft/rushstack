@@ -35,11 +35,20 @@ export {
 } from './parameters/BaseClasses';
 
 export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
-export { CommandLineStringParameter } from './parameters/CommandLineStringParameter';
+export {
+  CommandLineStringParameter,
+  type IRequiredCommandLineStringParameter
+} from './parameters/CommandLineStringParameter';
 export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
-export { CommandLineIntegerParameter } from './parameters/CommandLineIntegerParameter';
+export {
+  CommandLineIntegerParameter,
+  type IRequiredCommandLineIntegerParameter
+} from './parameters/CommandLineIntegerParameter';
 export { CommandLineIntegerListParameter } from './parameters/CommandLineIntegerListParameter';
-export { CommandLineChoiceParameter } from './parameters/CommandLineChoiceParameter';
+export {
+  CommandLineChoiceParameter,
+  type IRequiredCommandLineChoiceParameter
+} from './parameters/CommandLineChoiceParameter';
 export { CommandLineChoiceListParameter } from './parameters/CommandLineChoiceListParameter';
 export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 

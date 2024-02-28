@@ -1,6 +1,14 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Sat, 24 Feb 2024 23:02:51 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Feb 2024 16:09:27 GMT and should not be manually modified.
+
+## 4.18.0
+Wed, 28 Feb 2024 16:09:27 GMT
+
+### Minor changes
+
+- Allow choice parameters alternatives to be typed.
+- Update the return type of `defineChoiceParameter`, `defineIntegerParameter`, and `defineStringParameter` respectively when the `{ required: true }` option is set to a new type (`IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter` respectively) with a required `value` property.
 
 ## 4.17.4
 Sat, 24 Feb 2024 23:02:51 GMT

@@ -14,13 +14,10 @@
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "local-node-rig": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-lint-plugin": "workspace:*",
-    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/node": "18.17.15",
-    "typescript": "~5.3.3"
+    "local-node-rig": "workspace:*"
   },
   "dependenciesMeta": {
     "@microsoft/rush-lib": {
@@ -32,10 +29,7 @@
     "@rushstack/heft": {
       "injected": true
     },
-    "@rushstack/heft-lint-plugin": {
-      "injected": true
-    },
-    "@rushstack/heft-typescript-plugin": {
+    "local-node-rig": {
       "injected": true
     }
   }

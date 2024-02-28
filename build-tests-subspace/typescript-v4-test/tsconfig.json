@@ -1,4 +1,6 @@
 {
+  "$schema": "http://json.schemastore.org/tsconfig",
+
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
@@ -19,6 +21,5 @@
     "types": []
   },
 
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

@@ -19,19 +19,28 @@ import {
   type CommandLineParameterWithArgument,
   CommandLineParameterKind
 } from '../parameters/BaseClasses';
-import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
+import {
+  CommandLineChoiceParameter,
+  type IRequiredCommandLineChoiceParameter
+} from '../parameters/CommandLineChoiceParameter';
 import { CommandLineChoiceListParameter } from '../parameters/CommandLineChoiceListParameter';
-import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import {
+  CommandLineIntegerParameter,
+  type IRequiredCommandLineIntegerParameter
+} from '../parameters/CommandLineIntegerParameter';
 import { CommandLineIntegerListParameter } from '../parameters/CommandLineIntegerListParameter';
 import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import {
+  CommandLineStringParameter,
+  type IRequiredCommandLineStringParameter
+} from '../parameters/CommandLineStringParameter';
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
- * The result containing the parsed paramter long name and scope. Returned when calling
+ * The result containing the parsed parameter long name and scope. Returned when calling
  * {@link CommandLineParameterProvider.parseScopedLongName}.
  *
  * @public
@@ -148,8 +157,25 @@ export abstract class CommandLineParameterProvider {
    * example-tool --log-level warn
    * ```
    */
-  public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
-    const parameter: CommandLineChoiceParameter = new CommandLineChoiceParameter(definition);
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice> & { required: false | undefined }
+  ): CommandLineChoiceParameter<TChoice>;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
+   */
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice> & { required: true }
+  ): IRequiredCommandLineChoiceParameter<TChoice>;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
+   */
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice>
+  ): CommandLineChoiceParameter<TChoice>;
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice>
+  ): CommandLineChoiceParameter<TChoice> {
+    const parameter: CommandLineChoiceParameter<TChoice> = new CommandLineChoiceParameter(definition);
     this._defineParameter(parameter);
     return parameter;
   }
@@ -174,10 +200,10 @@ export abstract class CommandLineParameterProvider {
    * example-tool --allow-color red --allow-color green
    * ```
    */
-  public defineChoiceListParameter(
-    definition: ICommandLineChoiceListDefinition
-  ): CommandLineChoiceListParameter {
-    const parameter: CommandLineChoiceListParameter = new CommandLineChoiceListParameter(definition);
+  public defineChoiceListParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceListDefinition<TChoice>
+  ): CommandLineChoiceListParameter<TChoice> {
+    const parameter: CommandLineChoiceListParameter<TChoice> = new CommandLineChoiceListParameter(definition);
     this._defineParameter(parameter);
     return parameter;
   }
@@ -228,6 +254,19 @@ export abstract class CommandLineParameterProvider {
    * example-tool --max-attempts 5
    * ```
    */
+  public defineIntegerParameter(
+    definition: ICommandLineIntegerDefinition & { required: false | undefined }
+  ): CommandLineIntegerParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
+   */
+  public defineIntegerParameter(
+    definition: ICommandLineIntegerDefinition & { required: true }
+  ): IRequiredCommandLineIntegerParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
+   */
+  public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
   public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);
     this._defineParameter(parameter);
@@ -285,6 +324,19 @@ export abstract class CommandLineParameterProvider {
    * example-tool --message "Hello, world!"
    * ```
    */
+  public defineStringParameter(
+    definition: ICommandLineStringDefinition & { required: false | undefined }
+  ): CommandLineStringParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
+   */
+  public defineStringParameter(
+    definition: ICommandLineStringDefinition & { required: true }
+  ): IRequiredCommandLineStringParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
+   */
+  public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
     const parameter: CommandLineStringParameter = new CommandLineStringParameter(definition);
     this._defineParameter(parameter);

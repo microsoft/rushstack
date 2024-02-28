@@ -32,7 +32,7 @@ build/Release
 
 # Dependency directories
 node_modules
-jspm_packages/
+jspm_packages
 
 # Optional npm cache directory
 .npm
@@ -64,7 +64,7 @@ jspm_packages/
 *.iml
 
 # Visual Studio Code
-.vscode/*
+.vscode
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -82,8 +82,6 @@ common/autoinstallers/*/.npmrc
 .cache
 .heft
 
-# Visual Studio Code
-.vscode
 
 # Common toolchain intermediate files
 temp
