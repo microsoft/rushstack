@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where, when the experimental subspaces feature was enabled, the lockfile validation would check irrelevant subspaces",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
