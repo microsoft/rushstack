@@ -5,7 +5,15 @@ import type { ICommandLineStringDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineStringParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.(defineStringParameter:2)}.
+ * @public
+ */
+export interface IRequiredCommandLineStringParameter extends CommandLineStringParameter {
+  value: string;
+}
+
+/**
+ * The data type returned by {@link CommandLineParameterProvider.(defineStringParameter:1)}.
  * @public
  */
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {

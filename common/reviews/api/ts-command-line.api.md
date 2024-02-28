@@ -36,34 +36,34 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 }
 
 // @public
-export class CommandLineChoiceListParameter extends CommandLineParameter {
+export class CommandLineChoiceListParameter<TChoice extends string = string> extends CommandLineParameter {
     // @internal
-    constructor(definition: ICommandLineChoiceListDefinition);
-    readonly alternatives: ReadonlyArray<string>;
+    constructor(definition: ICommandLineChoiceListDefinition<TChoice>);
+    readonly alternatives: ReadonlyArray<TChoice>;
     // @override
     appendToArgList(argList: string[]): void;
-    readonly completions: (() => Promise<string[]>) | undefined;
+    readonly completions: (() => Promise<TChoice[]>) | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    get values(): ReadonlyArray<string>;
+    get values(): ReadonlyArray<TChoice>;
 }
 
 // @public
-export class CommandLineChoiceParameter extends CommandLineParameter {
+export class CommandLineChoiceParameter<TChoice extends string = string> extends CommandLineParameter {
     // @internal
-    constructor(definition: ICommandLineChoiceDefinition);
-    readonly alternatives: ReadonlyArray<string>;
+    constructor(definition: ICommandLineChoiceDefinition<TChoice>);
+    readonly alternatives: ReadonlyArray<TChoice>;
     // @override
     appendToArgList(argList: string[]): void;
-    readonly completions: (() => Promise<string[]>) | undefined;
-    readonly defaultValue: string | undefined;
+    readonly completions: (() => Promise<TChoice[]>) | undefined;
+    readonly defaultValue: TChoice | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    get value(): string | undefined;
+    get value(): TChoice | undefined;
 }
 
 // @public
@@ -160,15 +160,33 @@ export abstract class CommandLineParameterProvider {
     readonly _ambiguousParameterParserKeysByName: Map<string, string>;
     // @internal (undocumented)
     protected _defineAmbiguousParameter(name: string): string;
-    defineChoiceListParameter(definition: ICommandLineChoiceListDefinition): CommandLineChoiceListParameter;
-    defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
+    defineChoiceListParameter<TChoice extends string = string>(definition: ICommandLineChoiceListDefinition<TChoice>): CommandLineChoiceListParameter<TChoice>;
+    defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice> & {
+        required: false | undefined;
+    }): CommandLineChoiceParameter<TChoice>;
+    defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice> & {
+        required: true;
+    }): IRequiredCommandLineChoiceParameter<TChoice>;
+    defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice>): CommandLineChoiceParameter<TChoice>;
     defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
     defineIntegerListParameter(definition: ICommandLineIntegerListDefinition): CommandLineIntegerListParameter;
+    defineIntegerParameter(definition: ICommandLineIntegerDefinition & {
+        required: false | undefined;
+    }): CommandLineIntegerParameter;
+    defineIntegerParameter(definition: ICommandLineIntegerDefinition & {
+        required: true;
+    }): IRequiredCommandLineIntegerParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
     // @internal (undocumented)
     protected _defineParameter(parameter: CommandLineParameter): void;
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
+    defineStringParameter(definition: ICommandLineStringDefinition & {
+        required: false | undefined;
+    }): CommandLineStringParameter;
+    defineStringParameter(definition: ICommandLineStringDefinition & {
+        required: true;
+    }): IRequiredCommandLineStringParameter;
     defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
     // @internal
     protected abstract _getArgumentParser(): argparse.ArgumentParser;
@@ -307,16 +325,16 @@ export interface ICommandLineActionOptions {
 }
 
 // @public
-export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
-    alternatives: string[];
-    completions?: () => Promise<string[]>;
-    defaultValue?: string;
+export interface ICommandLineChoiceDefinition<TChoice extends string = string> extends IBaseCommandLineDefinition {
+    alternatives: TChoice[];
+    completions?: () => Promise<TChoice[]>;
+    defaultValue?: TChoice;
 }
 
 // @public
-export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefinition {
-    alternatives: string[];
-    completions?: () => Promise<string[]>;
+export interface ICommandLineChoiceListDefinition<TChoice extends string = string> extends IBaseCommandLineDefinition {
+    alternatives: TChoice[];
+    completions?: () => Promise<TChoice[]>;
 }
 
 // @public
@@ -369,6 +387,24 @@ export interface ICommandLineStringListDefinition extends IBaseCommandLineDefini
 // @internal
 export interface _IRegisterDefinedParametersState {
     parentParameterNames: Set<string>;
+}
+
+// @public
+export interface IRequiredCommandLineChoiceParameter<TChoice extends string = string> extends CommandLineChoiceParameter<TChoice> {
+    // (undocumented)
+    value: TChoice;
+}
+
+// @public
+export interface IRequiredCommandLineIntegerParameter extends CommandLineIntegerParameter {
+    // (undocumented)
+    value: number;
+}
+
+// @public
+export interface IRequiredCommandLineStringParameter extends CommandLineStringParameter {
+    // (undocumented)
+    value: string;
 }
 
 // @public

@@ -6,13 +6,13 @@ import type { CommandLineFlagParameter, CommandLineChoiceParameter } from '@rush
 import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 
-import { YamlDocumenter } from '../documenters/YamlDocumenter';
+import { YamlDocumenter, type YamlFormat } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 
 export class YamlAction extends BaseAction {
   private readonly _officeParameter: CommandLineFlagParameter;
   private readonly _newDocfxNamespacesParameter: CommandLineFlagParameter;
-  private readonly _yamlFormatParameter: CommandLineChoiceParameter;
+  private readonly _yamlFormatParameter: CommandLineChoiceParameter<YamlFormat>;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({
@@ -36,7 +36,7 @@ export class YamlAction extends BaseAction {
         ` adds them to the table of contents.  This will also affect file layout as namespaced items will be nested` +
         ` under a directory for the namespace instead of just within the package.`
     });
-    this._yamlFormatParameter = this.defineChoiceParameter({
+    this._yamlFormatParameter = this.defineChoiceParameter<YamlFormat>({
       parameterLongName: '--yaml-format',
       alternatives: ['udp', 'sdp'],
       defaultValue: 'sdp',

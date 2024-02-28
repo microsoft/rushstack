@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
-import type { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineStringParameter,
+  IRequiredCommandLineStringParameter
+} from '@rushstack/ts-command-line';
 import { Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -15,7 +18,7 @@ import { RushConstants } from '../../logic/RushConstants';
 const CONFIG_TEMPLATE_PATH: string = `${assetsFolderPath}/rush-init-deploy/scenario-template.json`;
 
 export class InitDeployAction extends BaseRushAction {
-  private readonly _project: CommandLineStringParameter;
+  private readonly _project: IRequiredCommandLineStringParameter;
   private readonly _scenario: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
@@ -67,7 +70,7 @@ export class InitDeployAction extends BaseRushAction {
     // eslint-disable-next-line no-console
     console.log(Colorize.green('Creating scenario file: ') + scenarioFilePath);
 
-    const shortProjectName: string = this._project.value!;
+    const shortProjectName: string = this._project.value;
     const rushProject: RushConfigurationProject | undefined =
       this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {

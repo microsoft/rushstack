@@ -119,22 +119,24 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
 }
 
 /**
- * For use with {@link CommandLineParameterProvider.defineChoiceParameter},
- * this interface defines a command line parameter which is constrained to a list of possible
+ * For use with {@link CommandLineParameterProvider.(defineChoiceParameter:1)} and
+ * {@link CommandLineParameterProvider.(defineChoiceParameter:2)}, this interface
+ * defines a command line parameter which is constrained to a list of possible
  * options.
  *
  * @public
  */
-export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceDefinition<TChoice extends string = string>
+  extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  alternatives: string[];
+  alternatives: TChoice[];
 
   /**
    * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
-  defaultValue?: string;
+  defaultValue?: TChoice;
 
   /**
    * An optional callback that provides a list of custom choices for tab completion.
@@ -142,7 +144,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
    */
-  completions?: () => Promise<string[]>;
+  completions?: () => Promise<TChoice[]>;
 }
 
 /**
@@ -152,11 +154,12 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceListDefinition<TChoice extends string = string>
+  extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  alternatives: string[];
+  alternatives: TChoice[];
 
   /**
    * An optional callback that provides a list of custom choices for tab completion.
@@ -164,7 +167,7 @@ export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefini
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
    */
-  completions?: () => Promise<string[]>;
+  completions?: () => Promise<TChoice[]>;
 }
 
 /**
@@ -176,8 +179,9 @@ export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefini
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {}
 
 /**
- * For use with {@link CommandLineParameterProvider.defineIntegerParameter},
- * this interface defines a command line parameter whose argument is an integer value.
+ * For use with {@link CommandLineParameterProvider.(defineIntegerParameter:1)},
+ * {@link CommandLineParameterProvider.(defineIntegerParameter:2)}, this interface
+ * defines a command line parameter whose argument is an integer value.
  *
  * @public
  */
@@ -198,8 +202,9 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
 export interface ICommandLineIntegerListDefinition extends IBaseCommandLineDefinitionWithArgument {}
 
 /**
- * For use with {@link CommandLineParameterProvider.defineStringParameter},
- * this interface defines a command line parameter whose argument is a string value.
+ * For use with {@link CommandLineParameterProvider.(defineStringParameter:1)} and
+ * {@link CommandLineParameterProvider.(defineStringParameter:2)}, this interface
+ * defines a command line parameter whose argument is a string value.
  *
  * @public
  */
