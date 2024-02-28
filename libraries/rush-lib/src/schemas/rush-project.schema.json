@@ -29,11 +29,6 @@
       "type": "boolean"
     },
 
-    "projectCacheEntryNamePattern": {
-      "type": "string",
-      "description": "Setting this property overrides the cache entry ID for the project. If this property is set, it must contain a [hash] token. It may also contain one of the following tokens: [projectName], [projectName:normalize], [phaseName], [phaseName:normalize], [phaseName:trimPrefix], [os], and [arch]."
-    },
-
     "operationSettings": {
       "type": "array",
       "description": "Options for individual commands and phases.",

@@ -15,7 +15,6 @@ import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import type { GetCacheEntryIdFunction } from './CacheEntryId';
 
 export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
@@ -27,7 +26,6 @@ export interface IProjectBuildCacheOptions {
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   terminal: ITerminal;
   phaseName: string;
-  getCacheEntryId: GetCacheEntryIdFunction;
 }
 
 interface IPathsToCache {
@@ -384,8 +382,8 @@ export class ProjectBuildCache {
     projectOutputFolderNames,
     configHash,
     additionalContext,
-    getCacheEntryId,
-    phaseName
+    phaseName,
+    buildCacheConfiguration: { getCacheEntryId }
   }: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is

@@ -31,10 +31,9 @@ import type {
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { IRawRepoState, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { OperationMetadataManager } from './OperationMetadataManager';
-import { getCacheEntryIdFunction, type BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import type { GetCacheEntryIdFunction } from '../buildCache/CacheEntryId';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
@@ -52,7 +51,6 @@ export interface IOperationBuildCacheContext {
   projectBuildCache: ProjectBuildCache | undefined;
   cacheDisabledReason: string | undefined;
   operationSettings: IOperationSettings | undefined;
-  getCacheEntryId: GetCacheEntryIdFunction;
 
   cobuildLock: CobuildLock | undefined;
 
@@ -151,10 +149,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 interval: PERIODIC_CALLBACK_INTERVAL_IN_SECONDS * 1000
               }),
               cacheRestored: false,
-              isCacheReadAttempted: false,
-              getCacheEntryId: projectConfiguration?.overrideCacheEntryNamePattern
-                ? getCacheEntryIdFunction(projectConfiguration?.overrideCacheEntryNamePattern)
-                : buildCacheConfiguration.defaultGetCacheEntryId
+              isCacheReadAttempted: false
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this._buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -590,13 +585,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     operationMetadataManager: OperationMetadataManager | undefined;
   }): Promise<ProjectBuildCache | undefined> {
     if (!buildCacheContext.projectBuildCache) {
-      const { cacheDisabledReason, operationSettings, projectChangeAnalyzer, getCacheEntryId } =
-        buildCacheContext;
+      const { cacheDisabledReason } = buildCacheContext;
       if (cacheDisabledReason) {
         terminal.writeVerboseLine(cacheDisabledReason);
         return;
       }
 
+      const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
       if (!operationSettings || !buildCacheConfiguration) {
         // Unreachable, since this will have set `cacheDisabledReason`.
         return;
@@ -625,8 +620,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         terminal,
         configHash,
         projectChangeAnalyzer,
-        phaseName: phase.name,
-        getCacheEntryId
+        phaseName: phase.name
       });
     }
 
@@ -657,7 +651,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       return;
     }
 
-    const { operationSettings, projectChangeAnalyzer, getCacheEntryId } = buildCacheContext;
+    const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
 
     const projectOutputFolderNames: ReadonlyArray<string> = operationSettings?.outputFolderNames ?? [];
     const additionalProjectOutputFilePaths: ReadonlyArray<string> =
@@ -689,8 +683,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       terminal,
       configHash,
       projectChangeAnalyzer,
-      phaseName: phase.name,
-      getCacheEntryId
+      phaseName: phase.name
     });
 
     // eslint-disable-next-line require-atomic-updates -- This is guaranteed to not be concurrent

@@ -63,8 +63,8 @@ export class BuildCacheConfiguration {
     readonly buildCacheEnabled: boolean;
     cacheWriteEnabled: boolean;
     readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
-    readonly defaultGetCacheEntryId: GetCacheEntryIdFunction;
     static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string;
+    readonly getCacheEntryId: GetCacheEntryIdFunction;
     static loadAndRequireEnabledAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration>;
     readonly localCacheProvider: FileSystemBuildCacheProvider;
     static tryLoadAsync(terminal: ITerminal, rushConfiguration: RushConfiguration, rushSession: RushSession): Promise<BuildCacheConfiguration | undefined>;
@@ -723,7 +723,6 @@ export interface _IRushProjectJson {
     incrementalBuildIgnoredGlobs?: string[];
     // (undocumented)
     operationSettings?: IOperationSettings[];
-    projectCacheEntryNamePattern?: string;
 }
 
 // @beta (undocumented)
@@ -1311,7 +1310,6 @@ export class RushProjectConfiguration {
     readonly incrementalBuildIgnoredGlobs: ReadonlyArray<string>;
     // (undocumented)
     readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
-    readonly overrideCacheEntryNamePattern: string | undefined;
     // (undocumented)
     readonly project: RushConfigurationProject;
     static tryLoadForProjectAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<RushProjectConfiguration | undefined>;
