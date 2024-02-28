@@ -12,6 +12,7 @@ import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
@@ -369,23 +370,6 @@ export interface ICobuildLockProvider {
     setCompletedStateAsync(context: Readonly<ICobuildContext>, state: ICobuildCompletedState): Promise<void>;
 }
 
-// @beta
-export interface ICommandLineParameter {
-    readonly description: string;
-    readonly kind: string;
-    readonly longName?: string;
-    readonly required?: boolean;
-    readonly shortName?: string;
-}
-
-// @beta
-export interface ICommandLineSpec {
-    // (undocumented)
-    actionName: string;
-    // (undocumented)
-    parameters: ICommandLineParameter[];
-}
-
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -711,6 +695,24 @@ export interface _IRawRepoState {
 // @beta
 export interface IRushCommand {
     readonly actionName: string;
+}
+
+// @beta
+export interface IRushCommandLineAction {
+    // (undocumented)
+    actionName: string;
+    // (undocumented)
+    parameters: IRushCommandLineParameter[];
+}
+
+// @beta
+export interface IRushCommandLineParameter {
+    readonly description: string;
+    readonly environmentVariable?: string;
+    readonly kind: keyof typeof CommandLineParameterKind;
+    readonly longName: string;
+    readonly required?: boolean;
+    readonly shortName?: string;
 }
 
 // @beta (undocumented)
@@ -1059,7 +1061,7 @@ export class Rush {
 // @beta
 export class RushCommandLine {
     // (undocumented)
-    static getSpec(workspaceFolder: string): ICommandLineSpec[];
+    static getSpec(workspaceFolder: string): IRushCommandLineAction[];
 }
 
 // @public
