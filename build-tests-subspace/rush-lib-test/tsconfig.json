@@ -3,20 +3,23 @@
 
   "compilerOptions": {
     "outDir": "lib",
+    "rootDir": "src",
+
+    "module": "commonjs",
+    "target": "es2017",
+    "lib": ["es2017"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
+    "declarationMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "types": ["node"],
-
-    "module": "commonjs",
-    "target": "es6",
-    "lib": ["es5", "es2015.collection", "es2015.iterable", "es2015.promise"]
+    "noUnusedLocals": true,
+    "types": ["node"]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "lib"]
+
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

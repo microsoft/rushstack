@@ -830,31 +830,20 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: file:../../apps/heft
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
       local-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
+        version: file:../../rigs/local-node-rig
     dependenciesMeta:
       '@microsoft/rush-lib':
         injected: true
       '@rushstack/heft':
         injected: true
-      '@rushstack/heft-lint-plugin':
-        injected: true
-      '@rushstack/heft-typescript-plugin':
-        injected: true
       '@rushstack/terminal':
+        injected: true
+      local-node-rig:
         injected: true
 
   ../../build-tests-subspace/rush-sdk-test:
@@ -872,31 +861,20 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: file:../../apps/heft
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
       local-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/local-node-rig
-      typescript:
-        specifier: ~5.3.3
-        version: 5.3.3
+        version: file:../../rigs/local-node-rig
     dependenciesMeta:
       '@microsoft/rush-lib':
         injected: true
       '@rushstack/heft':
         injected: true
-      '@rushstack/heft-lint-plugin':
-        injected: true
-      '@rushstack/heft-typescript-plugin':
-        injected: true
       '@rushstack/rush-sdk':
+        injected: true
+      local-node-rig:
         injected: true
 
   ../../build-tests-subspace/typescript-newest-test:
@@ -907,21 +885,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: file:../../apps/heft
-      '@rushstack/heft-lint-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.5)
-      '@rushstack/heft-typescript-plugin':
-        specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.5)
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
       local-node-rig:
         specifier: workspace:*
-        version: link:../../rigs/local-node-rig
-      tslint:
-        specifier: ~5.20.1
-        version: 5.20.1(typescript@5.3.3)
+        version: file:../../rigs/local-node-rig
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -930,9 +899,7 @@ importers:
         injected: true
       '@rushstack/heft':
         injected: true
-      '@rushstack/heft-lint-plugin':
-        injected: true
-      '@rushstack/heft-typescript-plugin':
+      local-node-rig:
         injected: true
 
   ../../build-tests-subspace/typescript-v4-test:
@@ -1927,7 +1894,7 @@ importers:
         version: 29.5.12
       '@types/node':
         specifier: ts4.9
-        version: 20.11.20
+        version: 20.11.21
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
@@ -11900,8 +11867,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.11.20:
-    resolution: {integrity: sha512-7/rR21OS+fq8IyHTgtLkDK949uzsa6n8BkziAKtPVpugIkO6D+/ooXMvzXxDnZrmtXVfjb1bKQafYpb8s89LOg==}
+  /@types/node@20.11.21:
+    resolution: {integrity: sha512-/ySDLGscFPNasfqStUuWWPfL78jompfIoVzLJPVVAHBh6rpG68+pI2Gk+fNLeI8/f1yPYL4s46EleVIc20F1Ow==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -19404,7 +19371,6 @@ packages:
       strip-ansi: 5.2.0
       uuid: 8.3.2
       xml: 1.0.1
-    dev: false
 
   /jest-leak-detector@29.7.0:
     resolution: {integrity: sha512-kYA8IJcSYtST2BY9I+SMC32nDpBT3J2NvWJx8+JCuCdl/CR1I4EKUJROiP8XtCcxqgTTBGJNdbB1A8XRKbTetw==}
@@ -26736,7 +26702,6 @@ packages:
 
   /xml@1.0.1:
     resolution: {integrity: sha512-huCv9IH9Tcf95zuYCsQraZtWnJvBtLVE0QHMOs8bWyZAFZNDcYjsPq1nEx8jKA9y+Beo9v+7OBPRisQTjinQMw==}
-    dev: false
 
   /xmlbuilder@11.0.1:
     resolution: {integrity: sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==}
@@ -27095,3 +27060,20 @@ packages:
       '@types/node': 18.17.15
       supports-color: 8.1.1
     dev: false
+
+  file:../../rigs/local-node-rig:
+    resolution: {directory: ../../rigs/local-node-rig, type: directory}
+    name: local-node-rig
+    dependencies:
+      '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 18.17.15
+      eslint: 8.7.0(supports-color@8.1.1)
+      jest-junit: 12.3.0
+      local-eslint-config: link:../../eslint/local-eslint-config
+      typescript: 5.3.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
