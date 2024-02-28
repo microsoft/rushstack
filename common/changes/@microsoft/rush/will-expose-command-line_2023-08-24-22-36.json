@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Introduce a `RushCommandLineAPI` class that exposes an object representing the skeleton of the Rush command-line.",
+      "comment": "Introduce a `RushCommandLine` API that exposes an object representing the skeleton of the Rush command-line.",
       "type": "none"
     }
   ],
