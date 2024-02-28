@@ -715,6 +715,12 @@ export interface IRushCommandLineParameter {
     readonly shortName?: string;
 }
 
+// @beta
+export interface IRushCommandLineSpec {
+    // (undocumented)
+    actions: IRushCommandLineAction[];
+}
+
 // @beta (undocumented)
 export interface IRushPlugin {
     // (undocumented)
@@ -1061,7 +1067,7 @@ export class Rush {
 // @beta
 export class RushCommandLine {
     // (undocumented)
-    static getSpec(workspaceFolder: string): IRushCommandLineAction[];
+    static getCliSpec(rushJsonFolder: string): IRushCommandLineSpec;
 }
 
 // @public

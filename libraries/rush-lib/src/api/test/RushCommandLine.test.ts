@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+
 import { RushCommandLine } from '../RushCommandLine';
 
 describe(RushCommandLine.name, () => {
   it(`Returns a spec`, async () => {
-    const spec = RushCommandLine.getSpec(path.resolve(__dirname, '../../cli/test/repo/'));
+    const spec = RushCommandLine.getCliSpec(path.resolve(__dirname, '../../cli/test/repo/'));
     expect(spec).toMatchSnapshot();
   });
 });

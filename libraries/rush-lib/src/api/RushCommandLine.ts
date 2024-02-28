@@ -6,7 +6,7 @@ import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 
 /**
- * Information about the available parameters associated with a rush action
+ * Information about the available parameters associated with a Rush action
  *
  * @beta
  */
@@ -43,7 +43,7 @@ export interface IRushCommandLineParameter {
 }
 
 /**
- * The full spec of an available rush command line action
+ * The full spec of an available Rush command line action
  *
  * @beta
  */
@@ -52,7 +52,16 @@ export interface IRushCommandLineAction {
   parameters: IRushCommandLineParameter[];
 }
 
-const _workspaceCommandLineMap: Map<string, IRushCommandLineAction[]> = new Map();
+/**
+ * The full spec of a Rush CLI
+ *
+ * @beta
+ */
+export interface IRushCommandLineSpec {
+  actions: IRushCommandLineAction[];
+}
+
+const _commandLineSpecByWorkspaceFolder: Map<string, IRushCommandLineSpec> = new Map();
 
 /**
  * Information about the available CLI commands
@@ -60,14 +69,14 @@ const _workspaceCommandLineMap: Map<string, IRushCommandLineAction[]> = new Map(
  * @beta
  */
 export class RushCommandLine {
-  public static getSpec(workspaceFolder: string): IRushCommandLineAction[] {
-    let result: IRushCommandLineAction[] | undefined = _workspaceCommandLineMap.get(workspaceFolder);
+  public static getCliSpec(rushJsonFolder: string): IRushCommandLineSpec {
+    let result: IRushCommandLineSpec | undefined = _commandLineSpecByWorkspaceFolder.get(rushJsonFolder);
 
     if (!result) {
-      const commandLineParser: RushCommandLineParser = new RushCommandLineParser({ cwd: workspaceFolder });
+      const commandLineParser: RushCommandLineParser = new RushCommandLineParser({ cwd: rushJsonFolder });
 
       // extract the set of command line elements from the command line parser
-      result = [];
+      const actions: IRushCommandLineAction[] = [];
       for (const { actionName, parameters: rawParameters } of commandLineParser.actions) {
         const parameters: IRushCommandLineParameter[] = [];
         for (const {
@@ -88,13 +97,14 @@ export class RushCommandLine {
           });
         }
 
-        result.push({
+        actions.push({
           actionName,
           parameters
         });
       }
 
-      _workspaceCommandLineMap.set(workspaceFolder, result);
+      result = { actions };
+      _commandLineSpecByWorkspaceFolder.set(rushJsonFolder, result);
     }
 
     return result;
