@@ -287,7 +287,7 @@ describe(OperationExecutionManager.name, () => {
         const run: ExecuteAsyncMock = jest.fn(
           async (context: IOperationRunnerContext): Promise<OperationStatus> => {
             ++concurrency;
-            await Async.sleep(1);
+            await Async.sleep(0);
             if (concurrency > maxConcurrency) {
               maxConcurrency = concurrency;
             }
