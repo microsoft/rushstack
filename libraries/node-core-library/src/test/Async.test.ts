@@ -42,7 +42,7 @@ describe(Async.name, () => {
 
       const fn: (item: number) => Promise<string> = async (item) => {
         running++;
-        await Async.sleep(1);
+        await Async.sleep(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
         return `result ${item}`;
@@ -137,7 +137,7 @@ describe(Async.name, () => {
 
       const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(1);
+        await Async.sleep(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -155,7 +155,7 @@ describe(Async.name, () => {
 
       const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
         running++;
-        await Async.sleep(1);
+        await Async.sleep(0);
         maxRunning = Math.max(maxRunning, running);
         running--;
       });
@@ -171,14 +171,14 @@ describe(Async.name, () => {
         array.push(i);
       }
 
-      await Async.forEachAsync(array, async () => await Async.sleep(1), { concurrency: 3 });
+      await Async.forEachAsync(array, async () => await Async.sleep(0), { concurrency: 3 });
     });
 
     it('rejects if any operation rejects', async () => {
       const array: number[] = [1, 2, 3];
 
       const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
-        await Async.sleep(1);
+        await Async.sleep(0);
         if (item === 3) throw new Error('Something broke');
       });
 
@@ -223,7 +223,7 @@ describe(Async.name, () => {
       };
 
       await expect(() =>
-        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
       ).rejects.toThrow(expectedError);
     });
 
@@ -245,7 +245,7 @@ describe(Async.name, () => {
       };
 
       await expect(() =>
-        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
       ).rejects.toThrow(expectedError);
     });
 
@@ -285,7 +285,7 @@ describe(Async.name, () => {
       );
 
       // Wait for all the instant resolutions to be done
-      await Async.sleep(1);
+      await Async.sleep(0);
       expect(waitingIterators).toEqual(expectedConcurrency);
       resolve2({ done: true, value: undefined });
       await finalPromise;
@@ -309,7 +309,7 @@ describe(Async.name, () => {
       };
 
       await expect(() =>
-        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(0))
       ).rejects.toThrow(expectedError);
     });
   });
@@ -516,7 +516,7 @@ describe(AsyncQueue.name, () => {
       queue,
       async ([item, callback]) => {
         // Add an async tick to ensure that the queue is actually running concurrently
-        await Async.sleep(1);
+        await Async.sleep(0);
         seenItems++;
         expect(expectedItems.has(item)).toBe(true);
         expectedItems.delete(item);
@@ -543,7 +543,7 @@ describe(AsyncQueue.name, () => {
       queue,
       async ([item, callback]) => {
         // Add an async tick to ensure that the queue is actually running concurrently
-        await Async.sleep(1);
+        await Async.sleep(0);
         seenItems++;
         if (item < 4) {
           expect(expectedItems.has(item)).toBe(true);
@@ -577,7 +577,7 @@ describe(AsyncQueue.name, () => {
       queue,
       async ([item, callback]) => {
         // Add an async tick to ensure that the queue is actually running concurrently
-        await Async.sleep(1);
+        await Async.sleep(0);
         seenItems++;
         if (item < 4) {
           expect(expectedItems.has(item)).toBe(true);
