@@ -27,6 +27,17 @@ import schemaJson from '../schemas/build-cache.schema.json';
 export interface IBaseBuildCacheJson {
   buildCacheEnabled: boolean;
   cacheProvider: string;
+  /**
+   * Used to specify the cache entry ID format. If this property is set, it must
+   * contain a `[hash]` token. It may also contain one of the following tokens:
+   * - `[projectName]`
+   * - `[projectName:normalize]`
+   * - `[phaseName]`
+   * - `[phaseName:normalize]`
+   * - `[phaseName:trimPrefix]`
+   * - `[os]`
+   * - `[arch]`
+   */
   cacheEntryNamePattern?: string;
 }
 

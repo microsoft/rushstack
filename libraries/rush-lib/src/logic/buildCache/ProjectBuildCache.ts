@@ -50,13 +50,22 @@ export class ProjectBuildCache {
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
-    const { buildCacheConfiguration, project, projectOutputFolderNames, additionalProjectOutputFilePaths } =
-      options;
+    const {
+      buildCacheConfiguration: {
+        localCacheProvider,
+        cloudCacheProvider,
+        buildCacheEnabled,
+        cacheWriteEnabled
+      },
+      project,
+      projectOutputFolderNames,
+      additionalProjectOutputFilePaths
+    } = options;
     this._project = project;
-    this._localBuildCacheProvider = buildCacheConfiguration.localCacheProvider;
-    this._cloudBuildCacheProvider = buildCacheConfiguration.cloudCacheProvider;
-    this._buildCacheEnabled = buildCacheConfiguration.buildCacheEnabled;
-    this._cacheWriteEnabled = buildCacheConfiguration.cacheWriteEnabled;
+    this._localBuildCacheProvider = localCacheProvider;
+    this._cloudBuildCacheProvider = cloudCacheProvider;
+    this._buildCacheEnabled = buildCacheEnabled;
+    this._cacheWriteEnabled = cacheWriteEnabled;
     this._projectOutputFolderNames = projectOutputFolderNames || [];
     this._additionalProjectOutputFilePaths = additionalProjectOutputFilePaths || [];
     this._cacheId = cacheId;
@@ -366,7 +375,16 @@ export class ProjectBuildCache {
     return path.join(this._project.projectRushTempFolder, `${this._cacheId}.${mode}.log`);
   }
 
-  private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
+  private static async _getCacheId({
+    projectChangeAnalyzer,
+    project,
+    terminal,
+    projectOutputFolderNames,
+    configHash,
+    additionalContext,
+    phaseName,
+    buildCacheConfiguration: { getCacheEntryId }
+  }: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is
     //   calculated and appended to an array
@@ -379,15 +397,14 @@ export class ProjectBuildCache {
     //   3. Each dependency project hash (from the array constructed in previous steps),
     //      in sorted alphanumerical-sorted order
     // - A hex digest of the hash is returned
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = options.projectChangeAnalyzer;
     const projectStates: string[] = [];
     const projectsToProcess: Set<RushConfigurationProject> = new Set();
-    projectsToProcess.add(options.project);
+    projectsToProcess.add(project);
 
     for (const projectToProcess of projectsToProcess) {
       const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
         projectToProcess,
-        options.terminal
+        terminal
       );
       if (!projectState) {
         // If we hit any projects with unknown state, return unknown cache ID
@@ -405,20 +422,20 @@ export class ProjectBuildCache {
     // This value is used to force cache bust when the build cache algorithm changes
     hash.update(`${RushConstants.buildCacheVersion}`);
     hash.update(RushConstants.hashDelimiter);
-    const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
+    const serializedOutputFolders: string = JSON.stringify(projectOutputFolderNames);
     hash.update(serializedOutputFolders);
     hash.update(RushConstants.hashDelimiter);
-    hash.update(options.configHash);
+    hash.update(configHash);
     hash.update(RushConstants.hashDelimiter);
-    if (options.additionalContext) {
-      for (const key of Object.keys(options.additionalContext).sort()) {
+    if (additionalContext) {
+      for (const key of Object.keys(additionalContext).sort()) {
         // Add additional context keys and values.
         //
         // This choice (to modify the hash for every key regardless of whether a value is set) implies
         // that just _adding_ an env var to the list of dependsOnEnvVars will modify its hash. This
         // seems appropriate, because this behavior is consistent whether or not the env var happens
         // to have a value.
-        hash.update(`${key}=${options.additionalContext[key]}`);
+        hash.update(`${key}=${additionalContext[key]}`);
         hash.update(RushConstants.hashDelimiter);
       }
     }
@@ -429,10 +446,10 @@ export class ProjectBuildCache {
 
     const projectStateHash: string = hash.digest('hex');
 
-    return options.buildCacheConfiguration.getCacheEntryId({
-      projectName: options.project.packageName,
+    return getCacheEntryId({
+      projectName: project.packageName,
       projectStateHash,
-      phaseName: options.phaseName
+      phaseName
     });
   }
 }
