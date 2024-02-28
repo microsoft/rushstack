@@ -5,23 +5,32 @@ import type { ICommandLineChoiceDefinition } from './CommandLineDefinition';
 import { CommandLineParameter, CommandLineParameterKind } from './BaseClasses';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineChoiceParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.(defineChoiceParameter:2)}.
  * @public
  */
-export class CommandLineChoiceParameter extends CommandLineParameter {
+export interface IRequiredCommandLineChoiceParameter<TChoice extends string = string>
+  extends CommandLineChoiceParameter<TChoice> {
+  value: TChoice;
+}
+
+/**
+ * The data type returned by {@link CommandLineParameterProvider.(defineChoiceParameter:1)}.
+ * @public
+ */
+export class CommandLineChoiceParameter<TChoice extends string = string> extends CommandLineParameter {
   /** {@inheritDoc ICommandLineChoiceDefinition.alternatives} */
-  public readonly alternatives: ReadonlyArray<string>;
+  public readonly alternatives: ReadonlyArray<TChoice>;
 
   /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
-  public readonly defaultValue: string | undefined;
+  public readonly defaultValue: TChoice | undefined;
 
-  private _value: string | undefined = undefined;
+  private _value: TChoice | undefined = undefined;
 
   /** {@inheritDoc ICommandLineChoiceDefinition.completions} */
-  public readonly completions: (() => Promise<string[]>) | undefined;
+  public readonly completions: (() => Promise<TChoice[]>) | undefined;
 
   /** @internal */
-  public constructor(definition: ICommandLineChoiceDefinition) {
+  public constructor(definition: ICommandLineChoiceDefinition<TChoice>) {
     super(definition);
 
     if (definition.alternatives.length < 1) {
@@ -58,7 +67,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
       if (typeof data !== 'string') {
         this.reportInvalidData(data);
       }
-      this._value = data;
+      this._value = data as TChoice;
       return;
     }
 
@@ -66,14 +75,15 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
       // Try reading the environment variable
       const environmentValue: string | undefined = process.env[this.environmentVariable];
       if (environmentValue !== undefined && environmentValue !== '') {
-        if (this.alternatives.indexOf(environmentValue) < 0) {
+        if (!this.alternatives.includes(environmentValue as TChoice)) {
           const choices: string = '"' + this.alternatives.join('", "') + '"';
           throw new Error(
             `Invalid value "${environmentValue}" for the environment variable` +
               ` ${this.environmentVariable}.  Valid choices are: ${choices}`
           );
         }
-        this._value = environmentValue;
+
+        this._value = environmentValue as TChoice;
         return;
       }
     }
@@ -105,7 +115,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
    * The return value will be `undefined` if the command-line has not been parsed yet,
    * or if the parameter was omitted and has no default value.
    */
-  public get value(): string | undefined {
+  public get value(): TChoice | undefined {
     return this._value;
   }
 

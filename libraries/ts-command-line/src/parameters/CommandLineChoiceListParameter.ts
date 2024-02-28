@@ -9,17 +9,17 @@ import { EnvironmentVariableParser } from './EnvironmentVariableParser';
  * The data type returned by {@link CommandLineParameterProvider.defineChoiceListParameter}.
  * @public
  */
-export class CommandLineChoiceListParameter extends CommandLineParameter {
+export class CommandLineChoiceListParameter<TChoice extends string = string> extends CommandLineParameter {
   /** {@inheritDoc ICommandLineChoiceListDefinition.alternatives} */
-  public readonly alternatives: ReadonlyArray<string>;
+  public readonly alternatives: ReadonlyArray<TChoice>;
 
-  private _values: string[] = [];
+  private _values: TChoice[] = [];
 
   /** {@inheritDoc ICommandLineChoiceListDefinition.completions} */
-  public readonly completions: (() => Promise<string[]>) | undefined;
+  public readonly completions: (() => Promise<TChoice[]>) | undefined;
 
   /** @internal */
-  public constructor(definition: ICommandLineChoiceListDefinition) {
+  public constructor(definition: ICommandLineChoiceListDefinition<TChoice>) {
     super(definition);
 
     if (definition.alternatives.length < 1) {
@@ -61,7 +61,7 @@ export class CommandLineChoiceListParameter extends CommandLineParameter {
       const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
       if (values) {
         for (const value of values) {
-          if (this.alternatives.indexOf(value) < 0) {
+          if (!this.alternatives.includes(value as TChoice)) {
             const choices: string = '"' + this.alternatives.join('", "') + '"';
             throw new Error(
               `Invalid value "${value}" for the environment variable` +
@@ -69,7 +69,8 @@ export class CommandLineChoiceListParameter extends CommandLineParameter {
             );
           }
         }
-        this._values = values;
+
+        this._values = values as TChoice[];
         return;
       }
     }
@@ -86,7 +87,7 @@ export class CommandLineChoiceListParameter extends CommandLineParameter {
    * The array will be empty if the command-line has not been parsed yet,
    * or if the parameter was omitted and has no default value.
    */
-  public get values(): ReadonlyArray<string> {
+  public get values(): ReadonlyArray<TChoice> {
     return this._values;
   }
 

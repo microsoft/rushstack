@@ -28,11 +28,11 @@ export class InspectAction extends BaseReportAction {
   protected async onExecute(): Promise<void> {
     const rundown: Rundown = new Rundown();
     await rundown.invokeAsync(
-      this.scriptParameter.value!,
+      this.scriptParameter.value,
       this.argsParameter.value,
-      this.quietParameter.value!!,
-      this.ignoreExitCodeParameter.value!!
+      this.quietParameter.value,
+      this.ignoreExitCodeParameter.value
     );
-    rundown.writeInspectReport(this._traceParameter.value!!);
+    rundown.writeInspectReport(this._traceParameter.value);
   }
 }
