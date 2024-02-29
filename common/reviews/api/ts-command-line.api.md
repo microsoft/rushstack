@@ -119,7 +119,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
 export abstract class CommandLineParameter {
     // @internal
     constructor(definition: IBaseCommandLineDefinition);
-    readonly allowNonStandardEnvironmentVariable: boolean | undefined;
+    readonly allowNonStandardEnvironmentVariableNames: boolean | undefined;
     abstract appendToArgList(argList: string[]): void;
     readonly description: string;
     readonly environmentVariable: string | undefined;
