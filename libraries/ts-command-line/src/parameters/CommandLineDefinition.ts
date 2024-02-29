@@ -81,7 +81,8 @@ export interface IBaseCommandLineDefinition {
   environmentVariable?: string;
 
   /**
-   * Allows for the use of non-standardized environment variable names. This disables
+   * Allows for the use of environment variable names that do not conform to the standard
+   * described by the Shell and Utilities volume of IEEE Std 1003.1-2001. This disables
    * the validation that is performed on the provided
    * {@link IBaseCommandLineDefinition.environmentVariable} value by default.
    *
