@@ -12,6 +12,7 @@ import { AsyncSeriesHook } from 'tapable';
 import { AsyncSeriesWaterfallHook } from 'tapable';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/terminal';
@@ -703,6 +704,30 @@ export interface IRushCommand {
     readonly actionName: string;
 }
 
+// @beta
+export interface IRushCommandLineAction {
+    // (undocumented)
+    actionName: string;
+    // (undocumented)
+    parameters: IRushCommandLineParameter[];
+}
+
+// @beta
+export interface IRushCommandLineParameter {
+    readonly description: string;
+    readonly environmentVariable?: string;
+    readonly kind: keyof typeof CommandLineParameterKind;
+    readonly longName: string;
+    readonly required?: boolean;
+    readonly shortName?: string;
+}
+
+// @beta
+export interface IRushCommandLineSpec {
+    // (undocumented)
+    actions: IRushCommandLineAction[];
+}
+
 // @beta (undocumented)
 export interface IRushPlugin {
     // (undocumented)
@@ -1055,6 +1080,12 @@ export class Rush {
     // @internal (undocumented)
     static get _rushLibPackageJson(): IPackageJson;
     static get version(): string;
+}
+
+// @beta
+export class RushCommandLine {
+    // (undocumented)
+    static getCliSpec(rushJsonFolder: string): IRushCommandLineSpec;
 }
 
 // @public
