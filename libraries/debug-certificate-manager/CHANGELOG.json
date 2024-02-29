@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.3.33",
+      "tag": "@rushstack/debug-certificate-manager_v1.3.33",
+      "date": "Thu, 29 Feb 2024 07:11:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.32",
       "tag": "@rushstack/debug-certificate-manager_v1.3.32",
       "date": "Wed, 28 Feb 2024 16:09:27 GMT",

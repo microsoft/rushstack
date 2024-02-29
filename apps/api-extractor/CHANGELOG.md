@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 28 Feb 2024 16:09:27 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Feb 2024 07:11:45 GMT and should not be manually modified.
+
+## 7.42.0
+Thu, 29 Feb 2024 07:11:45 GMT
+
+### Minor changes
+
+- Add glob support in `bundledPackages`
+
+### Patches
+
+- Don't mark items documented with {@inheritDoc} references to package-external items as "undocumented"
 
 ## 7.41.1
 Wed, 28 Feb 2024 16:09:27 GMT

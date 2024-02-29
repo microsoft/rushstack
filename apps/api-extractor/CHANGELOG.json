@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.42.0",
+      "tag": "@microsoft/api-extractor_v7.42.0",
+      "date": "Thu, 29 Feb 2024 07:11:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Don't mark items documented with {@inheritDoc} references to package-external items as \"undocumented\""
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add glob support in `bundledPackages`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.41.1",
       "tag": "@microsoft/api-extractor_v7.41.1",
       "date": "Wed, 28 Feb 2024 16:09:27 GMT",

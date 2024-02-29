@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.11.17",
+      "tag": "@rushstack/heft-jest-plugin_v0.11.17",
+      "date": "Thu, 29 Feb 2024 07:11:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.65.6` to `0.65.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.16",
       "tag": "@rushstack/heft-jest-plugin_v0.11.16",
       "date": "Wed, 28 Feb 2024 16:09:27 GMT",
