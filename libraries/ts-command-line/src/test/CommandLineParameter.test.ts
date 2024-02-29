@@ -195,7 +195,7 @@ describe(CommandLineParameter.name, () => {
       'second'
     ];
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -238,7 +238,7 @@ describe(CommandLineParameter.name, () => {
     const action: CommandLineAction = commandLineParser.getAction('do:the-job');
     const args: string[] = ['do:the-job', '--integer-required', '123'];
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -302,7 +302,7 @@ describe(CommandLineParameter.name, () => {
     process.env.ENV_STRING_LIST = 'simple text';
     process.env.ENV_JSON_STRING_LIST = ' [ 1, true, "Hello, world!" ] ';
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -326,7 +326,7 @@ describe(CommandLineParameter.name, () => {
       '6'
     ];
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
