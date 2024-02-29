@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Remove naming restrictions on environment variables searched by parameters",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}
