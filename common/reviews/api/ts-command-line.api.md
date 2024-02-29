@@ -119,6 +119,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
 export abstract class CommandLineParameter {
     // @internal
     constructor(definition: IBaseCommandLineDefinition);
+    readonly allowNonStandardEnvironmentVariableNames: boolean | undefined;
     abstract appendToArgList(argList: string[]): void;
     readonly description: string;
     readonly environmentVariable: string | undefined;
@@ -301,6 +302,7 @@ export interface IAliasCommandLineActionOptions {
 
 // @public
 export interface IBaseCommandLineDefinition {
+    allowNonStandardEnvironmentVariableNames?: boolean;
     description: string;
     environmentVariable?: string;
     parameterGroup?: string | typeof SCOPING_PARAMETER_GROUP;

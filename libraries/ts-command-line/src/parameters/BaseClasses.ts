@@ -91,6 +91,9 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
 
+  /** {@inheritDoc IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames} */
+  public readonly allowNonStandardEnvironmentVariableNames: boolean | undefined;
+
   /** {@inheritDoc IBaseCommandLineDefinition.undocumentedSynonyms } */
   public readonly undocumentedSynonyms: string[] | undefined;
 
@@ -143,7 +146,10 @@ export abstract class CommandLineParameter {
         );
       }
 
-      if (!ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)) {
+      if (
+        !this.allowNonStandardEnvironmentVariableNames &&
+        !ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)
+      ) {
         throw new Error(
           `Invalid environment variable name: "${this.environmentVariable}". The name must` +
             ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`
