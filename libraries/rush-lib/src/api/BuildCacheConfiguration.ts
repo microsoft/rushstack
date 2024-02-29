@@ -37,6 +37,9 @@ export interface IBaseBuildCacheJson {
    * - `[phaseName:trimPrefix]`
    * - `[os]`
    * - `[arch]`
+   * @privateRemarks
+   * NOTE: If you update this comment, make sure to update build-cache.json in the "rush init" template.
+   * The token parser is in CachEntryId.ts
    */
   cacheEntryNamePattern?: string;
 }

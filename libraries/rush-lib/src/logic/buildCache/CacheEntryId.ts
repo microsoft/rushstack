@@ -30,6 +30,8 @@ export interface IGenerateCacheEntryIdOptions {
  */
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
+// NOTE: When adding new tokens, make sure to document the syntax in the "rush init"
+// template for build-cache.json
 const HASH_TOKEN_NAME: 'hash' = 'hash';
 const PROJECT_NAME_TOKEN_NAME: 'projectName' = 'projectName';
 const PHASE_NAME_TOKEN_NAME: 'phaseName' = 'phaseName';

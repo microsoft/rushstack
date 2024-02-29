@@ -24,11 +24,13 @@
    * a [hash] token.
    *
    * Other available tokens:
-   *  - [projectName]
-   *  - [projectName:normalize]
-   *  - [phaseName]
-   *  - [phaseName:normalize]
-   *  - [phaseName:trimPrefix]
+   *  - [projectName]             Example: "@my-scope/my-project"
+   *  - [projectName:normalize]   Example: "my-scope+my-project"
+   *  - [phaseName]               Example: "_phase:test/api"
+   *  - [phaseName:normalize]     Example: "_phase:test+api"
+   *  - [phaseName:trimPrefix]    Example: "test/api"
+   *  - [os]                      Example: "win32"
+   *  - [arch]                    Example: "x64"
    */
   // "cacheEntryNamePattern": "[projectName:normalize]-[phaseName:normalize]-[hash]"
 
