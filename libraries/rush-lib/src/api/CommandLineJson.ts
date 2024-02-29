@@ -29,6 +29,7 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   allowWarningsInSuccessfulBuild?: boolean;
   watchForChanges?: boolean;
   disableBuildCache?: boolean;
+  defaultCommand?: string;
 }
 
 /**
@@ -39,6 +40,7 @@ export interface IPhasedCommandWithoutPhasesJson extends IBaseCommandJson {
   commandKind: 'phased';
   enableParallelism: boolean;
   incremental?: boolean;
+  defaultCommand?: string;
 }
 
 /**

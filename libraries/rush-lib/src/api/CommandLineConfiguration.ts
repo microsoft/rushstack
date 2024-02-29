@@ -87,6 +87,16 @@ export interface IPhase {
    * values will be appended to the end of this string.
    */
   shellCommand?: string;
+
+  /**
+   * (Optional) If the `defaultCommand` field is set for a bulk command, when Rush can't find the package.json `"scripts"` entry
+   * matching Rush command/phase name, it will fall back to this command.
+   *
+   * This string is the path to a script that will be invoked using the OS shell. The working directory will be
+   * the folder that contains rush.json.  If custom parameters are associated with this command, their
+   * values will be appended to the end of this string.
+   */
+  defaultCommand?: string;
 }
 
 export interface ICommandWithParameters {
@@ -695,7 +705,8 @@ export class CommandLineConfiguration {
       },
       missingScriptBehavior: command.ignoreMissingScript ? 'log' : 'error',
       allowWarningsOnSuccess: !!command.allowWarningsInSuccessfulBuild,
-      shellCommand: command.shellCommand
+      shellCommand: command.shellCommand,
+      defaultCommand: command.defaultCommand
     };
 
     if (!command.ignoreDependencyOrder) {
