@@ -49,8 +49,9 @@ export interface IBaseCommandLineDefinition {
    *
    * @remarks
    * The environment variable name must consist only of upper-case letters, numbers,
-   * and underscores. It may not start with a number. To disable this validation, you
-   * must set `{@link IBaseCommandLineDefinition.allowNonStandardEnvironmentVariable}`
+   * and underscores. It may not start with a number. To disable this validation, set
+   * `{@link IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames}`
+   * to `true`.
    * to `true`.
    *
    * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
@@ -91,7 +92,7 @@ export interface IBaseCommandLineDefinition {
    * while on Linux, environment variable names are case-sensitive. It is recommended that
    * this option be used only when necessary based on environmental constraints.
    */
-  allowNonStandardEnvironmentVariable?: boolean;
+  allowNonStandardEnvironmentVariableNames?: boolean;
 
   /**
    * Specifies additional names for this parameter that are accepted but not displayed

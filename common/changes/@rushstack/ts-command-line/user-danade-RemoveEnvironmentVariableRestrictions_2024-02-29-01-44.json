@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/ts-command-line",
-      "comment": "Add an \"allowNonStandardEnvironmentVariable\" option to remove naming restrictions on parameter environment variables",
+      "comment": "Add an \"allowNonStandardEnvironmentVariableNames\" option to remove naming restrictions on parameter environment variables",
       "type": "patch"
     }
   ],

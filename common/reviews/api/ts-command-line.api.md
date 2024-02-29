@@ -302,7 +302,7 @@ export interface IAliasCommandLineActionOptions {
 
 // @public
 export interface IBaseCommandLineDefinition {
-    allowNonStandardEnvironmentVariable?: boolean;
+    allowNonStandardEnvironmentVariableNames?: boolean;
     description: string;
     environmentVariable?: string;
     parameterGroup?: string | typeof SCOPING_PARAMETER_GROUP;

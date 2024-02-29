@@ -91,8 +91,8 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
 
-  /** {@inheritDoc IBaseCommandLineDefinition.allowNonStandardEnvironmentVariable} */
-  public readonly allowNonStandardEnvironmentVariable: boolean | undefined;
+  /** {@inheritDoc IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames} */
+  public readonly allowNonStandardEnvironmentVariableNames: boolean | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.undocumentedSynonyms } */
   public readonly undocumentedSynonyms: string[] | undefined;
@@ -147,7 +147,7 @@ export abstract class CommandLineParameter {
       }
 
       if (
-        !this.allowNonStandardEnvironmentVariable &&
+        !this.allowNonStandardEnvironmentVariableNames &&
         !ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)
       ) {
         throw new Error(
