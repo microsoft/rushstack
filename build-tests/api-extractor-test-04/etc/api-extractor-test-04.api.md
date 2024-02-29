@@ -110,5 +110,7 @@ export enum RegularEnum {
 // @beta
 export const variableDeclaration: string;
 
+// @public (undocumented)
+export const variableFromArbitraryExtensionModule: string;
 
 ```

@@ -19,6 +19,10 @@ fsx.emptyDirSync('temp');
 // Run the TypeScript compiler
 executeCommand('node node_modules/typescript/lib/tsc');
 
+// Copy the arbitraryExtensionModule.d.xyz.ts declaration file to lib
+console.log(`==> Copying arbitraryExtensionModule.d.xyz.ts to lib`);
+fsx.copySync('src/arbitraryExtensionModule.d.xyz.ts', 'lib/arbitraryExtensionModule.d.xyz.ts');
+
 // Run the API Extractor command-line
 if (process.argv.indexOf('--production') >= 0) {
   executeCommand('node node_modules/@microsoft/api-extractor/lib/start run');
