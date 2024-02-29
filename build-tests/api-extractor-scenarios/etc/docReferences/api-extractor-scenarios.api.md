@@ -23,7 +23,7 @@ export namespace MyNamespace {
     }
 }
 
-// @public (undocumented)
+// @public
 export function succeedForNow(): void;
 
 // @public

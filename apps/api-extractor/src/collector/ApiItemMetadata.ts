@@ -75,7 +75,19 @@ export class ApiItemMetadata {
    */
   public tsdocComment: tsdoc.DocComment | undefined;
 
-  // Assigned by DocCommentEnhancer
+  /**
+   * Tracks whether or not the associated API item is known to be missing sufficient documentation.
+   *
+   * @remarks
+   *
+   * An "undocumented" item is one whose TSDoc comment which either does not contain a summary comment block, or
+   * has an `@inheritDoc` tag that resolves to another "undocumented" API member.
+   *
+   * If there is any ambiguity (e.g. if an `@inheritDoc` comment points to an external API member, whose documentation,
+   * we can't parse), "undocumented" will be `false`.
+   *
+   * @remarks Assigned by {@link DocCommentEnhancer}.
+   */
   public undocumented: boolean = true;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
