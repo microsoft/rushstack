@@ -47,6 +47,14 @@ const SHORT_NAME_REGEXP: RegExp = /^-[a-zA-Z]$/;
 const SCOPE_REGEXP: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
+ * "Environment variable names used by the utilities in the Shell and Utilities volume of
+ * IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
+ * from the characters defined in Portable Character Set and do not begin with a digit."
+ * Example: "THE_SETTING"
+ */
+const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
+
+/**
  * The base class for the various command-line parameter types.
  * @public
  */
@@ -82,6 +90,9 @@ export abstract class CommandLineParameter {
 
   /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
+
+  /** {@inheritDoc IBaseCommandLineDefinition.allowNonStandardEnvironmentVariable} */
+  public readonly allowNonStandardEnvironmentVariable: boolean | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.undocumentedSynonyms } */
   public readonly undocumentedSynonyms: string[] | undefined;
@@ -132,6 +143,16 @@ export abstract class CommandLineParameter {
         throw new Error(
           `An "environmentVariable" cannot be specified for "${this.longName}"` +
             ` because it is a required parameter`
+        );
+      }
+
+      if (
+        !this.allowNonStandardEnvironmentVariable &&
+        !ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)
+      ) {
+        throw new Error(
+          `Invalid environment variable name: "${this.environmentVariable}". The name must` +
+            ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`
         );
       }
     }
