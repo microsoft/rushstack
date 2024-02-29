@@ -76,6 +76,9 @@ importers:
       lodash:
         specifier: ~4.17.15
         version: 4.17.21
+      minimatch:
+        specifier: ~3.0.3
+        version: 3.0.8
       resolve:
         specifier: ~1.22.1
         version: 1.22.8
@@ -101,6 +104,9 @@ importers:
       '@types/lodash':
         specifier: 4.14.116
         version: 4.14.116
+      '@types/minimatch':
+        specifier: 3.0.5
+        version: 3.0.5
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
@@ -1071,7 +1077,47 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
+  ../../build-tests/api-extractor-lib4-test:
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@types/jest':
+        specifier: 29.2.5
+        version: 29.2.5
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      fs-extra:
+        specifier: ~7.0.1
+        version: 7.0.1
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+
+  ../../build-tests/api-extractor-lib5-test:
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: workspace:*
+        version: link:../../apps/api-extractor
+      '@types/jest':
+        specifier: 29.2.5
+        version: 29.2.5
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
+      fs-extra:
+        specifier: ~7.0.1
+        version: 7.0.1
+      typescript:
+        specifier: ~5.3.3
+        version: 5.3.3
+
   ../../build-tests/api-extractor-scenarios:
+    dependencies:
+      api-extractor-lib1-test:
+        specifier: workspace:*
+        version: link:../api-extractor-lib1-test
     devDependencies:
       '@microsoft/api-extractor':
         specifier: workspace:*
@@ -1088,15 +1134,21 @@ importers:
       '@rushstack/terminal':
         specifier: workspace:*
         version: link:../../libraries/terminal
-      api-extractor-lib1-test:
-        specifier: workspace:*
-        version: link:../api-extractor-lib1-test
       api-extractor-lib2-test:
         specifier: workspace:*
         version: link:../api-extractor-lib2-test
       api-extractor-lib3-test:
         specifier: workspace:*
         version: link:../api-extractor-lib3-test
+      api-extractor-lib4-test:
+        specifier: workspace:*
+        version: link:../api-extractor-lib4-test
+      api-extractor-lib5-test:
+        specifier: workspace:*
+        version: link:../api-extractor-lib5-test
+      colors:
+        specifier: ~1.2.1
+        version: 1.2.5
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig

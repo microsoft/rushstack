@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * api-extractor-lib3-test
+ * api-extractor-lib4-test
  *
  * @remarks
  * This library is consumed by api-extractor-scenarios.
@@ -10,9 +10,9 @@
  * @packageDocumentation
  */
 
-export { Lib1Class } from 'api-extractor-lib1-test';
-
 /** @public */
-export class Lib3Class {
-  prop: boolean;
+export enum Lib4Enum {
+  Foo = 'Foo',
+  Bar = 'Bar',
+  Baz = 'Baz'
 }

@@ -55,6 +55,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "colors",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "dependency-path",
       "allowedCategories": [ "libraries" ]
     },

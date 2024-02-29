@@ -8,4 +8,10 @@ import { Lib1Class } from 'api-extractor-lib1-test';
 
 export { Lib1Class }
 
+// @public (undocumented)
+export class Lib3Class {
+    // (undocumented)
+    prop: boolean;
+}
+
 ```

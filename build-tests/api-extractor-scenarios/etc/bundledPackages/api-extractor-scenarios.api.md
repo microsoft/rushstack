@@ -4,10 +4,10 @@
 
 ```ts
 
-import { Lib2Class } from 'api-extractor-lib2-test/lib/index';
+import { Lib3Class } from 'api-extractor-lib3-test/lib/index';
 
 // @public (undocumented)
-export function f(arg1: Lib1Class, arg2: Lib2Class): void;
+export function f(arg1: Lib1Class, arg2: Lib2Class, arg3: Lib3Class, arg4: Lib4Enum): void;
 
 // Warning: (ae-forgotten-export) The symbol "Lib1ForgottenExport" needs to be exported by the entry point index.d.ts
 //
@@ -19,7 +19,26 @@ export class Lib1Class extends Lib1ForgottenExport {
     writeableProperty: string;
 }
 
-export { Lib2Class }
+// @public (undocumented)
+export class Lib2Class {
+    // (undocumented)
+    prop: number;
+}
+
+export { Lib3Class }
+
+// @public (undocumented)
+export enum Lib4Enum {
+    // (undocumented)
+    Bar = "Bar",
+    // (undocumented)
+    Baz = "Baz",
+    // (undocumented)
+    Foo = "Foo"
+}
+
+// @public (undocumented)
+export function lib5Function(): number;
 
 // (No @packageDocumentation comment for this package)
 

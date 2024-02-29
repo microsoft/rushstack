@@ -107,7 +107,7 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstImport) {
         // Note: it isn't valid to trim imports based on their release tags.
         // E.g. class Foo (`@public`) extends interface Bar (`@beta`) from some external library.
-        // API-Extractor cannot trim `import { Bar } from "externa-library"` when generating its public rollup,
+        // API-Extractor cannot trim `import { Bar } from "external-library"` when generating its public rollup,
         // or the export of `Foo` would include a broken reference to `Bar`.
         const astImport: AstImport = entity.astEntity;
         DtsEmitHelpers.emitImport(writer, entity, astImport);

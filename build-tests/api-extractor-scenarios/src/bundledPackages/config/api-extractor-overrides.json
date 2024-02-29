@@ -1,3 +1,18 @@
 {
-  "bundledPackages": ["api-extractor-lib1-test"]
+  "bundledPackages": [
+    // Explicit package name
+    "api-extractor-lib1-test",
+
+    // Simple glob pattern (resolves to a single package)
+    "api-extractor-lib2*",
+
+    // Complex glob pattern (resolves to 3 packages: lib2, which is captured above; lib4; and lib5)
+    "*-lib{2,4,5}**",
+
+    // Explicit package name with no dependency match
+    "@foo/bar",
+
+    // Glob pattern with no dependency matches
+    "@baz/*"
+  ]
 }
