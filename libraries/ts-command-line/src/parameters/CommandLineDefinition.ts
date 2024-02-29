@@ -52,7 +52,6 @@ export interface IBaseCommandLineDefinition {
    * and underscores. It may not start with a number. To disable this validation, set
    * `{@link IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames}`
    * to `true`.
-   * to `true`.
    *
    * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
    * because in that case the environmentVariable would never be used.
