@@ -127,14 +127,17 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: {
       isRushCheckCommand: boolean;
-      subspaceName?: string | undefined;
+      subspace?: Subspace | undefined;
       printAsJson?: boolean | undefined;
       terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration);
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        rushConfiguration,
+        options
+      );
 
       if (options.printAsJson) {
         mismatchFinder.printAsJson();
@@ -146,7 +149,7 @@ export class VersionMismatchFinder {
           console.log(
             Colorize.red(
               `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
-                options.subspaceName ? `in subspace: ${options.subspaceName}` : ''
+                options.subspace?.subspaceName ? `in subspace: ${options.subspace?.subspaceName}` : ''
               }`
             )
           );
