@@ -130,7 +130,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * {@inheritdoc CommandLineAction._processParsedData}
+   * {@inheritdoc CommandLineParameterProvider._processParsedData}
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {

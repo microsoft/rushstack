@@ -183,7 +183,7 @@ export abstract class CommandLineParameter {
    * Called internally by CommandLineParameterProvider._processParsedData()
    * @internal
    */
-  public abstract _setValue(data: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  public abstract _setValue(data: unknown): void;
 
   /**
    * Returns additional text used by the help formatter.
@@ -223,8 +223,7 @@ export abstract class CommandLineParameter {
   /**
    * Internal usage only.  Used to report unexpected output from the argparse library.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected reportInvalidData(data: any): never {
+  protected reportInvalidData(data: unknown): never {
     throw new Error(`Unexpected data object for parameter "${this.longName}": ` + JSON.stringify(data));
   }
 

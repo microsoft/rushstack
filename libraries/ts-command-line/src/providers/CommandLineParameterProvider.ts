@@ -567,8 +567,11 @@ export abstract class CommandLineParameterProvider {
    */
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
-  /** @internal */
-  protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
+  /**
+   * This is called internally by CommandLineParser.execute()
+   * @internal
+   */
+  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
     if (!this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have not been registered');
     }
@@ -663,7 +666,7 @@ export abstract class CommandLineParameterProvider {
 
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      const value: any = data[parameter._parserKey!]; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
     }
 
@@ -733,89 +736,107 @@ export abstract class CommandLineParameterProvider {
     useScopedLongName: boolean,
     ignoreShortName: boolean
   ): void {
+    const {
+      shortName,
+      longName,
+      scopedLongName,
+      description,
+      kind,
+      required,
+      parameterGroup,
+      undocumentedSynonyms,
+      _parserKey: parserKey
+    } = parameter;
+
     const names: string[] = [];
-    if (parameter.shortName && !ignoreShortName) {
-      names.push(parameter.shortName);
+    if (shortName && !ignoreShortName) {
+      names.push(shortName);
     }
 
     // Use the original long name unless otherwise requested
     if (!useScopedLongName) {
-      names.push(parameter.longName);
+      names.push(longName);
     }
 
     // Add the scoped long name if it exists
-    if (parameter.scopedLongName) {
-      names.push(parameter.scopedLongName);
+    if (scopedLongName) {
+      names.push(scopedLongName);
     }
 
-    let finalDescription: string = parameter.description;
+    let finalDescription: string = description;
 
     const supplementaryNotes: string[] = [];
     parameter._getSupplementaryNotes(supplementaryNotes);
     if (supplementaryNotes.length > 0) {
       // If they left the period off the end of their sentence, then add one.
       if (finalDescription.match(/[a-z0-9]"?\s*$/i)) {
-        finalDescription = finalDescription.trimRight() + '.';
+        finalDescription = finalDescription.trimEnd() + '.';
       }
       // Append the supplementary text
       finalDescription += ' ' + supplementaryNotes.join(' ');
+    }
+
+    let choices: string[] | undefined;
+    let action: string | undefined;
+    let type: string | undefined;
+    switch (kind) {
+      case CommandLineParameterKind.Choice: {
+        const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
+        choices = choiceParameter.alternatives as string[];
+        break;
+      }
+      case CommandLineParameterKind.ChoiceList: {
+        const choiceParameter: CommandLineChoiceListParameter = parameter as CommandLineChoiceListParameter;
+        choices = choiceParameter.alternatives as string[];
+        action = 'append';
+        break;
+      }
+      case CommandLineParameterKind.Flag:
+        action = 'storeTrue';
+        break;
+      case CommandLineParameterKind.Integer:
+        type = 'int';
+        break;
+      case CommandLineParameterKind.IntegerList:
+        type = 'int';
+        action = 'append';
+        break;
+      case CommandLineParameterKind.String:
+        break;
+      case CommandLineParameterKind.StringList:
+        action = 'append';
+        break;
     }
 
     // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
     // so we have to reimplement that feature.
     const argparseOptions: argparse.ArgumentOptions = {
       help: finalDescription,
-      dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
-      required: parameter.required
+      dest: parserKey,
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName,
+      required,
+      choices,
+      action,
+      type
     };
 
-    switch (parameter.kind) {
-      case CommandLineParameterKind.Choice: {
-        const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
-        argparseOptions.choices = choiceParameter.alternatives as string[];
-        break;
-      }
-      case CommandLineParameterKind.ChoiceList: {
-        const choiceParameter: CommandLineChoiceListParameter = parameter as CommandLineChoiceListParameter;
-        argparseOptions.choices = choiceParameter.alternatives as string[];
-        argparseOptions.action = 'append';
-        break;
-      }
-      case CommandLineParameterKind.Flag:
-        argparseOptions.action = 'storeTrue';
-        break;
-      case CommandLineParameterKind.Integer:
-        argparseOptions.type = 'int';
-        break;
-      case CommandLineParameterKind.IntegerList:
-        argparseOptions.type = 'int';
-        argparseOptions.action = 'append';
-        break;
-      case CommandLineParameterKind.String:
-        break;
-      case CommandLineParameterKind.StringList:
-        argparseOptions.action = 'append';
-        break;
-    }
-
     let argumentGroup: argparse.ArgumentGroup | undefined;
-    if (parameter.parameterGroup) {
-      argumentGroup = this._parameterGroupsByName.get(parameter.parameterGroup);
+    if (parameterGroup) {
+      argumentGroup = this._parameterGroupsByName.get(parameterGroup);
       if (!argumentGroup) {
         let parameterGroupName: string;
-        if (typeof parameter.parameterGroup === 'string') {
-          parameterGroupName = parameter.parameterGroup;
-        } else if (parameter.parameterGroup === SCOPING_PARAMETER_GROUP) {
+        if (typeof parameterGroup === 'string') {
+          parameterGroupName = parameterGroup;
+        } else if (parameterGroup === SCOPING_PARAMETER_GROUP) {
           parameterGroupName = 'scoping';
         } else {
-          throw new Error('Unexpected parameter group: ' + parameter.parameterGroup);
+          throw new Error('Unexpected parameter group: ' + parameterGroup);
         }
 
         argumentGroup = this._getArgumentParser().addArgumentGroup({
           title: `Optional ${parameterGroupName} arguments`
         });
-        this._parameterGroupsByName.set(parameter.parameterGroup, argumentGroup);
+        this._parameterGroupsByName.set(parameterGroup, argumentGroup);
       }
     } else {
       argumentGroup = this._getArgumentParser();
@@ -823,16 +844,16 @@ export abstract class CommandLineParameterProvider {
 
     argumentGroup.addArgument(names, { ...argparseOptions });
 
-    if (parameter.undocumentedSynonyms?.length) {
-      argumentGroup.addArgument(parameter.undocumentedSynonyms, {
+    if (undocumentedSynonyms?.length) {
+      argumentGroup.addArgument(undocumentedSynonyms, {
         ...argparseOptions,
         help: argparse.Const.SUPPRESS
       });
     }
 
     // Register the parameter names so that we can detect ambiguous parameters
-    for (const name of [...names, ...(parameter.undocumentedSynonyms || [])]) {
-      this._registeredParameterParserKeysByName.set(name, parameter._parserKey!);
+    for (const name of [...names, ...(undocumentedSynonyms || [])]) {
+      this._registeredParameterParserKeysByName.set(name, parserKey!);
     }
   }
 
