@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes an issue where VersionMismatchFinder's getMismatches doesn't get the subspace info",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
