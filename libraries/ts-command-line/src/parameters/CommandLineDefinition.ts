@@ -53,9 +53,6 @@ export interface IBaseCommandLineDefinition {
    * `{@link IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames}`
    * to `true`.
    *
-   * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
-   * because in that case the environmentVariable would never be used.
-   *
    * Syntax notes for environment variable values:
    *
    * - Choice Parameter: The value must match one of the defined choices,

@@ -80,6 +80,14 @@ export class CommandLineChoiceListParameter<
   }
 
   /**
+   * {@inheritDoc CommandLineParameter._setValue}
+   * @internal
+   */
+  public _getValue(): unknown {
+    return this._values;
+  }
+
+  /**
    * Returns the string arguments for a choice list parameter that was parsed from the command line.
    *
    * @remarks

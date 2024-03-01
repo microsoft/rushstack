@@ -54,6 +54,14 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
   }
 
   /**
+   * {@inheritDoc CommandLineParameter._setValue}
+   * @internal
+   */
+  public _getValue(): unknown {
+    return this._values;
+  }
+
+  /**
    * Returns the string arguments for a string list parameter that was parsed from the command line.
    *
    * @remarks

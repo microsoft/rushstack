@@ -669,6 +669,9 @@ export abstract class CommandLineParameterProvider {
     for (const parameter of this._parameters) {
       const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
+      if (parameter._postParseValidation) {
+        parameter._postParseValidation(parameter._getValue());
+      }
     }
 
     if (this.remainder) {
@@ -744,6 +747,7 @@ export abstract class CommandLineParameterProvider {
       description,
       kind,
       required,
+      environmentVariable,
       parameterGroup,
       undocumentedSynonyms,
       _parserKey: parserKey
@@ -819,6 +823,18 @@ export abstract class CommandLineParameterProvider {
       type
     };
 
+    const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
+    if (required && environmentVariable) {
+      argparseOptions.required = false;
+      parameter._postParseValidation = (value: unknown | null | undefined) => {
+        if (value === undefined || value === null) {
+          // Reset the required value to make the usage text correct
+          argparseOptions.required = true;
+          argumentParser.error(`Argument "${longName}" is required`);
+        }
+      };
+    }
+
     let argumentGroup: argparse.ArgumentGroup | undefined;
     if (parameterGroup) {
       argumentGroup = this._parameterGroupsByName.get(parameterGroup);
@@ -832,13 +848,13 @@ export abstract class CommandLineParameterProvider {
           throw new Error('Unexpected parameter group: ' + parameterGroup);
         }
 
-        argumentGroup = this._getArgumentParser().addArgumentGroup({
+        argumentGroup = argumentParser.addArgumentGroup({
           title: `Optional ${parameterGroupName} arguments`
         });
         this._parameterGroupsByName.set(parameterGroup, argumentGroup);
       }
     } else {
-      argumentGroup = this._getArgumentParser();
+      argumentGroup = argumentParser;
     }
 
     argumentGroup.addArgument(names, { ...argparseOptions });
