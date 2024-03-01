@@ -567,8 +567,11 @@ export abstract class CommandLineParameterProvider {
    */
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
-  /** @internal */
-  protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
+  /**
+   * This is called internally by CommandLineParser.execute()
+   * @internal
+   */
+  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
     if (!this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have not been registered');
     }

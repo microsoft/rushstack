@@ -3,8 +3,7 @@
 
 import type * as argparse from 'argparse';
 
-import { CommandLineParameterProvider, type ICommandLineParserData } from './CommandLineParameterProvider';
-import type { ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineParameterProvider } from './CommandLineParameterProvider';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
@@ -104,14 +103,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     };
 
     this.onDefineParameters?.();
-  }
-
-  /**
-   * This is called internally by CommandLineParser.execute()
-   * @internal
-   */
-  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    super._processParsedData(parserOptions, data);
   }
 
   /**

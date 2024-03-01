@@ -30,8 +30,6 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     // @internal
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected abstract onExecute(): Promise<void>;
-    // @internal
-    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     readonly summary: string;
 }
 
@@ -215,8 +213,8 @@ export abstract class CommandLineParameterProvider {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
-    // @internal (undocumented)
-    protected _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
+    // @internal
+    _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // (undocumented)
     protected _registerAmbiguousParameter(name: string, parserKey: string): void;
     // @internal (undocumented)

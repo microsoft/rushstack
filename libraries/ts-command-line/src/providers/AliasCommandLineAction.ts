@@ -170,7 +170,7 @@ export class AliasCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * This is called internally by CommandLineParser.execute()
+   * {@inheritdoc CommandLineParameterProvider._processParsedData}
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
