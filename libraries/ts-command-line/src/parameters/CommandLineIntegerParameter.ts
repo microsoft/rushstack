@@ -49,6 +49,25 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
       return;
     }
 
+    const envVarValue: number | undefined = this._getValueFromEnvVar();
+    if (envVarValue !== undefined) {
+      this._value = envVarValue;
+      return;
+    }
+
+    if (this.defaultValue !== undefined) {
+      this._value = this.defaultValue;
+      return;
+    }
+
+    this._value = undefined;
+  }
+
+  /**
+   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
+   * @internal
+   */
+  public _getValueFromEnvVar(): number | undefined {
     if (this.environmentVariable !== undefined) {
       // Try reading the environment variable
       const environmentValue: string | undefined = process.env[this.environmentVariable];
@@ -60,17 +79,9 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
               ` ${this.environmentVariable}.  It must be an integer value.`
           );
         }
-        this._value = parsed;
-        return;
+        return parsed;
       }
     }
-
-    if (this.defaultValue !== undefined) {
-      this._value = this.defaultValue;
-      return;
-    }
-
-    this._value = undefined;
   }
 
   /**

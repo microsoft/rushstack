@@ -50,15 +50,10 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
       return;
     }
 
-    if (this.environmentVariable !== undefined) {
-      // Try reading the environment variable
-      const environmentValue: string | undefined = process.env[this.environmentVariable];
-      if (environmentValue !== undefined) {
-        // NOTE: If the environment variable is defined as an empty string,
-        // here we will accept the empty string as our value.  (For number/flag we don't do that.)
-        this._value = environmentValue;
-        return;
-      }
+    const envVarValue: string | undefined = this._getValueFromEnvVar();
+    if (envVarValue !== undefined) {
+      this._value = envVarValue;
+      return;
     }
 
     if (this.defaultValue !== undefined) {
@@ -67,6 +62,22 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     }
 
     this._value = undefined;
+  }
+
+  /**
+   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
+   * @internal
+   */
+  public _getValueFromEnvVar(): string | undefined {
+    if (this.environmentVariable !== undefined) {
+      // Try reading the environment variable
+      const environmentValue: string | undefined = process.env[this.environmentVariable];
+      if (environmentValue !== undefined) {
+        // NOTE: If the environment variable is defined as an empty string,
+        // here we will accept the empty string as our value.  (For number/flag we don't do that.)
+        return environmentValue;
+      }
+    }
   }
 
   /**
