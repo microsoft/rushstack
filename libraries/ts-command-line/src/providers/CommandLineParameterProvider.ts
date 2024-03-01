@@ -666,7 +666,7 @@ export abstract class CommandLineParameterProvider {
 
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      const value: unknown | undefined = data[parameter._parserKey!];
+      const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
     }
 
