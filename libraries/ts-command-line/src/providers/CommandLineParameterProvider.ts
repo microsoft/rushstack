@@ -585,6 +585,16 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
+   * This is called internally by {@link CommandLineParser.execute} before `printUsage` is called
+   * @internal
+   */
+  public _postParse(): void {
+    for (const parameter of this._parameters) {
+      parameter._postParse?.();
+    }
+  }
+
+  /**
    * This is called internally by {@link CommandLineParser.execute}
    * @internal
    */
@@ -870,10 +880,12 @@ export abstract class CommandLineParameterProvider {
       parameter._preParse = () => {
         argparseArgument.required = false;
       };
+      parameter._postParse = () => {
+        // Reset the required value to make the usage text correct
+        argparseArgument.required = true;
+      };
       parameter._postParseValidation = (value: unknown | null | undefined) => {
         if (value === undefined || value === null) {
-          // Reset the required value to make the usage text correct
-          argparseArgument.required = true;
           argumentParser.error(`Argument "${longName}" is required`);
         }
       };

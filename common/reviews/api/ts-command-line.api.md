@@ -28,7 +28,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     // @internal
     _execute(): Promise<void>;
     // @internal
-    protected _getArgumentParser(): argparse.ArgumentParser;
+    _getArgumentParser(): argparse.ArgumentParser;
     protected abstract onExecute(): Promise<void>;
     readonly summary: string;
 }
@@ -142,6 +142,8 @@ export abstract class CommandLineParameter {
     // @internal
     _parserKey: string | undefined;
     // @internal (undocumented)
+    _postParse: (() => void) | undefined;
+    // @internal (undocumented)
     _postParseValidation: ((value: unknown | undefined) => void) | undefined;
     // @internal (undocumented)
     _preParse: (() => void) | undefined;
@@ -219,6 +221,8 @@ export abstract class CommandLineParameterProvider {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
+    // @internal
+    _postParse(): void;
     // @internal
     _preParse(): void;
     // @internal

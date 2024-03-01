@@ -117,7 +117,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser {
+  public _getArgumentParser(): argparse.ArgumentParser {
     // override
     if (!this._argumentParser) {
       // We will improve this in the future

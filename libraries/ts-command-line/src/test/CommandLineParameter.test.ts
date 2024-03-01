@@ -399,6 +399,7 @@ describe(CommandLineParameterBase.name, () => {
       await runWithArgsAsync(['do:the-job', '--env-integer-required', '1']);
 
       expect(printMessageSpy).toHaveBeenCalledTimes(2);
+      expect(printMessageSpy.mock.calls[0][0]).toMatchSnapshot('Usage');
       expect(printMessageSpy.mock.calls[0][0]).toEqual(printMessageSpy.mock.calls[1][0]);
     }
   );
