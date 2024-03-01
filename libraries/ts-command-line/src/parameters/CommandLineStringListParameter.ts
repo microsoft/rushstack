@@ -26,6 +26,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: unknown): void {
     // If argparse passed us a value, confirm it is valid
     if (data !== null && data !== undefined) {
@@ -41,27 +42,18 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
       return;
     }
 
-    const envVarValues: string[] | undefined = this._getValueFromEnvVar();
-    if (envVarValues !== undefined) {
-      this._values = envVarValues;
-      return;
+    // If an environment variable exists, attempt to parse it as a list
+    if (this.environmentVariable !== undefined) {
+      const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
+      if (values) {
+        this._values = values;
+        return;
+      }
     }
 
     // (No default value for string lists)
 
     this._values = [];
-  }
-
-  /**
-   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
-   * @internal
-   */
-  public _getValueFromEnvVar(): string[] | undefined {
-    // If an environment variable exists, attempt to parse it as a list
-    if (this.environmentVariable !== undefined) {
-      const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
-      return values;
-    }
   }
 
   /**

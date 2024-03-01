@@ -41,22 +41,6 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
       return;
     }
 
-    const envVarValue: number[] | undefined = this._getValueFromEnvVar();
-    if (envVarValue !== undefined) {
-      this._values = envVarValue;
-      return;
-    }
-
-    // (No default value for integer lists)
-
-    this._values = [];
-  }
-
-  /**
-   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
-   * @internal
-   */
-  public _getValueFromEnvVar(): number[] | undefined {
     // If an environment variable exists, attempt to parse it as a list
     if (this.environmentVariable !== undefined) {
       const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
@@ -72,9 +56,14 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
           }
           parsedValues.push(parsed);
         }
-        return parsedValues;
+        this._values = parsedValues;
+        return;
       }
     }
+
+    // (No default value for integer lists)
+
+    this._values = [];
   }
 
   /**

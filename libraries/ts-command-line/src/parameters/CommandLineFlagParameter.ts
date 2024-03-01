@@ -41,20 +41,6 @@ export class CommandLineFlagParameter extends CommandLineParameter {
       }
     }
 
-    const envVarValue: boolean | undefined = this._getValueFromEnvVar();
-    if (envVarValue !== undefined) {
-      this._value = envVarValue;
-      return;
-    }
-
-    this._value = false;
-  }
-
-  /**
-   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
-   * @internal
-   */
-  public _getValueFromEnvVar(): boolean | undefined {
     if (this.environmentVariable !== undefined) {
       // Try reading the environment variable
       const environmentValue: string | undefined = process.env[this.environmentVariable];
@@ -65,9 +51,12 @@ export class CommandLineFlagParameter extends CommandLineParameter {
               ` ${this.environmentVariable}.  Valid choices are 0 or 1.`
           );
         }
-        return environmentValue === '1';
+        this._value = environmentValue === '1';
+        return;
       }
     }
+
+    this._value = false;
   }
 
   /**

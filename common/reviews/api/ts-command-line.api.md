@@ -41,8 +41,6 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
     // @override
     appendToArgList(argList: string[]): void;
     readonly completions: (() => Promise<TChoice[]>) | undefined;
-    // @internal
-    _getValueFromEnvVar(): TChoice[] | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;
@@ -60,8 +58,6 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     readonly defaultValue: TChoice | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    _getValueFromEnvVar(): TChoice | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;
@@ -79,8 +75,6 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     constructor(definition: ICommandLineFlagDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    // @internal
-    _getValueFromEnvVar(): boolean | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;
@@ -98,8 +92,6 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     constructor(definition: ICommandLineIntegerListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    // @internal
-    _getValueFromEnvVar(): number[] | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;
@@ -115,8 +107,6 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     readonly defaultValue: number | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    _getValueFromEnvVar(): number | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;
@@ -133,8 +123,6 @@ export abstract class CommandLineParameter {
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    abstract _getValueFromEnvVar(): unknown | undefined;
     abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
     readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
@@ -271,8 +259,6 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     constructor(definition: ICommandLineStringListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    // @internal
-    _getValueFromEnvVar(): string[] | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;
@@ -288,8 +274,6 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    _getValueFromEnvVar(): string | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: unknown): void;

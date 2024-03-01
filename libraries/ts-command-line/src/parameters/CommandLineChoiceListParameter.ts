@@ -56,22 +56,6 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
       return;
     }
 
-    const envVarValues: TChoice[] | undefined = this._getValueFromEnvVar();
-    if (envVarValues !== undefined) {
-      this._values = envVarValues;
-      return;
-    }
-
-    // (No default value for choice lists)
-
-    this._values = [];
-  }
-
-  /**
-   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
-   * @internal
-   */
-  public _getValueFromEnvVar(): TChoice[] | undefined {
     if (this.environmentVariable !== undefined) {
       const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
       if (values) {
@@ -85,9 +69,14 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
           }
         }
 
-        return values as TChoice[];
+        this._values = values as TChoice[];
+        return;
       }
     }
+
+    // (No default value for choice lists)
+
+    this._values = [];
   }
 
   /**

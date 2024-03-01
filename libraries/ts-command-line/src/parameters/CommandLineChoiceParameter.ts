@@ -70,25 +70,6 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
       return;
     }
 
-    const envVarValue: TChoice | undefined = this._getValueFromEnvVar();
-    if (envVarValue !== undefined) {
-      this._value = envVarValue;
-      return;
-    }
-
-    if (this.defaultValue !== undefined) {
-      this._value = this.defaultValue;
-      return;
-    }
-
-    this._value = undefined;
-  }
-
-  /**
-   * {@inheritDoc CommandLineParameter._getValueFromEnvVar}
-   * @internal
-   */
-  public _getValueFromEnvVar(): TChoice | undefined {
     if (this.environmentVariable !== undefined) {
       // Try reading the environment variable
       const environmentValue: string | undefined = process.env[this.environmentVariable];
@@ -101,9 +82,17 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
           );
         }
 
-        return environmentValue as TChoice;
+        this._value = environmentValue as TChoice;
+        return;
       }
     }
+
+    if (this.defaultValue !== undefined) {
+      this._value = this.defaultValue;
+      return;
+    }
+
+    this._value = undefined;
   }
 
   /**

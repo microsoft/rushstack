@@ -186,12 +186,6 @@ export abstract class CommandLineParameter {
   public abstract _setValue(data: unknown): void;
 
   /**
-   * Called internally by CommandLineParser.executeWithoutErrorHandling()
-   * @internal
-   */
-  public abstract _getValueFromEnvVar(): unknown | undefined;
-
-  /**
    * Returns additional text used by the help formatter.
    * @internal
    */
