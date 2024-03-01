@@ -239,6 +239,11 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         }
       }
 
+      this._preParse();
+      for (const action of this.actions) {
+        action._preParse();
+      }
+
       const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
       this._processParsedData(this._options, data);

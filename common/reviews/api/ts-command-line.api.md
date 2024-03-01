@@ -143,6 +143,8 @@ export abstract class CommandLineParameter {
     _parserKey: string | undefined;
     // @internal (undocumented)
     _postParseValidation: ((value: unknown | undefined) => void) | undefined;
+    // @internal (undocumented)
+    _preParse: (() => void) | undefined;
     protected reportInvalidData(data: unknown): never;
     readonly required: boolean;
     readonly scopedLongName: string | undefined;
@@ -217,6 +219,8 @@ export abstract class CommandLineParameterProvider {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
+    // @internal
+    _preParse(): void;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // (undocumented)

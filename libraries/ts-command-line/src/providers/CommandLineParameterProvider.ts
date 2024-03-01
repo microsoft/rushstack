@@ -88,6 +88,12 @@ const LONG_NAME_GROUP_NAME: string = 'longName';
 const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
   /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
 
+interface IExtendedArgumentGroup extends argparse.ArgumentGroup {
+  // The types are incorrect - this function returns the constructed argument
+  // object, which looks like the argument options type.
+  addArgument(nameOrFlags: string | string[], options: argparse.ArgumentOptions): argparse.ArgumentOptions;
+}
+
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
@@ -569,7 +575,17 @@ export abstract class CommandLineParameterProvider {
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
   /**
-   * This is called internally by CommandLineParser.execute()
+   * This is called internally by {@link CommandLineParser.execute}
+   * @internal
+   */
+  public _preParse(): void {
+    for (const parameter of this._parameters) {
+      parameter._preParse?.();
+    }
+  }
+
+  /**
+   * This is called internally by {@link CommandLineParser.execute}
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
@@ -824,17 +840,6 @@ export abstract class CommandLineParameterProvider {
     };
 
     const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
-    if (required && environmentVariable) {
-      argparseOptions.required = false;
-      parameter._postParseValidation = (value: unknown | null | undefined) => {
-        if (value === undefined || value === null) {
-          // Reset the required value to make the usage text correct
-          argparseOptions.required = true;
-          argumentParser.error(`Argument "${longName}" is required`);
-        }
-      };
-    }
-
     let argumentGroup: argparse.ArgumentGroup | undefined;
     if (parameterGroup) {
       argumentGroup = this._parameterGroupsByName.get(parameterGroup);
@@ -857,7 +862,22 @@ export abstract class CommandLineParameterProvider {
       argumentGroup = argumentParser;
     }
 
-    argumentGroup.addArgument(names, { ...argparseOptions });
+    const argparseArgument: argparse.ArgumentOptions = (argumentGroup as IExtendedArgumentGroup).addArgument(
+      names,
+      argparseOptions
+    );
+    if (required && environmentVariable) {
+      parameter._preParse = () => {
+        argparseArgument.required = false;
+      };
+      parameter._postParseValidation = (value: unknown | null | undefined) => {
+        if (value === undefined || value === null) {
+          // Reset the required value to make the usage text correct
+          argparseArgument.required = true;
+          argumentParser.error(`Argument "${longName}" is required`);
+        }
+      };
+    }
 
     if (undocumentedSynonyms?.length) {
       argumentGroup.addArgument(undocumentedSynonyms, {
