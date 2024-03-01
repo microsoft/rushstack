@@ -151,6 +151,18 @@ const snapshotPropertyNames: string[] = [
 ];
 
 describe(CommandLineParameter.name, () => {
+  let existingEnv: NodeJS.ProcessEnv;
+
+  beforeEach(() => {
+    existingEnv = {
+      ...process.env
+    };
+  });
+
+  afterEach(() => {
+    process.env = existingEnv;
+  });
+
   it('prints the global help', () => {
     const commandLineParser: CommandLineParser = createParser();
     const helpText: string = AnsiEscape.removeCodes(commandLineParser.renderHelpText());
