@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.2",
+      "tag": "@microsoft/rush_v5.117.2",
+      "date": "Fri, 01 Mar 2024 23:12:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue with the experimental subspaces feature, where version checks incorrectly scanned irrelevant subspaces."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.1",
       "tag": "@microsoft/rush_v5.117.1",
       "date": "Thu, 29 Feb 2024 07:34:31 GMT",
