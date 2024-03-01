@@ -45,7 +45,7 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
     _getValueFromEnvVar(): TChoice[] | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get values(): ReadonlyArray<TChoice>;
 }
 
@@ -64,7 +64,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     _getValueFromEnvVar(): TChoice | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get value(): TChoice | undefined;
 }
 
@@ -83,7 +83,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     _getValueFromEnvVar(): boolean | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get value(): boolean;
 }
 
@@ -102,7 +102,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     _getValueFromEnvVar(): number[] | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get values(): ReadonlyArray<number>;
 }
 
@@ -119,7 +119,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     _getValueFromEnvVar(): number | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get value(): number | undefined;
 }
 
@@ -141,11 +141,11 @@ export abstract class CommandLineParameter {
     readonly parameterScope: string | undefined;
     // @internal
     _parserKey: string | undefined;
-    protected reportInvalidData(data: any): never;
+    protected reportInvalidData(data: unknown): never;
     readonly required: boolean;
     readonly scopedLongName: string | undefined;
     // @internal
-    abstract _setValue(data: any): void;
+    abstract _setValue(data: unknown): void;
     get shortName(): string | undefined;
     readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
@@ -261,7 +261,7 @@ export class CommandLineRemainder {
     appendToArgList(argList: string[]): void;
     readonly description: string;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get values(): ReadonlyArray<string>;
 }
 
@@ -275,7 +275,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     _getValueFromEnvVar(): string[] | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get values(): ReadonlyArray<string>;
 }
 
@@ -292,7 +292,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     _getValueFromEnvVar(): string | undefined;
     get kind(): CommandLineParameterKind;
     // @internal
-    _setValue(data: any): void;
+    _setValue(data: unknown): void;
     get value(): string | undefined;
 }
 

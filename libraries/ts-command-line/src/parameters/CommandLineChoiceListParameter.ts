@@ -41,8 +41,7 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void {
+  public _setValue(data: unknown): void {
     // If argparse passed us a value, confirm it is valid
     if (data !== null && data !== undefined) {
       if (!Array.isArray(data)) {

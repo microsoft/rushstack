@@ -25,8 +25,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void {
+  public _setValue(data: unknown): void {
     // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'boolean') {
