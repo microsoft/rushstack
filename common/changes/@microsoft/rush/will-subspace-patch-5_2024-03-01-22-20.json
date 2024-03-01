@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where `VersionMismatchFinder.getMismatches` doesn't correctly handle subspaces.",
+      "comment": "Fix an issue with the experimental subspaces feature, where version checks incorrectly scanned irrelevant subspaces.",
       "type": "none"
     }
   ],
