@@ -21,20 +21,21 @@ export interface IMetricsData {
   encounteredError?: boolean;
 
   /**
-   * The amount of time the command took to execute, in milliseconds.
+   * The total execution duration of all user-defined tasks from `heft.json`, in milliseconds.
+   * This metric is for measuring the cumulative time spent on the underlying build steps for a project.
+   * If running in watch mode, this will be the duration of the most recent incremental build.
    */
   taskTotalExecutionMs: number;
 
   /**
-   * How long the process has been running before the action was first executed, in milliseconds.
-   * Broken out so that `taskTotalExecutionMs` only includes the actual task executions.
-   * This is how long Heft took to boot.
+   * The total duration before Heft started executing user-defined tasks, in milliseconds.
+   * This metric is for tracking the contribution of Heft itself to total build duration.
    */
   bootDurationMs: number;
 
   /**
    * How long the process has been alive, in milliseconds.
-   * Mostly of interest when running in watch mode, to track how long developer sessions last.
+   * This metric is for watch mode, to analyze how long developers leave individual Heft sessions running.
    */
   totalUptimeMs: number;
 
