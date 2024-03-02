@@ -9,7 +9,7 @@ import { CommandLineParameterWithArgument, CommandLineParameterKind } from './Ba
  * @public
  */
 export interface IRequiredCommandLineIntegerParameter extends CommandLineIntegerParameter {
-  value: number;
+  readonly value: number;
 }
 
 /**

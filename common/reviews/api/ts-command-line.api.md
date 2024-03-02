@@ -416,19 +416,19 @@ export interface _IRegisterDefinedParametersState {
 // @public
 export interface IRequiredCommandLineChoiceParameter<TChoice extends string = string> extends CommandLineChoiceParameter<TChoice> {
     // (undocumented)
-    value: TChoice;
+    readonly value: TChoice;
 }
 
 // @public
 export interface IRequiredCommandLineIntegerParameter extends CommandLineIntegerParameter {
     // (undocumented)
-    value: number;
+    readonly value: number;
 }
 
 // @public
 export interface IRequiredCommandLineStringParameter extends CommandLineStringParameter {
     // (undocumented)
-    value: string;
+    readonly value: string;
 }
 
 // @public

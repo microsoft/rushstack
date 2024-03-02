@@ -9,7 +9,7 @@ import { CommandLineParameterWithArgument, CommandLineParameterKind } from './Ba
  * @public
  */
 export interface IRequiredCommandLineStringParameter extends CommandLineStringParameter {
-  value: string;
+  readonly value: string;
 }
 
 /**
