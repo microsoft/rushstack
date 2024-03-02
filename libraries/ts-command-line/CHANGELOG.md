@@ -1,6 +1,19 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 01 Mar 2024 01:10:08 GMT and should not be manually modified.
+This log was last generated on Sat, 02 Mar 2024 02:22:23 GMT and should not be manually modified.
+
+## 4.19.0
+Sat, 02 Mar 2024 02:22:23 GMT
+
+### Minor changes
+
+- Use more specific types for command line parameters' `kind` properties.
+- Allow parameters that may be backed by an environment variable to be marked as `required`.
+- Update the return type of `defineChoiceParameter`, `defineIntegerParameter`, and `defineStringParameter` respectively when the `defaultValue` option is provided to return `IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter` respectively, as the value will definitely be defined in these cases.
+
+### Patches
+
+- Include a missing `readonly` modifier on the `value` properties of `IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter`.
 
 ## 4.18.1
 Fri, 01 Mar 2024 01:10:08 GMT
