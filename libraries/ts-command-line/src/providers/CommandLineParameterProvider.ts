@@ -881,19 +881,26 @@ export abstract class CommandLineParameterProvider {
     );
     if (required && environmentVariable) {
       // Add some special-cased logic to handle required parameters with environment variables
+
+      const originalPreParse: (() => void) | undefined = parameter._preParse?.bind(parameter);
       parameter._preParse = () => {
+        originalPreParse?.();
         // Set the value as non-required before parsing. We'll validate it explicitly
         argparseArgument.required = false;
       };
+
+      const originalPostParse: (() => void) | undefined = parameter._postParse?.bind(parameter);
       parameter._postParse = () => {
         // Reset the required value to make the usage text correct
         argparseArgument.required = true;
+        originalPostParse?.();
       };
 
       function throwMissingParameterError(): never {
         argumentParser.error(`Argument "${longName}" is required`);
       }
 
+      const originalValidateValue: (() => void) | undefined = parameter._validateValue?.bind(parameter);
       // For these values, we have to perform explicit validation because they're requested
       // as required, but we disabled argparse's required flag to allow the environment variable
       // to potentially fill the value.
@@ -905,6 +912,8 @@ export abstract class CommandLineParameterProvider {
             if (this.value === undefined || this.value === null) {
               throwMissingParameterError();
             }
+
+            originalValidateValue?.();
           };
           break;
         case CommandLineParameterKind.ChoiceList:
@@ -914,6 +923,8 @@ export abstract class CommandLineParameterProvider {
             if (this.values.length === 0) {
               throwMissingParameterError();
             }
+
+            originalValidateValue?.();
           };
           break;
       }
