@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Include a missing `readonly` modifier on the `value` properties of `IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}

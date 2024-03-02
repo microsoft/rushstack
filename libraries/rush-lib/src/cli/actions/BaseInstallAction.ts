@@ -4,7 +4,8 @@
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  IRequiredCommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
@@ -33,7 +34,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected readonly _noLinkParameter: CommandLineFlagParameter;
   protected readonly _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected readonly _debugPackageManagerParameter: CommandLineFlagParameter;
-  protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
+  protected readonly _maxInstallAttempts: IRequiredCommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
   protected readonly _offlineParameter: CommandLineFlagParameter;
   protected readonly _subspaceParameter: CommandLineStringParameter;
@@ -223,9 +224,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
     }
 
-    // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
-    // it is safe to assume that the value is not null
-    if (this._maxInstallAttempts.value! < 1) {
+    if (this._maxInstallAttempts.value < 1) {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
 

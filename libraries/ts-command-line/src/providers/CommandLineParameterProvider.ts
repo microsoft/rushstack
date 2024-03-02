@@ -170,13 +170,22 @@ export abstract class CommandLineParameterProvider {
    * ```
    */
   public defineChoiceParameter<TChoice extends string = string>(
-    definition: ICommandLineChoiceDefinition<TChoice> & { required: false | undefined }
+    definition: ICommandLineChoiceDefinition<TChoice> & {
+      required: false | undefined;
+      defaultValue: undefined;
+    }
   ): CommandLineChoiceParameter<TChoice>;
   /**
    * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
    */
   public defineChoiceParameter<TChoice extends string = string>(
     definition: ICommandLineChoiceDefinition<TChoice> & { required: true }
+  ): IRequiredCommandLineChoiceParameter<TChoice>;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
+   */
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice> & { defaultValue: TChoice }
   ): IRequiredCommandLineChoiceParameter<TChoice>;
   /**
    * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
@@ -267,13 +276,19 @@ export abstract class CommandLineParameterProvider {
    * ```
    */
   public defineIntegerParameter(
-    definition: ICommandLineIntegerDefinition & { required: false | undefined }
+    definition: ICommandLineIntegerDefinition & { required: false | undefined; defaultValue: undefined }
   ): CommandLineIntegerParameter;
   /**
    * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
    */
   public defineIntegerParameter(
     definition: ICommandLineIntegerDefinition & { required: true }
+  ): IRequiredCommandLineIntegerParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
+   */
+  public defineIntegerParameter(
+    definition: ICommandLineIntegerDefinition & { defaultValue: number }
   ): IRequiredCommandLineIntegerParameter;
   /**
    * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
@@ -337,13 +352,19 @@ export abstract class CommandLineParameterProvider {
    * ```
    */
   public defineStringParameter(
-    definition: ICommandLineStringDefinition & { required: false | undefined }
+    definition: ICommandLineStringDefinition & { required: false | undefined; defaultValue: undefined }
   ): CommandLineStringParameter;
   /**
    * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
    */
   public defineStringParameter(
     definition: ICommandLineStringDefinition & { required: true }
+  ): IRequiredCommandLineStringParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
+   */
+  public defineStringParameter(
+    definition: ICommandLineStringDefinition & { defaultValue: string }
   ): IRequiredCommandLineStringParameter;
   /**
    * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}

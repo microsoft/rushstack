@@ -10,7 +10,7 @@ import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasse
  */
 export interface IRequiredCommandLineChoiceParameter<TChoice extends string = string>
   extends CommandLineChoiceParameter<TChoice> {
-  value: TChoice;
+  readonly value: TChoice;
 }
 
 /**

@@ -3,8 +3,8 @@
 
 import stringArgv from 'string-argv';
 
-import type { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { IRequiredCommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import type { IRequiredCommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import {
   CommandLineParameterKind,
   type CommandLineParameterBase,
@@ -19,8 +19,8 @@ const DEFAULT_WORD_TO_AUTOCOMPLETE: string = '';
 const DEFAULT_POSITION: number = 0;
 
 export class TabCompleteAction extends CommandLineAction {
-  private readonly _wordToCompleteParameter: CommandLineStringParameter;
-  private readonly _positionParameter: CommandLineIntegerParameter;
+  private readonly _wordToCompleteParameter: IRequiredCommandLineStringParameter;
+  private readonly _positionParameter: IRequiredCommandLineIntegerParameter;
   private readonly _actions: Map<string, Map<string, CommandLineParameter>>;
   private readonly _globalParameters: Map<string, CommandLineParameter>;
 
@@ -70,8 +70,8 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   protected async onExecute(): Promise<void> {
-    const commandLine: string = this._wordToCompleteParameter.value || '';
-    const caretPosition: number = this._positionParameter.value || (commandLine && commandLine.length) || 0;
+    const commandLine: string = this._wordToCompleteParameter.value;
+    const caretPosition: number = this._positionParameter.value || commandLine.length;
 
     for await (const value of this.getCompletions(commandLine, caretPosition)) {
       // eslint-disable-next-line no-console
