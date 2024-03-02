@@ -30,7 +30,8 @@ export type {
 
 export {
   CommandLineParameterKind,
-  CommandLineParameter,
+  // TODO: Export both `CommandLineParameter` and `CommandLineParameterBase` in the next major bump
+  CommandLineParameterBase as CommandLineParameter,
   CommandLineParameterWithArgument
 } from './parameters/BaseClasses';
 

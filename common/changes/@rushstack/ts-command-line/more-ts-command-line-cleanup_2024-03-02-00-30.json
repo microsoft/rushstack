@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Use more specific types for command line parameters' `kind` properties.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line"
+}

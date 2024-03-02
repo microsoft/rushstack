@@ -22,16 +22,14 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
 
   private _value: number | undefined = undefined;
 
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.Integer = CommandLineParameterKind.Integer;
+
   /** @internal */
   public constructor(definition: ICommandLineIntegerDefinition) {
     super(definition);
     this.defaultValue = definition.defaultValue;
     this.validateDefaultValue(!!this.defaultValue);
-  }
-
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.Integer;
   }
 
   /**

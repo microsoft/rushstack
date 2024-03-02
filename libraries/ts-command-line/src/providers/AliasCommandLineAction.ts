@@ -4,15 +4,13 @@
 import * as argparse from 'argparse';
 
 import { CommandLineAction } from './CommandLineAction';
-import { CommandLineParameterKind, type CommandLineParameter } from '../parameters/BaseClasses';
+import {
+  CommandLineParameterKind,
+  type CommandLineParameterBase,
+  type CommandLineParameter
+} from '../parameters/BaseClasses';
 import type { ICommandLineParserData, IRegisterDefinedParametersState } from './CommandLineParameterProvider';
 import type { ICommandLineParserOptions } from './CommandLineParser';
-import type { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
-import type { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
-import type { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-import type { CommandLineChoiceListParameter } from '../parameters/CommandLineChoiceListParameter';
-import type { CommandLineIntegerListParameter } from '../parameters/CommandLineIntegerListParameter';
 
 /**
  * Options for the AliasCommandLineAction constructor.
@@ -89,53 +87,45 @@ export class AliasCommandLineAction extends CommandLineAction {
     /* override */
     // All parameters are going to be defined by the target action. Re-use the target action parameters
     // for this action.
-    for (const parameter of this.targetAction.parameters) {
-      let aliasParameter: CommandLineParameter;
+    for (const parameter of this.targetAction.parameters as CommandLineParameter[]) {
+      const { kind, longName, shortName } = parameter;
+      let aliasParameter: CommandLineParameterBase;
       const nameOptions: { parameterLongName: string; parameterShortName: string | undefined } = {
-        parameterLongName: parameter.longName,
-        parameterShortName: parameter.shortName
+        parameterLongName: longName,
+        parameterShortName: shortName
       };
-      switch (parameter.kind) {
+      switch (kind) {
         case CommandLineParameterKind.Choice:
-          const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
           aliasParameter = this.defineChoiceParameter({
             ...nameOptions,
-            ...choiceParameter,
-            alternatives: ([] as string[]).concat(choiceParameter.alternatives)
+            ...parameter,
+            alternatives: [...parameter.alternatives]
           });
           break;
         case CommandLineParameterKind.ChoiceList:
-          const choiceListParameter: CommandLineChoiceListParameter =
-            parameter as CommandLineChoiceListParameter;
           aliasParameter = this.defineChoiceListParameter({
             ...nameOptions,
-            ...choiceListParameter,
-            alternatives: ([] as string[]).concat(choiceListParameter.alternatives)
+            ...parameter,
+            alternatives: [...parameter.alternatives]
           });
           break;
         case CommandLineParameterKind.Flag:
-          const flagParameter: CommandLineFlagParameter = parameter as CommandLineFlagParameter;
-          aliasParameter = this.defineFlagParameter({ ...nameOptions, ...flagParameter });
+          aliasParameter = this.defineFlagParameter({ ...nameOptions, ...parameter });
           break;
         case CommandLineParameterKind.Integer:
-          const integerParameter: CommandLineIntegerParameter = parameter as CommandLineIntegerParameter;
-          aliasParameter = this.defineIntegerParameter({ ...nameOptions, ...integerParameter });
+          aliasParameter = this.defineIntegerParameter({ ...nameOptions, ...parameter });
           break;
         case CommandLineParameterKind.IntegerList:
-          const integerListParameter: CommandLineIntegerListParameter =
-            parameter as CommandLineIntegerListParameter;
-          aliasParameter = this.defineIntegerListParameter({ ...nameOptions, ...integerListParameter });
+          aliasParameter = this.defineIntegerListParameter({ ...nameOptions, ...parameter });
           break;
         case CommandLineParameterKind.String:
-          const stringParameter: CommandLineStringParameter = parameter as CommandLineStringParameter;
-          aliasParameter = this.defineStringParameter({ ...nameOptions, ...stringParameter });
+          aliasParameter = this.defineStringParameter({ ...nameOptions, ...parameter });
           break;
         case CommandLineParameterKind.StringList:
-          const stringListParameter: CommandLineStringParameter = parameter as CommandLineStringParameter;
-          aliasParameter = this.defineStringListParameter({ ...nameOptions, ...stringListParameter });
+          aliasParameter = this.defineStringListParameter({ ...nameOptions, ...parameter });
           break;
         default:
-          throw new Error(`Unsupported parameter kind: ${parameter.kind}`);
+          throw new Error(`Unsupported parameter kind: ${kind}`);
       }
 
       // We know the parserKey is defined because the underlying _defineParameter method sets it,

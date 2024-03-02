@@ -6,6 +6,13 @@ import type {
   IBaseCommandLineDefinition,
   IBaseCommandLineDefinitionWithArgument
 } from './CommandLineDefinition';
+import type { CommandLineChoiceListParameter } from './CommandLineChoiceListParameter';
+import type { CommandLineChoiceParameter } from './CommandLineChoiceParameter';
+import type { CommandLineFlagParameter } from './CommandLineFlagParameter';
+import type { CommandLineIntegerListParameter } from './CommandLineIntegerListParameter';
+import type { CommandLineIntegerParameter } from './CommandLineIntegerParameter';
+import type { CommandLineStringListParameter } from './CommandLineStringListParameter';
+import type { CommandLineStringParameter } from './CommandLineStringParameter';
 
 /**
  * Identifies the kind of a CommandLineParameter.
@@ -54,11 +61,20 @@ const SCOPE_REGEXP: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
  */
 const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
 
+export type CommandLineParameter =
+  | CommandLineChoiceListParameter
+  | CommandLineChoiceParameter
+  | CommandLineFlagParameter
+  | CommandLineIntegerListParameter
+  | CommandLineIntegerParameter
+  | CommandLineStringListParameter
+  | CommandLineStringParameter;
+
 /**
  * The base class for the various command-line parameter types.
  * @public
  */
-export abstract class CommandLineParameter {
+export abstract class CommandLineParameterBase {
   private _shortNameValue: string | undefined;
 
   /**
@@ -249,7 +265,7 @@ export abstract class CommandLineParameter {
  * example "--max-count 123".
  * @public
  */
-export abstract class CommandLineParameterWithArgument extends CommandLineParameter {
+export abstract class CommandLineParameterWithArgument extends CommandLineParameterBase {
   // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
   private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
 

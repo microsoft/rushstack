@@ -3,7 +3,7 @@
 
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
-import { CommandLineParameter } from '../parameters/BaseClasses';
+import { CommandLineParameterBase } from '../parameters/BaseClasses';
 import type { CommandLineParser } from '../providers/CommandLineParser';
 import type { CommandLineAction } from '../providers/CommandLineAction';
 import { AnsiEscape } from '@rushstack/terminal';
@@ -150,7 +150,7 @@ const snapshotPropertyNames: string[] = [
   'values'
 ];
 
-describe(CommandLineParameter.name, () => {
+describe(CommandLineParameterBase.name, () => {
   let existingEnv: NodeJS.ProcessEnv;
 
   beforeEach(() => {

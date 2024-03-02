@@ -41,7 +41,7 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
     // @override
     appendToArgList(argList: string[]): void;
     readonly completions: (() => Promise<TChoice[]>) | undefined;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.ChoiceList;
     // @internal
     _setValue(data: unknown): void;
     get values(): ReadonlyArray<TChoice>;
@@ -58,7 +58,7 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     readonly defaultValue: TChoice | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.Choice;
     // @internal
     _setValue(data: unknown): void;
     get value(): TChoice | undefined;
@@ -75,7 +75,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     constructor(definition: ICommandLineFlagDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.Flag;
     // @internal
     _setValue(data: unknown): void;
     get value(): boolean;
@@ -92,7 +92,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     constructor(definition: ICommandLineIntegerListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.IntegerList;
     // @internal
     _setValue(data: unknown): void;
     get values(): ReadonlyArray<number>;
@@ -107,7 +107,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     readonly defaultValue: number | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.Integer;
     // @internal
     _setValue(data: unknown): void;
     get value(): number | undefined;
@@ -177,8 +177,10 @@ export abstract class CommandLineParameterProvider {
         required: true;
     }): IRequiredCommandLineIntegerParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
+    // Warning: (ae-forgotten-export) The symbol "CommandLineParameter_2" needs to be exported by the entry point index.d.ts
+    //
     // @internal (undocumented)
-    protected _defineParameter(parameter: CommandLineParameter): void;
+    protected _defineParameter(parameter: CommandLineParameter_2): void;
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
     defineStringParameter(definition: ICommandLineStringDefinition & {
         required: false | undefined;
@@ -210,7 +212,7 @@ export abstract class CommandLineParameterProvider {
     // @internal (undocumented)
     protected readonly _registeredParameterParserKeysByName: Map<string, string>;
     // @internal (undocumented)
-    protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean, ignoreShortName: boolean): void;
+    protected _registerParameter(parameter: CommandLineParameter_2, useScopedLongName: boolean, ignoreShortName: boolean): void;
     get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
     renderUsageText(): string;
@@ -259,7 +261,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     constructor(definition: ICommandLineStringListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.StringList;
     // @internal
     _setValue(data: unknown): void;
     get values(): ReadonlyArray<string>;
@@ -274,7 +276,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    get kind(): CommandLineParameterKind;
+    readonly kind: CommandLineParameterKind.String;
     // @internal
     _setValue(data: unknown): void;
     get value(): string | undefined;
@@ -417,7 +419,7 @@ export interface IScopedLongNameParseResult {
 export abstract class ScopedCommandLineAction extends CommandLineAction {
     constructor(options: ICommandLineActionOptions);
     // @internal (undocumented)
-    protected _defineParameter(parameter: CommandLineParameter): void;
+    protected _defineParameter(parameter: CommandLineParameter_2): void;
     // @internal
     _execute(): Promise<void>;
     // @internal

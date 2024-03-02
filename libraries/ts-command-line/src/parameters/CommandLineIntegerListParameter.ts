@@ -12,14 +12,12 @@ import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 export class CommandLineIntegerListParameter extends CommandLineParameterWithArgument {
   private _values: number[] = [];
 
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.IntegerList = CommandLineParameterKind.IntegerList;
+
   /** @internal */
   public constructor(definition: ICommandLineIntegerListDefinition) {
     super(definition);
-  }
-
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.IntegerList;
   }
 
   /**

@@ -2,23 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import type { ICommandLineFlagDefinition } from './CommandLineDefinition';
-import { CommandLineParameter, CommandLineParameterKind } from './BaseClasses';
+import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasses';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineFlagParameter}.
  * @public
  */
-export class CommandLineFlagParameter extends CommandLineParameter {
+export class CommandLineFlagParameter extends CommandLineParameterBase {
   private _value: boolean = false;
+
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.Flag = CommandLineParameterKind.Flag;
 
   /** @internal */
   public constructor(definition: ICommandLineFlagDefinition) {
     super(definition);
-  }
-
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.Flag;
   }
 
   /**
