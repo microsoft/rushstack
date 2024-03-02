@@ -695,9 +695,7 @@ export abstract class CommandLineParameterProvider {
     for (const parameter of this._parameters) {
       const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
-      if (parameter._postParseValidation) {
-        parameter._postParseValidation(parameter._getValue());
-      }
+      parameter._validateValue?.(parameter._getValue());
     }
 
     if (this.remainder) {
@@ -877,14 +875,19 @@ export abstract class CommandLineParameterProvider {
       argparseOptions
     );
     if (required && environmentVariable) {
+      // Add some special-cased logic to handle required parameters with environment variables
       parameter._preParse = () => {
+        // Set the value as non-required before parsing. We'll validate it explicitly
         argparseArgument.required = false;
       };
       parameter._postParse = () => {
         // Reset the required value to make the usage text correct
         argparseArgument.required = true;
       };
-      parameter._postParseValidation = (value: unknown | null | undefined) => {
+      parameter._validateValue = (value: unknown | null | undefined) => {
+        // For these values, we have to perform explicit validation because they're requested
+        // as required, but we disabled argparse's required flag to allow the environment variable
+        // to potentially fill the value.
         if (value === undefined || value === null) {
           argumentParser.error(`Argument "${longName}" is required`);
         }

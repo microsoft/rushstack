@@ -144,8 +144,6 @@ export abstract class CommandLineParameter {
     // @internal (undocumented)
     _postParse: (() => void) | undefined;
     // @internal (undocumented)
-    _postParseValidation: ((value: unknown | undefined) => void) | undefined;
-    // @internal (undocumented)
     _preParse: (() => void) | undefined;
     protected reportInvalidData(data: unknown): never;
     readonly required: boolean;
@@ -156,6 +154,8 @@ export abstract class CommandLineParameter {
     readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
+    // @internal (undocumented)
+    _validateValue: ((value: unknown | undefined) => void) | undefined;
 }
 
 // @public

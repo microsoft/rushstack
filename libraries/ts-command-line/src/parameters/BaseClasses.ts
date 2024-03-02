@@ -96,7 +96,7 @@ export abstract class CommandLineParameterBase {
   /**
    * @internal
    */
-  public _postParseValidation: ((value: unknown | undefined) => void) | undefined;
+  public _validateValue: ((value: unknown | undefined) => void) | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
