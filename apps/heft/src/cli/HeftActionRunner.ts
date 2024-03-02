@@ -209,8 +209,6 @@ export class HeftActionRunner {
       // to the number of CPU cores
       this._parallelism = numberOfCores;
     }
-
-    this._metricsCollector.setStartTime();
   }
 
   protected get parameterManager(): HeftParameterManager {
@@ -350,6 +348,8 @@ export class HeftActionRunner {
     abortSignal: AbortSignal,
     requestRun?: (requestor?: string) => void
   ): Promise<OperationStatus> {
+    // Record this as the start of task execution.
+    this._metricsCollector.setStartTime();
     // Execute the action operations
     return await runWithLoggingAsync(
       () => {

@@ -26,6 +26,19 @@ export interface IMetricsData {
   taskTotalExecutionMs: number;
 
   /**
+   * How long the process has been running before the action was first executed, in milliseconds.
+   * Broken out so that `taskTotalExecutionMs` only includes the actual task executions.
+   * This is how long Heft took to boot.
+   */
+  bootDurationMs: number;
+
+  /**
+   * How long the process has been alive, in milliseconds.
+   * Mostly of interest when running in watch mode, to track how long developer sessions last.
+   */
+  totalUptimeMs: number;
+
+  /**
    * The name of the operating system provided by NodeJS.
    */
   machineOs: string;
@@ -87,12 +100,17 @@ export class MetricsCollector {
   public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
     new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
 
+  private _bootDurationMs: number | undefined;
   private _startTimeMs: number | undefined;
 
   /**
    * Start metrics log timer.
    */
   public setStartTime(): void {
+    if (this._bootDurationMs === undefined) {
+      // Only set this once. This is for tracking boot overhead.
+      this._bootDurationMs = process.uptime() * 1000;
+    }
     this._startTimeMs = performance.now();
   }
 
@@ -108,7 +126,8 @@ export class MetricsCollector {
     performanceData?: Partial<IPerformanceData>,
     parameters?: Record<string, string>
   ): Promise<void> {
-    if (this._startTimeMs === undefined) {
+    const { _bootDurationMs, _startTimeMs } = this;
+    if (_bootDurationMs === undefined || _startTimeMs === undefined) {
       throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
     }
 
@@ -117,14 +136,18 @@ export class MetricsCollector {
     }
 
     const filledPerformanceData: IPerformanceData = {
-      taskTotalExecutionMs: (performance.now() - this._startTimeMs) / 1000,
+      taskTotalExecutionMs: performance.now() - _startTimeMs,
       ...(performanceData || {})
     };
+
+    const { taskTotalExecutionMs } = filledPerformanceData;
 
     const metricData: IMetricsData = {
       command: command,
       encounteredError: filledPerformanceData.encounteredError,
-      taskTotalExecutionMs: filledPerformanceData.taskTotalExecutionMs,
+      bootDurationMs: _bootDurationMs,
+      taskTotalExecutionMs: taskTotalExecutionMs,
+      totalUptimeMs: process.uptime() * 1000,
       machineOs: process.platform,
       machineArch: process.arch,
       machineCores: os.cpus().length,
