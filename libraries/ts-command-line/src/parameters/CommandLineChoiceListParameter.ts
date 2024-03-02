@@ -2,14 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import type { ICommandLineChoiceListDefinition } from './CommandLineDefinition';
-import { CommandLineParameter, CommandLineParameterKind } from './BaseClasses';
+import { CommandLineParameterBase, CommandLineParameterKind } from './BaseClasses';
 import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineChoiceListParameter}.
  * @public
  */
-export class CommandLineChoiceListParameter<TChoice extends string = string> extends CommandLineParameter {
+export class CommandLineChoiceListParameter<
+  TChoice extends string = string
+> extends CommandLineParameterBase {
   /** {@inheritDoc ICommandLineChoiceListDefinition.alternatives} */
   public readonly alternatives: ReadonlyArray<TChoice>;
 
@@ -17,6 +19,9 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
 
   /** {@inheritDoc ICommandLineChoiceListDefinition.completions} */
   public readonly completions: (() => Promise<TChoice[]>) | undefined;
+
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.ChoiceList = CommandLineParameterKind.ChoiceList;
 
   /** @internal */
   public constructor(definition: ICommandLineChoiceListDefinition<TChoice>) {
@@ -30,11 +35,6 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
 
     this.alternatives = definition.alternatives;
     this.completions = definition.completions;
-  }
-
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.ChoiceList;
   }
 
   /**

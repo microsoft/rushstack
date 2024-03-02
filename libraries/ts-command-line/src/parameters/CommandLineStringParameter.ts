@@ -22,17 +22,15 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
 
   private _value: string | undefined = undefined;
 
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.String = CommandLineParameterKind.String;
+
   /** @internal */
   public constructor(definition: ICommandLineStringDefinition) {
     super(definition);
 
     this.defaultValue = definition.defaultValue;
     this.validateDefaultValue(!!this.defaultValue);
-  }
-
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.String;
   }
 
   /**

@@ -5,7 +5,7 @@ import { SCOPING_PARAMETER_GROUP } from '../Constants';
 import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction';
 import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
-import type { CommandLineParameter } from '../parameters/BaseClasses';
+import type { CommandLineParameter, CommandLineParameterBase } from '../parameters/BaseClasses';
 import type {
   CommandLineParameterProvider,
   ICommandLineParserData,
@@ -120,8 +120,11 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
   /**
    * {@inheritDoc CommandLineParameterProvider.parameters}
+   *
+   * @internalremarks
+   * TODO: Replace this type with `CommandLineParameter` in the next major bump.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameter> {
+  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
     if (this._scopedCommandLineParser) {
       return [...super.parameters, ...this._scopedCommandLineParser.parameters];
     } else {
@@ -152,7 +155,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
       actionOptions: this._options,
       aliasAction: data.aliasAction,
       aliasDocumentation: data.aliasDocumentation,
-      unscopedActionParameters: this.parameters,
+      unscopedActionParameters: this.parameters as CommandLineParameter[],
       registerDefinedParametersState: this._subparserState,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });

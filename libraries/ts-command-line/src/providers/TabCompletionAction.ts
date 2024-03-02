@@ -7,7 +7,7 @@ import type { CommandLineIntegerParameter } from '../parameters/CommandLineInteg
 import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import {
   CommandLineParameterKind,
-  type CommandLineParameter,
+  type CommandLineParameterBase,
   CommandLineParameterWithArgument
 } from '../parameters/BaseClasses';
 import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
@@ -20,12 +20,12 @@ const DEFAULT_POSITION: number = 0;
 export class TabCompleteAction extends CommandLineAction {
   private readonly _wordToCompleteParameter: CommandLineStringParameter;
   private readonly _positionParameter: CommandLineIntegerParameter;
-  private readonly _actions: Map<string, Map<string, CommandLineParameter>>;
-  private readonly _globalParameters: Map<string, CommandLineParameter>;
+  private readonly _actions: Map<string, Map<string, CommandLineParameterBase>>;
+  private readonly _globalParameters: Map<string, CommandLineParameterBase>;
 
   public constructor(
     actions: ReadonlyArray<CommandLineAction>,
-    globalParameters: ReadonlyArray<CommandLineParameter>
+    globalParameters: ReadonlyArray<CommandLineParameterBase>
   ) {
     super({
       actionName: CommandLineConstants.TabCompletionActionName,
@@ -33,11 +33,11 @@ export class TabCompleteAction extends CommandLineAction {
       documentation: 'Provides tab completion.'
     });
 
-    this._actions = new Map<string, Map<string, CommandLineParameter>>();
+    this._actions = new Map<string, Map<string, CommandLineParameterBase>>();
     for (const action of actions) {
-      const parameterNameToParameterInfoMap: Map<string, CommandLineParameter> = new Map<
+      const parameterNameToParameterInfoMap: Map<string, CommandLineParameterBase> = new Map<
         string,
-        CommandLineParameter
+        CommandLineParameterBase
       >();
       for (const parameter of action.parameters) {
         parameterNameToParameterInfoMap.set(parameter.longName, parameter);
@@ -48,7 +48,7 @@ export class TabCompleteAction extends CommandLineAction {
       this._actions.set(action.actionName, parameterNameToParameterInfoMap);
     }
 
-    this._globalParameters = new Map<string, CommandLineParameter>();
+    this._globalParameters = new Map<string, CommandLineParameterBase>();
     for (const parameter of globalParameters) {
       this._globalParameters.set(parameter.longName, parameter);
       if (parameter.shortName) {
@@ -85,7 +85,7 @@ export class TabCompleteAction extends CommandLineAction {
     commandLine: string,
     caretPosition: number = commandLine.length
   ): AsyncIterable<string> {
-    const actions: Map<string, Map<string, CommandLineParameter>> = this._actions;
+    const actions: Map<string, Map<string, CommandLineParameterBase>> = this._actions;
 
     if (!commandLine || !caretPosition) {
       yield* this._getAllActions();
@@ -116,7 +116,7 @@ export class TabCompleteAction extends CommandLineAction {
     } else {
       for (const actionName of actions.keys()) {
         if (actionName === tokens[1 + globalParameterOffset]) {
-          const parameterNameMap: Map<string, CommandLineParameter> = actions.get(actionName)!;
+          const parameterNameMap: Map<string, CommandLineParameterBase> = actions.get(actionName)!;
 
           const parameterNames: string[] = Array.from(parameterNameMap.keys());
 
@@ -173,7 +173,7 @@ export class TabCompleteAction extends CommandLineAction {
     return stringArgv(commandLine);
   }
 
-  private async _getParameterValueCompletions(parameter: CommandLineParameter): Promise<string[]> {
+  private async _getParameterValueCompletions(parameter: CommandLineParameterBase): Promise<string[]> {
     let choiceParameterValues: string[] = [];
     if (parameter.kind === CommandLineParameterKind.Choice) {
       choiceParameterValues = (parameter as CommandLineChoiceParameter).alternatives as string[];
@@ -196,7 +196,7 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   private _getGlobalParameterOffset(tokens: string[]): number {
-    const globalParameters: Map<string, CommandLineParameter> = this._globalParameters;
+    const globalParameters: Map<string, CommandLineParameterBase> = this._globalParameters;
     let count: number = 0;
 
     outer: for (let i: number = 1; i < tokens.length; i++) {

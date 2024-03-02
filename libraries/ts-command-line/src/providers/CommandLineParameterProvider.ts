@@ -15,9 +15,10 @@ import type {
 } from '../parameters/CommandLineDefinition';
 import type { ICommandLineParserOptions } from './CommandLineParser';
 import {
-  type CommandLineParameter,
+  type CommandLineParameterBase,
   type CommandLineParameterWithArgument,
-  CommandLineParameterKind
+  CommandLineParameterKind,
+  type CommandLineParameter
 } from '../parameters/BaseClasses';
 import {
   CommandLineChoiceParameter,
@@ -128,7 +129,7 @@ export abstract class CommandLineParameterProvider {
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameter> {
+  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
     return this._parameters;
   }
 
@@ -492,7 +493,7 @@ export abstract class CommandLineParameterProvider {
     // First, loop through all parameters with short names. If there are any duplicates, disable the short names
     // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
     // be reported as errors if the user attempts to use them.
-    const parametersWithDuplicateShortNames: Set<CommandLineParameter> = new Set();
+    const parametersWithDuplicateShortNames: Set<CommandLineParameterBase> = new Set();
     for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
       if (shortNameParameters.length > 1) {
         for (const parameter of shortNameParameters) {
@@ -591,14 +592,14 @@ export abstract class CommandLineParameterProvider {
 
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
         // the non-ambiguous name is different for each.
-        const duplicateShortNameParameters: CommandLineParameter[] | undefined =
+        const duplicateShortNameParameters: CommandLineParameterBase[] | undefined =
           this._parametersByShortName.get(parameterName);
         if (duplicateShortNameParameters) {
           // We also need to make sure we get the non-ambiguous long name for the parameter, since it is
           // possible for that the long name is ambiguous as well.
           const nonAmbiguousLongNames: string[] = [];
           for (const parameter of duplicateShortNameParameters) {
-            const matchingLongNameParameters: CommandLineParameter[] | undefined =
+            const matchingLongNameParameters: CommandLineParameterBase[] | undefined =
               this._parametersByLongName.get(parameter.longName);
             if (!matchingLongNameParameters?.length) {
               // This should never happen
@@ -632,11 +633,11 @@ export abstract class CommandLineParameterProvider {
           );
         }
 
-        const duplicateLongNameParameters: CommandLineParameter[] | undefined =
+        const duplicateLongNameParameters: CommandLineParameterBase[] | undefined =
           this._parametersByLongName.get(parameterName);
         if (duplicateLongNameParameters) {
           const nonAmbiguousLongNames: string[] = duplicateLongNameParameters.map(
-            (p: CommandLineParameter) => {
+            (p: CommandLineParameterBase) => {
               // The scoped long name should always be provided
               if (!p.scopedLongName) {
                 // This should never happen
@@ -781,13 +782,11 @@ export abstract class CommandLineParameterProvider {
     let type: string | undefined;
     switch (kind) {
       case CommandLineParameterKind.Choice: {
-        const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
-        choices = choiceParameter.alternatives as string[];
+        choices = parameter.alternatives as string[];
         break;
       }
       case CommandLineParameterKind.ChoiceList: {
-        const choiceParameter: CommandLineChoiceListParameter = parameter as CommandLineChoiceListParameter;
-        choices = choiceParameter.alternatives as string[];
+        choices = parameter.alternatives as string[];
         action = 'append';
         break;
       }
@@ -872,7 +871,7 @@ export abstract class CommandLineParameterProvider {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 
-  private _getParameter<T extends CommandLineParameter>(
+  private _getParameter<T extends CommandLineParameterBase>(
     parameterLongName: string,
     expectedKind: CommandLineParameterKind,
     parameterScope?: string
@@ -882,12 +881,13 @@ export abstract class CommandLineParameterProvider {
     parameterLongName = longName;
     parameterScope = scope || parameterScope;
 
-    const parameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(parameterLongName);
+    const parameters: CommandLineParameterBase[] | undefined =
+      this._parametersByLongName.get(parameterLongName);
     if (!parameters) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }
 
-    let parameter: CommandLineParameter | undefined = parameters.find(
+    let parameter: CommandLineParameterBase | undefined = parameters.find(
       (p) => p.parameterScope === parameterScope
     );
     if (!parameter) {

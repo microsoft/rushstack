@@ -4,7 +4,7 @@
 import * as argparse from 'argparse';
 
 import { CommandLineAction } from './CommandLineAction';
-import { CommandLineParameterKind, type CommandLineParameter } from '../parameters/BaseClasses';
+import { CommandLineParameterKind, type CommandLineParameterBase } from '../parameters/BaseClasses';
 import type { ICommandLineParserData, IRegisterDefinedParametersState } from './CommandLineParameterProvider';
 import type { ICommandLineParserOptions } from './CommandLineParser';
 import type { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
@@ -90,7 +90,7 @@ export class AliasCommandLineAction extends CommandLineAction {
     // All parameters are going to be defined by the target action. Re-use the target action parameters
     // for this action.
     for (const parameter of this.targetAction.parameters) {
-      let aliasParameter: CommandLineParameter;
+      let aliasParameter: CommandLineParameterBase;
       const nameOptions: { parameterLongName: string; parameterShortName: string | undefined } = {
         parameterLongName: parameter.longName,
         parameterShortName: parameter.shortName
