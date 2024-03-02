@@ -168,9 +168,13 @@ export abstract class CommandLineParameterProvider {
     defineChoiceListParameter<TChoice extends string = string>(definition: ICommandLineChoiceListDefinition<TChoice>): CommandLineChoiceListParameter<TChoice>;
     defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice> & {
         required: false | undefined;
+        defaultValue: undefined;
     }): CommandLineChoiceParameter<TChoice>;
     defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice> & {
         required: true;
+    }): IRequiredCommandLineChoiceParameter<TChoice>;
+    defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice> & {
+        defaultValue: TChoice;
     }): IRequiredCommandLineChoiceParameter<TChoice>;
     defineChoiceParameter<TChoice extends string = string>(definition: ICommandLineChoiceDefinition<TChoice>): CommandLineChoiceParameter<TChoice>;
     defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
@@ -178,9 +182,13 @@ export abstract class CommandLineParameterProvider {
     defineIntegerListParameter(definition: ICommandLineIntegerListDefinition): CommandLineIntegerListParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition & {
         required: false | undefined;
+        defaultValue: undefined;
     }): CommandLineIntegerParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition & {
         required: true;
+    }): IRequiredCommandLineIntegerParameter;
+    defineIntegerParameter(definition: ICommandLineIntegerDefinition & {
+        defaultValue: number;
     }): IRequiredCommandLineIntegerParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
     // Warning: (ae-forgotten-export) The symbol "CommandLineParameter_2" needs to be exported by the entry point index.d.ts
@@ -190,9 +198,13 @@ export abstract class CommandLineParameterProvider {
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
     defineStringParameter(definition: ICommandLineStringDefinition & {
         required: false | undefined;
+        defaultValue: undefined;
     }): CommandLineStringParameter;
     defineStringParameter(definition: ICommandLineStringDefinition & {
         required: true;
+    }): IRequiredCommandLineStringParameter;
+    defineStringParameter(definition: ICommandLineStringDefinition & {
+        defaultValue: string;
     }): IRequiredCommandLineStringParameter;
     defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
     // @internal

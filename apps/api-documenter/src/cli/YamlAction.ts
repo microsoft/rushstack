@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { CommandLineFlagParameter, CommandLineChoiceParameter } from '@rushstack/ts-command-line';
+import type {
+  CommandLineFlagParameter,
+  IRequiredCommandLineChoiceParameter
+} from '@rushstack/ts-command-line';
 
 import type { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
@@ -12,7 +15,7 @@ import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 export class YamlAction extends BaseAction {
   private readonly _officeParameter: CommandLineFlagParameter;
   private readonly _newDocfxNamespacesParameter: CommandLineFlagParameter;
-  private readonly _yamlFormatParameter: CommandLineChoiceParameter<YamlFormat>;
+  private readonly _yamlFormatParameter: IRequiredCommandLineChoiceParameter<YamlFormat>;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({

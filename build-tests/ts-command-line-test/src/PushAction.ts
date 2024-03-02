@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import {
-  CommandLineFlagParameter,
+  type CommandLineFlagParameter,
   CommandLineAction,
-  CommandLineChoiceParameter
+  type IRequiredCommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { BusinessLogic } from './BusinessLogic';
 
@@ -12,7 +12,7 @@ type Protocol = 'ftp' | 'webdav' | 'scp';
 
 export class PushAction extends CommandLineAction {
   private _force: CommandLineFlagParameter;
-  private _protocol: CommandLineChoiceParameter<Protocol>;
+  private _protocol: IRequiredCommandLineChoiceParameter<Protocol>;
 
   public constructor() {
     super({
@@ -24,7 +24,7 @@ export class PushAction extends CommandLineAction {
 
   protected onExecute(): Promise<void> {
     // abstract
-    return BusinessLogic.doTheWork(this._force.value, this._protocol.value || '(none)');
+    return BusinessLogic.doTheWork(this._force.value, this._protocol.value);
   }
 
   protected onDefineParameters(): void {

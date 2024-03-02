@@ -5,8 +5,8 @@ import {
   CommandLineParser,
   type CommandLineFlagParameter,
   type CommandLineStringParameter,
-  type CommandLineChoiceParameter,
-  type IRequiredCommandLineStringParameter
+  type IRequiredCommandLineStringParameter,
+  type IRequiredCommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { InternalError } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
@@ -17,7 +17,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;
   private readonly _pathParameter: IRequiredCommandLineStringParameter;
   private readonly _baseFolderParameter: CommandLineStringParameter;
-  private readonly _resolutionTypeParameter: CommandLineChoiceParameter<ResolutionType>;
+  private readonly _resolutionTypeParameter: IRequiredCommandLineChoiceParameter<ResolutionType>;
 
   public constructor() {
     super({
@@ -75,7 +75,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
       traceImport({
         importPath: this._pathParameter.value,
         baseFolder: this._baseFolderParameter.value,
-        resolutionType: this._resolutionTypeParameter.value ?? 'cjs'
+        resolutionType: this._resolutionTypeParameter.value
       });
     } catch (error) {
       if (this._debugParameter.value) {
