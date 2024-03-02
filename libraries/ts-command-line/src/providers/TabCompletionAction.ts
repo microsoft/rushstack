@@ -8,7 +8,8 @@ import type { CommandLineStringParameter } from '../parameters/CommandLineString
 import {
   CommandLineParameterKind,
   type CommandLineParameterBase,
-  CommandLineParameterWithArgument
+  CommandLineParameterWithArgument,
+  type CommandLineParameter
 } from '../parameters/BaseClasses';
 import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
 import { CommandLineAction } from './CommandLineAction';
@@ -20,8 +21,8 @@ const DEFAULT_POSITION: number = 0;
 export class TabCompleteAction extends CommandLineAction {
   private readonly _wordToCompleteParameter: CommandLineStringParameter;
   private readonly _positionParameter: CommandLineIntegerParameter;
-  private readonly _actions: Map<string, Map<string, CommandLineParameterBase>>;
-  private readonly _globalParameters: Map<string, CommandLineParameterBase>;
+  private readonly _actions: Map<string, Map<string, CommandLineParameter>>;
+  private readonly _globalParameters: Map<string, CommandLineParameter>;
 
   public constructor(
     actions: ReadonlyArray<CommandLineAction>,
@@ -33,26 +34,23 @@ export class TabCompleteAction extends CommandLineAction {
       documentation: 'Provides tab completion.'
     });
 
-    this._actions = new Map<string, Map<string, CommandLineParameterBase>>();
+    this._actions = new Map();
     for (const action of actions) {
-      const parameterNameToParameterInfoMap: Map<string, CommandLineParameterBase> = new Map<
-        string,
-        CommandLineParameterBase
-      >();
+      const parameterNameToParameterInfoMap: Map<string, CommandLineParameter> = new Map();
       for (const parameter of action.parameters) {
-        parameterNameToParameterInfoMap.set(parameter.longName, parameter);
+        parameterNameToParameterInfoMap.set(parameter.longName, parameter as CommandLineParameter);
         if (parameter.shortName) {
-          parameterNameToParameterInfoMap.set(parameter.shortName, parameter);
+          parameterNameToParameterInfoMap.set(parameter.shortName, parameter as CommandLineParameter);
         }
       }
       this._actions.set(action.actionName, parameterNameToParameterInfoMap);
     }
 
-    this._globalParameters = new Map<string, CommandLineParameterBase>();
+    this._globalParameters = new Map<string, CommandLineParameter>();
     for (const parameter of globalParameters) {
-      this._globalParameters.set(parameter.longName, parameter);
+      this._globalParameters.set(parameter.longName, parameter as CommandLineParameter);
       if (parameter.shortName) {
-        this._globalParameters.set(parameter.shortName, parameter);
+        this._globalParameters.set(parameter.shortName, parameter as CommandLineParameter);
       }
     }
 
@@ -85,7 +83,7 @@ export class TabCompleteAction extends CommandLineAction {
     commandLine: string,
     caretPosition: number = commandLine.length
   ): AsyncIterable<string> {
-    const actions: Map<string, Map<string, CommandLineParameterBase>> = this._actions;
+    const actions: Map<string, Map<string, CommandLineParameter>> = this._actions;
 
     if (!commandLine || !caretPosition) {
       yield* this._getAllActions();
@@ -116,14 +114,14 @@ export class TabCompleteAction extends CommandLineAction {
     } else {
       for (const actionName of actions.keys()) {
         if (actionName === tokens[1 + globalParameterOffset]) {
-          const parameterNameMap: Map<string, CommandLineParameterBase> = actions.get(actionName)!;
+          const parameterNameMap: Map<string, CommandLineParameter> = actions.get(actionName)!;
 
           const parameterNames: string[] = Array.from(parameterNameMap.keys());
 
           if (completePartialWord) {
             for (const parameterName of parameterNames) {
               if (parameterName === secondLastToken) {
-                const values: string[] = await this._getParameterValueCompletions(
+                const values: ReadonlyArray<string> = await this._getParameterValueCompletions(
                   parameterNameMap.get(parameterName)!
                 );
                 if (values.length > 0) {
@@ -136,7 +134,7 @@ export class TabCompleteAction extends CommandLineAction {
           } else {
             for (const parameterName of parameterNames) {
               if (parameterName === lastToken) {
-                const values: string[] = await this._getParameterValueCompletions(
+                const values: ReadonlyArray<string> = await this._getParameterValueCompletions(
                   parameterNameMap.get(parameterName)!
                 );
                 if (values.length > 0) {
@@ -173,21 +171,25 @@ export class TabCompleteAction extends CommandLineAction {
     return stringArgv(commandLine);
   }
 
-  private async _getParameterValueCompletions(parameter: CommandLineParameterBase): Promise<string[]> {
-    let choiceParameterValues: string[] = [];
+  private async _getParameterValueCompletions(
+    parameter: CommandLineParameter
+  ): Promise<ReadonlyArray<string>> {
+    let choiceParameterValues: ReadonlyArray<string> = [];
     if (parameter.kind === CommandLineParameterKind.Choice) {
-      choiceParameterValues = (parameter as CommandLineChoiceParameter).alternatives as string[];
+      choiceParameterValues = parameter.alternatives;
     } else if (parameter.kind !== CommandLineParameterKind.Flag) {
       let parameterWithArgumentOrChoices:
         | CommandLineParameterWithArgument
         | CommandLineChoiceParameter
         | undefined = undefined;
-      if (parameter instanceof CommandLineParameterWithArgument) {
-        parameterWithArgumentOrChoices = parameter as CommandLineParameterWithArgument;
-      } else if (parameter instanceof CommandLineChoiceParameter) {
-        parameterWithArgumentOrChoices = parameter as CommandLineChoiceParameter;
+      if (
+        parameter instanceof CommandLineParameterWithArgument ||
+        parameter instanceof CommandLineChoiceParameter
+      ) {
+        parameterWithArgumentOrChoices = parameter;
       }
-      if (parameterWithArgumentOrChoices && parameterWithArgumentOrChoices.completions) {
+
+      if (parameterWithArgumentOrChoices?.completions) {
         choiceParameterValues = await parameterWithArgumentOrChoices.completions();
       }
     }
@@ -196,7 +198,7 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   private _getGlobalParameterOffset(tokens: string[]): number {
-    const globalParameters: Map<string, CommandLineParameterBase> = this._globalParameters;
+    const globalParameters: Map<string, CommandLineParameter> = this._globalParameters;
     let count: number = 0;
 
     outer: for (let i: number = 1; i < tokens.length; i++) {
@@ -212,7 +214,7 @@ export class TabCompleteAction extends CommandLineAction {
   }
 
   private *_completeParameterValues(
-    choiceParameterValues: string[],
+    choiceParameterValues: ReadonlyArray<string>,
     lastToken: string
   ): IterableIterator<string> {
     for (const choiceParameterValue of choiceParameterValues) {
