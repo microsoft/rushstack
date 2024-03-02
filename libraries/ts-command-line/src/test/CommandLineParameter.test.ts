@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as argparse from 'argparse';
+import { AnsiEscape } from '@rushstack/terminal';
+
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { CommandLineParameterBase } from '../parameters/BaseClasses';
 import type { CommandLineParser } from '../providers/CommandLineParser';
 import type { CommandLineAction } from '../providers/CommandLineAction';
-import { AnsiEscape } from '@rushstack/terminal';
+
+interface IExtendedArgumentParser extends argparse.ArgumentParser {
+  _printMessage: (message: string) => void;
+}
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -78,8 +84,13 @@ function createParser(): DynamicCommandLineParser {
     parameterLongName: '--integer-required',
     description: 'An integer',
     argumentName: 'NUMBER',
-    // Not yet supported
-    // environmentVariable: 'ENV_INTEGER_REQUIRED',
+    required: true
+  });
+  action.defineIntegerParameter({
+    parameterLongName: '--env-integer-required',
+    description: 'An integer',
+    argumentName: 'NUMBER',
+    environmentVariable: 'ENV_INTEGER_REQUIRED',
     required: true
   });
 
@@ -195,6 +206,8 @@ describe(CommandLineParameterBase.name, () => {
       '123',
       '--integer-required',
       '321',
+      '--env-integer-required',
+      '123',
       '--integer-list',
       '37',
       '--integer-list',
@@ -248,7 +261,7 @@ describe(CommandLineParameterBase.name, () => {
   it('parses an input with NO parameters', async () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do:the-job');
-    const args: string[] = ['do:the-job', '--integer-required', '123'];
+    const args: string[] = ['do:the-job', '--integer-required', '123', '--env-integer-required', '321'];
 
     await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
@@ -335,7 +348,9 @@ describe(CommandLineParameterBase.name, () => {
       '--undocumented-synonym',
       'undocumented-value',
       '--integer-required',
-      '6'
+      '6',
+      '--env-integer-required',
+      '123'
     ];
 
     await expect(commandLineParser.execute(args)).resolves.toBe(true);
@@ -349,6 +364,45 @@ describe(CommandLineParameterBase.name, () => {
     }
     expect(copiedArgs).toMatchSnapshot();
   });
+
+  it('raises an error if a required parameter backed by an env variable is not provided', async () => {
+    const commandLineParser: CommandLineParser = createParser();
+
+    const printMessageSpy: jest.SpyInstance = jest
+      .spyOn(argparse.ArgumentParser.prototype as IExtendedArgumentParser, '_printMessage')
+      .mockImplementation(() => {
+        /* don't print */
+      });
+
+    const args: string[] = ['do:the-job', '--integer-required', '1'];
+    await expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toMatchSnapshot('Error');
+    expect(printMessageSpy).toHaveBeenCalled();
+    expect(printMessageSpy.mock.calls[0][0]).toMatchSnapshot('Usage');
+  });
+
+  it(
+    'prints the same usage if a required parameter backed by an env variable is not provided as when ' +
+      'a different required parameter is missing',
+    async () => {
+      const printMessageSpy: jest.SpyInstance = jest
+        .spyOn(argparse.ArgumentParser.prototype as IExtendedArgumentParser, '_printMessage')
+        .mockImplementation(() => {
+          /* don't print */
+        });
+
+      async function runWithArgsAsync(args: string[]): Promise<void> {
+        const commandLineParser: CommandLineParser = createParser();
+        await expect(commandLineParser.execute(args)).resolves.toBe(false);
+      }
+
+      await runWithArgsAsync(['do:the-job', '--integer-required', '1']);
+      await runWithArgsAsync(['do:the-job', '--env-integer-required', '1']);
+
+      expect(printMessageSpy).toHaveBeenCalledTimes(2);
+      expect(printMessageSpy.mock.calls[0][0]).toMatchSnapshot('Usage');
+      expect(printMessageSpy.mock.calls[0][0]).toEqual(printMessageSpy.mock.calls[1][0]);
+    }
+  );
 
   describe('choice list', () => {
     function createHelloWorldParser(): CommandLineParser {

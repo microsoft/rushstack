@@ -28,7 +28,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
     // @internal
     _execute(): Promise<void>;
     // @internal
-    protected _getArgumentParser(): argparse.ArgumentParser;
+    _getArgumentParser(): argparse.ArgumentParser;
     protected abstract onExecute(): Promise<void>;
     readonly summary: string;
 }
@@ -129,6 +129,10 @@ export abstract class CommandLineParameter {
     readonly parameterScope: string | undefined;
     // @internal
     _parserKey: string | undefined;
+    // @internal (undocumented)
+    _postParse?: () => void;
+    // @internal (undocumented)
+    _preParse?: () => void;
     protected reportInvalidData(data: unknown): never;
     readonly required: boolean;
     readonly scopedLongName: string | undefined;
@@ -138,6 +142,8 @@ export abstract class CommandLineParameter {
     readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
+    // @internal (undocumented)
+    _validateValue?: () => void;
 }
 
 // @public
@@ -203,6 +209,10 @@ export abstract class CommandLineParameterProvider {
     get parameters(): ReadonlyArray<CommandLineParameter>;
     get parametersProcessed(): boolean;
     parseScopedLongName(scopedLongName: string): IScopedLongNameParseResult;
+    // @internal
+    _postParse(): void;
+    // @internal
+    _preParse(): void;
     // @internal
     _processParsedData(parserOptions: ICommandLineParserOptions, data: _ICommandLineParserData): void;
     // (undocumented)

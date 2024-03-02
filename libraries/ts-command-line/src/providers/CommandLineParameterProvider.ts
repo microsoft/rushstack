@@ -88,6 +88,17 @@ const LONG_NAME_GROUP_NAME: string = 'longName';
 const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
   /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
 
+interface IExtendedArgumentGroup extends argparse.ArgumentGroup {
+  // The types are incorrect - this function returns the constructed argument
+  // object, which looks like the argument options type.
+  addArgument(nameOrFlags: string | string[], options: argparse.ArgumentOptions): argparse.ArgumentOptions;
+}
+
+interface IExtendedArgumentParser extends argparse.ArgumentParser {
+  // This function throws
+  error(message: string): never;
+}
+
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
@@ -569,7 +580,27 @@ export abstract class CommandLineParameterProvider {
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
   /**
-   * This is called internally by CommandLineParser.execute()
+   * This is called internally by {@link CommandLineParser.execute}
+   * @internal
+   */
+  public _preParse(): void {
+    for (const parameter of this._parameters) {
+      parameter._preParse?.();
+    }
+  }
+
+  /**
+   * This is called internally by {@link CommandLineParser.execute} before `printUsage` is called
+   * @internal
+   */
+  public _postParse(): void {
+    for (const parameter of this._parameters) {
+      parameter._postParse?.();
+    }
+  }
+
+  /**
+   * This is called internally by {@link CommandLineParser.execute}
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
@@ -669,6 +700,7 @@ export abstract class CommandLineParameterProvider {
     for (const parameter of this._parameters) {
       const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
+      parameter._validateValue?.();
     }
 
     if (this.remainder) {
@@ -744,6 +776,7 @@ export abstract class CommandLineParameterProvider {
       description,
       kind,
       required,
+      environmentVariable,
       parameterGroup,
       undocumentedSynonyms,
       _parserKey: parserKey
@@ -819,6 +852,7 @@ export abstract class CommandLineParameterProvider {
       type
     };
 
+    const argumentParser: IExtendedArgumentParser = this._getArgumentParser() as IExtendedArgumentParser;
     let argumentGroup: argparse.ArgumentGroup | undefined;
     if (parameterGroup) {
       argumentGroup = this._parameterGroupsByName.get(parameterGroup);
@@ -832,16 +866,69 @@ export abstract class CommandLineParameterProvider {
           throw new Error('Unexpected parameter group: ' + parameterGroup);
         }
 
-        argumentGroup = this._getArgumentParser().addArgumentGroup({
+        argumentGroup = argumentParser.addArgumentGroup({
           title: `Optional ${parameterGroupName} arguments`
         });
         this._parameterGroupsByName.set(parameterGroup, argumentGroup);
       }
     } else {
-      argumentGroup = this._getArgumentParser();
+      argumentGroup = argumentParser;
     }
 
-    argumentGroup.addArgument(names, { ...argparseOptions });
+    const argparseArgument: argparse.ArgumentOptions = (argumentGroup as IExtendedArgumentGroup).addArgument(
+      names,
+      argparseOptions
+    );
+    if (required && environmentVariable) {
+      // Add some special-cased logic to handle required parameters with environment variables
+
+      const originalPreParse: (() => void) | undefined = parameter._preParse?.bind(parameter);
+      parameter._preParse = () => {
+        originalPreParse?.();
+        // Set the value as non-required before parsing. We'll validate it explicitly
+        argparseArgument.required = false;
+      };
+
+      const originalPostParse: (() => void) | undefined = parameter._postParse?.bind(parameter);
+      parameter._postParse = () => {
+        // Reset the required value to make the usage text correct
+        argparseArgument.required = true;
+        originalPostParse?.();
+      };
+
+      function throwMissingParameterError(): never {
+        argumentParser.error(`Argument "${longName}" is required`);
+      }
+
+      const originalValidateValue: (() => void) | undefined = parameter._validateValue?.bind(parameter);
+      // For these values, we have to perform explicit validation because they're requested
+      // as required, but we disabled argparse's required flag to allow the environment variable
+      // to potentially fill the value.
+      switch (kind) {
+        case CommandLineParameterKind.Choice:
+        case CommandLineParameterKind.Integer:
+        case CommandLineParameterKind.String:
+          parameter._validateValue = function () {
+            if (this.value === undefined || this.value === null) {
+              throwMissingParameterError();
+            }
+
+            originalValidateValue?.();
+          };
+          break;
+        case CommandLineParameterKind.ChoiceList:
+        case CommandLineParameterKind.IntegerList:
+        case CommandLineParameterKind.StringList:
+          parameter._validateValue = function () {
+            if (this.values.length === 0) {
+              throwMissingParameterError();
+            }
+
+            originalValidateValue?.();
+          };
+          break;
+      }
+    }
 
     if (undocumentedSynonyms?.length) {
       argumentGroup.addArgument(undocumentedSynonyms, {

@@ -15,6 +15,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "6",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "123",
   "### --integer-list output: ###",
   "### --string output: ###",
   "### --string-with-default output: ###",
@@ -244,6 +247,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "321",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "123",
   "### --integer-list output: ###",
   "--integer-list",
   "37",
@@ -459,6 +465,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "123",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "321",
   "### --integer-list output: ###",
   "### --string output: ###",
   "### --string-with-default output: ###",
@@ -493,6 +502,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "1",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "333",
   "### --integer-list output: ###",
   "--integer-list",
   "1",
@@ -525,8 +537,8 @@ exports[`CommandLineParameterBase prints the action help 1`] = `
                           [--choice-with-default {one,two,three,default}]
                           [-C {red,green,blue}] [-f] [-i NUMBER]
                           [--integer-with-default NUMBER] --integer-required
-                          NUMBER [-I LIST_ITEM] [-s TEXT]
-                          [--string-with-default TEXT]
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
                           [--string-with-undocumented-synonym TEXT]
                           [-l LIST_ITEM]
                           
@@ -559,6 +571,10 @@ Optional arguments:
                         environment variable. The default value is 123.
   --integer-required NUMBER
                         An integer
+  --env-integer-required NUMBER
+                        An integer. This parameter may alternatively be 
+                        specified via the ENV_INTEGER_REQUIRED environment 
+                        variable.
   -I LIST_ITEM, --integer-list LIST_ITEM
                         This parameter may be specified multiple times to 
                         make a list of integers. This parameter may 
@@ -595,5 +611,36 @@ Optional arguments:
   -g, --global-flag  A flag that affects all actions
 
 For detailed help about a specific command, use: example <command> -h
+"
+`;
+
+exports[`CommandLineParameterBase prints the same usage if a required parameter backed by an env variable is not provided as when a different required parameter is missing: Usage 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}]
+                          [-C {red,green,blue}] [-f] [-i NUMBER]
+                          [--integer-with-default NUMBER] --integer-required
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
+                          
+"
+`;
+
+exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Error 1`] = `
+[Error: example do:the-job: error: Argument "--env-integer-required" is required
+]
+`;
+
+exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Usage 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}]
+                          [-C {red,green,blue}] [-f] [-i NUMBER]
+                          [--integer-with-default NUMBER] --integer-required
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
+                          
 "
 `;

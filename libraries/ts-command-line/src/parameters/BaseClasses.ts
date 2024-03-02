@@ -83,6 +83,21 @@ export abstract class CommandLineParameterBase {
    */
   public _parserKey: string | undefined;
 
+  /**
+   * @internal
+   */
+  public _preParse?: () => void;
+
+  /**
+   * @internal
+   */
+  public _postParse?: () => void;
+
+  /**
+   * @internal
+   */
+  public _validateValue?: () => void;
+
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
 
@@ -153,15 +168,6 @@ export abstract class CommandLineParameterBase {
     }
 
     if (this.environmentVariable) {
-      if (this.required) {
-        // TODO: This constraint is imposed only because argparse enforces "required" parameters, but
-        // it does not know about ts-command-line environment variable mappings.  We should fix this.
-        throw new Error(
-          `An "environmentVariable" cannot be specified for "${this.longName}"` +
-            ` because it is a required parameter`
-        );
-      }
-
       if (
         !this.allowNonStandardEnvironmentVariableNames &&
         !ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)
