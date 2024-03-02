@@ -67,14 +67,6 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
-   * @internal
-   */
-  public _getValue(): unknown {
-    return this._value;
-  }
-
-  /**
    * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */

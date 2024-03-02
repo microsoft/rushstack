@@ -94,14 +94,6 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
-   * @internal
-   */
-  public _getValue(): unknown {
-    return this._value;
-  }
-
-  /**
    * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */

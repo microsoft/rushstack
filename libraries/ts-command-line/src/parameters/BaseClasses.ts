@@ -86,17 +86,17 @@ export abstract class CommandLineParameterBase {
   /**
    * @internal
    */
-  public _preParse: (() => void) | undefined;
+  public _preParse?: () => void;
 
   /**
    * @internal
    */
-  public _postParse: (() => void) | undefined;
+  public _postParse?: () => void;
 
   /**
    * @internal
    */
-  public _validateValue: ((value: unknown | undefined) => void) | undefined;
+  public _validateValue?: () => void;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
@@ -206,12 +206,6 @@ export abstract class CommandLineParameterBase {
    * @internal
    */
   public abstract _setValue(data: unknown): void;
-
-  /**
-   * Called internally by CommandLineParameterProvider._processParsedData()
-   * @internal
-   */
-  public abstract _getValue(): unknown;
 
   /**
    * Returns additional text used by the help formatter.

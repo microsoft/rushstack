@@ -41,8 +41,6 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
     // @override
     appendToArgList(argList: string[]): void;
     readonly completions: (() => Promise<TChoice[]>) | undefined;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.ChoiceList;
     // @internal
     _setValue(data: unknown): void;
@@ -60,8 +58,6 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     readonly defaultValue: TChoice | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.Choice;
     // @internal
     _setValue(data: unknown): void;
@@ -79,8 +75,6 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     constructor(definition: ICommandLineFlagDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.Flag;
     // @internal
     _setValue(data: unknown): void;
@@ -98,8 +92,6 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     constructor(definition: ICommandLineIntegerListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.IntegerList;
     // @internal
     _setValue(data: unknown): void;
@@ -115,8 +107,6 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     readonly defaultValue: number | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.Integer;
     // @internal
     _setValue(data: unknown): void;
@@ -133,8 +123,6 @@ export abstract class CommandLineParameter {
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    abstract _getValue(): unknown;
     abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
     readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
@@ -142,9 +130,9 @@ export abstract class CommandLineParameter {
     // @internal
     _parserKey: string | undefined;
     // @internal (undocumented)
-    _postParse: (() => void) | undefined;
+    _postParse?: () => void;
     // @internal (undocumented)
-    _preParse: (() => void) | undefined;
+    _preParse?: () => void;
     protected reportInvalidData(data: unknown): never;
     readonly required: boolean;
     readonly scopedLongName: string | undefined;
@@ -155,7 +143,7 @@ export abstract class CommandLineParameter {
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
     // @internal (undocumented)
-    _validateValue: ((value: unknown | undefined) => void) | undefined;
+    _validateValue?: () => void;
 }
 
 // @public
@@ -273,8 +261,6 @@ export class CommandLineRemainder {
     appendToArgList(argList: string[]): void;
     readonly description: string;
     // @internal
-    _getValue(): unknown;
-    // @internal
     _setValue(data: unknown): void;
     get values(): ReadonlyArray<string>;
 }
@@ -285,8 +271,6 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     constructor(definition: ICommandLineStringListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.StringList;
     // @internal
     _setValue(data: unknown): void;
@@ -302,8 +286,6 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    // @internal
-    _getValue(): unknown;
     readonly kind: CommandLineParameterKind.String;
     // @internal
     _setValue(data: unknown): void;

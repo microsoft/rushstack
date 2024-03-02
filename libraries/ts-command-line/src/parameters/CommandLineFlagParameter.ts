@@ -58,14 +58,6 @@ export class CommandLineFlagParameter extends CommandLineParameterBase {
   }
 
   /**
-   * {@inheritDoc CommandLineParameter._setValue}
-   * @internal
-   */
-  public _getValue(): unknown {
-    return this._value;
-  }
-
-  /**
    * Returns a boolean indicating whether the parameter was included in the command line.
    *
    * @remarks

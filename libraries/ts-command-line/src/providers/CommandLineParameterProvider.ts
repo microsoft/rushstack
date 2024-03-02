@@ -94,6 +94,11 @@ interface IExtendedArgumentGroup extends argparse.ArgumentGroup {
   addArgument(nameOrFlags: string | string[], options: argparse.ArgumentOptions): argparse.ArgumentOptions;
 }
 
+interface IExtendedArgumentParser extends argparse.ArgumentParser {
+  // This function throws
+  error(message: string): never;
+}
+
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
@@ -695,7 +700,7 @@ export abstract class CommandLineParameterProvider {
     for (const parameter of this._parameters) {
       const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
-      parameter._validateValue?.(parameter._getValue());
+      parameter._validateValue?.();
     }
 
     if (this.remainder) {
@@ -847,7 +852,7 @@ export abstract class CommandLineParameterProvider {
       type
     };
 
-    const argumentParser: argparse.ArgumentParser = this._getArgumentParser();
+    const argumentParser: IExtendedArgumentParser = this._getArgumentParser() as IExtendedArgumentParser;
     let argumentGroup: argparse.ArgumentGroup | undefined;
     if (parameterGroup) {
       argumentGroup = this._parameterGroupsByName.get(parameterGroup);
@@ -884,14 +889,34 @@ export abstract class CommandLineParameterProvider {
         // Reset the required value to make the usage text correct
         argparseArgument.required = true;
       };
-      parameter._validateValue = (value: unknown | null | undefined) => {
-        // For these values, we have to perform explicit validation because they're requested
-        // as required, but we disabled argparse's required flag to allow the environment variable
-        // to potentially fill the value.
-        if (value === undefined || value === null) {
-          argumentParser.error(`Argument "${longName}" is required`);
-        }
-      };
+
+      function throwMissingParameterError(): never {
+        argumentParser.error(`Argument "${longName}" is required`);
+      }
+
+      // For these values, we have to perform explicit validation because they're requested
+      // as required, but we disabled argparse's required flag to allow the environment variable
+      // to potentially fill the value.
+      switch (kind) {
+        case CommandLineParameterKind.Choice:
+        case CommandLineParameterKind.Integer:
+        case CommandLineParameterKind.String:
+          parameter._validateValue = function () {
+            if (this.value === undefined || this.value === null) {
+              throwMissingParameterError();
+            }
+          };
+          break;
+        case CommandLineParameterKind.ChoiceList:
+        case CommandLineParameterKind.IntegerList:
+        case CommandLineParameterKind.StringList:
+          parameter._validateValue = function () {
+            if (this.values.length === 0) {
+              throwMissingParameterError();
+            }
+          };
+          break;
+      }
     }
 
     if (undocumentedSynonyms?.length) {

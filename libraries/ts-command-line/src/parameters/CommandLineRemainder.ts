@@ -42,14 +42,6 @@ export class CommandLineRemainder {
     this._values.push(...data);
   }
 
-  /**
-   * {@inheritDoc CommandLineParameter._setValue}
-   * @internal
-   */
-  public _getValue(): unknown {
-    return this._values;
-  }
-
   /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.values.length > 0) {
