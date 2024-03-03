@@ -138,6 +138,7 @@ export abstract class CommandLineParameterBase {
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
     this.undocumentedSynonyms = definition.undocumentedSynonyms;
+    this.allowNonStandardEnvironmentVariableNames = definition.allowNonStandardEnvironmentVariableNames;
 
     if (!LONG_NAME_REGEXP.test(this.longName)) {
       throw new Error(
