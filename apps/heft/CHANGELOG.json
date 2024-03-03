@@ -2,6 +2,21 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.65.10",
+      "tag": "@rushstack/heft_v0.65.10",
+      "date": "Sun, 03 Mar 2024 20:58:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.19.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.42.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.65.9",
       "tag": "@rushstack/heft_v0.65.9",
       "date": "Sat, 02 Mar 2024 02:22:23 GMT",

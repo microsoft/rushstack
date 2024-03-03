@@ -2,6 +2,18 @@
   "name": "@rushstack/worker-pool",
   "entries": [
     {
+      "version": "0.4.36",
+      "tag": "@rushstack/worker-pool_v0.4.36",
+      "date": "Sun, 03 Mar 2024 20:58:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.65.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.35",
       "tag": "@rushstack/worker-pool_v0.4.35",
       "date": "Sat, 02 Mar 2024 02:22:24 GMT",

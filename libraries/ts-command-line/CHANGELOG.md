@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Sat, 02 Mar 2024 02:22:23 GMT and should not be manually modified.
+This log was last generated on Sun, 03 Mar 2024 20:58:12 GMT and should not be manually modified.
+
+## 4.19.1
+Sun, 03 Mar 2024 20:58:12 GMT
+
+### Patches
+
+- Fix an issue where the `allowNonStandardEnvironmentVariableNames` parameter option had no effect.
 
 ## 4.19.0
 Sat, 02 Mar 2024 02:22:23 GMT
