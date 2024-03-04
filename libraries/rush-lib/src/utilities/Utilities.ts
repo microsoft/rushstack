@@ -321,7 +321,8 @@ export class Utilities {
    */
   public static async executeCommandAndInspectOutputAsync(
     options: IExecuteCommandOptions,
-    onStdoutStreamChunk?: (chunkString: string) => void
+    onStdoutStreamChunk?: (chunk: string) => string | void,
+    onExit?: (code: number, signal: string) => void
   ): Promise<void> {
     await Utilities._executeCommandAndInspectOutputInternalAsync(
       options.command,
@@ -330,7 +331,8 @@ export class Utilities {
       options.suppressOutput ? undefined : onStdoutStreamChunk ? ['inherit', 'pipe', 'inherit'] : [0, 1, 2],
       options.environment,
       options.keepEnvironment,
-      onStdoutStreamChunk
+      onStdoutStreamChunk,
+      onExit
     );
   }
 
@@ -411,7 +413,7 @@ export class Utilities {
   public static async executeCommandAndProcessOutputWithRetryAsync(
     options: IExecuteCommandOptions,
     maxAttempts: number,
-    onStdoutStreamChunk?: (chunkString: string) => void,
+    onStdoutStreamChunk?: (chunk: string) => string | void,
     retryCallback?: () => void
   ): Promise<void> {
     if (maxAttempts < 1) {
@@ -746,7 +748,8 @@ export class Utilities {
     stdio: child_process.SpawnSyncOptions['stdio'],
     environment?: IEnvironment,
     keepEnvironment: boolean = false,
-    onStdoutStreamChunk?: (chunk: string) => void
+    onStdoutStreamChunk?: (chunk: string) => string | void,
+    onExit?: (code: number, signal: string) => void
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const options: child_process.SpawnOptions = {
@@ -770,14 +773,23 @@ export class Utilities {
         options
       );
 
-      const inspectStream: PassThrough = new PassThrough();
-
-      inspectStream.on('data', (chunk) => {
-        const strData: string = chunk.toString();
-        onStdoutStreamChunk?.(strData);
+      const inspectStream: PassThrough = new PassThrough({
+        transform: onStdoutStreamChunk
+          ? (
+              chunk: string | Buffer,
+              encoding: BufferEncoding,
+              callback: (error?: Error, data?: string | Buffer) => void
+            ) => {
+              const chunkString: string = chunk.toString();
+              const updatedChunk: string | void = onStdoutStreamChunk(chunkString);
+              callback(undefined, updatedChunk ?? chunk);
+            }
+          : undefined
       });
 
       childProcess.on('close', (code: number, signal: string) => {
+        onExit?.(code, signal);
+
         // TODO: Is it possible that the childProcess is closed before the receiving the last chunks?
         if (code === 0) {
           resolve();
