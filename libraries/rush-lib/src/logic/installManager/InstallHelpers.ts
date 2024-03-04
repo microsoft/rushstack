@@ -48,7 +48,8 @@ export class InstallHelpers {
     };
 
     if (rushConfiguration.packageManager === 'pnpm') {
-      let pnpmOptions: PnpmOptionsConfiguration = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+      const pnpmOptions: PnpmOptionsConfiguration =
+        subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
       if (!commonPackageJson.pnpm) {
         commonPackageJson.pnpm = {};
       }

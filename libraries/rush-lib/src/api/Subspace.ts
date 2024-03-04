@@ -70,7 +70,7 @@ export class Subspace {
             this.getSubspaceTempFolder()
           );
         } catch (e) {
-          console.error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
+          throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
         }
       }
     } else {
