@@ -5,7 +5,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import { PassThrough } from 'stream';
+import { Transform } from 'stream';
 import {
   JsonFile,
   type IPackageJson,
@@ -773,7 +773,7 @@ export class Utilities {
         options
       );
 
-      const inspectStream: PassThrough = new PassThrough({
+      const inspectStream: Transform = new Transform({
         transform: onStdoutStreamChunk
           ? (
               chunk: string | Buffer,
