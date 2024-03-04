@@ -29,8 +29,6 @@ interface ISubspaceDetail {
   tempShrinkwrapPreinstallFilename: string;
 }
 
-type UnknownPnpmOptions = 'UNKNOWN_PNPM_OPTIONS';
-
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
  * configuration file.
