@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import type { SpawnSyncReturns } from 'child_process';
 import {
   AlreadyReportedError,
   EnvironmentMap,
-  Executable,
   FileConstants,
   FileSystem,
   JsonFile,
@@ -31,6 +29,7 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import { Utilities } from '../utilities/Utilities';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -160,7 +159,7 @@ export class RushPnpmCommandLineParser {
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
     process.exitCode = 1;
-    this._execute();
+    await this._executeAsync();
 
     if (process.exitCode === 0) {
       await this._postExecuteAsync();
@@ -349,7 +348,7 @@ export class RushPnpmCommandLineParser {
     }
   }
 
-  private _execute(): void {
+  private async _executeAsync(): Promise<void> {
     const rushConfiguration: RushConfiguration = this._rushConfiguration;
     const workspaceFolder: string = rushConfiguration.commonTempFolder;
     const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
@@ -375,21 +374,36 @@ export class RushPnpmCommandLineParser {
       }
     }
 
-    const result: SpawnSyncReturns<string> = Executable.spawnSync(
-      rushConfiguration.packageManagerToolFilename,
-      this._pnpmArgs,
-      {
-        environmentMap: pnpmEnvironmentMap,
-        stdio: 'inherit'
+    let onStdoutStreamChunk: ((chunk: string) => string | void) | undefined;
+    switch (this._commandName) {
+      case 'patch': {
+        // Replace `pnpm patch-commit` with `rush-pnpm patch-commit` when running
+        // `pnpm patch` to avoid the `pnpm patch` command being suggested in the output
+        onStdoutStreamChunk = (stdoutChunk: string) => {
+          return stdoutChunk.replace(/pnpm patch-commit/g, 'rush-pnpm patch-commit');
+        };
+
+        break;
       }
-    );
-    if (result.error) {
-      throw new Error('Failed to invoke PNPM: ' + result.error);
     }
-    if (result.status === null) {
-      throw new Error('Failed to invoke PNPM: Spawn completed without an exit code');
+
+    try {
+      await Utilities.executeCommandAndInspectOutputAsync(
+        {
+          command: rushConfiguration.packageManagerToolFilename,
+          args: this._pnpmArgs,
+          workingDirectory: process.cwd(),
+          environment: pnpmEnvironmentMap.toObject(),
+          keepEnvironment: true
+        },
+        onStdoutStreamChunk,
+        (exitCode: number, signal: string) => {
+          process.exitCode = exitCode;
+        }
+      );
+    } catch (e) {
+      this._terminal.writeDebugLine(`Error: ${e}`);
     }
-    process.exitCode = result.status;
   }
 
   private async _postExecuteAsync(): Promise<void> {
