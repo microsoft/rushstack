@@ -13,7 +13,9 @@ import {
   NewlineKind,
   AlreadyReportedError,
   type FileSystemStats,
-  Path
+  Path,
+  type FolderItem,
+  Async
 } from '@rushstack/node-core-library';
 import {
   PrintUtilities,
@@ -405,17 +407,57 @@ export abstract class BaseInstallManager {
       ? crypto.createHash('sha1').update(npmrcText).digest('hex')
       : undefined;
 
-    // Copy the committed patches folder if using pnpm
     if (this.rushConfiguration.packageManager === 'pnpm') {
+      // Copy the committed patches folder if using pnpm
       const commonTempPnpmPatchesFolder: string = `${subspace.getSubspaceTempFolder()}/${
         RushConstants.pnpmPatchesFolderName
       }`;
       const rushPnpmPatchesFolder: string = `${this.rushConfiguration.commonFolder}/${RushConstants.pnpmPatchesCommonFolderName}`;
-      if (FileSystem.exists(rushPnpmPatchesFolder)) {
-        FileSystem.copyFiles({
-          sourcePath: rushPnpmPatchesFolder,
-          destinationPath: commonTempPnpmPatchesFolder
-        });
+      let rushPnpmPatches: FolderItem[] | undefined;
+      try {
+        rushPnpmPatches = await FileSystem.readFolderItemsAsync(rushPnpmPatchesFolder);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+      }
+
+      if (rushPnpmPatches) {
+        await FileSystem.ensureFolderAsync(commonTempPnpmPatchesFolder);
+        const existingPatches: FolderItem[] = await FileSystem.readFolderItemsAsync(
+          commonTempPnpmPatchesFolder
+        );
+        const copiedPatchNames: Set<string> = new Set();
+        await Async.forEachAsync(
+          rushPnpmPatches,
+          async (patch: FolderItem) => {
+            const name: string = patch.name;
+            const sourcePath: string = `${rushPnpmPatchesFolder}/${name}`;
+            if (patch.isFile()) {
+              await FileSystem.copyFileAsync({
+                sourcePath,
+                destinationPath: `${commonTempPnpmPatchesFolder}/${name}`
+              });
+              copiedPatchNames.add(name);
+            } else {
+              throw new Error(`Unexpected non-file item found in ${rushPnpmPatchesFolder}: ${sourcePath}`);
+            }
+          },
+          { concurrency: 50 }
+        );
+
+        await Async.forEachAsync(
+          existingPatches,
+          async (patch: FolderItem) => {
+            const name: string = patch.name;
+            if (!copiedPatchNames.has(name)) {
+              await FileSystem.deleteFileAsync(`${commonTempPnpmPatchesFolder}/${name}`);
+            }
+          },
+          { concurrency: 50 }
+        );
+      } else {
+        await FileSystem.deleteFolderAsync(commonTempPnpmPatchesFolder);
       }
     }
 

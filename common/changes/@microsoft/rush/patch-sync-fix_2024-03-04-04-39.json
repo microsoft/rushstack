@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where if a patch is removed from `common/pnpm-patches` after `rush install` had already been run with that patch present, pnpm would try to continue applying the patch.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
