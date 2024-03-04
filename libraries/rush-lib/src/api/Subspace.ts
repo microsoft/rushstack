@@ -11,6 +11,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
+import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 
 /**
  * @internal
@@ -41,6 +42,10 @@ export class Subspace {
   private _commonVersionsConfiguration: CommonVersionsConfiguration | undefined = undefined;
 
   private _detail: ISubspaceDetail | undefined;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration}
+   */
+  private _pnpmOptions: PnpmOptionsConfiguration | undefined;
 
   public constructor(options: ISubspaceOptions) {
     this.subspaceName = options.subspaceName;
@@ -54,6 +59,23 @@ export class Subspace {
    */
   public getProjects(): RushConfigurationProject[] {
     return this._projects;
+  }
+
+  public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
+    if (!this._pnpmOptions) {
+      if (FileSystem.exists(`${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`)) {
+        try {
+          this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+            `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
+            this.getSubspaceTempFolder()
+          );
+        } catch (e) {
+          console.error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
+        }
+      }
+    } else {
+      return this._pnpmOptions;
+    }
   }
 
   private _ensureDetail(): ISubspaceDetail {
