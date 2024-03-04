@@ -29,6 +29,8 @@ interface ISubspaceDetail {
   tempShrinkwrapPreinstallFilename: string;
 }
 
+type UnknownPnpmOptions = 'UNKNOWN_PNPM_OPTIONS';
+
 /**
  * This represents the subspace configurations for a repository, based on the "subspaces.json"
  * configuration file.
@@ -63,19 +65,21 @@ export class Subspace {
 
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
     if (!this._pnpmOptions) {
-      if (FileSystem.exists(`${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`)) {
-        try {
-          this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
-            `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
-            this.getSubspaceTempFolder()
-          );
-        } catch (e) {
+      try {
+        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
+          this.getSubspaceTempFolder()
+        );
+        return this._pnpmOptions;
+      } catch (e) {
+        if (FileSystem.isNotExistError(e as Error)) {
+          return undefined;
+        } else {
           throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
         }
       }
-    } else {
-      return this._pnpmOptions;
     }
+    return this._pnpmOptions;
   }
 
   private _ensureDetail(): ISubspaceDetail {

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for subspace level scoped pnpm-config.jsons",
+      "comment": "Add support for subspace level scoped pnpm-config.json e.g. `common/config/subspaces/default/pnpm-config.json`",
       "type": "none"
     }
   ],
