@@ -212,6 +212,7 @@ export interface IIncrementalCopyOperation extends ICopyOperation {
 
 // @public (undocumented)
 export interface IMetricsData {
+    bootDurationMs: number;
     command: string;
     commandParameters: Record<string, string>;
     encounteredError?: boolean;
@@ -221,6 +222,7 @@ export interface IMetricsData {
     machineProcessor: string;
     machineTotalMemoryMB: number;
     taskTotalExecutionMs: number;
+    totalUptimeMs: number;
 }
 
 // @internal (undocumented)

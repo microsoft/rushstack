@@ -21,9 +21,23 @@ export interface IMetricsData {
   encounteredError?: boolean;
 
   /**
-   * The amount of time the command took to execute, in milliseconds.
+   * The total execution duration of all user-defined tasks from `heft.json`, in milliseconds.
+   * This metric is for measuring the cumulative time spent on the underlying build steps for a project.
+   * If running in watch mode, this will be the duration of the most recent incremental build.
    */
   taskTotalExecutionMs: number;
+
+  /**
+   * The total duration before Heft started executing user-defined tasks, in milliseconds.
+   * This metric is for tracking the contribution of Heft itself to total build duration.
+   */
+  bootDurationMs: number;
+
+  /**
+   * How long the process has been alive, in milliseconds.
+   * This metric is for watch mode, to analyze how long developers leave individual Heft sessions running.
+   */
+  totalUptimeMs: number;
 
   /**
    * The name of the operating system provided by NodeJS.
@@ -87,12 +101,17 @@ export class MetricsCollector {
   public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
     new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
 
+  private _bootDurationMs: number | undefined;
   private _startTimeMs: number | undefined;
 
   /**
    * Start metrics log timer.
    */
   public setStartTime(): void {
+    if (this._bootDurationMs === undefined) {
+      // Only set this once. This is for tracking boot overhead.
+      this._bootDurationMs = process.uptime() * 1000;
+    }
     this._startTimeMs = performance.now();
   }
 
@@ -108,7 +127,8 @@ export class MetricsCollector {
     performanceData?: Partial<IPerformanceData>,
     parameters?: Record<string, string>
   ): Promise<void> {
-    if (this._startTimeMs === undefined) {
+    const { _bootDurationMs, _startTimeMs } = this;
+    if (_bootDurationMs === undefined || _startTimeMs === undefined) {
       throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
     }
 
@@ -117,14 +137,18 @@ export class MetricsCollector {
     }
 
     const filledPerformanceData: IPerformanceData = {
-      taskTotalExecutionMs: (performance.now() - this._startTimeMs) / 1000,
+      taskTotalExecutionMs: performance.now() - _startTimeMs,
       ...(performanceData || {})
     };
+
+    const { taskTotalExecutionMs } = filledPerformanceData;
 
     const metricData: IMetricsData = {
       command: command,
       encounteredError: filledPerformanceData.encounteredError,
-      taskTotalExecutionMs: filledPerformanceData.taskTotalExecutionMs,
+      bootDurationMs: _bootDurationMs,
+      taskTotalExecutionMs: taskTotalExecutionMs,
+      totalUptimeMs: process.uptime() * 1000,
       machineOs: process.platform,
       machineArch: process.arch,
       machineCores: os.cpus().length,
