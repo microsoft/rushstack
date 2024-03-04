@@ -11,7 +11,7 @@ import path from 'path';
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory
 import type * as TSemver from 'semver';
-import type { IPackageJson } from '@rushstack/node-core-library';
+import type { IPackageJson, IDependenciesMetaTable } from '@rushstack/node-core-library';
 
 import type {
   IPnpmfile,
@@ -67,7 +67,8 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
 // For example: "project-a": "workspace:*" --> "project-a": "link:../../project-a"
 function rewriteRushProjectVersions(
   packageName: string,
-  dependencies: { [dependencyName: string]: string } | undefined
+  dependencies: { [dependencyName: string]: string } | undefined,
+  dependenciesMeta: IDependenciesMetaTable | undefined
 ): void {
   if (!dependencies) {
     return;
@@ -77,8 +78,9 @@ function rewriteRushProjectVersions(
     throw new Error(`splitWorkspaceGlobalPnpmfileShimSettings not initialized`);
   }
 
-  const subspaceProject: IWorkspaceProjectInfo | undefined = settings.subspaceProjects[packageName];
-  if (!subspaceProject) {
+  const workspaceProject: IWorkspaceProjectInfo | undefined =
+    settings.subspaceProjects[packageName] || settings.workspaceProjects[packageName];
+  if (!workspaceProject) {
     return;
   }
 
@@ -90,10 +92,14 @@ function rewriteRushProjectVersions(
         settings.workspaceProjects[dependencyName];
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
+        let workspaceVersionProtocol: string = 'link:';
+        if (dependenciesMeta && dependenciesMeta[dependencyName]?.injected) {
+          workspaceVersionProtocol = 'file:';
+        }
         const relativePath: string = path.normalize(
-          path.relative(subspaceProject.projectRelativeFolder, workspaceProjectInfo.projectRelativeFolder)
+          path.relative(workspaceProject.projectRelativeFolder, workspaceProjectInfo.projectRelativeFolder)
         );
-        const newVersion: string = 'link:' + relativePath;
+        const newVersion: string = workspaceVersionProtocol + relativePath;
         dependencies[dependencyName] = newVersion;
       } else {
         // Case 2. "<alias>": "workspace:<aliased_package_name>@<version>"
@@ -107,7 +113,7 @@ function rewriteRushProjectVersions(
         if (aliasedWorkspaceProjectInfo) {
           const relativePath: string = path.normalize(
             path.relative(
-              subspaceProject.projectRelativeFolder,
+              workspaceProject.projectRelativeFolder,
               aliasedWorkspaceProjectInfo.projectRelativeFolder
             )
           );
@@ -127,7 +133,7 @@ function rewriteRushProjectVersions(
       if (aliasedWorkspaceProjectInfo) {
         const relativePath: string = path.normalize(
           path.relative(
-            subspaceProject.projectRelativeFolder,
+            workspaceProject.projectRelativeFolder,
             aliasedWorkspaceProjectInfo.projectRelativeFolder
           )
         );
@@ -150,8 +156,8 @@ export const hooks: IPnpmfileHooks = {
   // Rewrite workspace protocol to link protocol for non split workspace projects
   readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
     context = init(context);
-    rewriteRushProjectVersions(pkg.name, pkg.dependencies);
-    rewriteRushProjectVersions(pkg.name, pkg.devDependencies);
+    rewriteRushProjectVersions(pkg.name, pkg.dependencies, pkg?.dependenciesMeta);
+    rewriteRushProjectVersions(pkg.name, pkg.devDependencies, pkg?.dependenciesMeta);
     return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
   },
 
