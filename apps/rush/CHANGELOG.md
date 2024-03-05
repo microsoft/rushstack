@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 05 Mar 2024 01:19:42 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Mar 2024 21:15:26 GMT and should not be manually modified.
+
+## 5.117.4
+Tue, 05 Mar 2024 21:15:26 GMT
+
+### Updates
+
+- Add support for subspace level scoped pnpm-config.json e.g. `common/config/subspaces/default/pnpm-config.json`
 
 ## 5.117.3
 Tue, 05 Mar 2024 01:19:42 GMT
