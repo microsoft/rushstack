@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 01 Mar 2024 23:12:43 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Mar 2024 01:19:42 GMT and should not be manually modified.
+
+## 5.117.3
+Tue, 05 Mar 2024 01:19:42 GMT
+
+### Updates
+
+- Fix an issue where if a patch is removed from `common/pnpm-patches` after `rush install` had already been run with that patch present, pnpm would try to continue applying the patch.
+- Intercept the output printed by `rush-pnpm patch` to update the next step's instructions to run `rush-pnpm patch-commit ...` instead of `pnpm patch-commit ...`.
 
 ## 5.117.2
 Fri, 01 Mar 2024 23:12:43 GMT
