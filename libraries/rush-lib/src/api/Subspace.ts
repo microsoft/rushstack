@@ -42,10 +42,10 @@ export class Subspace {
   private _commonVersionsConfiguration: CommonVersionsConfiguration | undefined = undefined;
 
   private _detail: ISubspaceDetail | undefined;
-  /**
-   * {@inheritDoc PnpmOptionsConfiguration}
-   */
-  private _pnpmOptions: PnpmOptionsConfiguration | undefined;
+
+  private _cachedPnpmOptions: PnpmOptionsConfiguration | undefined = undefined;
+  // If true, then _cachedPnpmOptions has been initialized.
+  private _cachedPnpmOptionsInitialized: boolean = false;
 
   public constructor(options: ISubspaceOptions) {
     this.subspaceName = options.subspaceName;
@@ -61,23 +61,28 @@ export class Subspace {
     return this._projects;
   }
 
+  /**
+   * Returns the parsed contents of the pnpm-config.json config file.
+   * @beta
+   */
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
-    if (!this._pnpmOptions) {
+    if (this._cachedPnpmOptionsInitialized) {
       try {
-        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
           this.getSubspaceTempFolder()
         );
-        return this._pnpmOptions;
+        this._cachedPnpmOptionsInitialized = true;
       } catch (e) {
         if (FileSystem.isNotExistError(e as Error)) {
-          return undefined;
+          this._cachedPnpmOptions = undefined;
+          this._cachedPnpmOptionsInitialized = true;
         } else {
           throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
         }
       }
     }
-    return this._pnpmOptions;
+    return this._cachedPnpmOptions;
   }
 
   private _ensureDetail(): ISubspaceDetail {
