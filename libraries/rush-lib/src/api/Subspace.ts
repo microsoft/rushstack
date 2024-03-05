@@ -11,6 +11,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
+import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
 
 /**
  * @internal
@@ -42,6 +43,10 @@ export class Subspace {
 
   private _detail: ISubspaceDetail | undefined;
 
+  private _cachedPnpmOptions: PnpmOptionsConfiguration | undefined = undefined;
+  // If true, then _cachedPnpmOptions has been initialized.
+  private _cachedPnpmOptionsInitialized: boolean = false;
+
   public constructor(options: ISubspaceOptions) {
     this.subspaceName = options.subspaceName;
     this._rushConfiguration = options.rushConfiguration;
@@ -54,6 +59,30 @@ export class Subspace {
    */
   public getProjects(): RushConfigurationProject[] {
     return this._projects;
+  }
+
+  /**
+   * Returns the parsed contents of the pnpm-config.json config file.
+   * @beta
+   */
+  public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
+    if (!this._cachedPnpmOptionsInitialized) {
+      try {
+        this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+          `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
+          this.getSubspaceTempFolder()
+        );
+        this._cachedPnpmOptionsInitialized = true;
+      } catch (e) {
+        if (FileSystem.isNotExistError(e as Error)) {
+          this._cachedPnpmOptions = undefined;
+          this._cachedPnpmOptionsInitialized = true;
+        } else {
+          throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
+        }
+      }
+    }
+    return this._cachedPnpmOptions;
   }
 
   private _ensureDetail(): ISubspaceDetail {
