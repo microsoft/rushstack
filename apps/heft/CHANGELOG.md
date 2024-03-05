@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sun, 03 Mar 2024 20:58:12 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Mar 2024 01:19:24 GMT and should not be manually modified.
+
+## 0.66.0
+Tue, 05 Mar 2024 01:19:24 GMT
+
+### Minor changes
+
+- Add new metrics value `bootDurationMs` to track the boot overhead of Heft before the action starts executing the subtasks. Update the start time used to compute `taskTotalExecutionMs` to be the beginning of operation graph execution. Fix the value of `taskTotalExecutionMs` field to be in milliseconds instead of seconds. Add new metrics value `totalUptimeMs` to track how long watch mode sessions are kept alive.
 
 ## 0.65.10
 Sun, 03 Mar 2024 20:58:12 GMT

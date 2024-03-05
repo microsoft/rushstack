@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.66.0",
+      "tag": "@rushstack/heft_v0.66.0",
+      "date": "Tue, 05 Mar 2024 01:19:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new metrics value `bootDurationMs` to track the boot overhead of Heft before the action starts executing the subtasks. Update the start time used to compute `taskTotalExecutionMs` to be the beginning of operation graph execution. Fix the value of `taskTotalExecutionMs` field to be in milliseconds instead of seconds. Add new metrics value `totalUptimeMs` to track how long watch mode sessions are kept alive."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.65.10",
       "tag": "@rushstack/heft_v0.65.10",
       "date": "Sun, 03 Mar 2024 20:58:12 GMT",
