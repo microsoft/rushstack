@@ -66,7 +66,7 @@ export class Subspace {
    * @beta
    */
   public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
-    if (this._cachedPnpmOptionsInitialized) {
+    if (!this._cachedPnpmOptionsInitialized) {
       try {
         this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
