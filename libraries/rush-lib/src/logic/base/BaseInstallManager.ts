@@ -111,7 +111,8 @@ export abstract class BaseInstallManager {
     const { allowShrinkwrapUpdates } = this.options;
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
-      this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+      this.rushConfiguration.defaultSubspace.getPnpmOptions() &&
+      this.rushConfiguration.defaultSubspace.getPnpmOptions().useWorkspaces;
     // Prevent filtered installs when workspaces is disabled
     if (isFilteredInstall && !useWorkspaces) {
       // eslint-disable-next-line no-console
@@ -690,10 +691,7 @@ ${gitLfsHookHandling}
       // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
       // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
       // path.  In all cases, this will be overridden by RUSH_PNPM_STORE_PATH
-      if (
-        this.rushConfiguration.pnpmOptions.pnpmStore === 'local' ||
-        EnvironmentConfiguration.pnpmStorePathOverride
-      ) {
+      if (subspace.getPnpmOptions().pnpmStore === 'local' || EnvironmentConfiguration.pnpmStorePathOverride) {
         args.push('--store', this.rushConfiguration.pnpmOptions.pnpmStorePath);
         if (semver.gte(this.rushConfiguration.packageManagerToolVersion, '6.10.0')) {
           args.push(`${pnpmCacheDirParameter}=${this.rushConfiguration.pnpmOptions.pnpmStorePath}`);
@@ -743,7 +741,7 @@ ${gitLfsHookHandling}
         args.push('--offline');
       }
 
-      if (this.rushConfiguration.pnpmOptions.strictPeerDependencies === false) {
+      if (subspace.getPnpmOptions().strictPeerDependencies === false) {
         args.push('--no-strict-peer-dependencies');
       } else {
         args.push('--strict-peer-dependencies');
@@ -760,7 +758,7 @@ ${gitLfsHookHandling}
         'auto-install-peers'
       );
 
-      let autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
+      let autoInstallPeers: boolean | undefined = subspace.getPnpmOptions().autoInstallPeers;
       if (autoInstallPeers !== undefined) {
         if (isAutoInstallPeersInNpmrc) {
           this._terminal.writeWarningLine(
@@ -788,7 +786,7 @@ ${gitLfsHookHandling}
         'resolution-mode'
       );
 
-      let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;
+      let resolutionMode: PnpmResolutionMode | undefined = subspace.getPnpmOptions().resolutionMode;
       if (resolutionMode) {
         if (isResolutionModeInNpmrc) {
           this._terminal.writeWarningLine(

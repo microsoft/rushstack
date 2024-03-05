@@ -30,6 +30,7 @@ import type { BaseInstallManager } from '../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../logic/base/BaseInstallManagerTypes';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import { Utilities } from '../utilities/Utilities';
+import type { IConfigurationEnvironment } from '../logic/base/BasePackageManagerOptionsConfiguration';
 
 const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
 
@@ -97,9 +98,9 @@ export class RushPnpmCommandLineParser {
       );
     }
 
-    if (!rushConfiguration.pnpmOptions.useWorkspaces) {
+    if (!rushConfiguration.defaultSubspace.getPnpmOptions().useWorkspaces) {
       const pnpmConfigFilename: string =
-        rushConfiguration.pnpmOptions.jsonFilename || RushConstants.rushJsonFilename;
+        rushConfiguration.defaultSubspace.getPnpmOptions().jsonFilename || RushConstants.rushJsonFilename;
       throw new Error(
         `The "rush-pnpm" command requires the "useWorkspaces" setting to be enabled in ${pnpmConfigFilename}`
       );
@@ -354,16 +355,25 @@ export class RushPnpmCommandLineParser {
     const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
     pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
-    if (rushConfiguration.pnpmOptions.pnpmStorePath) {
-      pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
-      pnpmEnvironmentMap.set('NPM_CONFIG_CACHE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
-      pnpmEnvironmentMap.set('NPM_CONFIG_STATE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+    if (rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath) {
+      pnpmEnvironmentMap.set(
+        'NPM_CONFIG_STORE_DIR',
+        rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath
+      );
+      pnpmEnvironmentMap.set(
+        'NPM_CONFIG_CACHE_DIR',
+        rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath
+      );
+      pnpmEnvironmentMap.set(
+        'NPM_CONFIG_STATE_DIR',
+        rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath
+      );
     }
 
-    if (rushConfiguration.pnpmOptions.environmentVariables) {
-      for (const [envKey, { value: envValue, override }] of Object.entries(
-        rushConfiguration.pnpmOptions.environmentVariables
-      )) {
+    const environmentVariables: IConfigurationEnvironment | undefined =
+      rushConfiguration.defaultSubspace.getPnpmOptions().environmentVariables;
+    if (environmentVariables) {
+      for (const [envKey, { value: envValue, override }] of Object.entries(environmentVariables)) {
         if (override) {
           pnpmEnvironmentMap.set(envKey, envValue);
         } else {
@@ -420,7 +430,7 @@ export class RushPnpmCommandLineParser {
         const newGlobalPatchedDependencies: Record<string, string> | undefined =
           commonPackageJson?.pnpm?.patchedDependencies;
         const currentGlobalPatchedDependencies: Record<string, string> | undefined =
-          this._rushConfiguration.pnpmOptions.globalPatchedDependencies;
+          this._rushConfiguration.defaultSubspace.getPnpmOptions().globalPatchedDependencies;
 
         if (!objectsAreDeepEqual(currentGlobalPatchedDependencies, newGlobalPatchedDependencies)) {
           const commonTempPnpmPatchesFolder: string = `${this._rushConfiguration.commonTempFolder}/${RushConstants.pnpmPatchesFolderName}`;
@@ -445,7 +455,9 @@ export class RushPnpmCommandLineParser {
           }
 
           // Update patchedDependencies to pnpm configuration file
-          this._rushConfiguration.pnpmOptions.updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
+          this._rushConfiguration.defaultSubspace
+            .getPnpmOptions()
+            .updateGlobalPatchedDependencies(newGlobalPatchedDependencies);
 
           // Rerun installation to update
           await this._doRushUpdateAsync();

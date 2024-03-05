@@ -28,7 +28,8 @@ export class UnlinkManager {
    */
   public unlink(force: boolean = false): boolean {
     const useWorkspaces: boolean =
-      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+      this._rushConfiguration.defaultSubspace.getPnpmOptions() &&
+      this._rushConfiguration.defaultSubspace.getPnpmOptions().useWorkspaces;
     if (!force && useWorkspaces) {
       // eslint-disable-next-line no-console
       console.log(

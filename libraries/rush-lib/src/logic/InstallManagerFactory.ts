@@ -18,8 +18,8 @@ export class InstallManagerFactory {
   ): Promise<BaseInstallManager> {
     if (
       rushConfiguration.packageManager === 'pnpm' &&
-      rushConfiguration.pnpmOptions &&
-      rushConfiguration.pnpmOptions.useWorkspaces
+      rushConfiguration.defaultSubspace.getPnpmOptions() &&
+      rushConfiguration.defaultSubspace.getPnpmOptions().useWorkspaces
     ) {
       return new WorkspaceInstallManager(rushConfiguration, rushGlobalFolder, purgeManager, options);
     }

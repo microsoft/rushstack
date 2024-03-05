@@ -284,7 +284,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       // Only check for a valid link flag when subspaces is not enabled
       if (!lastLinkFlag.isValid() && !this.rushConfiguration.subspacesFeatureEnabled) {
         const useWorkspaces: boolean =
-          this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+          this.rushConfiguration.defaultSubspace.getPnpmOptions() &&
+          this.rushConfiguration.defaultSubspace.getPnpmOptions().useWorkspaces;
         if (useWorkspaces) {
           throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
         } else {

@@ -48,8 +48,7 @@ export class InstallHelpers {
     };
 
     if (rushConfiguration.packageManager === 'pnpm') {
-      const pnpmOptions: PnpmOptionsConfiguration =
-        subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+      const pnpmOptions: PnpmOptionsConfiguration = subspace.getPnpmOptions();
       if (!commonPackageJson.pnpm) {
         commonPackageJson.pnpm = {};
       }
@@ -112,8 +111,11 @@ export class InstallHelpers {
         configurationEnvironment = rushConfiguration.npmOptions.environmentVariables;
       }
     } else if (rushConfiguration.packageManager === 'pnpm') {
-      if (rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.environmentVariables) {
-        configurationEnvironment = rushConfiguration.pnpmOptions.environmentVariables;
+      if (
+        rushConfiguration.defaultSubspace.getPnpmOptions() &&
+        rushConfiguration.defaultSubspace.getPnpmOptions().environmentVariables
+      ) {
+        configurationEnvironment = rushConfiguration.defaultSubspace.getPnpmOptions().environmentVariables;
       }
     } else if (rushConfiguration.packageManager === 'yarn') {
       if (rushConfiguration.yarnOptions && rushConfiguration.yarnOptions.environmentVariables) {

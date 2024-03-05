@@ -34,7 +34,7 @@ import { PackageNameParsers } from './PackageNameParsers';
 import type { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { RushPluginsConfiguration } from './RushPluginsConfiguration';
-import { type IPnpmOptionsJson, PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { PnpmOptionsConfiguration, type IPnpmOptionsJson } from '../logic/pnpm/PnpmOptionsConfiguration';
 import { type INpmOptionsJson, NpmOptionsConfiguration } from '../logic/npm/NpmOptionsConfiguration';
 import { type IYarnOptionsJson, YarnOptionsConfiguration } from '../logic/yarn/YarnOptionsConfiguration';
 import schemaJson from '../schemas/rush.schema.json';
@@ -501,7 +501,7 @@ export class RushConfiguration {
    * The configuration options used by the current package manager.
    * @remarks
    * For package manager specific variants, reference {@link RushConfiguration.npmOptions | npmOptions},
-   * {@link RushConfiguration.pnpmOptions | pnpmOptions}, or {@link RushConfiguration.yarnOptions | yarnOptions}.
+   * or {@link RushConfiguration.yarnOptions | yarnOptions}.
    */
   public readonly packageManagerOptions!: PackageManagerOptionsConfigurationBase;
 

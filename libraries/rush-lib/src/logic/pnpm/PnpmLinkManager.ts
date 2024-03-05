@@ -41,7 +41,8 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
     const useWorkspaces: boolean =
-      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+      this._rushConfiguration.defaultSubspace.getPnpmOptions() &&
+      this._rushConfiguration.defaultSubspace.getPnpmOptions().useWorkspaces;
     if (useWorkspaces) {
       // eslint-disable-next-line no-console
       console.log(

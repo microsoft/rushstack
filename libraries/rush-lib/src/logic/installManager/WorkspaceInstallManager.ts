@@ -554,7 +554,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // projects with dependencies, a lockfile won't be generated.
     const tempShrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
       this.rushConfiguration.packageManager,
-      this.rushConfiguration.pnpmOptions,
+      subspace.getPnpmOptions(),
       subspace.getTempShrinkwrapFilename()
     );
 
@@ -567,10 +567,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         },
         { concurrency: 10 }
       );
-    } else if (
-      this.rushConfiguration.packageManager === 'pnpm' &&
-      this.rushConfiguration.pnpmOptions?.useWorkspaces
-    ) {
+    } else if (this.rushConfiguration.packageManager === 'pnpm' && subspace.getPnpmOptions()?.useWorkspaces) {
       // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
       // there are no dependencies. Generate empty shrinkwrap files for all projects.
       await Async.forEachAsync(

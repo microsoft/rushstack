@@ -57,10 +57,10 @@ describe(RushConfiguration.name, () => {
     assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, './repo/common/temp');
     assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
-    expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+    expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('local');
     assertPathProperty(
       'pnpmStorePath',
-      rushConfiguration.pnpmOptions.pnpmStorePath,
+      rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath,
       './repo/common/temp/pnpm-store'
     );
     assertPathProperty(
@@ -130,10 +130,10 @@ describe(RushConfiguration.name, () => {
     assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, './repo/common/temp');
     assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, './repo/common/temp/npm-cache');
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, './repo/common/temp/npm-tmp');
-    expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+    expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('local');
     assertPathProperty(
       'pnpmStorePath',
-      rushConfiguration.pnpmOptions.pnpmStorePath,
+      rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath,
       './repo/common/temp/pnpm-store'
     );
     assertPathProperty(
@@ -206,10 +206,10 @@ describe(RushConfiguration.name, () => {
     );
     assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, path.join(expectedValue, 'npm-tmp'));
 
-    expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
+    expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('local');
     assertPathProperty(
       'pnpmStorePath',
-      rushConfiguration.pnpmOptions.pnpmStorePath,
+      rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath,
       path.join(expectedValue, 'pnpm-store')
     );
     assertPathProperty(
@@ -240,11 +240,13 @@ describe(RushConfiguration.name, () => {
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
-        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-        expect(Path.convertToSlashes(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(
-          Path.convertToSlashes(EXPECT_STORE_PATH)
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('local');
+        expect(
+          Path.convertToSlashes(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath)
+        ).toEqual(Path.convertToSlashes(EXPECT_STORE_PATH));
+        expect(path.isAbsolute(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath)).toEqual(
+          true
         );
-        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
       });
 
       it('loads the correct path when environment variable is defined', () => {
@@ -255,9 +257,11 @@ describe(RushConfiguration.name, () => {
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
-        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
-        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
-        expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('local');
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+        expect(path.isAbsolute(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath)).toEqual(
+          true
+        );
       });
     });
 
@@ -270,8 +274,8 @@ describe(RushConfiguration.name, () => {
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
-        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
-        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('global');
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath).toEqual(EXPECT_STORE_PATH);
       });
 
       it('loads the correct path when environment variable is defined', () => {
@@ -282,8 +286,8 @@ describe(RushConfiguration.name, () => {
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
-        expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
-        expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore).toEqual('global');
+        expect(rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath).toEqual(EXPECT_STORE_PATH);
       });
     });
 
@@ -298,12 +302,12 @@ describe(RushConfiguration.name, () => {
     });
   });
 
-  it('reject "pnpmOptions" in rush.json if the file pnpm-config.json exists', () => {
+  it('reject "defaultSubspace.getPnpmOptions()" in rush.json if the file pnpm-config.json exists', () => {
     const RUSH_JSON_FILENAME: string = `${__dirname}/pnpmConfigThrow/rush.json`;
     expect(() => {
       RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
     }).toThrow(
-      'Because the new config file "common/config/rush/pnpm-config.json" is being used, you must remove the old setting "pnpmOptions" from rush.json'
+      'Because the new config file "common/config/rush/pnpm-config.json" is being used, you must remove the old setting "defaultSubspace.getPnpmOptions()" from rush.json'
     );
   });
 
