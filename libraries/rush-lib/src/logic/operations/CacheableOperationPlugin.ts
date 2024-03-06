@@ -471,8 +471,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           if (cobuildLock && isCacheWriteAllowed) {
             const { cacheId, contextId } = cobuildLock.cobuildContext;
 
-            const finalCacheId: string =
-              status === OperationStatus.Failure ? `${cacheId}-${contextId}-failed` : cacheId;
+            let finalCacheId: string = cacheId;
+            if (status === OperationStatus.Failure) {
+              finalCacheId = `${cacheId}-${contextId}-failed`;
+            } else if (status === OperationStatus.SuccessWithWarning && !record.runner.warningsAreAllowed) {
+              finalCacheId = `${cacheId}-${contextId}-warnings`;
+            }
             switch (status) {
               case OperationStatus.SuccessWithWarning:
               case OperationStatus.Success:
