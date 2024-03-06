@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.5",
+      "tag": "@microsoft/rush_v5.117.5",
+      "date": "Wed, 06 Mar 2024 23:03:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add filtered installs for subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.4",
       "tag": "@microsoft/rush_v5.117.4",
       "date": "Tue, 05 Mar 2024 21:15:26 GMT",

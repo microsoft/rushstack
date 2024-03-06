@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 05 Mar 2024 21:15:26 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Mar 2024 23:03:27 GMT and should not be manually modified.
+
+## 5.117.5
+Wed, 06 Mar 2024 23:03:27 GMT
+
+### Updates
+
+- Add filtered installs for subspaces
 
 ## 5.117.4
 Tue, 05 Mar 2024 21:15:26 GMT
