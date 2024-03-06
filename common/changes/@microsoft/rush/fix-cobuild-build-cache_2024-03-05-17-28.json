@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "fixes an issue where cobuilds would write success with warnings as success cache entries unexpectedly.",
-      "type": "patch"
+      "comment": "Fixes an issue where cobuilds would write success with warnings as successful cache entries.",
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush"
