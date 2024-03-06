@@ -50,7 +50,6 @@ import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
-import { SubspacesConfiguration } from '../../api/SubspacesConfiguration';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 
 /**
@@ -372,11 +371,6 @@ export abstract class BaseInstallManager {
 
     const extraNpmrcLines: string[] = [];
     if (this.rushConfiguration.subspacesFeatureEnabled) {
-      const subspaceEnvironmentVariable: string = SubspacesConfiguration._convertNameToEnvironmentVariable(
-        subspace.subspaceName,
-        this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility ?? false
-      );
-
       // Look for a global .npmrc-global file
       const globalNpmrcPath: string = `${this.rushConfiguration.commonRushConfigFolder}/.npmrc-global`;
       if (FileSystem.exists(globalNpmrcPath)) {
@@ -384,10 +378,8 @@ export abstract class BaseInstallManager {
         extraNpmrcLines.push(...globalNpmrcFileLines);
       }
 
-      // _RUSH_SUBSPACE_TEMP_FOLDER is used in .npmrc for subspaces.
-      process.env[subspaceEnvironmentVariable] = subspace.getSubspaceTempFolder();
       extraNpmrcLines.push(
-        `global-pnpmfile=\${${subspaceEnvironmentVariable}}/${RushConstants.pnpmfileGlobalFilename}`
+        `global-pnpmfile=${subspace.getSubspaceTempFolder()}/${RushConstants.pnpmfileGlobalFilename}`
       );
     }
 
