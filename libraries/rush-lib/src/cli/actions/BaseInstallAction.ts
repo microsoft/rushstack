@@ -143,18 +143,23 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
     let selectedSubspaces: ReadonlySet<Subspace> | undefined;
+    const filterArgumentsForSubspace: Map<Subspace, string[]> = new Map();
     if (this.rushConfiguration.subspacesFeatureEnabled) {
       if (installManagerOptions.pnpmFilterArguments.length) {
         // Selecting a set of subspaces
         const selectedProjects: Set<RushConfigurationProject> | undefined =
           await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
         if (selectedProjects) {
+          // Go through each project, add it to it's subspace's pnpm filter arguments
+          for (const project of selectedProjects) {
+            const subspaceFilterArguments: string[] = filterArgumentsForSubspace.get(project.subspace) || [];
+            subspaceFilterArguments.push('--filter', project.packageName);
+            filterArgumentsForSubspace.set(project.subspace, subspaceFilterArguments);
+          }
           selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
         } else {
           throw new Error('The specified filter arguments resulted in no projects being selected.');
         }
-        // Remove the filter arguments as we already have the selected subspaces
-        installManagerOptions.pnpmFilterArguments = [];
       } else if (this._subspaceParameter.value) {
         // Selecting a single subspace
         const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
@@ -239,6 +244,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         // Run the install for each affected subspace
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
+          installManagerOptions.pnpmFilterArguments = filterArgumentsForSubspace.get(selectedSubspace) || [];
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
