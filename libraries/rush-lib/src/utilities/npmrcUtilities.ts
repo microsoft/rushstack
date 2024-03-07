@@ -22,13 +22,25 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
-function _trimNpmrcFile(sourceNpmrcPath: string, extraLines: string[] = []): string {
+function _trimNpmrcFile(
+  sourceNpmrcPath: string,
+  extraLines: {
+    lines: string[];
+    insertBefore: boolean;
+  } = { lines: [], insertBefore: false }
+): string {
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
   }
-  let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
-  npmrcFileLines.push(...extraLines);
+  let npmrcFileLines: string[];
+  if (extraLines.insertBefore) {
+    npmrcFileLines = extraLines.lines;
+    npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
+  } else {
+    npmrcFileLines = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
+    npmrcFileLines.push(...extraLines.lines);
+  }
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
 
@@ -101,7 +113,10 @@ function _copyAndTrimNpmrcFile(
   logger: ILogger,
   sourceNpmrcPath: string,
   targetNpmrcPath: string,
-  extraLines?: string[]
+  extraLines?: {
+    lines: string[];
+    insertBefore: boolean;
+  }
 ): string {
   logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
   logger.info(`  --> "${targetNpmrcPath}"`);
@@ -132,7 +147,10 @@ export function syncNpmrc(
     // eslint-disable-next-line no-console
     error: console.error
   },
-  extraLines?: string[]
+  extraLines?: {
+    lines: string[];
+    insertBefore: boolean;
+  }
 ): string | undefined {
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,

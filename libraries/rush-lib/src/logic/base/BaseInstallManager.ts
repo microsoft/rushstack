@@ -391,7 +391,10 @@ export abstract class BaseInstallManager {
       subspace.getSubspaceTempFolder(),
       undefined,
       undefined,
-      extraNpmrcLines
+      {
+        lines: extraNpmrcLines,
+        insertBefore: true
+      }
     );
     this._syncNpmrcAlreadyCalled = true;
 

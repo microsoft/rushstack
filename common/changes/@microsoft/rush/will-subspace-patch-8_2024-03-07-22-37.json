@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add ability to configure global npmrc lines to be added before local subspace lines",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
