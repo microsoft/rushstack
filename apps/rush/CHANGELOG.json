@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.6",
+      "tag": "@microsoft/rush_v5.117.6",
+      "date": "Thu, 07 Mar 2024 19:35:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes an issue where cobuilds would write success with warnings as successful cache entries."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.5",
       "tag": "@microsoft/rush_v5.117.5",
       "date": "Wed, 06 Mar 2024 23:03:27 GMT",

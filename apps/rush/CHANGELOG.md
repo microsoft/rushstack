@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 06 Mar 2024 23:03:27 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Mar 2024 19:35:20 GMT and should not be manually modified.
+
+## 5.117.6
+Thu, 07 Mar 2024 19:35:20 GMT
+
+### Updates
+
+- Fixes an issue where cobuilds would write success with warnings as successful cache entries.
 
 ## 5.117.5
 Wed, 06 Mar 2024 23:03:27 GMT
