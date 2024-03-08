@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.7",
+      "tag": "@microsoft/rush_v5.117.7",
+      "date": "Fri, 08 Mar 2024 23:45:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where, when the experimental subspace feature is enabled, the subspace's \".npmrc\" file did not take precedence over \".npmrc-global\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.6",
       "tag": "@microsoft/rush_v5.117.6",
       "date": "Thu, 07 Mar 2024 19:35:20 GMT",

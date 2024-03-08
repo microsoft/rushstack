@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 07 Mar 2024 19:35:20 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Mar 2024 23:45:24 GMT and should not be manually modified.
+
+## 5.117.7
+Fri, 08 Mar 2024 23:45:24 GMT
+
+### Updates
+
+- Fix an issue where, when the experimental subspace feature is enabled, the subspace's ".npmrc" file did not take precedence over ".npmrc-global".
 
 ## 5.117.6
 Thu, 07 Mar 2024 19:35:20 GMT
