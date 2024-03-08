@@ -386,13 +386,12 @@ export abstract class BaseInstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    const npmrcText: string | undefined = Utilities.syncNpmrc(
-      subspace.getSubspaceConfigFolder(),
-      subspace.getSubspaceTempFolder(),
-      undefined,
-      undefined,
-      extraNpmrcLines
-    );
+    const npmrcText: string | undefined = Utilities.syncNpmrc({
+      sourceNpmrcFolder: subspace.getSubspaceConfigFolder(),
+      targetNpmrcFolder: subspace.getSubspaceTempFolder(),
+      linesToPrepend: extraNpmrcLines,
+      createIfMissing: this.rushConfiguration.subspacesFeatureEnabled
+    });
     this._syncNpmrcAlreadyCalled = true;
 
     const npmrcHash: string | undefined = npmrcText

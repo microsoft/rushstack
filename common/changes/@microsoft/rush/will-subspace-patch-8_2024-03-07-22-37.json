@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where, when the experimental subspace feature is enabled, the subspace's \".npmrc\" file did not take precedence over \".npmrc-global\".",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
