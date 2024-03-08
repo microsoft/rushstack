@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add ability to configure global npmrc lines to be added before local subspace lines",
+      "comment": "Add configuration options to append or prepend extra lines to the npmrc when it is synced from the source to target directory.",
       "type": "none"
     }
   ],
