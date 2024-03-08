@@ -581,7 +581,11 @@ export class PublishAction extends BaseRushAction {
     Utilities.createFolderWithRetry(this._targetNpmrcPublishFolder);
 
     // Copy down the committed "common\config\rush\.npmrc-publish" file, if there is one
-    Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._targetNpmrcPublishFolder, true);
+    Utilities.syncNpmrc({
+      sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
+      targetNpmrcFolder: this._targetNpmrcPublishFolder,
+      useNpmrcPublish: true
+    });
   }
 
   private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {

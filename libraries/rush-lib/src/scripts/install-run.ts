@@ -166,7 +166,11 @@ function _resolvePackageVersion(
       const rushTempFolder: string = _getRushTempFolder(rushCommonFolder);
       const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
 
-      syncNpmrc(sourceNpmrcFolder, rushTempFolder, undefined, logger);
+      syncNpmrc({
+        sourceNpmrcFolder,
+        targetNpmrcFolder: rushTempFolder,
+        logger
+      });
 
       const npmPath: string = getNpmPath();
 
@@ -409,7 +413,11 @@ export function installAndRun(
     _cleanInstallFolder(rushTempFolder, packageInstallFolder, lockFilePath);
 
     const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
-    syncNpmrc(sourceNpmrcFolder, packageInstallFolder, undefined, logger);
+    syncNpmrc({
+      sourceNpmrcFolder,
+      targetNpmrcFolder: packageInstallFolder,
+      logger
+    });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);
     const command: 'install' | 'ci' = lockFilePath ? 'ci' : 'install';

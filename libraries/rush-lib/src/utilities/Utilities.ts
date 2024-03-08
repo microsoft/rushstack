@@ -529,7 +529,10 @@ export class Utilities {
     JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
     if (options.commonRushConfigFolder) {
-      Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
+      Utilities.syncNpmrc({
+        sourceNpmrcFolder: options.commonRushConfigFolder,
+        targetNpmrcFolder: directory
+      });
     }
 
     // eslint-disable-next-line no-console

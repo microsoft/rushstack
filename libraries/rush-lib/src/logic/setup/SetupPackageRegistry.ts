@@ -108,10 +108,10 @@ export class SetupPackageRegistry {
     }
 
     if (!this._options.syncNpmrcAlreadyCalled) {
-      Utilities.syncNpmrc(
-        this.rushConfiguration.commonRushConfigFolder,
-        this.rushConfiguration.commonTempFolder
-      );
+      Utilities.syncNpmrc({
+        sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
+        targetNpmrcFolder: this.rushConfiguration.commonTempFolder
+      });
     }
 
     // Artifactory does not implement the "npm ping" protocol or any equivalent REST API.

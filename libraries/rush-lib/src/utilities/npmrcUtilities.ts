@@ -22,24 +22,25 @@ export interface ILogger {
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap: Map<string, string> = new Map();
 
-function _trimNpmrcFile(
-  sourceNpmrcPath: string,
-  extraLines: {
-    lines: string[];
-    insertBefore: boolean;
-  } = { lines: [], insertBefore: false }
-): string {
+function _trimNpmrcFile(options: {
+  sourceNpmrcPath: string;
+  linesToPrepend?: string[];
+  linesToAppend?: string[];
+}): string {
+  const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
   const combinedNpmrcFromCache: string | undefined = _combinedNpmrcMap.get(sourceNpmrcPath);
   if (combinedNpmrcFromCache !== undefined) {
     return combinedNpmrcFromCache;
   }
-  let npmrcFileLines: string[];
-  if (extraLines.insertBefore) {
-    npmrcFileLines = extraLines.lines;
+  let npmrcFileLines: string[] = [];
+  if (linesToPrepend) {
+    npmrcFileLines.push(...linesToPrepend);
+  }
+  if (fs.existsSync(sourceNpmrcPath)) {
     npmrcFileLines.push(...fs.readFileSync(sourceNpmrcPath).toString().split('\n'));
-  } else {
-    npmrcFileLines = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
-    npmrcFileLines.push(...extraLines.lines);
+  }
+  if (linesToAppend) {
+    npmrcFileLines.push(...linesToAppend);
   }
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];
@@ -109,19 +110,22 @@ function _trimNpmrcFile(
  * @returns
  * The text of the the .npmrc with lines containing undefined variables commented out.
  */
-function _copyAndTrimNpmrcFile(
-  logger: ILogger,
-  sourceNpmrcPath: string,
-  targetNpmrcPath: string,
-  extraLines?: {
-    lines: string[];
-    insertBefore: boolean;
-  }
-): string {
-  logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
-  logger.info(`  --> "${targetNpmrcPath}"`);
+function _copyAndTrimNpmrcFile(options: ISyncNpmrcOptions): string {
+  const {
+    logger,
+    sourceNpmrcFolder: sourceNpmrcPath,
+    sourceNpmrcFolder: targetNpmrcPath,
+    linesToPrepend,
+    linesToAppend
+  } = options;
+  logger?.info(`Transforming ${sourceNpmrcPath}`); // Verbose
+  logger?.info(`  --> "${targetNpmrcPath}"`);
 
-  const combinedNpmrc: string = _trimNpmrcFile(sourceNpmrcPath, extraLines);
+  const combinedNpmrc: string = _trimNpmrcFile({
+    sourceNpmrcPath,
+    linesToPrepend,
+    linesToAppend
+  });
 
   fs.writeFileSync(targetNpmrcPath, combinedNpmrc);
 
@@ -137,33 +141,40 @@ function _copyAndTrimNpmrcFile(
  * @returns
  * The text of the the synced .npmrc, if one exists. If one does not exist, then undefined is returned.
  */
-export function syncNpmrc(
-  sourceNpmrcFolder: string,
-  targetNpmrcFolder: string,
-  useNpmrcPublish?: boolean,
-  logger: ILogger = {
-    // eslint-disable-next-line no-console
-    info: console.log,
-    // eslint-disable-next-line no-console
-    error: console.error
-  },
-  extraLines?: {
-    lines: string[];
-    insertBefore: boolean;
-  }
-): string | undefined {
+export interface ISyncNpmrcOptions {
+  sourceNpmrcFolder: string;
+  targetNpmrcFolder: string;
+  useNpmrcPublish?: boolean;
+  logger?: ILogger;
+  linesToPrepend?: string[];
+  linesToAppend?: string[];
+  createIfMissing?: boolean;
+}
+export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
+  const {
+    sourceNpmrcFolder,
+    targetNpmrcFolder,
+    useNpmrcPublish,
+    logger = {
+      // eslint-disable-next-line no-console
+      info: console.log,
+      // eslint-disable-next-line no-console
+      error: console.error
+    },
+    createIfMissing = false
+  } = options;
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
     !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
   );
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
-    if (fs.existsSync(sourceNpmrcPath)) {
+    if (fs.existsSync(sourceNpmrcPath) || createIfMissing) {
       // Ensure the target folder exists
       if (!fs.existsSync(targetNpmrcFolder)) {
         fs.mkdirSync(targetNpmrcFolder, { recursive: true });
       }
-      return _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath, extraLines);
+      return _copyAndTrimNpmrcFile(options);
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
       logger.info(`Deleting ${targetNpmrcPath}`); // Verbose
@@ -182,7 +193,7 @@ export function isVariableSetInNpmrcFile(sourceNpmrcFolder: string, variableKey:
     return false;
   }
 
-  const trimmedNpmrcFile: string = _trimNpmrcFile(sourceNpmrcPath);
+  const trimmedNpmrcFile: string = _trimNpmrcFile({ sourceNpmrcPath });
 
   const variableKeyRegExp: RegExp = new RegExp(`^${variableKey}=`, 'm');
   return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
