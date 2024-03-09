@@ -110,16 +110,17 @@ function _trimNpmrcFile(options: {
  * @returns
  * The text of the the .npmrc with lines containing undefined variables commented out.
  */
-function _copyAndTrimNpmrcFile(options: ISyncNpmrcOptions): string {
-  const {
-    logger,
-    sourceNpmrcFolder: sourceNpmrcPath,
-    sourceNpmrcFolder: targetNpmrcPath,
-    linesToPrepend,
-    linesToAppend
-  } = options;
-  logger?.info(`Transforming ${sourceNpmrcPath}`); // Verbose
-  logger?.info(`  --> "${targetNpmrcPath}"`);
+interface INpmrcTrimOptions {
+  sourceNpmrcPath: string;
+  targetNpmrcPath: string;
+  logger: ILogger;
+  linesToPrepend?: string[];
+  linesToAppend?: string[];
+}
+function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
+  const { logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend } = options;
+  logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
+  logger.info(`  --> "${targetNpmrcPath}"`);
 
   const combinedNpmrc: string = _trimNpmrcFile({
     sourceNpmrcPath,
@@ -161,7 +162,9 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       // eslint-disable-next-line no-console
       error: console.error
     },
-    createIfMissing = false
+    createIfMissing = false,
+    linesToAppend,
+    linesToPrepend
   } = options;
   const sourceNpmrcPath: string = path.join(
     sourceNpmrcFolder,
@@ -174,7 +177,13 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       if (!fs.existsSync(targetNpmrcFolder)) {
         fs.mkdirSync(targetNpmrcFolder, { recursive: true });
       }
-      return _copyAndTrimNpmrcFile(options);
+      return _copyAndTrimNpmrcFile({
+        sourceNpmrcPath,
+        targetNpmrcPath,
+        logger,
+        linesToAppend,
+        linesToPrepend
+      });
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
       logger.info(`Deleting ${targetNpmrcPath}`); // Verbose
