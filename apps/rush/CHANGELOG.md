@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 08 Mar 2024 23:45:24 GMT and should not be manually modified.
+This log was last generated on Sat, 09 Mar 2024 01:11:16 GMT and should not be manually modified.
+
+## 5.117.8
+Sat, 09 Mar 2024 01:11:16 GMT
+
+### Updates
+
+- Fixes a bug where the syncNpmrc function incorrectly uses the folder instead of the path
 
 ## 5.117.7
 Fri, 08 Mar 2024 23:45:24 GMT

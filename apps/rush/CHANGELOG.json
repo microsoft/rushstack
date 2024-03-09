@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.8",
+      "tag": "@microsoft/rush_v5.117.8",
+      "date": "Sat, 09 Mar 2024 01:11:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes a bug where the syncNpmrc function incorrectly uses the folder instead of the path"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.7",
       "tag": "@microsoft/rush_v5.117.7",
       "date": "Fri, 08 Mar 2024 23:45:24 GMT",
