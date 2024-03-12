@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 09 Mar 2024 01:11:16 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Mar 2024 19:15:07 GMT and should not be manually modified.
+
+## 5.117.9
+Tue, 12 Mar 2024 19:15:07 GMT
+
+### Updates
+
+- Add functionality to disable filtered installs for specific subspaces
 
 ## 5.117.8
 Sat, 09 Mar 2024 01:11:16 GMT

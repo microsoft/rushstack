@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.9",
+      "tag": "@microsoft/rush_v5.117.9",
+      "date": "Tue, 12 Mar 2024 19:15:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add functionality to disable filtered installs for specific subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.8",
       "tag": "@microsoft/rush_v5.117.8",
       "date": "Sat, 09 Mar 2024 01:11:16 GMT",
