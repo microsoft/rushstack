@@ -170,6 +170,11 @@
     "autoInstallPeers": {
       "description": "This setting determines whether PNPM will automatically install (non-optional) missing peer dependencies instead of reporting an error. With Rush, the default value is always false.\n\nPNPM documentation: https://pnpm.io/npmrc#auto-install-peers",
       "type": "boolean"
+    },
+
+    "alwaysFullInstall": {
+      "description": "(EXPERIMENTAL) If 'true', then filtered installs ('rush install --to my-project') * will be disregarded, instead always performing a full installation of the lockfile.",
+      "type": "boolean"
     }
   }
 }
