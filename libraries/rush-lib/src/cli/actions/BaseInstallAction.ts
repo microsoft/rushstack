@@ -244,7 +244,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
         // Run the install for each affected subspace
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
-          installManagerOptions.pnpmFilterArguments = filterArgumentsForSubspace.get(selectedSubspace) || [];
+          if (selectedSubspace.preventFilteredInstall) {
+            installManagerOptions.pnpmFilterArguments = [];
+          } else {
+            installManagerOptions.pnpmFilterArguments =
+              filterArgumentsForSubspace.get(selectedSubspace) || [];
+          }
           // eslint-disable-next-line no-console
           console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
           await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);

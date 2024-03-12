@@ -21,6 +21,13 @@
       "description": "If true, requires a selector for a subspace or set of subspaces when installing.",
       "type": "boolean"
     },
+    "preventFilteredInstallSubspaces": {
+      "description": "Listed subspace names will always install as a complete subspace, instead of filtered installs depending on selected projects",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "subspaceNames": {
       "description": "Individual subspace configurations.",
       "type": "array",

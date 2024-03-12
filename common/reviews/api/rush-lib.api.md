@@ -1410,12 +1410,15 @@ export class Subspace {
     // @beta
     getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
     // (undocumented)
+    readonly preventFilteredInstall: boolean;
+    // (undocumented)
     readonly subspaceName: string;
 }
 
 // @beta
 export class SubspacesConfiguration {
     static explainIfInvalidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): string | undefined;
+    readonly preventFilteredInstallSubspaces: ReadonlySet<string>;
     readonly preventSelectingAllSubspaces: boolean;
     static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;
     readonly splitWorkspaceCompatibility: boolean;

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add functionality to disable filtered installs for specific subspaces",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

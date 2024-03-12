@@ -20,6 +20,7 @@ export interface ISubspaceOptions {
   subspaceName: string;
   rushConfiguration: RushConfiguration;
   splitWorkspaceCompatibility: boolean;
+  preventFilteredInstall: boolean;
 }
 
 interface ISubspaceDetail {
@@ -36,6 +37,7 @@ interface ISubspaceDetail {
  */
 export class Subspace {
   public readonly subspaceName: string;
+  public readonly preventFilteredInstall: boolean;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projects: RushConfigurationProject[] = [];
   private readonly _splitWorkspaceCompatibility: boolean;
@@ -51,6 +53,7 @@ export class Subspace {
     this.subspaceName = options.subspaceName;
     this._rushConfiguration = options.rushConfiguration;
     this._splitWorkspaceCompatibility = options.splitWorkspaceCompatibility;
+    this.preventFilteredInstall = options.preventFilteredInstall;
   }
 
   /**

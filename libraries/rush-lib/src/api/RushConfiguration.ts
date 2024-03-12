@@ -841,7 +841,9 @@ export class RushConfiguration {
       const subspace: Subspace = new Subspace({
         subspaceName,
         rushConfiguration: this,
-        splitWorkspaceCompatibility
+        splitWorkspaceCompatibility,
+        preventFilteredInstall:
+          !!this.subspacesConfiguration?.preventFilteredInstallSubspaces.has(subspaceName)
       });
       this._subspacesByName.set(subspaceName, subspace);
       this._subspaces.push(subspace);

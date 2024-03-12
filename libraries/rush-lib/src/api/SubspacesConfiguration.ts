@@ -24,6 +24,7 @@ interface ISubspacesConfigurationJson {
   subspacesEnabled: boolean;
   splitWorkspaceCompatibility?: boolean;
   preventSelectingAllSubspaces?: boolean;
+  preventFilteredInstallSubspaces?: string[];
   subspaceNames: string[];
 }
 
@@ -56,6 +57,11 @@ export class SubspacesConfiguration {
   public readonly preventSelectingAllSubspaces: boolean;
 
   /**
+   * This determines if a subspace needs to be installed as a full subspace instead of filtered installs.
+   */
+  public readonly preventFilteredInstallSubspaces: ReadonlySet<string>;
+
+  /**
    * A set of the available subspaces
    */
   public readonly subspaceNames: ReadonlySet<string>;
@@ -66,6 +72,7 @@ export class SubspacesConfiguration {
     this.splitWorkspaceCompatibility = !!configuration.splitWorkspaceCompatibility;
     this.preventSelectingAllSubspaces = !!configuration.preventSelectingAllSubspaces;
     const subspaceNames: Set<string> = new Set();
+    const preventFilteredSubspaceNames: Set<string> = new Set();
     for (const subspaceName of configuration.subspaceNames) {
       SubspacesConfiguration.requireValidSubspaceName(subspaceName, this.splitWorkspaceCompatibility);
 
@@ -74,6 +81,18 @@ export class SubspacesConfiguration {
     // Add the default subspace if it wasn't explicitly declared
     subspaceNames.add(RushConstants.defaultSubspaceName);
     this.subspaceNames = subspaceNames;
+
+    if (configuration.preventFilteredInstallSubspaces) {
+      for (const subspaceName of configuration.preventFilteredInstallSubspaces) {
+        if (!this.subspaceNames.has(subspaceName)) {
+          throw new Error(
+            `The subspace ${subspaceName} listed in preventFilteredSubspaceNames of subspaces.json is not a valid subspace.`
+          );
+        }
+        preventFilteredSubspaceNames.add(subspaceName);
+      }
+    }
+    this.preventFilteredInstallSubspaces = preventFilteredSubspaceNames;
   }
 
   /**
