@@ -664,6 +664,7 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    alwaysFullInstall?: boolean;
     autoInstallPeers?: boolean;
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
@@ -1014,6 +1015,7 @@ export class PhasedCommandHooks {
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
+    readonly alwaysFullInstall: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
@@ -1410,15 +1412,12 @@ export class Subspace {
     // @beta
     getTempShrinkwrapPreinstallFilename(subspaceName?: string | undefined): string;
     // (undocumented)
-    readonly preventFilteredInstall: boolean;
-    // (undocumented)
     readonly subspaceName: string;
 }
 
 // @beta
 export class SubspacesConfiguration {
     static explainIfInvalidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): string | undefined;
-    readonly preventFilteredInstallSubspaces: ReadonlySet<string>;
     readonly preventSelectingAllSubspaces: boolean;
     static requireValidSubspaceName(subspaceName: string, splitWorkspaceCompatibility?: boolean): void;
     readonly splitWorkspaceCompatibility: boolean;

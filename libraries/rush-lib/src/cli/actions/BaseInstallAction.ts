@@ -244,7 +244,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         // Run the install for each affected subspace
         for (const selectedSubspace of selectedSubspaces) {
           installManagerOptions.subspace = selectedSubspace;
-          if (selectedSubspace.preventFilteredInstall) {
+          if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
             installManagerOptions.pnpmFilterArguments = [];
           } else {
             installManagerOptions.pnpmFilterArguments =
