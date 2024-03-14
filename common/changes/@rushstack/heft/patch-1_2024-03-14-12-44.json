@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Fix internal error when run 'heft clean'",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
