@@ -237,8 +237,9 @@ export function shouldBulkSuppress(params: {
   const serializedSuppression: string = serializeSuppression(suppression);
   const currentNodeIsSuppressed: boolean = suppressionsJson.serializedSuppressions.has(serializedSuppression);
 
-  if (currentNodeIsSuppressed && shouldWriteSuppression(suppression)) {
+  if (!currentNodeIsSuppressed && shouldWriteSuppression(suppression)) {
     insort(suppressionsJson.jsonObject.suppressions, suppression, compareSuppressions);
+    suppressionsJson.serializedSuppressions.add(serializedSuppression);
     writeSuppressionsJsonToFile(eslintrcDirectory, suppressionsJson);
   }
 
