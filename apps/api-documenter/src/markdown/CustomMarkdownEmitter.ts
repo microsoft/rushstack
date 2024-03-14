@@ -135,6 +135,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           writer.writeLine();
         }
         writer.write('</tbody>');
+        writer.write('</table>');
         writer.writeLine();
 
         break;
