@@ -918,10 +918,10 @@ importers:
         version: file:../../apps/heft
       '@rushstack/heft-lint-plugin':
         specifier: workspace:*
-        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.6)
+        version: file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.66.0)
       '@rushstack/heft-typescript-plugin':
         specifier: workspace:*
-        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.6)
+        version: file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.66.0)
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
@@ -1946,7 +1946,7 @@ importers:
         version: 29.5.12
       '@types/node':
         specifier: ts4.9
-        version: 20.11.22
+        version: 20.11.27
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
@@ -2450,12 +2450,21 @@ importers:
       '@rushstack/heft-node-rig':
         specifier: 2.4.18
         version: 2.4.18(@rushstack/heft@0.65.5)(@types/node@18.17.15)(supports-color@8.1.1)
+      '@types/eslint':
+        specifier: 8.2.0
+        version: 8.2.0
       '@types/node':
         specifier: 18.17.15
         version: 18.17.15
       '@typescript-eslint/types':
         specifier: ~5.59.2
         version: 5.59.11(typescript@5.3.3)
+      eslint:
+        specifier: ~8.7.0
+        version: 8.7.0(supports-color@8.1.1)
+      eslint-plugin-header:
+        specifier: ~3.1.1
+        version: 3.1.1(eslint@8.7.0)
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -2502,6 +2511,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
+      eslint-plugin-header:
+        specifier: ~3.1.1
+        version: 3.1.1(eslint@8.7.0)
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -2542,6 +2554,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
+      eslint-plugin-header:
+        specifier: ~3.1.1
+        version: 3.1.1(eslint@8.7.0)
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -2588,6 +2603,9 @@ importers:
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
+      eslint-plugin-header:
+        specifier: ~3.1.1
+        version: 3.1.1(eslint@8.7.0)
       typescript:
         specifier: ~5.3.3
         version: 5.3.3
@@ -11931,8 +11949,8 @@ packages:
   /@types/node@18.17.15:
     resolution: {integrity: sha512-2yrWpBk32tvV/JAd3HNHWuZn/VDN1P+72hWirHnvsvTGSqbANi+kSeuQR9yAHnbvaBvHDsoTdXV0Fe+iRtHLKA==}
 
-  /@types/node@20.11.22:
-    resolution: {integrity: sha512-/G+IxWxma6V3E+pqK1tSl2Fo1kl41pK1yeCyDsgkF9WlVAme4j5ISYM2zR11bgLFJGLN5sVK40T4RJNuiZbEjA==}
+  /@types/node@20.11.27:
+    resolution: {integrity: sha512-qyUZfMnCg1KEz57r7pzFtSGt49f6RPkPBis3Vo4PbS7roQEDn22hiHzl/Lo1q4i4hDEgBJmBF/NTNg2XR0HbFg==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -13479,7 +13497,17 @@ packages:
       '@aws-cdk/asset-awscli-v1': 2.2.202
       '@aws-cdk/asset-kubectl-v20': 2.1.2
       '@aws-cdk/asset-node-proxy-agent-v5': 2.0.166
+      '@balena/dockerignore': 1.0.2
+      case: 1.6.3
       constructs: 10.0.130
+      fs-extra: 11.2.0
+      ignore: 5.3.1
+      jsonschema: 1.4.1
+      minimatch: 3.1.2
+      punycode: 2.3.1
+      semver: 7.5.4
+      table: 6.8.1
+      yaml: 1.10.2
     dev: true
     bundledDependencies:
       - '@balena/dockerignore'
@@ -16477,7 +16505,6 @@ packages:
       eslint: '>=7.7.0'
     dependencies:
       eslint: 8.7.0(supports-color@8.1.1)
-    dev: false
 
   /eslint-plugin-import@2.25.4(eslint@8.7.0):
     resolution: {integrity: sha512-/KJBASVFxpu0xg1kIBn9AUa8hQVnszpwgE7Ld0lKAlx7Ie87yzEzCgSkekt+le/YVhiaosO4Y14GDAOc41nfxA==}
@@ -17557,6 +17584,15 @@ packages:
   /fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.1.0
+      universalify: 2.0.1
+    dev: true
+
+  /fs-extra@11.2.0:
+    resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==}
+    engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
@@ -23354,6 +23390,7 @@ packages:
 
   /remove-trailing-separator@1.1.0:
     resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
+    requiresBuild: true
 
   /renderkid@2.0.7:
     resolution: {integrity: sha512-oCcFyxaMrKsKcTY59qnCAtmDVSLfPbrv6A3tVbPdFMMrv5jaK10V6m40cKsoPNhAqN6rmHW9sswW4o3ruSrwUQ==}
@@ -27051,7 +27088,7 @@ packages:
       - supports-color
     dev: true
 
-  file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.65.6):
+  file:../../heft-plugins/heft-lint-plugin(@rushstack/heft@0.66.0):
     resolution: {directory: ../../heft-plugins/heft-lint-plugin, type: directory}
     id: file:../../heft-plugins/heft-lint-plugin
     name: '@rushstack/heft-lint-plugin'
@@ -27063,7 +27100,7 @@ packages:
       semver: 7.5.4
     dev: true
 
-  file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.65.6):
+  file:../../heft-plugins/heft-typescript-plugin(@rushstack/heft@0.66.0):
     resolution: {directory: ../../heft-plugins/heft-typescript-plugin, type: directory}
     id: file:../../heft-plugins/heft-typescript-plugin
     name: '@rushstack/heft-typescript-plugin'

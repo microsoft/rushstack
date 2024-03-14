@@ -74,14 +74,13 @@ export class PackletAnalyzer {
     this.isEntryPoint = false;
 
     // Example: /path/to/my-project/src
-    let srcFolderPath: string | undefined;
 
     if (!tsconfigFilePath) {
       this.error = { messageId: 'missing-tsconfig' };
       return;
     }
 
-    srcFolderPath = Path.join(Path.dirname(tsconfigFilePath), 'src');
+    const srcFolderPath: string = Path.join(Path.dirname(tsconfigFilePath), 'src');
 
     if (!fs.existsSync(srcFolderPath)) {
       this.error = { messageId: 'missing-src-folder', data: { srcFolderPath } };
@@ -104,7 +103,7 @@ export class PackletAnalyzer {
 
     const expectedPackletsFolder: string = Path.join(srcFolderPath, 'packlets');
 
-    for (let i = 0; i < pathParts.length; ++i) {
+    for (let i: number = 0; i < pathParts.length; ++i) {
       const pathPart: string = pathParts[i];
       if (pathPart.toUpperCase() === 'PACKLETS') {
         if (pathPart !== 'packlets') {
@@ -164,7 +163,10 @@ export class PackletAnalyzer {
     }
   }
 
-  public static analyzeInputFile(inputFilePath: string, tsconfigFilePath: string | undefined) {
+  public static analyzeInputFile(
+    inputFilePath: string,
+    tsconfigFilePath: string | undefined
+  ): PackletAnalyzer {
     return new PackletAnalyzer(inputFilePath, tsconfigFilePath);
   }
 

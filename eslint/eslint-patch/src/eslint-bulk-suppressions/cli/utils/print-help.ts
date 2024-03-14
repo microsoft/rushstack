@@ -3,8 +3,8 @@
 
 import { wrapWordsToLines } from './wrap-words-to-lines';
 
-export function printPruneHelp() {
-  const help = `eslint-bulk prune
+export function printPruneHelp(): void {
+  const help: string = `eslint-bulk prune
 
 Usage:
 
@@ -12,14 +12,14 @@ eslint-bulk prune
 
 This command is a thin wrapper around ESLint that communicates with @rushstack/eslint-patch to delete all unused suppression entries in all .eslint-bulk-suppressions.json files under the current working directory.`;
 
-  const wrapped = wrapWordsToLines(help);
+  const wrapped: string[] = wrapWordsToLines(help);
   for (const line of wrapped) {
     console.log(line);
   }
 }
 
-export function printHelp() {
-  const help = `eslint-bulk <command>
+export function printHelp(): void {
+  const help: string = `eslint-bulk <command>
 
 Usage:
 
@@ -44,14 +44,14 @@ Commands:
     Please run "eslint-bulk prune --help" to learn more.
 `;
 
-  const wrapped = wrapWordsToLines(help);
+  const wrapped: string[] = wrapWordsToLines(help);
   for (const line of wrapped) {
     console.log(line);
   }
 }
 
-export function printSuppressHelp() {
-  const help = `eslint-bulk suppress [options] <path...>
+export function printSuppressHelp(): void {
+  const help: string = `eslint-bulk suppress [options] <path...>
 
 Usage:
 
@@ -75,7 +75,7 @@ Options:
   -A, --all
     Bulk-suppress all rules in the specified file patterns.`;
 
-  const wrapped = wrapWordsToLines(help);
+  const wrapped: string[] = wrapWordsToLines(help);
   for (const line of wrapped) {
     console.log(line);
   }

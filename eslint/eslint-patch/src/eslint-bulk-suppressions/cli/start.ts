@@ -22,7 +22,7 @@ if (!isCorrectCwd(process.cwd())) {
   );
   process.exit(1);
 }
-const subcommand = process.argv[2];
+const subcommand: string = process.argv[2];
 
 if (subcommand === 'suppress') {
   try {

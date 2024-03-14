@@ -11,7 +11,7 @@ type Options = [];
 
 // Jest APIs that need to be hoisted
 // Based on HOIST_METHODS from ts-jest
-const HOIST_METHODS = ['mock', 'unmock', 'enableAutomock', 'disableAutomock', 'deepUnmock'];
+const HOIST_METHODS: string[] = ['mock', 'unmock', 'enableAutomock', 'disableAutomock', 'deepUnmock'];
 
 const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
@@ -141,7 +141,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
         if (firstImportNode === undefined) {
           // EXAMPLE: export * from "Y";
           // IGNORE:  export type { Y } from "Y";
-          if ((node as any as TSESTree.ExportNamedDeclaration).exportKind !== 'type') {
+          if ((node as unknown as TSESTree.ExportNamedDeclaration).exportKind !== 'type') {
             firstImportNode = node;
           }
         }

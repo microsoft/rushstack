@@ -54,7 +54,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
     // Example: /path/to/my-project/tsconfig.json
     const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
       context
-    ).program.getCompilerOptions()['configFilePath'] as string;
+    ).program.getCompilerOptions().configFilePath as string;
 
     const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
       inputFilePath,
@@ -90,6 +90,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
       // ExportAllDeclaration matches these forms:
       //   export * from '../../packlets/other-packlet';
       //   export * as X from '../../packlets/other-packlet';
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration': (
         node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration
       ): void => {
@@ -97,7 +98,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
           if (packletAnalyzer.projectUsesPacklets) {
             // Extract the import/export module path
             // Example: "../../packlets/other-packlet"
-            const modulePath = node.source.value;
+            const modulePath: string = node.source.value;
             if (typeof modulePath !== 'string') {
               return;
             }

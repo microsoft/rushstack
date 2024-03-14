@@ -5,30 +5,30 @@ import fs from 'fs';
 
 /**
  * Dynamically generate file to properly patch many versions of ESLint
- * @param inputFilePath Must be an iteration of https://github.com/eslint/eslint/blob/main/lib/linter/linter.js
- * @param outputFilePath Some small changes to linter.js
+ * @param inputFilePath - Must be an iteration of https://github.com/eslint/eslint/blob/main/lib/linter/linter.js
+ * @param outputFilePath - Some small changes to linter.js
  */
-export function generatePatchedFileIfDoesntExist(inputFilePath: string, outputFilePath: string): void {
+export function generatePatchedFileIfDoesNotExist(inputFilePath: string, outputFilePath: string): void {
   if (fs.existsSync(outputFilePath)) {
     return;
   }
 
-  const inputFile = fs.readFileSync(inputFilePath).toString();
+  const inputFile: string = fs.readFileSync(inputFilePath).toString();
 
-  let inputIndex = 0;
+  let inputIndex: number = 0;
 
   /**
    * Extract from the stream until marker is reached.  When matching marker,
    * ignore whitespace in the stream and in the marker.  Return the extracted text.
    */
   function scanUntilMarker(marker: string): string {
-    const trimmedMarker = marker.replace(/\s/g, '');
+    const trimmedMarker: string = marker.replace(/\s/g, '');
 
-    let output = '';
-    let trimmed = '';
+    let output: string = '';
+    let trimmed: string = '';
 
     while (inputIndex < inputFile.length) {
-      const char = inputFile[inputIndex++];
+      const char: string = inputFile[inputIndex++];
       output += char;
       if (!/^\s$/.test(char)) {
         trimmed += char;
@@ -42,10 +42,10 @@ export function generatePatchedFileIfDoesntExist(inputFilePath: string, outputFi
   }
 
   function scanUntilNewline(): string {
-    let output = '';
+    let output: string = '';
 
     while (inputIndex < inputFile.length) {
-      const char = inputFile[inputIndex++];
+      const char: string = inputFile[inputIndex++];
       output += char;
       if (char === '\n') {
         return output;
@@ -56,32 +56,33 @@ export function generatePatchedFileIfDoesntExist(inputFilePath: string, outputFi
   }
 
   function scanUntilEnd(): string {
-    const output = inputFile.substring(inputIndex);
+    const output: string = inputFile.substring(inputIndex);
     inputIndex = inputFile.length;
     return output;
   }
 
   /**
    * Returns index of next public method
-   * @param {number} fromIndex index of inputFile to search if public method still exists
-   * @returns {number} -1 if public method does not exist or index of next public method
+   * @param fromIndex - index of inputFile to search if public method still exists
+   * @returns -1 if public method does not exist or index of next public method
    */
   function getIndexOfNextPublicMethod(fromIndex: number): number {
-    const rest = inputFile.substring(fromIndex);
+    const rest: string = inputFile.substring(fromIndex);
 
-    const endOfClassIndex = rest.indexOf('\n}');
+    const endOfClassIndex: number = rest.indexOf('\n}');
 
-    const markerForStartOfClassMethod = '\n     */\n    ';
+    const markerForStartOfClassMethod: string = '\n     */\n    ';
 
-    const startOfClassMethodIndex = rest.indexOf(markerForStartOfClassMethod);
+    const startOfClassMethodIndex: number = rest.indexOf(markerForStartOfClassMethod);
 
     if (startOfClassMethodIndex === -1 || startOfClassMethodIndex > endOfClassIndex) {
       return -1;
     }
 
-    let afterMarkerIndex = rest.indexOf(markerForStartOfClassMethod) + markerForStartOfClassMethod.length;
+    const afterMarkerIndex: number =
+      rest.indexOf(markerForStartOfClassMethod) + markerForStartOfClassMethod.length;
 
-    const isPublicMethod =
+    const isPublicMethod: boolean =
       rest[afterMarkerIndex] !== '_' &&
       rest[afterMarkerIndex] !== '#' &&
       !rest.substring(afterMarkerIndex, rest.indexOf('\n', afterMarkerIndex)).includes('static') &&
@@ -94,17 +95,13 @@ export function generatePatchedFileIfDoesntExist(inputFilePath: string, outputFi
     return getIndexOfNextPublicMethod(fromIndex + afterMarkerIndex);
   }
 
-  /**
-   * @param {number} indexToScanTo
-   * @returns {string}
-   */
   function scanUntilIndex(indexToScanTo: number): string {
-    const output = inputFile.substring(inputIndex, indexToScanTo);
+    const output: string = inputFile.substring(inputIndex, indexToScanTo);
     inputIndex = indexToScanTo;
     return output;
   }
 
-  let outputFile = '';
+  let outputFile: string = '';
 
   // Match this:
   //    //------------------------------------------------------------------------------
@@ -124,7 +121,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //    //------------------------------------------------------------------------------
   //    // Typedefs
   //    //------------------------------------------------------------------------------
-  const requireSection = scanUntilMarker('// Typedefs');
+  const requireSection: string = scanUntilMarker('// Typedefs');
 
   // Match something like this:
   //
@@ -139,7 +136,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   //    evk = requireFromPathToLinterJS('eslint-visitor-keys'),
   //
   outputFile += requireSection.replace(/require\s*\((?:'([^']+)'|"([^"]+)")\)/g, (match, p1, p2) => {
-    const importPath = p1 ?? p2 ?? '';
+    const importPath: string = p1 ?? p2 ?? '';
 
     if (importPath !== 'path') {
       if (p1) {
@@ -261,7 +258,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
     // --- END MONKEY PATCH ---
 `;
 
-  let indexOfNextPublicMethod = getIndexOfNextPublicMethod(inputIndex);
+  let indexOfNextPublicMethod: number = getIndexOfNextPublicMethod(inputIndex);
   while (indexOfNextPublicMethod !== -1) {
     outputFile += scanUntilIndex(indexOfNextPublicMethod);
     outputFile += scanUntilNewline();
