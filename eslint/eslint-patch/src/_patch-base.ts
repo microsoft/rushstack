@@ -7,8 +7,8 @@
 //
 //    require("@rushstack/eslint-patch/modern-module-resolution");
 //
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
 const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';
@@ -34,26 +34,26 @@ let namingPath: string | undefined = undefined;
 let eslintFolder: string | undefined = undefined;
 
 // Probe for the ESLint >=8.0.0 layout:
-for (let currentModule = module; ; ) {
+for (let currentModule: NodeModule = module; ; ) {
   if (!eslintrcBundlePath) {
     if (currentModule.filename.endsWith('eslintrc.cjs')) {
       // For ESLint >=8.0.0, all @eslint/eslintrc code is bundled at this path:
       //   .../@eslint/eslintrc/dist/eslintrc.cjs
       try {
-        const eslintrcFolder = path.dirname(
+        const eslintrcFolderPath: string = path.dirname(
           require.resolve('@eslint/eslintrc/package.json', { paths: [currentModule.path] })
         );
 
         // Make sure we actually resolved the module in our call path
         // and not some other spurious dependency.
-        const resolvedEslintrcBundlePath: string = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
+        const resolvedEslintrcBundlePath: string = path.join(eslintrcFolderPath, 'dist/eslintrc.cjs');
         if (resolvedEslintrcBundlePath === currentModule.filename) {
           eslintrcBundlePath = resolvedEslintrcBundlePath;
         }
       } catch (ex: unknown) {
         // Module resolution failures are expected, as we're walking
         // up our require stack to look for eslint. All other errors
-        // are rethrown.
+        // are re-thrown.
         if (!isModuleResolutionError(ex)) {
           throw ex;
         }
@@ -63,7 +63,7 @@ for (let currentModule = module; ; ) {
     // Next look for a file in ESLint's folder
     //   .../eslint/lib/cli-engine/cli-engine.js
     try {
-      const eslintCandidateFolder = path.dirname(
+      const eslintCandidateFolder: string = path.dirname(
         require.resolve('eslint/package.json', {
           paths: [currentModule.path]
         })
@@ -78,7 +78,7 @@ for (let currentModule = module; ; ) {
     } catch (ex: unknown) {
       // Module resolution failures are expected, as we're walking
       // up our require stack to look for eslint. All other errors
-      // are rethrown.
+      // are re-thrown.
       if (!isModuleResolutionError(ex)) {
         throw ex;
       }
@@ -93,12 +93,12 @@ for (let currentModule = module; ; ) {
 
 if (!eslintFolder) {
   // Probe for the ESLint >=7.12.0 layout:
-  for (let currentModule = module; ; ) {
+  for (let currentModule: NodeModule = module; ; ) {
     if (!configArrayFactoryPath) {
       // For ESLint >=7.12.0, config-array-factory.js is at this path:
       //   .../@eslint/eslintrc/lib/config-array-factory.js
       try {
-        const eslintrcFolder = path.dirname(
+        const eslintrcFolder: string = path.dirname(
           require.resolve('@eslint/eslintrc/package.json', {
             paths: [currentModule.path]
           })
@@ -116,7 +116,7 @@ if (!eslintFolder) {
       } catch (ex: unknown) {
         // Module resolution failures are expected, as we're walking
         // up our require stack to look for eslint. All other errors
-        // are rethrown.
+        // are re-thrown.
         if (!isModuleResolutionError(ex)) {
           throw ex;
         }
@@ -125,13 +125,13 @@ if (!eslintFolder) {
       // Next look for a file in ESLint's folder
       //   .../eslint/lib/cli-engine/cli-engine.js
       try {
-        const eslintCandidateFolder = path.dirname(
+        const eslintCandidateFolder: string = path.dirname(
           require.resolve('eslint/package.json', {
             paths: [currentModule.path]
           })
         );
 
-        if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') == currentModule.filename) {
+        if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') === currentModule.filename) {
           eslintFolder = eslintCandidateFolder;
           break;
         }
@@ -154,7 +154,7 @@ if (!eslintFolder) {
 
 if (!eslintFolder) {
   // Probe for the <7.12.0 layout:
-  for (let currentModule = module; ; ) {
+  for (let currentModule: NodeModule = module; ; ) {
     // For ESLint <7.12.0, config-array-factory.js was at this path:
     //   .../eslint/lib/cli-engine/config-array-factory.js
     if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
@@ -195,17 +195,17 @@ if (!eslintFolder) {
 
 // Detect the ESLint package version
 const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
-const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
-const eslintPackageObject = JSON.parse(eslintPackageJson);
-const eslintPackageVersion = eslintPackageObject.version;
-const eslintMajorVersion: number = parseInt(eslintPackageVersion, 10);
-if (isNaN(eslintMajorVersion)) {
+const eslintPackageJson: string = fs.readFileSync(eslintPackageJsonPath).toString();
+const eslintPackageObject: { version: string } = JSON.parse(eslintPackageJson);
+const eslintPackageVersion: string = eslintPackageObject.version;
+const ESLINT_MAJOR_VERSION: number = parseInt(eslintPackageVersion, 10);
+if (isNaN(ESLINT_MAJOR_VERSION)) {
   throw new Error(
     `Unable to parse ESLint version "${eslintPackageVersion}" in file "${eslintPackageJsonPath}"`
   );
 }
 
-if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
+if (!(ESLINT_MAJOR_VERSION >= 6 && ESLINT_MAJOR_VERSION <= 8)) {
   throw new Error(
     'The ESLint patch script has only been tested with ESLint version 6.x, 7.x, and 8.x.' +
       ` (Your version: ${eslintPackageVersion})\n` +
@@ -214,16 +214,19 @@ if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
   );
 }
 
-let ConfigArrayFactory: any;
-if (eslintMajorVersion === 8) {
-  ConfigArrayFactory = require(eslintrcBundlePath!).Legacy.ConfigArrayFactory;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let configArrayFactory: any;
+if (ESLINT_MAJOR_VERSION === 8) {
+  configArrayFactory = require(eslintrcBundlePath!).Legacy.ConfigArrayFactory;
 } else {
-  ConfigArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
+  configArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let ModuleResolver: { resolve: any };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Naming: { normalizePackageName: any };
-if (eslintMajorVersion === 8) {
+if (ESLINT_MAJOR_VERSION === 8) {
   ModuleResolver = require(eslintrcBundlePath!).Legacy.ModuleResolver;
   Naming = require(eslintrcBundlePath!).Legacy.naming;
 } else {
@@ -233,9 +236,9 @@ if (eslintMajorVersion === 8) {
 
 export {
   eslintFolder,
-  ConfigArrayFactory,
+  configArrayFactory,
   ModuleResolver,
   Naming,
-  eslintMajorVersion as ESLINT_MAJOR_VERSION,
+  ESLINT_MAJOR_VERSION,
   isModuleResolutionError
 };

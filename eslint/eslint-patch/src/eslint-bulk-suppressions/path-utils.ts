@@ -5,15 +5,20 @@ import fs from 'fs';
 import path from 'path';
 import { eslintFolder } from '../_patch-base';
 
+interface IConfiguration {
+  minCliVersion: string;
+  cliEntryPoint: string;
+}
+
 export function findAndConsoleLogPatchPathCli(patchPath: string): void {
   if (process.env._RUSHSTACK_ESLINT_BULK_DETECT !== 'true') {
     return;
   }
 
-  const startDelimiter = 'RUSHSTACK_ESLINT_BULK_START';
-  const endDelimiter = 'RUSHSTACK_ESLINT_BULK_END';
+  const startDelimiter: string = 'RUSHSTACK_ESLINT_BULK_START';
+  const endDelimiter: string = 'RUSHSTACK_ESLINT_BULK_END';
 
-  const configuration = {
+  const configuration: IConfiguration = {
     /**
      * `@rushtack/eslint`-bulk should report an error if its package.json is older than this number
      */
@@ -37,25 +42,25 @@ export function getPathToLinterJS(): string {
 
 export function getPathToGeneratedPatch(patchPath: string, nameOfGeneratedPatchFile: string): string {
   fs.mkdirSync(path.join(patchPath, 'temp', 'patches'), { recursive: true });
-  const pathToGeneratedPatch = path.join(patchPath, 'temp', 'patches', nameOfGeneratedPatchFile);
+  const pathToGeneratedPatch: string = path.join(patchPath, 'temp', 'patches', nameOfGeneratedPatchFile);
 
   return pathToGeneratedPatch;
 }
 
-function getEslintPackageVersion() {
+function getEslintPackageVersion(): string {
   if (!eslintFolder) {
     throw new Error('Cannot find ESLint installation to patch.');
   }
-  const eslintPackageJsonPath = path.join(eslintFolder, 'package.json');
-  const eslintPackageJson = fs.readFileSync(eslintPackageJsonPath).toString();
-  const eslintPackageObject = JSON.parse(eslintPackageJson);
-  const eslintPackageVersion = eslintPackageObject.version;
+  const eslintPackageJsonPath: string = path.join(eslintFolder, 'package.json');
+  const eslintPackageJson: string = fs.readFileSync(eslintPackageJsonPath).toString();
+  const eslintPackageObject: { version: string } = JSON.parse(eslintPackageJson);
+  const eslintPackageVersion: string = eslintPackageObject.version;
 
   return eslintPackageVersion;
 }
 
-export function getNameOfGeneratedPatchFile() {
-  const eslintPackageVersion = getEslintPackageVersion();
-  const nameOfGeneratedPatchFile = `linter-patch-v${eslintPackageVersion}.js`;
+export function getNameOfGeneratedPatchFile(): string {
+  const eslintPackageVersion: string = getEslintPackageVersion();
+  const nameOfGeneratedPatchFile: string = `linter-patch-v${eslintPackageVersion}.js`;
   return nameOfGeneratedPatchFile;
 }

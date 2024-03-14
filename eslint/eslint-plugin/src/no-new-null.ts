@@ -7,9 +7,9 @@ import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 type MessageIds = 'error-new-usage-of-null';
 type Options = [];
 
-type Accessible = {
+interface IAccessible {
   accessibility?: TSESTree.Accessibility;
-};
+}
 
 const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
   defaultOptions: [],
@@ -39,15 +39,15 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     /**
      * Returns true if the accessibility is not explicitly set to private or protected, e.g. class properties, methods.
      */
-    function isPubliclyAccessible(node?: Accessible): boolean {
-      const accessibility = node?.accessibility;
+    function isPubliclyAccessible(node?: IAccessible): boolean {
+      const accessibility: TSESTree.Accessibility | undefined = node?.accessibility;
       return !(accessibility === 'private' || accessibility === 'protected');
     }
 
     /**
      * Let's us check the accessibility field of certain types of nodes
      */
-    function isAccessible(node?: unknown): node is Accessible {
+    function isAccessible(node?: unknown): node is IAccessible {
       if (!node) {
         return false;
       }
@@ -104,7 +104,7 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     }
 
     return {
-      TSNullKeyword(node): void {
+      TSNullKeyword(node: TSESTree.TSNullKeyword): void {
         if (isNewNull(node.parent)) {
           context.report({ node, messageId: 'error-new-usage-of-null' });
         }

@@ -15,7 +15,7 @@ enum RefFileKind {
 // TypeScript compiler internal:
 // Version range: >= 3.6.0, <= 4.2.0
 // https://github.com/microsoft/TypeScript/blob/5ecdcef4cecfcdc86bd681b377636422447507d7/src/compiler/program.ts#L541
-interface RefFile {
+interface IRefFile {
   // The absolute path of the module that was imported.
   // (Normalized to an all lowercase ts.Path string.)
   referencedFileName: string;
@@ -47,21 +47,21 @@ enum FileIncludeKind {
 // TypeScript compiler internal:
 // Version range: > 4.2.0
 // https://github.com/microsoft/TypeScript/blob/2eca17d7c1a3fb2b077f3a910d5019d74b6f07a0/src/compiler/types.ts#L3748
-type FileIncludeReason = {
+interface IFileIncludeReason {
   kind: FileIncludeKind;
   file: string | undefined;
-};
+}
 
 interface ITsProgramInternals extends ts.Program {
   // TypeScript compiler internal:
   // Version range: >= 3.6.0, <= 4.2.0
   // https://github.com/microsoft/TypeScript/blob/5ecdcef4cecfcdc86bd681b377636422447507d7/src/compiler/types.ts#L3723
-  getRefFileMap?: () => Map<string, RefFile[]> | undefined;
+  getRefFileMap?: () => Map<string, IRefFile[]> | undefined;
 
   // TypeScript compiler internal:
   // Version range: > 4.2.0
   // https://github.com/microsoft/TypeScript/blob/2eca17d7c1a3fb2b077f3a910d5019d74b6f07a0/src/compiler/types.ts#L3871
-  getFileIncludeReasons?: () => Map<string, FileIncludeReason[]>;
+  getFileIncludeReasons?: () => Map<string, IFileIncludeReason[]>;
 }
 
 /**
@@ -104,8 +104,8 @@ export class DependencyAnalyzer {
   private static _walkImports(
     packletName: string,
     startingPackletName: string,
-    refFileMap: Map<string, RefFile[]> | undefined,
-    fileIncludeReasonsMap: Map<string, FileIncludeReason[]> | undefined,
+    refFileMap: Map<string, IRefFile[]> | undefined,
+    fileIncludeReasonsMap: Map<string, IFileIncludeReason[]> | undefined,
     program: ts.Program,
     packletsFolderPath: string,
     visitedPacklets: Set<string>,
@@ -125,7 +125,8 @@ export class DependencyAnalyzer {
 
     if (refFileMap) {
       // TypeScript version range: >= 3.6.0, <= 4.2.0
-      const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const refFiles: IRefFile[] | undefined = refFileMap.get((tsSourceFile as any).path);
       if (refFiles) {
         for (const refFile of refFiles) {
           if (refFile.kind === RefFileKind.Import) {
@@ -135,8 +136,9 @@ export class DependencyAnalyzer {
       }
     } else if (fileIncludeReasonsMap) {
       // Typescript version range: > 4.2.0
-      const fileIncludeReasons: FileIncludeReason[] | undefined = fileIncludeReasonsMap.get(
-        (tsSourceFile as any).path as any
+      const fileIncludeReasons: IFileIncludeReason[] | undefined = fileIncludeReasonsMap.get(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (tsSourceFile as any).path
       );
       if (fileIncludeReasons) {
         for (const fileIncludeReason of fileIncludeReasons) {
@@ -236,8 +238,8 @@ export class DependencyAnalyzer {
   ): IPackletImport[] | undefined {
     const programInternals: ITsProgramInternals = program;
 
-    let refFileMap: Map<string, RefFile[]> | undefined;
-    let fileIncludeReasonsMap: Map<string, FileIncludeReason[]> | undefined;
+    let refFileMap: Map<string, IRefFile[]> | undefined;
+    let fileIncludeReasonsMap: Map<string, IFileIncludeReason[]> | undefined;
 
     if (programInternals.getRefFileMap) {
       // TypeScript version range: >= 3.6.0, <= 4.2.0

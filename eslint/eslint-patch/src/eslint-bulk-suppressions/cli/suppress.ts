@@ -5,8 +5,14 @@ import { ExecException, exec } from 'child_process';
 import { getEslintCli } from './utils/get-eslint-cli';
 import { printSuppressHelp } from './utils/print-help';
 
-export function suppress() {
-  const args = process.argv.slice(3);
+interface IParsedArgs {
+  rules: string[];
+  all: boolean;
+  files: string[];
+}
+
+export function suppress(): void {
+  const args: string[] = process.argv.slice(3);
 
   if (args.includes('--help') || args.includes('-h')) {
     printSuppressHelp();
@@ -14,7 +20,7 @@ export function suppress() {
   }
 
   // Use reduce to create an object with all the parsed arguments
-  const parsedArgs = args.reduce<{
+  const parsedArgs: IParsedArgs = args.reduce<{
     rules: string[];
     all: boolean;
     files: string[];
@@ -48,10 +54,10 @@ export function suppress() {
     );
   }
 
-  const eslintCLI = getEslintCli(process.cwd());
+  const eslintCLI: string = getEslintCli(process.cwd());
 
   // Find the index of the last argument that starts with '--'
-  const lastOptionIndex = args
+  const lastOptionIndex: number = args
     .map((arg, i) => (arg.startsWith('--') ? i : -1))
     .reduce((lastIndex, currentIndex) => Math.max(lastIndex, currentIndex), -1);
 
@@ -75,8 +81,9 @@ export function suppress() {
     (error: ExecException | null, stdout: string, stderr: string) => {
       // if errorCount != 0, ESLint will process.exit(1) giving the false impression
       // that the exec failed, even though linting errors are to be expected
-      const eslintOutputWithErrorRegex = /"errorCount":(?!0)\d+/;
-      const isEslintError = error !== null && error.code === 1 && eslintOutputWithErrorRegex.test(stdout);
+      const eslintOutputWithErrorRegex: RegExp = /"errorCount":(?!0)\d+/;
+      const isEslintError: boolean =
+        error !== null && error.code === 1 && eslintOutputWithErrorRegex.test(stdout);
 
       if (error && !isEslintError) {
         throw new Error(`@rushstack/eslint-bulk execution error: ${error.message}`);
