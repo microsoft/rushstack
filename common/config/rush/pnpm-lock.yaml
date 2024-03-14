@@ -2058,6 +2058,9 @@ importers:
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
+      source-map-loader:
+        specifier: ~3.0.1
+        version: 3.0.2(webpack@5.82.1)
       tslint:
         specifier: ~5.20.1
         version: 5.20.1(typescript@5.3.3)
@@ -8777,7 +8780,7 @@ packages:
     dependencies:
       '@jest/console': 29.7.0
       '@jest/types': 29.6.3
-      '@types/istanbul-lib-coverage': 2.0.4
+      '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.2(@types/node@18.17.15)
       jest-haste-map: 29.7.0
       jest-resolve: 29.7.0
@@ -26004,7 +26007,7 @@ packages:
     engines: {node: '>=10.12.0'}
     dependencies:
       '@jridgewell/trace-mapping': 0.3.22
-      '@types/istanbul-lib-coverage': 2.0.4
+      '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
   /validate-npm-package-license@3.0.4:
