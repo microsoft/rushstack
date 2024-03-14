@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'fs';
+import { patchFilePath } from './bulk-suppressions-patch';
 
 /**
  * Dynamically generate file to properly patch many versions of ESLint
@@ -113,7 +114,7 @@ export function generatePatchedFileIfDoesNotExist(inputFilePath: string, outputF
 
   outputFile += `
 // --- BEGIN MONKEY PATCH ---
-const bulkSuppressionsPatch = require('../../bulk-suppressions-patch');
+const bulkSuppressionsPatch = require(${JSON.stringify(patchFilePath)});
 const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJS;
 `;
 
@@ -178,6 +179,7 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   outputFile += scanUntilNewline();
   outputFile += `
                         // --- BEGIN MONKEY PATCH ---
+                        debugger;
                         if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
                         // --- END MONKEY PATCH ---
 `;

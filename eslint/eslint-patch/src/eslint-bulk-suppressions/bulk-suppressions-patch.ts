@@ -266,3 +266,5 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
     }
   }
 }
+
+export const patchFilePath: string = __filename;
