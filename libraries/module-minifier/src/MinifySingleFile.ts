@@ -4,13 +4,6 @@
 import { minify, type MinifyOptions, type MinifyOutput, type SimpleIdentifierMangler } from 'terser';
 import type { RawSourceMap } from 'source-map';
 
-declare module 'terser' {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  interface SourceMapOptions {
-    asObject?: boolean;
-  }
-}
-
 import { getIdentifier } from './MinifiedIdentifier';
 import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';
 
@@ -33,6 +26,7 @@ export async function minifySingleFileAsync(
       format: rawFormat,
       output: rawOutput,
       mangle: originalMangle,
+      sourceMap: sourceMapOptions,
       ...remainingOptions
     } = terserOptions;
 
@@ -56,11 +50,19 @@ export async function minifySingleFileAsync(
       mangle.reserved = mangle.reserved ? externals.concat(mangle.reserved) : externals;
     }
 
-    finalOptions.sourceMap = nameForMap
-      ? {
-          asObject: true
-        }
-      : false;
+    // SourceMap is only generated if nameForMap is provided
+    if (nameForMap) {
+      finalOptions.sourceMap = {
+        includeSources: true
+      };
+      if (typeof sourceMapOptions !== 'boolean' && sourceMapOptions !== undefined) {
+        finalOptions.sourceMap = { ...finalOptions.sourceMap, ...sourceMapOptions };
+      }
+      // Always generate source maps as an object rather than a string
+      finalOptions.sourceMap.asObject = true;
+    } else {
+      finalOptions.sourceMap = false;
+    }
 
     const minified: MinifyOutput = await minify(
       {
