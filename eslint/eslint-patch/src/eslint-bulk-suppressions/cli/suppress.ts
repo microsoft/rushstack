@@ -77,7 +77,10 @@ export function suppress(): void {
 
   exec(
     `${eslintCLI} ${parsedArgs.files.join(' ')} --format=json`,
-    { env },
+    {
+      env,
+      maxBuffer: 5 * 1024 * 1024 * 1024 // Increase maxBuffer to 5GB
+    },
     (error: ExecException | null, stdout: string, stderr: string) => {
       // if errorCount != 0, ESLint will process.exit(1) giving the false impression
       // that the exec failed, even though linting errors are to be expected
