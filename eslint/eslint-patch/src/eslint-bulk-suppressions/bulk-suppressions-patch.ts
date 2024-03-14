@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TSESTree } from '@typescript-eslint/types';
-import { SpawnSyncReturns, spawnSync } from 'child_process';
-import fs from 'fs';
+import type { TSESTree } from '@typescript-eslint/types';
+import { type SpawnSyncReturns, spawnSync } from 'child_process';
 import path from 'path';
+import fs from 'fs';
+
 import * as Guards from './ast-guards';
 
 import { eslintFolder } from '../_patch-base';
@@ -19,35 +20,34 @@ interface IBulkSuppressionsJson {
   suppressions: ISuppression[];
 }
 
-// eslint-disable-next-line @rushstack/no-new-null
-function getNodeName(node: TSESTree.Node): string | null {
-  if (!Guards.isNodeWithName(node)) return null;
+const SUPPRESSIONS_JSON_FILENAME: string = '.eslint-bulk-suppressions.json';
 
-  if (Guards.isClassDeclarationWithName(node)) return node.id.name;
-
-  if (Guards.isFunctionDeclarationWithName(node)) return node.id.name;
-
-  if (Guards.isClassExpressionWithName(node)) return node.id.name;
-
-  if (Guards.isFunctionExpressionWithName(node)) return node.id.name;
-
-  if (Guards.isNormalVariableDeclaratorWithAnonymousExpressionAssigned(node)) return node.id.name;
-
-  if (Guards.isNormalObjectPropertyWithAnonymousExpressionAssigned(node)) return node.key.name;
-
-  if (Guards.isNormalClassPropertyDefinitionWithAnonymousExpressionAssigned(node)) return node.key.name;
-
-  if (Guards.isNormalAssignmentPatternWithAnonymousExpressionAssigned(node)) return node.left.name;
-
-  if (Guards.isNormalMethodDefinition(node)) return node.key.name;
-
-  if (Guards.isTSEnumDeclaration(node)) return node.id.name;
-
-  if (Guards.isTSInterfaceDeclaration(node)) return node.id.name;
-
-  if (Guards.isTSTypeAliasDeclaration(node)) return node.id.name;
-
-  return null;
+function getNodeName(node: TSESTree.Node): string | undefined {
+  if (Guards.isClassDeclarationWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isFunctionDeclarationWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isClassExpressionWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isFunctionExpressionWithName(node)) {
+    return node.id.name;
+  } else if (Guards.isNormalVariableDeclaratorWithAnonymousExpressionAssigned(node)) {
+    return node.id.name;
+  } else if (Guards.isNormalObjectPropertyWithAnonymousExpressionAssigned(node)) {
+    return node.key.name;
+  } else if (Guards.isNormalClassPropertyDefinitionWithAnonymousExpressionAssigned(node)) {
+    return node.key.name;
+  } else if (Guards.isNormalAssignmentPatternWithAnonymousExpressionAssigned(node)) {
+    return node.left.name;
+  } else if (Guards.isNormalMethodDefinition(node)) {
+    return node.key.name;
+  } else if (Guards.isTSEnumDeclaration(node)) {
+    return node.id.name;
+  } else if (Guards.isTSInterfaceDeclaration(node)) {
+    return node.id.name;
+  } else if (Guards.isTSTypeAliasDeclaration(node)) {
+    return node.id.name;
+  }
 }
 
 type NodeWithParent = TSESTree.Node & { parent?: TSESTree.Node };
@@ -55,13 +55,17 @@ type NodeWithParent = TSESTree.Node & { parent?: TSESTree.Node };
 function calculateScopeId(node: NodeWithParent | undefined): string {
   const scopeIds: string[] = [];
   for (let current: NodeWithParent | undefined = node; current; current = current.parent) {
-    const scopeIdForASTNode: string | null = getNodeName(current);
-    if (scopeIdForASTNode !== null) scopeIds.unshift(scopeIdForASTNode);
+    const scopeIdForASTNode: string | undefined = getNodeName(current);
+    if (scopeIdForASTNode !== undefined) {
+      scopeIds.unshift(scopeIdForASTNode);
+    }
   }
 
-  if (scopeIds.length === 0) return '.';
-
-  return '.' + scopeIds.join('.');
+  if (scopeIds.length === 0) {
+    return '.';
+  } else {
+    return '.' + scopeIds.join('.');
+  }
 }
 
 /**
@@ -72,20 +76,25 @@ export function getGitRootPath(): string {
   const result: SpawnSyncReturns<string> = spawnSync('git', ['rev-parse', '--show-toplevel'], {
     encoding: 'utf-8'
   });
-  if (result.status !== 0) throw new Error(`get root path failed`);
-  return result.stdout.toString().trim();
+  if (result.status !== 0) {
+    throw new Error(`get root path failed`);
+  } else {
+    return result.stdout.toString().trim();
+  }
 }
 
-export const GitRootPath: string = getGitRootPath();
+const gitRootPath: string = getGitRootPath();
 
 function findEslintrcDirectory(fileAbsolutePath: string): string {
   for (
     let currentDir: string = fileAbsolutePath;
-    currentDir.startsWith(GitRootPath);
+    currentDir.startsWith(gitRootPath);
     currentDir = path.dirname(currentDir)
   )
-    if (['.eslintrc.js', '.eslintrc.cjs'].some((eslintrc) => fs.existsSync(path.join(currentDir, eslintrc))))
+    if (['.eslintrc.js', '.eslintrc.cjs'].some((eslintrc) => fs.existsSync(`${currentDir}/${eslintrc}`))) {
       return currentDir;
+    }
+
   throw new Error('Cannot locate eslintrc');
 }
 
@@ -131,41 +140,47 @@ function validateSuppressionsJson(json: IBulkSuppressionsJson): json is IBulkSup
 
 function readSuppressionsJson(fileAbsolutePath: string): IBulkSuppressionsJson {
   const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
-  const suppressionsPath: string = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
+  const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
   let suppressionsJson: IBulkSuppressionsJson = { suppressions: [] };
-  try {
-    const fileContent: string = fs.readFileSync(suppressionsPath, 'utf-8');
-    suppressionsJson = JSON.parse(fileContent);
 
-    if (!validateSuppressionsJson(suppressionsJson)) {
-      console.warn(
-        `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
+  try {
+    suppressionsJson = require(suppressionsPath);
+  } catch (e) {
+    if (e.code !== 'MODULE_NOT_FOUND') {
+      throw e;
+    }
+  }
+
+  if (!validateSuppressionsJson(suppressionsJson)) {
+    console.warn(
+      `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
 {
-  suppressions: {
-      file: string;
-      scopeId: string;
-      rule: string;
-  }[];
+suppressions: {
+    file: string;
+    scopeId: string;
+    rule: string;
+}[];
 }
 Please check file content, or delete file if suppressions are no longer needed.
 `
-      );
-      suppressionsJson = { suppressions: [] };
-    }
-  } catch {
-    // Do nothing and let JSON.parse() log the error. suppressionsJson will stay as the initialized value.
+    );
   }
+
   return suppressionsJson;
 }
 
 function shouldWriteSuppression(fileAbsolutePath: string, suppression: ISuppression): boolean {
-  if (process.env.ESLINT_BULK_SUPPRESS === undefined) return false;
-
-  if (isSuppressed(fileAbsolutePath, suppression)) return false;
+  if (process.env.ESLINT_BULK_SUPPRESS === undefined) {
+    return false;
+  } else if (isSuppressed(fileAbsolutePath, suppression)) {
+    return false;
+  }
 
   const rulesToSuppress: string[] = process.env.ESLINT_BULK_SUPPRESS.split(',');
 
-  if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') return true;
+  if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') {
+    return true;
+  }
 
   return rulesToSuppress.includes(suppression.rule);
 }
@@ -189,13 +204,21 @@ function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number)
 }
 
 function compareSuppressions(a: ISuppression, b: ISuppression): -1 | 0 | 1 {
-  if (a.file < b.file) return -1;
-  if (a.file > b.file) return 1;
-  if (a.scopeId < b.scopeId) return -1;
-  if (a.scopeId > b.scopeId) return 1;
-  if (a.rule < b.rule) return -1;
-  if (a.rule > b.rule) return 1;
-  return 0;
+  if (a.file < b.file) {
+    return -1;
+  } else if (a.file > b.file) {
+    return 1;
+  } else if (a.scopeId < b.scopeId) {
+    return -1;
+  } else if (a.scopeId > b.scopeId) {
+    return 1;
+  } else if (a.rule < b.rule) {
+    return -1;
+  } else if (a.rule > b.rule) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 function writeSuppressionToFile(
@@ -211,7 +234,7 @@ function writeSuppressionToFile(
 
   insort(suppressionsJson.suppressions, suppression, compareSuppressions);
 
-  const suppressionsPath: string = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
+  const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
 }
 
@@ -228,7 +251,9 @@ export function shouldBulkSuppress(params: {
   ruleId: string;
 }): boolean {
   // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
-  if (process.env.ESLINT_BULK_ENABLE === 'false') return false;
+  if (process.env.ESLINT_BULK_ENABLE === 'false') {
+    return false;
+  }
 
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
   const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
@@ -264,7 +289,7 @@ export function bulkSuppressionsPrune(params: { filename: string }): void {
     })
   };
   const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
-  const suppressionsPath: string = path.join(eslintrcDirectory, '.eslint-bulk-suppressions.json');
+  const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
   fs.writeFileSync(suppressionsPath, JSON.stringify(newSuppressionsJson, null, 2));
 }
 
@@ -273,7 +298,8 @@ export function requireFromPathToLinterJS(importPath: string): import('eslint').
   if (!eslintFolder) {
     return require(importPath);
   }
-  const pathToLinterFolder: string = path.join(eslintFolder, 'lib', 'linter');
+
+  const pathToLinterFolder: string = `${eslintFolder}/lib/linter`;
   const moduleAbsolutePath: string = require.resolve(importPath, { paths: [pathToLinterFolder] });
   return require(moduleAbsolutePath);
 }
