@@ -21,6 +21,12 @@ interface IBulkSuppressionsJson {
 }
 
 const SUPPRESSIONS_JSON_FILENAME: string = '.eslint-bulk-suppressions.json';
+const ESLINTRC_FILENAMES: string[] = [
+  '.eslintrc.js',
+  '.eslintrc.cjs'
+  // Several other filenames are allowed, but this patch requires that it be loaded via a JS config file,
+  // so we only need to check for the JS-based filenames
+];
 
 function getNodeName(node: TSESTree.Node): string | undefined {
   if (Guards.isClassDeclarationWithName(node)) {
@@ -68,38 +74,55 @@ function calculateScopeId(node: NodeWithParent | undefined): string {
   }
 }
 
-/**
- * @throws Throws an error if the command to retrieve the root path fails.
- * @returns The root path of the monorepo.
- */
-export function getGitRootPath(): string {
-  const result: SpawnSyncReturns<string> = spawnSync('git', ['rev-parse', '--show-toplevel'], {
-    encoding: 'utf-8'
-  });
-  if (result.status !== 0) {
-    throw new Error(`get root path failed`);
+const eslintrcPathByFileOrFolderPath: Map<string, string> = new Map();
+
+function findEslintrcFolder(fileAbsolutePath: string): string {
+  const cachedFolderPathForFilePath: string | undefined =
+    eslintrcPathByFileOrFolderPath.get(fileAbsolutePath);
+  if (cachedFolderPathForFilePath) {
+    return cachedFolderPathForFilePath;
+  }
+
+  const normalizedFilePath: string = fileAbsolutePath.replace(/\\/g, '/');
+  const normalizedFileFolderPath: string = normalizedFilePath.substring(
+    0,
+    normalizedFilePath.lastIndexOf('/')
+  );
+
+  const pathsToCache: string[] = [fileAbsolutePath];
+  let eslintrcFolderPath: string | undefined;
+  for (
+    let currentFolder: string = normalizedFileFolderPath;
+    currentFolder; // 'something'.substring(0, -1) is ''
+    currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf('/'))
+  ) {
+    const cachedEslintrcFolderPath: string | undefined = eslintrcPathByFileOrFolderPath.get(currentFolder);
+    if (cachedEslintrcFolderPath) {
+      return cachedEslintrcFolderPath;
+    }
+
+    pathsToCache.push(currentFolder);
+    for (const iterator of ESLINTRC_FILENAMES) {
+      if (fs.existsSync(`${currentFolder}/${iterator}`)) {
+        eslintrcFolderPath = currentFolder;
+        break;
+      }
+    }
+  }
+
+  if (eslintrcFolderPath) {
+    for (const checkedFolder of pathsToCache) {
+      eslintrcPathByFileOrFolderPath.set(checkedFolder, eslintrcFolderPath);
+    }
+
+    return eslintrcFolderPath;
   } else {
-    return result.stdout.toString().trim();
+    throw new Error(`Cannot locate an ESLint configuration file for ${fileAbsolutePath}`);
   }
 }
 
-const gitRootPath: string = getGitRootPath();
-
-function findEslintrcDirectory(fileAbsolutePath: string): string {
-  for (
-    let currentDir: string = fileAbsolutePath;
-    currentDir.startsWith(gitRootPath);
-    currentDir = path.dirname(currentDir)
-  )
-    if (['.eslintrc.js', '.eslintrc.cjs'].some((eslintrc) => fs.existsSync(`${currentDir}/${eslintrc}`))) {
-      return currentDir;
-    }
-
-  throw new Error('Cannot locate eslintrc');
-}
-
 function readSuppressionsJson(fileAbsolutePath: string): IBulkSuppressionsJson {
-  const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
+  const eslintrcDirectory: string = findEslintrcFolder(fileAbsolutePath);
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
   let suppressionsJson: IBulkSuppressionsJson = { suppressions: [] };
 
@@ -174,7 +197,7 @@ function writeSuppressionToFile(
     rule: string;
   }
 ): void {
-  const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
+  const eslintrcDirectory: string = findEslintrcFolder(fileAbsolutePath);
   const suppressionsJson: IBulkSuppressionsJson = readSuppressionsJson(fileAbsolutePath);
 
   insort(suppressionsJson.suppressions, suppression, compareSuppressions);
@@ -201,7 +224,7 @@ export function shouldBulkSuppress(params: {
   }
 
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
-  const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
+  const eslintrcDirectory: string = findEslintrcFolder(fileAbsolutePath);
   const fileRelativePath: string = path.relative(eslintrcDirectory, fileAbsolutePath);
   const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
@@ -233,7 +256,7 @@ export function bulkSuppressionsPrune(params: { filename: string }): void {
       return usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression));
     })
   };
-  const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
+  const eslintrcDirectory: string = findEslintrcFolder(fileAbsolutePath);
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
   fs.writeFileSync(suppressionsPath, JSON.stringify(newSuppressionsJson, null, 2));
 }
