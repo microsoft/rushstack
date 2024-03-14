@@ -50,12 +50,14 @@ export async function minifySingleFileAsync(
       mangle.reserved = mangle.reserved ? externals.concat(mangle.reserved) : externals;
     }
 
-    // SourceMap is only generated if nameForMap is provided
+    // SourceMap is only generated if nameForMap is provided- ModuleMinifierPlugin will override terserOptions.sourceMap's boolean value
     if (nameForMap) {
       finalOptions.sourceMap = {
         includeSources: true
       };
       if (typeof sourceMapOptions !== 'boolean' && sourceMapOptions !== undefined) {
+        // Include any provided sourceMap options from minifier
+        // Note that any provided terserOptions.sourceMap options must be aligned with devtool or SourceMapDevToolPlugin configuration
         finalOptions.sourceMap = { ...finalOptions.sourceMap, ...sourceMapOptions };
       }
       // Always generate source maps as an object rather than a string
