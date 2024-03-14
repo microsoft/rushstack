@@ -179,7 +179,6 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
   outputFile += scanUntilNewline();
   outputFile += `
                         // --- BEGIN MONKEY PATCH ---
-                        debugger;
                         if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
                         // --- END MONKEY PATCH ---
 `;
