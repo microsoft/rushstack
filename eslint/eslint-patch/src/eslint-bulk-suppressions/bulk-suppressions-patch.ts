@@ -98,46 +98,6 @@ function findEslintrcDirectory(fileAbsolutePath: string): string {
   throw new Error('Cannot locate eslintrc');
 }
 
-function validateSuppressionsJson(json: IBulkSuppressionsJson): json is IBulkSuppressionsJson {
-  if (typeof json !== 'object') throw new Error(`Invalid JSON object: ${JSON.stringify(json, null, 2)}`);
-  if (json === null) throw new Error('JSON object is null.');
-  if (!json.hasOwnProperty('suppressions')) throw new Error('Missing "suppressions" property.');
-  if (!Array.isArray(json.suppressions)) throw new Error('"suppressions" property is not an array.');
-
-  if (
-    !json.suppressions.every((suppression) => {
-      if (typeof suppression !== 'object')
-        throw new Error(`Invalid suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (suppression === null)
-        throw new Error(`Suppression is null: ${JSON.stringify(suppression, null, 2)}`);
-      if (!suppression.hasOwnProperty('file'))
-        throw new Error(`Missing "file" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.file !== 'string')
-        throw new Error(
-          `"file" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
-        );
-      if (!suppression.hasOwnProperty('scopeId'))
-        throw new Error(`Missing "scopeId" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.scopeId !== 'string')
-        throw new Error(
-          `"scopeId" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
-        );
-      if (!suppression.hasOwnProperty('rule'))
-        throw new Error(`Missing "rule" property in suppression: ${JSON.stringify(suppression, null, 2)}`);
-      if (typeof suppression.rule !== 'string')
-        throw new Error(
-          `"rule" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
-        );
-      return true;
-    })
-  ) {
-    throw new Error(
-      `Invalid suppression in "suppressions" array: ${JSON.stringify(json.suppressions, null, 2)}`
-    );
-  }
-  return true;
-}
-
 function readSuppressionsJson(fileAbsolutePath: string): IBulkSuppressionsJson {
   const eslintrcDirectory: string = findEslintrcDirectory(fileAbsolutePath);
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
@@ -149,21 +109,6 @@ function readSuppressionsJson(fileAbsolutePath: string): IBulkSuppressionsJson {
     if (e.code !== 'MODULE_NOT_FOUND') {
       throw e;
     }
-  }
-
-  if (!validateSuppressionsJson(suppressionsJson)) {
-    console.warn(
-      `Unexpected file content in .eslint-bulk-suppressions.json. JSON expected to be in the following format:
-{
-suppressions: {
-    file: string;
-    scopeId: string;
-    rule: string;
-}[];
-}
-Please check file content, or delete file if suppressions are no longer needed.
-`
-    );
   }
 
   return suppressionsJson;
