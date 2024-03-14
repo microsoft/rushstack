@@ -9,7 +9,10 @@ import { patchFilePath } from './bulk-suppressions-patch';
  * @param inputFilePath - Must be an iteration of https://github.com/eslint/eslint/blob/main/lib/linter/linter.js
  * @param outputFilePath - Some small changes to linter.js
  */
-export function generatePatchedFileIfDoesNotExist(inputFilePath: string, outputFilePath: string): void {
+export function generatePatchedLinterJsFileIfDoesNotExist(
+  inputFilePath: string,
+  outputFilePath: string
+): void {
   if (fs.existsSync(outputFilePath)) {
     return;
   }

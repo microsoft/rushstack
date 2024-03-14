@@ -9,7 +9,7 @@ import {
   getNameOfGeneratedPatchFile
 } from './path-utils';
 import { patchClass } from './bulk-suppressions-patch';
-import { generatePatchedFileIfDoesNotExist } from './generate-patched-file';
+import { generatePatchedLinterJsFileIfDoesNotExist } from './generate-patched-file';
 
 if (!eslintFolder) {
   console.error(
@@ -27,7 +27,7 @@ const pathToLinterJS: string = getPathToLinterJS();
 const nameOfGeneratedPatchFile: string = getNameOfGeneratedPatchFile();
 
 const pathToGeneratedPatch: string = getPathToGeneratedPatch(__dirname, nameOfGeneratedPatchFile);
-generatePatchedFileIfDoesNotExist(pathToLinterJS, pathToGeneratedPatch);
+generatePatchedLinterJsFileIfDoesNotExist(pathToLinterJS, pathToGeneratedPatch);
 const { Linter: LinterPatch } = require(pathToGeneratedPatch);
 
 const { Linter } = require(pathToLinterJS);
