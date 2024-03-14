@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { TSESTree } from '@typescript-eslint/types';
-import { type SpawnSyncReturns, spawnSync } from 'child_process';
-import path from 'path';
 import fs from 'fs';
 
 import * as Guards from './ast-guards';
@@ -14,6 +12,12 @@ interface ISuppression {
   file: string;
   scopeId: string;
   rule: string;
+}
+
+interface IBulkSuppressionsConfig {
+  usedSerializedSuppressions: Set<string>;
+  serializedSuppressions: Set<string>;
+  jsonObject: IBulkSuppressionsJson;
 }
 
 interface IBulkSuppressionsJson {
@@ -76,20 +80,18 @@ function calculateScopeId(node: NodeWithParent | undefined): string {
 
 const eslintrcPathByFileOrFolderPath: Map<string, string> = new Map();
 
-function findEslintrcFolderPath(fileAbsolutePath: string): string {
+function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath: string): string {
   const cachedFolderPathForFilePath: string | undefined =
-    eslintrcPathByFileOrFolderPath.get(fileAbsolutePath);
+    eslintrcPathByFileOrFolderPath.get(normalizedFilePath);
   if (cachedFolderPathForFilePath) {
     return cachedFolderPathForFilePath;
   }
-
-  const normalizedFilePath: string = fileAbsolutePath.replace(/\\/g, '/');
   const normalizedFileFolderPath: string = normalizedFilePath.substring(
     0,
     normalizedFilePath.lastIndexOf('/')
   );
 
-  const pathsToCache: string[] = [fileAbsolutePath];
+  const pathsToCache: string[] = [normalizedFilePath];
   let eslintrcFolderPath: string | undefined;
   for (
     let currentFolder: string = normalizedFileFolderPath;
@@ -102,8 +104,8 @@ function findEslintrcFolderPath(fileAbsolutePath: string): string {
     }
 
     pathsToCache.push(currentFolder);
-    for (const iterator of ESLINTRC_FILENAMES) {
-      if (fs.existsSync(`${currentFolder}/${iterator}`)) {
+    for (const eslintrcFilename of ESLINTRC_FILENAMES) {
+      if (fs.existsSync(`${currentFolder}/${eslintrcFilename}`)) {
         eslintrcFolderPath = currentFolder;
         break;
       }
@@ -117,32 +119,44 @@ function findEslintrcFolderPath(fileAbsolutePath: string): string {
 
     return eslintrcFolderPath;
   } else {
-    throw new Error(`Cannot locate an ESLint configuration file for ${fileAbsolutePath}`);
+    throw new Error(`Cannot locate an ESLint configuration file for ${normalizedFilePath}`);
   }
 }
 
-const suppressionsJsonByFolderPath: Map<string, IBulkSuppressionsJson> = new Map();
-function getSuppressionsJsonForEslintrcFolderPath(eslintrcFolderPath: string): IBulkSuppressionsJson {
-  let suppressionsJson: IBulkSuppressionsJson | undefined =
+const suppressionsJsonByFolderPath: Map<string, IBulkSuppressionsConfig> = new Map();
+function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string): IBulkSuppressionsConfig {
+  let suppressionsConfig: IBulkSuppressionsConfig | undefined =
     suppressionsJsonByFolderPath.get(eslintrcFolderPath);
-  if (!suppressionsJson) {
+  if (!suppressionsConfig) {
     const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
+    let jsonObject: IBulkSuppressionsJson | undefined;
     try {
-      suppressionsJson = require(suppressionsPath);
+      jsonObject = require(suppressionsPath);
     } catch (e) {
       if (e.code !== 'MODULE_NOT_FOUND') {
         throw e;
       }
     }
 
-    if (!suppressionsJson) {
-      suppressionsJson = { suppressions: [] };
+    if (!jsonObject) {
+      suppressionsConfig = {
+        serializedSuppressions: new Set(),
+        usedSerializedSuppressions: new Set(),
+        jsonObject: { suppressions: [] }
+      };
+    } else {
+      const serializedSuppressions: Set<string> = new Set();
+      for (const suppression of jsonObject.suppressions) {
+        serializedSuppressions.add(serializeSuppression(suppression));
+      }
+
+      suppressionsConfig = { serializedSuppressions, usedSerializedSuppressions: new Set(), jsonObject };
     }
 
-    suppressionsJsonByFolderPath.set(eslintrcFolderPath, suppressionsJson);
+    suppressionsJsonByFolderPath.set(eslintrcFolderPath, suppressionsConfig);
   }
 
-  return suppressionsJson;
+  return suppressionsConfig;
 }
 
 function shouldWriteSuppression(suppression: ISuppression): boolean {
@@ -157,17 +171,6 @@ function shouldWriteSuppression(suppression: ISuppression): boolean {
   }
 
   return rulesToSuppress.includes(suppression.rule);
-}
-
-function isSuppressed(suppressionsJson: IBulkSuppressionsJson, suppression: ISuppression): boolean {
-  return (
-    suppressionsJson.suppressions.find(
-      (element) =>
-        element.file === suppression.file &&
-        element.scopeId === suppression.scopeId &&
-        element.rule === suppression.rule
-    ) !== undefined
-  );
 }
 
 function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number): void {
@@ -199,17 +202,15 @@ function compareSuppressions(a: ISuppression, b: ISuppression): -1 | 0 | 1 {
 
 function writeSuppressionsJsonToFile(
   eslintrcDirectory: string,
-  suppressionsJson: IBulkSuppressionsJson
+  suppressionsConfig: IBulkSuppressionsConfig
 ): void {
+  suppressionsJsonByFolderPath.set(eslintrcDirectory, suppressionsConfig);
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
-  suppressionsJsonByFolderPath.set(eslintrcDirectory, suppressionsJson);
-  fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsJson, null, 2));
+  fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, null, 2));
 }
 
-const usedSuppressions: Set<string> = new Set<string>();
-
-function serializeSuppression(fileAbsolutePath: string, suppression: ISuppression): string {
-  return `${fileAbsolutePath}|${suppression.file}|${suppression.scopeId}|${suppression.rule}`;
+function serializeSuppression({ file, scopeId, rule }: ISuppression): string {
+  return `${file}|${scopeId}|${rule}`;
 }
 
 // One-line insert into the ruleContext report method to prematurely exit if the ESLint problem has been suppressed
@@ -224,21 +225,25 @@ export function shouldBulkSuppress(params: {
   }
 
   const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
-  const eslintrcDirectory: string = findEslintrcFolderPath(fileAbsolutePath);
-  const fileRelativePath: string = path.relative(eslintrcDirectory, fileAbsolutePath);
+  const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
+  const eslintrcDirectory: string =
+    findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
+  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcDirectory.length + 1);
   const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
-  const suppressionsJson: IBulkSuppressionsJson = getSuppressionsJsonForEslintrcFolderPath(eslintrcDirectory);
-  const currentNodeIsSuppressed: boolean = isSuppressed(suppressionsJson, suppression);
+  const suppressionsJson: IBulkSuppressionsConfig =
+    getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
+  const serializedSuppression: string = serializeSuppression(suppression);
+  const currentNodeIsSuppressed: boolean = suppressionsJson.serializedSuppressions.has(serializedSuppression);
 
   if (currentNodeIsSuppressed && shouldWriteSuppression(suppression)) {
-    insort(suppressionsJson.suppressions, suppression, compareSuppressions);
+    insort(suppressionsJson.jsonObject.suppressions, suppression, compareSuppressions);
     writeSuppressionsJsonToFile(eslintrcDirectory, suppressionsJson);
   }
 
   if (currentNodeIsSuppressed) {
-    usedSuppressions.add(serializeSuppression(fileAbsolutePath, suppression));
+    suppressionsJson.usedSerializedSuppressions.add(serializedSuppression);
   }
 
   return currentNodeIsSuppressed;
@@ -252,16 +257,32 @@ export function onFinish(params: { filename: string }): void {
 
 function bulkSuppressionsPrune(params: { filename: string }): void {
   const { filename: fileAbsolutePath } = params;
-  const eslintrcFolderPath: string = findEslintrcFolderPath(fileAbsolutePath);
-  const suppressionsJson: IBulkSuppressionsJson =
-    getSuppressionsJsonForEslintrcFolderPath(eslintrcFolderPath);
-  const newSuppressionsJson: IBulkSuppressionsJson = {
-    suppressions: suppressionsJson.suppressions.filter((suppression) => {
-      return usedSuppressions.has(serializeSuppression(fileAbsolutePath, suppression));
-    })
+  const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
+  const eslintrcFolderPath: string =
+    findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
+  const suppressionsConfig: IBulkSuppressionsConfig =
+    getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath);
+  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcFolderPath.length + 1);
+
+  const newSuppressions: ISuppression[] = [];
+  const newSerializedSuppressions: Set<string> = new Set();
+  for (const suppression of suppressionsConfig.jsonObject.suppressions) {
+    if (suppression.file === fileRelativePath) {
+      const serializedSuppression: string = serializeSuppression(suppression);
+      if (suppressionsConfig.usedSerializedSuppressions.has(serializedSuppression)) {
+        newSuppressions.push(suppression);
+        newSerializedSuppressions.add(serializedSuppression);
+      }
+    }
+  }
+
+  const newSuppressionsConfig: IBulkSuppressionsConfig = {
+    serializedSuppressions: newSerializedSuppressions,
+    usedSerializedSuppressions: new Set(),
+    jsonObject: { suppressions: newSuppressions }
   };
 
-  writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsJson);
+  writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js
