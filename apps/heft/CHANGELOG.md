@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 05 Mar 2024 01:19:24 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Mar 2024 00:12:40 GMT and should not be manually modified.
+
+## 0.66.1
+Fri, 15 Mar 2024 00:12:40 GMT
+
+### Patches
+
+- Fix internal error when run 'heft clean'
 
 ## 0.66.0
 Tue, 05 Mar 2024 01:19:24 GMT

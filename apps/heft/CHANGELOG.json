@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.66.1",
+      "tag": "@rushstack/heft_v0.66.1",
+      "date": "Fri, 15 Mar 2024 00:12:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix internal error when run 'heft clean'"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.66.0",
       "tag": "@rushstack/heft_v0.66.0",
       "date": "Tue, 05 Mar 2024 01:19:24 GMT",
