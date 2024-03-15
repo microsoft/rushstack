@@ -26,7 +26,6 @@ export interface IMarkdownEmitterOptions {}
 
 export interface IMarkdownEmitterContext<TOptions = IMarkdownEmitterOptions> {
   writer: IndentedWriter;
-  insideTable: boolean;
 
   boldRequested: boolean;
   italicRequested: boolean;
@@ -47,7 +46,6 @@ export class MarkdownEmitter {
 
     const context: IMarkdownEmitterContext = {
       writer,
-      insideTable: false,
 
       boldRequested: false,
       italicRequested: false,
@@ -106,23 +104,9 @@ export class MarkdownEmitter {
       }
       case DocNodeKind.CodeSpan: {
         const docCodeSpan: DocCodeSpan = docNode as DocCodeSpan;
-        if (context.insideTable) {
-          writer.write('<code>');
-        } else {
-          writer.write('`');
-        }
-        if (context.insideTable) {
-          const code: string = this.getTableEscapedText(docCodeSpan.code);
-          const parts: string[] = code.split(/\r?\n/g);
-          writer.write(parts.join('</code><br/><code>'));
-        } else {
-          writer.write(docCodeSpan.code);
-        }
-        if (context.insideTable) {
-          writer.write('</code>');
-        } else {
-          writer.write('`');
-        }
+        writer.write('`');
+        writer.write(docCodeSpan.code);
+        writer.write('`');
         break;
       }
       case DocNodeKind.LinkTag: {
@@ -139,24 +123,10 @@ export class MarkdownEmitter {
       case DocNodeKind.Paragraph: {
         const docParagraph: DocParagraph = docNode as DocParagraph;
         const trimmedParagraph: DocParagraph = DocNodeTransforms.trimSpacesInParagraph(docParagraph);
-        if (context.insideTable) {
-          if (docNodeSiblings) {
-            // This tentative write is necessary to avoid writing empty paragraph tags (i.e. `<p></p>`). At the
-            // time this code runs, we do not know whether the `writeNodes` call below will actually write
-            // anything. Thus, we want to only write a `<p>` tag (as well as eventually a corresponding
-            // `</p>` tag) if something ends up being written within the tags.
-            writer.writeTentative('<p>', '</p>', () => {
-              this.writeNodes(trimmedParagraph.nodes, context);
-            });
-          } else {
-            // Special case:  If we are the only element inside this table cell, then we can omit the <p></p> container.
-            this.writeNodes(trimmedParagraph.nodes, context);
-          }
-        } else {
-          this.writeNodes(trimmedParagraph.nodes, context);
-          writer.ensureNewLine();
-          writer.writeLine();
-        }
+
+        this.writeNodes(trimmedParagraph.nodes, context);
+        writer.ensureNewLine();
+        writer.writeLine();
         break;
       }
       case DocNodeKind.FencedCode: {
