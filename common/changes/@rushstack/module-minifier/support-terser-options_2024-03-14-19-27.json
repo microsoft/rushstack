@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/module-minifier",
-      "comment": "added includeSources: true in sourceMap option to terser",
+      "comment": "Fix an issue where the assets listed in sourcemaps were incomplete or missing.",
       "type": "patch"
     }
   ],
