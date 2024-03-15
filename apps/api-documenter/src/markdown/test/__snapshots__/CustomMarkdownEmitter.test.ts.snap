@@ -55,11 +55,9 @@ HTML escape: &amp;quot;
 Header 1
 
 
-
 </th><th>
 
 Header 2
-
 
 
 </th></tr></thead>
@@ -68,13 +66,11 @@ Header 2
 Cell 1
 
 
-
 </td><td>
 
 Cell 2
 
 **bold text**
-
 
 
 </td></tr>

@@ -105,13 +105,13 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           writer.write('<thead><tr>');
           for (let i: number = 0; i < columnCount; ++i) {
             writer.write('<th>');
-            writer.writeLine();
+            writer.ensureNewLine();
             writer.writeLine();
             const cell: DocTableCell | undefined = docTable.header.cells[i];
             if (cell) {
               this.writeNode(cell.content, context, false);
             }
-            writer.writeLine();
+            writer.ensureNewLine();
             writer.writeLine();
             writer.write('</th>');
           }
@@ -124,10 +124,10 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           writer.write('<tr>');
           for (const cell of row.cells) {
             writer.write('<td>');
-            writer.writeLine();
+            writer.ensureNewLine();
             writer.writeLine();
             this.writeNode(cell.content, context, false);
-            writer.writeLine();
+            writer.ensureNewLine();
             writer.writeLine();
             writer.write('</td>');
           }
