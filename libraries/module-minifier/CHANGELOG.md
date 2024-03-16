@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Fri, 15 Mar 2024 00:12:40 GMT and should not be manually modified.
+This log was last generated on Sat, 16 Mar 2024 00:11:37 GMT and should not be manually modified.
+
+## 0.4.39
+Sat, 16 Mar 2024 00:11:37 GMT
+
+### Patches
+
+- Fix an issue where the assets listed in sourcemaps were incomplete or missing.
 
 ## 0.4.38
 Fri, 15 Mar 2024 00:12:40 GMT

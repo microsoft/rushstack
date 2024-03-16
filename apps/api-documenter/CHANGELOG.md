@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 15 Mar 2024 00:12:40 GMT and should not be manually modified.
+This log was last generated on Sat, 16 Mar 2024 00:11:37 GMT and should not be manually modified.
+
+## 7.24.0
+Sat, 16 Mar 2024 00:11:37 GMT
+
+### Minor changes
+
+- Emit HTML tags for tables instead of Markdown code.
 
 ## 7.23.38
 Fri, 15 Mar 2024 00:12:40 GMT

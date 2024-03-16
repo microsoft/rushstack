@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.24.0",
+      "tag": "@microsoft/api-documenter_v7.24.0",
+      "date": "Sat, 16 Mar 2024 00:11:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Emit HTML tags for tables instead of Markdown code."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.23.38",
       "tag": "@microsoft/api-documenter_v7.23.38",
       "date": "Fri, 15 Mar 2024 00:12:40 GMT",
