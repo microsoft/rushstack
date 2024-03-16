@@ -92,7 +92,7 @@ function rewriteRushProjectVersions(
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
         let workspaceVersionProtocol: string = 'link:';
-        if (workspaceProjectInfo.isInjectedInstall) {
+        if (workspaceProject.injectedDependencies.includes(dependencyName)) {
           workspaceVersionProtocol = 'file:';
         }
         const relativePath: string = path.normalize(
