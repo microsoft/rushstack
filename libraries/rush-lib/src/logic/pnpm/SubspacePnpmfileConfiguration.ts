@@ -67,10 +67,9 @@ export class SubspacePnpmfileConfiguration {
       Set<string>
     > = SubspacePnpmfileConfiguration._getProjectNameToInjectedDependenciesMap(rushConfiguration, subspace);
     for (const project of rushConfiguration.projects) {
-      const { packageName, projectFolder, projectRelativeFolder, packageJson } = project;
+      const { packageName, projectRelativeFolder, packageJson } = project;
       const workspaceProjectInfo: IWorkspaceProjectInfo = {
         packageName,
-        projectFolder,
         projectRelativeFolder,
         packageVersion: packageJson.version,
         injectedDependencies: Array.from(projectNameToInjectedDependenciesMap.get(packageName) || [])
@@ -84,6 +83,7 @@ export class SubspacePnpmfileConfiguration {
       semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
     };
 
+    // common/config/subspaces/<subspace_name>/.pnpmfile-subspace.cjs
     const userPnpmfilePath: string = path.join(
       subspace.getSubspaceConfigFolder(),
       (rushConfiguration.packageManagerWrapper as PnpmPackageManager).subspacePnpmfileFilename
