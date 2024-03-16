@@ -147,12 +147,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       path.join(subspace.getSubspaceTempFolder(), 'pnpm-workspace.yaml')
     );
 
-    // For pnpm pacakge manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
+    // For pnpm package manager, we need to handle dependenciesMeta changes in package.json. See more: https://pnpm.io/package_json#dependenciesmeta
     // If dependenciesMeta settings is different between package.json and pnpm-lock.yaml, then shrinkwrapIsUpToDate return false.
-    // Build a object for dependenciesMeta settings in projects' package.jsons
+    // Build a object for dependenciesMeta settings in projects' package.json
     // key is the package path, value is the dependenciesMeta info for that package
     const expectedDependenciesMetaByProjectRelativePath: Record<string, IDependenciesMetaTable> = {};
-    const commonTempFolder: string = this.rushConfiguration.commonTempFolder;
+    const commonTempFolder: string = subspace.getSubspaceTempFolder();
     const rushJsonFolder: string = this.rushConfiguration.rushJsonFolder;
     // get the relative path from common temp folder to repo root folder
     const relativeFromTempFolderToRootFolder: string = path.relative(commonTempFolder, rushJsonFolder);

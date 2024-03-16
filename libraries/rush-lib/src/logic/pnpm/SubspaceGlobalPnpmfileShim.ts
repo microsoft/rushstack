@@ -11,7 +11,7 @@ import path from 'path';
 // This file can use "import type" but otherwise should not reference any other modules, since it will
 // be run from the "common/temp" directory
 import type * as TSemver from 'semver';
-import type { IPackageJson, IDependenciesMetaTable } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type {
   IPnpmfile,
@@ -67,8 +67,7 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
 // For example: "project-a": "workspace:*" --> "project-a": "link:../../project-a"
 function rewriteRushProjectVersions(
   packageName: string,
-  dependencies: { [dependencyName: string]: string } | undefined,
-  dependenciesMeta: IDependenciesMetaTable | undefined
+  dependencies: { [dependencyName: string]: string } | undefined
 ): void {
   if (!dependencies) {
     return;
@@ -93,7 +92,7 @@ function rewriteRushProjectVersions(
       if (workspaceProjectInfo) {
         // Case 1. "<package_name>": "workspace:*"
         let workspaceVersionProtocol: string = 'link:';
-        if (dependenciesMeta && dependenciesMeta[dependencyName]?.injected) {
+        if (workspaceProjectInfo.isInjectedInstall) {
           workspaceVersionProtocol = 'file:';
         }
         const relativePath: string = path.normalize(
@@ -156,8 +155,8 @@ export const hooks: IPnpmfileHooks = {
   // Rewrite workspace protocol to link protocol for non split workspace projects
   readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
     context = init(context);
-    rewriteRushProjectVersions(pkg.name, pkg.dependencies, pkg?.dependenciesMeta);
-    rewriteRushProjectVersions(pkg.name, pkg.devDependencies, pkg?.dependenciesMeta);
+    rewriteRushProjectVersions(pkg.name, pkg.dependencies);
+    rewriteRushProjectVersions(pkg.name, pkg.devDependencies);
     return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
   },
 

@@ -10,6 +10,8 @@ import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IDependenciesMetaTable } from '@rushstack/node-core-library';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -59,12 +61,17 @@ export class SubspacePnpmfileConfiguration {
   ): ISubspacePnpmfileShimSettings {
     const workspaceProjects: Record<string, IWorkspaceProjectInfo> = {};
     const subspaceProjects: Record<string, IWorkspaceProjectInfo> = {};
+
+    const projectNameToIsInjectedInstallMap: Map<string, boolean> =
+      SubspacePnpmfileConfiguration._getProjectNameToIsInjectedInstallMap(rushConfiguration, subspace);
     for (const project of rushConfiguration.projects) {
-      const { packageName, projectRelativeFolder, packageJson } = project;
+      const { packageName, projectFolder, projectRelativeFolder, packageJson } = project;
       const workspaceProjectInfo: IWorkspaceProjectInfo = {
         packageName,
+        projectFolder,
         projectRelativeFolder,
-        packageVersion: packageJson.version
+        packageVersion: packageJson.version,
+        isInjectedInstall: Boolean(projectNameToIsInjectedInstallMap.get(packageName))
       };
       (subspace.contains(project) ? subspaceProjects : workspaceProjects)[packageName] = workspaceProjectInfo;
     }
@@ -75,7 +82,6 @@ export class SubspacePnpmfileConfiguration {
       semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
     };
 
-    // common/config/rush/.pnpmfile-split-workspace.cjs
     const userPnpmfilePath: string = path.join(
       subspace.getSubspaceConfigFolder(),
       (rushConfiguration.packageManagerWrapper as PnpmPackageManager).subspacePnpmfileFilename
@@ -85,5 +91,74 @@ export class SubspacePnpmfileConfiguration {
     }
 
     return settings;
+  }
+
+  private static _getProjectNameToIsInjectedInstallMap(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace
+  ): Map<string, boolean> {
+    const projectNameToIsInjectedInstallMap: Map<string, boolean> = new Map();
+
+    const workspaceProjectsMap: Map<string, RushConfigurationProject> = new Map();
+    const subspaceProjectsMap: Map<string, RushConfigurationProject> = new Map();
+    for (const project of rushConfiguration.projects) {
+      if (subspace.contains(project)) {
+        subspaceProjectsMap.set(project.packageName, project);
+      } else {
+        workspaceProjectsMap.set(project.packageName, project);
+      }
+    }
+
+    const processTransitiveInjectedInstallQueue: Array<RushConfigurationProject> = [];
+
+    for (const subspaceProject of subspaceProjectsMap.values()) {
+      const dependenciesMeta: IDependenciesMetaTable | undefined =
+        subspaceProject.packageJson.dependenciesMeta;
+      for (const dependencyName in dependenciesMeta) {
+        if (dependenciesMeta[dependencyName]?.injected) {
+          projectNameToIsInjectedInstallMap.set(dependencyName, true);
+
+          //if this dependency is in the same subspace, leave as it is, PNPM will handle it
+          //if this dependency is in another subspace, then it is transitive injected installation
+          //so, we need to let all the workspace dependencies along the dependency chain to use injected installation
+          if (!subspaceProjectsMap.has(dependencyName)) {
+            processTransitiveInjectedInstallQueue.push(workspaceProjectsMap.get(dependencyName)!);
+          }
+        }
+      }
+    }
+
+    while (processTransitiveInjectedInstallQueue.length > 0) {
+      const currentProject: RushConfigurationProject | undefined =
+        processTransitiveInjectedInstallQueue.shift();
+      const dependencies: Record<string, string> | undefined = currentProject?.packageJson.dependencies;
+      const devDependencies: Record<string, string> | undefined = currentProject?.packageJson.devDependencies;
+
+      // handle dependencies
+      for (const dependencyName in dependencies) {
+        if (dependencies[dependencyName].startsWith('workspace:')) {
+          projectNameToIsInjectedInstallMap.set(dependencyName, true);
+          const nextProject: RushConfigurationProject | undefined =
+            rushConfiguration.getProjectByName(dependencyName);
+          if (nextProject) {
+            processTransitiveInjectedInstallQueue.push(nextProject);
+          }
+        }
+      }
+
+      // handle devDependencies
+      for (const dependencyName in devDependencies) {
+        if (devDependencies[dependencyName].startsWith('workspace:')) {
+          projectNameToIsInjectedInstallMap.set(dependencyName, true);
+          const nextProject: RushConfigurationProject | undefined =
+            rushConfiguration.getProjectByName(dependencyName);
+          if (nextProject) {
+            processTransitiveInjectedInstallQueue.push(nextProject);
+          }
+        }
+      }
+    }
+
+    return projectNameToIsInjectedInstallMap;
   }
 }
