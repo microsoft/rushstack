@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-shell-script-plugin",
+      "comment": "Initial implementation",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-shell-script-plugin"
+}
