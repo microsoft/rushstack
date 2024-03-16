@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix issues when use pnpm-sync in subspace projects",
+      "comment": "Support PNPM injected installation in Rush subspace feature",
       "type": "none"
     }
   ],
