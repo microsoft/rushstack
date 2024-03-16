@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix issues when use pnpm-sync in subspace projects",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
