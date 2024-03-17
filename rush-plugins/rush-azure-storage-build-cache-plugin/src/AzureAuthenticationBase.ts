@@ -254,7 +254,7 @@ export abstract class AzureAuthenticationBase {
 
   private async _getCredentialAsync(
     terminal: ITerminal,
-    loginFlow: 'DeviceCode' | 'InteractiveBrowser'
+    loginFlow: LoginFlowType
   ): Promise<ICredentialResult> {
     const authorityHost: string | undefined = AzureAuthorityHosts[this._azureEnvironment];
     if (!authorityHost) {
