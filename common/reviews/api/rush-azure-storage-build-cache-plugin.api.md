@@ -34,8 +34,6 @@ export abstract class AzureAuthenticationBase {
     protected abstract _getCacheIdParts(): string[];
     // (undocumented)
     protected abstract _getCredentialFromTokenAsync(terminal: ITerminal, tokenCredential: TokenCredential): Promise<ICredentialResult>;
-    // Warning: (ae-forgotten-export) The symbol "LoginFlowType" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     protected readonly _loginFlow: LoginFlowType;
     // (undocumented)
@@ -127,6 +125,9 @@ export interface ITryGetCachedCredentialOptionsLogWarning extends ITryGetCachedC
 export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCredentialOptionsBase {
     expiredCredentialBehavior: 'throwError';
 }
+
+// @public (undocumented)
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser';
 
 // @public (undocumented)
 class RushAzureStorageBuildCachePlugin implements IRushPlugin {

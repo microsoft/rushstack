@@ -7,6 +7,7 @@ export {
   type IAzureAuthenticationBaseOptions,
   type ICredentialResult,
   type AzureEnvironmentName,
+  type LoginFlowType,
   type ITryGetCachedCredentialOptionsBase,
   type ITryGetCachedCredentialOptionsLogWarning,
   type ITryGetCachedCredentialOptionsThrow,
