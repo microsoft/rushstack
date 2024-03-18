@@ -31,6 +31,13 @@ const ESLINTRC_FILENAMES: string[] = [
   // Several other filenames are allowed, but this patch requires that it be loaded via a JS config file,
   // so we only need to check for the JS-based filenames
 ];
+const NEW_SUPPRESSION_SYMBOL: unique symbol = Symbol('newSuppression');
+const NEW_SUPPRESSION_JSON_SYMBOL: unique symbol = Symbol('newSuppressionJson');
+
+interface IProblem {
+  [NEW_SUPPRESSION_JSON_SYMBOL]?: IBulkSuppressionsJson;
+  [NEW_SUPPRESSION_SYMBOL]?: ISuppression;
+}
 
 function getNodeName(node: TSESTree.Node): string | undefined {
   if (Guards.isClassDeclarationWithName(node)) {
@@ -150,7 +157,11 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
         serializedSuppressions.add(serializeSuppression(suppression));
       }
 
-      suppressionsConfig = { serializedSuppressions, usedSerializedSuppressions: new Set(), jsonObject };
+      suppressionsConfig = {
+        serializedSuppressions,
+        usedSerializedSuppressions: new Set(),
+        jsonObject
+      };
     }
 
     suppressionsJsonByFolderPath.set(eslintrcFolderPath, suppressionsConfig);
@@ -210,13 +221,14 @@ export function shouldBulkSuppress(params: {
   filename: string;
   currentNode: TSESTree.Node;
   ruleId: string;
+  problem: IProblem;
 }): boolean {
   // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
   if (process.env.ESLINT_BULK_ENABLE === 'false') {
     return false;
   }
 
-  const { filename: fileAbsolutePath, currentNode, ruleId: rule } = params;
+  const { filename: fileAbsolutePath, currentNode, ruleId: rule, problem } = params;
   const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
   const eslintrcDirectory: string =
     findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
@@ -224,18 +236,16 @@ export function shouldBulkSuppress(params: {
   const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
-  const suppressionsJson: IBulkSuppressionsConfig =
+  const { serializedSuppressions, jsonObject, usedSerializedSuppressions }: IBulkSuppressionsConfig =
     getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
   const serializedSuppression: string = serializeSuppression(suppression);
-  const currentNodeIsSuppressed: boolean = suppressionsJson.serializedSuppressions.has(serializedSuppression);
+  const currentNodeIsSuppressed: boolean = serializedSuppressions.has(serializedSuppression);
 
   if (!currentNodeIsSuppressed && shouldWriteSuppression(suppression)) {
-    suppressionsJson.jsonObject.suppressions.push(suppression);
-    suppressionsJson.serializedSuppressions.add(serializedSuppression);
-  }
-
-  if (currentNodeIsSuppressed) {
-    suppressionsJson.usedSerializedSuppressions.add(serializedSuppression);
+    problem[NEW_SUPPRESSION_SYMBOL] = suppression;
+    problem[NEW_SUPPRESSION_JSON_SYMBOL] = jsonObject;
+  } else if (currentNodeIsSuppressed) {
+    usedSerializedSuppressions.add(serializedSuppression);
   }
 
   return currentNodeIsSuppressed;
@@ -296,4 +306,21 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
       Object.defineProperty(originalClass.prototype, prop, descriptor);
     }
   }
+}
+
+export function extendVerifyFunction(
+  originalFn: (this: unknown, ...args: unknown[]) => IProblem[] | undefined
+): (this: unknown, ...args: unknown[]) => IProblem[] | undefined {
+  return function (this: unknown, ...args: unknown[]): IProblem[] | undefined {
+    const problems: IProblem[] | undefined = originalFn.apply(this, args);
+    if (problems) {
+      for (const problem of problems) {
+        if (problem[NEW_SUPPRESSION_SYMBOL]) {
+          problem[NEW_SUPPRESSION_JSON_SYMBOL]!.suppressions.push(problem[NEW_SUPPRESSION_SYMBOL]);
+        }
+      }
+    }
+
+    return problems;
+  };
 }

@@ -8,7 +8,7 @@ import {
   getPathToGeneratedPatch,
   getNameOfGeneratedPatchFile
 } from './path-utils';
-import { patchClass } from './bulk-suppressions-patch';
+import { patchClass, extendVerifyFunction } from './bulk-suppressions-patch';
 import { generatePatchedLinterJsFileIfDoesNotExist } from './generate-patched-file';
 
 if (!eslintFolder) {
@@ -29,6 +29,7 @@ const nameOfGeneratedPatchFile: string = getNameOfGeneratedPatchFile();
 const pathToGeneratedPatch: string = getPathToGeneratedPatch(__dirname, nameOfGeneratedPatchFile);
 generatePatchedLinterJsFileIfDoesNotExist(pathToLinterJS, pathToGeneratedPatch);
 const { Linter: LinterPatch } = require(pathToGeneratedPatch);
+LinterPatch.prototype.verify = extendVerifyFunction(LinterPatch.prototype.verify);
 
 const { Linter } = require(pathToLinterJS);
 

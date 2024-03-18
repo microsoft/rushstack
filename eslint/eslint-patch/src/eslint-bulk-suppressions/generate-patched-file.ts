@@ -157,31 +157,47 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
 `;
 
   // Match this:
-  //    const ruleContext = Object.freeze(
-  //      Object.assign(Object.create(sharedTraversalContext), {
-  //        id: ruleId,
-  //        options: getRuleOptions(configuredRules[ruleId]),
-  //        report(...args) {
-  //          /*
-  //           * Create a report translator lazily.
+  // ```
+  //      if (reportTranslator === null) {
+  //        reportTranslator = createReportTranslator({
+  //            ruleId,
+  //            severity,
+  //            sourceCode,
+  //            messageIds,
+  //            disableFixes
+  //        });
+  //    }
+  //    const problem = reportTranslator(...args);
+  //
+  //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
+  //        throw new Error("Fixable rules must set the `meta.fixable` property to \"code\" or \"whitespace\".");
+  //    }
+  // ```
   //
   // Convert to something like this:
+  // ```
+  //      if (reportTranslator === null) {
+  //        reportTranslator = createReportTranslator({
+  //            ruleId,
+  //            severity,
+  //            sourceCode,
+  //            messageIds,
+  //            disableFixes
+  //        });
+  //    }
+  //    const problem = reportTranslator(...args);
+  //    // --- BEGIN MONKEY PATCH ---
+  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+  //    // --- END MONKEY PATCH ---
   //
-  //    const ruleContext = Object.freeze(
-  //      Object.assign(Object.create(sharedTraversalContext), {
-  //        id: ruleId,
-  //        options: getRuleOptions(configuredRules[ruleId]),
-  //        report(...args) {
-  //          if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
-  //          /*
-  //           * Create a report translator lazily.
-  //
-  outputFile += scanUntilMarker('const ruleContext = Object.freeze(');
-  outputFile += scanUntilMarker('report(...args) {');
-  outputFile += scanUntilNewline();
+  //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
+  //        throw new Error("Fixable rules must set the `meta.fixable` property to \"code\" or \"whitespace\".");
+  //    }
+  // ```
+  outputFile += scanUntilMarker('const problem = reportTranslator(...args);');
   outputFile += `
                         // --- BEGIN MONKEY PATCH ---
-                        if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+                        if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId, problem })) return;
                         // --- END MONKEY PATCH ---
 `;
 
