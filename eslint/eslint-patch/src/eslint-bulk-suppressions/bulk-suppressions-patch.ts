@@ -173,15 +173,6 @@ function shouldWriteSuppression(suppression: ISuppression): boolean {
   return rulesToSuppress.includes(suppression.rule);
 }
 
-function insort<T>(array: T[], item: T, compareFunction: (a: T, b: T) => number): void {
-  const index: number = array.findIndex((element) => compareFunction(element, item) > 0);
-  if (index === -1) {
-    array.push(item);
-  } else {
-    array.splice(index, 0, item);
-  }
-}
-
 function compareSuppressions(a: ISuppression, b: ISuppression): -1 | 0 | 1 {
   if (a.file < b.file) {
     return -1;
@@ -206,7 +197,8 @@ function writeSuppressionsJsonToFile(
 ): void {
   suppressionsJsonByFolderPath.set(eslintrcDirectory, suppressionsConfig);
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
-  fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, null, 2));
+  suppressionsConfig.jsonObject.suppressions.sort(compareSuppressions);
+  fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, undefined, 2));
 }
 
 function serializeSuppression({ file, scopeId, rule }: ISuppression): string {
@@ -238,9 +230,8 @@ export function shouldBulkSuppress(params: {
   const currentNodeIsSuppressed: boolean = suppressionsJson.serializedSuppressions.has(serializedSuppression);
 
   if (!currentNodeIsSuppressed && shouldWriteSuppression(suppression)) {
-    insort(suppressionsJson.jsonObject.suppressions, suppression, compareSuppressions);
+    suppressionsJson.jsonObject.suppressions.push(suppression);
     suppressionsJson.serializedSuppressions.add(serializedSuppression);
-    writeSuppressionsJsonToFile(eslintrcDirectory, suppressionsJson);
   }
 
   if (currentNodeIsSuppressed) {
@@ -250,40 +241,32 @@ export function shouldBulkSuppress(params: {
   return currentNodeIsSuppressed;
 }
 
-export function onFinish(params: { filename: string }): void {
-  if (process.env.ESLINT_BULK_PRUNE === 'true') {
-    bulkSuppressionsPrune(params);
-  }
-}
-
-function bulkSuppressionsPrune(params: { filename: string }): void {
-  const { filename: fileAbsolutePath } = params;
-  const normalizedFileAbsolutePath: string = fileAbsolutePath.replace(/\\/g, '/');
-  const eslintrcFolderPath: string =
-    findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFileAbsolutePath);
-  const suppressionsConfig: IBulkSuppressionsConfig =
-    getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath);
-  const fileRelativePath: string = normalizedFileAbsolutePath.substring(eslintrcFolderPath.length + 1);
-
-  const newSuppressions: ISuppression[] = [];
-  const newSerializedSuppressions: Set<string> = new Set();
-  for (const suppression of suppressionsConfig.jsonObject.suppressions) {
-    if (suppression.file === fileRelativePath) {
+export function prune(): void {
+  for (const [eslintrcFolderPath, suppressionsConfig] of suppressionsJsonByFolderPath) {
+    const newSuppressions: ISuppression[] = [];
+    const newSerializedSuppressions: Set<string> = new Set();
+    for (const suppression of suppressionsConfig.jsonObject.suppressions) {
       const serializedSuppression: string = serializeSuppression(suppression);
       if (suppressionsConfig.usedSerializedSuppressions.has(serializedSuppression)) {
         newSuppressions.push(suppression);
         newSerializedSuppressions.add(serializedSuppression);
       }
     }
+
+    const newSuppressionsConfig: IBulkSuppressionsConfig = {
+      serializedSuppressions: newSerializedSuppressions,
+      usedSerializedSuppressions: new Set(),
+      jsonObject: { suppressions: newSuppressions }
+    };
+
+    writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
   }
+}
 
-  const newSuppressionsConfig: IBulkSuppressionsConfig = {
-    serializedSuppressions: newSerializedSuppressions,
-    usedSerializedSuppressions: new Set(),
-    jsonObject: { suppressions: newSuppressions }
-  };
-
-  writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
+export function write(): void {
+  for (const [eslintrcFolderPath, suppressionsConfig] of suppressionsJsonByFolderPath) {
+    writeSuppressionsJsonToFile(eslintrcFolderPath, suppressionsConfig);
+  }
 }
 
 // utility function for linter-patch.js to make require statements that use relative paths in linter.js work in linter-patch.js

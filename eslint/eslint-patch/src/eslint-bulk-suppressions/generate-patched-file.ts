@@ -185,54 +185,9 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
                         // --- END MONKEY PATCH ---
 `;
 
-  // Match this:
-  // nodeQueue.forEach((traversalInfo) => {
-  //   currentNode = traversalInfo.node;
-  //
-  //   try {
-  //     if (traversalInfo.isEntering) {
-  //       eventGenerator.enterNode(currentNode);
-  //     } else {
-  //       eventGenerator.leaveNode(currentNode);
-  //     }
-  //   } catch (err) {
-  //     err.currentNode = currentNode;
-  //     throw err;
-  //   }
-  // });
-  //
-  // return lintingProblems;
-  //
-  // Convert to this:
-  // nodeQueue.forEach((traversalInfo) => {
-  //   currentNode = traversalInfo.node;
-  //
-  //   try {
-  //     if (traversalInfo.isEntering) {
-  //       eventGenerator.enterNode(currentNode);
-  //     } else {
-  //       eventGenerator.leaveNode(currentNode);
-  //     }
-  //   } catch (err) {
-  //     err.currentNode = currentNode;
-  //     throw err;
-  //   }
-  // });
-  //
-  // // --- BEGIN MONKEY PATCH ---
-  // bulkSuppressionsPatch.onFinish({ filename });
-  // // --- END MONKEY PATCH ---
-  //
-  // return lintingProblems;
   outputFile += scanUntilMarker('nodeQueue.forEach(traversalInfo => {');
   outputFile += scanUntilMarker('});');
   outputFile += scanUntilNewline();
-  outputFile += `
-    // --- BEGIN MONKEY PATCH ---
-    bulkSuppressionsPatch.onFinish({ filename });
-    // --- END MONKEY PATCH ---
-`;
-
   outputFile += scanUntilMarker('class Linter {');
   outputFile += scanUntilNewline();
   outputFile += `
