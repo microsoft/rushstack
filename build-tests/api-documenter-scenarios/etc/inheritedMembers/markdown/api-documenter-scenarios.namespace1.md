@@ -13,7 +13,25 @@ export declare namespace Namespace1
 
 ## Classes
 
-|  Class | Description |
-|  --- | --- |
-|  [Class3](./api-documenter-scenarios.namespace1.class3.md) |  |
+<table><thead><tr><th>
 
+Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[Class3](./api-documenter-scenarios.namespace1.class3.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+</tbody></table>

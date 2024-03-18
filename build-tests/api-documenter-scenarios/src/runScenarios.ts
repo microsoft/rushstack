@@ -131,6 +131,7 @@ export function runScenarios(buildConfigPath: string): void {
 
     JsonFile.save(apiDocumenterJson, apiDocumenterJsonPath, { ensureFolderExists: true });
 
+    // TODO: Ensure that the checked-in files are up-to-date
     // Run the API Documenter command-line
     executeCommand(
       'node node_modules/@microsoft/api-documenter/lib/start ' +
