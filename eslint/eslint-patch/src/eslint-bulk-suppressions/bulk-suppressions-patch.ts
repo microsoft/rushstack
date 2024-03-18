@@ -15,9 +15,10 @@ interface ISuppression {
 }
 
 interface IBulkSuppressionsConfig {
-  usedSerializedSuppressions: Set<string>;
   serializedSuppressions: Set<string>;
   jsonObject: IBulkSuppressionsJson;
+  newSerializedSuppressions: Set<string>;
+  newJsonObject: IBulkSuppressionsJson;
 }
 
 interface IBulkSuppressionsJson {
@@ -31,12 +32,14 @@ const ESLINTRC_FILENAMES: string[] = [
   // Several other filenames are allowed, but this patch requires that it be loaded via a JS config file,
   // so we only need to check for the JS-based filenames
 ];
-const NEW_SUPPRESSION_SYMBOL: unique symbol = Symbol('newSuppression');
-const NEW_SUPPRESSION_JSON_SYMBOL: unique symbol = Symbol('newSuppressionJson');
+const SUPPRESSION_SYMBOL: unique symbol = Symbol('suppression');
 
 interface IProblem {
-  [NEW_SUPPRESSION_JSON_SYMBOL]?: IBulkSuppressionsJson;
-  [NEW_SUPPRESSION_SYMBOL]?: ISuppression;
+  [SUPPRESSION_SYMBOL]?: {
+    config: IBulkSuppressionsConfig;
+    suppression: ISuppression;
+    serializedSuppression: string;
+  };
 }
 
 function getNodeName(node: TSESTree.Node): string | undefined {
@@ -148,8 +151,9 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
     if (!jsonObject) {
       suppressionsConfig = {
         serializedSuppressions: new Set(),
-        usedSerializedSuppressions: new Set(),
-        jsonObject: { suppressions: [] }
+        jsonObject: { suppressions: [] },
+        newSerializedSuppressions: new Set(),
+        newJsonObject: { suppressions: [] }
       };
     } else {
       const serializedSuppressions: Set<string> = new Set();
@@ -159,8 +163,9 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
 
       suppressionsConfig = {
         serializedSuppressions,
-        usedSerializedSuppressions: new Set(),
-        jsonObject
+        jsonObject,
+        newSerializedSuppressions: new Set(),
+        newJsonObject: { suppressions: [] }
       };
     }
 
@@ -236,37 +241,31 @@ export function shouldBulkSuppress(params: {
   const scopeId: string = calculateScopeId(currentNode);
   const suppression: ISuppression = { file: fileRelativePath, scopeId, rule };
 
-  const { serializedSuppressions, jsonObject, usedSerializedSuppressions }: IBulkSuppressionsConfig =
-    getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
+  const config: IBulkSuppressionsConfig = getSuppressionsConfigForEslintrcFolderPath(eslintrcDirectory);
   const serializedSuppression: string = serializeSuppression(suppression);
-  const currentNodeIsSuppressed: boolean = serializedSuppressions.has(serializedSuppression);
+  const currentNodeIsSuppressed: boolean = config.serializedSuppressions.has(serializedSuppression);
 
-  if (!currentNodeIsSuppressed && shouldWriteSuppression(suppression)) {
-    problem[NEW_SUPPRESSION_SYMBOL] = suppression;
-    problem[NEW_SUPPRESSION_JSON_SYMBOL] = jsonObject;
-  } else if (currentNodeIsSuppressed) {
-    usedSerializedSuppressions.add(serializedSuppression);
+  if (currentNodeIsSuppressed || shouldWriteSuppression(suppression)) {
+    problem[SUPPRESSION_SYMBOL] = {
+      suppression,
+      serializedSuppression,
+      config
+    };
   }
 
-  return currentNodeIsSuppressed;
+  return process.env.ESLINT_BULK_PRUNE !== 'true' && currentNodeIsSuppressed;
 }
 
 export function prune(): void {
-  for (const [eslintrcFolderPath, suppressionsConfig] of suppressionsJsonByFolderPath) {
-    const newSuppressions: ISuppression[] = [];
-    const newSerializedSuppressions: Set<string> = new Set();
-    for (const suppression of suppressionsConfig.jsonObject.suppressions) {
-      const serializedSuppression: string = serializeSuppression(suppression);
-      if (suppressionsConfig.usedSerializedSuppressions.has(serializedSuppression)) {
-        newSuppressions.push(suppression);
-        newSerializedSuppressions.add(serializedSuppression);
-      }
-    }
-
+  for (const [
+    eslintrcFolderPath,
+    { newSerializedSuppressions, newJsonObject }
+  ] of suppressionsJsonByFolderPath) {
     const newSuppressionsConfig: IBulkSuppressionsConfig = {
       serializedSuppressions: newSerializedSuppressions,
-      usedSerializedSuppressions: new Set(),
-      jsonObject: { suppressions: newSuppressions }
+      jsonObject: newJsonObject,
+      newSerializedSuppressions: new Set(),
+      newJsonObject: { suppressions: [] }
     };
 
     writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
@@ -315,8 +314,19 @@ export function extendVerifyFunction(
     const problems: IProblem[] | undefined = originalFn.apply(this, args);
     if (problems) {
       for (const problem of problems) {
-        if (problem[NEW_SUPPRESSION_SYMBOL]) {
-          problem[NEW_SUPPRESSION_JSON_SYMBOL]!.suppressions.push(problem[NEW_SUPPRESSION_SYMBOL]);
+        if (problem[SUPPRESSION_SYMBOL]) {
+          const {
+            serializedSuppression,
+            suppression,
+            config: {
+              newSerializedSuppressions,
+              jsonObject: { suppressions },
+              newJsonObject: { suppressions: newSuppressions }
+            }
+          } = problem[SUPPRESSION_SYMBOL];
+          newSerializedSuppressions.add(serializedSuppression);
+          suppressions.push(suppression);
+          newSuppressions.push(suppression);
         }
       }
     }
