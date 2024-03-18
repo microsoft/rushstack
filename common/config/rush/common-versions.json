@@ -78,7 +78,8 @@
       // For testing Heft with TS V4
       "~4.9.5",
 
-      "5.3.3"
+      // API Extractor bundles a specific TypeScript version because it calls internal APIs
+      "5.4.2"
     ],
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
