@@ -14,7 +14,7 @@
     "@rushstack/heft": "workspace:*",
     "eslint": "~8.7.0",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.3.3"
+    "typescript": "~5.4.2"
   },
   "dependenciesMeta": {
     "@rushstack/eslint-config": {
