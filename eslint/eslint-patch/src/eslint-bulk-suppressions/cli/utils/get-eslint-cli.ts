@@ -3,6 +3,8 @@
 
 import path from 'path';
 
+// When this list is updated, update the `eslint-bulk-suppressions-newest-test`
+// and/or the `eslint-bulk-suppressions-newest-test` projects' eslint dependencies.
 const TESTED_VERSIONS: Set<string> = new Set(['8.6.0', '8.7.0', '8.21.0', '8.22.0', '8.23.0', '8.23.1']);
 
 export function getEslintPath(packagePath: string): string {
