@@ -108,7 +108,7 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
 
   const pathsToCache: string[] = [normalizedFilePath];
   let eslintrcFolderPath: string | undefined;
-  for (
+  findEslintrcFileLoop: for (
     let currentFolder: string = normalizedFileFolderPath;
     currentFolder; // 'something'.substring(0, -1) is ''
     currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf('/'))
@@ -122,7 +122,7 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
     for (const eslintrcFilename of ESLINTRC_FILENAMES) {
       if (fs.existsSync(`${currentFolder}/${eslintrcFilename}`)) {
         eslintrcFolderPath = currentFolder;
-        break;
+        break findEslintrcFileLoop;
       }
     }
   }
