@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rush will now hoist explicitly stated hoisted dependencies for split workspace compatibility",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

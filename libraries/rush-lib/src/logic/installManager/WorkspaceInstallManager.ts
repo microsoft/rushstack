@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
+import yaml from 'js-yaml';
 import {
   FileSystem,
   FileConstants,
@@ -12,7 +13,6 @@ import {
   type IDependenciesMetaTable,
   Path
 } from '@rushstack/node-core-library';
-import yaml = require('js-yaml');
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
@@ -40,6 +40,10 @@ import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
+
+export interface IPnpmModules {
+  hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
+}
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -595,26 +599,35 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration.subspacesFeatureEnabled &&
       this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility &&
       subspace.subspaceName.startsWith('split_') &&
-      subspace.getProjects().length !== 1
+      subspace.getProjects().length === 1
     ) {
       // Find the .modules.yaml file in the subspace temp/node_modules folder
       const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
       const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
 
       const modulesContent: string = FileSystem.readFile(modulesFilePath);
-      const yamlContent: { hoistedDependencies: { [key in string]: { [key in string]: string } } } =
-        yaml.load(modulesContent, { filename: modulesFilePath });
+      const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
       const { hoistedDependencies } = yamlContent;
-      const projectNodeModulesPath: string = `${subspace.getSubspaceConfigFolder()}/node_modules`;
+      const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
+      const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
       for (const value of Object.values(hoistedDependencies)) {
         for (const [filePath, type] of Object.entries(value)) {
           if (type === 'public') {
-            console.log('hoisting: ', filePath);
-            fs.symlinkSync(
-              `${tempNodeModulesPath}/${filePath}`,
-              `${projectNodeModulesPath}/${filePath}`,
-              'dir'
-            );
+            // If we don't already have a symlink for this package, create one
+            if (!fs.existsSync(`${projectNodeModulesPath}/${filePath}`)) {
+              // Ensure origin folder exists
+              const parentDirSep: string[] = `${projectNodeModulesPath}/${filePath}`.split(path.sep);
+              parentDirSep.pop();
+              const parentDir: string = parentDirSep.join(path.sep);
+              if (!fs.existsSync(parentDir)) {
+                fs.mkdirSync(parentDir, { recursive: true });
+              }
+              fs.symlinkSync(
+                `${tempNodeModulesPath}/${filePath}`,
+                `${projectNodeModulesPath}/${filePath}`,
+                'dir'
+              );
+            }
           }
         }
       }
