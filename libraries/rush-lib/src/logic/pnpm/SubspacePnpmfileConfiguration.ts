@@ -168,7 +168,7 @@ export class SubspacePnpmfileConfiguration {
 
   private static _processDependenciesForTransitiveInjectedInstall(
     projectNameToInjectedDependencies: Map<string, Set<string>>,
-    processTransitiveInjectedInstallQueue: Array<RushConfigurationProject> = [],
+    processTransitiveInjectedInstallQueue: Array<RushConfigurationProject>,
     dependencies: Record<string, string>,
     currentProject: RushConfigurationProject,
     rushConfiguration: RushConfiguration
