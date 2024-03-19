@@ -5,6 +5,7 @@ import { eslintFolder } from '../_patch-base';
 import { findAndConsoleLogPatchPathCli, getPathToLinterJS, ensurePathToGeneratedPatch } from './path-utils';
 import { patchClass, extendVerifyFunction } from './bulk-suppressions-patch';
 import { generatePatchedLinterJsFileIfDoesNotExist } from './generate-patched-file';
+import { ESLINT_BULK_DETECT_ENV_VAR_NAME, ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME } from './constants';
 
 if (!eslintFolder) {
   console.error(
@@ -14,12 +15,14 @@ if (!eslintFolder) {
   process.exit(1);
 }
 
-if (process.env._RUSHSTACK_ESLINT_BULK_DETECT === 'true') {
+if (process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME] === 'true') {
   findAndConsoleLogPatchPathCli();
   process.exit(0);
 }
 
 const pathToLinterJS: string = getPathToLinterJS();
+
+process.env[ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME] = require.resolve('./bulk-suppressions-patch');
 
 const pathToGeneratedPatch: string = ensurePathToGeneratedPatch();
 generatePatchedLinterJsFileIfDoesNotExist(pathToLinterJS, pathToGeneratedPatch);

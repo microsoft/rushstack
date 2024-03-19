@@ -3,6 +3,7 @@
 
 import { printSuppressHelp } from './utils/print-help';
 import { runEslintAsync } from './runEslint';
+import { ESLINT_BULK_SUPPRESS_ENV_VAR_NAME } from '../constants';
 
 interface IParsedArgs {
   rules: string[];
@@ -67,9 +68,9 @@ export async function suppressAsync(): Promise<void> {
   }
 
   if (parsedArgs.all) {
-    process.env.ESLINT_BULK_SUPPRESS = '*';
+    process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME] = '*';
   } else if (parsedArgs.rules.length > 0) {
-    process.env.ESLINT_BULK_SUPPRESS = parsedArgs.rules.join(',');
+    process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME] = parsedArgs.rules.join(',');
   }
 
   await runEslintAsync(parsedArgs.files, 'suppress');

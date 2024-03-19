@@ -2,6 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'fs';
+import {
+  ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME,
+  ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME
+} from './constants';
 
 /**
  * Dynamically generate file to properly patch many versions of ESLint
@@ -12,7 +16,10 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
   inputFilePath: string,
   outputFilePath: string
 ): void {
-  if (fs.existsSync(outputFilePath)) {
+  if (
+    process.env[ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME] !== 'true' &&
+    fs.existsSync(outputFilePath)
+  ) {
     return;
   }
 
@@ -116,7 +123,7 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
 
   outputFile += `
 // --- BEGIN MONKEY PATCH ---
-const bulkSuppressionsPatch = require('../../bulk-suppressions-patch');
+const bulkSuppressionsPatch = require(process.env.${ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME});
 const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJS;
 `;
 

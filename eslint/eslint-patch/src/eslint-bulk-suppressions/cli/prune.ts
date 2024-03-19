@@ -3,6 +3,7 @@
 
 import { printPruneHelp } from './utils/print-help';
 import { runEslintAsync } from './runEslint';
+import { ESLINT_BULK_PRUNE_ENV_VAR_NAME } from '../constants';
 
 export async function pruneAsync(): Promise<void> {
   const args: string[] = process.argv.slice(3);
@@ -16,7 +17,7 @@ export async function pruneAsync(): Promise<void> {
     throw new Error(`@rushstack/eslint-bulk: Unknown arguments: ${args.join(' ')}`);
   }
 
-  process.env.ESLINT_BULK_PRUNE = 'true';
+  process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] = 'true';
 
   await runEslintAsync(['.'], 'prune');
 }

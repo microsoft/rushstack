@@ -4,15 +4,18 @@
 import fs from 'fs';
 import os from 'os';
 import { eslintFolder, eslintPackageVersion } from '../_patch-base';
-import { eslintBulkPath } from '../exports/eslint-bulk';
+import { ESLINT_BULK_DETECT_ENV_VAR_NAME } from './constants';
+import currentPackageJson from '../../package.json';
 
 interface IConfiguration {
   minCliVersion: string;
   cliEntryPoint: string;
 }
 
+const CURRENT_PACKAGE_VERSION: string = currentPackageJson.version;
+
 export function findAndConsoleLogPatchPathCli(): void {
-  if (process.env._RUSHSTACK_ESLINT_BULK_DETECT !== 'true') {
+  if (process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME] !== 'true') {
     return;
   }
 
@@ -27,7 +30,7 @@ export function findAndConsoleLogPatchPathCli(): void {
     /**
      * `@rushstack/eslint-bulk` will invoke this entry point
      */
-    cliEntryPoint: eslintBulkPath
+    cliEntryPoint: require.resolve('../exports/eslint-bulk')
   };
 
   console.log(startDelimiter + JSON.stringify(configuration) + endDelimiter);
@@ -42,7 +45,7 @@ export function getPathToLinterJS(): string {
 }
 
 export function ensurePathToGeneratedPatch(): string {
-  const patchesFolderPath: string = `${os.tmpdir()}/rushstack-eslint-bulk/patches`;
+  const patchesFolderPath: string = `${os.tmpdir()}/rushstack-eslint-bulk-${CURRENT_PACKAGE_VERSION}/patches`;
   fs.mkdirSync(patchesFolderPath, { recursive: true });
   const pathToGeneratedPatch: string = `${patchesFolderPath}/linter-patch-v${eslintPackageVersion}.js`;
   return pathToGeneratedPatch;

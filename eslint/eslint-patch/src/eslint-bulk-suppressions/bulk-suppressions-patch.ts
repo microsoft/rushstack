@@ -7,6 +7,11 @@ import fs from 'fs';
 import * as Guards from './ast-guards';
 
 import { eslintFolder } from '../_patch-base';
+import {
+  ESLINT_BULK_ENABLE_ENV_VAR_NAME,
+  ESLINT_BULK_PRUNE_ENV_VAR_NAME,
+  ESLINT_BULK_SUPPRESS_ENV_VAR_NAME
+} from './constants';
 
 interface ISuppression {
   file: string;
@@ -176,11 +181,11 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
 }
 
 function shouldWriteSuppression(suppression: ISuppression): boolean {
-  if (process.env.ESLINT_BULK_SUPPRESS === undefined) {
+  if (process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME] === undefined) {
     return false;
   }
 
-  const rulesToSuppress: string[] = process.env.ESLINT_BULK_SUPPRESS.split(',');
+  const rulesToSuppress: string[] = process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME].split(',');
 
   if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') {
     return true;
@@ -229,7 +234,7 @@ export function shouldBulkSuppress(params: {
   problem: IProblem;
 }): boolean {
   // Use this ENV variable to turn off eslint-bulk-suppressions functionality, default behavior is on
-  if (process.env.ESLINT_BULK_ENABLE === 'false') {
+  if (process.env[ESLINT_BULK_ENABLE_ENV_VAR_NAME] === 'false') {
     return false;
   }
 
@@ -253,7 +258,7 @@ export function shouldBulkSuppress(params: {
     };
   }
 
-  return process.env.ESLINT_BULK_PRUNE !== 'true' && currentNodeIsSuppressed;
+  return process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] !== 'true' && currentNodeIsSuppressed;
 }
 
 export function prune(): void {
