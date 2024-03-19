@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as fs from 'fs';
 import * as semver from 'semver';
 import {
   FileSystem,
@@ -11,6 +12,7 @@ import {
   type IDependenciesMetaTable,
   Path
 } from '@rushstack/node-core-library';
+import yaml = require('js-yaml');
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
@@ -586,6 +588,36 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         'A shrinkwrap file does not exist after after successful installation. This probably indicates a ' +
           'bug in the package manager.'
       );
+    }
+
+    // Hoist any dependencies for this subspace if splitWorkspaceCompatibility is enabled
+    if (
+      this.rushConfiguration.subspacesFeatureEnabled &&
+      this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility &&
+      subspace.subspaceName.startsWith('split_') &&
+      subspace.getProjects().length !== 1
+    ) {
+      // Find the .modules.yaml file in the subspace temp/node_modules folder
+      const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
+      const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
+
+      const modulesContent: string = FileSystem.readFile(modulesFilePath);
+      const yamlContent: { hoistedDependencies: { [key in string]: { [key in string]: string } } } =
+        yaml.load(modulesContent, { filename: modulesFilePath });
+      const { hoistedDependencies } = yamlContent;
+      const projectNodeModulesPath: string = `${subspace.getSubspaceConfigFolder()}/node_modules`;
+      for (const value of Object.values(hoistedDependencies)) {
+        for (const [filePath, type] of Object.entries(value)) {
+          if (type === 'public') {
+            console.log('hoisting: ', filePath);
+            fs.symlinkSync(
+              `${tempNodeModulesPath}/${filePath}`,
+              `${projectNodeModulesPath}/${filePath}`,
+              'dir'
+            );
+          }
+        }
+      }
     }
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated

@@ -1285,6 +1285,7 @@ export class RushConstants {
     static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs';
     static readonly pnpmfileV1Filename: 'pnpmfile.js';
     static readonly pnpmfileV6Filename: '.pnpmfile.cjs';
+    static readonly pnpmModulesFilename: '.modules.yaml';
     static readonly pnpmPatchesCommonFolderName: `pnpm-patches`;
     static readonly pnpmPatchesFolderName: 'patches';
     static readonly pnpmV3ShrinkwrapFilename: 'pnpm-lock.yaml';
