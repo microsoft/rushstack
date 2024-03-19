@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-typescript-plugin",
-      "comment": "",
-      "type": "none"
+      "comment": "Bump latest supported version of TypeScript to 5.4",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-typescript-plugin"
