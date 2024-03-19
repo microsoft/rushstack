@@ -7,6 +7,11 @@
     },
     {
       "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "prefer-const"
+    },
+    {
+      "file": "src/index.ts",
       "scopeId": ".ExampleClass",
       "rule": "@typescript-eslint/ban-types"
     },
@@ -48,6 +53,11 @@
     {
       "file": "src/index.ts",
       "scopeId": ".exampleAnonymousClass",
+      "rule": "@typescript-eslint/typedef"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass",
       "rule": "no-useless-concat"
     },
     {
@@ -63,7 +73,17 @@
     {
       "file": "src/index.ts",
       "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/ban-types"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
       "rule": "@typescript-eslint/explicit-function-return-type"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleAnonymousClass.exampleSetGet",
+      "rule": "@typescript-eslint/explicit-member-accessibility"
     },
     {
       "file": "src/index.ts",
@@ -94,6 +114,11 @@
       "file": "src/index.ts",
       "scopeId": ".exampleArrowFunction",
       "rule": "no-unused-expressions"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".exampleFunction",
+      "rule": "@typescript-eslint/ban-types"
     },
     {
       "file": "src/index.ts",
