@@ -15,7 +15,8 @@ if (!eslintFolder) {
   process.exit(1);
 }
 
-if (process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME] === 'true') {
+const eslintBulkDetectEnvVarValue: string | undefined = process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME];
+if (eslintBulkDetectEnvVarValue === 'true' || eslintBulkDetectEnvVarValue === '1') {
   findAndConsoleLogPatchPathCli();
   process.exit(0);
 }

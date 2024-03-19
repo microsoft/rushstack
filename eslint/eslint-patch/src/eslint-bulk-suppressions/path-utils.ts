@@ -15,7 +15,8 @@ interface IConfiguration {
 const CURRENT_PACKAGE_VERSION: string = currentPackageJson.version;
 
 export function findAndConsoleLogPatchPathCli(): void {
-  if (process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME] !== 'true') {
+  const eslintBulkDetectEnvVarValue: string | undefined = process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME];
+  if (eslintBulkDetectEnvVarValue !== 'true' && eslintBulkDetectEnvVarValue !== '1') {
     return;
   }
 

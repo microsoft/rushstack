@@ -258,7 +258,7 @@ export function shouldBulkSuppress(params: {
     };
   }
 
-  return process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] !== 'true' && currentNodeIsSuppressed;
+  return process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] !== '1' && currentNodeIsSuppressed;
 }
 
 export function prune(): void {

@@ -16,10 +16,9 @@ export function generatePatchedLinterJsFileIfDoesNotExist(
   inputFilePath: string,
   outputFilePath: string
 ): void {
-  if (
-    process.env[ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME] !== 'true' &&
-    fs.existsSync(outputFilePath)
-  ) {
+  const generateEnvVarValue: string | undefined =
+    process.env[ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME];
+  if (generateEnvVarValue !== 'true' && generateEnvVarValue !== '1' && fs.existsSync(outputFilePath)) {
     return;
   }
 

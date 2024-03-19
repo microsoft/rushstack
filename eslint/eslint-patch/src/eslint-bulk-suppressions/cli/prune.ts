@@ -17,7 +17,7 @@ export async function pruneAsync(): Promise<void> {
     throw new Error(`@rushstack/eslint-bulk: Unknown arguments: ${args.join(' ')}`);
   }
 
-  process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] = 'true';
+  process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] = '1';
 
   await runEslintAsync(['.'], 'prune');
 }
