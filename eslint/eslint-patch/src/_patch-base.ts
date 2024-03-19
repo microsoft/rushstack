@@ -7,8 +7,8 @@
 //
 //    require("@rushstack/eslint-patch/modern-module-resolution");
 //
+
 import path from 'path';
-import fs from 'fs';
 
 const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
   typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';
@@ -195,9 +195,8 @@ if (!eslintFolder) {
 
 // Detect the ESLint package version
 const eslintPackageJsonPath: string = `${eslintFolder}/package.json`;
-const eslintPackageJson: string = fs.readFileSync(eslintPackageJsonPath).toString();
-const eslintPackageObject: { version: string } = JSON.parse(eslintPackageJson);
-const eslintPackageVersion: string = eslintPackageObject.version;
+const eslintPackageObject: { version: string } = require(eslintPackageJsonPath);
+export const eslintPackageVersion: string = eslintPackageObject.version;
 const ESLINT_MAJOR_VERSION: number = parseInt(eslintPackageVersion, 10);
 if (isNaN(ESLINT_MAJOR_VERSION)) {
   throw new Error(
