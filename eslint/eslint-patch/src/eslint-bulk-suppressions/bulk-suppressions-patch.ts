@@ -10,7 +10,8 @@ import { eslintFolder } from '../_patch-base';
 import {
   ESLINT_BULK_ENABLE_ENV_VAR_NAME,
   ESLINT_BULK_PRUNE_ENV_VAR_NAME,
-  ESLINT_BULK_SUPPRESS_ENV_VAR_NAME
+  ESLINT_BULK_SUPPRESS_ENV_VAR_NAME,
+  VSCODE_PID_ENV_VAR_NAME
 } from './constants';
 
 interface ISuppression {
@@ -38,6 +39,8 @@ const ESLINTRC_FILENAMES: string[] = [
   // so we only need to check for the JS-based filenames
 ];
 const SUPPRESSION_SYMBOL: unique symbol = Symbol('suppression');
+const IS_RUNNING_IN_VSCODE: boolean = process.env[VSCODE_PID_ENV_VAR_NAME] !== undefined;
+const TEN_SECONDS_MS: number = 10 * 1000;
 
 interface IProblem {
   [SUPPRESSION_SYMBOL]?: {
@@ -138,22 +141,37 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
   }
 }
 
-const suppressionsJsonByFolderPath: Map<string, IBulkSuppressionsConfig> = new Map();
+interface ICachedBulkSuppressionsConfig {
+  readTime: number;
+  suppressionsConfig: IBulkSuppressionsConfig;
+}
+const suppressionsJsonByFolderPath: Map<string, ICachedBulkSuppressionsConfig> = new Map();
 function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string): IBulkSuppressionsConfig {
-  let suppressionsConfig: IBulkSuppressionsConfig | undefined =
+  const cachedSuppressionsConfig: ICachedBulkSuppressionsConfig | undefined =
     suppressionsJsonByFolderPath.get(eslintrcFolderPath);
-  if (!suppressionsConfig) {
+
+  let shouldReload: boolean;
+  let suppressionsConfig: IBulkSuppressionsConfig;
+  if (cachedSuppressionsConfig) {
+    shouldReload = IS_RUNNING_IN_VSCODE && cachedSuppressionsConfig.readTime < Date.now() - TEN_SECONDS_MS;
+    suppressionsConfig = cachedSuppressionsConfig.suppressionsConfig;
+  } else {
+    shouldReload = true;
+  }
+
+  if (shouldReload) {
     const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
-    let jsonObject: IBulkSuppressionsJson | undefined;
+    let rawJsonFile: string | undefined;
     try {
-      jsonObject = require(suppressionsPath);
+      rawJsonFile = fs.readFileSync(suppressionsPath).toString();
     } catch (e) {
-      if (e.code !== 'MODULE_NOT_FOUND') {
+      // Throw an error if any other error than file not found
+      if (e.code !== 'ENOENT') {
         throw e;
       }
     }
 
-    if (!jsonObject) {
+    if (!rawJsonFile) {
       suppressionsConfig = {
         serializedSuppressions: new Set(),
         jsonObject: { suppressions: [] },
@@ -161,6 +179,7 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
         newJsonObject: { suppressions: [] }
       };
     } else {
+      const jsonObject: IBulkSuppressionsJson = JSON.parse(rawJsonFile);
       const serializedSuppressions: Set<string> = new Set();
       for (const suppression of jsonObject.suppressions) {
         serializedSuppressions.add(serializeSuppression(suppression));
@@ -174,10 +193,10 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
       };
     }
 
-    suppressionsJsonByFolderPath.set(eslintrcFolderPath, suppressionsConfig);
+    suppressionsJsonByFolderPath.set(eslintrcFolderPath, { readTime: Date.now(), suppressionsConfig });
   }
 
-  return suppressionsConfig;
+  return suppressionsConfig!;
 }
 
 function shouldWriteSuppression(suppression: ISuppression): boolean {
@@ -216,7 +235,7 @@ function writeSuppressionsJsonToFile(
   eslintrcDirectory: string,
   suppressionsConfig: IBulkSuppressionsConfig
 ): void {
-  suppressionsJsonByFolderPath.set(eslintrcDirectory, suppressionsConfig);
+  suppressionsJsonByFolderPath.set(eslintrcDirectory, { readTime: Date.now(), suppressionsConfig });
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
   suppressionsConfig.jsonObject.suppressions.sort(compareSuppressions);
   fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, undefined, 2));
@@ -262,24 +281,26 @@ export function shouldBulkSuppress(params: {
 }
 
 export function prune(): void {
-  for (const [
-    eslintrcFolderPath,
-    { newSerializedSuppressions, newJsonObject }
-  ] of suppressionsJsonByFolderPath) {
-    const newSuppressionsConfig: IBulkSuppressionsConfig = {
-      serializedSuppressions: newSerializedSuppressions,
-      jsonObject: newJsonObject,
-      newSerializedSuppressions: new Set(),
-      newJsonObject: { suppressions: [] }
-    };
+  for (const [eslintrcFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
+    if (suppressionsConfig) {
+      const { newSerializedSuppressions, newJsonObject } = suppressionsConfig;
+      const newSuppressionsConfig: IBulkSuppressionsConfig = {
+        serializedSuppressions: newSerializedSuppressions,
+        jsonObject: newJsonObject,
+        newSerializedSuppressions: new Set(),
+        newJsonObject: { suppressions: [] }
+      };
 
-    writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
+      writeSuppressionsJsonToFile(eslintrcFolderPath, newSuppressionsConfig);
+    }
   }
 }
 
 export function write(): void {
-  for (const [eslintrcFolderPath, suppressionsConfig] of suppressionsJsonByFolderPath) {
-    writeSuppressionsJsonToFile(eslintrcFolderPath, suppressionsConfig);
+  for (const [eslintrcFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
+    if (suppressionsConfig) {
+      writeSuppressionsJsonToFile(eslintrcFolderPath, suppressionsConfig);
+    }
   }
 }
 
