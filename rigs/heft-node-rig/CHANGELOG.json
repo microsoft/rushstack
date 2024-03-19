@@ -2,6 +2,41 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.5.0",
+      "tag": "@rushstack/heft-node-rig_v2.5.0",
+      "date": "Tue, 19 Mar 2024 15:10:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to TypeScript 5.4"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-api-extractor-plugin\" to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.11.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-lint-plugin\" to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.66.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.66.1` to `0.66.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.25",
       "tag": "@rushstack/heft-node-rig_v2.4.25",
       "date": "Fri, 15 Mar 2024 00:12:40 GMT",
