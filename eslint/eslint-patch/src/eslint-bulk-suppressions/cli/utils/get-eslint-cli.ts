@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import path from 'path';
+import { BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME } from '../../constants';
 
 // When this list is updated, update the `eslint-bulk-suppressions-newest-test`
 // and/or the `eslint-bulk-suppressions-newest-test` projects' eslint dependencies.
@@ -11,7 +12,9 @@ export function getEslintPath(packagePath: string): string {
   // Try to find a local ESLint installation, the one that should be listed as a dev dependency in package.json
   // and installed in node_modules
   try {
-    const localEslintApiPath: string = require.resolve('eslint', { paths: [packagePath] });
+    const localEslintApiPath: string = require.resolve(BULK_SUPPRESSIONS_CLI_ESLINT_PACKAGE_NAME, {
+      paths: [packagePath]
+    });
     const localEslintPath: string = path.dirname(path.dirname(localEslintApiPath));
     const { version: localEslintVersion } = require(`${localEslintPath}/package.json`);
 
