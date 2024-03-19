@@ -11,6 +11,6 @@
     "local-node-rig": "workspace:*",
     "@typescript-eslint/parser": "~6.19.0",
     "eslint": "~8.7.0",
-    "typescript": "~5.3.3"
+    "typescript": "~5.4.2"
   }
 }
