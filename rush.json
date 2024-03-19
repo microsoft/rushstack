@@ -570,18 +570,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "eslint-bulk-suppressions-newest-test",
-      "projectFolder": "build-tests/eslint-bulk-suppressions-newest-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "eslint-bulk-suppressions-oldest-test",
-      "projectFolder": "build-tests/eslint-bulk-suppressions-oldest-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "eslint-bulk-suppressions-test",
       "projectFolder": "build-tests/eslint-bulk-suppressions-test",
       "reviewCategory": "tests",
