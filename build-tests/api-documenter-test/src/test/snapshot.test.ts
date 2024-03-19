@@ -53,16 +53,19 @@ async function runApiDocumenterAsync(verb: string, outputFolderName: string): Pr
 
   expect(exitCode).toBe(0);
 
-  const itemContents: Map<string, string> = new Map();
+  const itemContents: Record<string, string> = {};
   await Async.forEachAsync(
     readFolderItemsAsync(outputPath, ''),
     async ({ relativePath, absolutePath }) => {
-      itemContents.set(relativePath, await FileSystem.readFileAsync(absolutePath));
+      itemContents[relativePath] = await FileSystem.readFileAsync(absolutePath);
     },
     { concurrency: 50 }
   );
 
-  expect(itemContents).toMatchSnapshot('itemContents');
+  const sortedEntries: [string, string][] = Object.entries(itemContents).sort(([a], [b]) =>
+    a.localeCompare(b)
+  );
+  expect(Object.fromEntries(sortedEntries)).toMatchSnapshot('itemContents');
 }
 
 describe('api-documenter', () => {
