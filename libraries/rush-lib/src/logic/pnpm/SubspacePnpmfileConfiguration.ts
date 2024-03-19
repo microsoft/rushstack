@@ -2,16 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Import, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, Import, JsonFile, type IDependenciesMetaTable } from '@rushstack/node-core-library';
 import { subspacePnpmfileShimFilename, scriptsFolderPath } from '../../utilities/PathConstants';
 
 import type { ISubspacePnpmfileShimSettings, IWorkspaceProjectInfo } from './IPnpmfile';
 import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IDependenciesMetaTable } from '@rushstack/node-core-library';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -118,15 +117,17 @@ export class SubspacePnpmfileConfiguration {
     for (const subspaceProject of subspaceProjectsMap.values()) {
       const dependenciesMeta: IDependenciesMetaTable | undefined =
         subspaceProject.packageJson.dependenciesMeta;
-      for (const dependencyName in dependenciesMeta) {
-        if (dependenciesMeta[dependencyName]?.injected) {
-          projectNameToInjectedDependenciesMap.get(subspaceProject.packageName)?.add(dependencyName);
+      if (dependenciesMeta) {
+        for (const [dependencyName, { injected }] of Object.entries(dependenciesMeta)) {
+          if (injected) {
+            projectNameToInjectedDependenciesMap.get(subspaceProject.packageName)?.add(dependencyName);
 
-          //if this dependency is in the same subspace, leave as it is, PNPM will handle it
-          //if this dependency is in another subspace, then it is transitive injected installation
-          //so, we need to let all the workspace dependencies along the dependency chain to use injected installation
-          if (!subspaceProjectsMap.has(dependencyName)) {
-            processTransitiveInjectedInstallQueue.push(workspaceProjectsMap.get(dependencyName)!);
+            //if this dependency is in the same subspace, leave as it is, PNPM will handle it
+            //if this dependency is in another subspace, then it is transitive injected installation
+            //so, we need to let all the workspace dependencies along the dependency chain to use injected installation
+            if (!subspaceProjectsMap.has(dependencyName)) {
+              processTransitiveInjectedInstallQueue.push(workspaceProjectsMap.get(dependencyName)!);
+            }
           }
         }
       }
@@ -139,25 +140,26 @@ export class SubspacePnpmfileConfiguration {
       const dependencies: Record<string, string> | undefined = currentProject?.packageJson?.dependencies;
       const devDependencies: Record<string, string> | undefined =
         currentProject?.packageJson?.devDependencies;
+      if (currentProject) {
+        if (dependencies) {
+          SubspacePnpmfileConfiguration._processDependenciesForTransitiveInjectedInstall(
+            projectNameToInjectedDependenciesMap,
+            processTransitiveInjectedInstallQueue,
+            dependencies,
+            currentProject,
+            rushConfiguration
+          );
+        }
 
-      if (currentProject && dependencies) {
-        SubspacePnpmfileConfiguration._processDependenciesForTransitiveInjectedInstall(
-          projectNameToInjectedDependenciesMap,
-          processTransitiveInjectedInstallQueue,
-          dependencies,
-          currentProject,
-          rushConfiguration
-        );
-      }
-
-      if (currentProject && devDependencies) {
-        SubspacePnpmfileConfiguration._processDependenciesForTransitiveInjectedInstall(
-          projectNameToInjectedDependenciesMap,
-          processTransitiveInjectedInstallQueue,
-          devDependencies,
-          currentProject,
-          rushConfiguration
-        );
+        if (devDependencies) {
+          SubspacePnpmfileConfiguration._processDependenciesForTransitiveInjectedInstall(
+            projectNameToInjectedDependenciesMap,
+            processTransitiveInjectedInstallQueue,
+            devDependencies,
+            currentProject,
+            rushConfiguration
+          );
+        }
       }
     }
 
