@@ -14,17 +14,155 @@ export declare class Class1 extends Class2<number>
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [fourthProp](./api-documenter-scenarios.class1.fourthprop.md) |  | number | A fourth prop |
-|  [secondProp](./api-documenter-scenarios.class1.secondprop.md) |  | boolean | A second prop. Overrides <code>Class2.secondProp</code>. |
-|  [someProp](./api-documenter-scenarios.namespace1.class3.someprop.md) |  | number | <p>Some prop.</p><p>(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)</p> |
-|  [thirdProp](./api-documenter-scenarios.class2.thirdprop.md) |  | T | <p>A third prop.</p><p>(Inherited from [Class2](./api-documenter-scenarios.class2.md)<!-- -->)</p> |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[fourthProp](./api-documenter-scenarios.class1.fourthprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+A fourth prop
+
+
+</td></tr>
+<tr><td>
+
+[secondProp](./api-documenter-scenarios.class1.secondprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+A second prop. Overrides `Class2.secondProp`<!-- -->.
+
+
+</td></tr>
+<tr><td>
+
+[someProp](./api-documenter-scenarios.namespace1.class3.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+(Inherited from [Class3](./api-documenter-scenarios.namespace1.class3.md)<!-- -->)
+
+
+</td></tr>
+<tr><td>
+
+[thirdProp](./api-documenter-scenarios.class2.thirdprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+A third prop.
+
+(Inherited from [Class2](./api-documenter-scenarios.class2.md)<!-- -->)
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [someMethod(x)](./api-documenter-scenarios.class2.somemethod.md) |  | <p>Some method. Overrides <code>Class3.someMethod</code>.</p><p>(Inherited from [Class2](./api-documenter-scenarios.class2.md)<!-- -->)</p> |
-|  [someOverload(x)](./api-documenter-scenarios.class1.someoverload.md) |  | Some overload. Overrides <code>Class3.someOverload</code>. |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[someMethod(x)](./api-documenter-scenarios.class2.somemethod.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some method. Overrides `Class3.someMethod`<!-- -->.
+
+(Inherited from [Class2](./api-documenter-scenarios.class2.md)<!-- -->)
+
+
+</td></tr>
+<tr><td>
+
+[someOverload(x)](./api-documenter-scenarios.class1.someoverload.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some overload. Overrides `Class3.someOverload`<!-- -->.
+
+
+</td></tr>
+</tbody></table>

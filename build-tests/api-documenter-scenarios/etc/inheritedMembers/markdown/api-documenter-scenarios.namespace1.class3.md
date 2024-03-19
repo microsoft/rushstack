@@ -13,15 +13,106 @@ class Class3
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [someProp](./api-documenter-scenarios.namespace1.class3.someprop.md) |  | number | Some prop. |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[someProp](./api-documenter-scenarios.namespace1.class3.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [someMethod(x)](./api-documenter-scenarios.namespace1.class3.somemethod.md) |  | Some method. |
-|  [someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload.md) |  | Some overload. |
-|  [someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload_1.md) |  | Some overload. |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[someMethod(x)](./api-documenter-scenarios.namespace1.class3.somemethod.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some method.
+
+
+</td></tr>
+<tr><td>
+
+[someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some overload.
+
+
+</td></tr>
+<tr><td>
+
+[someOverload(x)](./api-documenter-scenarios.namespace1.class3.someoverload_1.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Some overload.
+
+
+</td></tr>
+</tbody></table>

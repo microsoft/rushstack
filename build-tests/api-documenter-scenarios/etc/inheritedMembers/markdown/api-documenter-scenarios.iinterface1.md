@@ -13,8 +13,63 @@ export interface IInterface1
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [secondProp](./api-documenter-scenarios.iinterface1.secondprop.md) |  | boolean \| string | A second prop. |
-|  [someProp](./api-documenter-scenarios.iinterface1.someprop.md) |  | number | Some prop. |
+<table><thead><tr><th>
 
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[secondProp](./api-documenter-scenarios.iinterface1.secondprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean \| string
+
+
+</td><td>
+
+A second prop.
+
+
+</td></tr>
+<tr><td>
+
+[someProp](./api-documenter-scenarios.iinterface1.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+
+</td></tr>
+</tbody></table>
