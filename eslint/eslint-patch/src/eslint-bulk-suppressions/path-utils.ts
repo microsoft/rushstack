@@ -2,16 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'fs';
-import path from 'path';
-import { eslintFolder } from '../_patch-base';
+import os from 'os';
+import { eslintFolder, eslintPackageVersion } from '../_patch-base';
+import { ESLINT_BULK_DETECT_ENV_VAR_NAME } from './constants';
+import currentPackageJson from '../../package.json';
 
 interface IConfiguration {
   minCliVersion: string;
   cliEntryPoint: string;
 }
 
-export function findAndConsoleLogPatchPathCli(patchPath: string): void {
-  if (process.env._RUSHSTACK_ESLINT_BULK_DETECT !== 'true') {
+const CURRENT_PACKAGE_VERSION: string = currentPackageJson.version;
+
+export function findAndConsoleLogPatchPathCli(): void {
+  const eslintBulkDetectEnvVarValue: string | undefined = process.env[ESLINT_BULK_DETECT_ENV_VAR_NAME];
+  if (eslintBulkDetectEnvVarValue !== 'true' && eslintBulkDetectEnvVarValue !== '1') {
     return;
   }
 
@@ -20,13 +25,13 @@ export function findAndConsoleLogPatchPathCli(patchPath: string): void {
 
   const configuration: IConfiguration = {
     /**
-     * `@rushtack/eslint`-bulk should report an error if its package.json is older than this number
+     * `@rushstack/eslint-bulk` should report an error if its package.json is older than this number
      */
     minCliVersion: '0.0.0',
     /**
-     * `@rushtack/eslint-bulk` will invoke this entry point
+     * `@rushstack/eslint-bulk` will invoke this entry point
      */
-    cliEntryPoint: path.resolve(patchPath, '..', 'exports', 'eslint-bulk.js')
+    cliEntryPoint: require.resolve('../exports/eslint-bulk')
   };
 
   console.log(startDelimiter + JSON.stringify(configuration) + endDelimiter);
@@ -37,30 +42,12 @@ export function getPathToLinterJS(): string {
     throw new Error('Cannot find ESLint installation to patch.');
   }
 
-  return path.join(eslintFolder, 'lib', 'linter', 'linter.js');
+  return `${eslintFolder}/lib/linter/linter.js`;
 }
 
-export function getPathToGeneratedPatch(patchPath: string, nameOfGeneratedPatchFile: string): string {
-  fs.mkdirSync(path.join(patchPath, 'temp', 'patches'), { recursive: true });
-  const pathToGeneratedPatch: string = path.join(patchPath, 'temp', 'patches', nameOfGeneratedPatchFile);
-
+export function ensurePathToGeneratedPatch(): string {
+  const patchesFolderPath: string = `${os.tmpdir()}/rushstack-eslint-bulk-${CURRENT_PACKAGE_VERSION}/patches`;
+  fs.mkdirSync(patchesFolderPath, { recursive: true });
+  const pathToGeneratedPatch: string = `${patchesFolderPath}/linter-patch-v${eslintPackageVersion}.js`;
   return pathToGeneratedPatch;
-}
-
-function getEslintPackageVersion(): string {
-  if (!eslintFolder) {
-    throw new Error('Cannot find ESLint installation to patch.');
-  }
-  const eslintPackageJsonPath: string = path.join(eslintFolder, 'package.json');
-  const eslintPackageJson: string = fs.readFileSync(eslintPackageJsonPath).toString();
-  const eslintPackageObject: { version: string } = JSON.parse(eslintPackageJson);
-  const eslintPackageVersion: string = eslintPackageObject.version;
-
-  return eslintPackageVersion;
-}
-
-export function getNameOfGeneratedPatchFile(): string {
-  const eslintPackageVersion: string = getEslintPackageVersion();
-  const nameOfGeneratedPatchFile: string = `linter-patch-v${eslintPackageVersion}.js`;
-  return nameOfGeneratedPatchFile;
 }

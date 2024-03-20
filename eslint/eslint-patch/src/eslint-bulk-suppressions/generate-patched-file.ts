@@ -2,14 +2,23 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'fs';
+import {
+  ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME,
+  ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME
+} from './constants';
 
 /**
  * Dynamically generate file to properly patch many versions of ESLint
  * @param inputFilePath - Must be an iteration of https://github.com/eslint/eslint/blob/main/lib/linter/linter.js
  * @param outputFilePath - Some small changes to linter.js
  */
-export function generatePatchedFileIfDoesNotExist(inputFilePath: string, outputFilePath: string): void {
-  if (fs.existsSync(outputFilePath)) {
+export function generatePatchedLinterJsFileIfDoesNotExist(
+  inputFilePath: string,
+  outputFilePath: string
+): void {
+  const generateEnvVarValue: string | undefined =
+    process.env[ESLINT_BULK_FORCE_REGENERATE_PATCH_ENV_VAR_NAME];
+  if (generateEnvVarValue !== 'true' && generateEnvVarValue !== '1' && fs.existsSync(outputFilePath)) {
     return;
   }
 
@@ -113,7 +122,7 @@ export function generatePatchedFileIfDoesNotExist(inputFilePath: string, outputF
 
   outputFile += `
 // --- BEGIN MONKEY PATCH ---
-const bulkSuppressionsPatch = require('../../bulk-suppressions-patch');
+const bulkSuppressionsPatch = require(process.env.${ESLINT_BULK_PATCH_PATH_ENV_VAR_NAME});
 const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJS;
 `;
 
@@ -154,82 +163,53 @@ const requireFromPathToLinterJS = bulkSuppressionsPatch.requireFromPathToLinterJ
 `;
 
   // Match this:
-  //    const ruleContext = Object.freeze(
-  //      Object.assign(Object.create(sharedTraversalContext), {
-  //        id: ruleId,
-  //        options: getRuleOptions(configuredRules[ruleId]),
-  //        report(...args) {
-  //          /*
-  //           * Create a report translator lazily.
+  // ```
+  //      if (reportTranslator === null) {
+  //        reportTranslator = createReportTranslator({
+  //            ruleId,
+  //            severity,
+  //            sourceCode,
+  //            messageIds,
+  //            disableFixes
+  //        });
+  //    }
+  //    const problem = reportTranslator(...args);
+  //
+  //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
+  //        throw new Error("Fixable rules must set the `meta.fixable` property to \"code\" or \"whitespace\".");
+  //    }
+  // ```
   //
   // Convert to something like this:
+  // ```
+  //      if (reportTranslator === null) {
+  //        reportTranslator = createReportTranslator({
+  //            ruleId,
+  //            severity,
+  //            sourceCode,
+  //            messageIds,
+  //            disableFixes
+  //        });
+  //    }
+  //    const problem = reportTranslator(...args);
+  //    // --- BEGIN MONKEY PATCH ---
+  //    if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+  //    // --- END MONKEY PATCH ---
   //
-  //    const ruleContext = Object.freeze(
-  //      Object.assign(Object.create(sharedTraversalContext), {
-  //        id: ruleId,
-  //        options: getRuleOptions(configuredRules[ruleId]),
-  //        report(...args) {
-  //          if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
-  //          /*
-  //           * Create a report translator lazily.
-  //
-  outputFile += scanUntilMarker('const ruleContext = Object.freeze(');
-  outputFile += scanUntilMarker('report(...args) {');
-  outputFile += scanUntilNewline();
+  //    if (problem.fix && !(rule.meta && rule.meta.fixable)) {
+  //        throw new Error("Fixable rules must set the `meta.fixable` property to \"code\" or \"whitespace\".");
+  //    }
+  // ```
+  outputFile += scanUntilMarker('const problem = reportTranslator(...args);');
   outputFile += `
                         // --- BEGIN MONKEY PATCH ---
-                        if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId })) return;
+                        if (bulkSuppressionsPatch.shouldBulkSuppress({ filename, currentNode, ruleId, problem })) return;
                         // --- END MONKEY PATCH ---
 `;
 
-  // Match this:
-  // nodeQueue.forEach((traversalInfo) => {
-  //   currentNode = traversalInfo.node;
-  //
-  //   try {
-  //     if (traversalInfo.isEntering) {
-  //       eventGenerator.enterNode(currentNode);
-  //     } else {
-  //       eventGenerator.leaveNode(currentNode);
-  //     }
-  //   } catch (err) {
-  //     err.currentNode = currentNode;
-  //     throw err;
-  //   }
-  // });
-  //
-  // return lintingProblems;
-  //
-  // Convert to this:
-  // nodeQueue.forEach((traversalInfo) => {
-  //   currentNode = traversalInfo.node;
-  //
-  //   try {
-  //     if (traversalInfo.isEntering) {
-  //       eventGenerator.enterNode(currentNode);
-  //     } else {
-  //       eventGenerator.leaveNode(currentNode);
-  //     }
-  //   } catch (err) {
-  //     err.currentNode = currentNode;
-  //     throw err;
-  //   }
-  // });
-  //
-  // // --- BEGIN MONKEY PATCH ---
-  // bulkSuppressionsPatch.onFinish({ filename });
-  // // --- END MONKEY PATCH ---
-  //
-  // return lintingProblems;
   outputFile += scanUntilMarker('nodeQueue.forEach(traversalInfo => {');
   outputFile += scanUntilMarker('});');
   outputFile += scanUntilNewline();
-  outputFile += `
-    // --- BEGIN MONKEY PATCH ---
-    bulkSuppressionsPatch.onFinish({ filename });
-    // --- END MONKEY PATCH ---
-`;
-
   outputFile += scanUntilMarker('class Linter {');
   outputFile += scanUntilNewline();
   outputFile += `

@@ -99,6 +99,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/eslint-bulk",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
     },

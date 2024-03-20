@@ -100,9 +100,7 @@ function findPatchPath(): string {
 
 const patchPath: string = findPatchPath();
 try {
-  const args: string = process.argv.slice(2).join(' ');
-  const command: string = `node ${patchPath} ${args}`;
-  execSync(command, { stdio: 'inherit' });
+  require(patchPath);
 } catch (e) {
   console.error(`@rushstack/eslint-bulk: Error running patch at ${patchPath}:\n` + e.message);
   process.exit(1);
