@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 20 Mar 2024 04:57:57 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2024 20:45:18 GMT and should not be manually modified.
+
+## 5.118.0
+Wed, 20 Mar 2024 20:45:18 GMT
+
+### Updates
+
+- (BREAKING API CHANGE) Rename `AzureAuthenticationBase._getCredentialFromDeviceCodeAsync` to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`. Adding support for InteractiveBrowserCredential.
 
 ## 5.117.10
 Wed, 20 Mar 2024 04:57:57 GMT

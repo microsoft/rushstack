@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.0",
+      "tag": "@microsoft/rush_v5.118.0",
+      "date": "Wed, 20 Mar 2024 20:45:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BREAKING API CHANGE) Rename `AzureAuthenticationBase._getCredentialFromDeviceCodeAsync` to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`. Adding support for InteractiveBrowserCredential."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.10",
       "tag": "@microsoft/rush_v5.117.10",
       "date": "Wed, 20 Mar 2024 04:57:57 GMT",
