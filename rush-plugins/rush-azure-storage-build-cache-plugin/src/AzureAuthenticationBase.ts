@@ -6,6 +6,7 @@ import {
   type DeviceCodeInfo,
   AzureAuthorityHosts,
   type DeviceCodeCredentialOptions,
+  type InteractiveBrowserCredentialInBrowserOptions,
   InteractiveBrowserCredential,
   type InteractiveBrowserCredentialNodeOptions,
   type TokenCredential
@@ -262,18 +263,24 @@ export abstract class AzureAuthenticationBase {
     }
 
     let tokenCredential: TokenCredential;
+
+    const interactiveCredentialOptions: (
+      | InteractiveBrowserCredentialNodeOptions
+      | InteractiveBrowserCredentialInBrowserOptions
+    ) &
+      DeviceCodeCredentialOptions = {
+      ...this._additionalInteractiveCredentialOptions,
+      authorityHost
+    };
+
     switch (loginFlow) {
       case 'InteractiveBrowser': {
-        tokenCredential = new InteractiveBrowserCredential({
-          ...this._additionalInteractiveCredentialOptions,
-          authorityHost: authorityHost
-        });
+        tokenCredential = new InteractiveBrowserCredential(interactiveCredentialOptions);
         break;
       }
       case 'DeviceCode': {
         tokenCredential = new DeviceCodeCredential({
-          ...this._additionalDeviceCodeCredentialOptions,
-          authorityHost: authorityHost,
+          ...interactiveCredentialOptions,
           userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
             PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
           }
