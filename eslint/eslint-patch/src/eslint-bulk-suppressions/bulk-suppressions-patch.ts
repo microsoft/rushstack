@@ -324,6 +324,12 @@ export function patchClass<T, U extends T>(originalClass: new () => T, patchedCl
   }
 }
 
+/**
+ * This returns a wrapped version of the "verify" function from ESLint's Linter class
+ * that postprocesses rule violations that weren't suppressed by comments. This postprocessing
+ * records suppressions that weren't otherwise suppressed by comments to be used
+ * by the "suppress" and "prune" commands.
+ */
 export function extendVerifyFunction(
   originalFn: (this: unknown, ...args: unknown[]) => IProblem[] | undefined
 ): (this: unknown, ...args: unknown[]) => IProblem[] | undefined {
@@ -341,9 +347,11 @@ export function extendVerifyFunction(
               newJsonObject: { suppressions: newSuppressions }
             }
           } = problem[SUPPRESSION_SYMBOL];
-          newSerializedSuppressions.add(serializedSuppression);
-          suppressions.push(suppression);
-          newSuppressions.push(suppression);
+          if (!newSerializedSuppressions.has(serializedSuppression)) {
+            newSerializedSuppressions.add(serializedSuppression);
+            newSuppressions.push(suppression);
+            suppressions.push(suppression);
+          }
         }
       }
     }
