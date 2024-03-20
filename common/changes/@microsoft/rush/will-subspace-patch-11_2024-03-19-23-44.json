@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve the \"splitWorkspaceCompatibility\" setting to simulate hoisted dependencies when the experimental Rush subspaces feature is enabled",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
