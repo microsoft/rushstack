@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING API CHANGE) Rename `AzureAuthenticationBase._getCredentialFromDeviceCodeAsync` to `AzureAuthenticationBase._getCredentialFromTokenAsync` in `@rushstack/rush-azure-storage-build-cache-plugin`. Adding support for InteractiveBrowserCredential.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

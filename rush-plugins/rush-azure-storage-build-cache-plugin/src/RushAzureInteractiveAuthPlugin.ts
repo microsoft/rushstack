@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@rushstack/rush-sdk';
-import type { AzureEnvironmentName } from './AzureAuthenticationBase';
+import type { AzureEnvironmentName, LoginFlowType } from './AzureAuthenticationBase';
 
 const PLUGIN_NAME: 'AzureInteractiveAuthPlugin' = 'AzureInteractiveAuthPlugin';
 
@@ -24,6 +24,12 @@ export interface IAzureInteractiveAuthOptions {
    * The Azure environment the storage account exists in. Defaults to AzureCloud.
    */
   readonly azureEnvironment?: AzureEnvironmentName;
+
+  /**
+   * Login flow to use for interactive authentication.
+   * @defaultValue 'deviceCode'
+   */
+  readonly loginFlow?: LoginFlowType;
 
   /**
    * If specified and a credential exists that will be valid for at least this many minutes from the time
@@ -79,7 +85,8 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
         storageAccountName,
         storageContainerName,
         azureEnvironment = 'AzurePublicCloud',
-        minimumValidityInMinutes
+        minimumValidityInMinutes,
+        loginFlow = 'DeviceCode'
       } = options;
 
       const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
@@ -95,8 +102,9 @@ export default class RushAzureInteractieAuthPlugin implements IRushPlugin {
       await new AzureStorageAuthentication({
         storageAccountName: storageAccountName,
         storageContainerName: storageContainerName,
-        azureEnvironment: options.azureEnvironment,
-        isCacheWriteAllowed: true
+        azureEnvironment: azureEnvironment,
+        isCacheWriteAllowed: true,
+        loginFlow: loginFlow
       }).updateCachedCredentialInteractiveAsync(logger.terminal, minimumExpiry);
     };
 

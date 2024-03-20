@@ -5,7 +5,11 @@ import {
   DeviceCodeCredential,
   type DeviceCodeInfo,
   AzureAuthorityHosts,
-  type DeviceCodeCredentialOptions
+  type DeviceCodeCredentialOptions,
+  type InteractiveBrowserCredentialInBrowserOptions,
+  InteractiveBrowserCredential,
+  type InteractiveBrowserCredentialNodeOptions,
+  type TokenCredential
 } from '@azure/identity';
 import type { ITerminal } from '@rushstack/terminal';
 import { CredentialCache } from '@rushstack/rush-sdk';
@@ -75,9 +79,15 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser';
+
+/**
+ * @public
+ */
 export interface IAzureAuthenticationBaseOptions {
   azureEnvironment?: AzureEnvironmentName;
   credentialUpdateCommandForLogging?: string | undefined;
+  loginFlow?: LoginFlowType;
 }
 
 /**
@@ -96,8 +106,12 @@ export abstract class AzureAuthenticationBase {
   protected abstract readonly _credentialKindForLogging: string;
   protected readonly _credentialUpdateCommandForLogging: string | undefined;
   protected readonly _additionalDeviceCodeCredentialOptions: DeviceCodeCredentialOptions | undefined;
+  protected readonly _additionalInteractiveCredentialOptions:
+    | InteractiveBrowserCredentialNodeOptions
+    | undefined;
 
   protected readonly _azureEnvironment: AzureEnvironmentName;
+  protected readonly _loginFlow: LoginFlowType;
 
   private __credentialCacheId: string | undefined;
   private get _credentialCacheId(): string {
@@ -117,6 +131,7 @@ export abstract class AzureAuthenticationBase {
   public constructor(options: IAzureAuthenticationBaseOptions) {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._credentialUpdateCommandForLogging = options.credentialUpdateCommandForLogging;
+    this._loginFlow = options.loginFlow || 'DeviceCode';
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
@@ -161,7 +176,7 @@ export abstract class AzureAuthenticationBase {
           }
         }
 
-        const credential: ICredentialResult = await this._getCredentialAsync(terminal);
+        const credential: ICredentialResult = await this._getCredentialAsync(terminal, this._loginFlow);
         credentialsCache.setCacheEntry(this._credentialCacheId, {
           credential: credential.credentialString,
           expires: credential.expiresOn,
@@ -233,25 +248,50 @@ export abstract class AzureAuthenticationBase {
    */
   protected abstract _getCacheIdParts(): string[];
 
-  protected abstract _getCredentialFromDeviceCodeAsync(
+  protected abstract _getCredentialFromTokenAsync(
     terminal: ITerminal,
-    deviceCodeCredential: DeviceCodeCredential
+    tokenCredential: TokenCredential
   ): Promise<ICredentialResult>;
 
-  private async _getCredentialAsync(terminal: ITerminal): Promise<ICredentialResult> {
+  private async _getCredentialAsync(
+    terminal: ITerminal,
+    loginFlow: LoginFlowType
+  ): Promise<ICredentialResult> {
     const authorityHost: string | undefined = AzureAuthorityHosts[this._azureEnvironment];
     if (!authorityHost) {
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
-    const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential({
-      ...this._additionalDeviceCodeCredentialOptions,
-      authorityHost: authorityHost,
-      userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
-        PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-      }
-    });
+    let tokenCredential: TokenCredential;
 
-    return await this._getCredentialFromDeviceCodeAsync(terminal, deviceCodeCredential);
+    const interactiveCredentialOptions: (
+      | InteractiveBrowserCredentialNodeOptions
+      | InteractiveBrowserCredentialInBrowserOptions
+    ) &
+      DeviceCodeCredentialOptions = {
+      ...this._additionalInteractiveCredentialOptions,
+      authorityHost
+    };
+
+    switch (loginFlow) {
+      case 'InteractiveBrowser': {
+        tokenCredential = new InteractiveBrowserCredential(interactiveCredentialOptions);
+        break;
+      }
+      case 'DeviceCode': {
+        tokenCredential = new DeviceCodeCredential({
+          ...interactiveCredentialOptions,
+          userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+            PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
+          }
+        });
+        break;
+      }
+      default: {
+        throw new Error(`Unsupported login flow: ${loginFlow}`);
+      }
+    }
+
+    return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
   }
 }
