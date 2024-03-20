@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.23.1",
+      "tag": "@rushstack/heft-web-rig_v0.23.1",
+      "date": "Wed, 20 Mar 2024 02:09:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.6.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.23.0",
       "tag": "@rushstack/heft-web-rig_v0.23.0",
       "date": "Tue, 19 Mar 2024 15:10:18 GMT",

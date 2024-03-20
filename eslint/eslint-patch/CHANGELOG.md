@@ -1,6 +1,17 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Thu, 25 Jan 2024 23:03:57 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2024 02:09:14 GMT and should not be manually modified.
+
+## 1.8.0
+Wed, 20 Mar 2024 02:09:14 GMT
+
+### Minor changes
+
+- Refactor the bulk-suppressions feature to fix some performance issues.
+
+### Patches
+
+- Fix an issue where linting issues that were already suppressed via suppression comments were recorded in the bulk suppressions list.
 
 ## 1.7.2
 Thu, 25 Jan 2024 23:03:57 GMT

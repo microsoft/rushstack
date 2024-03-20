@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.8.0",
+      "tag": "@rushstack/eslint-patch_v1.8.0",
+      "date": "Wed, 20 Mar 2024 02:09:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Refactor the bulk-suppressions feature to fix some performance issues."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where linting issues that were already suppressed via suppression comments were recorded in the bulk suppressions list."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.2",
       "tag": "@rushstack/eslint-patch_v1.7.2",
       "date": "Thu, 25 Jan 2024 23:03:57 GMT",
