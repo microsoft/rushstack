@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/experimental-utils';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
 
 import { PackletAnalyzer, IAnalyzerError, InputFileMessageIds, ImportMessageIds } from './PackletAnalyzer';
 
@@ -42,9 +42,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
     ],
     docs: {
       description: 'Check that file paths and imports follow the basic mechanics for the packlet formalism',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Best Practices',
-      recommended: 'warn',
+      recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
     } as TSESLint.RuleMetaDataDocs
   },
@@ -56,7 +54,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
     // Example: /path/to/my-project/tsconfig.json
     const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
       context
-    ).program.getCompilerOptions()['configFilePath'] as string;
+    ).program.getCompilerOptions().configFilePath as string;
 
     const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
       inputFilePath,
@@ -92,6 +90,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
       // ExportAllDeclaration matches these forms:
       //   export * from '../../packlets/other-packlet';
       //   export * as X from '../../packlets/other-packlet';
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration': (
         node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration
       ): void => {
@@ -99,7 +98,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
           if (packletAnalyzer.projectUsesPacklets) {
             // Extract the import/export module path
             // Example: "../../packlets/other-packlet"
-            const modulePath = node.source.value;
+            const modulePath: string = node.source.value;
             if (typeof modulePath !== 'string') {
               return;
             }

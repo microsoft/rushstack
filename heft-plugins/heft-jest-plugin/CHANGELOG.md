@@ -1,6 +1,454 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+
+## 0.11.23
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 0.11.22
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
+
+## 0.11.21
+Tue, 05 Mar 2024 01:19:24 GMT
+
+_Version update only_
+
+## 0.11.20
+Sun, 03 Mar 2024 20:58:13 GMT
+
+_Version update only_
+
+## 0.11.19
+Sat, 02 Mar 2024 02:22:24 GMT
+
+_Version update only_
+
+## 0.11.18
+Fri, 01 Mar 2024 01:10:08 GMT
+
+_Version update only_
+
+## 0.11.17
+Thu, 29 Feb 2024 07:11:45 GMT
+
+_Version update only_
+
+## 0.11.16
+Wed, 28 Feb 2024 16:09:27 GMT
+
+_Version update only_
+
+## 0.11.15
+Mon, 26 Feb 2024 16:10:56 GMT
+
+### Patches
+
+- Make `@rushstack/terminal` a dependency because the reporter has a runtime dependency on that package.
+
+## 0.11.14
+Thu, 22 Feb 2024 05:54:17 GMT
+
+### Patches
+
+- Add a missing dependency on `@rushstack/terminal`
+
+## 0.11.13
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.11.12
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 0.11.11
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 0.11.10
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.11.9
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
+
+## 0.11.8
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 0.11.7
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 0.11.6
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 0.11.5
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.11.4
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.11.3
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.11.2
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 0.11.1
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
+
+## 0.11.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3
+
+## 0.10.8
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 0.10.7
+Wed, 20 Dec 2023 01:09:46 GMT
+
+_Version update only_
+
+## 0.10.6
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.10.5
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 0.10.4
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.10.3
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.10.2
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
+
+## 0.10.1
+Thu, 26 Oct 2023 00:27:48 GMT
+
+### Patches
+
+- Add an option (`enableNodeEnvManagement`) to ensure that the NODE_ENV environment variable is set to `"test"` during test execution.
+
+## 0.10.0
+Mon, 23 Oct 2023 15:18:38 GMT
+
+### Minor changes
+
+- Use Jest verbose logging when `heft --debug test` or `heft test --verbose` is specified
+- Fix an issue where `silent: true` was ignored when specified in `jest.config.json`
+
+## 0.9.9
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.9.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.9.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.9.6
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 0.9.5
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 0.9.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.9.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.9.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 0.9.1
+Tue, 19 Sep 2023 15:21:51 GMT
+
+_Version update only_
+
+## 0.9.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Add a `--log-heap-usage` flag that includes memory usage analysis in each test run.
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Wait for first test run to be scheduled in initial invocation in watch mode.
+
+## 0.8.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.8.0
+Mon, 31 Jul 2023 15:19:05 GMT
+
+### Minor changes
+
+- Make `jest-environment-jsdom` and `jest-environment-node` optional peerDependencies.
+
+## 0.7.18
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.7.17
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.7.16
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.7.15
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.7.14
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.7.13
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.7.12
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.7.11
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.7.10
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.7.9
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.7.8
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.7.7
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Patches
+
+- Add support for using '-u' for the '--update-snapshots' parameter and '-t' for the '--test-name-pattern' parameter
+
+## 0.7.6
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.7.5
+Fri, 09 Jun 2023 15:23:15 GMT
+
+### Patches
+
+- Added --test-path-ignore-patterns support for subtractive test selection to complement existing additive support.
+
+## 0.7.4
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.7.3
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.7.2
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.7.1
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Adds a new base config for web projects, jest-web.config.json. Adds the "customExportConditions" field to both base configs with sensible defaults.
+
+## 0.6.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.5.13
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.5.12
+Mon, 22 May 2023 06:34:32 GMT
+
+_Version update only_
+
+## 0.5.11
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.5.10
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.5.9
+Mon, 01 May 2023 15:23:19 GMT
+
+### Patches
+
+- Allow "preset" configuration value to be used when extending Jest configuration files
+
+## 0.5.8
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 0.5.7
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 0.5.6
+Tue, 04 Apr 2023 22:36:28 GMT
+
+### Patches
+
+- Upgrade Jest to 29.5.0.
+
+## 0.5.5
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 0.5.4
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 0.5.3
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.5.2
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 0.5.1
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 0.5.0
+Mon, 30 Jan 2023 00:55:44 GMT
+
+### Minor changes
+
+- Upgrade Jest from `~27.4.2` to `~29.3.1`
+
+## 0.4.5
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.4.4
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.4.3
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.4.2
 Tue, 20 Dec 2022 01:18:22 GMT

@@ -1,22 +1,19 @@
-@import 'office-ui-fabric-core/dist/sass/References';
+@use '../../styles/base';
 
 .LockfileEntryListView {
   display: flex;
   justify-content: space-between;
-  height: 30%;
+  min-height: 400px;
+  flex: 1;
   padding-top: 12px;
   & > * {
-    width: calc(50% - 48px - 12px);
-  }
-  h5 {
-    margin: 0;
+    width: calc(50% - 24px - 12px);
   }
 }
 
 .DependencyListWrapper {
   margin-top: 8px;
-  height: calc(25vh - 24px);
-  overflow: scroll;
+  height: calc(100% - 24px);
 }
 
 .DependencyItem {
@@ -25,9 +22,6 @@
   margin-top: 12px;
   &:hover {
     border: 1px solid #107c10;
-  }
-  p {
-    margin: 0;
   }
   & > * + * {
     margin-top: 8px;
@@ -39,15 +33,13 @@
 }
 
 .InfluencerList {
-  margin-top: 12px;
-  height: 10%;
-  overflow: scroll;
+  margin: 12px 0;
 }
 
 .DependencyDetails {
+  @include base.card;
+  padding: 12px;
   margin-top: 12px;
-  height: 4%;
-  overflow: scroll;
 }
 
 .InfluencerEntry {
@@ -63,7 +55,6 @@
   display: flex;
   align-items: center;
   span {
-    font-size: 12px;
     margin-left: 4px;
   }
 }

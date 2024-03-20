@@ -1,6 +1,122 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Tue, 08 Nov 2022 01:20:55 GMT and should not be manually modified.
+This log was last generated on Sun, 03 Mar 2024 20:58:12 GMT and should not be manually modified.
+
+## 4.19.1
+Sun, 03 Mar 2024 20:58:12 GMT
+
+### Patches
+
+- Fix an issue where the `allowNonStandardEnvironmentVariableNames` parameter option had no effect.
+
+## 4.19.0
+Sat, 02 Mar 2024 02:22:23 GMT
+
+### Minor changes
+
+- Use more specific types for command line parameters' `kind` properties.
+- Allow parameters that may be backed by an environment variable to be marked as `required`.
+- Update the return type of `defineChoiceParameter`, `defineIntegerParameter`, and `defineStringParameter` respectively when the `defaultValue` option is provided to return `IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter` respectively, as the value will definitely be defined in these cases.
+
+### Patches
+
+- Include a missing `readonly` modifier on the `value` properties of `IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter`.
+
+## 4.18.1
+Fri, 01 Mar 2024 01:10:08 GMT
+
+### Patches
+
+- Add an "allowNonStandardEnvironmentVariableNames" option to remove naming restrictions on parameter environment variables
+
+## 4.18.0
+Wed, 28 Feb 2024 16:09:27 GMT
+
+### Minor changes
+
+- Allow choice parameters alternatives to be typed.
+- Update the return type of `defineChoiceParameter`, `defineIntegerParameter`, and `defineStringParameter` respectively when the `{ required: true }` option is set to a new type (`IRequiredCommandLineChoiceParameter`, `IRequiredCommandLineIntegerParameter`, and `IRequiredCommandLineStringParameter` respectively) with a required `value` property.
+
+## 4.17.4
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 4.17.3
+Wed, 21 Feb 2024 21:45:28 GMT
+
+### Patches
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
+
+## 4.17.2
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 4.17.1
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 4.17.0
+Mon, 30 Oct 2023 23:36:37 GMT
+
+### Minor changes
+
+- Consider parent tool and action parameters when determining ambiguous abbreviations. For example, if a CLI tool `mytool` has a parameter `--myparam` and an action `myaction`, then `myaction` would not accept a parameter named `--myparam` (i.e. - `mytool --myparam myaction` is valid, `mytool myaction --myparam` is not). Additionally, any parameter that can be abbreviated to `--myparam` must be uniquely provided (i.e. - `--myparam-2` can only be abbreviated to `--myparam-`, since any shorter abbreviation would be ambiguous with the original `--myparam` on the tool).
+
+## 4.16.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 4.16.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 4.15.2
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 4.15.1
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 4.15.0
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Minor changes
+
+- Add support for handling ambiguous parameters when conflicting parameters are provided but they provide a non-conflicting alternative (e.g. parameters with the same short-name but different long-names, scoped parameters with the same long-name but different scopes). When using an ambiguous parameter on the CLI, an error message describing the ambiguous parameter usage will appear.
+
+## 4.14.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add AliasCommandLineAction, a CommandLineAction that can be used to redirect commands with optional default arguments to existing commands.
+
+## 4.13.3
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 4.13.2
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
 
 ## 4.13.1
 Tue, 08 Nov 2022 01:20:55 GMT

@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
 
-import { IEnvironment } from '../utilities/Utilities';
+import type { IEnvironment } from '../utilities/Utilities';
 
 /**
  * @beta
@@ -18,7 +18,8 @@ export interface IEnvironmentConfigurationInitializeOptions {
  * Names of environment variables used by Rush.
  * @beta
  */
-export enum EnvironmentVariableNames {
+// eslint-disable-next-line @typescript-eslint/typedef
+export const EnvironmentVariableNames = {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
@@ -26,49 +27,41 @@ export enum EnvironmentVariableNames {
    * @remarks This environment variable is not compatible with workspace installs. If attempting
    * to move the PNPM store path, see the `RUSH_PNPM_STORE_PATH` environment variable.
    */
-  RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
+  RUSH_TEMP_FOLDER: 'RUSH_TEMP_FOLDER',
 
   /**
    * This variable overrides the version of Rush that will be installed by
    * the version selector.  The default value is determined by the "rushVersion"
    * field from rush.json.
    */
-  RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
+  RUSH_PREVIEW_VERSION: 'RUSH_PREVIEW_VERSION',
 
   /**
    * If this variable is set to "1", Rush will not fail the build when running a version
    * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
    * field from rush.json.
    */
-  RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
+  RUSH_ALLOW_UNSUPPORTED_NODEJS: 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
 
   /**
    * Setting this environment variable overrides the value of `allowWarningsInSuccessfulBuild`
    * in the `command-line.json` configuration file. Specify `1` to allow warnings in a successful build,
    * or `0` to disallow them. (See the comments in the command-line.json file for more information).
    */
-  RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
-
-  /**
-   * This variable selects a specific installation variant for Rush to use when installing
-   * and linking package dependencies.
-   * For more information, see the command-line help for the `--variant` parameter
-   * and this article:  https://rushjs.io/pages/advanced/installation_variants/
-   */
-  RUSH_VARIANT = 'RUSH_VARIANT',
+  RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
 
   /**
    * Specifies the maximum number of concurrent processes to launch during a build.
    * For more information, see the command-line help for the `--parallelism` parameter for "rush build".
    */
-  RUSH_PARALLELISM = 'RUSH_PARALLELISM',
+  RUSH_PARALLELISM: 'RUSH_PARALLELISM',
 
   /**
    * If this variable is set to "1", Rush will create symlinks with absolute paths instead
    * of relative paths. This can be necessary when a repository is moved during a build or
    * if parts of a repository are moved into a sandbox.
    */
-  RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS',
+  RUSH_ABSOLUTE_SYMLINKS: 'RUSH_ABSOLUTE_SYMLINKS',
 
   /**
    * When using PNPM as the package manager, this variable can be used to configure the path that
@@ -77,20 +70,20 @@ export enum EnvironmentVariableNames {
    * If a relative path is used, then the store path will be resolved relative to the process's
    * current working directory.  An absolute path is recommended.
    */
-  RUSH_PNPM_STORE_PATH = 'RUSH_PNPM_STORE_PATH',
+  RUSH_PNPM_STORE_PATH: 'RUSH_PNPM_STORE_PATH',
 
   /**
    * When using PNPM as the package manager, this variable can be used to control whether or not PNPM
    * validates the integrity of the PNPM store during installation. The value of this environment variable must be
    * `1` (for true) or `0` (for false). If not specified, defaults to the value in .npmrc.
    */
-  RUSH_PNPM_VERIFY_STORE_INTEGRITY = 'RUSH_PNPM_VERIFY_STORE_INTEGRITY',
+  RUSH_PNPM_VERIFY_STORE_INTEGRITY: 'RUSH_PNPM_VERIFY_STORE_INTEGRITY',
 
   /**
    * This environment variable can be used to specify the `--target-folder` parameter
    * for the "rush deploy" command.
    */
-  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER',
+  RUSH_DEPLOY_TARGET_FOLDER: 'RUSH_DEPLOY_TARGET_FOLDER',
 
   /**
    * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
@@ -108,7 +101,7 @@ export enum EnvironmentVariableNames {
    *
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
+  RUSH_GLOBAL_FOLDER: 'RUSH_GLOBAL_FOLDER',
 
   /**
    * Provides a credential for a remote build cache, if configured.  This credential overrides any cached credentials.
@@ -123,7 +116,7 @@ export enum EnvironmentVariableNames {
    *
    * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
-  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL',
+  RUSH_BUILD_CACHE_CREDENTIAL: 'RUSH_BUILD_CACHE_CREDENTIAL',
 
   /**
    * Setting this environment variable overrides the value of `buildCacheEnabled` in the `build-cache.json`
@@ -134,24 +127,66 @@ export enum EnvironmentVariableNames {
    *
    * If there is no build cache configured, then this environment variable is ignored.
    */
-  RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
+  RUSH_BUILD_CACHE_ENABLED: 'RUSH_BUILD_CACHE_ENABLED',
 
   /**
    * Overrides the value of `isCacheWriteAllowed` in the `build-cache.json` configuration file. The value of this
    * environment variable must be `1` (for true) or `0` (for false). If there is no build cache configured, then
    * this environment variable is ignored.
    */
-  RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
+  RUSH_BUILD_CACHE_WRITE_ALLOWED: 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
+
+  /**
+   * Setting this environment variable opts into running with cobuilds. The context id should be the same across
+   * multiple VMs, but changed when it is a new round of cobuilds.
+   *
+   * e.g. `Build.BuildNumber` in Azure DevOps Pipeline.
+   *
+   * @remarks
+   * If there is no cobuild configured, then this environment variable is ignored.
+   */
+  RUSH_COBUILD_CONTEXT_ID: 'RUSH_COBUILD_CONTEXT_ID',
+
+  /**
+   * Explicitly specifies a name for each participating cobuild runner.
+   *
+   * Setting this environment variable opts into running with cobuilds.
+   *
+   * @remarks
+   * This environment variable is optional, if it is not provided, a random id is used.
+   *
+   * If there is no cobuild configured, then this environment variable is ignored.
+   */
+  RUSH_COBUILD_RUNNER_ID: 'RUSH_COBUILD_RUNNER_ID',
+
+  /**
+   * If this variable is set to "1", When getting distributed builds, Rush will automatically handle the leaf project
+   * with build cache "disabled" by writing to the cache in a special "log files only mode". This is useful when you
+   * want to use Cobuilds to improve the performance in CI validations and the leaf projects have not enabled cache.
+   */
+  RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: 'RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED',
 
   /**
    * Explicitly specifies the path for the Git binary that is invoked by certain Rush operations.
    */
-  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
+  RUSH_GIT_BINARY_PATH: 'RUSH_GIT_BINARY_PATH',
 
   /**
    * Explicitly specifies the path for the `tar` binary that is invoked by certain Rush operations.
    */
-  RUSH_TAR_BINARY_PATH = 'RUSH_TAR_BINARY_PATH',
+  RUSH_TAR_BINARY_PATH: 'RUSH_TAR_BINARY_PATH',
+
+  /**
+   * Internal variable used by `rushx` when recursively invoking another `rushx` process, to avoid
+   * nesting event hooks.
+   */
+  _RUSH_RECURSIVE_RUSHX_CALL: '_RUSH_RECURSIVE_RUSHX_CALL',
+
+  /**
+   * Internal variable that explicitly specifies the path for the version of `@microsoft/rush-lib` being executed.
+   * Will be set upon loading Rush.
+   */
+  _RUSH_LIB_PATH: '_RUSH_LIB_PATH',
 
   /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
@@ -162,8 +197,19 @@ export enum EnvironmentVariableNames {
    * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
    * assign when they execute lifecycle scripts.
    */
-  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
-}
+  RUSH_INVOKED_FOLDER: 'RUSH_INVOKED_FOLDER',
+
+  /**
+   * When running a hook script, this environment variable communicates the original arguments
+   * passed to the `rush` or `rushx` command.
+   *
+   * @remarks
+   * Unlike `RUSH_INVOKED_FOLDER`, the `RUSH_INVOKED_ARGS` variable is only available for hook scripts.
+   * Other lifecycle scripts should not make assumptions about Rush's command line syntax
+   * if Rush did not explicitly pass along command-line parameters to their process.
+   */
+  RUSH_INVOKED_ARGS: 'RUSH_INVOKED_ARGS'
+} as const;
 
 /**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
@@ -195,6 +241,12 @@ export class EnvironmentConfiguration {
   private static _buildCacheEnabled: boolean | undefined;
 
   private static _buildCacheWriteAllowed: boolean | undefined;
+
+  private static _cobuildContextId: string | undefined;
+
+  private static _cobuildRunnerId: string | undefined;
+
+  private static _cobuildLeafProjectLogOnlyAllowed: boolean | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -291,6 +343,33 @@ export class EnvironmentConfiguration {
   public static get buildCacheWriteAllowed(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheWriteAllowed;
+  }
+
+  /**
+   * Provides a determined cobuild context id if configured
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID}
+   */
+  public static get cobuildContextId(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildContextId;
+  }
+
+  /**
+   * Provides a determined cobuild runner id if configured
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID}
+   */
+  public static get cobuildRunnerId(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildRunnerId;
+  }
+
+  /**
+   * If set, enables or disables the cobuild leaf project log only feature.
+   * See {@link EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED}
+   */
+  public static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed;
   }
 
   /**
@@ -423,6 +502,25 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_COBUILD_CONTEXT_ID: {
+            EnvironmentConfiguration._cobuildContextId = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_RUNNER_ID: {
+            EnvironmentConfiguration._cobuildRunnerId = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED: {
+            EnvironmentConfiguration._cobuildLeafProjectLogOnlyAllowed =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_COBUILD_LEAF_PROJECT_LOG_ONLY_ALLOWED,
+                value
+              );
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_GIT_BINARY_PATH: {
             EnvironmentConfiguration._gitBinaryPath = value;
             break;
@@ -435,13 +533,18 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
-          case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
 
           case EnvironmentVariableNames.RUSH_INVOKED_FOLDER:
+          case EnvironmentVariableNames.RUSH_INVOKED_ARGS:
+          case EnvironmentVariableNames._RUSH_LIB_PATH:
             // Assigned by Rush itself
+            break;
+
+          case EnvironmentVariableNames._RUSH_RECURSIVE_RUSHX_CALL:
+            // Assigned/read internally by RushXCommandLine
             break;
 
           default:

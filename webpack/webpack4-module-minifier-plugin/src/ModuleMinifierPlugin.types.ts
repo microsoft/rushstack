@@ -7,6 +7,21 @@ import type * as webpack from 'webpack';
 import type { ReplaceSource, Source } from 'webpack-sources';
 
 /**
+ * Information about where the module was rendered in the emitted asset.
+ * @public
+ */
+export interface IRenderedModulePosition {
+  /**
+   * The offset from the start of tha asset to the start of the module, in characters.
+   */
+  charOffset: number;
+  /**
+   * The length of the rendered module, in characters.
+   */
+  charLength: number;
+}
+
+/**
  * Information about a dehydrated webpack ECMAScript asset
  * @public
  */
@@ -27,6 +42,11 @@ export interface IAssetInfo {
   modules: (string | number)[];
 
   /**
+   * Information about the offsets and character lengths for each rendered module in the final asset.
+   */
+  renderInfo: Map<string | number, IRenderedModulePosition>;
+
+  /**
    * The raw chunk object from Webpack, in case information from it is necessary for reconstruction
    */
   chunk: webpack.compilation.Chunk;
@@ -35,6 +55,22 @@ export interface IAssetInfo {
    * The set of external names to postprocess
    */
   externalNames: Map<string, string>;
+}
+
+/**
+ * Statistics from the plugin. Namely module sizes.
+ * @public
+ */
+export interface IModuleMinifierPluginStats {
+  metadataByAssetFileName: Map<string, IAssetStats>;
+}
+
+/**
+ * Rendered positional data
+ * @public
+ */
+export interface IAssetStats {
+  positionByModuleId: Map<string | number, IRenderedModulePosition>;
 }
 
 /**

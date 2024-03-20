@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as glob from 'glob';
-import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -16,26 +14,31 @@ import {
   InternalError,
   AlreadyReportedError
 } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import { BaseInstallManager } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
-import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
-import { IRushTempPackageJson } from '../../logic/base/BasePackage';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
+import type { IRushTempPackageJson } from '../../logic/base/BasePackage';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
-import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import {
+  type PackageJsonEditor,
+  DependencyType,
+  type PackageJsonDependency
+} from '../../api/PackageJsonEditor';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { InstallHelpers } from './InstallHelpers';
 import { TempProjectHelper } from '../TempProjectHelper';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { RushConfiguration } from '../..';
-import { PurgeManager } from '../PurgeManager';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { RushConfiguration } from '../..';
+import type { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
-import { BaseLinkManager } from '../base/BaseLinkManager';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+import type { BaseLinkManager } from '../base/BaseLinkManager';
+import type { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+import type { Subspace } from '../../api/Subspace';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
@@ -67,7 +70,10 @@ export class RushInstallManager extends BaseInstallManager {
     options: IInstallManagerOptions
   ) {
     super(rushConfiguration, rushGlobalFolder, purgeManager, options);
-    this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
+    this._tempProjectHelper = new TempProjectHelper(
+      this.rushConfiguration,
+      rushConfiguration.defaultSubspace
+    );
   }
 
   /**
@@ -79,6 +85,7 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   public async prepareCommonTempAsync(
+    subspace: Subspace,
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -89,7 +96,8 @@ export class RushInstallManager extends BaseInstallManager {
       RushConstants.rushTempProjectsFolderName
     );
 
-    console.log('\n' + colors.bold('Updating temp projects in ' + tempProjectsFolder));
+    // eslint-disable-next-line no-console
+    console.log('\n' + Colorize.bold('Updating temp projects in ' + tempProjectsFolder));
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
@@ -102,9 +110,11 @@ export class RushInstallManager extends BaseInstallManager {
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
     } else if (shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+      // eslint-disable-next-line no-console
       console.log();
+      // eslint-disable-next-line no-console
       console.log(
-        colors.red(
+        Colorize.red(
           'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
             'to update the shrinkwrap file.'
         )
@@ -113,8 +123,8 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // dependency name --> version specifier
-    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration
-      .getCommonVersions(this.options.variant)
+    const allExplicitPreferredVersions: Map<string, string> = this.rushConfiguration.defaultSubspace
+      .getCommonVersions()
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
@@ -139,13 +149,15 @@ export class RushInstallManager extends BaseInstallManager {
 
       // If there are orphaned projects, we need to update
       const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
-        this.rushConfiguration
+        this.rushConfiguration,
+        this.rushConfiguration.defaultSubspace
       );
+
       if (orphanedProjects.length > 0) {
-        for (const orhpanedProject of orphanedProjects) {
+        for (const orphanedProject of orphanedProjects) {
           shrinkwrapWarnings.push(
-            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
-              'which was not found in rush.json'
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orphanedProject}" ` +
+              `which was not found in ${RushConstants.rushJsonFilename}`
           );
         }
         shrinkwrapIsUpToDate = false;
@@ -155,7 +167,7 @@ export class RushInstallManager extends BaseInstallManager {
     // dependency name --> version specifier
     const commonDependencies: Map<string, string> = new Map([
       ...allExplicitPreferredVersions,
-      ...this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
+      ...this.rushConfiguration.getImplicitlyPreferredVersions()
     ]);
 
     // To make the common/package.json file more readable, sort alphabetically
@@ -303,9 +315,11 @@ export class RushInstallManager extends BaseInstallManager {
           // Delete the existing tarball and create a new one
           this._tempProjectHelper.createTempProjectTarball(rushProject);
 
+          // eslint-disable-next-line no-console
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
-          console.log(colors.yellow(error as string));
+          // eslint-disable-next-line no-console
+          console.log(Colorize.yellow(error as string));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
@@ -334,8 +348,9 @@ export class RushInstallManager extends BaseInstallManager {
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
       if (packageJson.saveIfModified()) {
+        // eslint-disable-next-line no-console
         console.log(
-          colors.yellow(
+          Colorize.yellow(
             `"${rushProject.packageName}" depends on one or more local packages which used "workspace:" ` +
               'notation. The package.json has been modified and must be committed to source control.'
           )
@@ -359,9 +374,14 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Write the common package.json
-    InstallHelpers.generateCommonPackageJson(this.rushConfiguration, commonDependencies);
+    InstallHelpers.generateCommonPackageJson(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      commonDependencies
+    );
 
     stopwatch.stop();
+    // eslint-disable-next-line no-console
     console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
 
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
@@ -418,8 +438,8 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected canSkipInstall(lastModifiedDate: Date): boolean {
-    if (!super.canSkipInstall(lastModifiedDate)) {
+  protected canSkipInstall(lastModifiedDate: Date, subspace: Subspace): boolean {
+    if (!super.canSkipInstall(lastModifiedDate, subspace)) {
       return false;
     }
 
@@ -442,7 +462,7 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @override
    */
-  protected async installAsync(cleanInstall: boolean): Promise<void> {
+  protected async installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void> {
     // Since we are actually running npm/pnpm/yarn install, recreate all the temp project tarballs.
     // This ensures that any existing tarballs with older header bits will be regenerated.
     // It is safe to assume that temp project pacakge.jsons already exist.
@@ -454,10 +474,12 @@ export class RushInstallManager extends BaseInstallManager {
     // The user must request that via the command line.
     if (cleanInstall) {
       if (this.rushConfiguration.packageManager === 'npm') {
+        // eslint-disable-next-line no-console
         console.log(`Deleting the "npm-cache" folder`);
         // This is faster and more thorough than "npm cache clean"
         this.installRecycler.moveFolder(this.rushConfiguration.npmCacheFolder);
 
+        // eslint-disable-next-line no-console
         console.log(`Deleting the "npm-tmp" folder`);
         this.installRecycler.moveFolder(this.rushConfiguration.npmTmpFolder);
       }
@@ -483,6 +505,7 @@ export class RushInstallManager extends BaseInstallManager {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
+        // eslint-disable-next-line no-console
         console.log('Deleting files from ' + commonNodeModulesFolder);
 
         this.installRecycler.moveFolder(commonNodeModulesFolder);
@@ -493,12 +516,13 @@ export class RushInstallManager extends BaseInstallManager {
 
         // note: it is not necessary to run "prune" with pnpm
         if (this.rushConfiguration.packageManager === 'npm') {
+          // eslint-disable-next-line no-console
           console.log(
             `Running "${this.rushConfiguration.packageManager} prune"` +
               ` in ${this.rushConfiguration.commonTempFolder}`
           );
           const args: string[] = ['prune'];
-          this.pushConfigurationArgs(args, this.options);
+          this.pushConfigurationArgs(args, this.options, subspace);
 
           Utilities.executeCommandWithRetry(
             {
@@ -519,16 +543,19 @@ export class RushInstallManager extends BaseInstallManager {
             commonNodeModulesFolder,
             RushConstants.rushTempNpmScope
           );
+          // eslint-disable-next-line no-console
           console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
           // Glob can't handle Windows paths
-          const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(
+          const normalizedPathToDeleteWithoutStar: string = Text.replaceAll(
             pathToDeleteWithoutStar,
             '\\',
             '/'
           );
 
+          const { default: glob } = await import('fast-glob');
+          const tempModulePaths: string[] = await glob(globEscape(normalizedPathToDeleteWithoutStar) + '/*');
           // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-          for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
+          for (const tempModulePath of tempModulePaths) {
             // We could potentially use AsyncRecycler here, but in practice these folders tend
             // to be very small
             Utilities.dangerouslyDeletePath(tempModulePath);
@@ -545,6 +572,7 @@ export class RushInstallManager extends BaseInstallManager {
         'npm-@rush-temp'
       );
       if (FileSystem.exists(yarnRushTempCacheFolder)) {
+        // eslint-disable-next-line no-console
         console.log('Deleting ' + yarnRushTempCacheFolder);
         Utilities.dangerouslyDeletePath(yarnRushTempCacheFolder);
       }
@@ -552,11 +580,12 @@ export class RushInstallManager extends BaseInstallManager {
 
     // Run "npm install" in the common folder
     const installArgs: string[] = ['install'];
-    this.pushConfigurationArgs(installArgs, this.options);
+    this.pushConfigurationArgs(installArgs, this.options, subspace);
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
-        colors.bold(
+        Colorize.bold(
           `Running "${this.rushConfiguration.packageManager} install" in` +
             ` ${this.rushConfiguration.commonTempFolder}`
         ) +
@@ -565,9 +594,10 @@ export class RushInstallManager extends BaseInstallManager {
 
     // If any diagnostic options were specified, then show the full command-line
     if (this.options.debug || this.options.collectLogFile || this.options.networkConcurrency) {
+      // eslint-disable-next-line no-console
       console.log(
         '\n' +
-          colors.green('Invoking package manager: ') +
+          Colorize.green('Invoking package manager: ') +
           FileSystem.getRealPath(packageManagerFilename) +
           ' ' +
           installArgs.join(' ') +
@@ -575,68 +605,55 @@ export class RushInstallManager extends BaseInstallManager {
       );
     }
 
-    try {
-      Utilities.executeCommandWithRetry(
-        {
-          command: packageManagerFilename,
-          args: installArgs,
-          workingDirectory: this.rushConfiguration.commonTempFolder,
-          environment: packageManagerEnv,
-          suppressOutput: false
-        },
-        this.options.maxInstallAttempts,
-        () => {
-          if (this.rushConfiguration.packageManager === 'pnpm') {
-            console.log(colors.yellow(`Deleting the "node_modules" folder`));
-            this.installRecycler.moveFolder(commonNodeModulesFolder);
+    Utilities.executeCommandWithRetry(
+      {
+        command: packageManagerFilename,
+        args: installArgs,
+        workingDirectory: this.rushConfiguration.commonTempFolder,
+        environment: packageManagerEnv,
+        suppressOutput: false
+      },
+      this.options.maxInstallAttempts,
+      () => {
+        if (this.rushConfiguration.packageManager === 'pnpm') {
+          // eslint-disable-next-line no-console
+          console.log(Colorize.yellow(`Deleting the "node_modules" folder`));
+          this.installRecycler.moveFolder(commonNodeModulesFolder);
 
-            // Leave the pnpm-store as is for the retry. This ensures that packages that have already
-            // been downloaded need not be downloaded again, thereby potentially increasing the chances
-            // of a subsequent successful install.
+          // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+          // been downloaded need not be downloaded again, thereby potentially increasing the chances
+          // of a subsequent successful install.
 
-            Utilities.createFolderWithRetry(commonNodeModulesFolder);
-          }
+          Utilities.createFolderWithRetry(commonNodeModulesFolder);
         }
-      );
-    } catch (error) {
-      // All the install attempts failed.
-
-      if (
-        this.rushConfiguration.packageManager === 'pnpm' &&
-        this.rushConfiguration.pnpmOptions.pnpmStore === 'local'
-      ) {
-        // If the installation has failed even after the retries, then pnpm store may
-        // have got into a corrupted, irrecoverable state. Delete the store so that a
-        // future install can create the store afresh.
-        console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-        this.installRecycler.moveFolder(this.rushConfiguration.pnpmOptions.pnpmStorePath);
       }
-
-      throw error;
-    }
+    );
 
     if (this.rushConfiguration.packageManager === 'npm') {
-      console.log('\n' + colors.bold('Running "npm shrinkwrap"...'));
+      // eslint-disable-next-line no-console
+      console.log('\n' + Colorize.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
-      this.pushConfigurationArgs(npmArgs, this.options);
+      this.pushConfigurationArgs(npmArgs, this.options, subspace);
       Utilities.executeCommand({
         command: this.rushConfiguration.packageManagerToolFilename,
         args: npmArgs,
         workingDirectory: this.rushConfiguration.commonTempFolder
       });
+      // eslint-disable-next-line no-console
       console.log('"npm shrinkwrap" completed\n');
 
-      this._fixupNpm5Regression();
+      await this._fixupNpm5RegressionAsync();
     }
   }
 
-  protected async postInstallAsync(): Promise<void> {
+  protected async postInstallAsync(subspace: Subspace): Promise<void> {
     if (!this.options.noLink) {
       const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
       await linkManager.createSymlinksForProjects(false);
     } else {
+      // eslint-disable-next-line no-console
       console.log(
-        '\n' + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+        '\n' + Colorize.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
       );
     }
   }
@@ -655,7 +672,7 @@ export class RushInstallManager extends BaseInstallManager {
    * Our workaround is to rewrite the package.json files for each of the @rush-temp projects
    * in the node_modules folder, after "npm install" completes.
    */
-  private _fixupNpm5Regression(): void {
+  private async _fixupNpm5RegressionAsync(): Promise<void> {
     const pathToDeleteWithoutStar: string = path.join(
       this.rushConfiguration.commonTempFolder,
       'node_modules',
@@ -666,10 +683,12 @@ export class RushInstallManager extends BaseInstallManager {
 
     let anyChanges: boolean = false;
 
-    // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
-    for (const packageJsonPath of glob.sync(
+    const { default: glob } = await import('fast-glob');
+    const packageJsonPaths: string[] = await glob(
       globEscape(normalizedPathToDeleteWithoutStar) + '/*/package.json'
-    )) {
+    );
+    // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
+    for (const packageJsonPath of packageJsonPaths) {
       // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/example/package.json"
       const packageJsonObject: IRushTempPackageJson = JsonFile.load(packageJsonPath);
 
@@ -682,7 +701,10 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     if (anyChanges) {
-      console.log('\n' + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + '\n');
+      // eslint-disable-next-line no-console
+      console.log(
+        '\n' + Colorize.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + '\n'
+      );
     }
   }
 
@@ -697,9 +719,10 @@ export class RushInstallManager extends BaseInstallManager {
 
     for (const rushProject of this.rushConfiguration.projects) {
       if (!tempProjectNames.has(rushProject.tempProjectName)) {
+        // eslint-disable-next-line no-console
         console.log(
           '\n' +
-            colors.yellow(
+            Colorize.yellow(
               PrintUtilities.wrapWords(
                 `Your ${this.rushConfiguration.shrinkwrapFilePhrase} is missing the project "${rushProject.packageName}".`
               )

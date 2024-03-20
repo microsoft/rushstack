@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
-import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export interface IDependencyAnalysis {
   /**
@@ -15,7 +15,7 @@ export interface IDependencyAnalysis {
 
   /**
    * A map of all direct dependencies that only have a single semantic version specifier,
-   * unless the variant has the {@link CommonVersionsConfiguration.implicitlyPreferredVersions} option
+   * unless the {@link CommonVersionsConfiguration.implicitlyPreferredVersions} option
    * set to `false`.
    */
   implicitlyPreferredVersionByPackageName: Map<string, string>;
@@ -32,7 +32,7 @@ export class DependencyAnalyzer {
     | undefined;
 
   private _rushConfiguration: RushConfiguration;
-  private _analysisByVariant: Map<string, IDependencyAnalysis> = new Map();
+  private _analysis: IDependencyAnalysis | undefined;
 
   private constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
@@ -53,28 +53,23 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(variant?: string): IDependencyAnalysis {
-    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
-    // with a variant created by the user
-    const variantKey: string = variant || '';
-    let analysis: IDependencyAnalysis | undefined = this._analysisByVariant.get(variantKey);
-    if (!analysis) {
-      analysis = this._getAnalysisInternal(variant);
-      this._analysisByVariant.set(variantKey, analysis);
+  public getAnalysis(): IDependencyAnalysis {
+    if (!this._analysis) {
+      this._analysis = this._getAnalysisInternal();
     }
 
-    return analysis;
+    return this._analysis;
   }
 
   /**
-   * Generates the {@link IDependencyAnalysis} for a variant.
+   * Generates the {@link IDependencyAnalysis}.
    *
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(variant: string | undefined): IDependencyAnalysis {
+  private _getAnalysisInternal(): IDependencyAnalysis {
     const commonVersionsConfiguration: CommonVersionsConfiguration =
-      this._rushConfiguration.getCommonVersions(variant);
+      this._rushConfiguration.getCommonVersions();
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();
     const allowedAlternativeVersions: Map<
       string,
@@ -117,7 +112,7 @@ export class DependencyAnalyzer {
     }
 
     const implicitlyPreferredVersionByPackageName: Map<string, string> = new Map();
-    // Only generate implicitly preferred versions for variants that request it
+    // Only generate implicitly preferred versions when requested
     const useImplicitlyPreferredVersions: boolean =
       commonVersionsConfiguration.implicitlyPreferredVersions ?? true;
     if (useImplicitlyPreferredVersions) {

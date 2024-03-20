@@ -3,12 +3,13 @@
 
 import {
   FileSystem,
-  IPackageJson,
-  IParsedPackageName,
+  type IPackageJson,
+  type IParsedPackageName,
   JsonFile,
   PackageName
 } from '@rushstack/node-core-library';
-import colors from 'colors/safe';
+import { Colorize } from '@rushstack/terminal';
+
 import * as path from 'path';
 import * as process from 'process';
 import * as Resolve from 'resolve';
@@ -36,11 +37,11 @@ interface IExecuteOptions {
 const packageImportPathRegExp: RegExp = /^((?:@[a-z0-9_][a-z0-9\-_\.]*\/)?[a-z0-9_][a-z0-9\-_\.]*)(\/.*)?$/i;
 
 function logInputField(title: string, value: string): void {
-  console.log(colors.cyan(title.padEnd(25)) + value);
+  console.log(Colorize.cyan(title.padEnd(25)) + value);
 }
 
 function logOutputField(title: string, value: string): void {
-  console.log(colors.green(title.padEnd(25)) + value);
+  console.log(Colorize.green(title.padEnd(25)) + value);
 }
 
 function traceTypeScriptPackage(options: {
@@ -323,7 +324,7 @@ export function traceImport(options: IExecuteOptions): void {
     if (warnings.length) {
       console.log();
       for (const warning of warnings) {
-        console.log(colors.yellow('Warning: ' + warning));
+        console.log(Colorize.yellow('Warning: ' + warning));
       }
     }
   }

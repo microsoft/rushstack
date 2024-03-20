@@ -1,9 +1,7 @@
 {
-  "extends": "./node_modules/@rushstack/heft-web-rig/profiles/library/tsconfig-base.json",
+  "extends": "./node_modules/local-web-rig/profiles/library/tsconfig-base.json",
   "compilerOptions": {
     "importHelpers": false,
-    "module": "commonjs",
-    "target": "ES2017",
-    "types": ["heft-jest", "webpack-env"]
+    "module": "commonjs"
   }
 }

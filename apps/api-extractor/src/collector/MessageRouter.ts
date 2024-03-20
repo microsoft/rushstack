@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
 import * as ts from 'typescript';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { AstSymbol } from '../analyzer/AstSymbol';
+import type { AstSymbol } from '../analyzer/AstSymbol';
 import {
   ExtractorMessage,
   ExtractorMessageCategory,
-  IExtractorMessageOptions,
-  IExtractorMessageProperties
+  type IExtractorMessageOptions,
+  type IExtractorMessageProperties
 } from '../api/ExtractorMessage';
-import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
-import { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
-import { ISourceLocation, SourceMapper } from './SourceMapper';
+import { type ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
+import type { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
+import type { ISourceLocation, SourceMapper } from './SourceMapper';
 import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
@@ -597,17 +597,17 @@ export class MessageRouter {
 
     switch (message.logLevel) {
       case ExtractorLogLevel.Error:
-        console.error(colors.red('Error: ' + messageText));
+        console.error(Colorize.red('Error: ' + messageText));
         break;
       case ExtractorLogLevel.Warning:
-        console.warn(colors.yellow('Warning: ' + messageText));
+        console.warn(Colorize.yellow('Warning: ' + messageText));
         break;
       case ExtractorLogLevel.Info:
         console.log(messageText);
         break;
       case ExtractorLogLevel.Verbose:
         if (this.showVerboseMessages) {
-          console.log(colors.cyan(messageText));
+          console.log(Colorize.cyan(messageText));
         }
         break;
       default:

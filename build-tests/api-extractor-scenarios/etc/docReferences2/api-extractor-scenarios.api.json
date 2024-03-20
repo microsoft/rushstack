@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -184,6 +184,7 @@
           ],
           "fileUrlPath": "src/docReferences2/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "CyclicA",
           "preserveMemberOrder": false,
           "members": [
@@ -215,6 +216,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodA1"
             },
             {
@@ -245,6 +247,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodA3"
             }
           ],
@@ -262,6 +265,7 @@
           ],
           "fileUrlPath": "src/docReferences2/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "CyclicB",
           "preserveMemberOrder": false,
           "members": [
@@ -293,6 +297,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodB2"
             },
             {
@@ -323,6 +328,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "methodB4"
             }
           ],
@@ -340,6 +346,7 @@
           ],
           "fileUrlPath": "src/docReferences2/index.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "FailWithSelfReference",
           "preserveMemberOrder": false,
           "members": [
@@ -371,6 +378,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method1"
             },
             {
@@ -401,6 +409,7 @@
               "overloadIndex": 1,
               "parameters": [],
               "isOptional": false,
+              "isAbstract": false,
               "name": "method2"
             }
           ],

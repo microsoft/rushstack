@@ -8,8 +8,7 @@
  */
 
 export { AlreadyReportedError } from './AlreadyReportedError';
-export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
-export { Async, IAsyncParallelismOptions, IRunWithRetriesOptions } from './Async';
+export { Async, AsyncQueue, IAsyncParallelismOptions, IRunWithRetriesOptions } from './Async';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
@@ -20,6 +19,11 @@ export {
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
   IExecutableSpawnOptions,
+  IWaitForExitOptions,
+  IWaitForExitWithBufferOptions,
+  IWaitForExitWithStringOptions,
+  IWaitForExitResult,
+  IProcessInfo,
   Executable
 } from './Executable';
 export { IFileErrorOptions, IFileErrorFormattingOptions, FileError } from './FileError';
@@ -28,13 +32,18 @@ export {
   IPackageJson,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
-  IPackageJsonRepository
+  IPackageJsonRepository,
+  IPeerDependenciesMetaTable,
+  IDependenciesMetaTable
 } from './IPackageJson';
 export {
   Import,
   IImportResolveOptions,
+  IImportResolveAsyncOptions,
   IImportResolveModuleOptions,
-  IImportResolvePackageOptions
+  IImportResolveModuleAsyncOptions,
+  IImportResolvePackageOptions,
+  IImportResolvePackageAsyncOptions
 } from './Import';
 export { InternalError } from './InternalError';
 export {
@@ -55,6 +64,7 @@ export {
 } from './JsonSchema';
 export { LockFile } from './LockFile';
 export { MapExtensions } from './MapExtensions';
+export { MinimumHeap } from './MinimumHeap';
 export { PosixModeBits } from './PosixModeBits';
 export { ProtectableMap, IProtectableMapParameters } from './ProtectableMap';
 export { IPackageJsonLookupParameters, PackageJsonLookup } from './PackageJsonLookup';
@@ -66,7 +76,7 @@ export {
   IParsedPackageNameOrError
 } from './PackageName';
 export { Path, FileLocationStyle, IPathFormatFileLocationOptions, IPathFormatConciselyOptions } from './Path';
-export { Encoding, Text, NewlineKind } from './Text';
+export { Encoding, Text, NewlineKind, type IReadLinesFromIterableOptions } from './Text';
 export { Sort } from './Sort';
 export {
   AlreadyExistsBehavior,
@@ -91,13 +101,4 @@ export { FileWriter, IFileWriterFlags } from './FileWriter';
 export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';
 export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { ISubprocessOptions, SubprocessTerminator } from './SubprocessTerminator';
-export { ITerminal } from './Terminal/ITerminal';
-export { Terminal } from './Terminal/Terminal';
-export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Terminal/Colors';
-export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';
-export { ConsoleTerminalProvider, IConsoleTerminalProviderOptions } from './Terminal/ConsoleTerminalProvider';
-export {
-  StringBufferTerminalProvider,
-  IStringBufferOutputOptions
-} from './Terminal/StringBufferTerminalProvider';
 export { TypeUuid } from './TypeUuid';

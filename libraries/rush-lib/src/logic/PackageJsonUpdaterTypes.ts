@@ -53,10 +53,6 @@ export interface IPackageJsonUpdaterRushBaseUpdateOptions {
    * actionName
    */
   actionName: string;
-  /**
-   * The variant to consider when performing installations and validating shrinkwrap updates.
-   */
-  variant?: string | undefined;
 }
 
 /**
@@ -67,6 +63,10 @@ export interface IPackageJsonUpdaterRushAddOptions extends IPackageJsonUpdaterRu
    * Whether or not this dependency should be added as a devDependency or a regular dependency.
    */
   devDependency: boolean;
+  /**
+   * Whether or not this dependency should be added as a peerDependency or a regular dependency.
+   */
+  peerDependency: boolean;
   /**
    * If specified, other packages that use this dependency will also have their package.json's updated.
    */

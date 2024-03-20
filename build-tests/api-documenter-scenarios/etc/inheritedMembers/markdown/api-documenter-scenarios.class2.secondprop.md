@@ -6,7 +6,7 @@
 
 A second prop.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 secondProp: boolean | string;

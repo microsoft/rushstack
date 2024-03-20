@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+
+    "module": "commonjs",
+    "target": "es2017",
+    "lib": ["es2017"],
+
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "types": []
+  },
+
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

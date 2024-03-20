@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
@@ -45,24 +44,24 @@ export class InstallAction extends BaseInstallAction {
   }
 
   protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
+      bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
       recheckShrinkwrap: false,
+      offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
-      variant: this._variant.value,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
+      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(this._terminal),
       checkOnly: this._checkOnlyParameter.value,
-
+      subspace: this.getTargetSubspace(),
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };
   }

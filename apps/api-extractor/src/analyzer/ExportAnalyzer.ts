@@ -6,12 +6,12 @@ import { InternalError } from '@rushstack/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
-import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
+import { AstImport, type IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-import { IFetchAstSymbolOptions } from './AstSymbolTable';
-import { AstEntity } from './AstEntity';
+import type { IFetchAstSymbolOptions } from './AstSymbolTable';
+import type { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
 import { SyntaxHelpers } from './SyntaxHelpers';
 
@@ -268,6 +268,7 @@ export class ExportAnalyzer {
         : undefined;
 
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
+      this._program,
       importOrExportDeclaration.getSourceFile(),
       moduleSpecifier,
       mode
@@ -882,6 +883,7 @@ export class ExportAnalyzer {
           )
         : undefined;
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
+      this._program,
       importOrExportDeclaration.getSourceFile(),
       moduleSpecifier,
       mode

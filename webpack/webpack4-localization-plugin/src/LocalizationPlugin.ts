@@ -1,23 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, FileSystem, ITerminal, NewlineKind } from '@rushstack/node-core-library';
+import { JsonFile, FileSystem, NewlineKind } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import * as Webpack from 'webpack';
 import * as path from 'path';
-import * as Tapable from 'tapable';
+import type * as Tapable from 'tapable';
 import {
   getPseudolocalizer,
-  ILocalizationFile,
+  type ILocalizationFile,
   parseLocFile,
   TypingsGenerator
 } from '@rushstack/localization-utilities';
 
 import { Constants } from './utilities/Constants';
 import {
-  IWebpackConfigurationUpdaterOptions,
+  type IWebpackConfigurationUpdaterOptions,
   WebpackConfigurationUpdater
 } from './WebpackConfigurationUpdater';
-import {
+import type {
   ILocalizationPluginOptions,
   ILocalizationStats,
   ILocaleFileData,
@@ -25,9 +26,9 @@ import {
   ILocalizedStrings,
   IResolvedMissingTranslations
 } from './interfaces';
-import { ILocalizedWebpackChunk } from './webpackInterfaces';
+import type { ILocalizedWebpackChunk } from './webpackInterfaces';
 import { EntityMarker } from './utilities/EntityMarker';
-import { IAsset, IProcessAssetResult, AssetProcessor, PLACEHOLDER_REGEX } from './AssetProcessor';
+import { type IAsset, type IProcessAssetResult, AssetProcessor, PLACEHOLDER_REGEX } from './AssetProcessor';
 
 /**
  * @internal

@@ -2,6 +2,54 @@
   "name": "@rushstack/tree-pattern",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/tree-pattern_v0.3.3",
+      "date": "Sat, 17 Feb 2024 06:24:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@rushstack/tree-pattern_v0.3.2",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade build dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/tree-pattern_v0.3.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/tree-pattern_v0.3.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.4",
       "tag": "@rushstack/tree-pattern_v0.2.4",
       "date": "Fri, 17 Jun 2022 00:16:18 GMT",

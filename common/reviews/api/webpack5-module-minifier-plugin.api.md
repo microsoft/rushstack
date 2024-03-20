@@ -28,12 +28,19 @@ export function generateLicenseFileForAsset(compilation: Compilation, asset: IAs
 export interface IAssetInfo {
     chunk: Chunk;
     fileName: string;
+    renderInfo: Map<string | number, IRenderedModulePosition>;
     source: sources.Source;
     type: string;
 }
 
 // @public
 export type IAssetMap = Map<string, IAssetInfo>;
+
+// @public
+export interface IAssetStats {
+    // (undocumented)
+    positionByModuleId: Map<string | number, IRenderedModulePosition>;
+}
 
 // @public
 export interface IDehydratedAssets {
@@ -51,6 +58,7 @@ export interface IFactoryMeta {
 
 // @public
 export interface IModuleInfo {
+    id: string | number;
     module: Module;
     source: sources.Source;
 }
@@ -73,6 +81,8 @@ export interface IModuleMinifierPluginOptions {
 // @public
 export interface IModuleMinifierPluginStats {
     // (undocumented)
+    metadataByAssetFileName: Map<string, IAssetStats>;
+    // (undocumented)
     metadataByModule: WeakMap<Module, IModuleStats>;
 }
 
@@ -89,6 +99,12 @@ export interface IPostProcessFragmentContext {
     compilation: Compilation;
     loggingName: string;
     module: Module | undefined;
+}
+
+// @public
+export interface IRenderedModulePosition {
+    charLength: number;
+    charOffset: number;
 }
 
 // @public

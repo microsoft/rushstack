@@ -20,6 +20,10 @@ describe(LookupByPath.iteratePathSegments.name, () => {
     const result = [...LookupByPath.iteratePathSegments('foo/bar/baz')];
     expect(result).toEqual(['foo', 'bar', 'baz']);
   });
+  it('returns correct last single character segment', () => {
+    const result = [...LookupByPath.iteratePathSegments('foo/a')];
+    expect(result).toEqual(['foo', 'a']);
+  });
 });
 
 describe(LookupByPath.prototype.findChildPath.name, () => {
@@ -99,5 +103,39 @@ describe(LookupByPath.prototype.findChildPath.name, () => {
     expect(tree.findChildPath('foo/bar,baz')).toEqual(2);
     expect(tree.findChildPath('foo,bar/baz')).toEqual(undefined);
     expect(tree.findChildPathFromSegments(['foo', 'bar', 'baz'])).toEqual(1);
+  });
+});
+
+describe(LookupByPath.prototype.findLongestPrefixMatch.name, () => {
+  it('returns empty for an empty tree', () => {
+    expect(new LookupByPath().findLongestPrefixMatch('foo')).toEqual(undefined);
+  });
+  it('returns the matching node for a trivial tree', () => {
+    expect(new LookupByPath([['foo', 1]]).findLongestPrefixMatch('foo')).toEqual({ value: 1, index: 3 });
+  });
+  it('returns the matching node for a single-layer tree', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['barbar', 2],
+      ['baz', 3]
+    ]);
+
+    expect(tree.findLongestPrefixMatch('foo')).toEqual({ value: 1, index: 3 });
+    expect(tree.findLongestPrefixMatch('barbar')).toEqual({ value: 2, index: 6 });
+    expect(tree.findLongestPrefixMatch('baz')).toEqual({ value: 3, index: 3 });
+    expect(tree.findLongestPrefixMatch('buzz')).toEqual(undefined);
+  });
+  it('returns the matching parent for multi-layer queries', () => {
+    const tree: LookupByPath<number> = new LookupByPath([
+      ['foo', 1],
+      ['barbar', 2],
+      ['baz', 3],
+      ['foo/bar', 4]
+    ]);
+
+    expect(tree.findLongestPrefixMatch('foo/bar')).toEqual({ value: 4, index: 7 });
+    expect(tree.findLongestPrefixMatch('barbar/baz')).toEqual({ value: 2, index: 6 });
+    expect(tree.findLongestPrefixMatch('baz/foo')).toEqual({ value: 3, index: 3 });
+    expect(tree.findLongestPrefixMatch('foo/foo')).toEqual({ value: 1, index: 3 });
   });
 });

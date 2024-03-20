@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, ConsoleTerminalProvider, JsonFile } from '@rushstack/node-core-library';
+import { JsonFile } from '@rushstack/node-core-library';
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { RushConfiguration } from '@microsoft/rush-lib';
-import { CommandLineAction, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { CommandLineAction, type CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 export class RecordVersionsAction extends CommandLineAction {
   private readonly _outFilePath: CommandLineStringParameter;

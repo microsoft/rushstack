@@ -1,22 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import {
   CommandLineParser,
-  CommandLineFlagParameter,
-  CommandLineStringParameter,
-  CommandLineChoiceParameter
+  type CommandLineFlagParameter,
+  type CommandLineStringParameter,
+  type IRequiredCommandLineStringParameter,
+  type IRequiredCommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
 import { InternalError } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-import { ResolutionType, traceImport } from './traceImport';
+import { type ResolutionType, traceImport } from './traceImport';
 
 export class TraceImportCommandLineParser extends CommandLineParser {
   private readonly _debugParameter: CommandLineFlagParameter;
-  private readonly _pathParameter: CommandLineStringParameter;
+  private readonly _pathParameter: IRequiredCommandLineStringParameter;
   private readonly _baseFolderParameter: CommandLineStringParameter;
-  private readonly _resolutionTypeParameter: CommandLineChoiceParameter;
+  private readonly _resolutionTypeParameter: IRequiredCommandLineChoiceParameter<ResolutionType>;
 
   public constructor() {
     super({
@@ -54,7 +55,7 @@ export class TraceImportCommandLineParser extends CommandLineParser {
       argumentName: 'FOLDER_PATH'
     });
 
-    this._resolutionTypeParameter = this.defineChoiceParameter({
+    this._resolutionTypeParameter = this.defineChoiceParameter<ResolutionType>({
       parameterLongName: '--resolution-type',
       parameterShortName: '-t',
       description:
@@ -72,15 +73,15 @@ export class TraceImportCommandLineParser extends CommandLineParser {
     }
     try {
       traceImport({
-        importPath: this._pathParameter.value!,
+        importPath: this._pathParameter.value,
         baseFolder: this._baseFolderParameter.value,
-        resolutionType: (this._resolutionTypeParameter.value ?? 'cjs') as ResolutionType
+        resolutionType: this._resolutionTypeParameter.value
       });
     } catch (error) {
       if (this._debugParameter.value) {
         console.error('\n' + error.stack);
       } else {
-        console.error('\n' + colors.red('ERROR: ' + error.message.trim()));
+        console.error('\n' + Colorize.red('ERROR: ' + error.message.trim()));
       }
     }
   }

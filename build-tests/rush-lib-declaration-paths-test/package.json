@@ -5,16 +5,15 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "12.20.24"
+    "@types/node": "18.17.15"
   }
 }

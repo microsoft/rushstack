@@ -1,0 +1,49 @@
+@mixin TextStyles {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+@mixin HeadingStyles {
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 0;
+  @include TextStyles;
+}
+
+.H1 {
+  @include HeadingStyles;
+  font-size: 24px;
+}
+.H2 {
+  @include HeadingStyles;
+  font-size: 21px;
+}
+.H3 {
+  @include HeadingStyles;
+  font-size: 19px;
+}
+.H4 {
+  @include HeadingStyles;
+  font-size: 16px;
+}
+.H5 {
+  @include HeadingStyles;
+  font-size: 14px;
+}
+.H6 {
+  @include HeadingStyles;
+  font-size: 12px;
+}
+
+.ParagraphStyles {
+  @include TextStyles;
+  margin: 0;
+  font-weight: normal;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.SpanStyles {
+  @include TextStyles;
+  font-size: 12px;
+}

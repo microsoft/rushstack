@@ -1,13 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import * as argparse from 'argparse';
+import { AnsiEscape } from '@rushstack/terminal';
 
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
-import { CommandLineParameter } from '../parameters/BaseClasses';
-import { CommandLineParser } from '../providers/CommandLineParser';
-import { CommandLineAction } from '../providers/CommandLineAction';
+import { CommandLineParameterBase } from '../parameters/BaseClasses';
+import type { CommandLineParser } from '../providers/CommandLineParser';
+import type { CommandLineAction } from '../providers/CommandLineAction';
+
+interface IExtendedArgumentParser extends argparse.ArgumentParser {
+  _printMessage: (message: string) => void;
+}
 
 function createParser(): DynamicCommandLineParser {
   const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
@@ -79,8 +84,13 @@ function createParser(): DynamicCommandLineParser {
     parameterLongName: '--integer-required',
     description: 'An integer',
     argumentName: 'NUMBER',
-    // Not yet supported
-    // environmentVariable: 'ENV_INTEGER_REQUIRED',
+    required: true
+  });
+  action.defineIntegerParameter({
+    parameterLongName: '--env-integer-required',
+    description: 'An integer',
+    argumentName: 'NUMBER',
+    environmentVariable: 'ENV_INTEGER_REQUIRED',
     required: true
   });
 
@@ -151,16 +161,30 @@ const snapshotPropertyNames: string[] = [
   'values'
 ];
 
-describe(CommandLineParameter.name, () => {
+describe(CommandLineParameterBase.name, () => {
+  let existingEnv: NodeJS.ProcessEnv;
+
+  beforeEach(() => {
+    existingEnv = {
+      ...process.env
+    };
+  });
+
+  afterEach(() => {
+    process.env = existingEnv;
+  });
+
   it('prints the global help', () => {
     const commandLineParser: CommandLineParser = createParser();
-    const helpText: string = colors.stripColors(commandLineParser.renderHelpText());
+    const helpText: string = AnsiEscape.removeCodes(commandLineParser.renderHelpText());
     expect(helpText).toMatchSnapshot();
   });
 
   it('prints the action help', () => {
     const commandLineParser: CommandLineParser = createParser();
-    const helpText: string = colors.stripColors(commandLineParser.getAction('do:the-job').renderHelpText());
+    const helpText: string = AnsiEscape.removeCodes(
+      commandLineParser.getAction('do:the-job').renderHelpText()
+    );
     expect(helpText).toMatchSnapshot();
   });
 
@@ -182,6 +206,8 @@ describe(CommandLineParameter.name, () => {
       '123',
       '--integer-required',
       '321',
+      '--env-integer-required',
+      '123',
       '--integer-list',
       '37',
       '--integer-list',
@@ -194,7 +220,7 @@ describe(CommandLineParameter.name, () => {
       'second'
     ];
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -235,9 +261,9 @@ describe(CommandLineParameter.name, () => {
   it('parses an input with NO parameters', async () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do:the-job');
-    const args: string[] = ['do:the-job', '--integer-required', '123'];
+    const args: string[] = ['do:the-job', '--integer-required', '123', '--env-integer-required', '321'];
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -301,7 +327,7 @@ describe(CommandLineParameter.name, () => {
     process.env.ENV_STRING_LIST = 'simple text';
     process.env.ENV_JSON_STRING_LIST = ' [ 1, true, "Hello, world!" ] ';
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -322,10 +348,12 @@ describe(CommandLineParameter.name, () => {
       '--undocumented-synonym',
       'undocumented-value',
       '--integer-required',
-      '6'
+      '6',
+      '--env-integer-required',
+      '123'
     ];
 
-    await commandLineParser.execute(args);
+    await expect(commandLineParser.execute(args)).resolves.toBe(true);
 
     expect(commandLineParser.selectedAction).toBe(action);
 
@@ -336,6 +364,45 @@ describe(CommandLineParameter.name, () => {
     }
     expect(copiedArgs).toMatchSnapshot();
   });
+
+  it('raises an error if a required parameter backed by an env variable is not provided', async () => {
+    const commandLineParser: CommandLineParser = createParser();
+
+    const printMessageSpy: jest.SpyInstance = jest
+      .spyOn(argparse.ArgumentParser.prototype as IExtendedArgumentParser, '_printMessage')
+      .mockImplementation(() => {
+        /* don't print */
+      });
+
+    const args: string[] = ['do:the-job', '--integer-required', '1'];
+    await expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toMatchSnapshot('Error');
+    expect(printMessageSpy).toHaveBeenCalled();
+    expect(printMessageSpy.mock.calls[0][0]).toMatchSnapshot('Usage');
+  });
+
+  it(
+    'prints the same usage if a required parameter backed by an env variable is not provided as when ' +
+      'a different required parameter is missing',
+    async () => {
+      const printMessageSpy: jest.SpyInstance = jest
+        .spyOn(argparse.ArgumentParser.prototype as IExtendedArgumentParser, '_printMessage')
+        .mockImplementation(() => {
+          /* don't print */
+        });
+
+      async function runWithArgsAsync(args: string[]): Promise<void> {
+        const commandLineParser: CommandLineParser = createParser();
+        await expect(commandLineParser.execute(args)).resolves.toBe(false);
+      }
+
+      await runWithArgsAsync(['do:the-job', '--integer-required', '1']);
+      await runWithArgsAsync(['do:the-job', '--env-integer-required', '1']);
+
+      expect(printMessageSpy).toHaveBeenCalledTimes(2);
+      expect(printMessageSpy.mock.calls[0][0]).toMatchSnapshot('Usage');
+      expect(printMessageSpy.mock.calls[0][0]).toEqual(printMessageSpy.mock.calls[1][0]);
+    }
+  );
 
   describe('choice list', () => {
     function createHelloWorldParser(): CommandLineParser {
@@ -366,9 +433,23 @@ describe(CommandLineParameter.name, () => {
       const args: string[] = ['hello-world'];
       process.env.ENV_COLOR = '[u';
 
-      await expect(
-        commandLineParser.executeWithoutErrorHandling(args)
-      ).rejects.toThrowErrorMatchingSnapshot();
+      // TODO: When Node 18 support is removed, switch this to use
+      // ```
+      // await expect(
+      //   commandLineParser.executeWithoutErrorHandling(args)
+      // ).rejects.toThrowErrorMatchingSnapshot();
+      // ```
+
+      let error: string | undefined;
+      try {
+        await commandLineParser.executeWithoutErrorHandling(args);
+      } catch (e) {
+        error = e.message;
+      }
+
+      expect(error).toMatch(
+        /^The \[u environment variable value looks like a JSON array but failed to parse: Unexpected token /
+      );
     });
 
     it('raises an error if env var value is json containing non-scalars', async () => {

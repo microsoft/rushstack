@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Text, Path, FileSystem, FileSystemStats } from '@rushstack/node-core-library';
+import { Text, Path, FileSystem, type FolderItem } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -17,6 +18,7 @@ import { Utilities } from './Utilities';
 export class AsyncRecycler {
   private _movedFolderCount: number;
   private _deleting: boolean;
+  private _prefix: string;
 
   /**
    * The full path of the recycler folder.
@@ -28,6 +30,7 @@ export class AsyncRecycler {
     this.recyclerFolder = path.resolve(recyclerFolder);
     this._movedFolderCount = 0;
     this._deleting = false;
+    this._prefix = `${Date.now()}`;
   }
 
   /**
@@ -50,22 +53,17 @@ export class AsyncRecycler {
 
     ++this._movedFolderCount;
 
-    // We need to do a simple "FileSystem.move" here, however if the folder we're trying to rename
+    // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename
     // has a lock, or if its destination container doesn't exist yet,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes renameSync to
     // fail. To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    const oldFolderName: string = path.basename(folderPath);
-    const newFolderPath: string = path.join(this.recyclerFolder, `${oldFolderName}_${new Date().getTime()}`);
-
-    if (!FileSystem.exists(this.recyclerFolder)) {
-      Utilities.createFolderWithRetry(this.recyclerFolder);
-    }
+    Utilities.createFolderWithRetry(this.recyclerFolder);
 
     Utilities.retryUntilTimeout(
-      () => FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath }),
+      () => this._renameOrRecurseInFolder(folderPath),
       maxWaitTimeMs,
       (e) =>
         new Error(`Error: ${e}\nOften this is caused by a file lock from a process like the virus scanner.`),
@@ -83,20 +81,14 @@ export class AsyncRecycler {
 
     const excludeSet: Set<string> = new Set<string>((membersToExclude || []).map((x) => x.toUpperCase()));
 
-    for (const memberPath of FileSystem.readFolderItemNames(resolvedFolderPath, { absolutePaths: true })) {
-      const normalizedMemberName: string = path.basename(memberPath).toUpperCase();
+    for (const dirent of FileSystem.readFolderItems(resolvedFolderPath)) {
+      const normalizedMemberName: string = dirent.name.toUpperCase();
       if (!excludeSet.has(normalizedMemberName)) {
-        let shouldMove: boolean = false;
-        try {
-          const stats: FileSystemStats = FileSystem.getLinkStatistics(memberPath);
-          shouldMove = stats.isDirectory();
-        } catch (error) {
-          // If we fail to access the item, assume it's not a folder
-        }
-        if (shouldMove) {
-          this.moveFolder(memberPath);
+        const absolutePath: string = path.resolve(folderPath, dirent.name);
+        if (dirent.isDirectory()) {
+          this._renameOrRecurseInFolder(absolutePath);
         } else {
-          FileSystem.deleteFolder(memberPath);
+          FileSystem.deleteFile(absolutePath);
         }
       }
     }
@@ -109,9 +101,11 @@ export class AsyncRecycler {
    * NOTE: To avoid spawning multiple instances of the same command, moveFolder()
    * MUST NOT be called again after deleteAll() has started.
    */
-  public deleteAll(): void {
+  public async startDeleteAllAsync(): Promise<void> {
     if (this._deleting) {
-      throw new Error('AsyncRecycler.deleteAll() must not be called more than once');
+      throw new Error(
+        `${AsyncRecycler.name}.${this.startDeleteAllAsync.name}() must not be called more than once`
+      );
     }
 
     this._deleting = true;
@@ -158,9 +152,18 @@ export class AsyncRecycler {
 
       let pathCount: number = 0;
 
+      let folderItemNames: string[] = [];
+      try {
+        folderItemNames = await FileSystem.readFolderItemNamesAsync(this.recyclerFolder);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+      }
+
       // child_process.spawn() doesn't expand wildcards.  To be safe, we will do it manually
       // rather than rely on an unknown shell.
-      for (const filename of FileSystem.readFolderItemNames(this.recyclerFolder)) {
+      for (const filename of folderItemNames) {
         // The "." and ".." are supposed to be excluded, but let's be safe
         if (filename !== '.' && filename !== '..') {
           args.push(path.join(this.recyclerFolder, filename));
@@ -178,5 +181,35 @@ export class AsyncRecycler {
 
     // The child won't stay alive unless we unlink it from the parent process
     process.unref();
+  }
+
+  private _renameOrRecurseInFolder(folderPath: string): void {
+    const ordinal: number = this._movedFolderCount++;
+    const targetDir: string = `${this.recyclerFolder}/${this._prefix}_${ordinal}`;
+    try {
+      fs.renameSync(folderPath, targetDir);
+      return;
+    } catch (err) {
+      if (FileSystem.isNotExistError(err)) {
+        return;
+      }
+
+      if (err.code !== 'EPERM') {
+        throw err;
+      }
+    }
+
+    const children: FolderItem[] = FileSystem.readFolderItems(folderPath);
+    for (const child of children) {
+      const absoluteChild: string = `${folderPath}/${child.name}`;
+      if (child.isDirectory()) {
+        this._renameOrRecurseInFolder(absoluteChild);
+      } else {
+        FileSystem.deleteFile(absoluteChild);
+      }
+    }
+
+    // Yes, this is a folder. The API deletes empty folders, too.
+    FileSystem.deleteFile(folderPath);
   }
 }

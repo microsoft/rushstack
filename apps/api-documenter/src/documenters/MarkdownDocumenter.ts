@@ -7,22 +7,22 @@ import {
   DocSection,
   DocPlainText,
   DocLinkTag,
-  TSDocConfiguration,
+  type TSDocConfiguration,
   StringBuilder,
   DocNodeKind,
   DocParagraph,
   DocCodeSpan,
   DocFencedCode,
   StandardTags,
-  DocBlock,
-  DocComment,
-  DocNodeContainer
+  type DocBlock,
+  type DocComment,
+  type DocNodeContainer
 } from '@microsoft/tsdoc';
 import {
-  ApiModel,
-  ApiItem,
-  ApiEnum,
-  ApiPackage,
+  type ApiModel,
+  type ApiItem,
+  type ApiEnum,
+  type ApiPackage,
   ApiItemKind,
   ApiReleaseTagMixin,
   ApiDocumentedItem,
@@ -31,20 +31,21 @@ import {
   ApiStaticMixin,
   ApiPropertyItem,
   ApiInterface,
-  Excerpt,
+  type Excerpt,
+  ApiAbstractMixin,
   ApiParameterListMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
-  ApiNamespace,
+  type ApiNamespace,
   ExcerptTokenKind,
-  IResolveDeclarationReferenceResult,
+  type IResolveDeclarationReferenceResult,
   ApiTypeAlias,
-  ExcerptToken,
+  type ExcerptToken,
   ApiOptionalMixin,
   ApiInitializerMixin,
   ApiProtectedMixin,
   ApiReadonlyMixin,
-  IFindApiItemsResult
+  type IFindApiItemsResult
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -58,10 +59,10 @@ import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { PluginLoader } from '../plugin/PluginLoader';
 import {
-  IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
+  type IMarkdownDocumenterFeatureOnBeforeWritePageArgs,
   MarkdownDocumenterFeatureContext
 } from '../plugin/MarkdownDocumenterFeature';
-import { DocumenterConfig } from './DocumenterConfig';
+import type { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
 export interface IMarkdownDocumenterOptions {
@@ -172,7 +173,9 @@ export class MarkdownDocumenter {
     }
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha) {
+        this._writeAlphaWarning(output);
+      } else if (apiItem.releaseTag === ReleaseTag.Beta) {
         this._writeBetaWarning(output);
       }
     }
@@ -502,6 +505,11 @@ export class MarkdownDocumenter {
   private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
+    const abstractClassesTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Abstract Class', 'Description']
+    });
+
     const classesTable: DocTable = new DocTable({
       configuration,
       headerTitles: ['Class', 'Description']
@@ -550,7 +558,11 @@ export class MarkdownDocumenter {
 
       switch (apiMember.kind) {
         case ApiItemKind.Class:
-          classesTable.addRow(row);
+          if (ApiAbstractMixin.isBaseClassOf(apiMember) && apiMember.isAbstract) {
+            abstractClassesTable.addRow(row);
+          } else {
+            classesTable.addRow(row);
+          }
           this._writeApiItemPage(apiMember);
           break;
 
@@ -589,6 +601,11 @@ export class MarkdownDocumenter {
     if (classesTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration, title: 'Classes' }));
       output.appendNode(classesTable);
+    }
+
+    if (abstractClassesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration, title: 'Abstract Classes' }));
+      output.appendNode(abstractClassesTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
@@ -985,10 +1002,13 @@ export class MarkdownDocumenter {
     const section: DocSection = new DocSection({ configuration });
 
     if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.releaseTag === ReleaseTag.Beta) {
+      if (apiItem.releaseTag === ReleaseTag.Alpha || apiItem.releaseTag === ReleaseTag.Beta) {
         section.appendNodesInParagraph([
           new DocEmphasisSpan({ configuration, bold: true, italic: true }, [
-            new DocPlainText({ configuration, text: '(BETA)' })
+            new DocPlainText({
+              configuration,
+              text: `(${apiItem.releaseTag === ReleaseTag.Alpha ? 'ALPHA' : 'BETA'})`
+            })
           ]),
           new DocPlainText({ configuration, text: ' ' })
         ]);
@@ -1033,6 +1053,10 @@ export class MarkdownDocumenter {
 
     const section: DocSection = new DocSection({ configuration });
 
+    // Output modifiers in syntactically correct order: first access modifier (here: `protected`), then
+    // `static` or `abstract` (no member can be both, so the order between the two of them does not matter),
+    // last `readonly`. If `override` was supported, it would go directly before `readonly`.
+
     if (ApiProtectedMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isProtected) {
         section.appendNode(
@@ -1041,18 +1065,26 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.isReadonly) {
-        section.appendNode(
-          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'readonly' })])
-        );
-      }
-    }
-
     if (ApiStaticMixin.isBaseClassOf(apiItem)) {
       if (apiItem.isStatic) {
         section.appendNode(
           new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'static' })])
+        );
+      }
+    }
+
+    if (ApiAbstractMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isAbstract) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'abstract' })])
+        );
+      }
+    }
+
+    if (ApiReadonlyMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isReadonly) {
+        section.appendNode(
+          new DocParagraph({ configuration }, [new DocCodeSpan({ configuration, code: 'readonly' })])
         );
       }
     }
@@ -1125,10 +1157,22 @@ export class MarkdownDocumenter {
     }
   }
 
+  private _writeAlphaWarning(output: DocSection): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    const betaWarning: string =
+      'This API is provided as an alpha preview for developers and may change' +
+      ' based on feedback that we receive.  Do not use this API in a production environment.';
+    output.appendNode(
+      new DocNoteBox({ configuration }, [
+        new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: betaWarning })])
+      ])
+    );
+  }
+
   private _writeBetaWarning(output: DocSection): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
     const betaWarning: string =
-      'This API is provided as a preview for developers and may change' +
+      'This API is provided as a beta preview for developers and may change' +
       ' based on feedback that we receive.  Do not use this API in a production environment.';
     output.appendNode(
       new DocNoteBox({ configuration }, [

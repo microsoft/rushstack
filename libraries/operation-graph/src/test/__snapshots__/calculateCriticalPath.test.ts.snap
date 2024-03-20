@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calculateCriticalPathLength reports circularities 1`] = `
+"A cyclic dependency was encountered:
+  c
+  -> b
+  -> c"
+`;
+
+exports[`calculateCriticalPathLength sets the critical path 1`] = `
+Object {
+  "a": 1,
+  "b": 2,
+  "c": 3,
+  "d": 4,
+  "e": 5,
+  "f": 6,
+  "g": 13,
+}
+`;
+
+exports[`calculateCriticalPathLengths sets the critical path 1`] = `
+Object {
+  "a": 1,
+  "b": 2,
+  "c": 3,
+  "d": 4,
+  "e": 5,
+  "f": 6,
+  "g": 13,
+}
+`;
+
+exports[`calculateShortestPath returns the shortest path: long 1`] = `
+Array [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+]
+`;
+
+exports[`calculateShortestPath returns the shortest path: with multiple shortcuts (circular) 1`] = `
+Array [
+  "a",
+  "c",
+  "f",
+  "a",
+]
+`;
+
+exports[`calculateShortestPath returns the shortest path: with multiple shortcuts 1`] = `
+Array [
+  "a",
+  "c",
+  "f",
+]
+`;
+
+exports[`calculateShortestPath returns the shortest path: with shortcut 1`] = `
+Array [
+  "a",
+  "c",
+  "d",
+  "e",
+  "f",
+]
+`;

@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as tsdoc from '@microsoft/tsdoc';
-import { ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
-import { DeserializerContext } from '../model/DeserializerContext';
+import { ApiItem, type IApiItemOptions, type IApiItemJson } from './ApiItem';
+import type { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link ApiDocumentedItem}.

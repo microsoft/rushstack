@@ -1,20 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import child_process from 'child_process';
+import type child_process from 'child_process';
 import gitInfo from 'git-repo-info';
 import * as path from 'path';
 import * as url from 'url';
-import colors from 'colors/safe';
+
 import { trueCasePathSync } from 'true-case-path';
-import { Executable, AlreadyReportedError, Path, ITerminal } from '@rushstack/node-core-library';
+import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';
-import { GitEmailPolicy } from './policy/GitEmailPolicy';
-import { RushConfiguration } from '../api/RushConfiguration';
+import * as GitEmailPolicy from './policy/GitEmailPolicy';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-import { IChangedGitStatusEntry, IGitStatusEntry, parseGitStatus } from './GitStatusParser';
+import { type IChangedGitStatusEntry, type IGitStatusEntry, parseGitStatus } from './GitStatusParser';
+import { RushConstants } from './RushConstants';
 
 export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
 
@@ -109,6 +111,7 @@ export class Git {
     // Ex: "bob@example.com"
     const emailResult: IResultOrError<string> = this._tryGetGitEmail();
     if (emailResult.error) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           `Error: ${emailResult.error.message}`,
@@ -122,6 +125,7 @@ export class Git {
     }
 
     if (emailResult.result === undefined || emailResult.result.length === 0) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           'This operation requires that a Git email be specified.',
@@ -165,6 +169,7 @@ export class Git {
     const defaultHooksPath: string = path.resolve(commonGitDir, 'hooks');
     const hooksResult: IResultOrError<string> = this._tryGetGitHooksPath();
     if (hooksResult.error) {
+      // eslint-disable-next-line no-console
       console.log(
         [
           `Error: ${hooksResult.error.message}`,
@@ -350,6 +355,7 @@ export class Git {
 
       if (matchingRemotes.length > 0) {
         if (matchingRemotes.length > 1) {
+          // eslint-disable-next-line no-console
           console.log(
             `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
           );
@@ -363,14 +369,16 @@ export class Git {
                 ', '
               )}). `
             : `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `;
-        console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
+        // eslint-disable-next-line no-console
+        console.log(Colorize.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }
     } else {
+      // eslint-disable-next-line no-console
       console.log(
-        colors.yellow(
-          'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
+        Colorize.yellow(
+          `A git remote URL has not been specified in ${RushConstants.rushJsonFilename}. Setting the baseline remote URL is recommended.`
         )
       );
       return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
@@ -466,12 +474,12 @@ export class Git {
       // Example: "host.ext"
       const host: string = scpLikeSyntaxMatch[1];
       // Example: "path/to/repo"
-      const path: string = scpLikeSyntaxMatch[2];
+      const urlPath: string = scpLikeSyntaxMatch[2];
 
-      if (path.startsWith('/')) {
-        result = `https://${host}${path}`;
+      if (urlPath.startsWith('/')) {
+        result = `https://${host}${urlPath}`;
       } else {
-        result = `https://${host}/${path}`;
+        result = `https://${host}/${urlPath}`;
       }
     }
 
@@ -562,6 +570,7 @@ export class Git {
   }
 
   private _fetchRemoteBranch(remoteBranchName: string, terminal: ITerminal): void {
+    // eslint-disable-next-line no-console
     console.log(`Checking for updates to ${remoteBranchName}...`);
     const fetchResult: boolean = this._tryFetchRemoteBranch(remoteBranchName);
     if (!fetchResult) {

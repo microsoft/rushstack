@@ -1,18 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import } from '@rushstack/node-core-library';
 import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 import type {
-  AmazonS3BuildCacheProvider,
   IAmazonS3BuildCacheProviderOptionsAdvanced,
   IAmazonS3BuildCacheProviderOptionsSimple
 } from './AmazonS3BuildCacheProvider';
-
-const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(
-  './AmazonS3BuildCacheProvider',
-  require
-);
 
 const PLUGIN_NAME: string = 'AmazonS3BuildCachePlugin';
 
@@ -54,54 +47,53 @@ export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
-      rushSession.registerCloudBuildCacheProviderFactory(
-        'amazon-s3',
-        (buildCacheConfig): AmazonS3BuildCacheProvider => {
-          type IBuildCache = typeof buildCacheConfig & {
-            amazonS3Configuration: IAmazonS3ConfigurationJson;
-          };
-          const { amazonS3Configuration } = buildCacheConfig as IBuildCache;
-          let options:
-            | IAmazonS3BuildCacheProviderOptionsAdvanced
-            | IAmazonS3BuildCacheProviderOptionsSimple
-            | undefined;
-          const { s3Endpoint, s3Bucket, s3Region } = amazonS3Configuration;
-          const s3Prefix: undefined | string = amazonS3Configuration.s3Prefix || undefined;
-          const isCacheWriteAllowed: boolean = !!amazonS3Configuration.isCacheWriteAllowed;
+      rushSession.registerCloudBuildCacheProviderFactory('amazon-s3', async (buildCacheConfig) => {
+        type IBuildCache = typeof buildCacheConfig & {
+          amazonS3Configuration: IAmazonS3ConfigurationJson;
+        };
+        const { amazonS3Configuration } = buildCacheConfig as IBuildCache;
+        let options:
+          | IAmazonS3BuildCacheProviderOptionsAdvanced
+          | IAmazonS3BuildCacheProviderOptionsSimple
+          | undefined;
+        const { s3Endpoint, s3Bucket, s3Region } = amazonS3Configuration;
+        const s3Prefix: undefined | string = amazonS3Configuration.s3Prefix || undefined;
+        const isCacheWriteAllowed: boolean = !!amazonS3Configuration.isCacheWriteAllowed;
 
-          if (s3Prefix && s3Prefix[0] === '/') {
-            throw new Error('s3Prefix should not have a leading /');
-          }
-
-          // mutually exclusive
-          if (s3Bucket && s3Endpoint) {
-            throw new Error('Only one of "s3Bucket" or "s3Endpoint" must be provided.');
-          }
-
-          if (s3Endpoint) {
-            options = {
-              // IAmazonS3BuildCacheProviderOptionsAdvanced
-              s3Region,
-              s3Endpoint,
-              s3Prefix,
-              isCacheWriteAllowed
-            };
-          }
-          if (s3Bucket) {
-            options = {
-              // IAmazonS3BuildCacheProviderOptionsSimple
-              s3Region,
-              s3Bucket,
-              s3Prefix,
-              isCacheWriteAllowed
-            };
-          }
-          if (!options) {
-            throw new Error('You must provide either an s3Endpoint or s3Bucket');
-          }
-          return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider(options, rushSession);
+        if (s3Prefix && s3Prefix[0] === '/') {
+          throw new Error('s3Prefix should not have a leading /');
         }
-      );
+
+        // mutually exclusive
+        if (s3Bucket && s3Endpoint) {
+          throw new Error('Only one of "s3Bucket" or "s3Endpoint" must be provided.');
+        }
+
+        if (s3Endpoint) {
+          options = {
+            // IAmazonS3BuildCacheProviderOptionsAdvanced
+            s3Region,
+            s3Endpoint,
+            s3Prefix,
+            isCacheWriteAllowed
+          };
+        }
+        if (s3Bucket) {
+          options = {
+            // IAmazonS3BuildCacheProviderOptionsSimple
+            s3Region,
+            s3Bucket,
+            s3Prefix,
+            isCacheWriteAllowed
+          };
+        }
+        if (!options) {
+          throw new Error('You must provide either an s3Endpoint or s3Bucket');
+        }
+
+        const { AmazonS3BuildCacheProvider } = await import('./AmazonS3BuildCacheProvider');
+        return new AmazonS3BuildCacheProvider(options, rushSession);
+      });
     });
   }
 }

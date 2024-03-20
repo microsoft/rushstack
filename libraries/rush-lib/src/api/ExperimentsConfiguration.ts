@@ -13,15 +13,22 @@ import schemaJson from '../schemas/experiments.schema.json';
 export interface IExperimentsJson {
   /**
    * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
-   * Set this option to true to pass '--frozen-lockfile' instead.
+   * Set this option to true to pass '--frozen-lockfile' instead for faster installs.
    */
   usePnpmFrozenLockfileForRushInstall?: boolean;
 
   /**
    * By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'.
-   * Set this option to true to pass '--prefer-frozen-lockfile' instead.
+   * Set this option to true to pass '--prefer-frozen-lockfile' instead to minimize shrinkwrap changes.
    */
   usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
+
+  /**
+   * By default, 'rush update' runs as a single operation.
+   * Set this option to true to instead update the lockfile with `--lockfile-only`, then perform a `--frozen-lockfile` install.
+   * Necessary when using the `afterAllResolved` hook in .pnpmfile.cjs.
+   */
+  usePnpmLockfileOnlyThenFrozenLockfileForRushUpdate?: boolean;
 
   /**
    * If using the 'preventManualShrinkwrapChanges' option, restricts the hash to only include the layout of external dependencies.
@@ -43,6 +50,12 @@ export interface IExperimentsJson {
   buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
 
   /**
+   * If true, build skipping will respect the allowWarningsInSuccessfulBuild flag and skip builds with warnings.
+   * This will not replay warnings from the skipped build.
+   */
+  buildSkipWithAllowWarningsInSuccessfulBuild?: boolean;
+
+  /**
    * If true, the phased commands feature is enabled. To use this feature, create a "phased" command
    * in common/config/rush/command-line.json.
    */
@@ -53,6 +66,41 @@ export interface IExperimentsJson {
    * `.npmrc` file has changed since the last install.
    */
   cleanInstallAfterNpmrcChanges?: boolean;
+
+  /**
+   * If true, print the outputs of shell commands defined in event hooks to the console.
+   */
+  printEventHooksOutputToConsole?: boolean;
+
+  /**
+   * If true, Rush will not allow node_modules in the repo folder or in parent folders.
+   */
+  forbidPhantomResolvableNodeModulesFolders?: boolean;
+
+  /**
+   * (UNDER DEVELOPMENT) For certain installation problems involving peer dependencies, PNPM cannot
+   * correctly satisfy versioning requirements without installing duplicate copies of a package inside the
+   * node_modules folder. This poses a problem for "workspace:*" dependencies, as they are normally
+   * installed by making a symlink to the local project source folder. PNPM's "injected dependencies"
+   * feature provides a model for copying the local project folder into node_modules, however copying
+   * must occur AFTER the dependency project is built and BEFORE the consuming project starts to build.
+   * The "pnpm-sync" tool manages this operation; see its documentation for details.
+   * Enable this experiment if you want "rush" and "rushx" commands to resync injected dependencies
+   * by invoking "pnpm-sync" during the build.
+   */
+  usePnpmSyncForInjectedDependencies?: boolean;
+
+  /**
+   * If set to true, Rush will generate a `project-impact-graph.yaml` file in the repository root during `rush update`.
+   */
+  generateProjectImpactGraphDuringRushUpdate?: boolean;
+
+  /**
+   * If true, when running in watch mode, Rush will check for phase scripts named `_phase:<name>:ipc` and run them instead
+   * of `_phase:<name>` if they exist. The created child process will be provided with an IPC channel and expected to persist
+   * across invocations.
+   */
+  useIPCScriptsInWatchMode?: boolean;
 }
 
 /**

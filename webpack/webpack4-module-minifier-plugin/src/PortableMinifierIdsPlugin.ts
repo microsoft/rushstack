@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import webpack, { Compiler, Plugin } from 'webpack';
-import { ReplaceSource } from 'webpack-sources';
+import type { Compiler, Plugin } from 'webpack';
+import type webpack from 'webpack';
+import type { ReplaceSource } from 'webpack-sources';
 import { createHash } from 'crypto';
-import { TapOptions } from 'tapable';
+import type { TapOptions } from 'tapable';
 import RequestShortener from 'webpack/lib/RequestShortener';
 
 import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
-import {
+import type {
   _INormalModuleFactoryModuleData,
   IExtendedModule,
   IModuleMinifierPluginHooks,
@@ -114,6 +115,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
               return;
             }
 
+            // eslint-disable-next-line no-console
             console.error(`Missing resolution data for ${mod.resource}`);
           }
         );

@@ -4,7 +4,7 @@
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 import { parseLocJson } from '@rushstack/localization-utilities';
 
-import { createLoader, IBaseLocLoaderOptions } from './LoaderFactory';
+import { createLoader, type IBaseLocLoaderOptions } from './LoaderFactory';
 
 const loader: LoaderDefinitionFunction<IBaseLocLoaderOptions> = createLoader(
   (content: string, filePath: string, context: LoaderContext<IBaseLocLoaderOptions>) => {

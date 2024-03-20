@@ -3,8 +3,8 @@
 
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
-import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
-import { RushConfigurationProject } from './RushConfigurationProject';
+import { VersionPolicy, type BumpType, type LockStepVersionPolicy } from './VersionPolicy';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 import schemaJson from '../schemas/version-policies.schema.json';
 
 export interface IVersionPolicyJson {
@@ -68,7 +68,7 @@ export class VersionPolicyConfiguration {
   /**
    * Validate the version policy configuration against the rush config
    */
-  public validate(projectsByName: Map<string, RushConfigurationProject>): void {
+  public validate(projectsByName: ReadonlyMap<string, RushConfigurationProject>): void {
     if (!this.versionPolicies) {
       return;
     }
@@ -138,6 +138,7 @@ export class VersionPolicyConfiguration {
     const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
     const previousVersion: string = lockStepVersionPolicy.version;
     if (lockStepVersionPolicy.update(newVersion)) {
+      // eslint-disable-next-line no-console
       console.log(`\nUpdate version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`);
       this._saveFile(!!shouldCommit);
     }

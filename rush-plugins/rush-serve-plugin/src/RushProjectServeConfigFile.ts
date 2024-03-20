@@ -4,9 +4,11 @@
 import path from 'path';
 
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { Async, ITerminal } from '@rushstack/node-core-library';
+import { Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import { RigConfig } from '@rushstack/rig-package';
 import type { RushConfigurationProject } from '@rushstack/rush-sdk';
+import rushProjectServeSchema from './schemas/rush-project-serve.schema.json';
 
 export interface IRushProjectServeJson {
   routing: IRoutingRuleJson[];
@@ -40,10 +42,9 @@ export class RushServeConfiguration {
   private readonly _loader: ConfigurationFile<IRushProjectServeJson>;
 
   public constructor() {
-    const jsonSchemaPath: string = `${__dirname}/schemas/rush-project-serve.schema.json`;
     this._loader = new ConfigurationFile<IRushProjectServeJson>({
       projectRelativeFilePath: 'config/rush-project-serve.json',
-      jsonSchemaPath,
+      jsonSchemaObject: rushProjectServeSchema,
       propertyInheritance: {
         routing: {
           inheritanceType: InheritanceType.append
@@ -54,9 +55,10 @@ export class RushServeConfiguration {
 
   public async loadProjectConfigsAsync(
     projects: Iterable<RushConfigurationProject>,
-    terminal: ITerminal
+    terminal: ITerminal,
+    workspaceRoutingRules: Iterable<IRoutingRule>
   ): Promise<Iterable<IRoutingRule>> {
-    const rules: IRoutingRule[] = [];
+    const rules: IRoutingRule[] = Array.from(workspaceRoutingRules);
 
     await Async.forEachAsync(
       projects,

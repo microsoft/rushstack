@@ -5,8 +5,9 @@ import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-librar
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+import type { Subspace } from '../../api/Subspace';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -133,7 +134,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    variant?: string
+    subspace: Subspace
   ): Promise<boolean> {
     throw new InternalError('Not implemented');
   }

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tsdoc from '@microsoft/tsdoc';
-import { ReleaseTag } from '@microsoft/api-extractor-model';
+import type * as tsdoc from '@microsoft/tsdoc';
+import type { ReleaseTag } from '@microsoft/api-extractor-model';
 import { VisitorState } from './VisitorState';
 
 /**
@@ -75,8 +75,20 @@ export class ApiItemMetadata {
    */
   public tsdocComment: tsdoc.DocComment | undefined;
 
-  // Assigned by DocCommentEnhancer
-  public needsDocumentation: boolean = true;
+  /**
+   * Tracks whether or not the associated API item is known to be missing sufficient documentation.
+   *
+   * @remarks
+   *
+   * An "undocumented" item is one whose TSDoc comment which either does not contain a summary comment block, or
+   * has an `@inheritDoc` tag that resolves to another "undocumented" API member.
+   *
+   * If there is any ambiguity (e.g. if an `@inheritDoc` comment points to an external API member, whose documentation,
+   * we can't parse), "undocumented" will be `false`.
+   *
+   * @remarks Assigned by {@link DocCommentEnhancer}.
+   */
+  public undocumented: boolean = true;
 
   public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 

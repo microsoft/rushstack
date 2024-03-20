@@ -5,25 +5,30 @@
   "private": true,
   "scripts": {
     "build": "heft build --clean",
-    "start": "heft start",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:build:ipc": "heft run-watch --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
+    "_phase:test:ipc": "heft run-watch --only test -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
+    "local-eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-dev-cert-plugin": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-lint-plugin": "workspace:*",
+    "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/webpack-env": "1.13.0",
+    "@types/webpack-env": "1.18.0",
     "eslint": "~8.7.0",
     "html-webpack-plugin": "~5.5.0",
+    "source-map-loader": "~3.0.1",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
-    "typescript": "~4.8.4",
-    "webpack": "~5.68.0"
+    "typescript": "~5.4.2",
+    "webpack": "~5.82.1"
   }
 }

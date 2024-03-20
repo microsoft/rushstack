@@ -1,13 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
 import * as os from 'os';
+import * as child_process from 'child_process';
 import * as path from 'path';
 import { EnvironmentMap } from './EnvironmentMap';
 
 import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
+import { Text } from './Text';
+import { InternalError } from './InternalError';
+
+const OS_PLATFORM: NodeJS.Platform = os.platform();
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
@@ -105,6 +109,70 @@ export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
   stdio?: ExecutableStdioMapping;
 }
 
+/**
+ * The options for running a process to completion using {@link Executable.(waitForExitAsync:3)}.
+ *
+ * @public
+ */
+export interface IWaitForExitOptions {
+  /**
+   * Whether or not to throw when the process completes with a non-zero exit code. Defaults to false.
+   */
+  throwOnNonZeroExitCode?: boolean;
+
+  /**
+   * The encoding of the output. If not provided, the output will not be collected.
+   */
+  encoding?: BufferEncoding | 'buffer';
+}
+
+/**
+ * {@inheritDoc IWaitForExitOptions}
+ *
+ * @public
+ */
+export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
+  /**
+   * {@inheritDoc IWaitForExitOptions.encoding}
+   */
+  encoding: BufferEncoding;
+}
+
+/**
+ * {@inheritDoc IWaitForExitOptions}
+ *
+ * @public
+ */
+export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
+  /**
+   * {@inheritDoc IWaitForExitOptions.encoding}
+   */
+  encoding: 'buffer';
+}
+
+/**
+ * The result of running a process to completion using {@link Executable.(waitForExitAsync:3)}.
+ *
+ * @public
+ */
+export interface IWaitForExitResult<T extends Buffer | string | never = never> {
+  /**
+   * The process stdout output, if encoding was specified.
+   */
+  stdout: T;
+
+  /**
+   * The process stderr output, if encoding was specified.
+   */
+  stderr: T;
+
+  /**
+   * The process exit code. If the process was terminated, this will be null.
+   */
+  // eslint-disable-next-line @rushstack/no-new-null
+  exitCode: number | null;
+}
+
 // Common environmental state used by Executable members
 interface IExecutableContext {
   currentWorkingDirectory: string;
@@ -113,9 +181,185 @@ interface IExecutableContext {
   windowsExecutableExtensions: string[];
 }
 
-interface ICommandLineFixup {
+interface ICommandLineOptions {
   path: string;
   args: string[];
+}
+
+/**
+ * Process information sourced from the system. This process info is sourced differently depending
+ * on the operating system:
+ * - On Windows, this uses the `wmic.exe` utility.
+ * - On Unix, this uses the `ps` utility.
+ *
+ * @public
+ */
+export interface IProcessInfo {
+  /**
+   * The name of the process.
+   *
+   * @remarks On Windows, the process name will be empty if the process is a kernel process.
+   * On Unix, the process name will be empty if the process is the root process.
+   */
+  processName: string;
+
+  /**
+   * The process ID.
+   */
+  processId: number;
+
+  /**
+   * The parent process info.
+   *
+   * @remarks On Windows, the parent process info will be undefined if the process is a kernel process.
+   * On Unix, the parent process info will be undefined if the process is the root process.
+   */
+  parentProcessInfo: IProcessInfo | undefined;
+
+  /**
+   * The child process infos.
+   */
+  childProcessInfos: IProcessInfo[];
+}
+
+export async function parseProcessListOutputAsync(
+  stream: NodeJS.ReadableStream,
+  platform: NodeJS.Platform = OS_PLATFORM
+): Promise<Map<number, IProcessInfo>> {
+  const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
+  let seenHeaders: boolean = false;
+  for await (const line of Text.readLinesFromIterableAsync(stream, { ignoreEmptyLines: true })) {
+    if (!seenHeaders) {
+      seenHeaders = true;
+    } else {
+      parseProcessInfoEntry(line, processInfoById, platform);
+    }
+  }
+  return processInfoById;
+}
+
+export function parseProcessListOutput(
+  // eslint-disable-next-line @rushstack/no-new-null
+  output: Iterable<string | null>,
+  platform: NodeJS.Platform = OS_PLATFORM
+): Map<number, IProcessInfo> {
+  const processInfoById: Map<number, IProcessInfo> = new Map<number, IProcessInfo>();
+  let seenHeaders: boolean = false;
+  for (const line of Text.readLinesFromIterable(output, { ignoreEmptyLines: true })) {
+    if (!seenHeaders) {
+      seenHeaders = true;
+    } else {
+      parseProcessInfoEntry(line, processInfoById, platform);
+    }
+  }
+  return processInfoById;
+}
+
+// win32 format:
+// Name             ParentProcessId   ProcessId
+// process name     1234              5678
+// unix format:
+//  PPID     PID   COMMAND
+// 51234   56784   process name
+const NAME_GROUP: 'name' = 'name';
+const PROCESS_ID_GROUP: 'pid' = 'pid';
+const PARENT_PROCESS_ID_GROUP: 'ppid' = 'ppid';
+// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
+const PROCESS_LIST_ENTRY_REGEX_WIN32: RegExp = new RegExp(
+  `^(?<${NAME_GROUP}>.+?)\\s+(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s*$`
+);
+// eslint-disable-next-line @rushstack/security/no-unsafe-regexp
+const PROCESS_LIST_ENTRY_REGEX_UNIX: RegExp = new RegExp(
+  `^\\s*(?<${PARENT_PROCESS_ID_GROUP}>\\d+)\\s+(?<${PROCESS_ID_GROUP}>\\d+)\\s+(?<${NAME_GROUP}>.+?)\\s*$`
+);
+
+function parseProcessInfoEntry(
+  line: string,
+  existingProcessInfoById: Map<number, IProcessInfo>,
+  platform: NodeJS.Platform
+): void {
+  const processListEntryRegex: RegExp =
+    platform === 'win32' ? PROCESS_LIST_ENTRY_REGEX_WIN32 : PROCESS_LIST_ENTRY_REGEX_UNIX;
+  const match: RegExpMatchArray | null = line.match(processListEntryRegex);
+  if (!match?.groups) {
+    throw new InternalError(`Invalid process list entry: ${line}`);
+  }
+
+  const processName: string = match.groups[NAME_GROUP];
+  const processId: number = parseInt(match.groups[PROCESS_ID_GROUP], 10);
+  const parentProcessId: number = parseInt(match.groups[PARENT_PROCESS_ID_GROUP], 10);
+
+  // Only care about the parent process if it is not the same as the current process.
+  let parentProcessInfo: IProcessInfo | undefined;
+  if (parentProcessId !== processId) {
+    parentProcessInfo = existingProcessInfoById.get(parentProcessId);
+    if (!parentProcessInfo) {
+      // Create a new placeholder entry for the parent with the information we have so far
+      parentProcessInfo = {
+        processName: '',
+        processId: parentProcessId,
+        parentProcessInfo: undefined,
+        childProcessInfos: []
+      };
+      existingProcessInfoById.set(parentProcessId, parentProcessInfo);
+    }
+  }
+
+  let processInfo: IProcessInfo | undefined = existingProcessInfoById.get(processId);
+  if (!processInfo) {
+    // Create a new entry
+    processInfo = {
+      processName,
+      processId,
+      parentProcessInfo,
+      childProcessInfos: []
+    };
+    existingProcessInfoById.set(processId, processInfo);
+  } else {
+    // Update placeholder entry
+    processInfo.processName = processName;
+    processInfo.parentProcessInfo = parentProcessInfo;
+  }
+
+  // Add the process as a child of the parent process
+  parentProcessInfo?.childProcessInfos.push(processInfo);
+}
+
+function convertToProcessInfoByNameMap(
+  processInfoById: Map<number, IProcessInfo>
+): Map<string, IProcessInfo[]> {
+  const processInfoByNameMap: Map<string, IProcessInfo[]> = new Map<string, IProcessInfo[]>();
+  for (const processInfo of processInfoById.values()) {
+    let processInfoNameEntries: IProcessInfo[] | undefined = processInfoByNameMap.get(
+      processInfo.processName
+    );
+    if (!processInfoNameEntries) {
+      processInfoNameEntries = [];
+      processInfoByNameMap.set(processInfo.processName, processInfoNameEntries);
+    }
+    processInfoNameEntries.push(processInfo);
+  }
+  return processInfoByNameMap;
+}
+
+function getProcessListProcessOptions(): ICommandLineOptions {
+  let command: string;
+  let args: string[];
+  if (OS_PLATFORM === 'win32') {
+    command = 'wmic.exe';
+    // Order of declared properties does not impact the order of the output
+    args = ['process', 'get', 'Name,ParentProcessId,ProcessId'];
+  } else {
+    command = 'ps';
+    // -A: Select all processes
+    // -w: Wide format
+    // -o: User-defined format
+    // Order of declared properties impacts the order of the output. We will
+    // need to request the "comm" property last in order to ensure that the
+    // process names are not truncated on certain platforms
+    args = ['-Awo', 'ppid,pid,comm'];
+  }
+  return { path: command, args };
 }
 
 /**
@@ -210,7 +454,7 @@ export class Executable {
       shell: false
     };
 
-    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+    const normalizedCommandLine: ICommandLineOptions = Executable._buildCommandLineFixup(
       resolvedPath,
       args,
       context
@@ -267,13 +511,164 @@ export class Executable {
       shell: false
     };
 
-    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+    const normalizedCommandLine: ICommandLineOptions = Executable._buildCommandLineFixup(
       resolvedPath,
       args,
       context
     );
 
     return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+  }
+
+  /* eslint-disable @rushstack/no-new-null */
+  /** {@inheritDoc Executable.(waitForExitAsync:3)} */
+  public static async waitForExitAsync(
+    childProcess: child_process.ChildProcess,
+    options: IWaitForExitWithStringOptions
+  ): Promise<IWaitForExitResult<string>>;
+
+  /** {@inheritDoc Executable.(waitForExitAsync:3)} */
+  public static async waitForExitAsync(
+    childProcess: child_process.ChildProcess,
+    options: IWaitForExitWithBufferOptions
+  ): Promise<IWaitForExitResult<Buffer>>;
+
+  /**
+   * Wait for a child process to exit and return the result.
+   *
+   * @param childProcess - The child process to wait for.
+   * @param options - Options for waiting for the process to exit.
+   */
+  public static async waitForExitAsync(
+    childProcess: child_process.ChildProcess,
+    options?: IWaitForExitOptions
+  ): Promise<IWaitForExitResult<never>>;
+
+  public static async waitForExitAsync<T extends Buffer | string | never = never>(
+    childProcess: child_process.ChildProcess,
+    options: IWaitForExitOptions = {}
+  ): Promise<IWaitForExitResult<T>> {
+    const { throwOnNonZeroExitCode = false, encoding } = options;
+    if (encoding && (!childProcess.stdout || !childProcess.stderr)) {
+      throw new Error(
+        'An encoding was specified, but stdout and/or stderr on the child process are not defined'
+      );
+    }
+
+    const collectedStdout: T[] = [];
+    const collectedStderr: T[] = [];
+    const useBufferEncoding: boolean = encoding === 'buffer';
+
+    function normalizeChunk<TChunk extends Buffer | string>(chunk: Buffer | string): TChunk {
+      if (typeof chunk === 'string') {
+        return (useBufferEncoding ? Buffer.from(chunk) : chunk) as TChunk;
+      } else {
+        return (useBufferEncoding ? chunk : chunk.toString(encoding as BufferEncoding)) as TChunk;
+      }
+    }
+
+    let errorThrown: boolean = false;
+    const exitCode: number | null = await new Promise<number | null>(
+      (resolve: (result: number | null) => void, reject: (error: Error) => void) => {
+        if (encoding) {
+          childProcess.stdout!.on('data', (chunk: Buffer | string) => {
+            collectedStdout.push(normalizeChunk(chunk));
+          });
+          childProcess.stderr!.on('data', (chunk: Buffer | string) => {
+            collectedStderr.push(normalizeChunk(chunk));
+          });
+        }
+        childProcess.on('error', (error: Error) => {
+          errorThrown = true;
+          reject(error);
+        });
+        childProcess.on('exit', (code: number | null) => {
+          if (errorThrown) {
+            // We've already rejected the promise
+            return;
+          }
+          if (code !== 0 && throwOnNonZeroExitCode) {
+            reject(new Error(`Process exited with code ${code}`));
+          } else {
+            resolve(code);
+          }
+        });
+      }
+    );
+
+    const result: IWaitForExitResult<T> = {
+      exitCode
+    } as IWaitForExitResult<T>;
+
+    if (encoding === 'buffer') {
+      result.stdout = Buffer.concat(collectedStdout as Buffer[]) as T;
+      result.stderr = Buffer.concat(collectedStderr as Buffer[]) as T;
+    } else if (encoding) {
+      result.stdout = collectedStdout.join('') as T;
+      result.stderr = collectedStderr.join('') as T;
+    }
+
+    return result;
+  }
+  /* eslint-enable @rushstack/no-new-null */
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process ID.
+   *
+   * @remarks The underlying implementation depends on the operating system:
+   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Unix, this uses the `ps` utility.
+   */
+  public static async getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>> {
+    const { path: command, args } = getProcessListProcessOptions();
+    const process: child_process.ChildProcess = Executable.spawn(command, args, {
+      stdio: ['ignore', 'pipe', 'ignore']
+    });
+    if (process.stdout === null) {
+      throw new InternalError('Child process did not provide stdout');
+    }
+    const [processInfoByIdMap] = await Promise.all([
+      parseProcessListOutputAsync(process.stdout),
+      // Don't collect output in the result since we process it directly
+      Executable.waitForExitAsync(process, { throwOnNonZeroExitCode: true })
+    ]);
+    return processInfoByIdMap;
+  }
+
+  /**
+   * {@inheritDoc Executable.getProcessInfoByIdAsync}
+   */
+  public static getProcessInfoById(): Map<number, IProcessInfo> {
+    const { path: command, args } = getProcessListProcessOptions();
+    const processOutput: child_process.SpawnSyncReturns<string> = Executable.spawnSync(command, args);
+    if (processOutput.error) {
+      throw new Error(`Unable to list processes: ${command} failed with error ${processOutput.error}`);
+    }
+    if (processOutput.status !== 0) {
+      throw new Error(`Unable to list processes: ${command} exited with code ${processOutput.status}`);
+    }
+    return parseProcessListOutput(processOutput.output);
+  }
+
+  /**
+   * Get the list of processes currently running on the system, keyed by the process name. All processes
+   * with the same name will be grouped.
+   *
+   * @remarks The underlying implementation depends on the operating system:
+   * - On Windows, this uses the `wmic.exe` utility.
+   * - On Unix, this uses the `ps` utility.
+   */
+  public static async getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>> {
+    const processInfoById: Map<number, IProcessInfo> = await Executable.getProcessInfoByIdAsync();
+    return convertToProcessInfoByNameMap(processInfoById);
+  }
+
+  /**
+   * {@inheritDoc Executable.getProcessInfoByNameAsync}
+   */
+  public static getProcessInfoByName(): Map<string, IProcessInfo[]> {
+    const processInfoByIdMap: Map<number, IProcessInfo> = Executable.getProcessInfoById();
+    return convertToProcessInfoByNameMap(processInfoByIdMap);
   }
 
   // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
@@ -295,10 +690,10 @@ export class Executable {
     resolvedPath: string,
     args: string[],
     context: IExecutableContext
-  ): ICommandLineFixup {
+  ): ICommandLineOptions {
     const fileExtension: string = path.extname(resolvedPath);
 
-    if (os.platform() === 'win32') {
+    if (OS_PLATFORM === 'win32') {
       // Do we need a custom handler for this file type?
       switch (fileExtension.toUpperCase()) {
         case '.EXE':
@@ -377,7 +772,7 @@ export class Executable {
     // NOTE: Since "filename" cannot contain command-line arguments, the "/" here
     // must be interpreted as a path delimiter
     const hasPathSeparators: boolean =
-      filename.indexOf('/') >= 0 || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
+      filename.indexOf('/') >= 0 || (OS_PLATFORM === 'win32' && filename.indexOf('\\') >= 0);
 
     // Are there any path separators?
     if (hasPathSeparators) {
@@ -449,7 +844,7 @@ export class Executable {
       return false;
     }
 
-    if (os.platform() === 'win32') {
+    if (OS_PLATFORM === 'win32') {
       // NOTE: For Windows, we don't validate that the file extension appears in PATHEXT.
       // That environment variable determines which extensions can be appended if the
       // extension is missing, but it does not affect whether a file may be executed or not.
@@ -534,7 +929,7 @@ export class Executable {
 
     const windowsExecutableExtensions: string[] = [];
 
-    if (os.platform() === 'win32') {
+    if (OS_PLATFORM === 'win32') {
       const pathExtVariable: string = environment.get('PATHEXT') || '';
       for (const splitValue of pathExtVariable.split(';')) {
         const trimmed: string = splitValue.trim().toLowerCase();

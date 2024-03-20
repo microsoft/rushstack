@@ -1,11 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineStringDefinition } from './CommandLineDefinition';
+import type { ICommandLineStringDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineStringParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.(defineStringParameter:2)}.
+ * @public
+ */
+export interface IRequiredCommandLineStringParameter extends CommandLineStringParameter {
+  readonly value: string;
+}
+
+/**
+ * The data type returned by {@link CommandLineParameterProvider.(defineStringParameter:1)}.
  * @public
  */
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
@@ -13,6 +21,9 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   public readonly defaultValue: string | undefined;
 
   private _value: string | undefined = undefined;
+
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.String = CommandLineParameterKind.String;
 
   /** @internal */
   public constructor(definition: ICommandLineStringDefinition) {
@@ -22,17 +33,11 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     this.validateDefaultValue(!!this.defaultValue);
   }
 
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.String;
-  }
-
   /**
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void {
+  public _setValue(data: unknown): void {
     // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'string') {

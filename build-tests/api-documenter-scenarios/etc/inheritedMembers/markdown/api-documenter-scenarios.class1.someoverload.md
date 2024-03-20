@@ -6,7 +6,7 @@
 
 Some overload. Overrides `Class3.someOverload`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 someOverload(x: boolean | string): void;
@@ -14,11 +14,38 @@ someOverload(x: boolean | string): void;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  x | boolean \| string |  |
+<table><thead><tr><th>
 
-<b>Returns:</b>
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+x
+
+
+</td><td>
+
+boolean \| string
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
 
 void
 

@@ -3,11 +3,11 @@
 
 import npmCheck from 'npm-check';
 import type * as NpmCheck from 'npm-check';
-import colors from 'colors/safe';
+import { Colorize } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { upgradeInteractive, IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import { upgradeInteractive, type IDepsToUpgradeAnswers } from '../utilities/InteractiveUpgradeUI';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import Prompt from 'inquirer/lib/ui/prompt';
 
 import { SearchListPrompt } from '../utilities/prompts/SearchListPrompt';
@@ -56,7 +56,7 @@ export class InteractiveUpgrader {
         type: 'list',
         choices: projects.map((project) => {
           return {
-            name: colors.green(project.packageName),
+            name: Colorize.green(project.packageName),
             value: project
           };
         }),
@@ -72,7 +72,10 @@ export class InteractiveUpgrader {
   ): Promise<NpmCheck.INpmCheckPackage[]> {
     const { projectFolder } = rushProject;
 
-    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({ cwd: projectFolder });
+    const currentState: NpmCheck.INpmCheckCurrentState = await npmCheck({
+      cwd: projectFolder,
+      skipUnused: true
+    });
 
     return currentState.get('packages');
   }

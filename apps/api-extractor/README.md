@@ -46,6 +46,6 @@ For more details and support resources, please visit: https://api-extractor.com/
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/apps/api-extractor/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/api-extractor/)
+- [API Reference](https://api.rushstack.io/pages/api-extractor/)
 
 API Extractor is part of the [Rush Stack](https://rushstack.io/) family of projects.

@@ -6,7 +6,7 @@
 
 A fourth prop
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 fourthProp: number;

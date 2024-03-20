@@ -1,0 +1,36 @@
+{
+  "name": "rush-sdk-test",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A minimal example project that imports APIs from @rushstack/rush-sdk",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "node lib/start.js",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {
+    "@rushstack/rush-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "18.17.15",
+    "local-node-rig": "workspace:*"
+  },
+  "dependenciesMeta": {
+    "@microsoft/rush-lib": {
+      "injected": true
+    },
+    "@rushstack/rush-sdk": {
+      "injected": true
+    },
+    "@rushstack/heft": {
+      "injected": true
+    },
+    "local-node-rig": {
+      "injected": true
+    }
+  }
+}

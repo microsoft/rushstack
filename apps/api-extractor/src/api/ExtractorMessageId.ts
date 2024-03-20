@@ -11,11 +11,30 @@
  *
  * @public
  */
-export const enum ExtractorMessageId {
+export enum ExtractorMessageId {
   /**
    * "The doc comment should not contain more than one release tag."
    */
   ExtraReleaseTag = 'ae-extra-release-tag',
+
+  /**
+   * "Missing documentation for ___."
+   * @remarks
+   * The `ae-undocumented` message is only generated if the API report feature is enabled.
+   *
+   * Because the API report file already annotates undocumented items with `// (undocumented)`,
+   * the `ae-undocumented` message is not logged by default.  To see it, add a setting such as:
+   * ```json
+   * "messages": {
+   *   "extractorMessageReporting": {
+   *     "ae-undocumented": {
+   *       "logLevel": "warning"
+   *     }
+   *   }
+   *  }
+   * ```
+   */
+  Undocumented = 'ae-undocumented',
 
   /**
    * "This symbol has another declaration with a different release tag."
@@ -106,6 +125,7 @@ export const enum ExtractorMessageId {
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-extra-release-tag',
+  'ae-undocumented',
   'ae-different-release-tags',
   'ae-incompatible-release-tags',
   'ae-missing-release-tag',

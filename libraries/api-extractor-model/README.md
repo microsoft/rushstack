@@ -4,7 +4,7 @@ Use this library to read and write *.api.json files as defined by the [API Extra
 These files are used to generate a documentation website for your TypeScript package.  The files store the
 API signatures and doc comments that were extracted from your package.
 
-API documentation for this package: https://rushstack.io/pages/api/api-extractor-model/
+API documentation for this package: https://api.rushstack.io/pages/api-extractor-model/
 
 ## Example Usage
 
@@ -63,6 +63,6 @@ a namespace containing static members of the class.
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/api-extractor-model/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/api-extractor-model/)
+- [API Reference](https://api.rushstack.io/pages/api-extractor-model/)
 
 API Extractor is part of the [Rush Stack](https://rushstack.io/) family of projects.

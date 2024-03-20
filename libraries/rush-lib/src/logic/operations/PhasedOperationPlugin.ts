@@ -29,13 +29,18 @@ function createOperations(
   existingOperations: Set<Operation>,
   context: ICreateOperationsContext
 ): Set<Operation> {
-  const { projectsInUnknownState: changedProjects, phaseSelection, projectSelection } = context;
+  const {
+    projectsInUnknownState: changedProjects,
+    phaseOriginal,
+    phaseSelection,
+    projectSelection
+  } = context;
   const operationsWithWork: Set<Operation> = new Set();
 
   const operations: Map<string, Operation> = new Map();
 
   // Create tasks for selected phases and projects
-  for (const phase of phaseSelection) {
+  for (const phase of phaseOriginal) {
     for (const project of projectSelection) {
       getOrCreateOperation(phase, project);
     }

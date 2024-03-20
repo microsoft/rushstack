@@ -197,22 +197,8 @@
       "additionalProperties": false
     },
     "variants": {
-      "description": "Defines the list of installation variants for this repository. For more details about this feature, see this article: https://rushjs.io/pages/advanced/installation_variants/",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "variantName": {
-            "description": "The name of the variant. Maps to common/rush/variants/{name} under the repository root.",
-            "type": "string"
-          },
-          "description": {
-            "description": "",
-            "type": "string"
-          }
-        },
-        "required": ["variantName", "description"]
-      }
+      "description": "DEPRECATED",
+      "type": "array"
     },
     "repository": {
       "description": "The repository location",
@@ -307,6 +293,10 @@
               "type": "string",
               "pattern": "^[a-z0-9.@]+([-/][a-z0-9.@]+)*$"
             }
+          },
+          "subspaceName": {
+            "description": "(EXPERIMENTAL) An optional entry for specifying which subspace this project belongs to if the subspaces feature is enabled.",
+            "type": "string"
           }
         },
         "additionalProperties": false,
@@ -340,6 +330,20 @@
         },
         "postRushBuild": {
           "description": "The list of scripts to run after the Rush build command finishes.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preRushx": {
+          "description": "The list of scripts to run before rushx starts.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postRushx": {
+          "description": "The list of scripts to run after rushx finishes.",
           "type": "array",
           "items": {
             "type": "string"

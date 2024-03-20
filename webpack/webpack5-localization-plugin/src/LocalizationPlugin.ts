@@ -16,7 +16,7 @@ import type {
   WebpackPluginInstance
 } from 'webpack';
 
-import { getPseudolocalizer, ILocalizationFile, parseResJson } from '@rushstack/localization-utilities';
+import { getPseudolocalizer, type ILocalizationFile, parseResJson } from '@rushstack/localization-utilities';
 
 import * as Constants from './utilities/Constants';
 import type {
@@ -29,6 +29,8 @@ import type {
 import type { IAssetPathOptions } from './webpackInterfaces';
 import { markEntity, getMark } from './utilities/EntityMarker';
 import { processLocalizedAsset, processNonLocalizedAsset } from './AssetProcessor';
+import { getHashFunction, type HashFn, updateAssetHashes } from './trueHashes';
+import { chunkIsJs } from './utilities/chunkUtilities';
 
 /**
  * @public
@@ -80,7 +82,10 @@ export function getPluginInstance(compiler: Compiler | undefined): LocalizationP
 export class LocalizationPlugin implements WebpackPluginInstance {
   public readonly stringKeys: Map<string, IStringPlaceholder> = new Map();
 
-  private readonly _options: ILocalizationPluginOptions;
+  /**
+   * @internal
+   */
+  public readonly _options: ILocalizationPluginOptions;
   private readonly _resolvedTranslatedStringsFromOptions: Map<
     string,
     Map<string, ILocaleFileObject | string | ReadonlyMap<string, string>>
@@ -91,6 +96,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
   private _defaultLocale!: string;
   private _noStringsLocaleName!: string;
   private _fillMissingTranslationStrings!: boolean;
+  private _formatLocaleForFilename!: (loc: string) => string;
   private readonly _pseudolocalizers: Map<string, (str: string) => string> = new Map();
 
   /**
@@ -128,10 +134,11 @@ export class LocalizationPlugin implements WebpackPluginInstance {
       }
     }
 
+    const { webpack: thisWebpack } = compiler;
     const {
       WebpackError,
       runtime: { GetChunkFilenameRuntimeModule }
-    } = compiler.webpack;
+    } = thisWebpack;
 
     // Side-channel for async chunk URL generator chunk, since the actual chunk is completely inaccessible
     // from the assetPath hook below when invoked to build the async URL generator
@@ -156,6 +163,27 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     const { runtimeLocaleExpression } = this._options;
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation: Compilation) => {
+      let hashFn: HashFn | undefined;
+      if (this._options.realContentHash) {
+        if (runtimeLocaleExpression) {
+          compilation.errors.push(
+            new WebpackError(
+              `The "realContentHash" option cannot be used in conjunction with "runtimeLocaleExpression".`
+            )
+          );
+        } else {
+          hashFn = getHashFunction({ thisWebpack, compilation });
+        }
+      } else if (compiler.options.optimization?.realContentHash) {
+        compilation.errors.push(
+          new thisWebpack.WebpackError(
+            `The \`optimization.realContentHash\` option is set and the ${LocalizationPlugin.name}'s ` +
+              '`realContentHash` option is not set. This will likely produce invalid results. Consider setting the ' +
+              `\`realContentHash\` option in the ${LocalizationPlugin.name} plugin.`
+          )
+        );
+      }
+
       compilation.hooks.assetPath.tap(
         PLUGIN_NAME,
         (assetPath: string, options: IAssetPathOptions): string => {
@@ -207,7 +235,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                   Constants.JSONP_PLACEHOLDER;
 
                 if (chunkIdsWithStrings.size === 0) {
-                  return this._noStringsLocaleName;
+                  return this._formatLocaleForFilename(this._noStringsLocaleName);
                 } else if (chunkIdsWithoutStrings.size === 0) {
                   return `" + ${localeExpression} + "`;
                 } else {
@@ -229,7 +257,9 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                     chunkMapping[id] = 1;
                   }
 
-                  const noLocaleExpression: string = JSON.stringify(this._noStringsLocaleName);
+                  const noLocaleExpression: string = JSON.stringify(
+                    this._formatLocaleForFilename(this._noStringsLocaleName)
+                  );
 
                   return `" + (${JSON.stringify(chunkMapping)}[chunkId]?${
                     isLocalizedSmaller ? localeExpression : noLocaleExpression
@@ -247,7 +277,10 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 // Ensure that the initial name maps to a file that should exist in the final output
                 locale = isLocalized ? this._defaultLocale : this._noStringsLocaleName;
               }
-              return assetPath.replace(Constants.LOCALE_FILENAME_TOKEN_REGEX, locale);
+              return assetPath.replace(
+                Constants.LOCALE_FILENAME_TOKEN_REGEX,
+                this._formatLocaleForFilename(locale)
+              );
             }
           } else {
             return assetPath;
@@ -268,14 +301,19 @@ export class LocalizationPlugin implements WebpackPluginInstance {
           const locales: Set<string> = new Set(this._resolvedLocalizedStrings.keys());
 
           const { chunkGraph, chunks } = compilation;
+          const { localizationStats: statsOptions } = this._options;
 
-          const filesByChunkName: Map<string, Record<string, string>> = new Map();
+          const filesByChunkName: Map<string, Record<string, string>> | undefined = statsOptions
+            ? new Map()
+            : undefined;
           const localizedEntryPointNames: string[] = [];
           const localizedChunkNames: string[] = [];
 
-          const { localizationStats: statsOptions } = this._options;
-
           for (const chunk of chunks) {
+            if (!chunkIsJs(chunk, chunkGraph)) {
+              continue;
+            }
+
             const isLocalized: boolean = _chunkHasLocalizedModules(
               chunkGraph,
               chunk,
@@ -306,17 +344,16 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 locales,
                 defaultLocale: this._defaultLocale,
                 fillMissingTranslationStrings: this._fillMissingTranslationStrings,
+                formatLocaleForFilenameFn: this._formatLocaleForFilename,
                 // Chunk-specific values
                 chunk,
                 asset,
                 filenameTemplate: template
               });
 
-              if (statsOptions) {
-                if (chunk.name) {
-                  filesByChunkName.set(chunk.name, localizedAssets);
-                  (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
-                }
+              if (filesByChunkName && chunk.name) {
+                filesByChunkName.set(chunk.name, localizedAssets);
+                (chunk.hasRuntime() ? localizedEntryPointNames : localizedChunkNames).push(chunk.name);
               }
             } else {
               processNonLocalizedAsset({
@@ -324,6 +361,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 plugin: this,
                 compilation,
                 noStringsLocaleName: this._noStringsLocaleName,
+                formatLocaleForFilenameFn: this._formatLocaleForFilename,
                 // Chunk-specific values
                 chunk,
                 asset,
@@ -332,8 +370,17 @@ export class LocalizationPlugin implements WebpackPluginInstance {
             }
           }
 
+          if (hashFn) {
+            updateAssetHashes({
+              thisWebpack,
+              compilation,
+              hashFn,
+              filesByChunkName
+            });
+          }
+
           // Since the stats generation doesn't depend on content, do it immediately
-          if (statsOptions) {
+          if (statsOptions && filesByChunkName) {
             const localizationStats: ILocalizationStats = {
               entrypoints: {},
               namedChunkGroups: {}
@@ -700,6 +747,10 @@ export class LocalizationPlugin implements WebpackPluginInstance {
     }
     // END options.noStringsLocaleName
 
+    // START options.formatLocaleForFilename
+    const { formatLocaleForFilename = (localeName: string) => localeName } = this._options;
+    this._formatLocaleForFilename = formatLocaleForFilename;
+    // END options.formatLocaleForFilename
     return { errors, warnings };
   }
 }

@@ -18,7 +18,8 @@ export function rehydrateAsset(
   compilation: Compilation,
   asset: IAssetInfo,
   moduleMap: IModuleMap,
-  banner: string
+  banner: string,
+  emitRenderInfo?: boolean
 ): sources.Source {
   const { source: assetSource } = asset;
   const {
@@ -41,6 +42,7 @@ export function rehydrateAsset(
   const cachedAssetSource: sources.CachedSource = new CachedSource(assetSource);
 
   const source: sources.ConcatSource = new ConcatSource(banner);
+  let charOffset: number = banner.length;
 
   // RegExp.exec uses null or an array as the return type, explicitly
   let match: RegExpExecArray | null = null;
@@ -52,15 +54,39 @@ export function rehydrateAsset(
       compilation.errors.push(new WebpackError(`Missing module source for ${hash} in ${asset.fileName}!`));
     }
 
-    source.add(extractSegmentFromSource(ReplaceSource, cachedAssetSource, lastStart, match.index));
+    const separator: sources.ReplaceSource = extractSegmentFromSource(
+      ReplaceSource,
+      cachedAssetSource,
+      lastStart,
+      match.index
+    );
+
+    source.add(separator);
+    charOffset += separator.size();
+
     lastStart = CHUNK_MODULE_REGEX.lastIndex;
 
     if (moduleSource) {
+      const charLength: number = moduleSource.source.source().length;
+
+      if (emitRenderInfo) {
+        asset.renderInfo.set(moduleSource.id, {
+          charOffset,
+          charLength
+        });
+      }
+
       source.add(moduleSource.source);
+      charOffset += charLength;
     } else {
-      source.add(`()=>{throw new Error(\`Missing module with hash "${hash}"\`)}`);
+      const errorModule: string = `()=>{throw new Error(\`Missing module with hash "${hash}"\`)}`;
+
+      source.add(errorModule);
+      charOffset += errorModule.length;
     }
+
     source.add('\n');
+    charOffset += 1;
   }
 
   source.add(extractSegmentFromSource(ReplaceSource, cachedAssetSource, lastStart, Infinity));

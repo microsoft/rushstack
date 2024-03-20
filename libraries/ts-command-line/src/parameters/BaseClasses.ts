@@ -2,7 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import type { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { IBaseCommandLineDefinition, IBaseCommandLineDefinitionWithArgument } from './CommandLineDefinition';
+import type {
+  IBaseCommandLineDefinition,
+  IBaseCommandLineDefinitionWithArgument
+} from './CommandLineDefinition';
+import type { CommandLineChoiceListParameter } from './CommandLineChoiceListParameter';
+import type { CommandLineChoiceParameter } from './CommandLineChoiceParameter';
+import type { CommandLineFlagParameter } from './CommandLineFlagParameter';
+import type { CommandLineIntegerListParameter } from './CommandLineIntegerListParameter';
+import type { CommandLineIntegerParameter } from './CommandLineIntegerParameter';
+import type { CommandLineStringListParameter } from './CommandLineStringListParameter';
+import type { CommandLineStringParameter } from './CommandLineStringParameter';
 
 /**
  * Identifies the kind of a CommandLineParameter.
@@ -51,16 +61,42 @@ const SCOPE_REGEXP: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
  */
 const ENVIRONMENT_VARIABLE_NAME_REGEXP: RegExp = /^[A-Z_][A-Z0-9_]*$/;
 
+export type CommandLineParameter =
+  | CommandLineChoiceListParameter
+  | CommandLineChoiceParameter
+  | CommandLineFlagParameter
+  | CommandLineIntegerListParameter
+  | CommandLineIntegerParameter
+  | CommandLineStringListParameter
+  | CommandLineStringParameter;
+
 /**
  * The base class for the various command-line parameter types.
  * @public
  */
-export abstract class CommandLineParameter {
+export abstract class CommandLineParameterBase {
+  private _shortNameValue: string | undefined;
+
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
    * @internal
    */
   public _parserKey: string | undefined;
+
+  /**
+   * @internal
+   */
+  public _preParse?: () => void;
+
+  /**
+   * @internal
+   */
+  public _postParse?: () => void;
+
+  /**
+   * @internal
+   */
+  public _validateValue?: () => void;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
@@ -70,9 +106,6 @@ export abstract class CommandLineParameter {
    * including double dashes, eg. "--scope:do-something". Otherwise undefined.
    */
   public readonly scopedLongName: string | undefined;
-
-  /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
-  public readonly shortName: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterGroup} */
   public readonly parameterGroup: string | typeof SCOPING_PARAMETER_GROUP | undefined;
@@ -89,19 +122,23 @@ export abstract class CommandLineParameter {
   /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
 
+  /** {@inheritDoc IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames} */
+  public readonly allowNonStandardEnvironmentVariableNames: boolean | undefined;
+
   /** {@inheritDoc IBaseCommandLineDefinition.undocumentedSynonyms } */
   public readonly undocumentedSynonyms: string[] | undefined;
 
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
-    this.shortName = definition.parameterShortName;
+    this._shortNameValue = definition.parameterShortName;
     this.parameterGroup = definition.parameterGroup;
     this.parameterScope = definition.parameterScope;
     this.description = definition.description;
     this.required = !!definition.required;
     this.environmentVariable = definition.environmentVariable;
     this.undocumentedSynonyms = definition.undocumentedSynonyms;
+    this.allowNonStandardEnvironmentVariableNames = definition.allowNonStandardEnvironmentVariableNames;
 
     if (!LONG_NAME_REGEXP.test(this.longName)) {
       throw new Error(
@@ -132,16 +169,10 @@ export abstract class CommandLineParameter {
     }
 
     if (this.environmentVariable) {
-      if (this.required) {
-        // TODO: This constraint is imposed only because argparse enforces "required" parameters, but
-        // it does not know about ts-command-line environment variable mappings.  We should fix this.
-        throw new Error(
-          `An "environmentVariable" cannot be specified for "${this.longName}"` +
-            ` because it is a required parameter`
-        );
-      }
-
-      if (!ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)) {
+      if (
+        !this.allowNonStandardEnvironmentVariableNames &&
+        !ENVIRONMENT_VARIABLE_NAME_REGEXP.test(this.environmentVariable)
+      ) {
         throw new Error(
           `Invalid environment variable name: "${this.environmentVariable}". The name must` +
             ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`
@@ -166,11 +197,16 @@ export abstract class CommandLineParameter {
     }
   }
 
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
+  public get shortName(): string | undefined {
+    return this._shortNameValue;
+  }
+
   /**
    * Called internally by CommandLineParameterProvider._processParsedData()
    * @internal
    */
-  public abstract _setValue(data: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  public abstract _setValue(data: unknown): void;
 
   /**
    * Returns additional text used by the help formatter.
@@ -210,8 +246,7 @@ export abstract class CommandLineParameter {
   /**
    * Internal usage only.  Used to report unexpected output from the argparse library.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected reportInvalidData(data: any): never {
+  protected reportInvalidData(data: unknown): never {
     throw new Error(`Unexpected data object for parameter "${this.longName}": ` + JSON.stringify(data));
   }
 
@@ -237,7 +272,7 @@ export abstract class CommandLineParameter {
  * example "--max-count 123".
  * @public
  */
-export abstract class CommandLineParameterWithArgument extends CommandLineParameter {
+export abstract class CommandLineParameterWithArgument extends CommandLineParameterBase {
   // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
   private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
 

@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
 /// <reference lib="dom" />
 
 import * as path from 'path';
 import { URL, pathToFileURL, fileURLToPath } from 'url';
-import { CompileResult, Syntax, Exception, compileString } from 'sass';
+import { type CompileResult, type Syntax, type Exception, compileStringAsync } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
 import { FileSystem, Sort } from '@rushstack/node-core-library';
-import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
+import { type IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
  * @public
@@ -35,6 +36,11 @@ export interface ISassConfiguration {
    * Output directories for compiled CSS
    */
   cssOutputFolders?: string[] | undefined;
+
+  /**
+   * If `true`, when emitting compiled CSS from a file with a ".scss" extension, the emitted CSS will have the extension ".scss" instead of ".scss.css"
+   */
+  preserveSCSSExtension?: boolean | undefined;
 
   /**
    * Determines whether export values are wrapped in a default property, or not.
@@ -101,16 +107,42 @@ export class SassProcessor extends StringValuesTypingsGenerator {
 
     const { allFileExtensions, isFileModule } = buildExtensionClassifier(sassConfiguration);
 
-    const { cssOutputFolders } = sassConfiguration;
+    const {
+      cssOutputFolders,
+      excludeFiles,
+      secondaryGeneratedTsFolders,
+      importIncludePaths,
+      preserveSCSSExtension = false
+    } = sassConfiguration;
 
     const getCssPaths: ((relativePath: string) => string[]) | undefined = cssOutputFolders
       ? (relativePath: string): string[] => {
-          return cssOutputFolders.map(
-            (folder: string) =>
-              `${folder}/${relativePath.endsWith('.css') ? relativePath : `${relativePath}.css`}`
-          );
+          const lastDot: number = relativePath.lastIndexOf('.');
+          const oldExtension: string = relativePath.slice(lastDot);
+          const cssRelativePath: string =
+            oldExtension === '.css' || (oldExtension === '.scss' && preserveSCSSExtension)
+              ? relativePath
+              : `${relativePath}.css`;
+
+          const cssPaths: string[] = [];
+          for (const outputFolder of cssOutputFolders) {
+            cssPaths.push(`${outputFolder}/${cssRelativePath}`);
+          }
+          return cssPaths;
         }
       : undefined;
+
+    let globsToIgnore: string[] | undefined;
+    if (excludeFiles) {
+      globsToIgnore = [];
+      for (const excludedFile of excludeFiles) {
+        if (excludedFile.startsWith('./')) {
+          globsToIgnore.push(excludedFile.substring(2));
+        } else {
+          globsToIgnore.push(excludedFile);
+        }
+      }
+    }
 
     super({
       srcFolder,
@@ -118,8 +150,8 @@ export class SassProcessor extends StringValuesTypingsGenerator {
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions: allFileExtensions,
-      filesToIgnore: sassConfiguration.excludeFiles,
-      secondaryGeneratedTsFolders: sassConfiguration.secondaryGeneratedTsFolders,
+      globsToIgnore,
+      secondaryGeneratedTsFolders,
 
       getAdditionalOutputFiles: getCssPaths,
 
@@ -136,7 +168,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.importIncludePaths
+          importIncludePaths
         );
 
         let classMap: IClassMap = {};
@@ -199,7 +231,7 @@ export class SassProcessor extends StringValuesTypingsGenerator {
     let result: CompileResult;
     const nodeModulesUrl: URL = pathToFileURL(`${buildFolder}/node_modules/`);
     try {
-      result = compileString(fileContents, {
+      result = await compileStringAsync(fileContents, {
         importers: [
           {
             findFileUrl: (url: string): URL | null => {
@@ -305,8 +337,8 @@ function buildExtensionClassifier(sassConfiguration: ISassConfiguration): IExten
   };
 }
 
-function determineSyntaxFromFilePath(path: string): Syntax {
-  switch (path.substring(path.lastIndexOf('.'))) {
+function determineSyntaxFromFilePath(filePath: string): Syntax {
+  switch (filePath.substring(filePath.lastIndexOf('.'))) {
     case '.sass':
       return 'indented';
     case '.scss':

@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as ts from 'typescript';
-import * as tsdoc from '@microsoft/tsdoc';
+import type * as tsdoc from '@microsoft/tsdoc';
 import {
   ApiModel,
   ApiClass,
@@ -15,15 +15,15 @@ import {
   ApiNamespace,
   ApiInterface,
   ApiPropertySignature,
-  ApiItemContainerMixin,
+  type ApiItemContainerMixin,
   ReleaseTag,
   ApiProperty,
   ApiMethodSignature,
-  IApiParameterOptions,
+  type IApiParameterOptions,
   ApiEnum,
   ApiEnumMember,
-  IExcerptTokenRange,
-  IExcerptToken,
+  type IExcerptTokenRange,
+  type IExcerptToken,
   ApiConstructor,
   ApiConstructSignature,
   ApiFunction,
@@ -31,22 +31,22 @@ import {
   ApiVariable,
   ApiTypeAlias,
   ApiCallSignature,
-  IApiTypeParameterOptions,
+  type IApiTypeParameterOptions,
   EnumMemberOrder
 } from '@microsoft/api-extractor-model';
 import { Path } from '@rushstack/node-core-library';
 
-import { Collector } from '../collector/Collector';
-import { ISourceLocation } from '../collector/SourceMapper';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
+import type { Collector } from '../collector/Collector';
+import type { ISourceLocation } from '../collector/SourceMapper';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import { ExcerptBuilder, type IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstEntity } from '../analyzer/AstEntity';
-import { AstModule } from '../analyzer/AstModule';
+import type { AstEntity } from '../analyzer/AstEntity';
+import type { AstModule } from '../analyzer/AstModule';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
 interface IProcessAstEntityContext {
@@ -176,8 +176,8 @@ export class ApiModelGenerator {
 
     const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
     const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
-    if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
-      return; // trim out items marked as "@internal" or "@alpha"
+    if (releaseTag === ReleaseTag.Internal) {
+      return; // trim out items marked as "@internal"
     }
 
     switch (astDeclaration.declaration.kind) {
@@ -250,12 +250,26 @@ export class ApiModelGenerator {
         break;
 
       case ts.SyntaxKind.VariableDeclaration:
-        this._processApiVariable(astDeclaration, context);
+        // check for arrow functions in variable declaration
+        const functionDeclaration: ts.FunctionDeclaration | undefined =
+          this._tryFindFunctionDeclaration(astDeclaration);
+        if (functionDeclaration) {
+          this._processApiFunction(astDeclaration, context, functionDeclaration);
+        } else {
+          this._processApiVariable(astDeclaration, context);
+        }
         break;
 
       default:
       // ignore unknown types
     }
+  }
+
+  private _tryFindFunctionDeclaration(astDeclaration: AstDeclaration): ts.FunctionDeclaration | undefined {
+    const children: ts.Node[] = astDeclaration.declaration.getChildren(
+      astDeclaration.declaration.getSourceFile()
+    );
+    return children.find(ts.isFunctionTypeNode) as ts.FunctionDeclaration | undefined;
   }
 
   private _processChildDeclarations(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
@@ -395,10 +409,13 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isAbstract: boolean =
+        (ts.getCombinedModifierFlags(classDeclaration) & ts.ModifierFlags.Abstract) !== 0;
       const fileUrlPath: string = this._getFileUrlPath(classDeclaration);
 
       apiClass = new ApiClass({
         name,
+        isAbstract,
         docComment,
         releaseTag,
         excerptTokens,
@@ -541,7 +558,11 @@ export class ApiModelGenerator {
     }
   }
 
-  private _processApiFunction(astDeclaration: AstDeclaration, context: IProcessAstEntityContext): void {
+  private _processApiFunction(
+    astDeclaration: AstDeclaration,
+    context: IProcessAstEntityContext,
+    altFunctionDeclaration?: ts.FunctionDeclaration
+  ): void {
     const { name, isExported, parentApiItem } = context;
 
     const overloadIndex: number = this._collector.getOverloadIndex(astDeclaration);
@@ -551,7 +572,7 @@ export class ApiModelGenerator {
 
     if (apiFunction === undefined) {
       const functionDeclaration: ts.FunctionDeclaration =
-        astDeclaration.declaration as ts.FunctionDeclaration;
+        altFunctionDeclaration ?? (astDeclaration.declaration as ts.FunctionDeclaration);
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -729,10 +750,12 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
+      const isAbstract: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Abstract) !== 0;
       const fileUrlPath: string = this._getFileUrlPath(methodDeclaration);
 
       apiMethod = new ApiMethod({
         name,
+        isAbstract,
         docComment,
         releaseTag,
         isProtected,
@@ -875,6 +898,7 @@ export class ApiModelGenerator {
       const isOptional: boolean =
         (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
       const isProtected: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Protected) !== 0;
+      const isAbstract: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Abstract) !== 0;
       const isReadonly: boolean = this._isReadonly(astDeclaration);
       const fileUrlPath: string = this._getFileUrlPath(declaration);
 
@@ -882,6 +906,7 @@ export class ApiModelGenerator {
         name,
         docComment,
         releaseTag,
+        isAbstract,
         isProtected,
         isStatic,
         isOptional,

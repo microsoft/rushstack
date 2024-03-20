@@ -1,73 +1,69 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-export { IHeftPlugin } from './pluginFramework/IHeftPlugin';
+/**
+ * Heft is a config-driven toolchain that invokes other popular tools such
+ * as TypeScript, ESLint, Jest, Webpack, and API Extractor. You can use it to build
+ * web applications, Node.js services, command-line tools, libraries, and more.
+ *
+ * @packageDocumentation
+ */
+
 export {
   HeftConfiguration,
-  IHeftActionConfiguration,
-  IHeftActionConfigurationOptions,
-  IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
+  type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
+
+export type { IRigPackageResolver } from './configuration/RigPackageResolver';
+
+export type { IHeftPlugin, IHeftTaskPlugin, IHeftLifecyclePlugin } from './pluginFramework/IHeftPlugin';
+
+export type { IHeftParameters, IHeftDefaultParameters } from './pluginFramework/HeftParameterManager';
+
+export type {
+  IHeftLifecycleSession,
+  IHeftLifecycleHooks,
+  IHeftLifecycleCleanHookOptions,
+  IHeftLifecycleToolStartHookOptions,
+  IHeftLifecycleToolFinishHookOptions
+} from './pluginFramework/HeftLifecycleSession';
+
+export type {
+  IHeftParsedCommandLine,
+  IHeftTaskSession,
+  IHeftTaskHooks,
+  IHeftTaskFileOperations,
+  IHeftTaskRunHookOptions,
+  IHeftTaskRunIncrementalHookOptions
+} from './pluginFramework/HeftTaskSession';
+
+export type { ICopyOperation, IIncrementalCopyOperation } from './plugins/CopyFilesPlugin';
+
+export type { IDeleteOperation } from './plugins/DeleteFilesPlugin';
+
+export type { IRunScript, IRunScriptOptions } from './plugins/RunScriptPlugin';
+
+export type { IFileSelectionSpecifier, IGlobOptions, GlobFn, WatchGlobFn } from './plugins/FileGlobSpecifier';
+
+export type { IWatchedFileState } from './utilities/WatchFileSystemAdapter';
+
 export {
-  HeftSession,
-  IHeftSessionHooks,
-  RequestAccessToPluginByNameCallback,
-  RegisterAction
-} from './pluginFramework/HeftSession';
-export {
-  MetricsCollectorHooks,
-  IMetricsData,
-  IPerformanceData as _IPerformanceData,
+  type IHeftRecordMetricsHookOptions,
+  type IMetricsData,
+  type IPerformanceData as _IPerformanceData,
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
-export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
-export {
-  ICustomActionOptions,
-  ICustomActionParameterFlag,
-  ICustomActionParameterInteger,
-  ICustomActionParameterString,
-  ICustomActionParameterStringList,
-  ICustomActionParameterBase,
-  ICustomActionParameter,
-  CustomActionParameterType
-} from './cli/actions/CustomAction';
-export {
-  HeftCommandLine,
-  IHeftBaseParameter,
-  IHeftChoiceParameter,
-  IHeftChoiceListParameter,
-  IHeftFlagParameter,
-  IHeftIntegerParameter,
-  IHeftStringParameter,
-  IHeftStringListParameter,
-  IParameterAssociatedActionNames,
-  IHeftRegisterParameterOptions
-} from './cli/HeftCommandLine';
 
-// Stages
-export { StageHooksBase, IStageContext } from './stages/StageBase';
-export {
-  BuildStageHooks,
-  BuildSubstageHooksBase,
-  CompileSubstageHooks,
-  BundleSubstageHooks,
-  IBuildStageContext,
-  IBuildStageProperties,
-  IBuildSubstage,
-  IBundleSubstage,
-  IBundleSubstageProperties,
-  ICompileSubstage,
-  ICompileSubstageProperties,
-  IPostBuildSubstage,
-  IPreCompileSubstage
-} from './stages/BuildStage';
-export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
-export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';
+export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 
-// Other hooks
-export {
-  IHeftLifecycle as _IHeftLifecycle,
-  HeftLifecycleHooks as _HeftLifecycleHooks
-} from './pluginFramework/HeftLifecycle';
-
-export { IRunScriptOptions } from './plugins/RunScriptPlugin';
+// Re-export types required to use custom command-line parameters
+export type {
+  CommandLineParameter,
+  CommandLineChoiceListParameter,
+  CommandLineChoiceParameter,
+  CommandLineFlagParameter,
+  CommandLineIntegerListParameter,
+  CommandLineIntegerParameter,
+  CommandLineStringListParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';

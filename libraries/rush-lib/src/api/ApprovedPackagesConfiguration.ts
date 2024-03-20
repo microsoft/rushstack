@@ -4,9 +4,9 @@
 import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 
-import { Utilities } from '../utilities/Utilities';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 import schemaJson from '../schemas/approved-packages.schema.json';
+import { RushConstants } from '../logic/RushConstants';
 
 /**
  * Part of IApprovedPackagesJson.
@@ -113,9 +113,10 @@ export class ApprovedPackagesConfiguration {
     this.loadFromFile();
 
     if (!approvedPackagesPolicyEnabled) {
+      // eslint-disable-next-line no-console
       console.log(
         `Warning: Ignoring "${path.basename(this._jsonFilename)}" because the` +
-          ` "approvedPackagesPolicy" setting was not specified in rush.json`
+          ` "approvedPackagesPolicy" setting was not specified in ${RushConstants.rushJsonFilename}`
       );
     }
 
@@ -155,8 +156,8 @@ export class ApprovedPackagesConfiguration {
     });
 
     for (const item of this.items) {
-      // Sort the items from the set.  Too bad we can't use the new Array.from().
-      const allowedCategories: string[] = Utilities.getSetAsArray(item.allowedCategories);
+      // Sort the items from the set.
+      const allowedCategories: string[] = Array.from(item.allowedCategories);
       allowedCategories.sort();
 
       const itemJson: IApprovedPackagesItemJson = {

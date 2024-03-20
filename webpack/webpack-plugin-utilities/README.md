@@ -10,6 +10,8 @@ This is a collection of utilities for writing webpack plugins
 
 # Usage
 
+## VersionDetection
+
 ```JavaScript
 import { VersionDetection } from "@rushstack/webpack-plugin-utilities"
 
@@ -36,6 +38,66 @@ class MyExampleWebpackPlugin {
     }
   }
 }
+```
+
+## Testing
+
+### `getTestingWebpackCompiler`
+
+```typescript
+
+import { getTestingWebpackCompiler } from "@rushstack/webpack-plugin-utilities"
+
+describe("MyPlugin", () => {
+  it("should run", async () => {
+    const stats = await getTestingWebpackCompiler("./src/index.ts");
+
+    expect(stats).toBeDefined();
+  });
+});
+```
+
+### `getTestingWebpackCompiler` with additional configuration
+
+If you want to pass in additional configuration to the webpack compiler, you can pass it in as the second parameter to `getTestingWebpackCompiler`.
+
+```typescript
+import { getTestingWebpackCompiler } from "@rushstack/webpack-plugin-utilities"
+
+describe("MyPlugin", () => {
+  it("should run", async () => {
+    const stats = await getTestingWebpackCompiler("./src/index.ts", {
+      mode: "production",
+    });
+
+    expect(stats).toBeDefined();
+  });
+});
+```
+
+### `getTestingWebpackCompiler` with virtual filesystem
+
+If you want to be able to read, analyze, access the files written to the memory filesystem,
+you can pass in a memory filesystem instance to the `memFs` parameter.
+
+```typescript
+import { getTestingWebpackCompiler } from "@rushstack/webpack-plugin-utilities"
+import { createFsFromVolume, Volume, IFs } from "memfs"
+import path from "path"
+
+describe("MyPlugin", () => {
+  it("should run", async () => {
+    const virtualFileSystem: IFs = createFsFromVolume(new Volume());
+    const stats = await getTestingWebpackCompiler(
+      `./src/index.ts`,
+      {},
+      virtualFileSystem
+    );
+
+    expect(stats).toBeDefined();
+    expect(virtualFileSystem.existsSync(path.join(__dirname, "dist", "index.js"))).toBe(true);
+  });
+});
 ```
 
 ## Links

@@ -1,0 +1,21 @@
+/**
+ * Configures the TypeScript plugin for Heft.  This plugin also manages linting.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
+
+  /**
+   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
+   * Note that this option only applies to the main tsconfig.json configuration.
+   */
+  "additionalModuleKindsToEmit": [
+    {
+      "moduleKind": "esnext",
+      "outFolderName": "lib-esnext"
+    },
+    {
+      "moduleKind": "umd",
+      "outFolderName": "lib-umd"
+    }
+  ]
+}

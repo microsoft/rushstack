@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "echo",
+      "summary": "execute 'echo' command",
+      "description": "execute 'echo' command for selected project",
+      "enableParallelism": true,
+      "shellCommand": "echo custom shellCommand"
+    }
+  ],
+  "parameters": [
+    {
+      "longName": "--flag-for-echo",
+      "description": "This flag should be usable for build and rebuild commands.",
+      "parameterKind": "flag",
+      "associatedCommands": ["echo"]
+    }
+  ]
+}

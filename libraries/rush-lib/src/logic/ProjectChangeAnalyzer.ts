@@ -3,24 +3,24 @@
 
 import * as path from 'path';
 import * as crypto from 'crypto';
-import ignore, { Ignore } from 'ignore';
+import ignore, { type Ignore } from 'ignore';
 
 import {
   getRepoChanges,
   getRepoRoot,
-  getRepoState,
-  getGitHashForFiles,
-  IFileDiffStatus
+  getRepoStateAsync,
+  type IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, ITerminal, Async } from '@rushstack/node-core-library';
+import { Path, FileSystem, Async } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
-import { LookupByPath } from './LookupByPath';
+import type { LookupByPath } from './LookupByPath';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { UNINITIALIZED } from '../utilities/Utilities';
 
@@ -51,9 +51,13 @@ interface IGitState {
   rootDir: string;
 }
 
-interface IRawRepoState {
+/**
+ * @internal
+ */
+export interface IRawRepoState {
   projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
   rootDir: string;
+  rawHashes: Map<string, string>;
 }
 
 /**
@@ -93,7 +97,7 @@ export class ProjectChangeAnalyzer {
       return filteredProjectData;
     }
 
-    const data: IRawRepoState | undefined = this._ensureInitialized(terminal);
+    const data: IRawRepoState | undefined = await this._ensureInitializedAsync(terminal);
 
     if (!data) {
       return undefined;
@@ -124,9 +128,9 @@ export class ProjectChangeAnalyzer {
   /**
    * @internal
    */
-  public _ensureInitialized(terminal: ITerminal): IRawRepoState | undefined {
+  public async _ensureInitializedAsync(terminal: ITerminal): Promise<IRawRepoState | undefined> {
     if (this._data === UNINITIALIZED) {
-      this._data = this._getData(terminal);
+      this._data = await this._getDataAsync(terminal);
     }
 
     return this._data;
@@ -228,10 +232,7 @@ export class ProjectChangeAnalyzer {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
-      // Determine the current variant from the link JSON.
-      const variant: string | undefined = rushConfiguration.currentInstalledVariant;
-
-      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename(variant);
+      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename();
 
       const shrinkwrapFile: string = Path.convertToSlashes(path.relative(repoRoot, fullShrinkwrapPath));
       const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(shrinkwrapFile);
@@ -325,13 +326,14 @@ export class ProjectChangeAnalyzer {
     return changedProjects;
   }
 
-  private _getData(terminal: ITerminal): IRawRepoState {
-    const repoState: IGitState | undefined = this._getRepoDeps(terminal);
+  private async _getDataAsync(terminal: ITerminal): Promise<IRawRepoState> {
+    const repoState: IGitState | undefined = await this._getRepoDepsAsync(terminal);
     if (!repoState) {
       // Mark as resolved, but no data
       return {
         projectState: undefined,
-        rootDir: this._rushConfiguration.rushJsonFolder
+        rootDir: this._rushConfiguration.rushJsonFolder,
+        rawHashes: new Map()
       };
     }
 
@@ -347,50 +349,10 @@ export class ProjectChangeAnalyzer {
     const { hashes: repoDeps, rootDir } = repoState;
 
     // Currently, only pnpm handles project shrinkwraps
-    if (this._rushConfiguration.packageManager === 'pnpm') {
-      const projectDependencyManifestPaths: string[] = [];
-
-      for (const project of projectHashDeps.keys()) {
-        const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
-        const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
-          path.relative(rootDir, projectShrinkwrapFilePath)
-        );
-
-        if (!FileSystem.exists(projectShrinkwrapFilePath)) {
-          throw new Error(
-            `A project dependency file (${relativeProjectShrinkwrapFilePath}) is missing. You may need to run ` +
-              '"rush install" or "rush update".'
-          );
-        }
-
-        projectDependencyManifestPaths.push(relativeProjectShrinkwrapFilePath);
-      }
-
-      const gitPath: string = this._git.getGitPathOrThrow();
-      const hashes: Map<string, string> = getGitHashForFiles(
-        projectDependencyManifestPaths,
-        rootDir,
-        gitPath
-      );
-
-      let i: number = 0;
-      for (const projectDeps of projectHashDeps.values()) {
-        const projectDependencyManifestPath: string = projectDependencyManifestPaths[i];
-        const hash: string | undefined = hashes.get(projectDependencyManifestPath);
-        if (hash === undefined) {
-          throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
-        }
-
-        projectDeps.set(projectDependencyManifestPath, hash);
-        i++;
-      }
-    } else {
-      // Determine the current variant from the link JSON.
-      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
-
+    if (this._rushConfiguration.packageManager !== 'pnpm') {
       // Add the shrinkwrap file to every project's dependencies
       const shrinkwrapFile: string = Path.convertToSlashes(
-        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
+        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename())
       );
 
       const shrinkwrapHash: string | undefined = repoDeps.get(shrinkwrapFile);
@@ -416,7 +378,8 @@ export class ProjectChangeAnalyzer {
 
     return {
       projectState: projectHashDeps,
-      rootDir
+      rootDir,
+      rawHashes: repoState.hashes
     };
   }
 
@@ -434,13 +397,42 @@ export class ProjectChangeAnalyzer {
     }
   }
 
-  private _getRepoDeps(terminal: ITerminal): IGitState | undefined {
+  private async _getRepoDepsAsync(terminal: ITerminal): Promise<IGitState | undefined> {
     try {
+      const gitPath: string = this._git.getGitPathOrThrow();
+
       if (this._git.isPathUnderGitWorkingTree()) {
-        // Load the package deps hash for the whole repository
-        const gitPath: string = this._git.getGitPathOrThrow();
+        // Do not use getGitInfo().root; it is the root of the *primary* worktree, not the *current* one.
         const rootDir: string = getRepoRoot(this._rushConfiguration.rushJsonFolder, gitPath);
-        const hashes: Map<string, string> = getRepoState(rootDir, gitPath);
+        // Load the package deps hash for the whole repository
+        // Include project shrinkwrap files as part of the computation
+        const additionalFilesToHash: string[] = [];
+
+        if (this._rushConfiguration.packageManager === 'pnpm') {
+          await Async.forEachAsync(
+            this._rushConfiguration.projects,
+            async (project: RushConfigurationProject) => {
+              const projectShrinkwrapFilePath: string =
+                BaseProjectShrinkwrapFile.getFilePathForProject(project);
+              if (!(await FileSystem.existsAsync(projectShrinkwrapFilePath))) {
+                // Missing shrinkwrap of subspace project is allowed because subspace projects can be partial installed
+                if (this._rushConfiguration.subspacesFeatureEnabled) {
+                  return;
+                }
+                throw new Error(
+                  `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
+                    '"rush install" or "rush update".'
+                );
+              }
+              const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
+                path.relative(rootDir, projectShrinkwrapFilePath)
+              );
+              additionalFilesToHash.push(relativeProjectShrinkwrapFilePath);
+            }
+          );
+        }
+
+        const hashes: Map<string, string> = await getRepoStateAsync(rootDir, additionalFilesToHash, gitPath);
         return {
           gitPath,
           hashes,

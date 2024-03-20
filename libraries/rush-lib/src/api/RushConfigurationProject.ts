@@ -3,14 +3,16 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import { JsonFile, IPackageJson, FileSystem, FileConstants, JsonSyntax } from '@rushstack/node-core-library';
+import { type IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
-import { PackageJsonEditor } from './PackageJsonEditor';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
+import type { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageNameParsers } from './PackageNameParsers';
 import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
+import { SaveCallbackPackageJsonEditor } from './SaveCallbackPackageJsonEditor';
+import type { Subspace } from './Subspace';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -26,6 +28,7 @@ export interface IRushConfigurationProjectJson {
   skipRushCheck?: boolean;
   publishFolder?: string;
   tags?: string[];
+  subspaceName?: string;
 }
 
 /**
@@ -48,6 +51,11 @@ export interface IRushConfigurationProjectOptions {
    * If specified, validate project tags against this list.
    */
   allowedProjectTags: Set<string> | undefined;
+
+  /**
+   * The containing subspace.
+   */
+  subspace: Subspace;
 }
 
 /**
@@ -61,6 +69,7 @@ export class RushConfigurationProject {
   private _versionPolicy: VersionPolicy | undefined = undefined;
   private _dependencyProjects: Set<RushConfigurationProject> | undefined = undefined;
   private _consumingProjects: Set<RushConfigurationProject> | undefined = undefined;
+  private _packageJson: IPackageJson;
 
   /**
    * The name of the NPM package.  An error is reported if this name is not
@@ -104,6 +113,12 @@ export class RushConfigurationProject {
   public readonly rushConfiguration: RushConfiguration;
 
   /**
+   * Returns the subspace name that a project belongs to.
+   * If subspaces is not enabled, returns the default subspace.
+   */
+  public readonly subspace: Subspace;
+
+  /**
    * The review category name, or undefined if no category was assigned.
    * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
    */
@@ -121,7 +136,9 @@ export class RushConfigurationProject {
   /**
    * The parsed NPM "package.json" file from projectFolder.
    */
-  public readonly packageJson: IPackageJson;
+  public get packageJson(): IPackageJson {
+    return this._packageJson;
+  }
 
   /**
    * A useful wrapper around the package.json file for making modifications
@@ -180,47 +197,60 @@ export class RushConfigurationProject {
    */
   public readonly tags: ReadonlySet<string>;
 
+  /**
+   * Returns the subspace name specified in the `"subspaceName"` field in `rush.json`.
+   * Note that this field may be undefined, if the `default` subspace is being used,
+   * and this field may be ignored if the subspaces feature is disabled.
+   *
+   * @beta
+   */
+  public readonly configuredSubspaceName: string | undefined;
+
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
+    const { packageName, projectFolder: projectRelativeFolder } = projectJson;
     this.rushConfiguration = rushConfiguration;
-    this.packageName = projectJson.packageName;
-    this.projectRelativeFolder = projectJson.projectFolder;
+    this.packageName = packageName;
+    this.projectRelativeFolder = projectRelativeFolder;
+
+    validateRelativePathField(projectRelativeFolder, 'projectFolder', rushConfiguration.rushJsonFile);
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
-    const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
+    const projectFolderDepth: number = projectRelativeFolder.split('/').length;
     if (projectFolderDepth < rushConfiguration.projectFolderMinDepth) {
       throw new Error(
         `To keep things organized, this repository has a projectFolderMinDepth policy` +
           ` requiring project folders to be at least ${rushConfiguration.projectFolderMinDepth} levels deep.` +
-          `  Problem folder: "${projectJson.projectFolder}"`
+          `  Problem folder: "${projectRelativeFolder}"`
       );
     }
     if (projectFolderDepth > rushConfiguration.projectFolderMaxDepth) {
       throw new Error(
         `To keep things organized, this repository has a projectFolderMaxDepth policy` +
           ` preventing project folders from being deeper than ${rushConfiguration.projectFolderMaxDepth} levels.` +
-          `  Problem folder:  "${projectJson.projectFolder}"`
+          `  Problem folder:  "${projectRelativeFolder}"`
       );
     }
 
-    this.projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
-    const packageJsonFilename: string = path.join(this.projectFolder, FileConstants.PackageJson);
+    const absoluteProjectFolder: string = path.join(rushConfiguration.rushJsonFolder, projectRelativeFolder);
+    this.projectFolder = absoluteProjectFolder;
+    const packageJsonFilename: string = path.join(absoluteProjectFolder, FileConstants.PackageJson);
 
     try {
-      this.packageJson = JsonFile.load(packageJsonFilename, { jsonSyntax: JsonSyntax.Strict });
+      const packageJsonText: string = FileSystem.readFile(packageJsonFilename);
+      // JSON.parse is native and runs in less than 1/2 the time of jju.parse. package.json is required to be strict JSON by NodeJS.
+      this._packageJson = JSON.parse(packageJsonText);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
-        throw new Error(
-          `Could not find package.json for ${projectJson.packageName} at ${packageJsonFilename}`
-        );
+        throw new Error(`Could not find package.json for ${packageName} at ${packageJsonFilename}`);
       }
       throw error;
     }
 
-    this.projectRushConfigFolder = path.join(this.projectFolder, 'config', 'rush');
+    this.projectRushConfigFolder = path.join(absoluteProjectFolder, 'config', 'rush');
     this.projectRushTempFolder = path.join(
-      this.projectFolder,
+      absoluteProjectFolder,
       RushConstants.projectRushFolderName,
       RushConstants.rushTempFolderName
     );
@@ -231,13 +261,13 @@ export class RushConfigurationProject {
       // by the reviewCategories array.
       if (!projectJson.reviewCategory) {
         throw new Error(
-          `The "approvedPackagesPolicy" feature is enabled rush.json, but a reviewCategory` +
-            ` was not specified for the project "${projectJson.packageName}".`
+          `The "approvedPackagesPolicy" feature is enabled ${RushConstants.rushJsonFilename}, but a reviewCategory` +
+            ` was not specified for the project "${packageName}".`
         );
       }
       if (!rushConfiguration.approvedPackagesPolicy.reviewCategories.has(projectJson.reviewCategory)) {
         throw new Error(
-          `The project "${projectJson.packageName}" specifies its reviewCategory as` +
+          `The project "${packageName}" specifies its reviewCategory as` +
             `"${projectJson.reviewCategory}" which is not one of the defined reviewCategories.`
         );
       }
@@ -246,7 +276,7 @@ export class RushConfigurationProject {
 
     if (this.packageJson.name !== this.packageName) {
       throw new Error(
-        `The package name "${this.packageName}" specified in rush.json does not` +
+        `The package name "${this.packageName}" specified in ${RushConstants.rushJsonFilename} does not` +
           ` match the name "${this.packageJson.name}" from package.json`
       );
     }
@@ -258,7 +288,15 @@ export class RushConfigurationProject {
       );
     }
 
-    this.packageJsonEditor = PackageJsonEditor.fromObject(this.packageJson, packageJsonFilename);
+    this.packageJsonEditor = SaveCallbackPackageJsonEditor.fromObjectWithCallback({
+      object: this.packageJson,
+      filename: packageJsonFilename,
+      onSaved: (newObject) => {
+        // Just update the in-memory copy, don't bother doing the validation again
+        this._packageJson = newObject;
+        this._dependencyProjects = undefined; // Reset the cached dependency projects
+      }
+    });
 
     this.tempProjectName = tempProjectName;
 
@@ -285,31 +323,37 @@ export class RushConfigurationProject {
 
     if (this._shouldPublish && this.packageJson.private) {
       throw new Error(
-        `The project "${projectJson.packageName}" specifies "shouldPublish": true, ` +
+        `The project "${packageName}" specifies "shouldPublish": true, ` +
           `but the package.json file specifies "private": true.`
       );
     }
 
-    this.publishFolder = this.projectFolder;
-    if (projectJson.publishFolder) {
-      this.publishFolder = path.join(this.publishFolder, projectJson.publishFolder);
+    this.publishFolder = absoluteProjectFolder;
+    const { publishFolder } = projectJson;
+    if (publishFolder) {
+      validateRelativePathField(publishFolder, 'publishFolder', rushConfiguration.rushJsonFile);
+      this.publishFolder = path.join(this.publishFolder, publishFolder);
     }
 
     if (allowedProjectTags && projectJson.tags) {
-      this.tags = new Set();
+      const tags: Set<string> = new Set();
       for (const tag of projectJson.tags) {
         if (!allowedProjectTags.has(tag)) {
           throw new Error(
-            `The tag "${tag}" specified for project "${this.packageName}" is not listed in the ` +
-              `allowedProjectTags field in rush.json.`
+            `The tag "${tag}" specified for project "${packageName}" is not listed in the ` +
+              `allowedProjectTags field in ${RushConstants.rushJsonFilename}.`
           );
         } else {
-          (this.tags as Set<string>).add(tag);
+          tags.add(tag);
         }
       }
+      this.tags = tags;
     } else {
       this.tags = new Set(projectJson.tags);
     }
+
+    this.configuredSubspaceName = projectJson.subspaceName;
+    this.subspace = options.subspace;
   }
 
   /**
@@ -462,5 +506,35 @@ export class RushConfigurationProject {
       }
     }
     return isMain;
+  }
+}
+
+export function validateRelativePathField(relativePath: string, field: string, file: string): void {
+  // path.isAbsolute delegates depending on platform; however, path.posix.isAbsolute('C:/a') returns false,
+  // while path.win32.isAbsolute('C:/a') returns true. We want consistent validation across platforms.
+  if (path.posix.isAbsolute(relativePath) || path.win32.isAbsolute(relativePath)) {
+    throw new Error(
+      `The value "${relativePath}" in the "${field}" field in "${file}" must be a relative path.`
+    );
+  }
+
+  if (relativePath.includes('\\')) {
+    throw new Error(
+      `The value "${relativePath}" in the "${field}" field in "${file}" may not contain backslashes ('\\'), since they are interpreted differently` +
+        ` on POSIX and Windows. Paths must use '/' as the path separator.`
+    );
+  }
+
+  if (relativePath.endsWith('/')) {
+    throw new Error(
+      `The value "${relativePath}" in the "${field}" field in "${file}" may not end with a trailing '/' character.`
+    );
+  }
+
+  const normalized: string = path.posix.normalize(relativePath);
+  if (relativePath !== normalized) {
+    throw new Error(
+      `The value "${relativePath}" in the "${field}" field in "${file}" should be replaced with its normalized form "${normalized}".`
+    );
   }
 }

@@ -1,37 +1,38 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '../types/IPackageJson';
+import type { IPackageJson } from '../types/IPackageJson';
 
-const serviceUrl: string = window.appContext.serviceUrl;
+const apiPath: string = `${window.appContext.serviceUrl}/api`;
 
-export const checkAlive = async (): Promise<boolean> => {
+export async function checkAliveAsync(): Promise<boolean> {
   try {
-    await fetch(`${serviceUrl}/api/health`);
+    await fetch(`${apiPath}/health`);
     return true;
   } catch (e) {
     return false;
   }
-};
+}
 
 /**
  * Fetches a projects configuration files from the local file system
  *
  * @returns a json object representing a package.json or a text file to be rendered (in the case of readPnpmfile)
  */
-export const readPnpmfile = async (): Promise<string> => {
+export async function readPnpmfileAsync(): Promise<string> {
   try {
-    const response = await fetch(`${serviceUrl}/api/pnpmfile`);
+    const response = await fetch(`${apiPath}/pnpmfile`);
     return await response.text();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Could not load cjs file: ', e);
     return 'Missing CJS';
   }
-};
+}
 
-export const readPackageJson = async (projectPath: string): Promise<IPackageJson | undefined> => {
+export async function readPackageJsonAsync(projectPath: string): Promise<IPackageJson | undefined> {
   try {
-    const response = await fetch(`${serviceUrl}/api/package-json`, {
+    const response = await fetch(`${apiPath}/package-json`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -42,14 +43,15 @@ export const readPackageJson = async (projectPath: string): Promise<IPackageJson
     });
     return await response.json();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Could not load package json file: ', e);
     return undefined;
   }
-};
+}
 
-export const readPackageSpec = async (projectPath: string): Promise<IPackageJson | undefined> => {
+export async function readPackageSpecAsync(projectPath: string): Promise<IPackageJson | undefined> {
   try {
-    const response = await fetch(`${serviceUrl}/api/package-spec`, {
+    const response = await fetch(`${apiPath}/package-spec`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -60,7 +62,8 @@ export const readPackageSpec = async (projectPath: string): Promise<IPackageJson
     });
     return await response.json();
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Could not load cjs file: ', e);
     return undefined;
   }
-};
+}

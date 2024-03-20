@@ -1,0 +1,14 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/custom-tips.schema.json",
+
+  "customTips": [
+    {
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
+      "message": "duplicate 1"
+    },
+    {
+      "tipId": "TIP_RUSH_INCONSISTENT_VERSIONS",
+      "message": "duplicate 2"
+    }
+  ]
+}

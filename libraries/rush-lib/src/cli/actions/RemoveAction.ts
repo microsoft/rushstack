@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider, Terminal, ITerminal } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
 import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { BaseAddAndRemoveAction } from './BaseAddAndRemoveAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
   IPackageForRushRemove,
   IPackageJsonUpdaterRushRemoveOptions

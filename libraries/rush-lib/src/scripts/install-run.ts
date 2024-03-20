@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See the @microsoft/rush package's LICENSE file for license information.
+// See LICENSE in the project root for license information.
+
+/* eslint-disable no-console */
 
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
@@ -7,8 +9,9 @@ import * as os from 'os';
 import * as path from 'path';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import { syncNpmrc, type ILogger } from '../utilities/npmrcUtilities';
+import type { RushConstants } from '../logic/RushConstants';
 
-export const RUSH_JSON_FILENAME: string = 'rush.json';
+export const RUSH_JSON_FILENAME: typeof RushConstants.rushJsonFilename = 'rush.json';
 const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
 const INSTALL_RUN_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_LOCKFILE_PATH' = 'INSTALL_RUN_LOCKFILE_PATH';
 const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
@@ -124,6 +127,24 @@ export interface IPackageSpecifier {
 }
 
 /**
+ * Compare version strings according to semantic versioning.
+ * Returns a positive integer if "a" is a later version than "b",
+ * a negative integer if "b" is later than "a",
+ * and 0 otherwise.
+ */
+function _compareVersionStrings(a: string, b: string): number {
+  const aParts: string[] = a.split(/[.-]/);
+  const bParts: string[] = b.split(/[.-]/);
+  const numberOfParts: number = Math.max(aParts.length, bParts.length);
+  for (let i: number = 0; i < numberOfParts; i++) {
+    if (aParts[i] !== bParts[i]) {
+      return (Number(aParts[i]) || 0) - (Number(bParts[i]) || 0);
+    }
+  }
+  return 0;
+}
+
+/**
  * Resolve a package specifier to a static version
  */
 function _resolvePackageVersion(
@@ -145,19 +166,34 @@ function _resolvePackageVersion(
       const rushTempFolder: string = _getRushTempFolder(rushCommonFolder);
       const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
 
-      syncNpmrc(sourceNpmrcFolder, rushTempFolder, undefined, logger);
+      syncNpmrc({
+        sourceNpmrcFolder,
+        targetNpmrcFolder: rushTempFolder,
+        logger
+      });
 
       const npmPath: string = getNpmPath();
 
       // This returns something that looks like:
-      //  @microsoft/rush@3.0.0 '3.0.0'
-      //  @microsoft/rush@3.0.1 '3.0.1'
-      //  ...
-      //  @microsoft/rush@3.0.20 '3.0.20'
-      //  <blank line>
+      // ```
+      // [
+      //   "3.0.0",
+      //   "3.0.1",
+      //   ...
+      //   "3.0.20"
+      // ]
+      // ```
+      //
+      // if multiple versions match the selector, or
+      //
+      // ```
+      // "3.0.0"
+      // ```
+      //
+      // if only a single version matches.
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
         npmPath,
-        ['view', `${name}@${version}`, 'version', '--no-update-notifier'],
+        ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
         {
           cwd: rushTempFolder,
           stdio: []
@@ -169,18 +205,23 @@ function _resolvePackageVersion(
       }
 
       const npmViewVersionOutput: string = npmVersionSpawnResult.stdout.toString();
-      const versionLines: string[] = npmViewVersionOutput.split('\n').filter((line) => !!line);
-      const latestVersion: string | undefined = versionLines[versionLines.length - 1];
+      const parsedVersionOutput: string | string[] = JSON.parse(npmViewVersionOutput);
+      const versions: string[] = Array.isArray(parsedVersionOutput)
+        ? parsedVersionOutput
+        : [parsedVersionOutput];
+      let latestVersion: string | undefined = versions[0];
+      for (let i: number = 1; i < versions.length; i++) {
+        const latestVersionCandidate: string = versions[i];
+        if (_compareVersionStrings(latestVersionCandidate, latestVersion) > 0) {
+          latestVersion = latestVersionCandidate;
+        }
+      }
+
       if (!latestVersion) {
         throw new Error('No versions found for the specified version range.');
       }
 
-      const versionMatches: string[] | null = latestVersion.match(/^.+\s\'(.+)\'$/);
-      if (!versionMatches) {
-        throw new Error(`Invalid npm output ${latestVersion}`);
-      }
-
-      return versionMatches[1];
+      return latestVersion;
     } catch (e) {
       throw new Error(`Unable to resolve version ${version} of package ${name}: ${e}`);
     }
@@ -206,7 +247,7 @@ export function findRushJsonFolder(): string {
     } while (basePath !== (tempPath = path.dirname(basePath))); // Exit the loop when we hit the disk root
 
     if (!_rushJsonFolder) {
-      throw new Error('Unable to find rush.json.');
+      throw new Error(`Unable to find ${RUSH_JSON_FILENAME}.`);
     }
   }
 
@@ -372,7 +413,11 @@ export function installAndRun(
     _cleanInstallFolder(rushTempFolder, packageInstallFolder, lockFilePath);
 
     const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
-    syncNpmrc(sourceNpmrcFolder, packageInstallFolder, undefined, logger);
+    syncNpmrc({
+      sourceNpmrcFolder,
+      targetNpmrcFolder: packageInstallFolder,
+      logger
+    });
 
     _createPackageJson(packageInstallFolder, packageName, packageVersion);
     const command: 'install' | 'ci' = lockFilePath ? 'ci' : 'install';

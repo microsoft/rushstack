@@ -2,7 +2,7 @@
  * Configures the TypeScript plugin for Heft.  This plugin also manages linting.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/typescript.schema.json",
 
   /**
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
@@ -44,23 +44,9 @@
   // "emitMjsExtensionForESModule": true,
 
   /**
-   * Specifies the intermediary folder that tests will use.  Because Jest uses the
-   * Node.js runtime to execute tests, the module format must be CommonJS.
-   *
-   * The default value is "lib".
+   * If true and "isolatedModules" is configured in tsconfig.json, use a worker thread to run transpilation concurrently with type checking and declaration emit.
    */
-  "emitFolderNameForTests": "lib-commonjs",
-
-  /**
-   * If set to "true", the TSlint task will not be invoked.
-   */
-  // "disableTslint": true,
-
-  /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
-   */
-  // "maxWriteParallelism": 50,
+  // "useTranspilerWorker": true
 
   /**
    * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example

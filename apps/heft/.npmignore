@@ -30,3 +30,4 @@
 # (Add your project-specific overrides here)
 !/includes/**
 !UPGRADING.md
+!heft-plugin.json

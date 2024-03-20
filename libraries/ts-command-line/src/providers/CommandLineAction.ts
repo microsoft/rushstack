@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as argparse from 'argparse';
+import type * as argparse from 'argparse';
 
-import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
-import type { ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineParameterProvider } from './CommandLineParameterProvider';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -87,15 +87,22 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
       description: this.documentation
     });
 
-    this.onDefineParameters?.();
-  }
+    // Monkey-patch the error handling for the action parser
+    this._argumentParser.exit = (status: number, message: string) => {
+      throw new CommandLineParserExitError(status, message);
+    };
+    const originalArgumentParserErrorFn: (err: Error | string) => void = this._argumentParser.error.bind(
+      this._argumentParser
+    );
+    this._argumentParser.error = (err: Error | string) => {
+      // Ensure the ParserExitError bubbles up to the top without any special processing
+      if (err instanceof CommandLineParserExitError) {
+        throw err;
+      }
+      originalArgumentParserErrorFn(err);
+    };
 
-  /**
-   * This is called internally by CommandLineParser.execute()
-   * @internal
-   */
-  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    super._processParsedData(parserOptions, data);
+    this.onDefineParameters?.();
   }
 
   /**
@@ -110,7 +117,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser {
+  public _getArgumentParser(): argparse.ArgumentParser {
     // override
     if (!this._argumentParser) {
       // We will improve this in the future

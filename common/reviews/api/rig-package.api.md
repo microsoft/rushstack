@@ -12,13 +12,28 @@ export interface ILoadForProjectFolderOptions {
 }
 
 // @public
+export interface IRigConfig {
+    readonly filePath: string;
+    getResolvedProfileFolder(): string;
+    getResolvedProfileFolderAsync(): Promise<string>;
+    readonly projectFolderOriginalPath: string;
+    readonly projectFolderPath: string;
+    readonly relativeProfileFolderPath: string;
+    readonly rigFound: boolean;
+    readonly rigPackageName: string;
+    readonly rigProfile: string;
+    tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
+    tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
+}
+
+// @public
 export interface IRigConfigJson {
     rigPackageName: string;
     rigProfile?: string;
 }
 
 // @public
-export class RigConfig {
+export class RigConfig implements IRigConfig {
     readonly filePath: string;
     getResolvedProfileFolder(): string;
     getResolvedProfileFolderAsync(): Promise<string>;

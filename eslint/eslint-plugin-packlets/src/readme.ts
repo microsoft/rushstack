@@ -3,8 +3,8 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { ESLintUtils } from '@typescript-eslint/utils';
 
 import { PackletAnalyzer } from './PackletAnalyzer';
 
@@ -42,10 +42,8 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
 
     docs: {
       description: 'Require each packlet folder to have a README.md file summarizing its purpose and usage',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Best Practices',
       // Too strict to be recommended in the default configuration
-      recommended: false,
+      recommended: 'strict',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
     } as TSESLint.RuleMetaDataDocs
   },
@@ -59,7 +57,7 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
     // Example: /path/to/my-project/tsconfig.json
     const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
       context
-    ).program.getCompilerOptions()['configFilePath'] as string;
+    ).program.getCompilerOptions().configFilePath as string;
 
     const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
       inputFilePath,

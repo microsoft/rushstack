@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushUserConfiguration } from '../../api/RushUserConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushUserConfiguration } from '../../api/RushUserConfiguration';
 
 /**
  * Options for creating a file system build cache provider.

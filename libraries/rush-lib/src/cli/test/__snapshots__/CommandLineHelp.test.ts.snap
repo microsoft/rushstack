@@ -77,7 +77,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [-m] [--all]
+"usage: rush add [-h] [-s] -p PACKAGE [--exact] [--caret] [--dev] [--peer] [-m]
+                [--all]
+                
 
 Adds specified package(s) to the dependencies of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -111,6 +113,8 @@ Optional arguments:
                         specifier (\\"^\\").
   --dev                 If specified, the package will be added to the 
                         \\"devDependencies\\" section of the package.json
+  --peer                If specified, the package will be added to the 
+                        \\"peerDependencies\\" section of the package.json
   -m, --make-consistent
                         If specified, other packages with this dependency 
                         will have their package.json files updated to use the 
@@ -315,26 +319,24 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: check 1`] = `
-"usage: rush check [-h] [--variant VARIANT] [--json] [--verbose]
+"usage: rush check [-h] [--json] [--verbose]
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
 
 Optional arguments:
-  -h, --help         Show this help message and exit.
-  --variant VARIANT  Run command using a variant installation configuration. 
-                     This parameter may alternatively be specified via the 
-                     RUSH_VARIANT environment variable.
-  --json             If this flag is specified, output will be in JSON format.
-  --verbose          If this flag is specified, long lists of package names 
-                     will not be truncated. This has no effect if the --json 
-                     flag is also specified.
+  -h, --help  Show this help message and exit.
+  --json      If this flag is specified, output will be in JSON format.
+  --verbose   If this flag is specified, long lists of package names will not 
+              be truncated. This has no effect if the --json flag is also 
+              specified.
 "
 `;
 
 exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
 "usage: rush deploy [-h] [-p PROJECT_NAME] [-s SCENARIO_NAME] [--overwrite]
                    [-t PATH] [--create-archive ARCHIVE_PATH]
+                   [--create-archive-only]
                    
 
 After building the repo, \\"rush deploy\\" can be used to prepare a deployment by 
@@ -374,6 +376,11 @@ Optional arguments:
                         archive file will be placed according to the 
                         designated path, relative to the target folder. 
                         Supported file extensions: .zip
+  --create-archive-only
+                        If specified, \\"rush deploy\\" will only create an 
+                        archive containing the contents of the target folder. 
+                        The target folder will not be modified other than to 
+                        create the archive file.
 "
 `;
 
@@ -497,6 +504,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: init 1`] = `
 "usage: rush init [-h] [--overwrite-existing] [--rush-example-repo]
+                 [--include-experiments]
+                 
 
 When invoked in an empty folder, this command provisions a standard set of 
 config file templates to start managing projects using Rush.
@@ -513,6 +522,10 @@ Optional arguments:
                         monorepo that illustrates many Rush features. This 
                         option is primarily intended for maintaining that 
                         example.
+  --include-experiments
+                        Include features that may not be complete features, 
+                        useful for demoing specific future features or 
+                        current work in progress features.
 "
 `;
 
@@ -560,9 +573,9 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--variant VARIANT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
-                    [--to-version-policy VERSION_POLICY_NAME]
+                    [--offline] [--subspace SUBSPACE_NAME] [-t PROJECT]
+                    [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
+                    [-I PROJECT] [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [--check-only]
                     
 
@@ -604,9 +617,15 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
-  --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively be 
-                        specified via the RUSH_VARIANT environment variable.
+  --offline             Enables installation to be performed without internet 
+                        access. PNPM will instead report an error if the 
+                        necessary NPM packages cannot be obtained from the 
+                        local cache. For details, see the documentation for 
+                        PNPM's \\"--offline\\" parameter.
+  --subspace SUBSPACE_NAME
+                        (EXPERIMENTAL) Specifies a Rush subspace to be 
+                        installed. Requires the feature to be enabled in 
+                        subspaces.json.
   -t PROJECT, --to PROJECT
                         Normally all projects in the monorepo will be 
                         processed; adding this parameter will instead select 
@@ -1129,7 +1148,7 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--variant VARIANT] [--full] [--recheck]
+                   [--offline] [--subspace SUBSPACE_NAME] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1169,9 +1188,15 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
-  --variant VARIANT     Run command using a variant installation 
-                        configuration. This parameter may alternatively be 
-                        specified via the RUSH_VARIANT environment variable.
+  --offline             Enables installation to be performed without internet 
+                        access. PNPM will instead report an error if the 
+                        necessary NPM packages cannot be obtained from the 
+                        local cache. For details, see the documentation for 
+                        PNPM's \\"--offline\\" parameter.
+  --subspace SUBSPACE_NAME
+                        (EXPERIMENTAL) Specifies a Rush subspace to be 
+                        installed. Requires the feature to be enabled in 
+                        subspaces.json.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 

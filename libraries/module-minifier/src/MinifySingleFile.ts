@@ -1,15 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { minify, MinifyOptions, MinifyOutput, SimpleIdentifierMangler } from 'terser';
+import { minify, type MinifyOptions, type MinifyOutput, type SimpleIdentifierMangler } from 'terser';
 import type { RawSourceMap } from 'source-map';
-
-declare module 'terser' {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  interface SourceMapOptions {
-    asObject?: boolean;
-  }
-}
 
 import { getIdentifier } from './MinifiedIdentifier';
 import type { IModuleMinificationRequest, IModuleMinificationResult } from './types';
@@ -56,11 +49,15 @@ export async function minifySingleFileAsync(
       mangle.reserved = mangle.reserved ? externals.concat(mangle.reserved) : externals;
     }
 
-    finalOptions.sourceMap = nameForMap
-      ? {
-          asObject: true
-        }
-      : false;
+    // SourceMap is only generated if nameForMap is provided- overrides terserOptions.sourceMap
+    if (nameForMap) {
+      finalOptions.sourceMap = {
+        includeSources: true,
+        asObject: true
+      };
+    } else {
+      finalOptions.sourceMap = false;
+    }
 
     const minified: MinifyOutput = await minify(
       {
@@ -76,6 +73,7 @@ export async function minifySingleFileAsync(
       hash
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     return {
       error: error as Error,

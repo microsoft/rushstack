@@ -1,6 +1,454 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+
+## 0.66.2
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 0.66.1
+Fri, 15 Mar 2024 00:12:40 GMT
+
+### Patches
+
+- Fix internal error when run 'heft clean'
+
+## 0.66.0
+Tue, 05 Mar 2024 01:19:24 GMT
+
+### Minor changes
+
+- Add new metrics value `bootDurationMs` to track the boot overhead of Heft before the action starts executing the subtasks. Update the start time used to compute `taskTotalExecutionMs` to be the beginning of operation graph execution. Fix the value of `taskTotalExecutionMs` field to be in milliseconds instead of seconds. Add new metrics value `totalUptimeMs` to track how long watch mode sessions are kept alive.
+
+## 0.65.10
+Sun, 03 Mar 2024 20:58:12 GMT
+
+_Version update only_
+
+## 0.65.9
+Sat, 02 Mar 2024 02:22:23 GMT
+
+_Version update only_
+
+## 0.65.8
+Fri, 01 Mar 2024 01:10:08 GMT
+
+_Version update only_
+
+## 0.65.7
+Thu, 29 Feb 2024 07:11:45 GMT
+
+_Version update only_
+
+## 0.65.6
+Wed, 28 Feb 2024 16:09:27 GMT
+
+_Version update only_
+
+## 0.65.5
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 0.65.4
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.65.3
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 0.65.2
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 0.65.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Fix a recent regression causing `Error: Cannot find module 'colors/safe'` (GitHub #4525)
+- Remove a no longer needed dependency on the `chokidar` package
+
+## 0.65.0
+Tue, 20 Feb 2024 16:10:52 GMT
+
+### Minor changes
+
+- Add a built-in `set-environment-variables-plugin` task plugin to set environment variables.
+
+## 0.64.8
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 0.64.7
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.64.6
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 0.64.5
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.64.4
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.64.3
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.64.2
+Tue, 23 Jan 2024 20:12:57 GMT
+
+_Version update only_
+
+## 0.64.1
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
+
+## 0.64.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3
+
+## 0.63.6
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 0.63.5
+Wed, 20 Dec 2023 01:09:45 GMT
+
+_Version update only_
+
+## 0.63.4
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.63.3
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 0.63.2
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.63.1
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.63.0
+Mon, 30 Oct 2023 23:36:37 GMT
+
+### Minor changes
+
+- [BREAKING CHANGE] Remove "heft run" short-parameters for "--to" ("-t"), "--to-except" ("-T"), and "--only" ("-o").
+
+### Patches
+
+- Fix an issue with parsing of the "--debug" and "--unmanaged" flags for Heft
+
+## 0.62.3
+Sun, 01 Oct 2023 02:56:29 GMT
+
+_Version update only_
+
+## 0.62.2
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.62.1
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.62.0
+Wed, 27 Sep 2023 00:21:38 GMT
+
+### Minor changes
+
+- (BREAKING API CHANGE) Remove the deprecated `cancellationToken` property of `IHeftTaskRunHookOptions`. Use `abortSignal` on that object instead.
+
+## 0.61.3
+Tue, 26 Sep 2023 21:02:30 GMT
+
+### Patches
+
+- Fix an issue where `heft clean` would crash with `ERR_ILLEGAL_CONSTRUCTOR`.
+
+## 0.61.2
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.61.1
+Mon, 25 Sep 2023 23:38:27 GMT
+
+_Version update only_
+
+## 0.61.0
+Fri, 22 Sep 2023 00:05:50 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE): Rename task temp folder from "<phase>.<task>" to "<phase>/<task>" to simplify caching phase outputs.
+
+## 0.60.0
+Tue, 19 Sep 2023 15:21:51 GMT
+
+### Minor changes
+
+- Allow Heft to communicate via IPC with a host process when running in watch mode. The host controls scheduling of incremental re-runs.
+
+## 0.59.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+### Patches
+
+- Migrate plugin name collision detection to the InternalHeftSession instance to allow multiple Heft sessions in the same process.
+
+## 0.58.2
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 0.58.1
+Sat, 29 Jul 2023 00:22:50 GMT
+
+### Patches
+
+- Fix the `toolFinish` lifecycle hook so that it is invoked after the `recordMetrics` hook, rather than before. Ensure that the `toolFinish` lifecycle hook is invoked if the user performs a graceful shutdown of Heft (e.g. via Ctrl+C).
+
+## 0.58.0
+Thu, 20 Jul 2023 20:47:28 GMT
+
+### Minor changes
+
+- BREAKING CHANGE: Update the heft.json "cleanFiles" property and the delete-files-plugin to delete the contents of folders specified by "sourcePath" instead of deleting the folders themselves. To delete the folders, use the "includeGlobs" property to specify the folder to delete.
+
+## 0.57.1
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.57.0
+Thu, 13 Jul 2023 00:22:37 GMT
+
+### Minor changes
+
+- Support `--clean` in watch mode. Cleaning in watch mode is now performed only during the first-pass of lifecycle or phase operations. Once the clean has been completed, `--clean` will be ignored until the command is restarted
+
+## 0.56.3
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 0.56.2
+Fri, 07 Jul 2023 00:19:32 GMT
+
+### Patches
+
+- Revise README.md and UPGRADING.md documentation
+
+## 0.56.1
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 0.56.0
+Mon, 19 Jun 2023 22:40:21 GMT
+
+### Minor changes
+
+- Use the `IRigConfig` interface in the `HeftConfiguration` object insteacd of the `RigConfig` class.
+
+## 0.55.2
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 0.55.1
+Wed, 14 Jun 2023 00:19:41 GMT
+
+### Patches
+
+- Add MockScopedLogger to help plugin authors with unit testing.
+
+## 0.55.0
+Tue, 13 Jun 2023 15:17:20 GMT
+
+### Minor changes
+
+- Remove the deprecated `cacheFolderPath` property from the session object.
+
+## 0.54.0
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Minor changes
+
+- Add plugin support for parameter short-names.
+
+## 0.53.1
+Fri, 09 Jun 2023 18:05:34 GMT
+
+### Patches
+
+- Revise CHANGELOG.md to more clearly identify the breaking changes
+
+## 0.53.0
+Fri, 09 Jun 2023 00:19:49 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove "taskEvents" heft.json configuration option, and replace it with directly referencing the included plugins. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
+
+### Patches
+
+- Update UPGRADING.md with new JSON schema URLs
+
+## 0.52.2
+Thu, 08 Jun 2023 15:21:17 GMT
+
+### Patches
+
+- Provide a useful error message when encountering legacy Heft configurations
+
+## 0.52.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+### Patches
+
+- Remove the concept of the cache folder, since it mostly just causes bugs.
+
+## 0.52.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add a new API IHeftTaskSession.parsedCommandLine for accessing the invoked command name
+- (BREAKING CHANGE) The built-in task NodeServicePlugin now supports the "--serve" mode with semantics similar to heft-webpack5-plugin. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
+
+### Patches
+
+- Add action aliases support. Action aliases can be used to create custom "heft <alias>" commands which call existing Heft commands with optional default arguments.
+
+## 0.51.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Overhaul to support splitting single-project builds into more phases than "build" and "test", to align with Rush phased commands. Please read https://github.com/microsoft/rushstack/blob/main/apps/heft/UPGRADING.md
+
+## 0.50.7
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.50.6
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.50.5
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.50.4
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.50.3
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.50.2
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Patches
+
+- Fix issues where a terminal logging prefix may be added multiple times to the same line, or only to the first line
+
+## 0.50.1
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 0.50.0
+Sat, 18 Mar 2023 00:20:56 GMT
+
+### Minor changes
+
+- Remove monkey-patching of TypeScript for compatibility with 5.0. Refactors how the multi-emit logic works.
+
+## 0.49.7
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 0.49.6
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.49.5
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 0.49.4
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 0.49.3
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.49.2
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.49.1
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.49.0
 Tue, 20 Dec 2022 01:18:22 GMT

@@ -6,13 +6,10 @@
 // Extended to use one type of text table
 
 import inquirer from 'inquirer';
-import colors from 'colors/safe';
 import CliTable from 'cli-table';
-import Separator from 'inquirer/lib/objects/separator';
-import { Import } from '@rushstack/node-core-library';
+import type Separator from 'inquirer/lib/objects/separator';
 import type * as NpmCheck from 'npm-check';
-
-const _: typeof import('lodash') = Import.lazy('lodash', require);
+import { AnsiEscape, Colorize } from '@rushstack/terminal';
 
 export interface IUIGroup {
   title: string;
@@ -37,19 +34,19 @@ export interface IUpgradeInteractiveDepChoice {
 type ChoiceTable = (Separator | IUpgradeInteractiveDepChoice | boolean | undefined)[] | undefined;
 
 function greenUnderlineBold(text: string): string {
-  return colors.underline(colors.bold(colors.green(text)));
+  return Colorize.underline(Colorize.bold(Colorize.green(text)));
 }
 
 function yellowUnderlineBold(text: string): string {
-  return colors.underline(colors.bold(colors.yellow(text)));
+  return Colorize.underline(Colorize.bold(Colorize.yellow(text)));
 }
 
 function redUnderlineBold(text: string): string {
-  return colors.underline(colors.bold(colors.red(text)));
+  return Colorize.underline(Colorize.bold(Colorize.red(text)));
 }
 
 function magentaUnderlineBold(text: string): string {
-  return colors.underline(colors.bold(colors.magenta(text)));
+  return Colorize.underline(Colorize.bold(Colorize.magenta(text)));
 }
 
 export const UI_GROUPS: IUIGroup[] = [
@@ -58,26 +55,26 @@ export const UI_GROUPS: IUIGroup[] = [
     filter: { mismatch: true, bump: undefined }
   },
   {
-    title: `${greenUnderlineBold('Missing.')} ${colors.green('You probably want these.')}`,
+    title: `${greenUnderlineBold('Missing.')} ${Colorize.green('You probably want these.')}`,
     filter: { notInstalled: true, bump: undefined }
   },
   {
-    title: `${greenUnderlineBold('Patch Update')} ${colors.green('Backwards-compatible bug fixes.')}`,
+    title: `${greenUnderlineBold('Patch Update')} ${Colorize.green('Backwards-compatible bug fixes.')}`,
     filter: { bump: 'patch' }
   },
   {
-    title: `${yellowUnderlineBold('Minor Update')} ${colors.yellow('New backwards-compatible features.')}`,
+    title: `${yellowUnderlineBold('Minor Update')} ${Colorize.yellow('New backwards-compatible features.')}`,
     bgColor: 'yellow',
     filter: { bump: 'minor' }
   },
   {
-    title: `${redUnderlineBold('Major Update')} ${colors.red(
+    title: `${redUnderlineBold('Major Update')} ${Colorize.red(
       'Potentially breaking API changes. Use caution.'
     )}`,
     filter: { bump: 'major' }
   },
   {
-    title: `${magentaUnderlineBold('Non-Semver')} ${colors.magenta('Versions less than 1.0.0, caution.')}`,
+    title: `${magentaUnderlineBold('Non-Semver')} ${Colorize.magenta('Versions less than 1.0.0, caution.')}`,
     filter: { bump: 'nonSemver' }
   }
 ];
@@ -85,16 +82,16 @@ export const UI_GROUPS: IUIGroup[] = [
 function label(dep: NpmCheck.INpmCheckPackage): string[] {
   const bumpInstalled: string = dep.bump ? dep.installed : '';
   const installed: string = dep.mismatch ? dep.packageJson : bumpInstalled;
-  const name: string = colors.yellow(dep.moduleName);
-  const type: string = dep.devDependency ? colors.green(' devDep') : '';
-  const missing: string = dep.notInstalled ? colors.red(' missing') : '';
-  const homepage: string = dep.homepage ? colors.blue(colors.underline(dep.homepage)) : '';
+  const name: string = Colorize.yellow(dep.moduleName);
+  const type: string = dep.devDependency ? Colorize.green(' devDep') : '';
+  const missing: string = dep.notInstalled ? Colorize.red(' missing') : '';
+  const homepage: string = dep.homepage ? Colorize.blue(Colorize.underline(dep.homepage)) : '';
 
   return [
     name + type + missing,
     installed,
     installed && '>',
-    colors.bold(dep.latest || ''),
+    Colorize.bold(dep.latest || ''),
     dep.latest ? homepage : dep.regError || dep.pkgError
   ];
 }
@@ -103,7 +100,7 @@ function short(dep: NpmCheck.INpmCheckPackage): string {
   return `${dep.moduleName}@${dep.latest}`;
 }
 
-function choice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
+function getChoice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | boolean | Separator {
   if (!dep.mismatch && !dep.bump && !dep.notInstalled) {
     return false;
   }
@@ -116,17 +113,25 @@ function choice(dep: NpmCheck.INpmCheckPackage): IUpgradeInteractiveDepChoice | 
 }
 
 function unselectable(options?: { title: string }): Separator {
-  return new inquirer.Separator(colors.reset(options ? options.title : ''));
+  return new inquirer.Separator(AnsiEscape.removeCodes(options ? options.title : ''));
 }
 
 function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup): ChoiceTable {
-  const filteredChoices: NpmCheck.INpmCheckPackage[] = _.filter(
-    packages,
-    options.filter
-  ) as NpmCheck.INpmCheckPackage[];
+  const { filter } = options;
+  const filteredChoices: NpmCheck.INpmCheckPackage[] = packages.filter((pkg: NpmCheck.INpmCheckPackage) => {
+    if ('mismatch' in filter && pkg.mismatch !== filter.mismatch) {
+      return false;
+    } else if ('bump' in filter && pkg.bump !== filter.bump) {
+      return false;
+    } else if ('notInstalled' in filter && pkg.notInstalled !== filter.notInstalled) {
+      return false;
+    } else {
+      return true;
+    }
+  }) as NpmCheck.INpmCheckPackage[];
 
   const choices: (IUpgradeInteractiveDepChoice | Separator | boolean)[] = filteredChoices
-    .map(choice)
+    .map(getChoice)
     .filter(Boolean);
 
   const cliTable: CliTable = new CliTable({
@@ -150,15 +155,21 @@ function createChoices(packages: NpmCheck.INpmCheckPackage[], options: IUIGroup)
     colWidths: [50, 10, 3, 10, 100]
   });
 
-  cliTable.push(..._.map(choices, 'name'));
+  for (const choice of choices) {
+    if (typeof choice === 'object' && 'name' in choice) {
+      cliTable.push(choice.name);
+    }
+  }
 
   const choicesAsATable: string[] = cliTable.toString().split('\n');
-  const choicesWithTableFormatting: boolean[] = _.map(choices, (choice: IUpgradeInteractiveDepChoice, i) => {
-    choice.name = choicesAsATable[i];
-    return choice;
-  });
+  for (let i: number = 0; i < choices.length; i++) {
+    const choice: IUpgradeInteractiveDepChoice | Separator | boolean | undefined = choices[i];
+    if (typeof choice === 'object' && 'name' in choice) {
+      choice.name = choicesAsATable[i];
+    }
+  }
 
-  if (choicesWithTableFormatting.length) {
+  if (choices.length > 0) {
     choices.unshift(unselectable(options));
     choices.unshift(unselectable());
     return choices;
@@ -170,9 +181,15 @@ export const upgradeInteractive = async (
 ): Promise<IDepsToUpgradeAnswers> => {
   const choicesGrouped: ChoiceTable[] = UI_GROUPS.map((group) => createChoices(pkgs, group)).filter(Boolean);
 
-  const choices: ChoiceTable = _.flatten(choicesGrouped);
+  const choices: ChoiceTable = [];
+  for (const choiceGroup of choicesGrouped) {
+    if (choiceGroup) {
+      choices.push(...choiceGroup);
+    }
+  }
 
   if (!choices.length) {
+    // eslint-disable-next-line no-console
     console.log('All dependencies are up to date!');
     return { packages: [] };
   }

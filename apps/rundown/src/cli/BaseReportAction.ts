@@ -6,13 +6,14 @@
 
 import {
   CommandLineAction,
-  ICommandLineActionOptions,
-  CommandLineStringParameter,
-  CommandLineFlagParameter
+  type ICommandLineActionOptions,
+  type CommandLineStringParameter,
+  type CommandLineFlagParameter,
+  type IRequiredCommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 export abstract class BaseReportAction extends CommandLineAction {
-  protected readonly scriptParameter: CommandLineStringParameter;
+  protected readonly scriptParameter: IRequiredCommandLineStringParameter;
   protected readonly argsParameter: CommandLineStringParameter;
   protected readonly quietParameter: CommandLineFlagParameter;
   protected readonly ignoreExitCodeParameter: CommandLineFlagParameter;

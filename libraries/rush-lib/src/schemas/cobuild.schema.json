@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Rush's cobuild.",
+  "description": "For use with the Rush tool, this file provides configuration options for cobuild feature. See http://rushjs.io for details.",
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": {
+        "$ref": "#/definitions/anything"
+      }
+    }
+  },
+  "type": "object",
+  "allOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cobuildFeatureEnabled", "cobuildLockProvider"],
+      "properties": {
+        "$schema": {
+          "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+          "type": "string"
+        },
+        "cobuildFeatureEnabled": {
+          "description": "Set this to true to enable the cobuild feature.",
+          "type": "boolean"
+        },
+        "cobuildLockProvider": {
+          "description": "Specify the cobuild lock provider to use",
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

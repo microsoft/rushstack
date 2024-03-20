@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tsdoc from '@microsoft/tsdoc';
-import { ExtractorMessageId } from './ExtractorMessageId';
+import type * as tsdoc from '@microsoft/tsdoc';
+import type { ExtractorMessageId } from './ExtractorMessageId';
 import { ExtractorLogLevel } from './ExtractorLogLevel';
-import { ConsoleMessageId } from './ConsoleMessageId';
+import type { ConsoleMessageId } from './ConsoleMessageId';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 
 /**
@@ -28,7 +28,7 @@ export interface IExtractorMessageProperties {
  * Specifies a category of messages for use with {@link ExtractorMessage}.
  * @public
  */
-export const enum ExtractorMessageCategory {
+export enum ExtractorMessageCategory {
   /**
    * Messages originating from the TypeScript compiler.
    *

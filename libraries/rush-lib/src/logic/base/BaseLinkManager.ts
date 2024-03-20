@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
 import {
   FileSystem,
-  FileSystemStats,
-  IFileSystemCreateLinkOptions,
+  type FileSystemStats,
+  type IFileSystemCreateLinkOptions,
   InternalError
 } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { BasePackage } from './BasePackage';
+import type { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
@@ -34,7 +34,7 @@ export abstract class BaseLinkManager {
     this._rushConfiguration = rushConfiguration;
   }
 
-  protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
+  public static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
     FileSystem.ensureFolder(newLinkFolder);
 
@@ -95,6 +95,7 @@ export abstract class BaseLinkManager {
 
     // The root-level folder is the project itself, so we simply delete its node_modules
     // to start clean
+    // eslint-disable-next-line no-console
     console.log('Purging ' + localModuleFolder);
     Utilities.dangerouslyDeletePath(localModuleFolder);
 
@@ -189,16 +190,19 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    console.log('\n' + colors.bold('Linking local projects'));
+    // eslint-disable-next-line no-console
+    console.log('\n' + Colorize.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
     await this._linkProjects();
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
-    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration.defaultSubspace).create();
 
     stopwatch.stop();
-    console.log('\n' + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    // eslint-disable-next-line no-console
+    console.log('\n' + Colorize.green(`Linking finished successfully. (${stopwatch.toString()})`));
+    // eslint-disable-next-line no-console
     console.log('\nNext you should probably run "rush build" or "rush rebuild"');
   }
 

@@ -1,42 +1,49 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import type { AsyncSeriesHook } from 'tapable';
 
-import { AlreadyReportedError, InternalError, ITerminal, Terminal } from '@rushstack/node-core-library';
-import {
+import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
+import type {
   CommandLineFlagParameter,
   CommandLineParameter,
   CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
-import { PhasedCommandHooks, ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
+import { PhasedCommandHooks, type ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
-import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
+import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
 import {
-  IOperationExecutionManagerOptions,
+  type IOperationExecutionManagerOptions,
   OperationExecutionManager
 } from '../../logic/operations/OperationExecutionManager';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { type LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 import type { IPhase, IPhasedCommandConfig } from '../../api/CommandLineConfiguration';
-import { Operation } from '../../logic/operations/Operation';
+import type { Operation } from '../../logic/operations/Operation';
+import type { OperationExecutionRecord } from '../../logic/operations/OperationExecutionRecord';
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
-import type { ITelemetryOperationResult } from '../../logic/Telemetry';
+import type { ITelemetryData, ITelemetryOperationResult } from '../../logic/Telemetry';
 import { parseParallelism } from '../parsing/ParseParallelism';
+import { CobuildConfiguration } from '../../api/CobuildConfiguration';
+import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
+import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
+import type { ProjectWatcher } from '../../logic/ProjectWatcher';
 
 /**
  * Constructor parameters for PhasedScriptAction.
@@ -46,6 +53,7 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   incremental: boolean;
   disableBuildCache: boolean;
 
+  originalPhases: Set<IPhase>;
   initialPhases: Set<IPhase>;
   watchPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
@@ -97,11 +105,16 @@ interface IPhasedCommandTelemetry {
  * "build" script for each project.
  */
 export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
+  /**
+   * @internal
+   */
+  public _runsBeforeInstall: boolean | undefined;
   public readonly hooks: PhasedCommandHooks;
 
   private readonly _enableParallelism: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _disableBuildCache: boolean;
+  private readonly _originalPhases: ReadonlySet<IPhase>;
   private readonly _initialPhases: ReadonlySet<IPhase>;
   private readonly _watchPhases: ReadonlySet<IPhase>;
   private readonly _watchDebounceMs: number;
@@ -118,17 +131,20 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private readonly _watchParameter: CommandLineFlagParameter | undefined;
   private readonly _timelineParameter: CommandLineFlagParameter | undefined;
   private readonly _installParameter: CommandLineFlagParameter | undefined;
+  private readonly _noIPCParameter: CommandLineFlagParameter | undefined;
 
   public constructor(options: IPhasedScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._isIncrementalBuildAllowed = options.incremental;
     this._disableBuildCache = options.disableBuildCache;
+    this._originalPhases = options.originalPhases;
     this._initialPhases = options.initialPhases;
     this._watchPhases = options.watchPhases;
     this._watchDebounceMs = options.watchDebounceMs ?? RushConstants.defaultWatchDebounceMs;
     this._alwaysWatch = options.alwaysWatch;
     this._alwaysInstall = options.alwaysInstall;
+    this._runsBeforeInstall = false;
     this._knownPhases = options.phases;
 
     this.hooks = new PhasedCommandHooks();
@@ -140,6 +156,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     new PhasedOperationPlugin().apply(this.hooks);
     // Applies the Shell Operation Runner to selected operations
     new ShellOperationRunnerPlugin().apply(this.hooks);
+    new ValidateOperationsPlugin(terminal).apply(this.hooks);
 
     if (this._enableParallelism) {
       this._parallelismParameter = this.defineStringParameter({
@@ -190,7 +207,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+      description:
+        `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
+        'Make sure you know what you are skipping.'
     });
 
     if (this._watchPhases.size > 0 && !this._alwaysWatch) {
@@ -212,6 +231,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         description:
           'Normally a phased command expects "rush install" to have been manually run first. If this flag is specified, ' +
           'Rush will automatically perform an install before processing the current command.'
+      });
+    }
+
+    if (
+      this._watchPhases.size > 0 &&
+      this.rushConfiguration.experimentsConfiguration.configuration.useIPCScriptsInWatchMode
+    ) {
+      this._noIPCParameter = this.defineFlagParameter({
+        parameterLongName: '--no-ipc',
+        description:
+          'Disables the IPC feature for the current command (if applicable to selected operations). Operations will not look for a ":ipc" suffixed script.' +
+          'This feature only applies in watch mode and is enabled by default.'
       });
     }
 
@@ -238,21 +269,27 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
 
       await doBasicInstallAsync({
+        terminal: this._terminal,
         rushConfiguration: this.rushConfiguration,
         rushGlobalFolder: this.rushGlobalFolder,
         isDebug: this.parser.isDebug
       });
     }
 
-    // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
-    const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
-    if (!lastLinkFlag.isValid()) {
-      const useWorkspaces: boolean =
-        this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
-      if (useWorkspaces) {
-        throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
-      } else {
-        throw new Error('Link flag invalid.\nDid you run "rush link"?');
+    if (!this._runsBeforeInstall) {
+      // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are removed
+      const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(
+        this.rushConfiguration.defaultSubspace
+      );
+      // Only check for a valid link flag when subspaces is not enabled
+      if (!lastLinkFlag.isValid() && !this.rushConfiguration.subspacesFeatureEnabled) {
+        const useWorkspaces: boolean =
+          this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+        if (useWorkspaces) {
+          throw new Error('Link flag invalid.\nDid you run "rush install" or "rush update"?');
+        } else {
+          throw new Error('Link flag invalid.\nDid you run "rush link"?');
+        }
       }
     }
 
@@ -299,74 +336,151 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     const changedProjectsOnly: boolean = !!this._changedProjectsOnly?.value;
 
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    let cobuildConfiguration: CobuildConfiguration | undefined;
     if (!this._disableBuildCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
         terminal,
         this.rushConfiguration,
         this.rushSession
       );
+      cobuildConfiguration = await CobuildConfiguration.tryLoadAsync(
+        terminal,
+        this.rushConfiguration,
+        this.rushSession
+      );
+      await cobuildConfiguration?.createLockProviderAsync(terminal);
     }
 
-    const projectSelection: Set<RushConfigurationProject> =
-      await this._selectionParameters.getSelectedProjectsAsync(terminal);
+    try {
+      const projectSelection: Set<RushConfigurationProject> =
+        await this._selectionParameters.getSelectedProjectsAsync(terminal);
 
-    if (!projectSelection.size) {
-      terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
-      return;
-    }
-
-    const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
-
-    const customParametersByName: Map<string, CommandLineParameter> = new Map();
-    for (const [configParameter, parserParameter] of this.customParameters) {
-      customParametersByName.set(configParameter.longName, parserParameter);
-    }
-
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const initialCreateOperationsContext: ICreateOperationsContext = {
-      buildCacheConfiguration,
-      customParameters: customParametersByName,
-      isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      isInitial: true,
-      isWatch,
-      rushConfiguration: this.rushConfiguration,
-      phaseSelection: new Set(this._initialPhases),
-      projectChangeAnalyzer,
-      projectSelection,
-      projectsInUnknownState: projectSelection
-    };
-
-    const executionManagerOptions: IOperationExecutionManagerOptions = {
-      quietMode: isQuietMode,
-      debugMode: this.parser.isDebug,
-      parallelism,
-      changedProjectsOnly
-    };
-
-    const internalOptions: IRunPhasesOptions = {
-      initialCreateOperationsContext,
-      executionManagerOptions,
-      stopwatch,
-      terminal
-    };
-
-    terminal.write('Analyzing repo state... ');
-    const repoStateStopwatch: Stopwatch = new Stopwatch();
-    repoStateStopwatch.start();
-    projectChangeAnalyzer._ensureInitialized(terminal);
-    repoStateStopwatch.stop();
-    terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
-    terminal.writeLine();
-
-    await this._runInitialPhases(internalOptions);
-
-    if (isWatch) {
-      if (buildCacheConfiguration) {
-        // Cache writes are not supported during watch mode, only reads.
-        buildCacheConfiguration.cacheWriteEnabled = false;
+      if (!projectSelection.size) {
+        terminal.writeLine(
+          Colorize.yellow(`The command line selection parameters did not match any projects.`)
+        );
+        return;
       }
 
-      await this._runWatchPhases(internalOptions);
+      const isWatch: boolean = this._watchParameter?.value || this._alwaysWatch;
+
+      if (isWatch && this._noIPCParameter?.value === false) {
+        new (
+          await import(
+            /* webpackChunkName: 'IPCOperationRunnerPlugin' */ '../../logic/operations/IPCOperationRunnerPlugin'
+          )
+        ).IPCOperationRunnerPlugin().apply(this.hooks);
+      }
+
+      const customParametersByName: Map<string, CommandLineParameter> = new Map();
+      for (const [configParameter, parserParameter] of this.customParameters) {
+        customParametersByName.set(configParameter.longName, parserParameter);
+      }
+
+      if (buildCacheConfiguration?.buildCacheEnabled) {
+        terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
+        new CacheableOperationPlugin({
+          allowWarningsInSuccessfulBuild:
+            !!this.rushConfiguration.experimentsConfiguration.configuration
+              .buildCacheWithAllowWarningsInSuccessfulBuild,
+          buildCacheConfiguration,
+          cobuildConfiguration,
+          terminal
+        }).apply(this.hooks);
+      } else if (!this._disableBuildCache) {
+        terminal.writeVerboseLine(`Incremental strategy: output preservation`);
+        // Explicitly disabling the build cache also disables legacy skip detection.
+        new LegacySkipPlugin({
+          allowWarningsInSuccessfulBuild:
+            this.rushConfiguration.experimentsConfiguration.configuration
+              .buildSkipWithAllowWarningsInSuccessfulBuild,
+          terminal,
+          changedProjectsOnly,
+          isIncrementalBuildAllowed: this._isIncrementalBuildAllowed
+        }).apply(this.hooks);
+      } else {
+        terminal.writeVerboseLine(`Incremental strategy: none (full rebuild)`);
+      }
+
+      const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+      if (
+        this.rushConfiguration?.packageManager === 'pnpm' &&
+        experiments?.usePnpmSyncForInjectedDependencies
+      ) {
+        const { PnpmSyncCopyOperationPlugin } = await import(
+          '../../logic/operations/PnpmSyncCopyOperationPlugin'
+        );
+        new PnpmSyncCopyOperationPlugin().apply(this.hooks);
+      }
+
+      const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
+        ._runsBeforeInstall
+        ? new Map()
+        : await RushProjectConfiguration.tryLoadForProjectsAsync(projectSelection, terminal);
+
+      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+      const initialCreateOperationsContext: ICreateOperationsContext = {
+        buildCacheConfiguration,
+        cobuildConfiguration,
+        customParameters: customParametersByName,
+        isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
+        isInitial: true,
+        isWatch,
+        rushConfiguration: this.rushConfiguration,
+        phaseOriginal: new Set(this._originalPhases),
+        phaseSelection: new Set(this._initialPhases),
+        projectChangeAnalyzer,
+        projectSelection,
+        projectConfigurations,
+        projectsInUnknownState: projectSelection
+      };
+
+      const executionManagerOptions: IOperationExecutionManagerOptions = {
+        quietMode: isQuietMode,
+        debugMode: this.parser.isDebug,
+        parallelism,
+        changedProjectsOnly,
+        beforeExecuteOperation: async (record: OperationExecutionRecord) => {
+          return await this.hooks.beforeExecuteOperation.promise(record);
+        },
+        afterExecuteOperation: async (record: OperationExecutionRecord) => {
+          await this.hooks.afterExecuteOperation.promise(record);
+        },
+        beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+          await this.hooks.beforeExecuteOperations.promise(records, initialCreateOperationsContext);
+        },
+        onOperationStatusChanged: (record: OperationExecutionRecord) => {
+          this.hooks.onOperationStatusChanged.call(record);
+        }
+      };
+
+      const internalOptions: IRunPhasesOptions = {
+        initialCreateOperationsContext,
+        executionManagerOptions,
+        stopwatch,
+        terminal
+      };
+
+      terminal.write('Analyzing repo state... ');
+      const repoStateStopwatch: Stopwatch = new Stopwatch();
+      repoStateStopwatch.start();
+      await projectChangeAnalyzer._ensureInitializedAsync(terminal);
+      repoStateStopwatch.stop();
+      terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+      terminal.writeLine();
+
+      await this._runInitialPhases(internalOptions);
+
+      if (isWatch) {
+        if (buildCacheConfiguration) {
+          // Cache writes are not supported during watch mode, only reads.
+          buildCacheConfiguration.cacheWriteEnabled = false;
+        }
+
+        await this._runWatchPhases(internalOptions);
+      }
+    } finally {
+      await cobuildConfiguration?.destroyLockProviderAsync();
     }
   }
 
@@ -390,6 +504,69 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     await this._executeOperations(initialOptions);
   }
 
+  private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
+    const toggleWatcherKey: 'w' = 'w';
+    const buildOnceKey: 'b' = 'b';
+    const invalidateKey: 'i' = 'i';
+    const shutdownKey: 'x' = 'x';
+
+    const terminal: ITerminal = this._terminal;
+
+    projectWatcher.setPromptGenerator((isPaused: boolean) => {
+      const promptLines: string[] = [
+        `  Press <${toggleWatcherKey}> to ${isPaused ? 'resume' : 'pause'}.`,
+        `  Press <${invalidateKey}> to invalidate all projects.`
+      ];
+      if (isPaused) {
+        promptLines.push(`  Press <${buildOnceKey}> to build once.`);
+      }
+      if (this._noIPCParameter?.value === false) {
+        promptLines.push(`  Press <${shutdownKey}> to reset child processes.`);
+      }
+      return promptLines;
+    });
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (key: string) => {
+      switch (key) {
+        case toggleWatcherKey:
+          if (projectWatcher.isPaused) {
+            projectWatcher.resume();
+          } else {
+            projectWatcher.pause();
+          }
+          break;
+        case buildOnceKey:
+          if (projectWatcher.isPaused) {
+            projectWatcher.clearStatus();
+            terminal.writeLine(`Building once...`);
+            projectWatcher.resume();
+            projectWatcher.pause();
+          }
+          break;
+        case invalidateKey:
+          projectWatcher.clearStatus();
+          terminal.writeLine(`Invalidating all operations...`);
+          projectWatcher.invalidateAll('manual trigger');
+          if (!projectWatcher.isPaused) {
+            projectWatcher.resume();
+          }
+          break;
+        case shutdownKey:
+          projectWatcher.clearStatus();
+          terminal.writeLine(`Shutting down long-lived child processes...`);
+          // TODO: Inject this promise into the execution queue somewhere so that it gets waited on between runs
+          void this.hooks.shutdownAsync.promise();
+          break;
+        case '\u0003':
+          process.kill(process.pid, 'SIGINT');
+          break;
+      }
+    });
+  }
+
   /**
    * Runs the command in watch mode. Fundamentally is a simple loop:
    * 1) Wait for a change to one or more projects in the selection
@@ -400,6 +577,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
   private async _runWatchPhases(options: IRunPhasesOptions): Promise<void> {
     const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
 
+    const phaseOriginal: Set<IPhase> = new Set(this._watchPhases);
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
     const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
@@ -411,13 +589,18 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       '../../logic/ProjectWatcher'
     );
 
-    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+    const projectWatcher: ProjectWatcher = new ProjectWatcher({
       debounceMs: this._watchDebounceMs,
       rushConfiguration: this.rushConfiguration,
       projectsToWatch,
       terminal,
       initialState
     });
+
+    // Ensure process.stdin allows interactivity before using TTY-only APIs
+    if (process.stdin.isTTY) {
+      this._registerWatchModeInterface(projectWatcher);
+    }
 
     const onWaitingForChanges = (): void => {
       // Allow plugins to display their own messages when waiting for changes.
@@ -430,6 +613,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }. Press Ctrl+C to exit.`
       );
     };
+
+    function invalidateOperation(operation: Operation, reason: string): void {
+      const { associatedProject } = operation;
+      if (associatedProject) {
+        // Since ProjectWatcher only tracks entire projects, widen the operation to its project
+        // Revisit when migrating to @rushstack/operation-graph and we have a long-lived operation graph
+        projectWatcher.invalidateProject(associatedProject, `${operation.name!} (${reason})`);
+      }
+    }
 
     // Loop until Ctrl+C
     // eslint-disable-next-line no-constant-condition
@@ -448,7 +640,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       );
       const names: string[] = [...changedProjects].map((x) => x.packageName).sort();
       for (const name of names) {
-        terminal.writeLine(`    ${colors.cyan(name)}`);
+        terminal.writeLine(`    ${Colorize.cyan(name)}`);
       }
 
       // Account for consumer relationships
@@ -457,7 +649,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         isInitial: false,
         projectChangeAnalyzer: state,
         projectsInUnknownState: changedProjects,
-        phaseSelection
+        phaseOriginal,
+        phaseSelection,
+        invalidateOperation
       };
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(
@@ -471,7 +665,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         ignoreHooks: true,
         operations,
         stopwatch,
-        executionManagerOptions,
+        executionManagerOptions: {
+          ...executionManagerOptions,
+          beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+            await this.hooks.beforeExecuteOperations.promise(records, createOperationsContext);
+          }
+        },
         terminal
       };
 
@@ -513,7 +712,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const message: string = `rush ${this.actionName} (${stopwatch.toString()})`;
       if (result.status === OperationStatus.Success) {
-        terminal.writeLine(colors.green(message));
+        terminal.writeLine(Colorize.green(message));
       } else {
         terminal.writeLine(message);
       }
@@ -532,7 +731,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
           }
         }
 
-        terminal.writeErrorLine(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+        terminal.writeErrorLine(Colorize.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
       }
     }
 
@@ -626,13 +825,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         }
       }
 
-      this.parser.telemetry.log({
+      const logEntry: ITelemetryData = {
         name: this.actionName,
         durationInSeconds: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData,
         operationResults
-      });
+      };
+
+      this.hooks.beforeLog.call(logEntry);
+
+      this.parser.telemetry.log(logEntry);
 
       this.parser.flushTelemetry();
     }

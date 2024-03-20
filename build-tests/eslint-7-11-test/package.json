@@ -1,0 +1,20 @@
+{
+  "name": "eslint-7-11-test",
+  "description": "This project contains a build test to validate ESLint 7.11.0 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin)",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@types/node": "18.17.15",
+    "@typescript-eslint/parser": "~6.19.0",
+    "eslint": "7.11.0",
+    "typescript": "~5.4.2"
+  }
+}

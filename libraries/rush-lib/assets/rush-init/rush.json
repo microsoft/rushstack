@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "6.7.1",
+  "pnpmVersion": "7.33.5",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "6.14.15",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0 || >=14.15.0 <15.0.0 || >=16.13.0 <17.0.0",
+  "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0 || >=18.15.0 <19.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -247,60 +247,37 @@
    */
   "eventHooks": {
     /**
-     * The list of shell commands to run before the Rush installation starts
+     * A list of shell commands to run before "rush install" or "rush update" starts installation
      */
     "preRushInstall": [
       /*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"
     ],
 
     /**
-     * The list of shell commands to run after the Rush installation finishes
+     * A list of shell commands to run after "rush install" or "rush update" finishes installation
      */
     "postRushInstall": [],
 
     /**
-     * The list of shell commands to run before the Rush build command starts
+     * A list of shell commands to run before "rush build" or "rush rebuild" starts building
      */
     "preRushBuild": [],
 
     /**
-     * The list of shell commands to run after the Rush build command finishes
+     * A list of shell commands to run after "rush build" or "rush rebuild" finishes building
      */
-    "postRushBuild": []
+    "postRushBuild": [],
+
+    /**
+     * A list of shell commands to run before the "rushx" command starts
+     */
+    "preRushx": [],
+
+    /**
+     * A list of shell commands to run after the "rushx" command finishes
+     */
+    "postRushx": []
   },
-
-  /**
-   * Installation variants allow you to maintain a parallel set of configuration files that can be
-   * used to build the entire monorepo with an alternate set of dependencies.  For example, suppose
-   * you upgrade all your projects to use a new release of an important framework, but during a transition period
-   * you intend to maintain compatibility with the old release.  In this situation, you probably want your
-   * CI validation to build the entire repo twice: once with the old release, and once with the new release.
-   *
-   * Rush "installation variants" correspond to sets of config files located under this folder:
-   *
-   *   common/config/rush/variants/<variant_name>
-   *
-   * The variant folder can contain an alternate common-versions.json file.  Its "preferredVersions" field can be used
-   * to select older versions of dependencies (within a loose SemVer range specified in your package.json files).
-   * To install a variant, run "rush install --variant <variant_name>".
-   *
-   * For more details and instructions, see this article:  https://rushjs.io/pages/advanced/installation_variants/
-   */
-  "variants": [
-    /*[BEGIN "HYPOTHETICAL"]*/
-    {
-      /**
-       * The folder name for this variant.
-       */
-      "variantName": "old-sdk",
-
-      /**
-       * An informative description
-       */
-      "description": "Build this repo using the previous release of the SDK"
-    }
-    /*[END "HYPOTHETICAL"]*/
-  ],
 
   /**
    * Rush can collect anonymous telemetry about everyday developer activity such as
@@ -320,13 +297,13 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
-    * This is an optional, but recommended, list of allowed tags that can be applied to Rush projects
-    * using the "tags" setting in this file.  This list is useful for preventing mistakes such as misspelling,
-    * and it also provides a centralized place to document your tags.  If "allowedProjectTags" list is
-    * not specified, then any valid tag is allowed.  A tag name must be one or more words
-    * separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits,
-    * ".", and "@" characters.
-    */
+   * This is an optional, but recommended, list of allowed tags that can be applied to Rush projects
+   * using the "tags" setting in this file.  This list is useful for preventing mistakes such as misspelling,
+   * and it also provides a centralized place to document your tags.  If "allowedProjectTags" list is
+   * not specified, then any valid tag is allowed.  A tag name must be one or more words
+   * separated by hyphens or slashes, where a word may contain lowercase ASCII letters, digits,
+   * ".", and "@" characters.
+   */
   /*[LINE "HYPOTHETICAL"]*/ "allowedProjectTags": [ "tools", "frontend-team", "1.0.0-release" ],
 
   /**

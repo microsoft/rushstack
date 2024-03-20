@@ -143,6 +143,6 @@ separate patterns.
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/tree-pattern/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/tree-pattern/)
+- [API Reference](https://api.rushstack.io/pages/tree-pattern/)
 
 `@rushstack/tree-pattern` is part of the [Rush Stack](https://rushstack.io/) family of projects.

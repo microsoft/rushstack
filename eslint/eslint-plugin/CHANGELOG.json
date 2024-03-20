@@ -2,6 +2,93 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.15.1",
+      "tag": "@rushstack/eslint-plugin_v0.15.1",
+      "date": "Sat, 17 Feb 2024 06:24:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.15.0",
+      "tag": "@rushstack/eslint-plugin_v0.15.0",
+      "date": "Wed, 07 Feb 2024 01:11:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow using `as const` in `typedef-var`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.14.0",
+      "tag": "@rushstack/eslint-plugin_v0.14.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 5.3 with @typescript-eslint 6.19.x"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.1",
+      "tag": "@rushstack/eslint-plugin_v0.13.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.0",
+      "tag": "@rushstack/eslint-plugin_v0.13.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.12.0",
+      "tag": "@rushstack/eslint-plugin_v0.12.0",
+      "date": "Mon, 22 May 2023 06:34:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the @typescript-eslint/* dependencies to ~5.59.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.11.0",
       "tag": "@rushstack/eslint-plugin_v0.11.0",
       "date": "Thu, 29 Sep 2022 07:13:06 GMT",

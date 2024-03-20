@@ -1,20 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import { type PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
+import type { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import type { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
+import { CustomTipId } from '../../api/CustomTipsConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 const TRUNCATE_AFTER_PACKAGE_NAME_COUNT: number = 5;
 
 export interface IVersionMismatchFinderOptions {
-  variant?: string | undefined;
+  subspace?: Subspace;
 }
 
 export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatchFinderOptions {
@@ -65,20 +68,24 @@ export class VersionMismatchFinder {
 
   public static rushCheck(
     rushConfiguration: RushConfiguration,
+    terminal: ITerminal,
     options: IVersionMismatchFinderRushCheckOptions = {}
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
+      terminal,
       isRushCheckCommand: true
     });
   }
 
   public static ensureConsistentVersions(
     rushConfiguration: RushConfiguration,
+    terminal: ITerminal,
     options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
   ): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
       ...options,
+      terminal,
       isRushCheckCommand: false,
       truncateLongPackageNameLists: true
     });
@@ -92,7 +99,9 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: IVersionMismatchFinderOptions = {}
   ): VersionMismatchFinder {
-    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
+    const commonVersions: CommonVersionsConfiguration = (
+      options.subspace ?? rushConfiguration.defaultSubspace
+    ).getCommonVersions();
 
     const projects: VersionMismatchFinderEntity[] = [];
 
@@ -100,7 +109,14 @@ export class VersionMismatchFinder {
     // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    for (const project of rushConfiguration.projects) {
+    // If subspace is specified, only go through projects in that subspace
+    let projectsToParse: RushConfigurationProject[] = [];
+    if (options.subspace) {
+      projectsToParse = options.subspace.getProjects();
+    } else {
+      projectsToParse = rushConfiguration.projects;
+    }
+    for (const project of projectsToParse) {
       projects.push(new VersionMismatchFinderProject(project));
     }
 
@@ -111,8 +127,9 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: {
       isRushCheckCommand: boolean;
-      variant?: string | undefined;
+      subspace?: Subspace | undefined;
       printAsJson?: boolean | undefined;
+      terminal: ITerminal;
       truncateLongPackageNameLists?: boolean | undefined;
     }
   ): void {
@@ -128,9 +145,21 @@ export class VersionMismatchFinder {
         mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
-          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          // eslint-disable-next-line no-console
+          console.log(
+            Colorize.red(
+              `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
+                options.subspace?.subspaceName ? `in subspace: ${options.subspace?.subspaceName}` : ''
+              }`
+            )
+          );
+          rushConfiguration.customTipsConfiguration._showErrorTip(
+            options.terminal,
+            CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
+          );
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
+            // eslint-disable-next-line no-console
             console.log(
               'For more detailed reporting about these version mismatches, use the "rush check --verbose" command.'
             );
@@ -139,7 +168,8 @@ export class VersionMismatchFinder {
           throw new AlreadyReportedError();
         } else {
           if (options.isRushCheckCommand) {
-            console.log(colors.green(`Found no mis-matching dependencies!`));
+            // eslint-disable-next-line no-console
+            console.log(Colorize.green(`Found no mis-matching dependencies!`));
           }
         }
       }
@@ -203,14 +233,17 @@ export class VersionMismatchFinder {
       mismatchedVersions: mismatchDependencies
     };
 
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(output, undefined, 2));
   }
 
   public print(truncateLongPackageNameLists: boolean = false): void {
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     this.getMismatches().forEach((dependency: string) => {
-      console.log(colors.yellow(dependency));
+      // eslint-disable-next-line no-console
+      console.log(Colorize.yellow(dependency));
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
+        // eslint-disable-next-line no-console
         console.log(`  ${version}`);
         const consumersOfMismatch: VersionMismatchFinderEntity[] = this.getConsumersOfMismatch(
           dependency,
@@ -228,13 +261,16 @@ export class VersionMismatchFinder {
 
           numberRemaining--;
 
+          // eslint-disable-next-line no-console
           console.log(`   - ${friendlyName}`);
         }
 
         if (numberRemaining > 0) {
+          // eslint-disable-next-line no-console
           console.log(`   (and ${numberRemaining} others)`);
         }
       });
+      // eslint-disable-next-line no-console
       console.log();
     });
   }

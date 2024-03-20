@@ -6,7 +6,7 @@
 
 Some class-like variable.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 ClassLikeVariable: {

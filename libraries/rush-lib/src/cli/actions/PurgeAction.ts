@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { UnlinkManager } from '../../logic/UnlinkManager';
@@ -48,11 +47,12 @@ export class PurgeAction extends BaseRushAction {
       purgeManager.purgeNormal();
     }
 
-    purgeManager.deleteAll();
+    await purgeManager.startDeleteAllAsync();
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
-        colors.green(
+        Colorize.green(
           `Rush purge started successfully and will complete asynchronously. (${stopwatch.toString()})`
         )
     );

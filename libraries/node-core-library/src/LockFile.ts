@@ -263,8 +263,7 @@ export class LockFile {
       // We should ideally maintain a dictionary of normalized acquired filenames
       lockFileHandle = FileWriter.open(pidLockFilePath);
       lockFileHandle.write(startTime);
-
-      const currentBirthTimeMs: number = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
+      const currentBirthTimeMs: number = lockFileHandle.getStatistics().birthtime.getTime();
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
@@ -297,8 +296,11 @@ export class LockFile {
             otherPidOldStartTime = FileSystem.readFile(fileInFolderPath);
             // check the timestamp of the file
             otherBirthtimeMs = FileSystem.getStatistics(fileInFolderPath).birthtime.getTime();
-          } catch (err) {
-            // this means the file is probably deleted already
+          } catch (error) {
+            if (FileSystem.isNotExistError(error)) {
+              // the file is already deleted by other process, skip it
+              continue;
+            }
           }
 
           // if the otherPidOldStartTime is invalid, then we should look at the timestamp,

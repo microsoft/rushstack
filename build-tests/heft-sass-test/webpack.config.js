@@ -3,6 +3,7 @@
 const path = require('path');
 const Autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/webpack4-module-minifier-plugin');
 
 /**
  * If the "--production" command-line parameter is specified when invoking Heft, then the
@@ -18,7 +19,7 @@ function createWebpackConfig({ production }) {
     module: {
       rules: [
         {
-          test: /\.css$/,
+          test: /\.s?css$/,
           exclude: /node_modules/,
           use: [
             // Creates `style` nodes from JS strings
@@ -66,7 +67,15 @@ function createWebpackConfig({ production }) {
       new HtmlWebpackPlugin({
         template: 'assets/index.html'
       })
-    ]
+    ],
+    optimization: {
+      minimizer: [
+        new ModuleMinifierPlugin({
+          minifier: new WorkerPoolMinifier(),
+          useSourceMap: true
+        })
+      ]
+    }
   };
 
   return webpackConfig;

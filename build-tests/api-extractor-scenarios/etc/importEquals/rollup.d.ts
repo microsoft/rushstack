@@ -1,6 +1,6 @@
-import colors = require('colors');
+import { Colorize } from '@rushstack/terminal';
 
 /** @public */
-export declare function useColors(): typeof colors.zebra;
+export declare function useColors(): typeof Colorize.red;
 
 export { }

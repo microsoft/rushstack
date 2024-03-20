@@ -6,7 +6,7 @@
 
 Some prop.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 someProp: number;

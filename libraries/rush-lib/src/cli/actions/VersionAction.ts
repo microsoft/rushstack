@@ -2,18 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { type IPackageJson, FileConstants, Enum } from '@rushstack/node-core-library';
+import type { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
-import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
+import { BumpType, type LockStepVersionPolicy } from '../../api/VersionPolicy';
+import type { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { RushCommandLineParser } from '../RushCommandLineParser';
-import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import * as PolicyValidator from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
+import { RushConstants } from '../../logic/RushConstants';
 
 import type * as VersionManagerType from '../../logic/VersionManager';
 
@@ -61,7 +62,7 @@ export class VersionAction extends BaseRushAction {
       description: 'Bumps package version based on version policies.'
     });
     this._bypassPolicy = this.defineFlagParameter({
-      parameterLongName: '--bypass-policy',
+      parameterLongName: RushConstants.bypassPolicyFlagLongName,
       description: 'Overrides "gitPolicy" enforcement (use honorably!)'
     });
     this._versionPolicy = this.defineStringParameter({
@@ -94,7 +95,14 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
+    await PolicyValidator.validatePolicyAsync(
+      this.rushConfiguration,
+      this.rushConfiguration.defaultSubspace,
+      {
+        bypassPolicyAllowed: true,
+        bypassPolicy: this._bypassPolicy.value
+      }
+    );
     const git: Git = new Git(this.rushConfiguration);
     const userEmail: string = git.getGitEmail();
 
@@ -120,6 +128,7 @@ export class VersionAction extends BaseRushAction {
 
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
+        // eslint-disable-next-line no-console
         console.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch, this._targetBranch.value);
       }
@@ -203,6 +212,11 @@ export class VersionAction extends BaseRushAction {
     const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
       this.rushConfiguration.rushJsonFile
     );
+
+    // Respect the `ensureConsistentVersions` field in rush.json
+    if (!rushConfig.ensureConsistentVersions) {
+      return;
+    }
 
     const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
     if (mismatchFinder.numberOfMismatches) {

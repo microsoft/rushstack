@@ -1,4 +1,7 @@
-import { ApiItem } from '../items/ApiItem';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { ApiItem } from '../items/ApiItem';
 
 /**
  * Generic result object for finding API items used by different kinds of find operations.

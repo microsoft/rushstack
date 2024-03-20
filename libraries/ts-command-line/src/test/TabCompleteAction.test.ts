@@ -1,19 +1,11 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 import { TabCompleteAction } from '../providers/TabCompletionAction';
-import { ICommandLineStringDefinition } from '../parameters/CommandLineDefinition';
 
-/**
- * Provides the parameter configuration for '--variant'.
- */
-const VARIANT_PARAMETER: ICommandLineStringDefinition = {
-  parameterLongName: '--variant',
-  argumentName: 'VARIANT',
-  description: 'Run command using a variant installation configuration',
-  environmentVariable: 'RUSH_VARIANT'
-};
-
-async function arrayFromAsyncIteractorAsync(iterator: AsyncIterable<string>): Promise<string[]> {
+async function arrayFromAsyncIteratorAsync(iterator: AsyncIterable<string>): Promise<string[]> {
   const ret: string[] = [];
 
   for await (const val of iterator) {
@@ -198,7 +190,6 @@ function getCommandLineParser(): DynamicCommandLineParser {
     description: `Overrides the default maximum number of install attempts.`,
     defaultValue: 3
   });
-  installAction.defineStringParameter(VARIANT_PARAMETER);
 
   commandLineParser.defineFlagParameter({
     parameterLongName: '--debug',
@@ -215,7 +206,7 @@ const tc: TabCompleteAction = new TabCompleteAction(commandLineParser.actions, c
 describe(TabCompleteAction.name, () => {
   it(`gets completion(s) for rush <tab>`, async () => {
     const commandLine: string = 'rush ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -226,7 +217,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush a<tab>`, async () => {
     const commandLine: string = 'rush a';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -237,7 +228,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush -d a<tab>`, async () => {
     const commandLine: string = 'rush -d a';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -248,7 +239,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush build <tab>`, async () => {
     const commandLine: string = 'rush build ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -260,7 +251,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush build -<tab>`, async () => {
     const commandLine: string = 'rush build -';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -272,7 +263,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush build -t <tab>`, async () => {
     const commandLine: string = 'rush build -t ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -283,7 +274,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush build -t a<tab>`, async () => {
     const commandLine: string = 'rush build -t a';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -294,7 +285,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush --debug build -t a<tab>`, async () => {
     const commandLine: string = 'rush --debug build -t a';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -305,7 +296,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush change --bump-type <tab>`, async () => {
     const commandLine: string = 'rush change --bump-type ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -316,7 +307,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush change --bulk <tab>`, async () => {
     const commandLine: string = 'rush change --bulk ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -328,7 +319,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush change --bump-type m<tab>`, async () => {
     const commandLine: string = 'rush change --bump-type m';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -339,7 +330,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush change --message <tab>`, async () => {
     const commandLine: string = 'rush change --message ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -350,7 +341,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush change --message "my change log message" --bump-type <tab>`, async () => {
     const commandLine: string = 'rush change --message "my change log message" --bump-type ';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 
@@ -361,7 +352,7 @@ describe(TabCompleteAction.name, () => {
 
   it(`gets completion(s) for rush change --message "my change log message" --bump-type m<tab>`, async () => {
     const commandLine: string = 'rush change --message "my change log message" --bump-type m';
-    const actual: string[] = await arrayFromAsyncIteractorAsync(
+    const actual: string[] = await arrayFromAsyncIteratorAsync(
       tc.getCompletions(commandLine.trim(), commandLine.length)
     );
 

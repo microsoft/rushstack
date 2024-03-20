@@ -24,109 +24,26 @@ export class AlreadyReportedError extends Error {
 }
 
 // @public
-export class AnsiEscape {
-    static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
-    static removeCodes(text: string): string;
-}
-
-// @beta
 export class Async {
     static forEachAsync<TEntry>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static getSignal(): [Promise<void>, () => void, (err: Error) => void];
     static mapAsync<TEntry, TRetVal>(iterable: Iterable<TEntry> | AsyncIterable<TEntry>, callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static runWithRetriesAsync<TResult>({ action, maxRetries, retryDelayMs }: IRunWithRetriesOptions<TResult>): Promise<TResult>;
     static sleep(ms: number): Promise<void>;
 }
 
 // @public
+export class AsyncQueue<T> implements AsyncIterable<[T, () => void]> {
+    // (undocumented)
+    [Symbol.asyncIterator](): AsyncIterableIterator<[T, () => void]>;
+    constructor(iterable?: Iterable<T>);
+    push(item: T): void;
+}
+
+// @public
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
-
-// @beta
-export class Colors {
-    // (undocumented)
-    static black(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static blackBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static blink(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static blue(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static blueBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static bold(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static cyan(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static cyanBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static dim(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static gray(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static grayBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static green(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static greenBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static hidden(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static invertColor(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static magenta(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static magentaBackground(text: string | IColorableSequence): IColorableSequence;
-    // @internal
-    static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static red(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static redBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static underline(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static white(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static whiteBackground(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static yellow(text: string | IColorableSequence): IColorableSequence;
-    // (undocumented)
-    static yellowBackground(text: string | IColorableSequence): IColorableSequence;
-}
-
-// @beta
-export enum ColorValue {
-    // (undocumented)
-    Black = 0,
-    // (undocumented)
-    Blue = 4,
-    // (undocumented)
-    Cyan = 6,
-    // (undocumented)
-    Gray = 8,
-    // (undocumented)
-    Green = 2,
-    // (undocumented)
-    Magenta = 5,
-    // (undocumented)
-    Red = 1,
-    // (undocumented)
-    White = 7,
-    // (undocumented)
-    Yellow = 3
-}
-
-// @beta
-export class ConsoleTerminalProvider implements ITerminalProvider {
-    constructor(options?: Partial<IConsoleTerminalProviderOptions>);
-    debugEnabled: boolean;
-    get eolCharacter(): string;
-    get supportsColor(): boolean;
-    verboseEnabled: boolean;
-    write(data: string, severity: TerminalProviderSeverity): void;
-}
 
 // @public
 export enum Encoding {
@@ -169,9 +86,16 @@ export class EnvironmentMap {
 
 // @public
 export class Executable {
+    static getProcessInfoById(): Map<number, IProcessInfo>;
+    static getProcessInfoByIdAsync(): Promise<Map<number, IProcessInfo>>;
+    static getProcessInfoByName(): Map<string, IProcessInfo[]>;
+    static getProcessInfoByNameAsync(): Promise<Map<string, IProcessInfo[]>>;
     static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithStringOptions): Promise<IWaitForExitResult<string>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options: IWaitForExitWithBufferOptions): Promise<IWaitForExitResult<Buffer>>;
+    static waitForExitAsync(childProcess: child_process.ChildProcess, options?: IWaitForExitOptions): Promise<IWaitForExitResult<never>>;
 }
 
 // @public
@@ -210,12 +134,12 @@ export type FileLocationStyle = 'Unix' | 'VisualStudio';
 export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static appendToFileAsync(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): Promise<void>;
-    static changePosixModeBits(path: string, mode: PosixModeBits): void;
+    static changePosixModeBits(path: string, modeBits: PosixModeBits): void;
     static changePosixModeBitsAsync(path: string, mode: PosixModeBits): Promise<void>;
     static copyFile(options: IFileSystemCopyFileOptions): void;
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
-    static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -257,10 +181,6 @@ export class FileSystem {
     static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
     static readFileToBuffer(filePath: string): Buffer;
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
-    // @deprecated (undocumented)
-    static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
-    // @deprecated (undocumented)
-    static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
@@ -286,6 +206,7 @@ export type FileSystemStats = fs.Stats;
 export class FileWriter {
     close(): void;
     readonly filePath: string;
+    getStatistics(): FileSystemStats;
     static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
@@ -300,33 +221,16 @@ export enum FolderConstants {
 export type FolderItem = fs.Dirent;
 
 // @public
-export interface IAnsiEscapeConvertForTestsOptions {
-    encodeNewlines?: boolean;
-}
-
-// @beta
 export interface IAsyncParallelismOptions {
     concurrency?: number;
 }
 
-// @beta (undocumented)
-export interface IColorableSequence {
+// @public
+export interface IDependenciesMetaTable {
     // (undocumented)
-    backgroundColor?: ColorValue;
-    // (undocumented)
-    foregroundColor?: ColorValue;
-    // (undocumented)
-    isEol?: boolean;
-    // (undocumented)
-    text: string;
-    // (undocumented)
-    textAttributes?: TextAttribute[];
-}
-
-// @beta
-export interface IConsoleTerminalProviderOptions {
-    debugEnabled: boolean;
-    verboseEnabled: boolean;
+    [dependencyName: string]: {
+        injected?: boolean;
+    };
 }
 
 // @public
@@ -445,6 +349,16 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveAsyncOptions extends IImportResolveOptions {
+    getRealPathAsync?: (filePath: string) => Promise<string>;
+}
+
+// @public
+export interface IImportResolveModuleAsyncOptions extends IImportResolveAsyncOptions {
+    modulePath: string;
+}
+
+// @public
 export interface IImportResolveModuleOptions extends IImportResolveOptions {
     modulePath: string;
 }
@@ -453,7 +367,13 @@ export interface IImportResolveModuleOptions extends IImportResolveOptions {
 export interface IImportResolveOptions {
     allowSelfReference?: boolean;
     baseFolderPath: string;
+    getRealPath?: (filePath: string) => string;
     includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageAsyncOptions extends IImportResolveAsyncOptions {
+    packageName: string;
 }
 
 // @public
@@ -504,13 +424,16 @@ export interface IJsonSchemaValidateOptions {
 export class Import {
     static lazy(moduleName: string, require: (id: string) => unknown): any;
     static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolveModuleAsync(options: IImportResolveModuleAsyncOptions): Promise<string>;
     static resolvePackage(options: IImportResolvePackageOptions): string;
+    static resolvePackageAsync(options: IImportResolvePackageAsyncOptions): Promise<string>;
 }
 
 // @public
 export interface INodePackageJson {
-    bin?: string;
+    bin?: string | Record<string, string>;
     dependencies?: IPackageJsonDependencyTable;
+    dependenciesMeta?: IDependenciesMetaTable;
     description?: string;
     devDependencies?: IPackageJsonDependencyTable;
     homepage?: string;
@@ -519,6 +442,7 @@ export interface INodePackageJson {
     name: string;
     optionalDependencies?: IPackageJsonDependencyTable;
     peerDependencies?: IPackageJsonDependencyTable;
+    peerDependenciesMeta?: IPeerDependenciesMetaTable;
     private?: boolean;
     repository?: string | IPackageJsonRepository;
     resolutions?: Record<string, string>;
@@ -600,13 +524,35 @@ export interface IPathFormatFileLocationOptions {
 }
 
 // @public
+export interface IPeerDependenciesMetaTable {
+    // (undocumented)
+    [dependencyName: string]: {
+        optional?: boolean;
+    };
+}
+
+// @public
+export interface IProcessInfo {
+    childProcessInfos: IProcessInfo[];
+    parentProcessInfo: IProcessInfo | undefined;
+    processId: number;
+    processName: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
-// @beta (undocumented)
+// @public
+export interface IReadLinesFromIterableOptions {
+    encoding?: Encoding;
+    ignoreEmptyLines?: boolean;
+}
+
+// @public (undocumented)
 export interface IRunWithRetriesOptions<TResult> {
     // (undocumented)
     action: () => Promise<TResult> | TResult;
@@ -614,11 +560,6 @@ export interface IRunWithRetriesOptions<TResult> {
     maxRetries: number;
     // (undocumented)
     retryDelayMs?: number;
-}
-
-// @beta (undocumented)
-export interface IStringBufferOutputOptions {
-    normalizeSpecialCharacters: boolean;
 }
 
 // @public
@@ -632,27 +573,27 @@ export interface ISubprocessOptions {
     detached: boolean;
 }
 
-// @beta (undocumented)
-export interface ITerminal {
-    registerProvider(provider: ITerminalProvider): void;
-    unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeError(...messageParts: (string | IColorableSequence)[]): void;
-    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+// @public
+export interface IWaitForExitOptions {
+    encoding?: BufferEncoding | 'buffer';
+    throwOnNonZeroExitCode?: boolean;
 }
 
-// @beta
-export interface ITerminalProvider {
-    eolCharacter: string;
-    supportsColor: boolean;
-    write(data: string, severity: TerminalProviderSeverity): void;
+// @public
+export interface IWaitForExitResult<T extends Buffer | string | never = never> {
+    exitCode: number | null;
+    stderr: T;
+    stdout: T;
+}
+
+// @public
+export interface IWaitForExitWithBufferOptions extends IWaitForExitOptions {
+    encoding: 'buffer';
+}
+
+// @public
+export interface IWaitForExitWithStringOptions extends IWaitForExitOptions {
+    encoding: BufferEncoding;
 }
 
 // @public
@@ -708,8 +649,6 @@ export class LegacyAdapters {
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
-    // @deprecated
-    static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
 }
 
 // @public
@@ -732,6 +671,15 @@ export class MapExtensions {
     static toObject<TValue>(map: Map<string, TValue>): {
         [key: string]: TValue;
     };
+}
+
+// @public
+export class MinimumHeap<T> {
+    constructor(comparator: (a: T, b: T) => number);
+    peek(): T | undefined;
+    poll(): T | undefined;
+    push(item: T): void;
+    get size(): number;
 }
 
 // @public
@@ -832,19 +780,6 @@ export class Sort {
     static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
 }
 
-// @beta
-export class StringBufferTerminalProvider implements ITerminalProvider {
-    constructor(supportsColor?: boolean);
-    get eolCharacter(): string;
-    getDebugOutput(options?: IStringBufferOutputOptions): string;
-    getErrorOutput(options?: IStringBufferOutputOptions): string;
-    getOutput(options?: IStringBufferOutputOptions): string;
-    getVerbose(options?: IStringBufferOutputOptions): string;
-    getWarningOutput(options?: IStringBufferOutputOptions): string;
-    get supportsColor(): boolean;
-    write(data: string, severity: TerminalProviderSeverity): void;
-}
-
 // @public
 export class StringBuilder implements IStringBuilder {
     constructor();
@@ -859,64 +794,21 @@ export class SubprocessTerminator {
     static readonly RECOMMENDED_OPTIONS: ISubprocessOptions;
 }
 
-// @beta
-export class Terminal implements ITerminal {
-    constructor(provider: ITerminalProvider);
-    registerProvider(provider: ITerminalProvider): void;
-    unregisterProvider(provider: ITerminalProvider): void;
-    write(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
-    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeError(...messageParts: (string | IColorableSequence)[]): void;
-    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
-    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
-    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
-}
-
-// @beta
-export enum TerminalProviderSeverity {
-    // (undocumented)
-    debug = 4,
-    // (undocumented)
-    error = 2,
-    // (undocumented)
-    log = 0,
-    // (undocumented)
-    verbose = 3,
-    // (undocumented)
-    warning = 1
-}
-
 // @public
 export class Text {
     static convertTo(input: string, newlineKind: NewlineKind): string;
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+    static escapeRegExp(literal: string): string;
     static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
+    static readLinesFromIterable(iterable: Iterable<string | Buffer | null>, options?: IReadLinesFromIterableOptions): Generator<string>;
+    static readLinesFromIterableAsync(iterable: AsyncIterable<string | Buffer>, options?: IReadLinesFromIterableOptions): AsyncGenerator<string>;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
+    static reverse(s: string): string;
     static truncateWithEllipsis(s: string, maximumLength: number): string;
-}
-
-// @beta
-export enum TextAttribute {
-    // (undocumented)
-    Blink = 3,
-    // (undocumented)
-    Bold = 0,
-    // (undocumented)
-    Dim = 1,
-    // (undocumented)
-    Hidden = 5,
-    // (undocumented)
-    InvertColor = 4,
-    // (undocumented)
-    Underline = 2
 }
 
 // @public

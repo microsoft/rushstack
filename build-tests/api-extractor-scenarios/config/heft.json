@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "local-node-rig/profiles/default/config/heft.json",
+
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [
+        {
+          "sourcePath": "temp/etc",
+          "includeGlobs": ["**/*"]
+        },
+        {
+          "sourcePath": "temp/configs",
+          "includeGlobs": ["**/*"]
+        }
+      ],
+
+      "tasksByName": {
+        "copy-dts": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src",
+                  "destinationFolders": ["lib"],
+                  "fileExtensions": [".d.ts"]
+                }
+              ]
+            }
+          }
+        },
+
+        "run-scenarios": {
+          "taskDependencies": ["typescript", "copy-dts"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./lib/runScenarios.js"
+            }
+          }
+        }
+      }
+    }
+  }
+}

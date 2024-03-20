@@ -8,3 +8,5 @@ import(/* webpackChunkName: 'chunk' */ './chunks/ChunkClass')
   .catch((e) => {
     console.log('Error: ' + e.message);
   });
+
+export {};

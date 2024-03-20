@@ -1,6 +1,470 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+
+## 0.9.39
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 0.9.38
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
+
+## 0.9.37
+Tue, 05 Mar 2024 01:19:24 GMT
+
+_Version update only_
+
+## 0.9.36
+Sun, 03 Mar 2024 20:58:13 GMT
+
+_Version update only_
+
+## 0.9.35
+Sat, 02 Mar 2024 02:22:24 GMT
+
+_Version update only_
+
+## 0.9.34
+Fri, 01 Mar 2024 01:10:08 GMT
+
+_Version update only_
+
+## 0.9.33
+Thu, 29 Feb 2024 07:11:45 GMT
+
+_Version update only_
+
+## 0.9.32
+Wed, 28 Feb 2024 16:09:27 GMT
+
+_Version update only_
+
+## 0.9.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 0.9.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.9.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 0.9.28
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 0.9.27
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.9.26
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
+
+## 0.9.25
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 0.9.24
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 0.9.23
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 0.9.22
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 0.9.21
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.9.20
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.9.19
+Tue, 23 Jan 2024 20:12:57 GMT
+
+_Version update only_
+
+## 0.9.18
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
+
+## 0.9.17
+Tue, 16 Jan 2024 18:30:11 GMT
+
+_Version update only_
+
+## 0.9.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 0.9.15
+Wed, 20 Dec 2023 01:09:45 GMT
+
+_Version update only_
+
+## 0.9.14
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.9.13
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 0.9.12
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.9.11
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.9.10
+Mon, 30 Oct 2023 23:36:37 GMT
+
+_Version update only_
+
+## 0.9.9
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.9.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.9.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.9.6
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 0.9.5
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 0.9.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.9.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.9.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 0.9.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.9.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.8.15
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 0.8.14
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.8.13
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 0.8.12
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.8.11
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 0.8.10
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 0.8.9
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 0.8.8
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.8.7
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 0.8.6
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 0.8.5
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 0.8.4
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 0.8.3
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.8.2
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.8.1
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.8.0
+Wed, 14 Jun 2023 00:19:41 GMT
+
+### Minor changes
+
+- Move loading of webpack config file into the `onLoadConfiguration` hook to allow other plugins to define fallback behavior, rather than only overriding the config file.
+
+## 0.7.10
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 0.7.9
+Tue, 13 Jun 2023 01:49:01 GMT
+
+### Patches
+
+- Bump webpack to v5.82.1
+
+## 0.7.8
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.7.7
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.7.6
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.7.5
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.7.4
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 0.7.3
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Patches
+
+- Improve the error message when the "--serve" is incorrectly specified
+
+## 0.7.2
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.7.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.7.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Minor changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 0.6.12
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.6.11
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.6.10
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.6.9
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 0.6.8
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 0.6.7
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.6.6
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
+
+## 0.6.5
+Thu, 20 Apr 2023 15:16:55 GMT
+
+### Patches
+
+- Update webpack to v5.80.0
+
+## 0.6.4
+Tue, 11 Apr 2023 00:23:22 GMT
+
+### Patches
+
+- Fix bug where peerDep of webpack was not properly updated with regular dependency version. 
+
+## 0.6.3
+Fri, 07 Apr 2023 22:19:21 GMT
+
+### Patches
+
+- Bump webpack to 5.78.0
+
+## 0.6.2
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 0.6.1
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 0.6.0
+Sat, 11 Mar 2023 01:24:51 GMT
+
+### Minor changes
+
+- Add support for `.cjs` and `.mjs` file extensions for webpack config files, in addition to the `.js` file extension.
+
+## 0.5.73
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 0.5.72
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 0.5.71
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 0.5.70
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 0.5.69
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.5.68
+Thu, 26 Jan 2023 02:55:10 GMT
+
+### Patches
+
+- Upgrade to webpack 5.75.0
+
+## 0.5.67
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 0.5.66
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.5.65
 Tue, 20 Dec 2022 01:18:22 GMT

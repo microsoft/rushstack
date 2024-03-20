@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { Import, InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import { InternalError, type IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+import { cloneDeep } from '../utilities/objectUtilities';
 
 /**
  * @public
@@ -50,6 +49,26 @@ export class PackageJsonDependency {
 /**
  * @public
  */
+export class PackageJsonDependencyMeta {
+  private _injected: boolean;
+  private _onChange: () => void;
+
+  public readonly name: string;
+
+  public constructor(name: string, injected: boolean, onChange: () => void) {
+    this.name = name;
+    this._injected = injected;
+    this._onChange = onChange;
+  }
+
+  public get injected(): boolean {
+    return this._injected;
+  }
+}
+
+/**
+ * @public
+ */
 export class PackageJsonEditor {
   private readonly _dependencies: Map<string, PackageJsonDependency>;
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
@@ -57,6 +76,8 @@ export class PackageJsonEditor {
   // SemVer range in one of the other fields for consumers.  Thus "dependencies", "optionalDependencies",
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
+
+  private readonly _dependenciesMeta: Map<string, PackageJsonDependencyMeta>;
 
   // NOTE: The "resolutions" field is a yarn specific feature that controls package
   // resolution override within yarn.
@@ -66,7 +87,10 @@ export class PackageJsonEditor {
 
   public readonly filePath: string;
 
-  private constructor(filepath: string, data: IPackageJson) {
+  /**
+   * @internal
+   */
+  protected constructor(filepath: string, data: IPackageJson) {
     this.filePath = filepath;
     this._sourceData = data;
     this._modified = false;
@@ -74,6 +98,7 @@ export class PackageJsonEditor {
     this._dependencies = new Map<string, PackageJsonDependency>();
     this._devDependencies = new Map<string, PackageJsonDependency>();
     this._resolutions = new Map<string, PackageJsonDependency>();
+    this._dependenciesMeta = new Map<string, PackageJsonDependencyMeta>();
 
     const dependencies: { [key: string]: string } = data.dependencies || {};
     const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
@@ -81,6 +106,8 @@ export class PackageJsonEditor {
 
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
     const resolutions: { [key: string]: string } = data.resolutions || {};
+
+    const dependenciesMeta: { [key: string]: { [key: string]: boolean } } = data.dependenciesMeta || {};
 
     const _onChange: () => void = this._onChange.bind(this);
 
@@ -153,6 +180,13 @@ export class PackageJsonEditor {
         );
       });
 
+      Object.keys(dependenciesMeta || {}).forEach((packageName: string) => {
+        this._dependenciesMeta.set(
+          packageName,
+          new PackageJsonDependencyMeta(packageName, dependenciesMeta[packageName].injected, _onChange)
+        );
+      });
+
       // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
       Sort.sortMapKeys(this._dependencies);
       Sort.sortMapKeys(this._devDependencies);
@@ -189,6 +223,13 @@ export class PackageJsonEditor {
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
+  }
+
+  /**
+   * The list of dependenciesMeta in package.json.
+   */
+  public get dependencyMetaList(): ReadonlyArray<PackageJsonDependencyMeta> {
+    return [...this._dependenciesMeta.values()];
   }
 
   /**
@@ -283,7 +324,7 @@ export class PackageJsonEditor {
     // Only normalize if we need to
     const sourceData: IPackageJson = this._modified ? this._normalize(this._sourceData) : this._sourceData;
     // Provide a clone to avoid reference back to the original data object
-    return lodash.cloneDeep(sourceData);
+    return cloneDeep(sourceData);
   }
 
   private _onChange(): void {

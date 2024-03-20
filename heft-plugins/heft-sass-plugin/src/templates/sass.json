@@ -2,7 +2,7 @@
  * Configuration for @rushstack/heft-sass-plugin
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft-sass-plugin.schema.json"
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-sass-plugin.schema.json"
 
   /**
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
@@ -38,11 +38,19 @@
 
   /**
    * If specified, folders where compiled CSS files will be emitted to. They will be named by appending
-   * ".css" to the source file name for ease of reference translation.
+   * ".css" to the source file name for ease of reference translation, unless "preserveSCSSExtension" is set.
    *
    * Default value: undefined
    */
   // "cssOutputFolders": [],
+
+  /**
+   * If set, when emitting compiled CSS from a file with a ".scss" extension, the emitted CSS will have
+   * the extension ".scss" instead of ".scss.css".
+   *
+   * Default value: false
+   */
+  // "preserveSCSSExtension": true,
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.

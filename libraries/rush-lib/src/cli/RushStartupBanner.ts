@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
+import { Colorize } from '@rushstack/terminal';
 
 import { RushConstants } from '../logic/RushConstants';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
@@ -11,10 +11,11 @@ export class RushStartupBanner {
     const nodeVersion: string = this._formatNodeVersion();
     const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
 
+    // eslint-disable-next-line no-console
     console.log(
       '\n' +
-        colors.bold(`Rush Multi-Project Build Tool${versionSuffix}`) +
-        colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+        Colorize.bold(`Rush Multi-Project Build Tool${versionSuffix}`) +
+        Colorize.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
         `\nNode.js version is ${nodeVersion}\n`
     );
   }
@@ -23,7 +24,8 @@ export class RushStartupBanner {
     const nodeVersion: string = this._formatNodeVersion();
     const versionSuffix: string = rushVersion ? ' ' + this._formatRushVersion(rushVersion, isManaged) : '';
 
-    console.log(colors.bold(`Rush Multi-Project Build Tool${versionSuffix}`) + ` - Node.js ${nodeVersion}`);
+    // eslint-disable-next-line no-console
+    console.log(Colorize.bold(`Rush Multi-Project Build Tool${versionSuffix}`) + ` - Node.js ${nodeVersion}`);
   }
 
   private static _formatNodeVersion(): string {
@@ -37,6 +39,6 @@ export class RushStartupBanner {
   }
 
   private static _formatRushVersion(rushVersion: string, isManaged: boolean): string {
-    return rushVersion + colors.yellow(isManaged ? '' : ' (unmanaged)');
+    return rushVersion + Colorize.yellow(isManaged ? '' : ' (unmanaged)');
   }
 }

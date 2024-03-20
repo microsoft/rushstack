@@ -5,7 +5,11 @@ import * as path from 'path';
 
 import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { RushConfiguration, IRushConfigurationJson, IApprovedPackagesPolicyJson } from './RushConfiguration';
+import type {
+  RushConfiguration,
+  IRushConfigurationJson,
+  IApprovedPackagesPolicyJson
+} from './RushConfiguration';
 
 /**
  * This is a helper object for RushConfiguration.
@@ -72,7 +76,7 @@ export class ApprovedPackagesPolicy {
     if (this.enabled) {
       if (!this.reviewCategories.size) {
         throw new Error(
-          `The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories` +
+          `The "approvedPackagesPolicy" feature is enabled ${RushConstants.rushJsonFilename}, but the reviewCategories` +
             ` list is not configured.`
         );
       }

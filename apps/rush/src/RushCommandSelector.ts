@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
-import * as rushLib from '@microsoft/rush-lib';
+import type * as rushLib from '@microsoft/rush-lib';
+import { Colorize } from '@rushstack/terminal';
 
 type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
 
@@ -64,7 +64,7 @@ export class RushCommandSelector {
   }
 
   private static _failWithError(message: string): never {
-    console.log(colors.red(message));
+    console.log(Colorize.red(message));
     return process.exit(1);
   }
 

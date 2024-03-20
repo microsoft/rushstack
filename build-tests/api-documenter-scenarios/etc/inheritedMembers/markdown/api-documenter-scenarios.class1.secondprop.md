@@ -6,7 +6,7 @@
 
 A second prop. Overrides `Class2.secondProp`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 secondProp: boolean;

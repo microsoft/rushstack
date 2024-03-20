@@ -1,7 +1,9 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-project.schema.json",
+
   "operationSettings": [
     {
-      "operationName": "build",
+      "operationName": "_phase:build",
       "outputFolderNames": ["lib", "dist"]
     }
   ]

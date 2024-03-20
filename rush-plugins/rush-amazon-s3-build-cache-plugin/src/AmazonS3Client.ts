@@ -1,28 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Async, Colors, IColorableSequence, ITerminal } from '@rushstack/node-core-library';
+import { Async } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
 
-import { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
-import { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
+import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from './AmazonS3BuildCacheProvider';
+import type { IGetFetchOptions, IPutFetchOptions, WebClient } from './WebClient';
+import { type IAmazonS3Credentials, fromRushEnv } from './AmazonS3Credentials';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
 const HOST_HEADER_NAME: 'host' = 'host';
 const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
-
-/**
- * Credentials for authorizing and signing requests to an Amazon S3 endpoint.
- *
- * @public
- */
-export interface IAmazonS3Credentials {
-  accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken: string | undefined;
-}
 
 interface IIsoDateString {
   date: string;
@@ -116,20 +107,7 @@ export class AmazonS3Client {
   public static tryDeserializeCredentials(
     credentialString: string | undefined
   ): IAmazonS3Credentials | undefined {
-    if (!credentialString) {
-      return undefined;
-    }
-
-    const fields: string[] = credentialString.split(':');
-    if (fields.length < 2 || fields.length > 3) {
-      throw new Error('Amazon S3 credential is in an unexpected format.');
-    }
-
-    return {
-      accessKeyId: fields[0],
-      secretAccessKey: fields[1],
-      sessionToken: fields[2]
-    };
+    return fromRushEnv(credentialString);
   }
 
   public async getObjectAsync(objectName: string): Promise<Buffer | undefined> {
@@ -194,7 +172,7 @@ export class AmazonS3Client {
     });
   }
 
-  private _writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
+  private _writeDebugLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a debug message
     try {
       this._terminal.writeDebugLine(...messageParts);
@@ -203,7 +181,7 @@ export class AmazonS3Client {
     }
   }
 
-  private _writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
+  private _writeWarningLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a warning message
     try {
       this._terminal.writeWarningLine(...messageParts);
@@ -226,7 +204,7 @@ export class AmazonS3Client {
     // the host can be e.g. https://s3.aws.com or http://localhost:9000
     const host: string = this._s3Endpoint.replace(protocolRegex, '');
     const canonicalUri: string = AmazonS3Client.UriEncode(`/${objectName}`);
-    this._writeDebugLine(Colors.bold('Canonical URI: '), canonicalUri);
+    this._writeDebugLine(Colorize.bold('Canonical URI: '), canonicalUri);
 
     if (this._credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
@@ -325,11 +303,11 @@ export class AmazonS3Client {
 
     const url: string = `${this._s3Endpoint}${canonicalUri}`;
 
-    this._writeDebugLine(Colors.bold(Colors.underline('Sending request to S3')));
-    this._writeDebugLine(Colors.bold('HOST: '), url);
-    this._writeDebugLine(Colors.bold('Headers: '));
+    this._writeDebugLine(Colorize.bold(Colorize.underline('Sending request to S3')));
+    this._writeDebugLine(Colorize.bold('HOST: '), url);
+    this._writeDebugLine(Colorize.bold('Headers: '));
     headers.forEach((value, name) => {
-      this._writeDebugLine(Colors.cyan(`\t${name}: ${value}`));
+      this._writeDebugLine(Colorize.cyan(`\t${name}: ${value}`));
     });
 
     const response: fetch.Response = await this._webClient.fetchAsync(url, webFetchOptions);
@@ -340,7 +318,7 @@ export class AmazonS3Client {
   public _getSha256Hmac(key: string | Buffer, data: string): Buffer;
   public _getSha256Hmac(key: string | Buffer, data: string, encoding: 'hex'): string;
   public _getSha256Hmac(key: string | Buffer, data: string, encoding?: 'hex'): Buffer | string {
-    const hash: crypto.Hash = crypto.createHmac('sha256', key);
+    const hash: crypto.Hmac = crypto.createHmac('sha256', key);
     hash.update(data);
     if (encoding) {
       return hash.digest(encoding);
@@ -455,7 +433,7 @@ export class AmazonS3Client {
   ): Promise<T> {
     const response: RetryableRequestResponse<T> = await sendRequest();
 
-    const log: (...messageParts: (string | IColorableSequence)[]) => void = this._writeDebugLine.bind(this);
+    const log: (...messageParts: string[]) => void = this._writeDebugLine.bind(this);
 
     if (response.hasNetworkError) {
       if (storageRetryOptions && storageRetryOptions.maxTries > 1) {
@@ -470,19 +448,19 @@ export class AmazonS3Client {
 
           log(`Will retry request in ${delay}s...`);
           await Async.sleep(delay);
-          const response: RetryableRequestResponse<T> = await sendRequest();
+          const retryResponse: RetryableRequestResponse<T> = await sendRequest();
 
-          if (response.hasNetworkError) {
+          if (retryResponse.hasNetworkError) {
             if (retryAttempt < maxTries - 1) {
               log('The retried request failed, will try again');
               return retry(retryAttempt + 1);
             } else {
               log('The retried request failed and has reached the maxTries limit');
-              throw response.error;
+              throw retryResponse.error;
             }
           }
 
-          return response.response;
+          return retryResponse.response;
         }
         return retry(1);
       } else {

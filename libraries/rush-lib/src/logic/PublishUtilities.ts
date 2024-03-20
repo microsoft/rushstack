@@ -37,11 +37,13 @@ interface IAddChangeOptions {
   change: IChangeInfo;
   changeFilePath?: string;
   allChanges: IChangeRequests;
-  allPackages: Map<string, RushConfigurationProject>;
+  allPackages: ReadonlyMap<string, RushConfigurationProject>;
   rushConfiguration: RushConfiguration;
   prereleaseToken?: PrereleaseToken;
   projectsToExclude?: Set<string>;
 }
+
+const MAGIC_SPECIFIERS: Set<string> = new Set<string>(['*', '^', '~']);
 
 export class PublishUtilities {
   /**
@@ -49,22 +51,23 @@ export class PublishUtilities {
    * @param changesPath Path to the changes folder.
    * @returns Dictionary of all change requests, keyed by package name.
    */
-  public static findChangeRequests(
-    allPackages: Map<string, RushConfigurationProject>,
+  public static async findChangeRequestsAsync(
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
-  ): IChangeRequests {
+  ): Promise<IChangeRequests> {
     const allChanges: IChangeRequests = {
       packageChanges: new Map<string, IChangeInfo>(),
       versionPolicyChanges: new Map<string, IVersionPolicyChangeInfo>()
     };
 
+    // eslint-disable-next-line no-console
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
-    const files: string[] = changeFiles.getFiles();
+    const files: string[] = await changeFiles.getFilesAsync();
 
     // Add the minimum changes defined by the change descriptions.
     for (const changeFilePath of files) {
@@ -132,6 +135,7 @@ export class PublishUtilities {
         });
 
         if (projectHasChanged) {
+          // eslint-disable-next-line no-console
           console.log(
             `\n* APPLYING: update ${project.packageName} to version ${versionPolicyChange.newVersion}`
           );
@@ -194,7 +198,7 @@ export class PublishUtilities {
    */
   public static updatePackages(
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
@@ -270,6 +274,7 @@ export class PublishUtilities {
       commandArgs = Text.replaceAll(commandArgs, secretSubstring, '<<SECRET>>');
     }
 
+    // eslint-disable-next-line no-console
     console.log(
       `\n* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${commandArgs} ${relativeDirectory}`
     );
@@ -298,8 +303,10 @@ export class PublishUtilities {
     const currentDependencyVersion: string = currentDependencySpecifier.versionSpecifier;
     let newDependencyVersion: string;
 
-    if (currentDependencyVersion === '*') {
-      newDependencyVersion = '*';
+    if (MAGIC_SPECIFIERS.has(currentDependencyVersion)) {
+      // pnpm and yarn support `workspace:*', `workspace:~`, and `workspace:^` as valid version specifiers
+      // These translate as `current`, `~current`, and `^current` when published
+      newDependencyVersion = currentDependencyVersion;
     } else if (PublishUtilities.isRangeDependency(currentDependencyVersion)) {
       newDependencyVersion = PublishUtilities._getNewRangeDependency(newProjectVersion);
     } else if (currentDependencyVersion.lastIndexOf('~', 0) === 0) {
@@ -326,24 +333,6 @@ export class PublishUtilities {
         return 'prerelease';
       default:
         throw new Error(`Wrong change type ${changeType}`);
-    }
-  }
-
-  private static _getChangeTypeForSemverReleaseType(releaseType: semver.ReleaseType): ChangeType {
-    switch (releaseType) {
-      case 'major':
-        return ChangeType.major;
-      case 'minor':
-        return ChangeType.minor;
-      case 'patch':
-        return ChangeType.patch;
-      case 'premajor':
-      case 'preminor':
-      case 'prepatch':
-      case 'prerelease':
-        return ChangeType.hotfix;
-      default:
-        throw new Error(`Unsupported release type "${releaseType}"`);
     }
   }
 
@@ -393,7 +382,7 @@ export class PublishUtilities {
   private static _writePackageChanges(
     change: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
@@ -410,11 +399,13 @@ export class PublishUtilities {
       : PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
+      // eslint-disable-next-line no-console
       console.log(
         `\n* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
           `for ${change.packageName} to ${newVersion}`
       );
     } else {
+      // eslint-disable-next-line no-console
       console.log(
         `\n* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update for ${change.packageName} at ${newVersion}`
       );
@@ -457,6 +448,7 @@ export class PublishUtilities {
 
     change.changes!.forEach((subChange) => {
       if (subChange.comment) {
+        // eslint-disable-next-line no-console
         console.log(` - [${ChangeType[subChange.changeType!]}] ${subChange.comment}`);
       }
     });
@@ -468,7 +460,7 @@ export class PublishUtilities {
   }
 
   private static _isCyclicDependency(
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     packageName: string,
     dependencyName: string
   ): boolean {
@@ -480,7 +472,7 @@ export class PublishUtilities {
     packageName: string,
     dependencies: { [key: string]: string } | undefined,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
@@ -579,6 +571,7 @@ export class PublishUtilities {
     const project: RushConfigurationProject | undefined = allPackages.get(packageName);
 
     if (!project) {
+      // eslint-disable-next-line no-console
       console.log(
         `The package ${packageName} was requested for publishing but does not exist. Skip this change.`
       );
@@ -711,7 +704,7 @@ export class PublishUtilities {
   private static _updateDownstreamDependencies(
     change: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
@@ -761,7 +754,7 @@ export class PublishUtilities {
     dependencies: { [packageName: string]: string } | undefined,
     change: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
@@ -778,31 +771,31 @@ export class PublishUtilities {
       );
       const isWorkspaceWildcardVersion: boolean =
         requiredVersion.specifierType === DependencySpecifierType.Workspace &&
-        requiredVersion.versionSpecifier === '*';
-      const alwaysUpdate: boolean =
-        (!!prereleaseToken &&
-          prereleaseToken.hasValue &&
-          !allChanges.packageChanges.has(parentPackageName)) ||
-        isWorkspaceWildcardVersion;
+        MAGIC_SPECIFIERS.has(requiredVersion.versionSpecifier);
+
+      const isPrerelease: boolean =
+        !!prereleaseToken && prereleaseToken.hasValue && !allChanges.packageChanges.has(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
-      if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
+      if (
+        isPrerelease ||
+        isWorkspaceWildcardVersion ||
+        requiredVersion.versionSpecifier !== change.newRangeDependency
+      ) {
         let changeType: ChangeType | undefined;
-        if (changeType === undefined) {
-          // Propagate hotfix changes to dependencies
-          if (change.changeType === ChangeType.hotfix) {
-            changeType = ChangeType.hotfix;
-          } else {
-            // Either it already satisfies the new version, or doesn't.
-            // If not, the downstream dep needs to be republished.
-            // The downstream dep will also need to be republished if using `workspace:*` as this will publish
-            // as the exact version.
-            changeType =
-              semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
-              !isWorkspaceWildcardVersion
-                ? ChangeType.dependency
-                : ChangeType.patch;
-          }
+        // Propagate hotfix changes to dependencies
+        if (change.changeType === ChangeType.hotfix) {
+          changeType = ChangeType.hotfix;
+        } else {
+          // Either it already satisfies the new version, or doesn't.
+          // If not, the downstream dep needs to be republished.
+          // The downstream dep will also need to be republished if using `workspace:*` as this will publish
+          // as the exact version.
+          changeType =
+            !isWorkspaceWildcardVersion &&
+            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier)
+              ? ChangeType.dependency
+              : ChangeType.patch;
         }
 
         hasChanges = PublishUtilities._addChange({
@@ -817,7 +810,7 @@ export class PublishUtilities {
           projectsToExclude
         });
 
-        if (hasChanges || alwaysUpdate) {
+        if (hasChanges || isPrerelease) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
           // caused a version bump.
           hasChanges =
@@ -836,13 +829,27 @@ export class PublishUtilities {
     return hasChanges;
   }
 
+  private static _getPublishDependencyVersion(specifier: DependencySpecifier, newVersion: string): string {
+    if (specifier.specifierType === DependencySpecifierType.Workspace) {
+      const { versionSpecifier } = specifier;
+      switch (versionSpecifier) {
+        case '*':
+          return newVersion;
+        case '~':
+        case '^':
+          return `${versionSpecifier}${newVersion}`;
+      }
+    }
+    return newVersion;
+  }
+
   private static _updateDependencyVersion(
     packageName: string,
     dependencies: { [key: string]: string },
     dependencyName: string,
     dependencyChange: IChangeInfo,
     allChanges: IChangeRequests,
-    allPackages: Map<string, RushConfigurationProject>,
+    allPackages: ReadonlyMap<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
     let currentDependencyVersion: string | undefined = dependencies[dependencyName];
@@ -853,7 +860,7 @@ export class PublishUtilities {
     );
     dependencies[dependencyName] = newDependencyVersion;
 
-    // "*" is a special case for workspace ranges, since it will publish using the exact
+    // "*", "~", and "^" are special cases for workspace ranges, since it will publish using the exact
     // version of the local dependency, so we need to modify what we write for our change
     // comment
     const currentDependencySpecifier: DependencySpecifier = new DependencySpecifier(
@@ -862,7 +869,7 @@ export class PublishUtilities {
     );
     currentDependencyVersion =
       currentDependencySpecifier.specifierType === DependencySpecifierType.Workspace &&
-      currentDependencySpecifier.versionSpecifier === '*'
+      MAGIC_SPECIFIERS.has(currentDependencySpecifier.versionSpecifier)
         ? undefined
         : currentDependencySpecifier.versionSpecifier;
 
@@ -870,11 +877,10 @@ export class PublishUtilities {
       dependencyName,
       newDependencyVersion
     );
-    newDependencyVersion =
-      newDependencySpecifier.specifierType === DependencySpecifierType.Workspace &&
-      newDependencySpecifier.versionSpecifier === '*'
-        ? dependencyChange.newVersion!
-        : newDependencySpecifier.versionSpecifier;
+    newDependencyVersion = PublishUtilities._getPublishDependencyVersion(
+      newDependencySpecifier,
+      dependencyChange.newVersion!
+    );
 
     // Add dependency version update comment.
     PublishUtilities._addChange({

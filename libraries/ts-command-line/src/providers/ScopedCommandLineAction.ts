@@ -2,16 +2,23 @@
 // See LICENSE in the project root for license information.
 
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
-import { CommandLineAction, ICommandLineActionOptions } from './CommandLineAction';
-import { CommandLineParser, ICommandLineParserOptions } from './CommandLineParser';
+import { CommandLineAction, type ICommandLineActionOptions } from './CommandLineAction';
+import { CommandLineParser, type ICommandLineParserOptions } from './CommandLineParser';
 import { CommandLineParserExitError } from './CommandLineParserExitError';
-import type { CommandLineParameter } from '../parameters/BaseClasses';
-import type { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import type { CommandLineParameter, CommandLineParameterBase } from '../parameters/BaseClasses';
+import type {
+  CommandLineParameterProvider,
+  ICommandLineParserData,
+  IRegisterDefinedParametersState
+} from './CommandLineParameterProvider';
 
 interface IInternalScopedCommandLineParserOptions extends ICommandLineParserOptions {
   readonly actionOptions: ICommandLineActionOptions;
   readonly unscopedActionParameters: ReadonlyArray<CommandLineParameter>;
   readonly onDefineScopedParameters: (commandLineParameterProvider: CommandLineParameterProvider) => void;
+  readonly aliasAction?: string;
+  readonly aliasDocumentation?: string;
+  readonly registerDefinedParametersState: IRegisterDefinedParametersState;
 }
 
 /**
@@ -27,17 +34,26 @@ class InternalScopedCommandLineParser extends CommandLineParser {
   }
 
   public constructor(options: IInternalScopedCommandLineParserOptions) {
-    // We can run the parser directly because we are not going to use it for any other actions,
-    // so construct a special options object to make the "--help" text more useful.
+    const { actionOptions, unscopedActionParameters, toolFilename, aliasAction, aliasDocumentation } =
+      options;
+
+    const toolCommand: string = `${toolFilename} ${actionOptions.actionName}`;
+    // When coming from an alias command, we want to show the alias command name in the help text
+    const toolCommandForLogging: string = `${toolFilename} ${aliasAction ?? actionOptions.actionName}`;
     const scopingArgs: string[] = [];
-    for (const parameter of options.unscopedActionParameters) {
+    for (const parameter of unscopedActionParameters) {
       parameter.appendToArgList(scopingArgs);
     }
-    const unscopedToolName: string = `${options.toolFilename} ${options.actionOptions.actionName}`;
+    const scope: string = scopingArgs.join(' ');
+
+    // We can run the parser directly because we are not going to use it for any other actions,
+    // so construct a special options object to make the "--help" text more useful.
     const scopedCommandLineParserOptions: ICommandLineParserOptions = {
-      toolFilename: `${unscopedToolName}${scopingArgs.length ? ' ' + scopingArgs.join(' ') : ''} --`,
-      toolDescription: options.actionOptions.documentation,
-      toolEpilog: `For more information on available unscoped parameters, use "${unscopedToolName} --help"`,
+      // Strip the scoping args if coming from an alias command, since they are not applicable
+      // to the alias command itself
+      toolFilename: `${toolCommandForLogging}${scope && !aliasAction ? ` ${scope} --` : ''}`,
+      toolDescription: aliasDocumentation ?? actionOptions.documentation,
+      toolEpilog: `For more information on available unscoped parameters, use "${toolCommand} --help"`,
       enableTabCompletionAction: false
     };
 
@@ -45,6 +61,12 @@ class InternalScopedCommandLineParser extends CommandLineParser {
     this._canExecute = false;
     this._internalOptions = options;
     this._internalOptions.onDefineScopedParameters(this);
+  }
+
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    // Since we are in a separate parser, we need to register the parameters using the state
+    // from the parent parser.
+    super._registerDefinedParameters(this._internalOptions.registerDefinedParametersState);
   }
 
   protected async onExecute(): Promise<void> {
@@ -81,6 +103,7 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   private _scopingParameters: CommandLineParameter[];
   private _unscopedParserOptions: ICommandLineParserOptions | undefined;
   private _scopedCommandLineParser: InternalScopedCommandLineParser | undefined;
+  private _subparserState: IRegisterDefinedParametersState | undefined;
 
   /**
    * The required group name to apply to all scoping parameters. At least one parameter
@@ -97,8 +120,11 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
 
   /**
    * {@inheritDoc CommandLineParameterProvider.parameters}
+   *
+   * @internalremarks
+   * TODO: Replace this type with `CommandLineParameter` in the next major bump.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameter> {
+  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
     if (this._scopedCommandLineParser) {
       return [...super.parameters, ...this._scopedCommandLineParser.parameters];
     } else {
@@ -107,12 +133,18 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
   }
 
   /**
-   * {@inheritdoc CommandLineAction._processParsedData}
+   * {@inheritdoc CommandLineParameterProvider._processParsedData}
    * @internal
    */
   public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
     // override
     super._processParsedData(parserOptions, data);
+
+    // This should never happen because the super method should throw if parameters haven't been registered,
+    // but guard against this just in-case.
+    if (this._subparserState === undefined) {
+      throw new Error('Parameters have not been registered');
+    }
 
     this._unscopedParserOptions = parserOptions;
 
@@ -121,7 +153,10 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     this._scopedCommandLineParser = new InternalScopedCommandLineParser({
       ...parserOptions,
       actionOptions: this._options,
-      unscopedActionParameters: this.parameters,
+      aliasAction: data.aliasAction,
+      aliasDocumentation: data.aliasDocumentation,
+      unscopedActionParameters: this.parameters as CommandLineParameter[],
+      registerDefinedParametersState: this._subparserState,
       onDefineScopedParameters: this.onDefineScopedParameters.bind(this)
     });
   }
@@ -144,17 +179,17 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     const scopedArgs: string[] = [];
     if (this.remainder.values.length) {
       if (this.remainder.values[0] !== '--') {
-        // Immitate argparse behavior and log out usage text before throwing.
-        console.log(this.renderUsageText());
         throw new CommandLineParserExitError(
           // argparse sets exit code 2 for invalid arguments
           2,
           // model the message off of the built-in "unrecognized arguments" message
-          `${this._unscopedParserOptions.toolFilename} ${this.actionName}: error: Unrecognized ` +
-            `arguments: ${this.remainder.values[0]}.`
+          `${this.renderUsageText()}\n${this._unscopedParserOptions.toolFilename} ${this.actionName}: ` +
+            `error: Unrecognized arguments: ${this.remainder.values[0]}.\n`
         );
       }
-      scopedArgs.push(...this.remainder.values.slice(1));
+      for (const scopedArg of this.remainder.values.slice(1)) {
+        scopedArgs.push(scopedArg);
+      }
     }
 
     // Call the scoped parser using only the scoped args to handle parsing
@@ -167,6 +202,22 @@ export abstract class ScopedCommandLineAction extends CommandLineAction {
     }
 
     return;
+  }
+
+  /** @internal */
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    super._registerDefinedParameters(state);
+
+    const { parentParameterNames } = state;
+    const updatedParentParameterNames: Set<string> = new Set([
+      ...parentParameterNames,
+      ...this._registeredParameterParserKeysByName.keys()
+    ]);
+
+    this._subparserState = {
+      ...state,
+      parentParameterNames: updatedParentParameterNames
+    };
   }
 
   /**

@@ -1,17 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesHook, AsyncSeriesWaterfallHook, SyncHook } from 'tapable';
+import {
+  AsyncParallelHook,
+  AsyncSeriesBailHook,
+  AsyncSeriesHook,
+  AsyncSeriesWaterfallHook,
+  SyncHook
+} from 'tapable';
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-
 import type { Operation } from '../logic/operations/Operation';
 import type { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
-import { IExecutionResult } from '../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../logic/operations/IOperationExecutionResult';
+import type { CobuildConfiguration } from '../api/CobuildConfiguration';
+import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
+import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
+import type { ITelemetryData } from '../logic/Telemetry';
+import type { OperationStatus } from '../logic/operations/OperationStatus';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -34,6 +47,10 @@ export interface ICreateOperationsContext {
    */
   readonly buildCacheConfiguration: BuildCacheConfiguration | undefined;
   /**
+   * The configuration for the cobuild, if cobuild feature and build cache feature are both enabled.
+   */
+  readonly cobuildConfiguration: CobuildConfiguration | undefined;
+  /**
    * The set of custom parameters for the executing command.
    * Maps from the `longName` field in command-line.json to the parser configuration in ts-command-line.
    */
@@ -53,6 +70,10 @@ export interface ICreateOperationsContext {
    */
   readonly isWatch: boolean;
   /**
+   * The set of phases original for the current command execution.
+   */
+  readonly phaseOriginal: ReadonlySet<IPhase>;
+  /**
    * The set of phases selected for the current command execution.
    */
   readonly phaseSelection: ReadonlySet<IPhase>;
@@ -65,6 +86,10 @@ export interface ICreateOperationsContext {
    */
   readonly projectSelection: ReadonlySet<RushConfigurationProject>;
   /**
+   * All successfully loaded rush-project.json data for selected projects.
+   */
+  readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
+  /**
    * The set of Rush projects that have not been built in the current process since they were last modified.
    * When `isInitial` is true, this will be an exact match of `projectSelection`.
    */
@@ -73,6 +98,12 @@ export interface ICreateOperationsContext {
    * The Rush configuration
    */
   readonly rushConfiguration: RushConfiguration;
+  /**
+   * Marks an operation's result as invalid, potentially triggering a new build. Only applicable in watch mode.
+   * @param operation - The operation to invalidate
+   * @param reason - The reason for invalidating the operation
+   */
+  readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
 }
 
 /**
@@ -88,6 +119,20 @@ export class PhasedCommandHooks {
     new AsyncSeriesWaterfallHook(['operations', 'context'], 'createOperations');
 
   /**
+   * Hook invoked before operation start
+   * Hook is series for stable output.
+   */
+  public readonly beforeExecuteOperations: AsyncSeriesHook<
+    [Map<Operation, IOperationExecutionResult>, ICreateOperationsContext]
+  > = new AsyncSeriesHook(['records', 'context']);
+
+  /**
+   * Hook invoked when operation status changed
+   * Hook is series for stable output.
+   */
+  public readonly onOperationStatusChanged: SyncHook<[IOperationExecutionResult]> = new SyncHook(['record']);
+
+  /**
    * Hook invoked after executing a set of operations.
    * Use the context to distinguish between the initial run and phased runs.
    * Hook is series for stable output.
@@ -96,9 +141,35 @@ export class PhasedCommandHooks {
     new AsyncSeriesHook(['results', 'context']);
 
   /**
+   * Hook invoked before executing a operation.
+   */
+  public readonly beforeExecuteOperation: AsyncSeriesBailHook<
+    [IOperationRunnerContext & IOperationExecutionResult],
+    OperationStatus | undefined
+  > = new AsyncSeriesBailHook(['runnerContext'], 'beforeExecuteOperation');
+
+  /**
+   * Hook invoked after executing a operation.
+   */
+  public readonly afterExecuteOperation: AsyncSeriesHook<
+    [IOperationRunnerContext & IOperationExecutionResult]
+  > = new AsyncSeriesHook(['runnerContext'], 'afterExecuteOperation');
+
+  /**
+   * Hook invoked to shutdown long-lived work in plugins.
+   */
+  public readonly shutdownAsync: AsyncParallelHook<void> = new AsyncParallelHook(undefined, 'shutdown');
+
+  /**
    * Hook invoked after a run has finished and the command is watching for changes.
    * May be used to display additional relevant data to the user.
    * Only relevant when running in watch mode.
    */
   public readonly waitingForChanges: SyncHook<void> = new SyncHook(undefined, 'waitingForChanges');
+
+  /**
+   * Hook invoked after executing operations and before waitingForChanges. Allows the caller
+   * to augment or modify the log entry about to be written.
+   */
+  public readonly beforeLog: SyncHook<ITelemetryData, void> = new SyncHook(['telemetryData'], 'beforeLog');
 }

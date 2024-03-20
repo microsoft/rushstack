@@ -20,6 +20,7 @@ const minifier: MessagePortMinifier = new MessagePortMinifier(workerThreads.pare
 
 async function processTaskAsync(index: number): Promise<void> {
   const config: webpack.Configuration = webpackConfigs[index];
+  // eslint-disable-next-line no-console
   console.log(`Compiling config: ${config.name || (config.output && config.output.filename)}`);
 
   const optimization: webpack.Options.Optimization = config.optimization || (config.optimization = {});
@@ -61,6 +62,7 @@ async function processTaskAsync(index: number): Promise<void> {
         const errorStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-only');
 
         errorStats.errors.forEach((error) => {
+          // eslint-disable-next-line no-console
           console.error(error);
         });
 
@@ -92,6 +94,7 @@ workerThreads.parentPort!.on('message', (message: number | false | object) => {
       workerThreads.parentPort!.postMessage(index);
     },
     (err: Error) => {
+      // eslint-disable-next-line no-console
       console.error(err);
       process.exit(1);
     }

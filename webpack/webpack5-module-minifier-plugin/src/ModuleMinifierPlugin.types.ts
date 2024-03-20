@@ -7,6 +7,21 @@ import type { Chunk, Compilation, Module, sources } from 'webpack';
 import type { Comment } from 'estree';
 
 /**
+ * Information about where the module was rendered in the emitted asset.
+ * @public
+ */
+export interface IRenderedModulePosition {
+  /**
+   * The offset from the start of tha asset to the start of the module, in characters.
+   */
+  charOffset: number;
+  /**
+   * The length of the rendered module, in characters.
+   */
+  charLength: number;
+}
+
+/**
  * Information about a dehydrated webpack ECMAScript asset
  * @public
  */
@@ -25,6 +40,11 @@ export interface IAssetInfo {
    * The raw chunk object from Webpack, in case information from it is necessary for reconstruction
    */
   chunk: Chunk;
+
+  /**
+   * Information about the offsets and character lengths for each rendered module in the final asset.
+   */
+  renderInfo: Map<string | number, IRenderedModulePosition>;
 
   /**
    * The type of the asset
@@ -48,6 +68,11 @@ export interface IModuleInfo {
    * The raw module object from Webpack, in case information from it is necessary for reconstruction
    */
   module: Module;
+
+  /**
+   * The id of the module, from the chunk graph.
+   */
+  id: string | number;
 }
 
 /**
@@ -96,6 +121,7 @@ export interface IFactoryMeta {
  */
 export interface IModuleMinifierPluginStats {
   metadataByModule: WeakMap<Module, IModuleStats>;
+  metadataByAssetFileName: Map<string, IAssetStats>;
 }
 
 /**
@@ -105,6 +131,14 @@ export interface IModuleMinifierPluginStats {
 export interface IModuleStats {
   hashByChunk: Map<Chunk, string>;
   sizeByHash: Map<string, number>;
+}
+
+/**
+ * Rendered positional data
+ * @public
+ */
+export interface IAssetStats {
+  positionByModuleId: Map<string | number, IRenderedModulePosition>;
 }
 
 /**

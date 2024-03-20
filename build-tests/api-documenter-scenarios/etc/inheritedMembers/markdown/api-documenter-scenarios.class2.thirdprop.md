@@ -6,7 +6,7 @@
 
 A third prop.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 thirdProp: T;

@@ -9,8 +9,7 @@ import {
   type SASQueryParameters,
   type ServiceGetUserDelegationKeyResponse
 } from '@azure/storage-blob';
-import type { ITerminal } from '@rushstack/node-core-library';
-import { RushConstants } from '@rushstack/rush-sdk';
+import type { ITerminal } from '@rushstack/terminal';
 import {
   AzureAuthenticationBase,
   type ICredentialResult,
@@ -34,7 +33,6 @@ const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 export class AzureStorageAuthentication extends AzureAuthenticationBase {
   protected readonly _credentialNameForCache: string = 'azure-blob-storage';
   protected readonly _credentialKindForLogging: string = 'Storage';
-  protected readonly _credentialUpdateCommandForLogging: string = `rush ${RushConstants.updateCloudCredentialsCommandName}`;
 
   protected readonly _storageAccountName: string;
   protected readonly _storageContainerName: string;

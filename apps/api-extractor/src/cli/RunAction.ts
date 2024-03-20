@@ -1,21 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import { PackageJsonLookup, FileSystem, IPackageJson, Path } from '@rushstack/node-core-library';
-
+import { PackageJsonLookup, FileSystem, type IPackageJson, Path } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 import {
   CommandLineAction,
-  CommandLineStringParameter,
-  CommandLineFlagParameter
+  type CommandLineStringParameter,
+  type CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
-import { Extractor, ExtractorResult } from '../api/Extractor';
-
-import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-import { ExtractorConfig, IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
+import { Extractor, type ExtractorResult } from '../api/Extractor';
+import type { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
+import { ExtractorConfig, type IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
   private readonly _configFileParameter: CommandLineStringParameter;
@@ -144,9 +142,9 @@ export class RunAction extends CommandLineAction {
       process.exitCode = 1;
 
       if (extractorResult.errorCount > 0) {
-        console.log(os.EOL + colors.red('API Extractor completed with errors'));
+        console.log(os.EOL + Colorize.red('API Extractor completed with errors'));
       } else {
-        console.log(os.EOL + colors.yellow('API Extractor completed with warnings'));
+        console.log(os.EOL + Colorize.yellow('API Extractor completed with warnings'));
       }
     }
   }

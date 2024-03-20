@@ -1,13 +1,8 @@
-@import 'office-ui-fabric-core/dist/sass/References';
-
-@mixin card {
-  box-shadow: $ms-depth-shadow-8;
-  background-color: $ms-color-gray10;
-  padding: 24px;
-}
+@use './styles/base';
 
 .ContainerCard {
-  @include card;
+  padding: 12px;
+  @include base.card;
 }
 
 .AppContainer {

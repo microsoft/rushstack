@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { LoaderContext } from 'webpack';
-import { ITerminalProvider, TerminalProviderSeverity } from '@rushstack/node-core-library';
+import { type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 export class LoaderTerminalProvider {
   public static getTerminalProviderForLoader(loaderContext: LoaderContext<{}>): ITerminalProvider {

@@ -4,25 +4,25 @@
 /* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, type NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { IndentDocCommentScope, Span, SpanModification } from '../analyzer/Span';
+import { IndentDocCommentScope, Span, type SpanModification } from '../analyzer/Span';
 import { AstImport } from '../analyzer/AstImport';
-import { CollectorEntity } from '../collector/CollectorEntity';
+import type { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { SymbolMetadata } from '../collector/SymbolMetadata';
+import type { SymbolMetadata } from '../collector/SymbolMetadata';
 import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
-import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import type { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstModuleExportInfo } from '../analyzer/AstModule';
+import type { AstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
-import { AstEntity } from '../analyzer/AstEntity';
+import type { AstEntity } from '../analyzer/AstEntity';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -105,18 +105,12 @@ export class DtsRollupGenerator {
     // Emit the imports
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstImport) {
+        // Note: it isn't valid to trim imports based on their release tags.
+        // E.g. class Foo (`@public`) extends interface Bar (`@beta`) from some external library.
+        // API-Extractor cannot trim `import { Bar } from "external-library"` when generating its public rollup,
+        // or the export of `Foo` would include a broken reference to `Bar`.
         const astImport: AstImport = entity.astEntity;
-
-        // For example, if the imported API comes from an external package that supports AEDoc,
-        // and it was marked as `@internal`, then don't emit it.
-        const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
-        const maxEffectiveReleaseTag: ReleaseTag = symbolMetadata
-          ? symbolMetadata.maxEffectiveReleaseTag
-          : ReleaseTag.None;
-
-        if (this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
-          DtsEmitHelpers.emitImport(writer, entity, astImport);
-        }
+        DtsEmitHelpers.emitImport(writer, entity, astImport);
       }
     }
     writer.ensureSkippedLine();
@@ -207,6 +201,17 @@ export class DtsRollupGenerator {
             throw new InternalError(
               `Cannot find collector entity for ${entity.nameForEmit}.${exportedEntity.localName}`
             );
+          }
+
+          // If the entity's declaration won't be included, then neither should the namespace export it
+          // This fixes the issue encountered here: https://github.com/microsoft/rushstack/issues/2791
+          const exportedSymbolMetadata: SymbolMetadata | undefined =
+            collector.tryFetchMetadataForAstEntity(exportedEntity);
+          const exportedMaxEffectiveReleaseTag: ReleaseTag = exportedSymbolMetadata
+            ? exportedSymbolMetadata.maxEffectiveReleaseTag
+            : ReleaseTag.None;
+          if (!this._shouldIncludeReleaseTag(exportedMaxEffectiveReleaseTag, dtsKind)) {
+            continue;
           }
 
           if (collectorEntity.nameForEmit === exportedName) {

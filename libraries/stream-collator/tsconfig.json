@@ -1,7 +1,6 @@
 {
-  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
   "compilerOptions": {
-    "strictNullChecks": false,
-    "types": ["heft-jest", "node"]
+    "strictNullChecks": false
   }
 }

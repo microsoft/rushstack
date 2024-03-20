@@ -1,0 +1,438 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Configuration",
+  "description": "Defines configuration used by core Heft.",
+  "type": "object",
+
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    },
+
+    "baseParameter": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["parameterKind", "longName", "description"],
+      "properties": {
+        "parameterKind": {
+          "title": "Parameter Kind",
+          "description": "Indicates the kind of syntax for this command-line parameter",
+          "type": "string",
+          "enum": ["choice", "choiceList", "flag", "integer", "integerList", "string", "stringList"]
+        },
+        "longName": {
+          "title": "Long Name",
+          "description": "The name of the parameter (e.g. \"--verbose\").  This is a required field.",
+          "type": "string",
+          "pattern": "^-(-[a-z0-9]+)+$"
+        },
+        "shortName": {
+          "title": "Short Name",
+          "description": "A optional short form of the parameter (e.g. \"-v\" instead of \"--verbose\")",
+          "type": "string",
+          "pattern": "^-[a-zA-Z]$"
+        },
+        "description": {
+          "title": "Parameter Description",
+          "description": "A detailed description of the parameter, which appears when requesting help for the command (e.g. \"heft phaseName --help my-command\").",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "description": "If true, then this parameter must be included on the command line",
+          "type": "boolean"
+        }
+      }
+    },
+
+    "choiceParameter": {
+      "title": "Choice Parameter",
+      "description": "A command-line parameter whose argument must be chosen from a list of allowable alternatives",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["alternatives"],
+          "properties": {
+            "parameterKind": {
+              "enum": ["choice"]
+            },
+            "alternatives": {
+              "title": "Alternatives",
+              "description": "A list of alternative argument values that can be chosen for this parameter.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "description"],
+                "properties": {
+                  "name": {
+                    "title": "Name of Alternative",
+                    "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
+                    "type": "string"
+                  },
+                  "description": {
+                    "title": "Description of Alternative",
+                    "description": "A detailed description for the alternative that will be shown in the command-line help.",
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "defaultValue": {
+              "title": "Default Value",
+              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
+            "alternatives": { "$ref": "#/definitions/anything" },
+            "defaultValue": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "choiceListParameter": {
+      "title": "Choice List Parameter",
+      "description": "A command-line parameter whose arguments must be chosen from a list of allowable alternatives",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["alternatives"],
+          "properties": {
+            "parameterKind": {
+              "enum": ["choiceList"]
+            },
+            "alternatives": {
+              "title": "Alternatives",
+              "description": "A list of alternative argument values that can be chosen for this parameter.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "description"],
+                "properties": {
+                  "name": {
+                    "title": "Name of Alternative",
+                    "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
+                    "type": "string"
+                  },
+                  "description": {
+                    "title": "Description of Alternative",
+                    "description": "A detailed description for the alternative that will be shown in the command-line help.",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
+            "alternatives": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "flagParameter": {
+      "title": "Flag Parameter",
+      "description": "A command-line parameter whose presence acts as an on/off switch",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "parameterKind": {
+              "enum": ["flag"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "integerParameter": {
+      "title": "Integer Parameter",
+      "description": "A command-line parameter whose value is interpreted as an integer",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["argumentName"],
+          "properties": {
+            "parameterKind": {
+              "enum": ["integer"]
+            },
+            "argumentName": {
+              "title": "Argument Name",
+              "description": "The name of the argument for this parameter.",
+              "type": "string"
+            },
+            "defaultValue": {
+              "title": "Default Value",
+              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
+            "argumentName": { "$ref": "#/definitions/anything" },
+            "defaultValue": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "integerListParameter": {
+      "title": "Integer List Parameter",
+      "description": "A command-line parameter whose value is interpreted as a list of integers",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["argumentName"],
+          "properties": {
+            "parameterKind": {
+              "enum": ["integerList"]
+            },
+            "argumentName": {
+              "title": "Argument Name",
+              "description": "The name of the argument for this parameter.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
+            "argumentName": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "stringParameter": {
+      "title": "String Parameter",
+      "description": "A command-line parameter whose value is interpreted as a string",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["argumentName"],
+          "properties": {
+            "parameterKind": {
+              "enum": ["string"]
+            },
+            "argumentName": {
+              "title": "Argument Name",
+              "description": "The name of the argument for this parameter.",
+              "type": "string"
+            },
+            "defaultValue": {
+              "title": "Default Value",
+              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
+            "argumentName": { "$ref": "#/definitions/anything" },
+            "defaultValue": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "stringListParameter": {
+      "title": "String List Parameter",
+      "description": "A command-line parameter whose value is interpreted as a string list",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["argumentName"],
+          "properties": {
+            "parameterKind": {
+              "enum": ["stringList"]
+            },
+            "argumentName": {
+              "title": "Argument Name",
+              "description": "The name of the argument for this parameter.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "required": { "$ref": "#/definitions/anything" },
+
+            "argumentName": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "heft-plugin-base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pluginName", "entryPoint"],
+      "properties": {
+        "pluginName": {
+          "title": "Plugin Name",
+          "type": "string",
+          "description": "Name of the plugin to load from the package.",
+          "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
+        },
+
+        "entryPoint": {
+          "title": "Entry Point",
+          "description": "The entry point path. This path is resolved relative to the package folder.",
+          "type": "string",
+          "pattern": "[^\\\\]"
+        },
+
+        "optionsSchema": {
+          "title": "Options Schema",
+          "type": "string",
+          "description": "Path to the schema that defines the options for the plugin. This schema should be a valid JSON schema. This path is resolved relative to the package folder.",
+          "pattern": "[^\\\\]"
+        },
+
+        "parameterScope": {
+          "title": "Parameter Scope",
+          "type": "string",
+          "description": "The scope of the parameters for the plugin. This scope is used to provide alternate names for parameters if there is a conflict between identical long names. For example, if scope \"my-scope\" is provided and parameter \"--parameter\" is defined, it may be referenced as \"--parameter\" or \"--my-scope:parameter\" on the CLI. When multiple \"--parameter\" parameters are defined with different scopes, they can only be referenced by their scoped long name. If no scope is provided, the scope will default to the plugin name.",
+          "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
+        },
+
+        "parameters": {
+          "title": "Plugin Parameters",
+          "description": "A list of command-line parameters.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "oneOf": [
+              { "$ref": "#/definitions/flagParameter" },
+              { "$ref": "#/definitions/integerParameter" },
+              { "$ref": "#/definitions/integerListParameter" },
+              { "$ref": "#/definitions/choiceParameter" },
+              { "$ref": "#/definitions/choiceListParameter" },
+              { "$ref": "#/definitions/stringParameter" },
+              { "$ref": "#/definitions/stringListParameter" }
+            ]
+          }
+        }
+      }
+    },
+
+    "heft-lifecycle-plugin": {
+      "$ref": "#/definitions/heft-plugin-base"
+    },
+
+    "heft-task-plugin": {
+      "$ref": "#/definitions/heft-plugin-base"
+    }
+  },
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "lifecyclePlugins": {
+      "title": "Lifecycle Plugins",
+      "description": "A list of plugins that will be loaded and used for Heft lifecycle hooks.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/heft-lifecycle-plugin" }
+    },
+
+    "taskPlugins": {
+      "title": "Task Plugins",
+      "description": "A list of plugins that will be loaded and used for Heft task hooks.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/heft-task-plugin" }
+    }
+  }
+}

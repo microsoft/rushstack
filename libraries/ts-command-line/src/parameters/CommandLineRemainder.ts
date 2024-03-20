@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineRemainderDefinition } from './CommandLineDefinition';
+import type { ICommandLineRemainderDefinition } from './CommandLineDefinition';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineCommandLineRemainder}.
@@ -33,8 +33,7 @@ export class CommandLineRemainder {
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void {
+  public _setValue(data: unknown): void {
     // abstract
     if (!Array.isArray(data) || !data.every((x) => typeof x === 'string')) {
       throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));

@@ -1,0 +1,30 @@
+{
+  "name": "@rushstack/rush-themed-ui",
+  "description": "Rush Component Library: a set of themed components for rush projects",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "module": "dist/rush-themed-ui.js",
+  "types": "dist/rush-themed-ui.d.ts",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft build --watch",
+    "test": "heft test",
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {
+    "react": "~17.0.2",
+    "react-dom": "~17.0.2"
+  },
+  "devDependencies": {
+    "local-web-rig": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/react-dom": "17.0.25",
+    "@types/react": "17.0.74",
+    "@radix-ui/react-scroll-area": "~1.0.2",
+    "@radix-ui/colors": "~0.1.8",
+    "@radix-ui/react-tabs": "~1.0.1",
+    "@radix-ui/react-checkbox": "~1.0.1",
+    "@radix-ui/react-icons": "~1.1.1"
+  }
+}

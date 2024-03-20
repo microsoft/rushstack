@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from '@rushstack/node-core-library';
-import * as colorsPackage from 'colors';
+import { AnsiEscape } from '@rushstack/terminal';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 describe('CommandLineHelp', () => {
   let oldCwd: string | undefined;
-  let colorsEnabled: boolean;
 
   let parser: RushCommandLineParser;
 
@@ -23,25 +21,17 @@ describe('CommandLineHelp', () => {
 
     process.chdir(localCwd);
 
-    colorsEnabled = colorsPackage.enabled;
-    if (!colorsEnabled) {
-      colorsPackage.enable();
-    }
-
     // This call may terminate the entire test run because it invokes process.exit()
     // if it encounters errors.
     // TODO Remove the calls to process.exit() or override them for testing.
     parser = new RushCommandLineParser();
+    // eslint-disable-next-line no-console
     parser.execute().catch(console.error);
   });
 
   afterEach(() => {
     if (oldCwd) {
       process.chdir(oldCwd);
-    }
-
-    if (!colorsEnabled) {
-      colorsPackage.disable();
     }
   });
 

@@ -1,25 +1,45 @@
 {
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
 
-  "eventActions": [
-    {
-      "actionKind": "deleteGlobs",
-      "heftEvent": "clean",
-      "actionId": "defaultClean",
-      "globsToDelete": ["ambientTypes.d.ts"]
-    },
+  "extends": "local-node-rig/profiles/default/config/heft.json",
 
-    {
-      "actionKind": "copyFiles",
-      "heftEvent": "bundle",
-      "actionId": "copyAmbientTypesToRoot",
-      "copyOperations": [
-        {
-          "sourceFolder": "src",
-          "destinationFolders": ["."],
-          "includeGlobs": ["ambientTypes.d.ts"]
+  // TODO: Add comments
+  "phasesByName": {
+    "build": {
+      "cleanFiles": [{ "includeGlobs": ["ambientTypes.d.ts"] }],
+
+      "tasksByName": {
+        "copy-ambient-types": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "./src",
+                  "includeGlobs": ["ambientTypes.d.ts"],
+                  "destinationFolders": ["."]
+                }
+              ]
+            }
+          }
+        },
+        "copy-test-assets": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "./src/test/scenarios/",
+                  "includeGlobs": ["**/*"],
+                  "destinationFolders": ["lib/test/scenarios"]
+                }
+              ]
+            }
+          }
         }
-      ]
+      }
     }
-  ]
+  }
 }

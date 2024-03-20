@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { ParseError } from './ParseError';
-import { Tokenizer, Token, TokenKind } from './Tokenizer';
-import { AstNode, AstScript, AstCommand, AstCompoundWord, AstText } from './AstNode';
+import { type Tokenizer, type Token, TokenKind } from './Tokenizer';
+import { type AstNode, AstScript, AstCommand, AstCompoundWord, AstText } from './AstNode';
 
 export class Parser {
   private readonly _tokenizer: Tokenizer;

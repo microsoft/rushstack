@@ -31,8 +31,8 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
-jspm_packages/
+node_modules
+jspm_packages
 
 # Optional npm cache directory
 .npm
@@ -65,15 +65,23 @@ jspm_packages/
 
 # Visual Studio Code
 .vscode
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!*.code-workspace
 
 # Rush temporary files
 common/deploy/
 common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
+*.lock
 
 # Heft temporary files
+.cache
 .heft
+
 
 # Common toolchain intermediate files
 temp
@@ -82,6 +90,9 @@ lib-amd
 lib-es6
 lib-esnext
 lib-commonjs
+lib-shim
 dist
+dist-storybook
 *.scss.ts
 *.sass.ts
+*.tsbuildinfo

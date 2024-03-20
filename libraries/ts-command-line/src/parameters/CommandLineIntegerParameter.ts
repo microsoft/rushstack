@@ -1,11 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineIntegerDefinition } from './CommandLineDefinition';
+import type { ICommandLineIntegerDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineIntegerParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.(defineIntegerParameter:2)}.
+ * @public
+ */
+export interface IRequiredCommandLineIntegerParameter extends CommandLineIntegerParameter {
+  readonly value: number;
+}
+
+/**
+ * The data type returned by {@link CommandLineParameterProvider.(defineIntegerParameter:1)}.
  * @public
  */
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
@@ -14,6 +22,9 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
 
   private _value: number | undefined = undefined;
 
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.Integer = CommandLineParameterKind.Integer;
+
   /** @internal */
   public constructor(definition: ICommandLineIntegerDefinition) {
     super(definition);
@@ -21,17 +32,11 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     this.validateDefaultValue(!!this.defaultValue);
   }
 
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.Integer;
-  }
-
   /**
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void {
+  public _setValue(data: unknown): void {
     // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'number') {

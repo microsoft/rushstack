@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
-import { Terminal } from '@rushstack/node-core-library';
-import { ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
+import { Terminal } from '@rushstack/terminal';
+import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
 import type { IResxLoaderOptions } from './IResxLoaderOptions';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
@@ -11,6 +11,7 @@ import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 /**
  * This loader passes through the raw untranslated strings and may be used without a LocalizationPlugin instance.
  */
+// eslint-disable-next-line func-style
 const loader: LoaderDefinitionFunction<IResxLoaderOptions> = function (
   this: LoaderContext<IResxLoaderOptions>,
   content: string

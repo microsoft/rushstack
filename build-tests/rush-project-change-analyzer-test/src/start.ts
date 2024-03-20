@@ -1,5 +1,8 @@
-import { RushConfiguration, ProjectChangeAnalyzer, RushConfigurationProject } from '@microsoft/rush-lib';
-import { Terminal, ConsoleTerminalProvider } from '@rushstack/node-core-library';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { RushConfiguration, ProjectChangeAnalyzer, type RushConfigurationProject } from '@microsoft/rush-lib';
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 async function runAsync(): Promise<void> {
   const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
@@ -40,6 +43,9 @@ async function runAsync(): Promise<void> {
 }
 
 process.exitCode = 1;
-runAsync().then(() => {
-  process.exitCode = 0;
-}, console.error);
+runAsync()
+  .then(() => {
+    process.exitCode = 0;
+  })
+  // eslint-disable-next-line no-console
+  .catch(console.error);

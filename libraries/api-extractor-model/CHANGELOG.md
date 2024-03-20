@@ -1,6 +1,175 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 09 Dec 2022 16:18:28 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2024 21:45:28 GMT and should not be manually modified.
+
+## 7.28.13
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 7.28.12
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 7.28.11
+Mon, 19 Feb 2024 21:54:26 GMT
+
+### Patches
+
+- Fix a formatting issue with the LICENSE.
+
+## 7.28.10
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 7.28.9
+Thu, 08 Feb 2024 01:09:22 GMT
+
+_Version update only_
+
+## 7.28.8
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 7.28.7
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 7.28.6
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 7.28.5
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
+
+## 7.28.4
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 7.28.3
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 7.28.2
+Thu, 28 Sep 2023 20:53:16 GMT
+
+_Version update only_
+
+## 7.28.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 7.28.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 7.27.6
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 7.27.5
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 7.27.4
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 7.27.3
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 7.27.2
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 7.27.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 7.27.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the TypeScript dependency to ~5.0.4
+
+## 7.26.9
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 7.26.8
+Thu, 04 May 2023 00:20:28 GMT
+
+### Patches
+
+- Fix a mistake in the documentation for ApiParameterListMixin.overloadIndex
+
+## 7.26.7
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 7.26.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 7.26.5
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
+
+## 7.26.4
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 7.26.3
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 7.26.2
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 7.26.1
+Mon, 30 Jan 2023 16:22:30 GMT
+
+_Version update only_
+
+## 7.26.0
+Wed, 25 Jan 2023 07:26:55 GMT
+
+### Minor changes
+
+- Add new .api.json field `isAbstract` to track `abstract` modifier in ApiClass, ApiMethod, and ApiProperty via ApiAbstractMixin (GitHub #3661)
 
 ## 7.25.3
 Fri, 09 Dec 2022 16:18:28 GMT

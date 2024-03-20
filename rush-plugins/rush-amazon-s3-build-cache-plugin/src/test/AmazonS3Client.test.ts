@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { Response, ResponseInit } from 'node-fetch';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
+import { Response, type ResponseInit } from 'node-fetch';
 
-import { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
-import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
+import type { IAmazonS3BuildCacheProviderOptionsAdvanced } from '../AmazonS3BuildCacheProvider';
+import { AmazonS3Client } from '../AmazonS3Client';
 import { WebClient } from '../WebClient';
+import type { IAmazonS3Credentials } from '../AmazonS3Credentials';
 
 const webClient = new WebClient();
 

@@ -2,22 +2,22 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as tsdoc from '@microsoft/tsdoc';
-import colors from 'colors/safe';
+import type * as tsdoc from '@microsoft/tsdoc';
 
 import {
   CommandLineAction,
-  CommandLineStringParameter,
+  type CommandLineStringParameter,
   type ICommandLineActionOptions
 } from '@rushstack/ts-command-line';
 import { FileSystem } from '@rushstack/node-core-library';
 import {
   ApiModel,
-  ApiItem,
+  type ApiItem,
   ApiItemContainerMixin,
   ApiDocumentedItem,
-  IResolveDeclarationReferenceResult
+  type IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
+import { Colorize } from '@rushstack/terminal';
 
 export interface IBuildApiModelResult {
   apiModel: ApiModel;
@@ -94,7 +94,7 @@ export abstract class BaseAction extends CommandLineAction {
 
           if (result.errorMessage) {
             console.log(
-              colors.yellow(
+              Colorize.yellow(
                 `Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: ` + result.errorMessage
               )
             );

@@ -1,0 +1,41 @@
+{
+  "rushVersion": "5.80.0",
+  "pnpmVersion": "7.13.0",
+  "pnpmOptions": {
+    "useWorkspaces": true
+  },
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "projects/a"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "projects/b"
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "projects/c"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "projects/d"
+    },
+    {
+      "packageName": "e",
+      "projectFolder": "projects/e"
+    },
+    {
+      "packageName": "f",
+      "projectFolder": "projects/f"
+    },
+    {
+      "packageName": "g",
+      "projectFolder": "projects/g"
+    },
+    {
+      "packageName": "h",
+      "projectFolder": "projects/h"
+    }
+  ]
+}

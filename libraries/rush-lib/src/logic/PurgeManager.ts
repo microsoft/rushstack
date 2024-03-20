@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
+import { Colorize } from '@rushstack/terminal';
 
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 /**
  * This class implements the logic for "rush purge"
@@ -40,9 +40,11 @@ export class PurgeManager {
    * Performs the AsyncRecycler.deleteAll() operation.  This should be called before
    * the PurgeManager instance is disposed.
    */
-  public deleteAll(): void {
-    this.commonTempFolderRecycler.deleteAll();
-    this._rushUserFolderRecycler.deleteAll();
+  public async startDeleteAllAsync(): Promise<void> {
+    await Promise.all([
+      this.commonTempFolderRecycler.startDeleteAllAsync(),
+      this._rushUserFolderRecycler.startDeleteAllAsync()
+    ]);
   }
 
   /**
@@ -50,6 +52,7 @@ export class PurgeManager {
    */
   public purgeNormal(): void {
     // Delete everything under common\temp except for the recycler folder itself
+    // eslint-disable-next-line no-console
     console.log('Purging ' + this._rushConfiguration.commonTempFolder);
 
     this.commonTempFolderRecycler.moveAllItemsInFolder(
@@ -66,6 +69,7 @@ export class PurgeManager {
     this.purgeNormal();
 
     // We will delete everything under ~/.rush/ except for the recycler folder itself
+    // eslint-disable-next-line no-console
     console.log('Purging ' + this._rushGlobalFolder.path);
 
     // If Rush itself is running under a folder such as  ~/.rush/node-v4.5.6/rush-1.2.3,
@@ -88,7 +92,8 @@ export class PurgeManager {
       this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
       this._rushConfiguration.pnpmOptions.pnpmStorePath
     ) {
-      console.warn(colors.yellow(`Purging the global pnpm-store`));
+      // eslint-disable-next-line no-console
+      console.warn(Colorize.yellow(`Purging the global pnpm-store`));
       this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
     }
   }
@@ -115,8 +120,9 @@ export class PurgeManager {
 
         if (showWarning) {
           // Warn that we won't dispose this folder
+          // eslint-disable-next-line no-console
           console.log(
-            colors.yellow(
+            Colorize.yellow(
               "The active process's folder will not be deleted: " + path.join(folderToRecycle, firstPart)
             )
           );

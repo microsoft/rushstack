@@ -33,6 +33,7 @@ module.exports = function createWebpackConfig({ env, argv, projectRoot, configOv
     env: env,
     argv: argv,
     projectRoot: projectRoot,
+    extractCssInProduction: true,
     configOverride: createWebpackConfigCommon.merge(applicationOverrides, configOverride)
   });
 };

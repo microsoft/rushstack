@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 import * as ts from 'typescript';
-import colors = require('colors');
 
 import { JsonFile } from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
-import { IExtractorInvokeOptions } from './Extractor';
+import type { IExtractorInvokeOptions } from './Extractor';
+import { Colorize } from '@rushstack/terminal';
 
 /**
  * Options for {@link CompilerState.create}
@@ -60,7 +60,7 @@ export class CompilerState {
     if (!commandLine.options.skipLibCheck && extractorConfig.skipLibCheck) {
       commandLine.options.skipLibCheck = true;
       console.log(
-        colors.cyan(
+        Colorize.cyan(
           'API Extractor was invoked with skipLibCheck. This is not recommended and may cause ' +
             'incorrect type analysis.'
         )

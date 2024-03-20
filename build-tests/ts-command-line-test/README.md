@@ -131,7 +131,7 @@ Console Title: Default title
 Arguments to be executed: ["1","2","3"]
 ```
 
-For more about environment variables, see the [IBaseCommandLineDefinition.environmentVariable](https://rushstack.io/pages/api/ts-command-line.ibasecommandlinedefinition.environmentvariable/) documentation.
+For more about environment variables, see the [IBaseCommandLineDefinition.environmentVariable](https://api.rushstack.io/pages/ts-command-line.ibasecommandlinedefinition.environmentvariable/) documentation.
 
 ## More information
 

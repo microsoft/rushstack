@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
 import * as path from 'path';
 import yaml = require('js-yaml');
 
-import { ApiModel } from '@microsoft/api-extractor-model';
-import { Text, FileSystem } from '@rushstack/node-core-library';
+import type { ApiModel } from '@microsoft/api-extractor-model';
+import { FileSystem } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-import { IYamlTocItem } from '../yaml/IYamlTocFile';
-import { IYamlItem } from '../yaml/IYamlApiFile';
+import type { IYamlTocItem } from '../yaml/IYamlTocFile';
+import type { IYamlItem } from '../yaml/IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
 
 interface ISnippetsFile {
@@ -59,7 +59,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     // After we generate everything, check for any unused snippets
     console.log();
     for (const apiName of Object.keys(this._snippets)) {
-      console.error(colors.yellow('Warning: Unused snippet ' + apiName));
+      console.error(Colorize.yellow('Warning: Unused snippet ' + apiName));
     }
   }
 
@@ -78,18 +78,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\!/, '');
     if (yamlItem.summary) {
       yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
-      yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
     }
     if (yamlItem.remarks) {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
-      yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
-    }
-    if (yamlItem.syntax && yamlItem.syntax.parameters) {
-      yamlItem.syntax.parameters.forEach((part) => {
-        if (part.description) {
-          part.description = this._fixBoldAndItalics(part.description);
-        }
-      });
     }
 
     const snippets: string[] | undefined = this._snippetsAll[nameWithoutPackage];
@@ -130,21 +121,10 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return this._apiSetUrlDefault; // match not found.
   }
 
-  private _fixBoldAndItalics(text: string): string {
-    return Text.replaceAll(text, '\\*', '*');
-  }
-
   private _generateExampleSnippetText(snippets: string[]): string {
     const text: string[] = ['\n\n#### Examples\n'];
     for (const snippet of snippets) {
-      if (snippet.search(/await/) === -1) {
-        text.push('```javascript');
-      } else {
-        text.push('```typescript');
-      }
-
-      text.push(snippet);
-      text.push('```');
+      text.push(`\`\`\`TypeScript\n${snippet}\n\`\`\``);
     }
     return text.join('\n');
   }

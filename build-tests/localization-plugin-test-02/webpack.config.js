@@ -54,6 +54,9 @@ function generateConfiguration(mode, outputFolderName) {
     devtool: 'source-map',
     plugins: [
       new webpack.optimize.ModuleConcatenationPlugin(),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^non-existent$/
+      }),
       new LocalizationPlugin({
         localizedData: {
           defaultLocale: {

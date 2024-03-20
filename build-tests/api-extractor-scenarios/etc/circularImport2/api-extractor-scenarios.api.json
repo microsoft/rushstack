@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -184,6 +184,7 @@
           ],
           "fileUrlPath": "src/circularImport2/IFile.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "A",
           "preserveMemberOrder": false,
           "members": [],
@@ -201,6 +202,7 @@
           ],
           "fileUrlPath": "src/circularImport2/IFolder.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "B",
           "preserveMemberOrder": false,
           "members": [],
@@ -218,6 +220,7 @@
           ],
           "fileUrlPath": "src/circularImport2/IFile.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "IFile",
           "preserveMemberOrder": false,
           "members": [
@@ -249,7 +252,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []
@@ -266,6 +270,7 @@
           ],
           "fileUrlPath": "src/circularImport2/IFolder.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "IFolder",
           "preserveMemberOrder": false,
           "members": [
@@ -301,7 +306,8 @@
                 "endIndex": 3
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -335,7 +341,8 @@
                 "endIndex": 3
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []

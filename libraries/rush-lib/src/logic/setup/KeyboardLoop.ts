@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as readline from 'readline';
 import * as process from 'process';
 import { AlreadyReportedError, InternalError } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-// TODO: Integrate these into the AnsiEscape API in @rushstack/node-core-library
-// As part of that work we should generalize the "Colors" API to support more general
+// TODO: Integrate these into the AnsiEscape API in @rushstack/terminal
+// As part of that work we should generalize the "Colorize" API to support more general
 // terminal escapes, and simplify the interface for that API.
 const ANSI_ESCAPE_SHOW_CURSOR: string = '\u001B[?25l';
 const ANSI_ESCAPE_HIDE_CURSOR: string = '\u001B[?25h';
@@ -53,8 +53,9 @@ export class KeyboardLoop {
       const shell: string = process.env.SHELL ?? '';
       if (shell.toUpperCase().endsWith('BASH.EXE')) {
         // Git Bash has a known problem where the Node.js TTY is lost when invoked via an NPM binary script.
+        // eslint-disable-next-line no-console
         console.error(
-          colors.red(
+          Colorize.red(
             'ERROR: It appears that Rush was invoked from Git Bash shell, which does not support the\n' +
               'TTY mode for interactive input that is required by this feature.'
           ) +
@@ -69,8 +70,9 @@ export class KeyboardLoop {
       }
     }
 
+    // eslint-disable-next-line no-console
     console.error(
-      colors.red(
+      Colorize.red(
         'ERROR: Rush was invoked by a command whose STDIN does not support the TTY mode for\n' +
           'interactive input that is required by this feature.'
       ) + '\n\nTry invoking "rush" directly from your shell.'

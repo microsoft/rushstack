@@ -6,20 +6,26 @@
   "main": "lib/index.js",
   "typings": "dist/internal/some-fake-file.d.ts",
   "scripts": {
-    "build": "node build.js",
-    "_phase:build": "node build.js"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
+  },
+  "dependencies": {
+    "api-extractor-lib1-test": "workspace:*"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@microsoft/teams-js": "1.3.0-beta.4",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/jest": "27.4.0",
-    "@types/node": "12.20.24",
-    "api-extractor-lib1-test": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "api-extractor-lib2-test": "workspace:*",
     "api-extractor-lib3-test": "workspace:*",
+    "api-extractor-lib4-test": "workspace:*",
+    "api-extractor-lib5-test": "workspace:*",
     "colors": "~1.2.1",
-    "fs-extra": "~7.0.1",
-    "typescript": "~4.8.4"
+    "local-node-rig": "workspace:*"
+  },
+  "peerDependencies": {
+    "api-extractor-lib5-test": "workspace:*"
   }
 }

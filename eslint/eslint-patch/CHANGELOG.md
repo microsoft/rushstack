@@ -1,6 +1,101 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Thu, 15 Sep 2022 00:18:51 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2024 02:09:14 GMT and should not be manually modified.
+
+## 1.8.0
+Wed, 20 Mar 2024 02:09:14 GMT
+
+### Minor changes
+
+- Refactor the bulk-suppressions feature to fix some performance issues.
+
+### Patches
+
+- Fix an issue where linting issues that were already suppressed via suppression comments were recorded in the bulk suppressions list.
+
+## 1.7.2
+Thu, 25 Jan 2024 23:03:57 GMT
+
+### Patches
+
+- Some minor documentation updates
+
+## 1.7.1
+Wed, 24 Jan 2024 07:38:34 GMT
+
+### Patches
+
+- Update documentation
+
+## 1.7.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3 with @typescript-eslint 6.19.x
+
+## 1.6.1
+Fri, 15 Dec 2023 01:10:06 GMT
+
+### Patches
+
+- Fix bulk suppression patch's eslintrc detection in polyrepos
+
+## 1.6.0
+Wed, 22 Nov 2023 01:45:18 GMT
+
+### Minor changes
+
+- Add an experimental new feature for ESLint bulk suppressions; for details see GitHub #4303
+
+## 1.5.1
+Sun, 01 Oct 2023 02:56:29 GMT
+
+### Patches
+
+- Fix patch compatibility with ESLint 7 for versions matching <7.12.0
+
+## 1.5.0
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Minor changes
+
+- Add an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the "eslint-config-" prefix
+
+## 1.4.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 1.3.3
+Tue, 08 Aug 2023 07:10:39 GMT
+
+### Patches
+
+- Fix patching for running eslint via eslint/use-at-your-own-risk, which VS Code's eslint extension does when enabling flat config support
+
+## 1.3.2
+Thu, 15 Jun 2023 00:21:01 GMT
+
+### Patches
+
+- [eslint-patch] add invalid importer path test to ESLint 7.x || 8.x block
+
+## 1.3.1
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Patches
+
+- Add test for invalid importer path to fallback to relative path when loading eslint 6 plugins
+
+## 1.3.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the @typescript-eslint/* dependencies to ~5.59.2
 
 ## 1.2.0
 Thu, 15 Sep 2022 00:18:51 GMT

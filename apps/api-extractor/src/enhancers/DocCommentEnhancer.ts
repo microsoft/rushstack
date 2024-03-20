@@ -4,10 +4,10 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { Collector } from '../collector/Collector';
+import type { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItemMetadata } from '../collector/ApiItemMetadata';
+import type { AstDeclaration } from '../analyzer/AstDeclaration';
+import type { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
@@ -73,7 +73,7 @@ export class DocCommentEnhancer {
       // Constructors always do pretty much the same thing, so it's annoying to require people to write
       // descriptions for them.  Instead, if the constructor lacks a TSDoc summary, then API Extractor
       // will auto-generate one.
-      metadata.needsDocumentation = false;
+      metadata.undocumented = false;
 
       // The class that contains this constructor
       const classDeclaration: AstDeclaration = astDeclaration.parent!;
@@ -131,16 +131,43 @@ export class DocCommentEnhancer {
         );
       }
       return;
-    }
-
-    if (metadata.tsdocComment) {
-      // Require the summary to contain at least 10 non-spacing characters
-      metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        metadata.tsdocComment.summarySection,
-        10
-      );
     } else {
-      metadata.needsDocumentation = true;
+      // For non-constructor items, we will determine whether or not the item is documented as follows:
+      // 1. If it contains a summary section with at least 10 characters, then it is considered "documented".
+      // 2. If it contains an @inheritDoc tag, then it *may* be considered "documented", depending on whether or not
+      //    the tag resolves to a "documented" API member.
+      //    - Note: for external members, we cannot currently determine this, so we will consider the "documented"
+      //      status to be unknown.
+      if (metadata.tsdocComment) {
+        if (tsdoc.PlainTextEmitter.hasAnyTextContent(metadata.tsdocComment.summarySection, 10)) {
+          // If the API item has a summary comment block (with at least 10 characters), mark it as "documented".
+          metadata.undocumented = false;
+        } else if (metadata.tsdocComment.inheritDocTag) {
+          if (
+            this._refersToDeclarationInWorkingPackage(
+              metadata.tsdocComment.inheritDocTag.declarationReference
+            )
+          ) {
+            // If the API item has an `@inheritDoc` comment that points to an API item in the working package,
+            // then the documentation contents should have already been copied from the target via `_applyInheritDoc`.
+            // The continued existence of the tag indicates that the declaration reference was invalid, and not
+            // documentation contents could be copied.
+            // An analyzer issue will have already been logged for this.
+            // We will treat such an API as "undocumented".
+            metadata.undocumented = true;
+          } else {
+            // If the API item has an `@inheritDoc` comment that points to an external API item, we cannot currently
+            // determine whether or not the target is "documented", so we cannot say definitively that this is "undocumented".
+            metadata.undocumented = false;
+          }
+        } else {
+          // If the API item has neither a summary comment block, nor an `@inheritDoc` comment, mark it as "undocumented".
+          metadata.undocumented = true;
+        }
+      } else {
+        // If there is no tsdoc comment at all, mark "undocumented".
+        metadata.undocumented = true;
+      }
     }
   }
 
@@ -157,10 +184,7 @@ export class DocCommentEnhancer {
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
         // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
-        if (
-          node.codeDestination.packageName === undefined ||
-          node.codeDestination.packageName === this._collector.workingPackage.name
-        ) {
+        if (this._refersToDeclarationInWorkingPackage(node.codeDestination)) {
           const referencedAstDeclaration: AstDeclaration | ResolverFailure =
             this._collector.astReferenceResolver.resolve(node.codeDestination);
 
@@ -196,14 +220,8 @@ export class DocCommentEnhancer {
       return;
     }
 
-    // Is it referring to the working package?
-    if (
-      !(
-        inheritDocTag.declarationReference.packageName === undefined ||
-        inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name
-      )
-    ) {
-      // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
+    if (!this._refersToDeclarationInWorkingPackage(inheritDocTag.declarationReference)) {
+      // The `@inheritDoc` tag is referencing an external package. Skip it, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
       // Tracked by:  https://github.com/microsoft/rushstack/issues/1195
       return;
@@ -248,5 +266,17 @@ export class DocCommentEnhancer {
     targetDocComment.returnsBlock = sourceDocComment.returnsBlock;
 
     targetDocComment.inheritDocTag = undefined;
+  }
+
+  /**
+   * Determines whether or not the provided declaration reference points to an item in the working package.
+   */
+  private _refersToDeclarationInWorkingPackage(
+    declarationReference: tsdoc.DocDeclarationReference | undefined
+  ): boolean {
+    return (
+      declarationReference?.packageName === undefined ||
+      declarationReference.packageName === this._collector.workingPackage.name
+    );
   }
 }

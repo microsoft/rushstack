@@ -4,18 +4,18 @@
 import {
   FileSystem,
   InternalError,
-  ITerminal,
   JsonFile,
-  JsonObject,
+  type JsonObject,
   JsonSchema
 } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import * as path from 'path';
 
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
-import { IRushPlugin } from '../IRushPlugin';
+import type { IRushPlugin } from '../IRushPlugin';
 import { RushSdk } from './RushSdk';
 import schemaJson from '../../schemas/rush-plugin-manifest.schema.json';
 
@@ -120,7 +120,7 @@ export abstract class PluginLoaderBase<
   }
 
   private _loadAndValidatePluginPackage(resolvedPluginPath: string, options?: JsonObject): IRushPlugin {
-    type IRushPluginCtor<T = JsonObject> = new (options: T) => IRushPlugin;
+    type IRushPluginCtor<T = JsonObject> = new (opts: T) => IRushPlugin;
     let pluginPackage: IRushPluginCtor;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -15,22 +15,33 @@ import type {
 } from '../parameters/CommandLineDefinition';
 import type { ICommandLineParserOptions } from './CommandLineParser';
 import {
-  CommandLineParameter,
-  CommandLineParameterWithArgument,
-  CommandLineParameterKind
+  type CommandLineParameterBase,
+  type CommandLineParameterWithArgument,
+  CommandLineParameterKind,
+  type CommandLineParameter
 } from '../parameters/BaseClasses';
-import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
+import {
+  CommandLineChoiceParameter,
+  type IRequiredCommandLineChoiceParameter
+} from '../parameters/CommandLineChoiceParameter';
 import { CommandLineChoiceListParameter } from '../parameters/CommandLineChoiceListParameter';
-import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import {
+  CommandLineIntegerParameter,
+  type IRequiredCommandLineIntegerParameter
+} from '../parameters/CommandLineIntegerParameter';
 import { CommandLineIntegerListParameter } from '../parameters/CommandLineIntegerListParameter';
 import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import {
+  CommandLineStringParameter,
+  type IRequiredCommandLineStringParameter
+} from '../parameters/CommandLineStringParameter';
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 import { SCOPING_PARAMETER_GROUP } from '../Constants';
+import { CommandLineParserExitError } from './CommandLineParserExitError';
 
 /**
- * The result containing the parsed paramter long name and scope. Returned when calling
+ * The result containing the parsed parameter long name and scope. Returned when calling
  * {@link CommandLineParameterProvider.parseScopedLongName}.
  *
  * @public
@@ -49,11 +60,26 @@ export interface IScopedLongNameParseResult {
 }
 
 /**
+ * An object containing the state of the
+ *
+ * @internal
+ */
+export interface IRegisterDefinedParametersState {
+  /**
+   * A set of all defined parameter names registered by parent {@link CommandLineParameterProvider}
+   * objects.
+   */
+  parentParameterNames: Set<string>;
+}
+
+/**
  * This is the argparse result data object
  * @internal
  */
 export interface ICommandLineParserData {
   action: string;
+  aliasAction?: string;
+  aliasDocumentation?: string;
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
@@ -61,6 +87,17 @@ const SCOPE_GROUP_NAME: string = 'scope';
 const LONG_NAME_GROUP_NAME: string = 'longName';
 const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
   /^--((?<scope>[a-z0-9]+(-[a-z0-9]+)*):)?(?<longName>[a-z0-9]+((-[a-z0-9]+)+)?)$/;
+
+interface IExtendedArgumentGroup extends argparse.ArgumentGroup {
+  // The types are incorrect - this function returns the constructed argument
+  // object, which looks like the argument options type.
+  addArgument(nameOrFlags: string | string[], options: argparse.ArgumentOptions): argparse.ArgumentOptions;
+}
+
+interface IExtendedArgumentParser extends argparse.ArgumentParser {
+  // This function throws
+  error(message: string): never;
+}
 
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
@@ -71,14 +108,20 @@ const POSSIBLY_SCOPED_LONG_NAME_REGEXP: RegExp =
 export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
+  /** @internal */
+  public readonly _ambiguousParameterParserKeysByName: Map<string, string>;
+  /** @internal */
+  protected readonly _registeredParameterParserKeysByName: Map<string, string>;
+
   private readonly _parameters: CommandLineParameter[];
   private readonly _parametersByLongName: Map<string, CommandLineParameter[]>;
+  private readonly _parametersByShortName: Map<string, CommandLineParameter[]>;
   private readonly _parameterGroupsByName: Map<
     string | typeof SCOPING_PARAMETER_GROUP,
     argparse.ArgumentGroup
   >;
-  private _parametersRegistered: boolean;
-  private _parametersProcessed: boolean;
+  private _parametersHaveBeenRegistered: boolean;
+  private _parametersHaveBeenProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
   /** @internal */
@@ -86,15 +129,18 @@ export abstract class CommandLineParameterProvider {
   public constructor() {
     this._parameters = [];
     this._parametersByLongName = new Map();
+    this._parametersByShortName = new Map();
     this._parameterGroupsByName = new Map();
-    this._parametersRegistered = false;
-    this._parametersProcessed = false;
+    this._ambiguousParameterParserKeysByName = new Map();
+    this._registeredParameterParserKeysByName = new Map();
+    this._parametersHaveBeenRegistered = false;
+    this._parametersHaveBeenProcessed = false;
   }
 
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameter> {
+  public get parameters(): ReadonlyArray<CommandLineParameterBase> {
     return this._parameters;
   }
 
@@ -102,7 +148,7 @@ export abstract class CommandLineParameterProvider {
    * Informs the caller if the argparse data has been processed into parameters.
    */
   public get parametersProcessed(): boolean {
-    return this._parametersProcessed;
+    return this._parametersHaveBeenProcessed;
   }
 
   /**
@@ -123,8 +169,34 @@ export abstract class CommandLineParameterProvider {
    * example-tool --log-level warn
    * ```
    */
-  public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
-    const parameter: CommandLineChoiceParameter = new CommandLineChoiceParameter(definition);
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice> & {
+      required: false | undefined;
+      defaultValue: undefined;
+    }
+  ): CommandLineChoiceParameter<TChoice>;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
+   */
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice> & { required: true }
+  ): IRequiredCommandLineChoiceParameter<TChoice>;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
+   */
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice> & { defaultValue: TChoice }
+  ): IRequiredCommandLineChoiceParameter<TChoice>;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineChoiceParameter:1)}
+   */
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice>
+  ): CommandLineChoiceParameter<TChoice>;
+  public defineChoiceParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceDefinition<TChoice>
+  ): CommandLineChoiceParameter<TChoice> {
+    const parameter: CommandLineChoiceParameter<TChoice> = new CommandLineChoiceParameter(definition);
     this._defineParameter(parameter);
     return parameter;
   }
@@ -149,10 +221,10 @@ export abstract class CommandLineParameterProvider {
    * example-tool --allow-color red --allow-color green
    * ```
    */
-  public defineChoiceListParameter(
-    definition: ICommandLineChoiceListDefinition
-  ): CommandLineChoiceListParameter {
-    const parameter: CommandLineChoiceListParameter = new CommandLineChoiceListParameter(definition);
+  public defineChoiceListParameter<TChoice extends string = string>(
+    definition: ICommandLineChoiceListDefinition<TChoice>
+  ): CommandLineChoiceListParameter<TChoice> {
+    const parameter: CommandLineChoiceListParameter<TChoice> = new CommandLineChoiceListParameter(definition);
     this._defineParameter(parameter);
     return parameter;
   }
@@ -203,6 +275,25 @@ export abstract class CommandLineParameterProvider {
    * example-tool --max-attempts 5
    * ```
    */
+  public defineIntegerParameter(
+    definition: ICommandLineIntegerDefinition & { required: false | undefined; defaultValue: undefined }
+  ): CommandLineIntegerParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
+   */
+  public defineIntegerParameter(
+    definition: ICommandLineIntegerDefinition & { required: true }
+  ): IRequiredCommandLineIntegerParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
+   */
+  public defineIntegerParameter(
+    definition: ICommandLineIntegerDefinition & { defaultValue: number }
+  ): IRequiredCommandLineIntegerParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineIntegerParameter:1)}
+   */
+  public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
   public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);
     this._defineParameter(parameter);
@@ -260,6 +351,25 @@ export abstract class CommandLineParameterProvider {
    * example-tool --message "Hello, world!"
    * ```
    */
+  public defineStringParameter(
+    definition: ICommandLineStringDefinition & { required: false | undefined; defaultValue: undefined }
+  ): CommandLineStringParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
+   */
+  public defineStringParameter(
+    definition: ICommandLineStringDefinition & { required: true }
+  ): IRequiredCommandLineStringParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
+   */
+  public defineStringParameter(
+    definition: ICommandLineStringDefinition & { defaultValue: string }
+  ): IRequiredCommandLineStringParameter;
+  /**
+   * {@inheritdoc CommandLineParameterProvider.(defineStringParameter:1)}
+   */
+  public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
     const parameter: CommandLineStringParameter = new CommandLineStringParameter(definition);
     this._defineParameter(parameter);
@@ -332,7 +442,10 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    this._registerDefinedParameters();
+    const initialState: IRegisterDefinedParametersState = {
+      parentParameterNames: new Set()
+    };
+    this._registerDefinedParameters(initialState);
     return this._getArgumentParser().formatHelp();
   }
 
@@ -340,7 +453,10 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line usage text.
    */
   public renderUsageText(): string {
-    this._registerDefinedParameters();
+    const initialState: IRegisterDefinedParametersState = {
+      parentParameterNames: new Set()
+    };
+    this._registerDefinedParameters(initialState);
     return this._getArgumentParser().formatUsage();
   }
 
@@ -399,24 +515,62 @@ export abstract class CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
-    if (this._parametersRegistered) {
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    if (this._parametersHaveBeenRegistered) {
       // We prevent new parameters from being defined after the first call to _registerDefinedParameters,
       // so we can already ensure that all parameters were registered.
       return;
     }
-    this._parametersRegistered = true;
 
+    // First, loop through all parameters with short names. If there are any duplicates, disable the short names
+    // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
+    // be reported as errors if the user attempts to use them.
+    const parametersWithDuplicateShortNames: Set<CommandLineParameterBase> = new Set();
+    for (const [shortName, shortNameParameters] of this._parametersByShortName.entries()) {
+      if (shortNameParameters.length > 1) {
+        for (const parameter of shortNameParameters) {
+          this._defineAmbiguousParameter(shortName);
+          parametersWithDuplicateShortNames.add(parameter);
+        }
+      }
+    }
+
+    // Then, loop through all parameters and register them. If there are any duplicates, ensure that they have
+    // provided a scope and register them with the scope. The duplicate long names will be reported as an error
+    // if the user attempts to use them.
     for (const longNameParameters of this._parametersByLongName.values()) {
       const useScopedLongName: boolean = longNameParameters.length > 1;
       for (const parameter of longNameParameters) {
-        if (useScopedLongName && !parameter.parameterScope) {
-          throw new Error(
-            `The parameter "${parameter.longName}" is defined multiple times with the same long name. ` +
-              'Parameters with the same long name must define a scope.'
-          );
+        if (useScopedLongName) {
+          if (!parameter.parameterScope) {
+            throw new Error(
+              `The parameter "${parameter.longName}" is defined multiple times with the same long name. ` +
+                'Parameters with the same long name must define a scope.'
+            );
+          }
+          this._defineAmbiguousParameter(parameter.longName);
         }
-        this._registerParameter(parameter, useScopedLongName);
+
+        const ignoreShortName: boolean = parametersWithDuplicateShortNames.has(parameter);
+        this._registerParameter(parameter, useScopedLongName, ignoreShortName);
+      }
+    }
+
+    // Register the existing parameters as ambiguous parameters. These are generally provided by the
+    // parent action.
+    const { parentParameterNames } = state;
+    for (const parentParameterName of parentParameterNames) {
+      this._defineAmbiguousParameter(parentParameterName);
+    }
+
+    // We also need to loop through the defined ambiguous parameters and register them. These will be reported
+    // as errors if the user attempts to use them.
+    for (const [ambiguousParameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
+      // Only register the ambiguous parameter if it hasn't already been registered. We will still handle these
+      // already-registered parameters as ambiguous, but by avoiding registering again, we will defer errors
+      // until the user actually attempts to use the parameter.
+      if (!this._registeredParameterParserKeysByName.has(ambiguousParameterName)) {
+        this._registerAmbiguousParameter(ambiguousParameterName, parserKey);
       }
     }
 
@@ -430,6 +584,8 @@ export abstract class CommandLineParameterProvider {
 
       this._getArgumentParser().addArgument(argparse.Const.REMAINDER, argparseOptions);
     }
+
+    this._parametersHaveBeenRegistered = true;
   }
 
   /**
@@ -444,32 +600,140 @@ export abstract class CommandLineParameterProvider {
    */
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
-  /** @internal */
-  protected _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
-    if (!this._parametersRegistered) {
+  /**
+   * This is called internally by {@link CommandLineParser.execute}
+   * @internal
+   */
+  public _preParse(): void {
+    for (const parameter of this._parameters) {
+      parameter._preParse?.();
+    }
+  }
+
+  /**
+   * This is called internally by {@link CommandLineParser.execute} before `printUsage` is called
+   * @internal
+   */
+  public _postParse(): void {
+    for (const parameter of this._parameters) {
+      parameter._postParse?.();
+    }
+  }
+
+  /**
+   * This is called internally by {@link CommandLineParser.execute}
+   * @internal
+   */
+  public _processParsedData(parserOptions: ICommandLineParserOptions, data: ICommandLineParserData): void {
+    if (!this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have not been registered');
     }
 
-    if (this._parametersProcessed) {
+    if (this._parametersHaveBeenProcessed) {
       throw new Error('Command Line Parser Data was already processed');
+    }
+
+    // Search for any ambiguous parameters and throw an error if any are found
+    for (const [parameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
+      if (data[parserKey]) {
+        // When the parser key matches the actually registered parameter, we know that this is an ambiguous
+        // parameter sourced from the parent action or tool
+        if (this._registeredParameterParserKeysByName.get(parameterName) === parserKey) {
+          this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
+        }
+
+        // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
+        // the non-ambiguous name is different for each.
+        const duplicateShortNameParameters: CommandLineParameterBase[] | undefined =
+          this._parametersByShortName.get(parameterName);
+        if (duplicateShortNameParameters) {
+          // We also need to make sure we get the non-ambiguous long name for the parameter, since it is
+          // possible for that the long name is ambiguous as well.
+          const nonAmbiguousLongNames: string[] = [];
+          for (const parameter of duplicateShortNameParameters) {
+            const matchingLongNameParameters: CommandLineParameterBase[] | undefined =
+              this._parametersByLongName.get(parameter.longName);
+            if (!matchingLongNameParameters?.length) {
+              // This should never happen
+              throw new Error(
+                `Unable to find long name parameters for ambiguous short name parameter "${parameterName}".`
+              );
+            }
+            // If there is more than one matching long name parameter, then we know that we need to use the
+            // scoped long name for the parameter. The scoped long name should always be provided.
+            if (matchingLongNameParameters.length > 1) {
+              if (!parameter.scopedLongName) {
+                // This should never happen
+                throw new Error(
+                  `Unable to find scoped long name for ambiguous short name parameter "${parameterName}".`
+                );
+              }
+              nonAmbiguousLongNames.push(parameter.scopedLongName);
+            } else {
+              nonAmbiguousLongNames.push(parameter.longName);
+            }
+          }
+
+          // Throw an error including the non-ambiguous long names for the parameters that have the ambiguous
+          // short name, ex.
+          // Error: Ambiguous option "-p" could match "--param1", "--param2"
+          this._throwParserExitError(
+            parserOptions,
+            data,
+            1,
+            `Ambiguous option: "${parameterName}" could match ${nonAmbiguousLongNames.join(', ')}.`
+          );
+        }
+
+        const duplicateLongNameParameters: CommandLineParameterBase[] | undefined =
+          this._parametersByLongName.get(parameterName);
+        if (duplicateLongNameParameters) {
+          const nonAmbiguousLongNames: string[] = duplicateLongNameParameters.map(
+            (p: CommandLineParameterBase) => {
+              // The scoped long name should always be provided
+              if (!p.scopedLongName) {
+                // This should never happen
+                throw new Error(
+                  `Unable to find scoped long name for ambiguous long name parameter "${parameterName}".`
+                );
+              }
+              return p.scopedLongName;
+            }
+          );
+
+          // Throw an error including the non-ambiguous scoped long names for the parameters that have the
+          // ambiguous long name, ex.
+          // Error: Ambiguous option: "--param" could match --scope1:param, --scope2:param
+          this._throwParserExitError(
+            parserOptions,
+            data,
+            1,
+            `Ambiguous option: "${parameterName}" could match ${nonAmbiguousLongNames.join(', ')}.`
+          );
+        }
+
+        // This shouldn't happen, but we also shouldn't allow the user to use the ambiguous parameter
+        this._throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
+      }
     }
 
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      const value: any = data[parameter._parserKey!]; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const value: unknown = data[parameter._parserKey!];
       parameter._setValue(value);
+      parameter._validateValue?.();
     }
 
     if (this.remainder) {
       this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
 
-    this._parametersProcessed = true;
+    this._parametersHaveBeenProcessed = true;
   }
 
   /** @internal */
   protected _defineParameter(parameter: CommandLineParameter): void {
-    if (this._parametersRegistered) {
+    if (this._parametersHaveBeenRegistered) {
       throw new Error('Parameters have already been registered for this provider');
     }
 
@@ -487,113 +751,235 @@ export abstract class CommandLineParameterProvider {
       this._parametersByLongName.set(parameter.longName, longNameParameters);
     }
     longNameParameters.push(parameter);
+
+    // Collect all parameters with the same short name. We will perform conflict resolution at registration.
+    if (parameter.shortName) {
+      let shortNameParameters: CommandLineParameter[] | undefined = this._parametersByShortName.get(
+        parameter.shortName
+      );
+      if (!shortNameParameters) {
+        shortNameParameters = [];
+        this._parametersByShortName.set(parameter.shortName, shortNameParameters);
+      }
+      shortNameParameters.push(parameter);
+    }
   }
 
   /** @internal */
-  protected _registerParameter(parameter: CommandLineParameter, useScopedLongName: boolean): void {
+  protected _defineAmbiguousParameter(name: string): string {
+    if (this._parametersHaveBeenRegistered) {
+      throw new Error('Parameters have already been registered for this provider');
+    }
+
+    // Only generate a new parser key if the ambiguous parameter hasn't been defined yet,
+    // either as an existing parameter or as another ambiguous parameter
+    let existingParserKey: string | undefined =
+      this._registeredParameterParserKeysByName.get(name) ||
+      this._ambiguousParameterParserKeysByName.get(name);
+    if (!existingParserKey) {
+      existingParserKey = this._generateKey();
+    }
+
+    this._ambiguousParameterParserKeysByName.set(name, existingParserKey);
+    return existingParserKey;
+  }
+
+  /** @internal */
+  protected _registerParameter(
+    parameter: CommandLineParameter,
+    useScopedLongName: boolean,
+    ignoreShortName: boolean
+  ): void {
+    const {
+      shortName,
+      longName,
+      scopedLongName,
+      description,
+      kind,
+      required,
+      environmentVariable,
+      parameterGroup,
+      undocumentedSynonyms,
+      _parserKey: parserKey
+    } = parameter;
+
     const names: string[] = [];
-    if (parameter.shortName) {
-      names.push(parameter.shortName);
+    if (shortName && !ignoreShortName) {
+      names.push(shortName);
     }
 
     // Use the original long name unless otherwise requested
     if (!useScopedLongName) {
-      names.push(parameter.longName);
+      names.push(longName);
     }
 
     // Add the scoped long name if it exists
-    if (parameter.scopedLongName) {
-      names.push(parameter.scopedLongName);
+    if (scopedLongName) {
+      names.push(scopedLongName);
     }
 
-    let finalDescription: string = parameter.description;
+    let finalDescription: string = description;
 
     const supplementaryNotes: string[] = [];
     parameter._getSupplementaryNotes(supplementaryNotes);
     if (supplementaryNotes.length > 0) {
       // If they left the period off the end of their sentence, then add one.
       if (finalDescription.match(/[a-z0-9]"?\s*$/i)) {
-        finalDescription = finalDescription.trimRight() + '.';
+        finalDescription = finalDescription.trimEnd() + '.';
       }
       // Append the supplementary text
       finalDescription += ' ' + supplementaryNotes.join(' ');
+    }
+
+    let choices: string[] | undefined;
+    let action: string | undefined;
+    let type: string | undefined;
+    switch (kind) {
+      case CommandLineParameterKind.Choice: {
+        choices = parameter.alternatives as string[];
+        break;
+      }
+      case CommandLineParameterKind.ChoiceList: {
+        choices = parameter.alternatives as string[];
+        action = 'append';
+        break;
+      }
+      case CommandLineParameterKind.Flag:
+        action = 'storeTrue';
+        break;
+      case CommandLineParameterKind.Integer:
+        type = 'int';
+        break;
+      case CommandLineParameterKind.IntegerList:
+        type = 'int';
+        action = 'append';
+        break;
+      case CommandLineParameterKind.String:
+        break;
+      case CommandLineParameterKind.StringList:
+        action = 'append';
+        break;
     }
 
     // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
     // so we have to reimplement that feature.
     const argparseOptions: argparse.ArgumentOptions = {
       help: finalDescription,
-      dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
-      required: parameter.required
+      dest: parserKey,
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName,
+      required,
+      choices,
+      action,
+      type
     };
 
-    switch (parameter.kind) {
-      case CommandLineParameterKind.Choice: {
-        const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
-        argparseOptions.choices = choiceParameter.alternatives as string[];
-        break;
-      }
-      case CommandLineParameterKind.ChoiceList: {
-        const choiceParameter: CommandLineChoiceListParameter = parameter as CommandLineChoiceListParameter;
-        argparseOptions.choices = choiceParameter.alternatives as string[];
-        argparseOptions.action = 'append';
-        break;
-      }
-      case CommandLineParameterKind.Flag:
-        argparseOptions.action = 'storeTrue';
-        break;
-      case CommandLineParameterKind.Integer:
-        argparseOptions.type = 'int';
-        break;
-      case CommandLineParameterKind.IntegerList:
-        argparseOptions.type = 'int';
-        argparseOptions.action = 'append';
-        break;
-      case CommandLineParameterKind.String:
-        break;
-      case CommandLineParameterKind.StringList:
-        argparseOptions.action = 'append';
-        break;
-    }
-
+    const argumentParser: IExtendedArgumentParser = this._getArgumentParser() as IExtendedArgumentParser;
     let argumentGroup: argparse.ArgumentGroup | undefined;
-    if (parameter.parameterGroup) {
-      argumentGroup = this._parameterGroupsByName.get(parameter.parameterGroup);
+    if (parameterGroup) {
+      argumentGroup = this._parameterGroupsByName.get(parameterGroup);
       if (!argumentGroup) {
         let parameterGroupName: string;
-        if (typeof parameter.parameterGroup === 'string') {
-          parameterGroupName = parameter.parameterGroup;
-        } else if (parameter.parameterGroup === SCOPING_PARAMETER_GROUP) {
+        if (typeof parameterGroup === 'string') {
+          parameterGroupName = parameterGroup;
+        } else if (parameterGroup === SCOPING_PARAMETER_GROUP) {
           parameterGroupName = 'scoping';
         } else {
-          throw new Error('Unexpected parameter group: ' + parameter.parameterGroup);
+          throw new Error('Unexpected parameter group: ' + parameterGroup);
         }
 
-        argumentGroup = this._getArgumentParser().addArgumentGroup({
+        argumentGroup = argumentParser.addArgumentGroup({
           title: `Optional ${parameterGroupName} arguments`
         });
-        this._parameterGroupsByName.set(parameter.parameterGroup, argumentGroup);
+        this._parameterGroupsByName.set(parameterGroup, argumentGroup);
       }
     } else {
-      argumentGroup = this._getArgumentParser();
+      argumentGroup = argumentParser;
     }
 
-    argumentGroup.addArgument(names, { ...argparseOptions });
+    const argparseArgument: argparse.ArgumentOptions = (argumentGroup as IExtendedArgumentGroup).addArgument(
+      names,
+      argparseOptions
+    );
+    if (required && environmentVariable) {
+      // Add some special-cased logic to handle required parameters with environment variables
 
-    if (parameter.undocumentedSynonyms && parameter.undocumentedSynonyms.length > 0) {
-      argumentGroup.addArgument(parameter.undocumentedSynonyms, {
+      const originalPreParse: (() => void) | undefined = parameter._preParse?.bind(parameter);
+      parameter._preParse = () => {
+        originalPreParse?.();
+        // Set the value as non-required before parsing. We'll validate it explicitly
+        argparseArgument.required = false;
+      };
+
+      const originalPostParse: (() => void) | undefined = parameter._postParse?.bind(parameter);
+      parameter._postParse = () => {
+        // Reset the required value to make the usage text correct
+        argparseArgument.required = true;
+        originalPostParse?.();
+      };
+
+      function throwMissingParameterError(): never {
+        argumentParser.error(`Argument "${longName}" is required`);
+      }
+
+      const originalValidateValue: (() => void) | undefined = parameter._validateValue?.bind(parameter);
+      // For these values, we have to perform explicit validation because they're requested
+      // as required, but we disabled argparse's required flag to allow the environment variable
+      // to potentially fill the value.
+      switch (kind) {
+        case CommandLineParameterKind.Choice:
+        case CommandLineParameterKind.Integer:
+        case CommandLineParameterKind.String:
+          parameter._validateValue = function () {
+            if (this.value === undefined || this.value === null) {
+              throwMissingParameterError();
+            }
+
+            originalValidateValue?.();
+          };
+          break;
+        case CommandLineParameterKind.ChoiceList:
+        case CommandLineParameterKind.IntegerList:
+        case CommandLineParameterKind.StringList:
+          parameter._validateValue = function () {
+            if (this.values.length === 0) {
+              throwMissingParameterError();
+            }
+
+            originalValidateValue?.();
+          };
+          break;
+      }
+    }
+
+    if (undocumentedSynonyms?.length) {
+      argumentGroup.addArgument(undocumentedSynonyms, {
         ...argparseOptions,
         help: argparse.Const.SUPPRESS
       });
     }
+
+    // Register the parameter names so that we can detect ambiguous parameters
+    for (const name of [...names, ...(undocumentedSynonyms || [])]) {
+      this._registeredParameterParserKeysByName.set(name, parserKey!);
+    }
+  }
+
+  protected _registerAmbiguousParameter(name: string, parserKey: string): void {
+    this._getArgumentParser().addArgument(name, {
+      dest: parserKey,
+      // We don't know if this argument takes parameters or not, so we need to accept any number of args
+      nargs: '*',
+      // Ensure that the argument is not shown in the help text, since these parameters are only included
+      // to inform the user that ambiguous parameters are present
+      help: argparse.Const.SUPPRESS
+    });
   }
 
   private _generateKey(): string {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 
-  private _getParameter<T extends CommandLineParameter>(
+  private _getParameter<T extends CommandLineParameterBase>(
     parameterLongName: string,
     expectedKind: CommandLineParameterKind,
     parameterScope?: string
@@ -603,16 +989,25 @@ export abstract class CommandLineParameterProvider {
     parameterLongName = longName;
     parameterScope = scope || parameterScope;
 
-    const parameters: CommandLineParameter[] | undefined = this._parametersByLongName.get(parameterLongName);
+    const parameters: CommandLineParameterBase[] | undefined =
+      this._parametersByLongName.get(parameterLongName);
     if (!parameters) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }
 
-    const parameter: CommandLineParameter | undefined = parameters.find(
+    let parameter: CommandLineParameterBase | undefined = parameters.find(
       (p) => p.parameterScope === parameterScope
     );
     if (!parameter) {
-      throw new Error(`The parameter "${parameterLongName}" with scope "${parameterScope}" is not defined.`);
+      if (parameterScope !== undefined) {
+        throw new Error(
+          `The parameter "${parameterLongName}" with scope "${parameterScope}" is not defined.`
+        );
+      }
+      if (parameters.length !== 1) {
+        throw new Error(`The parameter "${parameterLongName}" is ambiguous. You must specify a scope.`);
+      }
+      parameter = parameters[0];
     }
 
     if (parameter.kind !== expectedKind) {
@@ -621,6 +1016,25 @@ export abstract class CommandLineParameterProvider {
           ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`
       );
     }
+
     return parameter as T;
+  }
+
+  private _throwParserExitError(
+    parserOptions: ICommandLineParserOptions,
+    data: ICommandLineParserData,
+    errorCode: number,
+    message: string
+  ): never {
+    // Write out the usage text to make it easier for the user to find the correct parameter name
+    const targetActionName: string = data.aliasAction || data.action || '';
+    const errorPrefix: string =
+      `Error: ${parserOptions.toolFilename}` +
+      // Handle aliases, actions, and actionless parameter providers
+      `${targetActionName ? ' ' : ''}${targetActionName}: error: `;
+
+    // eslint-disable-next-line no-console
+    console.log(this.renderUsageText());
+    throw new CommandLineParserExitError(errorCode, `${errorPrefix}${message.trimStart().trimEnd()}\n`);
   }
 }

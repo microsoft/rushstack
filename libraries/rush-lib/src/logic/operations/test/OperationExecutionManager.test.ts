@@ -4,13 +4,25 @@
 // The TaskExecutionManager prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import colors from 'colors/safe';
+jest.mock('@rushstack/terminal', () => {
+  const originalModule = jest.requireActual('@rushstack/terminal');
+  return {
+    ...originalModule,
+    ConsoleTerminalProvider: {
+      ...originalModule.ConsoleTerminalProvider,
+      supportsColor: true
+    }
+  };
+});
 
-import { Terminal } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable, PrintUtilities } from '@rushstack/terminal';
 
-import { OperationExecutionManager, IOperationExecutionManagerOptions } from '../OperationExecutionManager';
+import {
+  OperationExecutionManager,
+  type IOperationExecutionManagerOptions
+} from '../OperationExecutionManager';
 import { _printOperationStatus } from '../OperationResultSummarizerPlugin';
 import { _printTimeline } from '../ConsoleTimelinePlugin';
 import { OperationStatus } from '../OperationStatus';
@@ -26,7 +38,6 @@ Utilities.getTimeInMs = mockGetTimeInMs;
 
 let mockTimeInMs: number = 0;
 mockGetTimeInMs.mockImplementation(() => {
-  console.log('CALLED mockGetTimeInMs');
   mockTimeInMs += 100;
   return mockTimeInMs;
 });
@@ -48,19 +59,6 @@ function createExecutionManager(
 describe(OperationExecutionManager.name, () => {
   let executionManager: OperationExecutionManager;
   let executionManagerOptions: IOperationExecutionManagerOptions;
-
-  let initialColorsEnabled: boolean;
-
-  beforeAll(() => {
-    initialColorsEnabled = colors.enabled;
-    colors.enable();
-  });
-
-  afterAll(() => {
-    if (!initialColorsEnabled) {
-      colors.disable();
-    }
-  });
 
   beforeEach(() => {
     jest.spyOn(PrintUtilities, 'getConsoleWidth').mockReturnValue(90);
@@ -121,6 +119,42 @@ describe(OperationExecutionManager.name, () => {
       expect(allOutput).toMatch(/Build step 1/);
       expect(allOutput).toMatch(/Error: step 1 failed/);
       expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+    });
+  });
+
+  describe('Blocking', () => {
+    it('Failed operations block', async () => {
+      const failingOperation = new Operation({
+        runner: new MockOperationRunner('fail', async () => {
+          return OperationStatus.Failure;
+        })
+      });
+
+      const blockedRunFn: jest.Mock = jest.fn();
+
+      const blockedOperation = new Operation({
+        runner: new MockOperationRunner('blocked', blockedRunFn)
+      });
+
+      blockedOperation.addDependency(failingOperation);
+
+      const manager: OperationExecutionManager = new OperationExecutionManager(
+        new Set([failingOperation, blockedOperation]),
+        {
+          quietMode: false,
+          debugMode: false,
+          parallelism: 1,
+          changedProjectsOnly: false,
+          destination: mockWritable
+        }
+      );
+
+      const result = await manager.executeAsync();
+      expect(result.status).toEqual(OperationStatus.Failure);
+      expect(blockedRunFn).not.toHaveBeenCalled();
+      expect(result.operationResults.size).toEqual(2);
+      expect(result.operationResults.get(failingOperation)?.status).toEqual(OperationStatus.Failure);
+      expect(result.operationResults.get(blockedOperation)?.status).toEqual(OperationStatus.Blocked);
     });
   });
 
@@ -212,7 +246,7 @@ describe(OperationExecutionManager.name, () => {
         );
 
         const result: IExecutionResult = await executionManager.executeAsync();
-        _printTimeline(mockTerminal, result);
+        _printTimeline({ terminal: mockTerminal, result, cobuildConfiguration: undefined });
         _printOperationStatus(mockTerminal, result);
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');

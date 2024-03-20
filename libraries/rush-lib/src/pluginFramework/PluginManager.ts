@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Import, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, Import, InternalError } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
-import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { BuiltInPluginLoader, IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
-import { IRushPlugin } from './IRushPlugin';
+import type { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
+import type { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
-import { RushSession } from './RushSession';
-import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
+import type { RushSession } from './RushSession';
+import type { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -18,6 +20,7 @@ export interface IPluginManagerOptions {
   rushSession: RushSession;
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
   restrictConsoleOutput: boolean;
+  rushGlobalFolder: RushGlobalFolder;
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -34,6 +37,7 @@ export class PluginManager {
   private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
+  private readonly _rushGlobalFolder: RushGlobalFolder;
 
   private _error: Error | undefined;
 
@@ -42,6 +46,7 @@ export class PluginManager {
     this._rushConfiguration = options.rushConfiguration;
     this._rushSession = options.rushSession;
     this._restrictConsoleOutput = options.restrictConsoleOutput;
+    this._rushGlobalFolder = options.rushGlobalFolder;
 
     this._installedAutoinstallerNames = new Set<string>();
 
@@ -75,6 +80,7 @@ export class PluginManager {
 
     tryAddBuiltInPlugin('rush-amazon-s3-build-cache-plugin');
     tryAddBuiltInPlugin('rush-azure-storage-build-cache-plugin');
+    tryAddBuiltInPlugin('rush-http-build-cache-plugin');
     // This is a secondary plugin inside the `@rushstack/rush-azure-storage-build-cache-plugin`
     // package. Because that package comes with Rush (for now), it needs to get registered here.
     // If the necessary config file doesn't exist, this plugin doesn't do anything.
@@ -98,7 +104,8 @@ export class PluginManager {
         pluginConfiguration,
         rushConfiguration: this._rushConfiguration,
         terminal: this._terminal,
-        restrictConsoleOutput: this._restrictConsoleOutput
+        restrictConsoleOutput: this._restrictConsoleOutput,
+        rushGlobalFolder: this._rushGlobalFolder
       });
     });
   }

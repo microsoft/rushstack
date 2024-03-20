@@ -2,6 +2,76 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.9.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.9.1",
+      "date": "Sat, 17 Feb 2024 06:24:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.9.0",
+      "date": "Tue, 16 Jan 2024 18:30:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 5.3 with @typescript-eslint 6.19.x"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.8.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.8.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.8.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.7.0",
+      "date": "Mon, 22 May 2023 06:34:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the @typescript-eslint/* dependencies to ~5.59.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@rushstack/eslint-plugin-packlets_v0.6.1",
       "date": "Mon, 10 Oct 2022 15:23:44 GMT",

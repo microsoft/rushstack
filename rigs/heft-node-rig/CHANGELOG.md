@@ -1,6 +1,490 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2024 02:09:14 GMT and should not be manually modified.
+
+## 2.5.1
+Wed, 20 Mar 2024 02:09:14 GMT
+
+_Version update only_
+
+## 2.5.0
+Tue, 19 Mar 2024 15:10:18 GMT
+
+### Minor changes
+
+- Upgrade to TypeScript 5.4
+
+## 2.4.25
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
+
+## 2.4.24
+Tue, 05 Mar 2024 01:19:24 GMT
+
+_Version update only_
+
+## 2.4.23
+Sun, 03 Mar 2024 20:58:13 GMT
+
+_Version update only_
+
+## 2.4.22
+Sat, 02 Mar 2024 02:22:24 GMT
+
+_Version update only_
+
+## 2.4.21
+Fri, 01 Mar 2024 01:10:08 GMT
+
+_Version update only_
+
+## 2.4.20
+Thu, 29 Feb 2024 07:11:45 GMT
+
+_Version update only_
+
+## 2.4.19
+Wed, 28 Feb 2024 16:09:27 GMT
+
+_Version update only_
+
+## 2.4.18
+Mon, 26 Feb 2024 16:10:56 GMT
+
+_Version update only_
+
+## 2.4.17
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 2.4.16
+Thu, 22 Feb 2024 05:54:17 GMT
+
+_Version update only_
+
+## 2.4.15
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 2.4.14
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 2.4.13
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 2.4.12
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 2.4.11
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
+
+## 2.4.10
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 2.4.9
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 2.4.8
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 2.4.7
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 2.4.6
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 2.4.5
+Thu, 25 Jan 2024 23:03:57 GMT
+
+_Version update only_
+
+## 2.4.4
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 2.4.3
+Wed, 24 Jan 2024 07:38:34 GMT
+
+_Version update only_
+
+## 2.4.2
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 2.4.1
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
+
+## 2.4.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Upgrade to TypeScript 5.3
+
+## 2.3.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 2.3.15
+Wed, 20 Dec 2023 01:09:46 GMT
+
+_Version update only_
+
+## 2.3.14
+Fri, 15 Dec 2023 01:10:06 GMT
+
+_Version update only_
+
+## 2.3.13
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 2.3.12
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 2.3.11
+Wed, 22 Nov 2023 01:45:18 GMT
+
+_Version update only_
+
+## 2.3.10
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 2.3.9
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 2.3.8
+Mon, 30 Oct 2023 23:36:37 GMT
+
+_Version update only_
+
+## 2.3.7
+Thu, 26 Oct 2023 00:27:48 GMT
+
+_Version update only_
+
+## 2.3.6
+Mon, 23 Oct 2023 15:18:38 GMT
+
+_Version update only_
+
+## 2.3.5
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 2.3.4
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 2.3.3
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 2.3.2
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 2.3.1
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 2.3.0
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Minor changes
+
+- Add an optional patch which can be used to allow ESLint to extend configurations from packages that do not have the "eslint-config-" prefix. This change also includes the ESLint configurations sourced from "@rushstack/eslint-config"
+
+## 2.2.26
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 2.2.25
+Fri, 22 Sep 2023 00:05:51 GMT
+
+_Version update only_
+
+## 2.2.24
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 2.2.23
+Fri, 15 Sep 2023 00:36:58 GMT
+
+_Version update only_
+
+## 2.2.22
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 2.2.21
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 2.2.20
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 2.2.19
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 2.2.18
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 2.2.17
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 2.2.16
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.2.15
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 2.2.14
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 2.2.13
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 2.2.12
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 2.2.11
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 2.2.10
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 2.2.9
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 2.2.8
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 2.2.7
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 2.2.6
+Tue, 13 Jun 2023 01:49:01 GMT
+
+_Version update only_
+
+## 2.2.5
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 2.2.4
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 2.2.3
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 2.2.2
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 2.2.1
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 2.2.0
+Wed, 07 Jun 2023 22:45:16 GMT
+
+### Minor changes
+
+- Add "heft start" alias that maps to "heft build-watch --serve"
+
+### Patches
+
+- Fix a regression where heft-node-rig was not loading the NodeServicePlugin
+
+## 2.1.0
+Tue, 06 Jun 2023 02:52:51 GMT
+
+### Minor changes
+
+- Updated Jest environment "customExportConditions" to ["require", "node"]
+
+## 2.0.1
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 2.0.0
+Fri, 02 Jun 2023 02:01:12 GMT
+
+### Breaking changes
+
+- Refactor for multi-phase Heft. See @rushstack/heft/UPGRADING.md.
+
+## 1.13.1
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 1.13.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade TypeScript to ~5.0.4
+
+## 1.12.11
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 1.12.10
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 1.12.9
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 1.12.8
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 1.12.7
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 1.12.6
+Tue, 04 Apr 2023 22:36:28 GMT
+
+### Patches
+
+- Upgrade Jest to 29.5.0.
+
+## 1.12.5
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 1.12.4
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 1.12.3
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 1.12.2
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 1.12.1
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 1.12.0
+Mon, 30 Jan 2023 00:55:44 GMT
+
+### Minor changes
+
+- Upgrade Jest from `~27.4.2` to `~29.3.1`
+
+## 1.11.14
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 1.11.13
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 1.11.12
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 1.11.11
 Tue, 20 Dec 2022 01:18:22 GMT

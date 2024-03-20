@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineIntegerListDefinition } from './CommandLineDefinition';
+import type { ICommandLineIntegerListDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
 import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 
@@ -12,22 +12,19 @@ import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 export class CommandLineIntegerListParameter extends CommandLineParameterWithArgument {
   private _values: number[] = [];
 
+  /** {@inheritDoc CommandLineParameter.kind} */
+  public readonly kind: CommandLineParameterKind.IntegerList = CommandLineParameterKind.IntegerList;
+
   /** @internal */
   public constructor(definition: ICommandLineIntegerListDefinition) {
     super(definition);
-  }
-
-  /** {@inheritDoc CommandLineParameter.kind} */
-  public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.IntegerList;
   }
 
   /**
    * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void {
+  public _setValue(data: unknown): void {
     // If argparse passed us a value, confirm it is valid
     if (data !== null && data !== undefined) {
       if (!Array.isArray(data)) {

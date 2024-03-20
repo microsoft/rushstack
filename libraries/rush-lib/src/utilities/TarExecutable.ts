@@ -3,11 +3,12 @@
 
 import * as path from 'path';
 import os from 'os';
-import { Executable, FileSystem, FileWriter, ITerminal } from '@rushstack/node-core-library';
-import { ChildProcess } from 'child_process';
+import { Executable, FileSystem, FileWriter } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
+import type { ChildProcess } from 'child_process';
 import events from 'events';
 
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 export interface ITarOptionsBase {

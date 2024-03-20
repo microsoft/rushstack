@@ -4,13 +4,48 @@
 
 `npm install @rushstack/set-webpack-public-path-plugin --save-dev`
 
-## Overview
+## Mode 1: Using the `document.currentScript` API
 
-This simple plugin sets the `__webpack_public_path__` variable to
-a value specified in the arguments, optionally appended to the SystemJs baseURL
-property.
+### Overview
 
-# Plugin
+This plugin wraps the entire webpack bundle in an immediately executed function expression (IIFE) that sets a variable
+to the value of `document.currentScript` and then injects code that extracts the current script's base path from
+the `src` attribute when setting the `__webpack_public_path__` variable.
+
+This is similar to the `output.publicPath = 'auto'` option, but differs in two important ways:
+
+1. It does not contain any fallback logic to look at `<script />` elements
+2. It stores the `document.currentScript` value immediately when the bundle is executed, not when
+   the runtime is executed. This is important when the bundle's factory function is called by another script, like
+   when an AMD output target is produced.
+
+### Plugin
+
+To use the plugin, add it to the `plugins` array of your Webpack config. For example:
+
+```JavaScript
+import { SetPublicPathCurrentScriptPlugin } from '@rushstack/set-webpack-public-path-plugin';
+
+{
+  plugins: [
+    new SetPublicPathCurrentScriptPlugin()
+  ]
+}
+```
+
+### Options
+
+This plugin has no options.
+
+## Mode 2: Automatic public path detection via regular expression
+
+### Overview
+
+This simple plugin uses a specified regular expression or the emitted asset name to set the `__webpack_public_path__`
+variable. This is useful for scenarios where the Webpack automatic public path detection does not work. For example,
+when emitting AMD-style assets that are initialized by a callback.
+
+### Plugin
 
 To use the plugin, add it to the `plugins` array of your Webpack config. For example:
 
@@ -24,7 +59,7 @@ import { SetPublicPathPlugin } from '@rushstack/set-webpack-public-path-plugin';
 }
 ```
 
-## Options
+### Options
 
 #### `scriptName = { }`
 
@@ -49,22 +84,7 @@ property. `useAssetName` is exclusive to `name` and `isTokenized`.
 
 This option is exclusive to other options. If it is set, `systemJs`, `publicPath`, and `urlPrefix` will be ignored.
 
-#### `systemJs = true`
-
-Use `System.baseURL` if it is defined.
-
-#### `publicPath = '...'`
-
-Use the specified path as the base public path. If `urlPrefix` is also defined, the public path will
-be the concatenation of the two (i.e. - `__webpack_public_path__ = URL.concat({publicPath} + {urlPrefix}`).
-This option takes precedence over the `systemJs` option.
-
-#### `urlPrefix = '...'`
-
-Use the specified string as a URL prefix after the SystemJS path or the `publicPath` option. If neither
-`systemJs` nor `publicPath` is defined, this option will not apply and an exception will be thrown.
-
-#### `regexVariable = '...'`
+##### `regexVariable = '...'`
 
 Check for a variable with name `...` on the page and use its value as a regular expression against script paths to
 the bundle's script. If a value `foo` is passed into `regexVariable`, the produced bundle will look for a variable
@@ -74,7 +94,7 @@ detect the bundle's script.
 For example, if the `regexVariable` option is set to `scriptRegex` and `scriptName` is set to `{ name: 'myscript' }`,
 consider two cases:
 
-##### Case 1
+###### Case 1
 
 ```HTML
 <html>
@@ -92,7 +112,7 @@ consider two cases:
 In this case, because there is a `scriptRegex` variable defined on the page, the bundle will use its value
 (`/thescript/i`) to find the script.
 
-##### Case 2
+###### Case 2
 
 ```HTML
 <html>
@@ -107,7 +127,7 @@ In this case, because there is a `scriptRegex` variable defined on the page, the
 In this case, because there is not a `scriptRegex` variable defined on the page, the bundle will use the value
 passed into the `scriptName` option to find the script.
 
-#### `getPostProcessScript = (variableName) => { ... }`
+##### `getPostProcessScript = (variableName) => { ... }`
 
 A function that returns a snippet of code that manipulates the variable with the name that's specified in the
 parameter. If this parameter isn't provided, no post-processing code is included. The variable must be modified
@@ -126,62 +146,7 @@ the public path variable will have `/assets/` appended to the found path.
 
 Note that the existing value of the variable already ends in a slash (`/`).
 
-#### `preferLastFoundScript = false`
+##### `preferLastFoundScript = false`
 
 If true, find the last script matching the regexVariable (if it is set). If false, find the first matching script.
 This can be useful if there are multiple scripts loaded in the DOM that match the regexVariable.
-
-#### `skipDetection = false`
-
-If true, always include the code snippet to detect the public path regardless of whether chunks or assets are present.
-
-# SystemJS Caveat
-
-When modules are loaded with SystemJS (and with the , `scriptLoad: true` meta option) `<script src="..."></script>`
-tags are injected onto the page, evaludated and then immediately removed. This causes an issue because they are removed
-before webpack module code begins to execute, so the `publicPath=...` option won't work for modules loaded with SystemJS.
-
-To circumvent this issue, a small bit of code is availble to that will maintain a global register of script paths
-that have been inserted onto the page. This code block should be appended to bundles that are expected to be loaded
-with SystemJS and use the `publicPath=...` option.
-
-## `getGlobalRegisterCode(bool)`
-
-This function returns a block of JavaScript that maintains a global register of script tags. If the optional boolean parameter
-is set to `true`, the code is not minified. By default, it is minified. You can detect if the plugin may require
-the global register code by searching for the value of the `registryVariableName` field.
-
-## Usage without registryVariableName
-
-``` javascript
-var setWebpackPublicPath = require('@rushstack/set-webpack-public-path-plugin');
-var gulpInsert = require('gulp-insert');
-
-gulp.src('finizlied/webpack/bundle/path')
-  .pipe(gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true)))
-  .pipe(gulp.dest('dest/path'));
-```
-
-## Usage with registryVariableName
-
-``` javascript
-var setWebpackPublicPath = require('@rushstack/set-webpack-public-path-plugin');
-var gulpInsert = require('gulp-insert');
-var gulpIf = require('gulp-if');
-
-var detectRegistryVariableName = function (file) {
-  return file.contents.toString().indexOf(setWebpackPublicPath.registryVariableName) !== -1;
-};
-
-gulp.src('finizlied/webpack/bundle/path')
-  .pipe(gulpIf(detectRegistryVariableName, gulpInsert.append(setWebpackPublicPath.getGlobalRegisterCode(true))))
-  .pipe(gulp.dest('dest/path'));
-```
-
-## Links
-
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/webpack/set-webpack-public-path-plugin/CHANGELOG.md) - Find
-  out what's new in the latest version
-
-`@rushstack/set-webpack-public-path-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

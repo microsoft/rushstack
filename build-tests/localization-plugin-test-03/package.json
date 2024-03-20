@@ -9,16 +9,17 @@
     "_phase:build": "node build.js"
   },
   "dependencies": {
-    "@rushstack/webpack4-localization-plugin": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/set-webpack-public-path-plugin": "workspace:*",
-    "@types/webpack-env": "1.13.0",
+    "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
+    "@rushstack/webpack4-localization-plugin": "workspace:*",
+    "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
+    "@types/webpack-env": "1.18.0",
     "html-webpack-plugin": "~4.5.2",
     "ts-loader": "6.0.0",
-    "typescript": "~4.8.4",
+    "typescript": "~5.4.2",
     "webpack-bundle-analyzer": "~4.5.0",
     "webpack-cli": "~3.3.2",
     "webpack-dev-server": "~4.9.3",
-    "webpack": "~4.44.2"
+    "webpack": "~4.47.0"
   }
 }

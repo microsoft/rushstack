@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-plugin-utilities",
-  "version": "0.1.48",
+  "version": "0.4.23",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "dist/webpack-plugin-utilities.d.ts",
@@ -12,11 +12,15 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
+  },
+  "dependencies": {
+    "webpack-merge": "~5.8.0",
+    "memfs": "3.4.3"
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",
-    "webpack": "^5.35.1"
+    "webpack": "^5.35.1 || ^4.31.0"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
@@ -27,12 +31,9 @@
     }
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24",
+    "local-node-rig": "workspace:*",
     "@types/tapable": "1.0.6",
-    "webpack": "~5.68.0"
+    "webpack": "~5.82.1"
   }
 }

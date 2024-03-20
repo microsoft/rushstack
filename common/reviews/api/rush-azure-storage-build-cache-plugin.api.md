@@ -6,9 +6,10 @@
 
 import { AzureAuthorityHosts } from '@azure/identity';
 import { DeviceCodeCredential } from '@azure/identity';
+import { DeviceCodeCredentialOptions } from '@azure/identity';
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import type { IRushPlugin } from '@rushstack/rush-sdk';
-import type { ITerminal } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type { RushConfiguration } from '@rushstack/rush-sdk';
 import type { RushSession } from '@rushstack/rush-sdk';
 
@@ -16,13 +17,15 @@ import type { RushSession } from '@rushstack/rush-sdk';
 export abstract class AzureAuthenticationBase {
     constructor(options: IAzureAuthenticationBaseOptions);
     // (undocumented)
+    protected readonly _additionalDeviceCodeCredentialOptions: DeviceCodeCredentialOptions | undefined;
+    // (undocumented)
     protected readonly _azureEnvironment: AzureEnvironmentName;
     // (undocumented)
     protected abstract readonly _credentialKindForLogging: string;
     // (undocumented)
     protected abstract readonly _credentialNameForCache: string;
     // (undocumented)
-    protected abstract readonly _credentialUpdateCommandForLogging: string | undefined;
+    protected readonly _credentialUpdateCommandForLogging: string | undefined;
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
     protected abstract _getCacheIdParts(): string[];
@@ -48,8 +51,6 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
     // (undocumented)
     protected readonly _credentialNameForCache: string;
     // (undocumented)
-    protected readonly _credentialUpdateCommandForLogging: string;
-    // (undocumented)
     protected _getCacheIdParts(): string[];
     // (undocumented)
     protected _getCredentialFromDeviceCodeAsync(terminal: ITerminal, deviceCodeCredential: DeviceCodeCredential): Promise<ICredentialResult>;
@@ -70,6 +71,8 @@ export type ExpiredCredentialBehavior = 'logWarning' | 'throwError' | 'ignore';
 export interface IAzureAuthenticationBaseOptions {
     // (undocumented)
     azureEnvironment?: AzureEnvironmentName;
+    // (undocumented)
+    credentialUpdateCommandForLogging?: string | undefined;
 }
 
 // @public (undocumented)

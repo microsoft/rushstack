@@ -4,9 +4,10 @@
 import type { pki } from 'node-forge';
 import * as path from 'path';
 import { EOL } from 'os';
-import { FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 
-import { runSudoAsync, IRunResult, runAsync } from './runCommand';
+import { runSudoAsync, type IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
 
 const CA_SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
@@ -15,12 +16,22 @@ const FRIENDLY_NAME: string = 'debug-certificate-manager Development Certificate
 const MAC_KEYCHAIN: string = '/Library/Keychains/System.keychain';
 const CERTUTIL_EXE_NAME: string = 'certutil';
 const CA_ALT_NAME: string = 'rushstack-certificate-manager.localhost';
+const ONE_DAY_IN_MILLISECONDS: number = 24 * 60 * 60 * 1000;
 
 /**
  * The set of names the certificate should be generated for, by default.
  * @public
  */
 export const DEFAULT_CERTIFICATE_SUBJECT_NAMES: ReadonlyArray<string> = ['localhost'];
+
+/**
+ * The set of ip addresses the certificate should be generated for, by default.
+ * @public
+ */
+export const DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES: ReadonlyArray<string> = ['127.0.0.1'];
+
+const DISABLE_CERT_GENERATION_VARIABLE_NAME: 'RUSHSTACK_DISABLE_DEV_CERT_GENERATION' =
+  'RUSHSTACK_DISABLE_DEV_CERT_GENERATION';
 
 /**
  * The interface for a debug certificate instance
@@ -65,10 +76,22 @@ interface ISubjectAltNameExtension {
   altNames: readonly IAltName[];
 }
 
-interface IAltName {
+/**
+ * Fields for a Subject Alternative Name of type DNS Name
+ */
+interface IDnsAltName {
   type: 2;
   value: string;
 }
+/**
+ * Fields for a Subject Alternative Name of type IP Address
+ * `node-forge` requires the field name to be "ip" instead of "value", likely due to subtle encoding differences.
+ */
+interface IIPAddressAltName {
+  type: 7;
+  ip: string;
+}
+type IAltName = IDnsAltName | IIPAddressAltName;
 
 /**
  * Options to use if needing to generate a new certificate
@@ -76,14 +99,20 @@ interface IAltName {
  */
 export interface ICertificateGenerationOptions {
   /**
-   * The DNS Subject names to issue the certificate for.
+   * The DNS Subject names to issue the certificate for. Defaults to ['localhost'].
    */
   subjectAltNames?: ReadonlyArray<string>;
+  /**
+   * The IP Address Subject names to issue the certificate for. Defaults to ['127.0.0.1'].
+   */
+  subjectIPAddresses?: ReadonlyArray<string>;
   /**
    * How many days the certificate should be valid for.
    */
   validityInDays?: number;
 }
+
+const MAX_CERTIFICATE_VALIDITY_DAYS: 365 = 365;
 
 /**
  * A utility class to handle generating, trusting, and untrustring a debug certificate.
@@ -113,6 +142,14 @@ export class CertificateManager {
 
     const { certificateData: existingCert, keyData: existingKey } = this._certificateStore;
 
+    if (process.env[DISABLE_CERT_GENERATION_VARIABLE_NAME] === '1') {
+      // Allow the environment (e.g. GitHub codespaces) to forcibly disable dev cert generation
+      terminal.writeLine(
+        `Found environment variable ${DISABLE_CERT_GENERATION_VARIABLE_NAME}=1, disabling certificate generation.`
+      );
+      canGenerateNewCertificate = false;
+    }
+
     if (existingCert && existingKey) {
       const messages: string[] = [];
 
@@ -126,6 +163,17 @@ export class CertificateManager {
           'The existing development certificate is missing the subjectAltName ' +
             'property and will not work with the latest versions of some browsers.'
         );
+      } else {
+        const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
+        for (const altName of altNamesExtension.altNames) {
+          missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
+        }
+        if (missingSubjectNames.size) {
+          messages.push(
+            `The existing development certificate does not include the following expected subjectAltName values: ` +
+              Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
+          );
+        }
       }
 
       const { notBefore, notAfter } = certificate.validity;
@@ -139,6 +187,24 @@ export class CertificateManager {
       if (now > notAfter) {
         messages.push(
           `The existing development certificate's validity period ended ${notAfter}. It is currently ${now}.`
+        );
+      }
+
+      now.setUTCDate(now.getUTCDate() + optionsWithDefaults.validityInDays);
+      if (notAfter > now) {
+        messages.push(
+          `The existing development certificate's expiration date ${notAfter} exceeds the allowed limit ${now}. ` +
+            `This will be rejected by many browsers.`
+        );
+      }
+
+      if (
+        notBefore.getTime() - notAfter.getTime() >
+        optionsWithDefaults.validityInDays * ONE_DAY_IN_MILLISECONDS
+      ) {
+        messages.push(
+          "The existing development certificate's validity period is longer " +
+            `than ${optionsWithDefaults.validityInDays} days.`
         );
       }
 
@@ -174,7 +240,9 @@ export class CertificateManager {
           pemCaCertificate: caCertificateData,
           pemCertificate: existingCert,
           pemKey: existingKey,
-          subjectAltNames: altNamesExtension.altNames.map((entry) => entry.value)
+          subjectAltNames: altNamesExtension.altNames.map((entry) =>
+            isIPAddress(entry) ? entry.ip : entry.value
+          )
         };
       }
     } else if (canGenerateNewCertificate) {
@@ -279,9 +347,11 @@ export class CertificateManager {
 
     certificate.serialNumber = CA_SERIAL_NUMBER;
 
-    const now: Date = new Date();
-    certificate.validity.notBefore = now;
-    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+    const notBefore: Date = new Date();
+    const notAfter: Date = new Date(notBefore);
+    notAfter.setUTCDate(notBefore.getUTCDate() + validityInDays);
+    certificate.validity.notBefore = notBefore;
+    certificate.validity.notAfter = notAfter;
 
     const attrs: pki.CertificateField[] = [
       {
@@ -352,16 +422,18 @@ export class CertificateManager {
     certificate.publicKey = keys.publicKey;
     certificate.serialNumber = TLS_SERIAL_NUMBER;
 
-    const { subjectAltNames: subjectNames, validityInDays } = options;
+    const { subjectAltNames: subjectNames, subjectIPAddresses: subjectIpAddresses, validityInDays } = options;
 
     const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
       validityInDays,
       forge
     );
 
-    const now: Date = new Date();
-    certificate.validity.notBefore = now;
-    certificate.validity.notAfter.setUTCDate(certificate.validity.notBefore.getUTCDate() + validityInDays);
+    const notBefore: Date = new Date();
+    const notAfter: Date = new Date(notBefore);
+    notAfter.setUTCDate(notBefore.getUTCDate() + validityInDays);
+    certificate.validity.notBefore = notBefore;
+    certificate.validity.notAfter = notAfter;
 
     const subjectAttrs: pki.CertificateField[] = [
       {
@@ -374,10 +446,16 @@ export class CertificateManager {
     certificate.setSubject(subjectAttrs);
     certificate.setIssuer(issuerAttrs);
 
-    const subjectAltNames: readonly IAltName[] = subjectNames.map((subjectName) => ({
-      type: 2, // DNS
-      value: subjectName
-    }));
+    const subjectAltNames: IAltName[] = [
+      ...subjectNames.map<IDnsAltName>((subjectName) => ({
+        type: 2, // DNS
+        value: subjectName
+      })),
+      ...subjectIpAddresses.map<IIPAddressAltName>((ip) => ({
+        type: 7, // IP
+        ip
+      }))
+    ];
 
     const issuerAltNames: readonly IAltName[] = [
       {
@@ -623,7 +701,8 @@ export class CertificateManager {
       ]);
 
       if (repairStoreResult.code !== 0) {
-        terminal.writeErrorLine(`CertUtil Error: ${repairStoreResult.stderr.join('')}`);
+        terminal.writeVerboseLine(`CertUtil Error: ${repairStoreResult.stderr.join('')}`);
+        terminal.writeVerboseLine(`CertUtil: ${repairStoreResult.stdout.join('')}`);
         return false;
       } else {
         terminal.writeVerboseLine('Successfully set certificate name.');
@@ -666,7 +745,7 @@ export class CertificateManager {
       subjectAltNames = generatedCertificate.subjectAltNames;
 
       // Try to set the friendly name, and warn if we can't
-      if (!this._trySetFriendlyNameAsync(tempCertificatePath, terminal)) {
+      if (!(await this._trySetFriendlyNameAsync(tempCertificatePath, terminal))) {
         terminal.writeWarningLine("Unable to set the certificate's friendly name.");
       }
     } else {
@@ -707,8 +786,19 @@ function applyDefaultOptions(
   options: ICertificateGenerationOptions | undefined
 ): Required<ICertificateGenerationOptions> {
   const subjectNames: ReadonlyArray<string> | undefined = options?.subjectAltNames;
+  const subjectIpAddresses: ReadonlyArray<string> | undefined = options?.subjectIPAddresses;
   return {
     subjectAltNames: subjectNames?.length ? subjectNames : DEFAULT_CERTIFICATE_SUBJECT_NAMES,
-    validityInDays: options?.validityInDays ?? 365
+    subjectIPAddresses: subjectIpAddresses?.length
+      ? subjectIpAddresses
+      : DEFAULT_CERTIFICATE_SUBJECT_IP_ADDRESSES,
+    validityInDays: Math.min(
+      MAX_CERTIFICATE_VALIDITY_DAYS,
+      options?.validityInDays ?? MAX_CERTIFICATE_VALIDITY_DAYS
+    )
   };
+}
+
+function isIPAddress(altName: IAltName): altName is IIPAddressAltName {
+  return altName.type === 7;
 }

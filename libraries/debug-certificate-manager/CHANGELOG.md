@@ -1,6 +1,464 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+
+## 1.3.39
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 1.3.38
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
+
+## 1.3.37
+Tue, 05 Mar 2024 01:19:24 GMT
+
+_Version update only_
+
+## 1.3.36
+Sun, 03 Mar 2024 20:58:13 GMT
+
+_Version update only_
+
+## 1.3.35
+Sat, 02 Mar 2024 02:22:24 GMT
+
+_Version update only_
+
+## 1.3.34
+Fri, 01 Mar 2024 01:10:08 GMT
+
+_Version update only_
+
+## 1.3.33
+Thu, 29 Feb 2024 07:11:45 GMT
+
+_Version update only_
+
+## 1.3.32
+Wed, 28 Feb 2024 16:09:27 GMT
+
+_Version update only_
+
+## 1.3.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 1.3.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 1.3.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 1.3.28
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 1.3.27
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 1.3.26
+Tue, 20 Feb 2024 16:10:52 GMT
+
+_Version update only_
+
+## 1.3.25
+Mon, 19 Feb 2024 21:54:26 GMT
+
+_Version update only_
+
+## 1.3.24
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 1.3.23
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 1.3.22
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 1.3.21
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 1.3.20
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 1.3.19
+Tue, 23 Jan 2024 20:12:57 GMT
+
+_Version update only_
+
+## 1.3.18
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
+
+## 1.3.17
+Tue, 16 Jan 2024 18:30:11 GMT
+
+_Version update only_
+
+## 1.3.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 1.3.15
+Wed, 20 Dec 2023 01:09:45 GMT
+
+_Version update only_
+
+## 1.3.14
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 1.3.13
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 1.3.12
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 1.3.11
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 1.3.10
+Mon, 30 Oct 2023 23:36:37 GMT
+
+_Version update only_
+
+## 1.3.9
+Sun, 01 Oct 2023 02:56:29 GMT
+
+_Version update only_
+
+## 1.3.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 1.3.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 1.3.6
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 1.3.5
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 1.3.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 1.3.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 1.3.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 1.3.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 1.3.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 1.2.56
+Wed, 13 Sep 2023 00:32:29 GMT
+
+### Patches
+
+- Fixes issues with CertificateManager when setting the certificate friendly name fails.
+
+## 1.2.55
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 1.2.54
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 1.2.53
+Sat, 29 Jul 2023 00:22:50 GMT
+
+_Version update only_
+
+## 1.2.52
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 1.2.51
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 1.2.50
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 1.2.49
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 1.2.48
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 1.2.47
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 1.2.46
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 1.2.45
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 1.2.44
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 1.2.43
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 1.2.42
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 1.2.41
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 1.2.40
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 1.2.39
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 1.2.38
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 1.2.37
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 1.2.36
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 1.2.35
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 1.2.34
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 1.2.33
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 1.2.32
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 1.2.31
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 1.2.30
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 1.2.29
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 1.2.28
+Wed, 24 May 2023 00:19:12 GMT
+
+### Patches
+
+- Add environment variable to force disable certificate generation. Correctly encode 127.0.0.1 as an IP Address in subjectAltNames field during certificate generation.
+
+## 1.2.27
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 1.2.26
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 1.2.25
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 1.2.24
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 1.2.23
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 1.2.22
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 1.2.21
+Mon, 17 Apr 2023 15:21:31 GMT
+
+### Patches
+
+- Include "rushstack.localhost" and "127.0.0.1" in the default certificate subjects.
+
+## 1.2.20
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 1.2.19
+Mon, 20 Mar 2023 20:14:20 GMT
+
+### Patches
+
+- Force certificates with a validity period longer than the expected validity period to be refreshed.
+
+## 1.2.18
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 1.2.17
+Fri, 03 Mar 2023 04:11:20 GMT
+
+### Patches
+
+- Fix an issue where certificate expiration was calculated incorrectly and certificates were set to expire too late.
+
+## 1.2.16
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 1.2.15
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 1.2.14
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 1.2.13
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 1.2.12
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 1.2.11
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 1.2.10
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 1.2.9
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 1.2.8
 Tue, 20 Dec 2022 01:18:22 GMT

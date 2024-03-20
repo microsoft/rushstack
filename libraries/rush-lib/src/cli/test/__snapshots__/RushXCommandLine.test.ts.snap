@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RushXCommandLine launchRushX executes a valid package script 1`] = `
+exports[`RushXCommandLine launchRushXAsync executes a valid package script 1`] = `
 Array [
   Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+    "[1mRush Multi-Project Build Tool 40.40.40[33m[39m[22m - Node.js 12.12.12 (LTS)",
   ],
   Array [
     "> \\"an acme project build command\\"
@@ -12,36 +12,26 @@ Array [
 ]
 `;
 
-exports[`RushXCommandLine launchRushX executes a valid package script with no startup banner 1`] = `Array []`;
+exports[`RushXCommandLine launchRushXAsync executes a valid package script with no startup banner 1`] = `Array []`;
 
-exports[`RushXCommandLine launchRushX fails if the package does not contain a matching script 1`] = `
+exports[`RushXCommandLine launchRushXAsync fails if the package does not contain a matching script 1`] = `
 Array [
   Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
-  ],
-  Array [
-    "[31mError: The command \\"asdf\\" is not defined in the package.json file for this project.[39m",
-  ],
-  Array [
-    "
-Available commands for this project are: \\"build\\", \\"test\\"",
-  ],
-  Array [
-    "Use [33m\\"rushx --help\\"[39m for more information.",
+    "[1mRush Multi-Project Build Tool 40.40.40[33m[39m[22m - Node.js 12.12.12 (LTS)",
   ],
 ]
 `;
 
-exports[`RushXCommandLine launchRushX prints usage info 1`] = `
+exports[`RushXCommandLine launchRushXAsync prints usage info 1`] = `
 Array [
   Array [
-    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+    "[1mRush Multi-Project Build Tool 40.40.40[33m[39m[22m - Node.js 12.12.12 (LTS)",
   ],
   Array [
     "usage: rushx [-h]",
   ],
   Array [
-    "       rushx [-q/--quiet] <command> ...
+    "       rushx [-q/--quiet] [-d/--debug] [--ignore-hooks] <command> ...
 ",
   ],
   Array [
@@ -51,7 +41,10 @@ Array [
     "  -h, --help            Show this help message and exit.",
   ],
   Array [
-    "  -q, --quiet           Hide rushx startup information.
+    "  -q, --quiet           Hide rushx startup information.",
+  ],
+  Array [
+    "  -d, --debug           Run in debug mode.
 ",
   ],
   Array [

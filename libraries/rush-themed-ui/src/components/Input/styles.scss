@@ -1,0 +1,7 @@
+@use '../../styles/colors';
+
+.InputWrapper {
+  border: solid 1px colors.$gray;
+  border-radius: 4px;
+  padding: 0.4em;
+}

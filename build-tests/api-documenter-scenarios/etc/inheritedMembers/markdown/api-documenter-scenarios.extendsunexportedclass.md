@@ -6,12 +6,12 @@
 
 Some class that extends an unexported class.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ExtendsUnexportedClass extends UnexportedClass 
 ```
-<b>Extends:</b> UnexportedClass
+**Extends:** UnexportedClass
 
-<i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+_(Some inherited members may not be shown because they are not represented in the documentation.)_
 

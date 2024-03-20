@@ -49,10 +49,9 @@ export interface IBaseCommandLineDefinition {
    *
    * @remarks
    * The environment variable name must consist only of upper-case letters, numbers,
-   * and underscores. It may not start with a number.
-   *
-   * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
-   * because in that case the environmentVariable would never be used.
+   * and underscores. It may not start with a number. To disable this validation, set
+   * `{@link IBaseCommandLineDefinition.allowNonStandardEnvironmentVariableNames}`
+   * to `true`.
    *
    * Syntax notes for environment variable values:
    *
@@ -77,6 +76,20 @@ export interface IBaseCommandLineDefinition {
    *   ordinary String Parameter:  Any value is accepted, including an empty string.
    */
   environmentVariable?: string;
+
+  /**
+   * Allows for the use of environment variable names that do not conform to the standard
+   * described by the Shell and Utilities volume of IEEE Std 1003.1-2001. This disables
+   * the validation that is performed on the provided
+   * {@link IBaseCommandLineDefinition.environmentVariable} value by default.
+   *
+   * @remarks
+   * if this is set to `true`, environment variable discovery will vary based on the
+   * platform in use. For example, Windows environment variable names are case-insensitive,
+   * while on Linux, environment variable names are case-sensitive. It is recommended that
+   * this option be used only when necessary based on environmental constraints.
+   */
+  allowNonStandardEnvironmentVariableNames?: boolean;
 
   /**
    * Specifies additional names for this parameter that are accepted but not displayed
@@ -119,22 +132,24 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
 }
 
 /**
- * For use with {@link CommandLineParameterProvider.defineChoiceParameter},
- * this interface defines a command line parameter which is constrained to a list of possible
+ * For use with {@link CommandLineParameterProvider.(defineChoiceParameter:1)} and
+ * {@link CommandLineParameterProvider.(defineChoiceParameter:2)}, this interface
+ * defines a command line parameter which is constrained to a list of possible
  * options.
  *
  * @public
  */
-export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceDefinition<TChoice extends string = string>
+  extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  alternatives: string[];
+  alternatives: TChoice[];
 
   /**
    * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
-  defaultValue?: string;
+  defaultValue?: TChoice;
 
   /**
    * An optional callback that provides a list of custom choices for tab completion.
@@ -142,7 +157,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
    */
-  completions?: () => Promise<string[]>;
+  completions?: () => Promise<TChoice[]>;
 }
 
 /**
@@ -152,11 +167,12 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceListDefinition<TChoice extends string = string>
+  extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  alternatives: string[];
+  alternatives: TChoice[];
 
   /**
    * An optional callback that provides a list of custom choices for tab completion.
@@ -164,7 +180,7 @@ export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefini
    * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
    * is enabled.
    */
-  completions?: () => Promise<string[]>;
+  completions?: () => Promise<TChoice[]>;
 }
 
 /**
@@ -176,8 +192,9 @@ export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefini
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {}
 
 /**
- * For use with {@link CommandLineParameterProvider.defineIntegerParameter},
- * this interface defines a command line parameter whose argument is an integer value.
+ * For use with {@link CommandLineParameterProvider.(defineIntegerParameter:1)},
+ * {@link CommandLineParameterProvider.(defineIntegerParameter:2)}, this interface
+ * defines a command line parameter whose argument is an integer value.
  *
  * @public
  */
@@ -198,8 +215,9 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
 export interface ICommandLineIntegerListDefinition extends IBaseCommandLineDefinitionWithArgument {}
 
 /**
- * For use with {@link CommandLineParameterProvider.defineStringParameter},
- * this interface defines a command line parameter whose argument is a string value.
+ * For use with {@link CommandLineParameterProvider.(defineStringParameter:1)} and
+ * {@link CommandLineParameterProvider.(defineStringParameter:2)}, this interface
+ * defines a command line parameter whose argument is a string value.
  *
  * @public
  */

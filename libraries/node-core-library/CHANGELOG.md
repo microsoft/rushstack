@@ -1,6 +1,218 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 09 Dec 2022 16:18:27 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Feb 2024 21:45:28 GMT and should not be manually modified.
+
+## 4.0.2
+Wed, 21 Feb 2024 21:45:28 GMT
+
+### Patches
+
+- Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`.
+
+## 4.0.1
+Tue, 20 Feb 2024 21:45:10 GMT
+
+### Patches
+
+- Remove a no longer needed dependency on the `colors` package
+
+## 4.0.0
+Mon, 19 Feb 2024 21:54:27 GMT
+
+### Breaking changes
+
+- (BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details.
+- Remove deprecated `FileSystem.readFolder`, `FileSystem.readFolderAsync`, and `LegacyAdapters.sortStable` APIs.
+
+### Minor changes
+
+- Graduate `Async` and `MinimumHeap` APIs from beta to public.
+
+## 3.66.1
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 3.66.0
+Thu, 08 Feb 2024 01:09:21 GMT
+
+### Minor changes
+
+- Add getStatistics() method to FileWriter instances
+
+### Patches
+
+- LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux
+
+## 3.65.0
+Mon, 05 Feb 2024 23:46:52 GMT
+
+### Minor changes
+
+- Inclue a `Text.reverse` API for reversing a string.
+
+## 3.64.2
+Thu, 25 Jan 2024 01:09:29 GMT
+
+### Patches
+
+- Improve 'bin' definition in `IPackageJson` type
+
+## 3.64.1
+Tue, 23 Jan 2024 20:12:57 GMT
+
+### Patches
+
+- Fix Executable.getProcessInfoBy* methods truncating the process name on MacOS
+
+## 3.64.0
+Tue, 23 Jan 2024 16:15:05 GMT
+
+### Minor changes
+
+- Add the `dependenciesMeta` property to the `INodePackageJson` interface.
+
+## 3.63.0
+Wed, 03 Jan 2024 00:31:18 GMT
+
+### Minor changes
+
+- Updates the `JsonFile` API to format JSON as JSON5 if an existing string is being updated to preserve the style of the existing JSON.
+
+## 3.62.0
+Thu, 07 Dec 2023 03:44:13 GMT
+
+### Minor changes
+
+- Add functions inside the `Executable` API to list all process trees (`getProcessInfoById`, `getProcessInfoByIdAsync`, `getProcessInfoByName`, and `getProcessInfoByNameAsync`).
+- Add functions inside the `Text` API to split iterables (or async iterables) that produce strings or buffers on newlines (`readLinesFromIterable` and `readLinesFromIterableAsync`).
+- Add the `waitForExitAsync` method inside the `Executable` API used to wait for a provided child process to exit.
+
+## 3.61.0
+Thu, 28 Sep 2023 20:53:17 GMT
+
+### Minor changes
+
+- Add Async.getSignal for promise-based signaling. Add MinimumHeap for use as a priority queue.
+
+## 3.60.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 3.60.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 3.59.7
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 3.59.6
+Wed, 19 Jul 2023 00:20:31 GMT
+
+### Patches
+
+- Updated semver dependency
+
+## 3.59.5
+Thu, 06 Jul 2023 00:16:19 GMT
+
+### Patches
+
+- Fix Import.resolveModule* and Import.resolvePackage* methods to return real-paths when resolving self-referencing specs
+
+## 3.59.4
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 3.59.3
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 3.59.2
+Mon, 29 May 2023 15:21:15 GMT
+
+### Patches
+
+- Remove extraneous string encode/decode of final output during `JsonFile.save`/`JsonFile.saveAsync`.
+
+## 3.59.1
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 3.59.0
+Fri, 12 May 2023 00:23:05 GMT
+
+### Minor changes
+
+- Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp.
+
+## 3.58.0
+Mon, 01 May 2023 15:23:19 GMT
+
+### Minor changes
+
+- Expose a `Text.escapeRegExp` function to escape regexp special characters.
+
+## 3.57.0
+Sat, 29 Apr 2023 00:23:02 GMT
+
+### Minor changes
+
+- Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider
+- Add a Writable stream adapter for ITerminal to allow writing to a terminal as a stream
+
+## 3.56.0
+Thu, 27 Apr 2023 17:18:42 GMT
+
+### Minor changes
+
+- Adds the AsyncQueue class, a queue type that allows for iterating and concurrently adding to the queue
+- Adds support for async Import.resolve* APIs
+
+### Patches
+
+- Fix a typings issue in FileSystem.copyFilesAsync
+- Fix issues with Import.resolve* APIs when attempting to resolve system modules paths (ex. 'fs/promises') and self-referencing module paths
+
+## 3.55.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 3.55.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
+
+## 3.55.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
+
+## 3.54.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Add a `peerDependenciesMeta` property to `IPackageJson`.
+- Move the @types/node dependency to an optional peerDependency.
 
 ## 3.53.3
 Fri, 09 Dec 2022 16:18:27 GMT

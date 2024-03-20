@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
 import type {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  IRequiredCommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
 
-import { BaseRushAction, IBaseRushActionOptions } from './BaseRushAction';
+import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
 import type { BaseInstallManager } from '../../logic/base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
@@ -18,22 +19,25 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
-import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
-import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import type { SelectionParameterSet } from '../parsing/SelectionParameterSet';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
  */
 export abstract class BaseInstallAction extends BaseRushAction {
-  protected readonly _variant: CommandLineStringParameter;
+  protected readonly _terminal: ITerminal;
   protected readonly _purgeParameter: CommandLineFlagParameter;
   protected readonly _bypassPolicyParameter: CommandLineFlagParameter;
   protected readonly _noLinkParameter: CommandLineFlagParameter;
   protected readonly _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected readonly _debugPackageManagerParameter: CommandLineFlagParameter;
-  protected readonly _maxInstallAttempts: CommandLineIntegerParameter;
+  protected readonly _maxInstallAttempts: IRequiredCommandLineIntegerParameter;
   protected readonly _ignoreHooksParameter: CommandLineFlagParameter;
+  protected readonly _offlineParameter: CommandLineFlagParameter;
+  protected readonly _subspaceParameter: CommandLineStringParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -43,14 +47,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
   public constructor(options: IBaseRushActionOptions) {
     super(options);
 
+    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: options.parser.isDebug }));
+
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
       parameterShortName: '-p',
       description: 'Perform "rush purge" before starting the installation'
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
-      parameterLongName: '--bypass-policy',
-      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
+      parameterLongName: RushConstants.bypassPolicyFlagLongName,
+      description: `Overrides enforcement of the "gitPolicy" rules from ${RushConstants.rushJsonFilename} (use honorably!)`
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
@@ -82,17 +88,111 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+      description:
+        `Skips execution of the "eventHooks" scripts defined in ${RushConstants.rushJsonFilename}. ` +
+        'Make sure you know what you are skipping.'
     });
-    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
+    this._offlineParameter = this.defineFlagParameter({
+      parameterLongName: '--offline',
+      description:
+        `Enables installation to be performed without internet access. PNPM will instead report an error` +
+        ` if the necessary NPM packages cannot be obtained from the local cache.` +
+        ` For details, see the documentation for PNPM's "--offline" parameter.`
+    });
+    this._subspaceParameter = this.defineStringParameter({
+      parameterLongName: '--subspace',
+      argumentName: 'SUBSPACE_NAME',
+      description:
+        '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the feature to be enabled in subspaces.json.'
+    });
   }
 
   protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
 
+  protected getTargetSubspace(): Subspace {
+    const parameterValue: string | undefined = this._subspaceParameter.value;
+    if (parameterValue && !this.rushConfiguration.subspacesFeatureEnabled) {
+      // eslint-disable-next-line no-console
+      console.log();
+      // eslint-disable-next-line no-console
+      console.log(
+        Colorize.red(
+          `The "--subspace" parameter can only be passed if "subspacesEnabled" is set to true in subspaces.json.`
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+    const selectedSubspace: Subspace | undefined = parameterValue
+      ? this.rushConfiguration.getSubspace(parameterValue)
+      : this.rushConfiguration.defaultSubspace;
+    return selectedSubspace;
+  }
+
   protected async runAsync(): Promise<void> {
-    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
-      variant: this._variant.value
-    });
+    const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
+
+    if (this.rushConfiguration._hasVariantsField) {
+      this._terminal.writeLine(
+        Colorize.yellow(
+          `Warning: Please remove the obsolete "variants" field from your ${RushConstants.rushJsonFilename} ` +
+            'file. Installation variants have been replaced by the new Rush subspaces feature. ' +
+            'In the next major release, Rush will fail to execute if this field is present.'
+        )
+      );
+    }
+
+    // If we are doing a filtered install and subspaces is enabled, we need to find the affected subspaces and install for all of them.
+    let selectedSubspaces: ReadonlySet<Subspace> | undefined;
+    const filterArgumentsForSubspace: Map<Subspace, string[]> = new Map();
+    if (this.rushConfiguration.subspacesFeatureEnabled) {
+      if (installManagerOptions.pnpmFilterArguments.length) {
+        // Selecting a set of subspaces
+        const selectedProjects: Set<RushConfigurationProject> | undefined =
+          await this._selectionParameters?.getSelectedProjectsAsync(this._terminal);
+        if (selectedProjects) {
+          // Go through each project, add it to it's subspace's pnpm filter arguments
+          for (const project of selectedProjects) {
+            const subspaceFilterArguments: string[] = filterArgumentsForSubspace.get(project.subspace) || [];
+            subspaceFilterArguments.push('--filter', project.packageName);
+            filterArgumentsForSubspace.set(project.subspace, subspaceFilterArguments);
+          }
+          selectedSubspaces = this.rushConfiguration.getSubspacesForProjects(selectedProjects);
+        } else {
+          throw new Error('The specified filter arguments resulted in no projects being selected.');
+        }
+      } else if (this._subspaceParameter.value) {
+        // Selecting a single subspace
+        const selectedSubspace: Subspace = this.rushConfiguration.getSubspace(this._subspaceParameter.value);
+        selectedSubspaces = new Set<Subspace>([selectedSubspace]);
+      } else {
+        // Selecting all subspaces if preventSelectingAllSubspaces is not enabled in subspaces.json
+        if (!this.rushConfiguration.subspacesConfiguration?.preventSelectingAllSubspaces) {
+          selectedSubspaces = new Set<Subspace>(this.rushConfiguration.subspaces);
+        } else {
+          // eslint-disable-next-line no-console
+          console.log();
+          // eslint-disable-next-line no-console
+          console.log(
+            Colorize.red(
+              `The subspaces preventSelectingAllSubspaces configuration is enabled, which enforces installation for a specified set of subspace,` +
+                ` passed by the "--subspace" parameter or selected from targeted projects using any project selector.`
+            )
+          );
+          throw new AlreadyReportedError();
+        }
+      }
+    }
+
+    if (selectedSubspaces) {
+      // Check each subspace for version inconsistencies
+      for (const subspace of selectedSubspaces) {
+        VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal, {
+          subspace
+        });
+      }
+    } else {
+      VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, this._terminal);
+    }
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -113,8 +213,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
     if (this._purgeParameter.value!) {
+      // eslint-disable-next-line no-console
       console.log('The --purge flag was specified, so performing "rush purge"');
       purgeManager.purgeNormal();
+      // eslint-disable-next-line no-console
       console.log('');
     }
 
@@ -127,48 +229,39 @@ export abstract class BaseInstallAction extends BaseRushAction {
       }
     }
 
-    // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
-    // it is safe to assume that the value is not null
-    if (this._maxInstallAttempts.value! < 1) {
+    if (this._maxInstallAttempts.value < 1) {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
-
-    const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
     const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = await import(
       /* webpackChunkName: 'InstallManagerFactory' */
       '../../logic/InstallManagerFactory'
     );
-    const installManager: BaseInstallManager =
-      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
-        this.rushConfiguration,
-        this.rushGlobalFolder,
-        purgeManager,
-        installManagerOptions
-      );
-
     let installSuccessful: boolean = true;
+
     try {
-      await installManager.doInstallAsync();
-
-      if (warnAboutScriptUpdate) {
-        console.log(
-          '\n' +
-            colors.yellow(
-              'Rush refreshed some files in the "common/scripts" folder.' +
-                '  Please commit this change to Git.'
-            )
-        );
+      if (selectedSubspaces) {
+        // Run the install for each affected subspace
+        for (const selectedSubspace of selectedSubspaces) {
+          installManagerOptions.subspace = selectedSubspace;
+          if (selectedSubspace.getPnpmOptions()?.alwaysFullInstall) {
+            installManagerOptions.pnpmFilterArguments = [];
+          } else {
+            installManagerOptions.pnpmFilterArguments =
+              filterArgumentsForSubspace.get(selectedSubspace) || [];
+          }
+          // eslint-disable-next-line no-console
+          console.log(Colorize.green(`Installing for subspace: ${selectedSubspace.subspaceName}`));
+          await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
+        }
+      } else {
+        await this._doInstall(installManagerFactoryModule, purgeManager, installManagerOptions);
       }
-
-      console.log(
-        '\n' + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
-      );
     } catch (error) {
       installSuccessful = false;
       throw error;
     } finally {
-      purgeManager.deleteAll();
+      await purgeManager.startDeleteAllAsync();
       stopwatch.stop();
 
       this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
@@ -179,6 +272,38 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this._ignoreHooksParameter.value
       );
     }
+
+    if (warnAboutScriptUpdate) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '\n' +
+          Colorize.yellow(
+            'Rush refreshed some files in the "common/scripts" folder.' +
+              '  Please commit this change to Git.'
+          )
+      );
+    }
+
+    // eslint-disable-next-line no-console
+    console.log(
+      '\n' + Colorize.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+    );
+  }
+
+  private async _doInstall(
+    installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory'),
+    purgeManager: PurgeManager,
+    installManagerOptions: IInstallManagerOptions
+  ): Promise<void> {
+    const installManager: BaseInstallManager =
+      await installManagerFactoryModule.InstallManagerFactory.getInstallManagerAsync(
+        this.rushConfiguration,
+        this.rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
+
+    await installManager.doInstallAsync();
   }
 
   private _collectTelemetry(

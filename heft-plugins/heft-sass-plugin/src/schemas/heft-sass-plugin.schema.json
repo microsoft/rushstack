@@ -42,11 +42,16 @@
 
     "cssOutputFolders": {
       "type": "array",
-      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation.",
+      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation, unless \"preserveSCSSExtension\" is set.",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"
       }
+    },
+
+    "preserveSCSSExtension": {
+      "type": "boolean",
+      "description": "If set, when emitting compiled CSS from a file with a \".scss\" extension, the emitted CSS will have the extension \".scss\" instead of \".scss.css\"."
     },
 
     "fileExtensions": {

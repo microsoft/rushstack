@@ -1,25 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  AlreadyReportedError,
-  PackageJsonLookup,
-  IPackageJson,
-  ITerminal
-} from '@rushstack/node-core-library';
-import { CommandLineParameterProvider, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import { AlreadyReportedError, PackageJsonLookup, type IPackageJson } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
+import type {
+  CommandLineParameterProvider,
+  CommandLineStringListParameter
+} from '@rushstack/ts-command-line';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Selection } from '../../logic/Selection';
 import type { ISelectorParser as ISelectorParser } from '../../logic/selectors/ISelectorParser';
 import {
   GitChangedProjectSelectorParser,
-  IGitSelectorParserOptions
+  type IGitSelectorParserOptions
 } from '../../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../../logic/selectors/NamedProjectSelectorParser';
 import { TagProjectSelectorParser } from '../../logic/selectors/TagProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../../logic/selectors/VersionPolicyProjectSelectorParser';
+import { SubspaceSelectorParser } from '../../logic/selectors/SubspaceSelectorParser';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -59,6 +60,7 @@ export class SelectionParameterSet {
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
     selectorParsers.set('tag', new TagProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('subspace', new SubspaceSelectorParser(rushConfiguration));
 
     this._selectorParserByScope = selectorParsers;
 
@@ -356,7 +358,7 @@ export class SelectionParameterSet {
             selection.add(project);
           } else {
             terminal.writeErrorLine(
-              'Rush is not currently running in a project directory specified in rush.json. ' +
+              `Rush is not currently running in a project directory specified in ${RushConstants.rushJsonFilename}. ` +
                 `The "." value for the ${parameterName} parameter is not allowed.`
             );
             throw new AlreadyReportedError();
@@ -384,7 +386,7 @@ export class SelectionParameterSet {
           `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
             ` Supported prefixes: ${Array.from(
               this._selectorParserByScope.keys(),
-              (scope: string) => `"${scope}:"`
+              (selectorParserScope: string) => `"${selectorParserScope}:"`
             ).join(', ')}`
         );
         throw new AlreadyReportedError();

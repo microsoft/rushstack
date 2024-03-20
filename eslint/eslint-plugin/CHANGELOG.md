@@ -1,6 +1,46 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Thu, 29 Sep 2022 07:13:06 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Feb 2024 06:24:34 GMT and should not be manually modified.
+
+## 0.15.1
+Sat, 17 Feb 2024 06:24:34 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.15.0
+Wed, 07 Feb 2024 01:11:18 GMT
+
+### Minor changes
+
+- Allow using `as const` in `typedef-var`
+
+## 0.14.0
+Tue, 16 Jan 2024 18:30:10 GMT
+
+### Minor changes
+
+- Add support for TypeScript 5.3 with @typescript-eslint 6.19.x
+
+## 0.13.1
+Tue, 26 Sep 2023 09:30:33 GMT
+
+_Version update only_
+
+## 0.13.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.12.0
+Mon, 22 May 2023 06:34:32 GMT
+
+### Minor changes
+
+- Upgrade the @typescript-eslint/* dependencies to ~5.59.2
 
 ## 0.11.0
 Thu, 29 Sep 2022 07:13:06 GMT

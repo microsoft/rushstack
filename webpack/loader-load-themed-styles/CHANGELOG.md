@@ -1,6 +1,492 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Tue, 20 Dec 2022 01:18:22 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+
+## 2.1.39
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 2.1.38
+Fri, 15 Mar 2024 00:12:40 GMT
+
+_Version update only_
+
+## 2.1.37
+Tue, 05 Mar 2024 01:19:24 GMT
+
+_Version update only_
+
+## 2.1.36
+Sun, 03 Mar 2024 20:58:13 GMT
+
+_Version update only_
+
+## 2.1.35
+Sat, 02 Mar 2024 02:22:24 GMT
+
+_Version update only_
+
+## 2.1.34
+Fri, 01 Mar 2024 01:10:08 GMT
+
+_Version update only_
+
+## 2.1.33
+Thu, 29 Feb 2024 07:11:45 GMT
+
+_Version update only_
+
+## 2.1.32
+Wed, 28 Feb 2024 16:09:27 GMT
+
+_Version update only_
+
+## 2.1.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 2.1.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 2.1.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 2.1.28
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 2.1.27
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 2.1.26
+Tue, 20 Feb 2024 16:10:52 GMT
+
+_Version update only_
+
+## 2.1.25
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 2.1.24
+Sat, 17 Feb 2024 06:24:35 GMT
+
+_Version update only_
+
+## 2.1.23
+Thu, 08 Feb 2024 01:09:21 GMT
+
+_Version update only_
+
+## 2.1.22
+Wed, 07 Feb 2024 01:11:18 GMT
+
+_Version update only_
+
+## 2.1.21
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 2.1.20
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 2.1.19
+Tue, 23 Jan 2024 20:12:57 GMT
+
+_Version update only_
+
+## 2.1.18
+Tue, 23 Jan 2024 16:15:05 GMT
+
+_Version update only_
+
+## 2.1.17
+Tue, 16 Jan 2024 18:30:11 GMT
+
+_Version update only_
+
+## 2.1.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 2.1.15
+Wed, 20 Dec 2023 01:09:45 GMT
+
+_Version update only_
+
+## 2.1.14
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 2.1.13
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 2.1.12
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 2.1.11
+Wed, 01 Nov 2023 23:11:35 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 2.1.10
+Mon, 30 Oct 2023 23:36:37 GMT
+
+_Version update only_
+
+## 2.1.9
+Sun, 01 Oct 2023 02:56:29 GMT
+
+_Version update only_
+
+## 2.1.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 2.1.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 2.1.6
+Wed, 27 Sep 2023 00:21:38 GMT
+
+_Version update only_
+
+## 2.1.5
+Tue, 26 Sep 2023 21:02:30 GMT
+
+_Version update only_
+
+## 2.1.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 2.1.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 2.1.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 2.1.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 2.1.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 2.0.73
+Wed, 13 Sep 2023 00:32:29 GMT
+
+_Version update only_
+
+## 2.0.72
+Fri, 01 Sep 2023 04:53:58 GMT
+
+_Version update only_
+
+## 2.0.71
+Tue, 08 Aug 2023 07:10:39 GMT
+
+_Version update only_
+
+## 2.0.70
+Sat, 05 Aug 2023 00:20:19 GMT
+
+_Version update only_
+
+## 2.0.69
+Fri, 04 Aug 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.68
+Mon, 31 Jul 2023 15:19:05 GMT
+
+_Version update only_
+
+## 2.0.67
+Sat, 29 Jul 2023 00:22:50 GMT
+
+_Version update only_
+
+## 2.0.66
+Thu, 20 Jul 2023 20:47:28 GMT
+
+_Version update only_
+
+## 2.0.65
+Wed, 19 Jul 2023 00:20:31 GMT
+
+_Version update only_
+
+## 2.0.64
+Mon, 17 Jul 2023 15:20:25 GMT
+
+_Version update only_
+
+## 2.0.63
+Fri, 14 Jul 2023 15:20:45 GMT
+
+_Version update only_
+
+## 2.0.62
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 2.0.61
+Wed, 12 Jul 2023 15:20:39 GMT
+
+_Version update only_
+
+## 2.0.60
+Wed, 12 Jul 2023 00:23:29 GMT
+
+_Version update only_
+
+## 2.0.59
+Fri, 07 Jul 2023 00:19:32 GMT
+
+_Version update only_
+
+## 2.0.58
+Thu, 06 Jul 2023 00:16:19 GMT
+
+_Version update only_
+
+## 2.0.57
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 2.0.56
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 2.0.55
+Thu, 15 Jun 2023 00:21:01 GMT
+
+_Version update only_
+
+## 2.0.54
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 2.0.53
+Tue, 13 Jun 2023 15:17:20 GMT
+
+_Version update only_
+
+## 2.0.52
+Tue, 13 Jun 2023 01:49:01 GMT
+
+_Version update only_
+
+## 2.0.51
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 2.0.50
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 2.0.49
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 2.0.48
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 2.0.47
+Thu, 08 Jun 2023 00:20:02 GMT
+
+_Version update only_
+
+## 2.0.46
+Wed, 07 Jun 2023 22:45:16 GMT
+
+_Version update only_
+
+## 2.0.45
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 2.0.44
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 2.0.43
+Fri, 02 Jun 2023 02:01:12 GMT
+
+_Version update only_
+
+## 2.0.42
+Fri, 02 Jun 2023 00:24:45 GMT
+
+_Version update only_
+
+## 2.0.41
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 2.0.40
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 2.0.39
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 2.0.38
+Thu, 11 May 2023 00:17:21 GMT
+
+_Version update only_
+
+## 2.0.37
+Thu, 04 May 2023 00:20:28 GMT
+
+_Version update only_
+
+## 2.0.36
+Mon, 01 May 2023 15:23:19 GMT
+
+_Version update only_
+
+## 2.0.35
+Sat, 29 Apr 2023 00:23:02 GMT
+
+_Version update only_
+
+## 2.0.34
+Thu, 27 Apr 2023 17:18:42 GMT
+
+_Version update only_
+
+## 2.0.33
+Thu, 20 Apr 2023 15:16:55 GMT
+
+_Version update only_
+
+## 2.0.32
+Tue, 11 Apr 2023 00:23:22 GMT
+
+_Version update only_
+
+## 2.0.31
+Fri, 07 Apr 2023 22:19:21 GMT
+
+_Version update only_
+
+## 2.0.30
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 2.0.29
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 2.0.28
+Sat, 11 Mar 2023 01:24:51 GMT
+
+_Version update only_
+
+## 2.0.27
+Fri, 10 Feb 2023 01:18:50 GMT
+
+_Version update only_
+
+## 2.0.26
+Sun, 05 Feb 2023 03:02:02 GMT
+
+_Version update only_
+
+## 2.0.25
+Wed, 01 Feb 2023 02:16:34 GMT
+
+_Version update only_
+
+## 2.0.24
+Tue, 31 Jan 2023 01:23:23 GMT
+
+_Version update only_
+
+## 2.0.23
+Mon, 30 Jan 2023 16:22:31 GMT
+
+_Version update only_
+
+## 2.0.22
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 2.0.21
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 2.0.20
+Wed, 25 Jan 2023 07:26:55 GMT
+
+_Version update only_
+
+## 2.0.19
+Sun, 22 Jan 2023 20:37:08 GMT
+
+_Version update only_
+
+## 2.0.18
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 2.0.17
 Tue, 20 Dec 2022 01:18:22 GMT

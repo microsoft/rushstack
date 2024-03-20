@@ -2,6 +2,400 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "4.0.2",
+      "tag": "@rushstack/node-core-library_v4.0.2",
+      "date": "Wed, 21 Feb 2024 21:45:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace the dependency on the `colors` package with `Colorize` from `@rushstack/terminal`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.1",
+      "tag": "@rushstack/node-core-library_v4.0.1",
+      "date": "Tue, 20 Feb 2024 21:45:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove a no longer needed dependency on the `colors` package"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@rushstack/node-core-library_v4.0.0",
+      "date": "Mon, 19 Feb 2024 21:54:27 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(BREAKING CHANGE) Remove the Terminal and related APIs (Colors, AsciEscape, etc). These have been moved into the @rushstack/terminal package. See https://github.com/microsoft/rushstack/pull/3176 for details."
+          },
+          {
+            "comment": "Remove deprecated `FileSystem.readFolder`, `FileSystem.readFolderAsync`, and `LegacyAdapters.sortStable` APIs."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Graduate `Async` and `MinimumHeap` APIs from beta to public."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.66.1",
+      "tag": "@rushstack/node-core-library_v3.66.1",
+      "date": "Sat, 17 Feb 2024 06:24:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to API documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.66.0",
+      "tag": "@rushstack/node-core-library_v3.66.0",
+      "date": "Thu, 08 Feb 2024 01:09:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "LockFile: prevent accidentaly deleting freshly created lockfile when multiple processes try to acquire the same lock on macOS/Linux"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add getStatistics() method to FileWriter instances"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.65.0",
+      "tag": "@rushstack/node-core-library_v3.65.0",
+      "date": "Mon, 05 Feb 2024 23:46:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Inclue a `Text.reverse` API for reversing a string."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.64.2",
+      "tag": "@rushstack/node-core-library_v3.64.2",
+      "date": "Thu, 25 Jan 2024 01:09:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve 'bin' definition in `IPackageJson` type"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.64.1",
+      "tag": "@rushstack/node-core-library_v3.64.1",
+      "date": "Tue, 23 Jan 2024 20:12:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Executable.getProcessInfoBy* methods truncating the process name on MacOS"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.64.0",
+      "tag": "@rushstack/node-core-library_v3.64.0",
+      "date": "Tue, 23 Jan 2024 16:15:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add the `dependenciesMeta` property to the `INodePackageJson` interface."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.63.0",
+      "tag": "@rushstack/node-core-library_v3.63.0",
+      "date": "Wed, 03 Jan 2024 00:31:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updates the `JsonFile` API to format JSON as JSON5 if an existing string is being updated to preserve the style of the existing JSON."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.62.0",
+      "tag": "@rushstack/node-core-library_v3.62.0",
+      "date": "Thu, 07 Dec 2023 03:44:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add functions inside the `Executable` API to list all process trees (`getProcessInfoById`, `getProcessInfoByIdAsync`, `getProcessInfoByName`, and `getProcessInfoByNameAsync`)."
+          },
+          {
+            "comment": "Add functions inside the `Text` API to split iterables (or async iterables) that produce strings or buffers on newlines (`readLinesFromIterable` and `readLinesFromIterableAsync`)."
+          },
+          {
+            "comment": "Add the `waitForExitAsync` method inside the `Executable` API used to wait for a provided child process to exit."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.61.0",
+      "tag": "@rushstack/node-core-library_v3.61.0",
+      "date": "Thu, 28 Sep 2023 20:53:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add Async.getSignal for promise-based signaling. Add MinimumHeap for use as a priority queue."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.60.1",
+      "tag": "@rushstack/node-core-library_v3.60.1",
+      "date": "Tue, 26 Sep 2023 09:30:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update type-only imports to include the type modifier."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.60.0",
+      "tag": "@rushstack/node-core-library_v3.60.0",
+      "date": "Fri, 15 Sep 2023 00:36:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update @types/node from 14 to 18"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.7",
+      "tag": "@rushstack/node-core-library_v3.59.7",
+      "date": "Tue, 08 Aug 2023 07:10:39 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update error messages when modules or packages cannot be found using the \"Import.resolve*\" methods."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.6",
+      "tag": "@rushstack/node-core-library_v3.59.6",
+      "date": "Wed, 19 Jul 2023 00:20:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated semver dependency"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.5",
+      "tag": "@rushstack/node-core-library_v3.59.5",
+      "date": "Thu, 06 Jul 2023 00:16:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix Import.resolveModule* and Import.resolvePackage* methods to return real-paths when resolving self-referencing specs"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.4",
+      "tag": "@rushstack/node-core-library_v3.59.4",
+      "date": "Thu, 15 Jun 2023 00:21:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.3",
+      "tag": "@rushstack/node-core-library_v3.59.3",
+      "date": "Wed, 07 Jun 2023 22:45:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.2",
+      "tag": "@rushstack/node-core-library_v3.59.2",
+      "date": "Mon, 29 May 2023 15:21:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove extraneous string encode/decode of final output during `JsonFile.save`/`JsonFile.saveAsync`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.1",
+      "tag": "@rushstack/node-core-library_v3.59.1",
+      "date": "Mon, 22 May 2023 06:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.59.0",
+      "tag": "@rushstack/node-core-library_v3.59.0",
+      "date": "Fri, 12 May 2023 00:23:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an option to the `PrefixProxyTerminalProvider` to create a dynamic prefix, which can be used for something like prefixing logging lines with a timestamp."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.58.0",
+      "tag": "@rushstack/node-core-library_v3.58.0",
+      "date": "Mon, 01 May 2023 15:23:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose a `Text.escapeRegExp` function to escape regexp special characters."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.57.0",
+      "tag": "@rushstack/node-core-library_v3.57.0",
+      "date": "Sat, 29 Apr 2023 00:23:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add PrefixProxyTerminalProvider to allow for prefixing a provided string before writing to a terminal provider"
+          },
+          {
+            "comment": "Add a Writable stream adapter for ITerminal to allow writing to a terminal as a stream"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.56.0",
+      "tag": "@rushstack/node-core-library_v3.56.0",
+      "date": "Thu, 27 Apr 2023 17:18:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adds the AsyncQueue class, a queue type that allows for iterating and concurrently adding to the queue"
+          },
+          {
+            "comment": "Adds support for async Import.resolve* APIs"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix a typings issue in FileSystem.copyFilesAsync"
+          },
+          {
+            "comment": "Fix issues with Import.resolve* APIs when attempting to resolve system modules paths (ex. 'fs/promises') and self-referencing module paths"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.55.2",
+      "tag": "@rushstack/node-core-library_v3.55.2",
+      "date": "Fri, 10 Feb 2023 01:18:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.55.1",
+      "tag": "@rushstack/node-core-library_v3.55.1",
+      "date": "Sun, 05 Feb 2023 03:02:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change the peer dependency selector on `@types/node` to a wildcard (`*`)."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.55.0",
+      "tag": "@rushstack/node-core-library_v3.55.0",
+      "date": "Wed, 01 Feb 2023 02:16:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump @types/node peerDependency to ^14.18.36."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.54.0",
+      "tag": "@rushstack/node-core-library_v3.54.0",
+      "date": "Mon, 30 Jan 2023 16:22:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `peerDependenciesMeta` property to `IPackageJson`."
+          },
+          {
+            "comment": "Move the @types/node dependency to an optional peerDependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.53.3",
       "tag": "@rushstack/node-core-library_v3.53.3",
       "date": "Fri, 09 Dec 2022 16:18:27 GMT",

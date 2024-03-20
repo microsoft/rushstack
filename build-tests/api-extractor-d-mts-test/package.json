@@ -1,0 +1,20 @@
+{
+  "name": "api-extractor-d-mts-test",
+  "description": "Building this project is a regression test for api-extractor",
+  "version": "1.0.0",
+  "private": true,
+  "module": "lib/index.mjs",
+  "type": "module",
+  "types": "dist/api-extractor-d-mts-test.d.mts",
+  "scripts": {
+    "build": "node build.cjs",
+    "_phase:build": "node build.cjs"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "@types/jest": "29.2.5",
+    "@types/node": "18.17.15",
+    "fs-extra": "~7.0.1",
+    "typescript": "~5.4.2"
+  }
+}

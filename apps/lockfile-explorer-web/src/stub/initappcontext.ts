@@ -5,6 +5,7 @@
 // from Webpack dev server.  In a production release, a generated script is served by the
 // Node.js service with the live context object.
 
+// eslint-disable-next-line no-console
 console.log('Loaded stub/initappcontext.js');
 
 window.appContext = {

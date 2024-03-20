@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { loader } from 'webpack';
-import { Terminal } from '@rushstack/node-core-library';
-import { ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
+import type { loader } from 'webpack';
+import { Terminal } from '@rushstack/terminal';
+import { type ILocalizationFile, parseLocFile } from '@rushstack/localization-utilities';
 
-import { LocalizationPlugin } from '../LocalizationPlugin';
-import { loaderFactory, IBaseLoaderOptions } from './LoaderFactory';
+import type { LocalizationPlugin } from '../LocalizationPlugin';
+import { loaderFactory, type IBaseLoaderOptions } from './LoaderFactory';
 import { EntityMarker } from '../utilities/EntityMarker';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 

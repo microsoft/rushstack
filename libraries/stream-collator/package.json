@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/stream-collator",
-  "version": "4.0.219",
+  "version": "4.1.40",
   "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
@@ -11,8 +11,8 @@
   "typings": "dist/stream-collator.d.ts",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build"
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
   },
   "license": "MIT",
   "dependencies": {
@@ -20,10 +20,7 @@
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "12.20.24"
+    "local-node-rig": "workspace:*"
   }
 }

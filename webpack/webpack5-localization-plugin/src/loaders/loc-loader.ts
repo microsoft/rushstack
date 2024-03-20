@@ -3,11 +3,12 @@
 
 import type { LoaderContext, LoaderDefinitionFunction } from 'webpack';
 
-import { Terminal, NewlineKind } from '@rushstack/node-core-library';
+import type { NewlineKind } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/terminal';
 import { parseLocFile } from '@rushstack/localization-utilities';
 
 import type { LocalizationPlugin } from '../LocalizationPlugin';
-import { createLoader, IBaseLocLoaderOptions } from './LoaderFactory';
+import { createLoader, type IBaseLocLoaderOptions } from './LoaderFactory';
 import { LoaderTerminalProvider } from '../utilities/LoaderTerminalProvider';
 
 export interface ILocLoaderOptions extends IBaseLocLoaderOptions {

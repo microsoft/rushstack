@@ -66,8 +66,11 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       workerScriptPath: require.resolve('./MinifierWorker')
     });
 
+    const { version: terserVersion } = require('terser/package.json');
+
     this._configHash = createHash('sha256')
       .update(WorkerPoolMinifier.name, 'utf8')
+      .update(`terser@${terserVersion}`)
       .update(serialize(terserOptions))
       .digest('base64');
 
@@ -121,11 +124,13 @@ export class WorkerPoolMinifier implements IModuleMinifier {
           message: IModuleMinificationResult
         ): void => {
           worker.off('message', cb);
-          const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(message.hash)!;
+          const workerCallbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(
+            message.hash
+          )!;
           activeRequests.delete(message.hash);
           this._resultCache.set(message.hash, message);
-          for (const callback of callbacks) {
-            callback(message);
+          for (const workerCallback of workerCallbacks) {
+            workerCallback(message);
           }
           // This should always be the last thing done with the worker
           this._pool.checkinWorker(worker);
@@ -158,12 +163,14 @@ export class WorkerPoolMinifier implements IModuleMinifier {
       disconnect: async () => {
         if (--this._refCount === 0) {
           if (this._verbose) {
+            // eslint-disable-next-line no-console
             console.log(`Shutting down minifier worker pool`);
           }
           await this._pool.finishAsync();
           this._resultCache.clear();
           this._activeRequests.clear();
           if (this._verbose) {
+            // eslint-disable-next-line no-console
             console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
           }
         }

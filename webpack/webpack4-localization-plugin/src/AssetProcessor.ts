@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as Webpack from 'webpack';
-import * as lodash from 'lodash';
+import type * as Webpack from 'webpack';
 
 import { Constants } from './utilities/Constants';
-import { ILocaleElementMap } from './interfaces';
-import { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
+import type { ILocaleElementMap } from './interfaces';
+import type { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
 
 interface IReconstructionElement {
   kind: 'static' | 'localized' | 'dynamic';
@@ -123,7 +122,7 @@ export class AssetProcessor {
 
     const result: Map<string, IProcessAssetResult> = new Map<string, IProcessAssetResult>();
     for (const [locale, { source, size }] of reconstructedAsset.result) {
-      const newAsset: IAsset = lodash.clone(options.asset);
+      const newAsset: IAsset = { ...options.asset };
       newAsset.source = () => source;
       newAsset.size = () => size;
 
@@ -189,7 +188,7 @@ export class AssetProcessor {
       );
     }
 
-    const newAsset: IAsset = lodash.clone(options.asset);
+    const newAsset: IAsset = { ...options.asset };
     newAsset.source = () => reconstructedAsset.result.source;
     newAsset.size = () => reconstructedAsset.result.size;
     return {

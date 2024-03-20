@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Text, NewlineKind } from '@rushstack/node-core-library';
-import { TextRewriterState } from '../TextRewriter';
+import type { TextRewriterState } from '../TextRewriter';
 import { NormalizeNewlinesTextRewriter } from '../NormalizeNewlinesTextRewriter';
 
 function testCase(input: string): void {

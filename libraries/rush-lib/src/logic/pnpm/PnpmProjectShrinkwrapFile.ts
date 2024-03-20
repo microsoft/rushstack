@@ -5,9 +5,14 @@ import * as crypto from 'crypto';
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
-import { DependencySpecifier } from '../DependencySpecifier';
+import type {
+  PnpmShrinkwrapFile,
+  IPnpmShrinkwrapDependencyYaml,
+  IPnpmVersionSpecifier
+} from './PnpmShrinkwrapFile';
+import type { DependencySpecifier } from '../DependencySpecifier';
 import { RushConstants } from '../RushConstants';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  *
@@ -68,8 +73,10 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
 
   protected generateWorkspaceProjectShrinkwrapMap(): Map<string, string> | undefined {
     // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
+    const subspace: Subspace = this.project.subspace;
+
     const importerKey: string = this.shrinkwrapFile.getImporterKeyByPath(
-      this.project.rushConfiguration.commonTempFolder,
+      subspace.getSubspaceTempFolder(),
       this.project.projectFolder
     );
 
@@ -89,7 +96,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
       this.shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
 
-    const allDependencies: [string, string][] = [
+    const allDependencies: [string, IPnpmVersionSpecifier][] = [
       ...Object.entries(parentShrinkwrapEntry.dependencies || {}),
       ...Object.entries(parentShrinkwrapEntry.optionalDependencies || {})
     ];
@@ -113,7 +120,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
   private _addDependencyRecursive(
     projectShrinkwrapMap: Map<string, string>,
     name: string,
-    version: string,
+    version: IPnpmVersionSpecifier,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
@@ -155,16 +162,18 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile<PnpmShr
     projectShrinkwrapMap.set(specifier, integrity);
 
     // Add the dependencies of the dependency
-    for (const [name, version] of Object.entries(shrinkwrapEntry.dependencies || {})) {
-      this._addDependencyRecursive(projectShrinkwrapMap, name, version, shrinkwrapEntry);
+    for (const [dependencyName, dependencyVersion] of Object.entries(shrinkwrapEntry.dependencies || {})) {
+      this._addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
     }
 
     // Add the optional dependencies of the dependency, and don't blow up if they don't exist
-    for (const [name, version] of Object.entries(shrinkwrapEntry.optionalDependencies || {})) {
+    for (const [dependencyName, dependencyVersion] of Object.entries(
+      shrinkwrapEntry.optionalDependencies || {}
+    )) {
       this._addDependencyRecursive(
         projectShrinkwrapMap,
-        name,
-        version,
+        dependencyName,
+        dependencyVersion,
         shrinkwrapEntry,
         /* throwIfShrinkwrapEntryMissing */ false
       );

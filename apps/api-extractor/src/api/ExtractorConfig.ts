@@ -9,21 +9,23 @@ import {
   JsonSchema,
   FileSystem,
   PackageJsonLookup,
-  INodePackageJson,
+  type INodePackageJson,
   PackageName,
   Text,
   InternalError,
   Path,
   NewlineKind
 } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
+import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
+
+import apiExtractorSchema from '../schemas/api-extractor.schema.json';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -71,7 +73,7 @@ export interface IExtractorConfigLoadForFolderOptions {
   /**
    * An already constructed `RigConfig` object.  If omitted, then a new `RigConfig` object will be constructed.
    */
-  rigConfig?: RigConfig;
+  rigConfig?: IRigConfig;
 }
 
 /**
@@ -187,9 +189,7 @@ export class ExtractorConfig {
   /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
-  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/api-extractor.schema.json')
-  );
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(apiExtractorSchema);
 
   /**
    * The config file name "api-extractor.json".
@@ -210,7 +210,8 @@ export class ExtractorConfig {
     path.join(__dirname, '../schemas/api-extractor-defaults.json')
   );
 
-  private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
+  /** Match all three flavors for type declaration files (.d.ts, .d.mts, .d.cts) */
+  private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.(c|m)?ts$/i;
 
   /** {@inheritDoc IConfigFile.projectFolder} */
   public readonly projectFolder: string;
@@ -426,7 +427,7 @@ export class ExtractorConfig {
         // If We didn't find it in <packageFolder>/api-extractor.json or <packageFolder>/config/api-extractor.json
         // then check for a rig package
         if (packageFolder) {
-          let rigConfig: RigConfig;
+          let rigConfig: IRigConfig;
           if (options.rigConfig) {
             // The caller provided an already solved RigConfig.  Double-check that it is for the right project.
             if (!Path.isEqual(options.rigConfig.projectFolderPath, packageFolder)) {
@@ -836,11 +837,9 @@ export class ExtractorConfig {
       }
 
       const bundledPackages: string[] = configObject.bundledPackages || [];
-      for (const bundledPackage of bundledPackages) {
-        if (!PackageName.isValidName(bundledPackage)) {
-          throw new Error(`The "bundledPackages" list contains an invalid package name: "${bundledPackage}"`);
-        }
-      }
+
+      // Note: we cannot fully validate package name patterns, as the strings may contain wildcards.
+      // We won't know if the entries are valid until we can compare them against the package.json "dependencies" contents.
 
       const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens(
         'tsconfigFilePath',

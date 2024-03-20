@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
-import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
 import { LockFile } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { RushSession } from '../../pluginFramework/RushSession';
+import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { RushSession } from '../../pluginFramework/RushSession';
 import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
@@ -65,13 +65,15 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          console.log(colors.red(`Another Rush command is already running in this repository.`));
+          // eslint-disable-next-line no-console
+          console.log(Colorize.red(`Another Rush command is already running in this repository.`));
           process.exit(1);
         }
       }
     }
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+      // eslint-disable-next-line no-console
       console.log(`Starting "rush ${this.actionName}"\n`);
     }
     return this.runAsync();

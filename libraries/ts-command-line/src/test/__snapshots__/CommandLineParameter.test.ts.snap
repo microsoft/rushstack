@@ -1,58 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CommandLineParameter allows an undocumented synonym 1`] = `
+exports[`CommandLineParameterBase allows an undocumented synonym 1`] = `
 Array [
   "### --choice output: ###",
-  "--choice",
-  "one",
   "### --choice-with-default output: ###",
   "--choice-with-default",
-  "two",
+  "default",
   "### --choice-list output: ###",
-  "--choice-list",
-  "red",
-  "--choice-list",
-  "green",
   "### --flag output: ###",
-  "--flag",
   "### --integer output: ###",
-  "--integer",
-  "111",
   "### --integer-with-default output: ###",
   "--integer-with-default",
-  "222",
+  "123",
   "### --integer-required output: ###",
   "--integer-required",
   "6",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "123",
   "### --integer-list output: ###",
-  "--integer-list",
-  "1",
-  "--integer-list",
-  "2",
-  "--integer-list",
-  "3",
   "### --string output: ###",
-  "--string",
-  "Hello, world!",
   "### --string-with-default output: ###",
   "--string-with-default",
-  "Hello, world!",
+  "123",
   "### --string-with-undocumented-synonym output: ###",
   "--string-with-undocumented-synonym",
   "undocumented-value",
   "### --string-list output: ###",
-  "--string-list",
-  "simple text",
 ]
 `;
 
-exports[`CommandLineParameter choice list raises an error if env var value is json containing non-scalars 1`] = `"The [{}] environment variable value looks like a JSON array but failed to parse: The [{}] environment variable value must be a JSON  array containing only strings, numbers, and booleans."`;
+exports[`CommandLineParameterBase choice list raises an error if env var value is json containing non-scalars 1`] = `"The [{}] environment variable value looks like a JSON array but failed to parse: The [{}] environment variable value must be a JSON  array containing only strings, numbers, and booleans."`;
 
-exports[`CommandLineParameter choice list raises an error if env var value is not a valid choice 1`] = `"Invalid value \\"oblong\\" for the environment variable ENV_COLOR.  Valid choices are: \\"purple\\", \\"yellow\\", \\"pizza\\""`;
+exports[`CommandLineParameterBase choice list raises an error if env var value is not a valid choice 1`] = `"Invalid value \\"oblong\\" for the environment variable ENV_COLOR.  Valid choices are: \\"purple\\", \\"yellow\\", \\"pizza\\""`;
 
-exports[`CommandLineParameter choice list raises an error if env var value is not valid json 1`] = `"The [u environment variable value looks like a JSON array but failed to parse: Unexpected token u in JSON at position 1"`;
-
-exports[`CommandLineParameter parses an input with ALL parameters 1`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 1`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
@@ -67,13 +49,13 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 2`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 2`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
   "description": "A choice",
   "environmentVariable": "ENV_CHOICE",
-  "kind": 0,
+  "kind": -0,
   "longName": "--choice",
   "required": false,
   "shortName": "-c",
@@ -82,13 +64,13 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 3`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 3`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": "default",
   "description": "A choice with a default. This description ends with a \\"quoted word\\"",
   "environmentVariable": "ENV_CHOICE2",
-  "kind": 0,
+  "kind": -0,
   "longName": "--choice-with-default",
   "required": false,
   "shortName": undefined,
@@ -97,7 +79,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 4`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 4`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
@@ -115,7 +97,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 5`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 5`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
@@ -130,7 +112,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 6`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 6`] = `
 Object {
   "argumentName": "NUMBER",
   "defaultValue": undefined,
@@ -145,7 +127,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 7`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 7`] = `
 Object {
   "argumentName": "NUMBER",
   "defaultValue": 123,
@@ -160,7 +142,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 8`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 8`] = `
 Object {
   "argumentName": "NUMBER",
   "defaultValue": undefined,
@@ -175,7 +157,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 9`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 9`] = `
 Object {
   "argumentName": "LIST_ITEM",
   "defaultValue": undefined,
@@ -193,7 +175,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 10`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 10`] = `
 Object {
   "argumentName": "TEXT",
   "defaultValue": undefined,
@@ -208,7 +190,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 11`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 11`] = `
 Object {
   "argumentName": "TEXT",
   "defaultValue": "123",
@@ -223,7 +205,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 12`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 12`] = `
 Object {
   "argumentName": "LIST_ITEM",
   "defaultValue": undefined,
@@ -241,7 +223,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with ALL parameters 13`] = `
+exports[`CommandLineParameterBase parses an input with ALL parameters 13`] = `
 Array [
   "### --choice output: ###",
   "--choice",
@@ -265,6 +247,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "321",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "123",
   "### --integer-list output: ###",
   "--integer-list",
   "37",
@@ -285,7 +270,7 @@ Array [
 ]
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 1`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 1`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
@@ -300,13 +285,13 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 2`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 2`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
   "description": "A choice",
   "environmentVariable": "ENV_CHOICE",
-  "kind": 0,
+  "kind": -0,
   "longName": "--choice",
   "required": false,
   "shortName": "-c",
@@ -315,13 +300,13 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 3`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 3`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": "default",
   "description": "A choice with a default. This description ends with a \\"quoted word\\"",
   "environmentVariable": "ENV_CHOICE2",
-  "kind": 0,
+  "kind": -0,
   "longName": "--choice-with-default",
   "required": false,
   "shortName": undefined,
@@ -330,7 +315,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 4`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 4`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
@@ -345,7 +330,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 5`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 5`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": undefined,
@@ -360,7 +345,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 6`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 6`] = `
 Object {
   "argumentName": "NUMBER",
   "defaultValue": undefined,
@@ -375,7 +360,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 7`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 7`] = `
 Object {
   "argumentName": "NUMBER",
   "defaultValue": 123,
@@ -390,7 +375,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 8`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 8`] = `
 Object {
   "argumentName": "NUMBER",
   "defaultValue": undefined,
@@ -405,7 +390,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 9`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 9`] = `
 Object {
   "argumentName": "LIST_ITEM",
   "defaultValue": undefined,
@@ -420,7 +405,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 10`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 10`] = `
 Object {
   "argumentName": "TEXT",
   "defaultValue": undefined,
@@ -435,7 +420,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 11`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 11`] = `
 Object {
   "argumentName": "TEXT",
   "defaultValue": "123",
@@ -450,7 +435,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 12`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 12`] = `
 Object {
   "argumentName": "LIST_ITEM",
   "defaultValue": undefined,
@@ -465,7 +450,7 @@ Object {
 }
 `;
 
-exports[`CommandLineParameter parses an input with NO parameters 13`] = `
+exports[`CommandLineParameterBase parses an input with NO parameters 13`] = `
 Array [
   "### --choice output: ###",
   "### --choice-with-default output: ###",
@@ -480,6 +465,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "123",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "321",
   "### --integer-list output: ###",
   "### --string output: ###",
   "### --string-with-default output: ###",
@@ -490,7 +478,7 @@ Array [
 ]
 `;
 
-exports[`CommandLineParameter parses each parameter from an environment variable 1`] = `
+exports[`CommandLineParameterBase parses each parameter from an environment variable 1`] = `
 Array [
   "### --choice output: ###",
   "--choice",
@@ -514,6 +502,9 @@ Array [
   "### --integer-required output: ###",
   "--integer-required",
   "1",
+  "### --env-integer-required output: ###",
+  "--env-integer-required",
+  "333",
   "### --integer-list output: ###",
   "--integer-list",
   "1",
@@ -541,13 +532,13 @@ Array [
 ]
 `;
 
-exports[`CommandLineParameter prints the action help 1`] = `
+exports[`CommandLineParameterBase prints the action help 1`] = `
 "usage: example do:the-job [-h] [-c {one,two,three,default}]
                           [--choice-with-default {one,two,three,default}]
                           [-C {red,green,blue}] [-f] [-i NUMBER]
                           [--integer-with-default NUMBER] --integer-required
-                          NUMBER [-I LIST_ITEM] [-s TEXT]
-                          [--string-with-default TEXT]
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
                           [--string-with-undocumented-synonym TEXT]
                           [-l LIST_ITEM]
                           
@@ -580,6 +571,10 @@ Optional arguments:
                         environment variable. The default value is 123.
   --integer-required NUMBER
                         An integer
+  --env-integer-required NUMBER
+                        An integer. This parameter may alternatively be 
+                        specified via the ENV_INTEGER_REQUIRED environment 
+                        variable.
   -I LIST_ITEM, --integer-list LIST_ITEM
                         This parameter may be specified multiple times to 
                         make a list of integers. This parameter may 
@@ -602,7 +597,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineParameter prints the global help 1`] = `
+exports[`CommandLineParameterBase prints the global help 1`] = `
 "usage: example [-h] [-g] <command> ...
 
 An example project
@@ -616,5 +611,36 @@ Optional arguments:
   -g, --global-flag  A flag that affects all actions
 
 For detailed help about a specific command, use: example <command> -h
+"
+`;
+
+exports[`CommandLineParameterBase prints the same usage if a required parameter backed by an env variable is not provided as when a different required parameter is missing: Usage 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}]
+                          [-C {red,green,blue}] [-f] [-i NUMBER]
+                          [--integer-with-default NUMBER] --integer-required
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
+                          
+"
+`;
+
+exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Error 1`] = `
+[Error: example do:the-job: error: Argument "--env-integer-required" is required
+]
+`;
+
+exports[`CommandLineParameterBase raises an error if a required parameter backed by an env variable is not provided: Usage 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}]
+                          [-C {red,green,blue}] [-f] [-i NUMBER]
+                          [--integer-with-default NUMBER] --integer-required
+                          NUMBER --env-integer-required NUMBER [-I LIST_ITEM]
+                          [-s TEXT] [--string-with-default TEXT]
+                          [--string-with-undocumented-synonym TEXT]
+                          [-l LIST_ITEM]
+                          
 "
 `;

@@ -1,6 +1,449 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Tue, 20 Dec 2022 01:18:23 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+
+## 0.12.39
+Tue, 19 Mar 2024 15:10:18 GMT
+
+_Version update only_
+
+## 0.12.38
+Fri, 15 Mar 2024 00:12:41 GMT
+
+_Version update only_
+
+## 0.12.37
+Tue, 05 Mar 2024 01:19:24 GMT
+
+_Version update only_
+
+## 0.12.36
+Sun, 03 Mar 2024 20:58:13 GMT
+
+_Version update only_
+
+## 0.12.35
+Sat, 02 Mar 2024 02:22:24 GMT
+
+_Version update only_
+
+## 0.12.34
+Fri, 01 Mar 2024 01:10:09 GMT
+
+_Version update only_
+
+## 0.12.33
+Thu, 29 Feb 2024 07:11:46 GMT
+
+_Version update only_
+
+## 0.12.32
+Wed, 28 Feb 2024 16:09:28 GMT
+
+_Version update only_
+
+## 0.12.31
+Sat, 24 Feb 2024 23:02:51 GMT
+
+_Version update only_
+
+## 0.12.30
+Thu, 22 Feb 2024 01:36:09 GMT
+
+_Version update only_
+
+## 0.12.29
+Wed, 21 Feb 2024 21:45:28 GMT
+
+_Version update only_
+
+## 0.12.28
+Wed, 21 Feb 2024 08:55:47 GMT
+
+_Version update only_
+
+## 0.12.27
+Tue, 20 Feb 2024 21:45:10 GMT
+
+_Version update only_
+
+## 0.12.26
+Tue, 20 Feb 2024 16:10:53 GMT
+
+_Version update only_
+
+## 0.12.25
+Mon, 19 Feb 2024 21:54:27 GMT
+
+_Version update only_
+
+## 0.12.24
+Sat, 17 Feb 2024 06:24:35 GMT
+
+### Patches
+
+- Fix broken link to API documentation
+
+## 0.12.23
+Thu, 08 Feb 2024 01:09:22 GMT
+
+_Version update only_
+
+## 0.12.22
+Wed, 07 Feb 2024 01:11:19 GMT
+
+_Version update only_
+
+## 0.12.21
+Mon, 05 Feb 2024 23:46:52 GMT
+
+_Version update only_
+
+## 0.12.20
+Thu, 25 Jan 2024 01:09:30 GMT
+
+_Version update only_
+
+## 0.12.19
+Tue, 23 Jan 2024 20:12:58 GMT
+
+_Version update only_
+
+## 0.12.18
+Tue, 23 Jan 2024 16:15:06 GMT
+
+_Version update only_
+
+## 0.12.17
+Tue, 16 Jan 2024 18:30:11 GMT
+
+_Version update only_
+
+## 0.12.16
+Wed, 03 Jan 2024 00:31:18 GMT
+
+_Version update only_
+
+## 0.12.15
+Wed, 20 Dec 2023 01:09:46 GMT
+
+_Version update only_
+
+## 0.12.14
+Thu, 07 Dec 2023 03:44:13 GMT
+
+_Version update only_
+
+## 0.12.13
+Tue, 05 Dec 2023 01:10:16 GMT
+
+_Version update only_
+
+## 0.12.12
+Fri, 10 Nov 2023 18:02:04 GMT
+
+_Version update only_
+
+## 0.12.11
+Wed, 01 Nov 2023 23:11:36 GMT
+
+### Patches
+
+- Fix line endings in published package.
+
+## 0.12.10
+Mon, 30 Oct 2023 23:36:38 GMT
+
+_Version update only_
+
+## 0.12.9
+Sun, 01 Oct 2023 02:56:30 GMT
+
+_Version update only_
+
+## 0.12.8
+Sat, 30 Sep 2023 00:20:51 GMT
+
+_Version update only_
+
+## 0.12.7
+Thu, 28 Sep 2023 20:53:17 GMT
+
+_Version update only_
+
+## 0.12.6
+Wed, 27 Sep 2023 00:21:39 GMT
+
+_Version update only_
+
+## 0.12.5
+Tue, 26 Sep 2023 21:02:31 GMT
+
+_Version update only_
+
+## 0.12.4
+Tue, 26 Sep 2023 09:30:33 GMT
+
+### Patches
+
+- Update type-only imports to include the type modifier.
+
+## 0.12.3
+Mon, 25 Sep 2023 23:38:28 GMT
+
+_Version update only_
+
+## 0.12.2
+Fri, 22 Sep 2023 00:05:50 GMT
+
+_Version update only_
+
+## 0.12.1
+Tue, 19 Sep 2023 15:21:52 GMT
+
+_Version update only_
+
+## 0.12.0
+Fri, 15 Sep 2023 00:36:58 GMT
+
+### Minor changes
+
+- Update @types/node from 14 to 18
+
+## 0.11.1
+Tue, 08 Aug 2023 07:10:40 GMT
+
+_Version update only_
+
+## 0.11.0
+Sat, 05 Aug 2023 00:20:19 GMT
+
+### Minor changes
+
+- Allow customization of how the TypingsGenerator reads files.
+
+## 0.10.37
+Fri, 04 Aug 2023 00:22:37 GMT
+
+### Patches
+
+- Switch from glob to fast-glob.
+
+## 0.10.36
+Mon, 31 Jul 2023 15:19:06 GMT
+
+_Version update only_
+
+## 0.10.35
+Sat, 29 Jul 2023 00:22:51 GMT
+
+_Version update only_
+
+## 0.10.34
+Thu, 20 Jul 2023 20:47:29 GMT
+
+_Version update only_
+
+## 0.10.33
+Wed, 19 Jul 2023 00:20:32 GMT
+
+_Version update only_
+
+## 0.10.32
+Fri, 14 Jul 2023 15:20:46 GMT
+
+_Version update only_
+
+## 0.10.31
+Thu, 13 Jul 2023 00:22:37 GMT
+
+_Version update only_
+
+## 0.10.30
+Wed, 12 Jul 2023 15:20:40 GMT
+
+_Version update only_
+
+## 0.10.29
+Wed, 12 Jul 2023 00:23:30 GMT
+
+_Version update only_
+
+## 0.10.28
+Fri, 07 Jul 2023 00:19:33 GMT
+
+_Version update only_
+
+## 0.10.27
+Thu, 06 Jul 2023 00:16:20 GMT
+
+_Version update only_
+
+## 0.10.26
+Tue, 04 Jul 2023 00:18:47 GMT
+
+_Version update only_
+
+## 0.10.25
+Mon, 19 Jun 2023 22:40:21 GMT
+
+_Version update only_
+
+## 0.10.24
+Thu, 15 Jun 2023 00:21:02 GMT
+
+_Version update only_
+
+## 0.10.23
+Wed, 14 Jun 2023 00:19:42 GMT
+
+_Version update only_
+
+## 0.10.22
+Tue, 13 Jun 2023 15:17:21 GMT
+
+_Version update only_
+
+## 0.10.21
+Tue, 13 Jun 2023 01:49:02 GMT
+
+_Version update only_
+
+## 0.10.20
+Fri, 09 Jun 2023 18:05:35 GMT
+
+_Version update only_
+
+## 0.10.19
+Fri, 09 Jun 2023 15:23:15 GMT
+
+_Version update only_
+
+## 0.10.18
+Fri, 09 Jun 2023 00:19:49 GMT
+
+_Version update only_
+
+## 0.10.17
+Thu, 08 Jun 2023 15:21:17 GMT
+
+_Version update only_
+
+## 0.10.16
+Thu, 08 Jun 2023 00:20:03 GMT
+
+_Version update only_
+
+## 0.10.15
+Wed, 07 Jun 2023 22:45:17 GMT
+
+_Version update only_
+
+## 0.10.14
+Tue, 06 Jun 2023 02:52:51 GMT
+
+_Version update only_
+
+## 0.10.13
+Mon, 05 Jun 2023 21:45:21 GMT
+
+_Version update only_
+
+## 0.10.12
+Fri, 02 Jun 2023 02:01:13 GMT
+
+_Version update only_
+
+## 0.10.11
+Mon, 29 May 2023 15:21:15 GMT
+
+_Version update only_
+
+## 0.10.10
+Mon, 22 May 2023 06:34:33 GMT
+
+_Version update only_
+
+## 0.10.9
+Fri, 12 May 2023 00:23:05 GMT
+
+_Version update only_
+
+## 0.10.8
+Thu, 04 May 2023 00:20:29 GMT
+
+_Version update only_
+
+## 0.10.7
+Mon, 01 May 2023 15:23:20 GMT
+
+_Version update only_
+
+## 0.10.6
+Sat, 29 Apr 2023 00:23:03 GMT
+
+_Version update only_
+
+## 0.10.5
+Thu, 27 Apr 2023 17:18:43 GMT
+
+_Version update only_
+
+## 0.10.4
+Tue, 04 Apr 2023 22:36:28 GMT
+
+_Version update only_
+
+## 0.10.3
+Sat, 18 Mar 2023 00:20:56 GMT
+
+_Version update only_
+
+## 0.10.2
+Fri, 10 Feb 2023 01:18:51 GMT
+
+_Version update only_
+
+## 0.10.1
+Sun, 05 Feb 2023 03:02:02 GMT
+
+### Patches
+
+- Change the peer dependency selector on `@types/node` to a wildcard (`*`).
+
+## 0.10.0
+Wed, 01 Feb 2023 02:16:34 GMT
+
+### Minor changes
+
+- Bump @types/node peerDependency to ^14.18.36.
+
+## 0.9.0
+Mon, 30 Jan 2023 16:22:30 GMT
+
+### Minor changes
+
+- Move the @types/node dependency to an optional peerDependency.
+
+## 0.8.18
+Mon, 30 Jan 2023 00:55:44 GMT
+
+_Version update only_
+
+## 0.8.17
+Thu, 26 Jan 2023 02:55:10 GMT
+
+_Version update only_
+
+## 0.8.16
+Wed, 25 Jan 2023 07:26:56 GMT
+
+_Version update only_
+
+## 0.8.15
+Wed, 18 Jan 2023 22:44:12 GMT
+
+_Version update only_
 
 ## 0.8.14
 Tue, 20 Dec 2022 01:18:23 GMT

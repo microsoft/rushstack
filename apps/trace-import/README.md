@@ -1,8 +1,8 @@
-# @microsoft/trace-import
+# @rushstack/trace-import
 
-> 🚨 *EARLY PREVIEW RELEASE* 🚨
+> 🚨 _EARLY PREVIEW RELEASE_ 🚨
 >
-> Not all features are implemented yet.  To provide suggestions, please
+> Not all features are implemented yet. To provide suggestions, please
 > [create a GitHub issue](https://github.com/microsoft/rushstack/issues/new/choose).
 > If you have questions, see the [Rush Stack Help page](https://rushstack.io/pages/help/support/)
 > for support resources.
@@ -62,11 +62,13 @@ These commands were invoked in the `C:\Git\rushstack\apps\trace-import` folder
 where trace-import is developed.
 
 ### Resolving a CommonJS main index
+
 ```
 trace-import --path semver
 ```
 
 Sample output:
+
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Package name:            semver
@@ -82,11 +84,13 @@ Target path:             C:\Git\rushstack\common\temp\node_modules\.pnpm\semver@
 ```
 
 ### Resolving a CommonJS package subpath
+
 ```
 trace-import --path typescript/bin/tsc
 ```
 
 Sample output:
+
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Package name:            typescript
@@ -101,11 +105,13 @@ Target path:             C:\Git\rushstack\common\temp\node_modules\.pnpm\typescr
 ```
 
 ### Resolving a TypeScript declaration
+
 ```
 trace-import --resolution-type ts --path semver
 ```
 
 Sample output:
+
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Package name:            semver
@@ -123,11 +129,13 @@ Target path:             C:\Git\rushstack\common\temp\node_modules\.pnpm\@types+
 ```
 
 ### Resolving a relative path
+
 ```
 trace-import --path ./config/rig.json
 ```
 
 Sample output:
+
 ```
 Base folder:             C:\Git\rushstack\apps\trace-import
 Import path:             ./config/rig.json
@@ -140,8 +148,7 @@ Target path:             C:\Git\rushstack\apps\trace-import\config\rig.json
 
 ## Links
 
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/apps/trace-import/CHANGELOG.md) - Find
+- [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/main/apps/trace-import/CHANGELOG.md) - Find
   out what's new in the latest version
 - [Rush Lockfile Explorer](https://lfx.rushstack.io) - The desktop app for troubleshooting PNPM lockfiles
 

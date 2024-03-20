@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, ITerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { type ITerminal, type ITerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { WatchProject, WatchState } from './WatchProject';
+import { type WatchProject, WatchState } from './WatchProject';
 
 export class WatchManager {
   private readonly _terminal: ITerminal;

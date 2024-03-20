@@ -7,11 +7,15 @@
  * @packageDocumentation
  */
 
-export { CommandLineAction, ICommandLineActionOptions } from './providers/CommandLineAction';
+export { CommandLineAction, type ICommandLineActionOptions } from './providers/CommandLineAction';
 export { DynamicCommandLineAction } from './providers/DynamicCommandLineAction';
 export { ScopedCommandLineAction } from './providers/ScopedCommandLineAction';
-
 export {
+  AliasCommandLineAction,
+  type IAliasCommandLineActionOptions
+} from './providers/AliasCommandLineAction';
+
+export type {
   IBaseCommandLineDefinition,
   IBaseCommandLineDefinitionWithArgument,
   ICommandLineFlagDefinition,
@@ -26,26 +30,37 @@ export {
 
 export {
   CommandLineParameterKind,
-  CommandLineParameter,
+  // TODO: Export both `CommandLineParameter` and `CommandLineParameterBase` in the next major bump
+  CommandLineParameterBase as CommandLineParameter,
   CommandLineParameterWithArgument
 } from './parameters/BaseClasses';
 
 export { CommandLineFlagParameter } from './parameters/CommandLineFlagParameter';
-export { CommandLineStringParameter } from './parameters/CommandLineStringParameter';
+export {
+  CommandLineStringParameter,
+  type IRequiredCommandLineStringParameter
+} from './parameters/CommandLineStringParameter';
 export { CommandLineStringListParameter } from './parameters/CommandLineStringListParameter';
-export { CommandLineIntegerParameter } from './parameters/CommandLineIntegerParameter';
+export {
+  CommandLineIntegerParameter,
+  type IRequiredCommandLineIntegerParameter
+} from './parameters/CommandLineIntegerParameter';
 export { CommandLineIntegerListParameter } from './parameters/CommandLineIntegerListParameter';
-export { CommandLineChoiceParameter } from './parameters/CommandLineChoiceParameter';
+export {
+  CommandLineChoiceParameter,
+  type IRequiredCommandLineChoiceParameter
+} from './parameters/CommandLineChoiceParameter';
 export { CommandLineChoiceListParameter } from './parameters/CommandLineChoiceListParameter';
 export { CommandLineRemainder } from './parameters/CommandLineRemainder';
 
 export {
   CommandLineParameterProvider,
-  IScopedLongNameParseResult,
-  ICommandLineParserData as _ICommandLineParserData
+  type IScopedLongNameParseResult,
+  type ICommandLineParserData as _ICommandLineParserData,
+  type IRegisterDefinedParametersState as _IRegisterDefinedParametersState
 } from './providers/CommandLineParameterProvider';
 
-export { ICommandLineParserOptions, CommandLineParser } from './providers/CommandLineParser';
+export { CommandLineParser, type ICommandLineParserOptions } from './providers/CommandLineParser';
 export { DynamicCommandLineParser } from './providers/DynamicCommandLineParser';
 
 export { CommandLineConstants } from './Constants';

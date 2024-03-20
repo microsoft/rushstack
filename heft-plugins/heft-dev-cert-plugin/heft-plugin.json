@@ -1,0 +1,16 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "lifecyclePlugins": [],
+
+  "taskPlugins": [
+    {
+      "pluginName": "trust-dev-certificate-plugin",
+      "entryPoint": "./lib/TrustDevCertificatePlugin"
+    },
+    {
+      "pluginName": "untrust-dev-certificate-plugin",
+      "entryPoint": "./lib/UntrustDevCertificatePlugin"
+    }
+  ]
+}

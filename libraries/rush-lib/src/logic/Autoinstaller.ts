@@ -1,24 +1,33 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 
-import { FileSystem, IPackageJson, JsonFile, LockFile, NewlineKind } from '@rushstack/node-core-library';
-import { Utilities } from '../utilities/Utilities';
+import {
+  FileSystem,
+  type IPackageJson,
+  JsonFile,
+  LockFile,
+  NewlineKind,
+  PackageName,
+  type IParsedPackageNameOrError
+} from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
-import { PackageName, IParsedPackageNameOrError } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../api/RushConfiguration';
+import { Utilities } from '../utilities/Utilities';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import { PackageJsonEditor } from '../api/PackageJsonEditor';
 import { InstallHelpers } from './installManager/InstallHelpers';
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import type { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConstants } from './RushConstants';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
+import type { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 interface IAutoinstallerOptions {
   autoinstallerName: string;
   rushConfiguration: RushConfiguration;
+  rushGlobalFolder: RushGlobalFolder;
   restrictConsoleOutput?: boolean;
 }
 
@@ -26,11 +35,13 @@ export class Autoinstaller {
   public readonly name: string;
 
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
   private readonly _restrictConsoleOutput: boolean;
 
   public constructor(options: IAutoinstallerOptions) {
     this.name = options.autoinstallerName;
     this._rushConfiguration = options.rushConfiguration;
+    this._rushGlobalFolder = options.rushGlobalFolder;
     this._restrictConsoleOutput =
       options.restrictConsoleOutput ?? RushCommandLineParser.shouldRestrictConsoleOutput();
 
@@ -75,10 +86,9 @@ export class Autoinstaller {
       );
     }
 
-    const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
     await InstallHelpers.ensureLocalPackageManager(
       this._rushConfiguration,
-      rushGlobalFolder,
+      this._rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts,
       this._restrictConsoleOutput
     );
@@ -124,7 +134,10 @@ export class Autoinstaller {
         }
 
         // Copy: .../common/autoinstallers/my-task/.npmrc
-        Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, autoinstallerFullPath);
+        Utilities.syncNpmrc({
+          sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
+          targetNpmrcFolder: autoinstallerFullPath
+        });
 
         this._logIfConsoleOutputIsNotRestricted(
           `Installing dependencies under ${autoinstallerFullPath}...\n`
@@ -155,10 +168,17 @@ export class Autoinstaller {
     }
   }
 
-  public update(): void {
+  public async updateAsync(): Promise<void> {
+    await InstallHelpers.ensureLocalPackageManager(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      RushConstants.defaultMaxInstallAttempts,
+      this._restrictConsoleOutput
+    );
+
     const autoinstallerPackageJsonPath: string = path.join(this.folderFullPath, 'package.json');
 
-    if (!FileSystem.exists(autoinstallerPackageJsonPath)) {
+    if (!(await FileSystem.existsAsync(autoinstallerPackageJsonPath))) {
       throw new Error(`The specified autoinstaller path does not exist: ` + autoinstallerPackageJsonPath);
     }
 
@@ -168,15 +188,28 @@ export class Autoinstaller {
 
     let oldFileContents: string = '';
 
-    if (FileSystem.exists(this.shrinkwrapFilePath)) {
+    if (await FileSystem.existsAsync(this.shrinkwrapFilePath)) {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
       this._logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
-      FileSystem.deleteFile(this.shrinkwrapFilePath);
+      await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
+      if (this._rushConfiguration.packageManager === 'pnpm') {
+        // Workaround for https://github.com/pnpm/pnpm/issues/1890
+        //
+        // When "rush update-autoinstaller" is run, Rush deletes "common/autoinstallers/my-task/pnpm-lock.yaml"
+        // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
+        // "pnpm-lock.yaml" from "my-task/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
+        // Deleting both files ensures that a new lockfile will always be generated.
+        const pnpmPackageManager: PnpmPackageManager = this._rushConfiguration
+          .packageManagerWrapper as PnpmPackageManager;
+        await FileSystem.deleteFileAsync(
+          path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
+        );
+      }
     }
 
     // Detect a common mistake where PNPM prints "Already up-to-date" without creating a shrinkwrap file
     const packageJsonEditor: PackageJsonEditor = PackageJsonEditor.load(this.packageJsonPath);
-    if (packageJsonEditor.dependencyList.length === 0 && packageJsonEditor.dependencyList.length === 0) {
+    if (packageJsonEditor.dependencyList.length === 0) {
       throw new Error(
         'You must add at least one dependency to the autoinstaller package' +
           ' before invoking this command:\n' +
@@ -186,7 +219,10 @@ export class Autoinstaller {
 
     this._logIfConsoleOutputIsNotRestricted();
 
-    Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this.folderFullPath);
+    Utilities.syncNpmrc({
+      sourceNpmrcFolder: this._rushConfiguration.commonRushConfigFolder,
+      targetNpmrcFolder: this.folderFullPath
+    });
 
     Utilities.executeCommand({
       command: this._rushConfiguration.packageManagerToolFilename,
@@ -198,7 +234,7 @@ export class Autoinstaller {
     this._logIfConsoleOutputIsNotRestricted();
 
     if (this._rushConfiguration.packageManager === 'npm') {
-      this._logIfConsoleOutputIsNotRestricted(colors.bold('Running "npm shrinkwrap"...'));
+      this._logIfConsoleOutputIsNotRestricted(Colorize.bold('Running "npm shrinkwrap"...'));
       Utilities.executeCommand({
         command: this._rushConfiguration.packageManagerToolFilename,
         args: ['shrinkwrap'],
@@ -209,28 +245,29 @@ export class Autoinstaller {
       this._logIfConsoleOutputIsNotRestricted();
     }
 
-    if (!FileSystem.exists(this.shrinkwrapFilePath)) {
+    if (!(await FileSystem.existsAsync(this.shrinkwrapFilePath))) {
       throw new Error(
         'The package manager did not create the expected shrinkwrap file: ' + this.shrinkwrapFilePath
       );
     }
 
-    const newFileContents: string = FileSystem.readFile(this.shrinkwrapFilePath, {
+    const newFileContents: string = await FileSystem.readFileAsync(this.shrinkwrapFilePath, {
       convertLineEndings: NewlineKind.Lf
     });
     if (oldFileContents !== newFileContents) {
       this._logIfConsoleOutputIsNotRestricted(
-        colors.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
+        Colorize.green('The shrinkwrap file has been updated.') + '  Please commit the updated file:'
       );
       this._logIfConsoleOutputIsNotRestricted(`\n  ${this.shrinkwrapFilePath}`);
     } else {
-      this._logIfConsoleOutputIsNotRestricted(colors.green('Already up to date.'));
+      this._logIfConsoleOutputIsNotRestricted(Colorize.green('Already up to date.'));
     }
   }
 
   private _logIfConsoleOutputIsNotRestricted(message?: string): void {
     if (!this._restrictConsoleOutput) {
-      console.log(message);
+      // eslint-disable-next-line no-console
+      console.log(message ?? '');
     }
   }
 }

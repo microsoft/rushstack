@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AstSymbol } from './AstSymbol';
+import type { AstSymbol } from './AstSymbol';
 import { InternalError } from '@rushstack/node-core-library';
 import { AstSyntheticEntity } from './AstEntity';
 

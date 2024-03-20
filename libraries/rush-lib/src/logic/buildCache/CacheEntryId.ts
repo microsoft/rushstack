@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import process from 'node:process';
+
 const OPTIONS_ARGUMENT_NAME: string = 'options';
 
 /**
@@ -28,9 +30,13 @@ export interface IGenerateCacheEntryIdOptions {
  */
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
-const HASH_TOKEN_NAME: string = 'hash';
-const PROJECT_NAME_TOKEN_NAME: string = 'projectName';
-const PHASE_NAME_TOKEN_NAME: string = 'phaseName';
+// NOTE: When adding new tokens, make sure to document the syntax in the "rush init"
+// template for build-cache.json
+const HASH_TOKEN_NAME: 'hash' = 'hash';
+const PROJECT_NAME_TOKEN_NAME: 'projectName' = 'projectName';
+const PHASE_NAME_TOKEN_NAME: 'phaseName' = 'phaseName';
+const OS_TOKEN_NAME: 'os' = 'os';
+const ARCH_TOKEN_NAME: 'arch' = 'arch';
 
 // This regex matches substrings that look like [token]
 const TOKEN_REGEX: RegExp = /\[[^\]]*\]/g;
@@ -126,6 +132,22 @@ export class CacheEntryId {
                 throw new Error(`Unexpected attribute "${tokenAttribute}" for the "${tokenName}" token.`);
               }
             }
+          }
+
+          case OS_TOKEN_NAME: {
+            if (tokenAttribute !== undefined) {
+              throw new Error(`An attribute isn\'t supported for the "${tokenName}" token.`);
+            }
+
+            return process.platform;
+          }
+
+          case ARCH_TOKEN_NAME: {
+            if (tokenAttribute !== undefined) {
+              throw new Error(`An attribute isn\'t supported for the "${tokenName}" token.`);
+            }
+
+            return process.arch;
           }
 
           default: {

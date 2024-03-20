@@ -1,0 +1,292 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Output file data 1`] = `
+"globalExcludedGlobs:
+  - common/autoinstallers/**
+projects:
+  a:
+    includedGlobs:
+      - a/**
+    dependentProjects:
+      - a
+      - b
+      - e
+      - g
+      - h
+  b:
+    includedGlobs:
+      - b/**
+    dependentProjects:
+      - b
+      - c
+      - f
+  c:
+    includedGlobs:
+      - c/**
+    dependentProjects:
+      - c
+      - d
+  cyclic-dep-1:
+    includedGlobs:
+      - cyclic-dep-1/**
+    dependentProjects:
+      - cyclic-dep-1
+      - cyclic-dep-2
+  cyclic-dep-2:
+    includedGlobs:
+      - cyclic-dep-2/**
+    dependentProjects:
+      - cyclic-dep-1
+      - cyclic-dep-2
+  cyclic-dep-explicit-1:
+    includedGlobs:
+      - cyclic-dep-explicit-1/**
+    dependentProjects:
+      - cyclic-dep-explicit-1
+  cyclic-dep-explicit-2:
+    includedGlobs:
+      - cyclic-dep-explicit-2/**
+    dependentProjects:
+      - cyclic-dep-explicit-1
+      - cyclic-dep-explicit-2
+  d:
+    includedGlobs:
+      - d/**
+    dependentProjects:
+      - d
+  e:
+    includedGlobs:
+      - e/**
+    dependentProjects:
+      - e
+  f:
+    includedGlobs:
+      - f/**
+    dependentProjects:
+      - f
+  g:
+    includedGlobs:
+      - g/**
+    dependentProjects:
+      - g
+  h:
+    includedGlobs:
+      - h/**
+    dependentProjects:
+      - f
+      - h
+  i:
+    includedGlobs:
+      - i/**
+    dependentProjects:
+      - i
+      - j
+  j:
+    includedGlobs:
+      - j/**
+    dependentProjects:
+      - j
+"
+`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""packages""): Terminal Output 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "output": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Output file data 1`] = `
+"globalExcludedGlobs:
+  - common/autoinstallers/**
+projects:
+  a:
+    includedGlobs:
+      - a/**
+    dependentProjects:
+      - a
+      - b
+      - f
+      - g
+      - h
+  b:
+    includedGlobs:
+      - b/**
+    dependentProjects:
+      - b
+      - c
+      - d
+  c:
+    includedGlobs:
+      - c/**
+    dependentProjects:
+      - c
+      - e
+  d:
+    includedGlobs:
+      - d/**
+    dependentProjects:
+      - d
+  e:
+    includedGlobs:
+      - e/**
+    dependentProjects:
+      - e
+  f:
+    includedGlobs:
+      - f/**
+    dependentProjects:
+      - f
+  g:
+    includedGlobs:
+      - g/**
+    dependentProjects:
+      - g
+  h:
+    includedGlobs:
+      - h/**
+    dependentProjects:
+      - f
+      - h
+  i:
+    includedGlobs:
+      - i/**
+    dependentProjects:
+      - i
+  j:
+    includedGlobs:
+      - j/**
+    dependentProjects:
+      - j
+"
+`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""repo""): Terminal Output 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "output": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Output file data 1`] = `
+"globalExcludedGlobs:
+  - common/config/version-policies.json
+projects:
+  a:
+    includedGlobs:
+      - a/**
+    dependentProjects:
+      - a
+      - b
+      - e
+      - g
+      - h
+  b:
+    includedGlobs:
+      - b/**
+    dependentProjects:
+      - b
+      - c
+      - f
+  c:
+    includedGlobs:
+      - c/**
+    dependentProjects:
+      - c
+      - d
+  cyclic-dep-1:
+    includedGlobs:
+      - cyclic-dep-1/**
+    dependentProjects:
+      - cyclic-dep-1
+      - cyclic-dep-2
+  cyclic-dep-2:
+    includedGlobs:
+      - cyclic-dep-2/**
+    dependentProjects:
+      - cyclic-dep-1
+      - cyclic-dep-2
+  cyclic-dep-explicit-1:
+    includedGlobs:
+      - cyclic-dep-explicit-1/**
+    dependentProjects:
+      - cyclic-dep-explicit-1
+  cyclic-dep-explicit-2:
+    includedGlobs:
+      - cyclic-dep-explicit-2/**
+    dependentProjects:
+      - cyclic-dep-explicit-1
+      - cyclic-dep-explicit-2
+  d:
+    includedGlobs:
+      - d/**
+    dependentProjects:
+      - d
+  e:
+    includedGlobs:
+      - e/**
+    dependentProjects:
+      - e
+    excludedGlobs:
+      - e/src/**
+  f:
+    includedGlobs:
+      - f/**
+    dependentProjects:
+      - f
+  g:
+    includedGlobs:
+      - g/**
+    dependentProjects:
+      - g
+  h:
+    includedGlobs:
+      - h/**
+    dependentProjects:
+      - f
+      - h
+  i:
+    includedGlobs:
+      - i/**
+    dependentProjects:
+      - i
+      - j
+  j:
+    includedGlobs:
+      - j/**
+    dependentProjects:
+      - j
+"
+`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Output file path 1`] = `"<REPO_ROOT>/project-impact-graph.yaml"`;
+
+exports[`ProjectImpactGraphGenerator generateAsync Correctly generates a project impact graph (repo: ""workspacePackages""): Terminal Output 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "output": "[n][green]Generate project impact graph successfully. (1.50 seconds)[default][n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ProjectImpactGraphGenerator validateAsync Reports if the project-impact-graph.yaml file is missing (repo: ""workspacePackages""): Terminal Output 1`] = `
+Object {
+  "debug": "",
+  "error": "",
+  "output": "",
+  "verbose": "",
+  "warning": "",
+}
+`;

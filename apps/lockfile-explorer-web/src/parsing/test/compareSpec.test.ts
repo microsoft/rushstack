@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '../../types/IPackageJson';
+import type { IPackageJson } from '../../types/IPackageJson';
 import { compareSpec } from '../compareSpec';
 
 const packageJson: IPackageJson = {
   name: 'testPackage',
+  version: '0.0.0',
   dependencies: {
     package1: '0.0.0'
   },
@@ -17,6 +18,7 @@ const packageJson: IPackageJson = {
 
 const parsedPackageJson: IPackageJson = {
   name: 'testPackage',
+  version: '0.0.0',
   dependencies: {
     package1: '1.0.0'
   },

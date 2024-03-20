@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BasePackage } from './base/BasePackage';
+import type { BasePackage } from './base/BasePackage';
 
 export class PackageLookup {
   private _packageMap: Map<string, BasePackage>;

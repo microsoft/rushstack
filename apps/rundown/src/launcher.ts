@@ -58,7 +58,7 @@ class Launcher {
   }
 
   public installHook(): void {
-    const realRequire: NodeRequireFunction = moduleApi.Module.prototype.require;
+    const realRequire: NodeJS.Require = moduleApi.Module.prototype.require;
 
     const importedModules: Set<unknown> = this._importedModules; // for closure
     const importedModulePaths: Set<string> = this._importedModulePaths; // for closure
@@ -110,7 +110,7 @@ class Launcher {
       return importedModule;
     }
 
-    moduleApi.Module.prototype.require = hookedRequire;
+    moduleApi.Module.prototype.require = hookedRequire as NodeJS.Require;
     Launcher._copyProperties(hookedRequire, realRequire);
 
     process.on('exit', () => {

@@ -6,6 +6,7 @@ export * from './GenerateLicenseFileForAsset';
 export type {
   IAssetInfo,
   IAssetMap,
+  IAssetStats,
   IDehydratedAssets,
   IFactoryMeta,
   IModuleInfo,
@@ -14,6 +15,7 @@ export type {
   IModuleMinifierPluginOptions,
   IModuleMinifierPluginStats,
   IModuleStats,
-  IPostProcessFragmentContext
+  IPostProcessFragmentContext,
+  IRenderedModulePosition
 } from './ModuleMinifierPlugin.types';
 export * from './ModuleMinifierPlugin';

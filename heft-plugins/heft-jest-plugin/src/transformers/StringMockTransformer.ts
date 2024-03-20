@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
-import type { Config } from '@jest/types';
 
 /**
  * This Jest transform handles imports of data files (e.g. .png, .jpg) that would normally be
@@ -11,8 +10,10 @@ import type { Config } from '@jest/types';
  * environment.
  */
 export class StringMockTransformer implements SyncTransformer {
-  public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
+  public process(sourceText: string, sourcePath: string, options: TransformOptions): TransformedSource {
     // For a file called "myImage.png", this will generate a JS module that exports the literal string "myImage.png"
-    return `module.exports = ${JSON.stringify(sourcePath)};`;
+    return {
+      code: `module.exports = ${JSON.stringify(sourcePath)};`
+    };
   }
 }

@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 
-import { Path, Text } from '@rushstack/node-core-library';
+import { JsonFile, Path, Text } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
-import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
+import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
+import { DependencyType } from '../PackageJsonEditor';
 
 function normalizePathForComparison(pathToNormalize: string): string {
   return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();
@@ -32,6 +32,7 @@ describe(RushConfiguration.name, () => {
 
   afterEach(() => {
     process.env = _oldEnv;
+    jest.resetAllMocks();
   });
 
   it("can't load too new rush", () => {
@@ -47,11 +48,6 @@ describe(RushConfiguration.name, () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     expect(rushConfiguration.packageManager).toEqual('npm');
-    assertPathProperty(
-      'committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename,
-      './repo/common/config/rush/npm-shrinkwrap.json'
-    );
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
     assertPathProperty(
       'commonRushConfigFolder',
@@ -86,13 +82,13 @@ describe(RushConfiguration.name, () => {
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toEqual(true);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
+    expect(Array.from(approvedPackagesPolicy.reviewCategories)).toEqual([
       'first-party',
       'third-party',
       'prototype'
     ]);
 
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
+    expect(Array.from(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -120,11 +116,6 @@ describe(RushConfiguration.name, () => {
 
     expect(rushConfiguration.packageManager).toEqual('pnpm');
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
-    assertPathProperty(
-      'committedShrinkwrapFilename',
-      rushConfiguration.getCommittedShrinkwrapFilename(),
-      './repo/common/config/rush/pnpm-lock.yaml'
-    );
     assertPathProperty(
       'getPnpmfilePath',
       rushConfiguration.getPnpmfilePath(),
@@ -163,12 +154,12 @@ describe(RushConfiguration.name, () => {
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
     expect(approvedPackagesPolicy.enabled).toBe(true);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual([
+    expect(Array.from(approvedPackagesPolicy.reviewCategories)).toEqual([
       'first-party',
       'third-party',
       'prototype'
     ]);
-    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
+    expect(Array.from(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(['@types', '@internal']);
 
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
     expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
@@ -314,5 +305,30 @@ describe(RushConfiguration.name, () => {
     }).toThrow(
       'Because the new config file "common/config/rush/pnpm-config.json" is being used, you must remove the old setting "pnpmOptions" from rush.json'
     );
+  });
+
+  describe(RushConfigurationProject.name, () => {
+    it('correctly updates the packageJson property after the packageJson is edited by packageJsonEditor', async () => {
+      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+        `${__dirname}/repo/rush-pnpm.json`
+      );
+      jest.spyOn(JsonFile, 'save').mockImplementation(() => {
+        /* no-op*/
+        return true;
+      });
+
+      const project: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
+
+      expect(project.packageJson.devDependencies).toMatchSnapshot('devDependencies before');
+      expect(Array.from(project.dependencyProjects.values()).map((x) => x.packageName)).toMatchSnapshot(
+        'dependencyProjects before'
+      );
+      project.packageJsonEditor.addOrUpdateDependency('project2', '1.0.0', DependencyType.Dev);
+      project.packageJsonEditor.saveIfModified();
+      expect(project.packageJson.devDependencies).toMatchSnapshot('devDependencies after');
+      expect(Array.from(project.dependencyProjects.values()).map((x) => x.packageName)).toMatchSnapshot(
+        'dependencyProjects after'
+      );
+    });
   });
 });

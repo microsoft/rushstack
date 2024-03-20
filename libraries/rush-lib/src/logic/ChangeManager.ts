@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { IChangeInfo } from '../api/ChangeManagement';
-import { IChangelog } from '../api/Changelog';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
-import { PublishUtilities, IChangeRequests } from './PublishUtilities';
+import type { IChangeInfo } from '../api/ChangeManagement';
+import type { IChangelog } from '../api/Changelog';
+import type { RushConfiguration } from '../api/RushConfiguration';
+import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import type { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
+import { PublishUtilities, type IChangeRequests } from './PublishUtilities';
 import { ChangeFiles } from './ChangeFiles';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangelogGenerator } from './ChangelogGenerator';
@@ -20,7 +20,7 @@ import { ChangelogGenerator } from './ChangelogGenerator';
 export class ChangeManager {
   private _prereleaseToken!: PrereleaseToken;
   private _orderedChanges!: IChangeInfo[];
-  private _allPackages!: Map<string, RushConfigurationProject>;
+  private _allPackages!: ReadonlyMap<string, RushConfigurationProject>;
   private _allChanges!: IChangeRequests;
   private _changeFiles!: ChangeFiles;
   private _rushConfiguration: RushConfiguration;
@@ -37,17 +37,17 @@ export class ChangeManager {
    * @param prereleaseToken - prerelease token
    * @param includeCommitDetails - whether commit details need to be included in changes
    */
-  public load(
+  public async loadAsync(
     changesPath: string,
     prereleaseToken: PrereleaseToken = new PrereleaseToken(),
     includeCommitDetails: boolean = false
-  ): void {
+  ): Promise<void> {
     this._allPackages = this._rushConfiguration.projectsByName;
 
     this._prereleaseToken = prereleaseToken;
 
     this._changeFiles = new ChangeFiles(changesPath);
-    this._allChanges = PublishUtilities.findChangeRequests(
+    this._allChanges = await PublishUtilities.findChangeRequestsAsync(
       this._allPackages,
       this._rushConfiguration,
       this._changeFiles,
@@ -69,7 +69,7 @@ export class ChangeManager {
     return this._orderedChanges;
   }
 
-  public get allPackages(): Map<string, RushConfigurationProject> {
+  public get allPackages(): ReadonlyMap<string, RushConfigurationProject> {
     return this._allPackages;
   }
 
@@ -117,7 +117,7 @@ export class ChangeManager {
     return updatedPackages;
   }
 
-  public updateChangelog(shouldCommit: boolean): void {
+  public async updateChangelogAsync(shouldCommit: boolean): Promise<void> {
     // Do not update changelog or delete the change files for prerelease.
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
@@ -130,7 +130,7 @@ export class ChangeManager {
       );
 
       // Remove the change request files only if "-a" was provided.
-      this._changeFiles.deleteAll(shouldCommit, updatedChangelogs);
+      await this._changeFiles.deleteAllAsync(shouldCommit, updatedChangelogs);
     }
   }
 }

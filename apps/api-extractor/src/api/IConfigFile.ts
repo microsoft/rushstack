@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EnumMemberOrder } from '@microsoft/api-extractor-model';
-import { ExtractorLogLevel } from './ExtractorLogLevel';
+import type { EnumMemberOrder } from '@microsoft/api-extractor-model';
+import type { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
  * Determines how the TypeScript compiler engine will be invoked by API Extractor.
@@ -378,8 +378,17 @@ export interface IConfigFile {
    * A list of NPM package names whose exports should be treated as part of this package.
    *
    * @remarks
+   * Also supports glob patterns.
+   * Note: glob patterns will **only** be resolved against dependencies listed in the project's package.json file.
    *
-   * For example, suppose that Webpack is used to generate a distributed bundle for the project `library1`,
+   * * This is both a safety and a performance precaution.
+   *
+   * Exact package names will be applied against any dependency encountered while walking the type graph, regardless of
+   * dependencies listed in the package.json.
+   *
+   * @example
+   *
+   * Suppose that Webpack is used to generate a distributed bundle for the project `library1`,
    * and another NPM package `library2` is embedded in this bundle.  Some types from `library2` may become part
    * of the exported API for `library1`, but by default API Extractor would generate a .d.ts rollup that explicitly
    * imports `library2`.  To avoid this, we can specify:

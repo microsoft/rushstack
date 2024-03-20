@@ -6,7 +6,7 @@ import * as child_process from 'child_process';
 import * as path from 'path';
 import stringArgv from 'string-argv';
 
-import { IpcMessage } from './LauncherTypes';
+import type { IpcMessage } from './LauncherTypes';
 
 export class Rundown {
   // Map from required path --> caller path

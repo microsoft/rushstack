@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { StdioSummarizer } from '@rushstack/terminal';
+import type { ITerminal, ITerminalProvider } from '@rushstack/terminal';
 import type { CollatedWriter } from '@rushstack/stream-collator';
 
 import type { OperationStatus } from './OperationStatus';
-import type { OperationStateFile } from './OperationStateFile';
+import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 
 /**
@@ -27,19 +27,41 @@ export interface IOperationRunnerContext {
    */
   quietMode: boolean;
   /**
-   * Object used to report a summary at the end of the Rush invocation.
-   */
-  stdioSummarizer: StdioSummarizer;
-  /**
-   * Object used to record state of the operation.
+   * Object used to manage metadata of the operation.
    *
    * @internal
    */
-  _operationStateFile?: OperationStateFile;
+  _operationMetadataManager?: OperationMetadataManager;
   /**
    * Object used to track elapsed time.
    */
   stopwatch: IStopwatchResult;
+  /**
+   * The current execution status of an operation. Operations start in the 'ready' state,
+   * but can be 'blocked' if an upstream operation failed. It is 'executing' when
+   * the operation is executing. Once execution is complete, it is either 'success' or
+   * 'failure'.
+   */
+  status: OperationStatus;
+
+  /**
+   * Error which occurred while executing this operation, this is stored in case we need
+   * it later (for example to re-print errors at end of execution).
+   */
+  error?: Error;
+
+  /**
+   * Invokes the specified callback with a terminal that is associated with this operation.
+   *
+   * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
+   */
+  runWithTerminalAsync<T>(
+    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    options: {
+      createLogFile: boolean;
+      logFileSuffix?: string;
+    }
+  ): Promise<T>;
 }
 
 /**
@@ -56,9 +78,9 @@ export interface IOperationRunner {
   readonly name: string;
 
   /**
-   * This flag determines if the operation is allowed to be skipped if up to date.
+   * Whether or not the operation is cacheable. If false, all cache engines will be disabled for this operation.
    */
-  isSkipAllowed: boolean;
+  cacheable: boolean;
 
   /**
    * Indicates that this runner's duration has meaning.
@@ -77,12 +99,18 @@ export interface IOperationRunner {
   warningsAreAllowed: boolean;
 
   /**
-   * Indicates if the output of this operation may be written to the cache
+   * If set to true, this operation is considered a no-op and can be considered always skipped for
+   * analysis purposes.
    */
-  isCacheWriteAllowed: boolean;
+  readonly isNoOp?: boolean;
 
   /**
    * Method to be executed for the operation.
    */
   executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+
+  /**
+   * Return a hash of the configuration that affects the operation.
+   */
+  getConfigHash(): string;
 }

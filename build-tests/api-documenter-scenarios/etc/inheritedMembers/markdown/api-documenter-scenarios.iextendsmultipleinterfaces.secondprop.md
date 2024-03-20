@@ -6,7 +6,7 @@
 
 A second prop. Overrides `IInterface1.someProp`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 secondProp: boolean;

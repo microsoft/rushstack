@@ -1,19 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Config } from '@jest/types';
-
 // This signature is declared here:
 // https://github.com/facebook/jest/blob/c76f9a7c8eb2fab1a15dfe8952d125a8607d1bbe/packages/jest-resolve/src/defaultResolver.ts#L26
 interface IResolverOptions {
-  basedir: Config.Path;
+  basedir: string;
   browser?: boolean;
   conditions?: Array<string>;
-  defaultResolver: (path: Config.Path, options: IResolverOptions) => Config.Path;
+  defaultResolver: (path: string, options: IResolverOptions) => string;
   extensions?: Array<string>;
   moduleDirectory?: Array<string>;
-  paths?: Array<Config.Path>;
-  rootDir?: Config.Path;
+  paths?: Array<string>;
+  rootDir?: string;
   packageFilter?: unknown; // (pkg: PkgJson, dir: string) => PkgJson
   pathFilter?: unknown; // (pkg: PkgJson, path: string, relativePath: string) => string
 }
@@ -30,7 +28,7 @@ interface IResolverOptions {
 // NO:   some-package/__mocks__/Thing
 const mockPathRegExp: RegExp = /^(\..*[\/])__mocks__\/([^\/]+)$/;
 
-function resolve(request: Config.Path, options: IResolverOptions): Config.Path {
+function resolve(request: string, options: IResolverOptions): string {
   let newRequest: string = request;
 
   // Jest's manual mock feature works by looking for a matching filename in a  "__mocks__" subfolder,

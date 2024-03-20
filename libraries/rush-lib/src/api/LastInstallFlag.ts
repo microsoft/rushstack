@@ -3,12 +3,12 @@
 
 import * as path from 'path';
 
-import { FileSystem, JsonFile, JsonObject, Import, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
 
-import { PackageManagerName } from './packageManager/PackageManager';
-import { RushConfiguration } from './RushConfiguration';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import type { PackageManagerName } from './packageManager/PackageManager';
+import type { RushConfiguration } from './RushConfiguration';
+import { objectsAreDeepEqual } from '../utilities/objectUtilities';
+import type { Subspace } from './Subspace';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -89,7 +89,7 @@ export class LastInstallFlag {
       }
     }
 
-    if (!lodash.isEqual(oldState, newState)) {
+    if (!objectsAreDeepEqual(oldState, newState)) {
       if (checkValidAndReportStoreIssues) {
         const pkgManager: PackageManagerName = newState.packageManager as PackageManagerName;
         if (pkgManager === 'pnpm') {
@@ -163,6 +163,7 @@ export class LastInstallFlagFactory {
    */
   public static getCommonTempFlag(
     rushConfiguration: RushConfiguration,
+    subspace: Subspace,
     extraState: Record<string, string> = {}
   ): LastInstallFlag {
     const currentState: JsonObject = {
@@ -180,6 +181,6 @@ export class LastInstallFlagFactory {
       }
     }
 
-    return new LastInstallFlag(rushConfiguration.commonTempFolder, currentState);
+    return new LastInstallFlag(subspace.getSubspaceTempFolder(), currentState);
   }
 }

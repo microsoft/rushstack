@@ -1,14 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson, ITerminalProvider, PackageJsonLookup } from '@rushstack/node-core-library';
+import * as path from 'path';
+
+import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import type { ITerminalProvider } from '@rushstack/terminal';
+
+import '../utilities/SetRushLibPath';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
-import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 
 /**
@@ -31,16 +36,23 @@ export interface ILaunchOptions {
   alreadyReportedNodeTooNewError?: boolean;
 
   /**
-   * Used to specify Rush plugins that are dependencies of the "\@microsoft/rush" package.
+   * Pass along the terminal provider from the CLI version selector.
    *
+   * @privateRemarks
+   * We should remove this.  The version selector package can be very old.  It's unwise for
+   * `rush-lib` to rely on a potentially ancient `ITerminalProvider` implementation.
+   */
+  terminalProvider?: ITerminalProvider;
+
+  /**
+   * Used only by `@microsoft/rush/lib/start-dev.js` during development.
+   * Specifies Rush devDependencies of the `@microsoft/rush` to be manually loaded.
+   *
+   * @remarks
+   * Marked as `@internal` because `IBuiltInPluginConfiguration` is internal.
    * @internal
    */
   builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
-
-  /**
-   * Used to specify terminal how to write a message
-   */
-  terminalProvider?: ITerminalProvider;
 }
 
 /**
@@ -50,6 +62,7 @@ export interface ILaunchOptions {
  */
 export class Rush {
   private static __rushLibPackageJson: IPackageJson | undefined = undefined;
+  private static __rushLibPackageFolder: string | undefined = undefined;
 
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
@@ -62,8 +75,8 @@ export class Rush {
    *
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
-  public static launch(launcherVersion: string, arg: ILaunchOptions): void {
-    const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
+  public static launch(launcherVersion: string, options: ILaunchOptions): void {
+    options = Rush._normalizeLaunchOptions(options);
 
     if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
@@ -80,6 +93,7 @@ export class Rush {
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
       builtInPluginConfigurations: options.builtInPluginConfigurations
     });
+    // eslint-disable-next-line no-console
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
@@ -90,9 +104,9 @@ export class Rush {
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
-
     Rush._assignRushInvokedFolder();
-    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
+    // eslint-disable-next-line no-console
+    RushXCommandLine.launchRushXAsync(launcherVersion, options).catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
   /**
@@ -117,11 +131,25 @@ export class Rush {
    * @internal
    */
   public static get _rushLibPackageJson(): IPackageJson {
-    if (!Rush.__rushLibPackageJson) {
-      Rush.__rushLibPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
-    }
+    Rush._ensureOwnPackageJsonIsLoaded();
+    return Rush.__rushLibPackageJson!;
+  }
 
-    return Rush.__rushLibPackageJson;
+  public static get _rushLibPackageFolder(): string {
+    Rush._ensureOwnPackageJsonIsLoaded();
+    return Rush.__rushLibPackageFolder!;
+  }
+
+  private static _ensureOwnPackageJsonIsLoaded(): void {
+    if (!Rush.__rushLibPackageJson) {
+      const packageJsonFilePath: string | undefined =
+        PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(__dirname);
+      if (!packageJsonFilePath) {
+        throw new InternalError('Unable to locate the package.json file for this module');
+      }
+      Rush.__rushLibPackageFolder = path.dirname(packageJsonFilePath);
+      Rush.__rushLibPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonFilePath);
+    }
   }
 
   /**

@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShellOperationRunnerPlugin shellCommand "echo custom shellCommand" should be set to commandToRun 1`] = `
+Array [
+  Object {
+    "commandToRun": "echo custom shellCommand ",
+    "name": "a",
+  },
+  Object {
+    "commandToRun": "echo custom shellCommand ",
+    "name": "b",
+  },
+]
+`;
+
+exports[`ShellOperationRunnerPlugin shellCommand priority should be higher than script name 1`] = `
+Array [
+  Object {
+    "commandToRun": "echo custom shellCommand ",
+    "name": "a",
+  },
+  Object {
+    "commandToRun": "echo custom shellCommand ",
+    "name": "b",
+  },
+]
+`;

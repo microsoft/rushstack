@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { Subspace } from '../../api/Subspace';
+
 export interface IInstallManagerOptions {
   /**
    * Whether the global "--debug" flag was specified.
@@ -19,6 +21,11 @@ export interface IInstallManagerOptions {
   checkOnly: boolean;
 
   /**
+   * Whether a "--bypass-policy" flag can be specified.
+   */
+  bypassPolicyAllowed?: boolean;
+
+  /**
    * Whether to skip policy checks.
    */
   bypassPolicy: boolean;
@@ -35,12 +42,23 @@ export interface IInstallManagerOptions {
   fullUpgrade: boolean;
 
   /**
+   * If set, only update the shrinkwrap file; do not create node_modules.
+   */
+  onlyShrinkwrap?: boolean;
+
+  /**
    * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
    * Normally Rush uses heuristics to determine when "pnpm install" can be skipped,
    * but sometimes the heuristics can be inaccurate due to external influences
    * (pnpmfile.js script logic, registry changes, etc).
    */
   recheckShrinkwrap: boolean;
+
+  /**
+   * Do not attempt to access the network. Report an error if the required dependencies
+   * cannot be obtained from the local cache.
+   */
+  offline: boolean;
 
   /**
    * The value of the "--network-concurrency" command-line parameter, which
@@ -57,11 +75,6 @@ export interface IInstallManagerOptions {
   collectLogFile: boolean;
 
   /**
-   * The variant to consider when performing installations and validating shrinkwrap updates.
-   */
-  variant?: string | undefined;
-
-  /**
    * Retry the install the specified number of times
    */
   maxInstallAttempts: number;
@@ -76,4 +89,9 @@ export interface IInstallManagerOptions {
    * Callback to invoke between preparing the common/temp folder and running installation.
    */
   beforeInstallAsync?: () => Promise<void>;
+
+  /**
+   * The specific subspace to install.
+   */
+  subspace: Subspace;
 }

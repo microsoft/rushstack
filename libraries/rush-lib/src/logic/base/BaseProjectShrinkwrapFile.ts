@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
+import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
 
 /**
  * This class handles creating the project/.rush/temp/shrinkwrap-deps.json file
@@ -42,7 +41,7 @@ export abstract class BaseProjectShrinkwrapFile<TShrinkwrapFile extends BaseShri
    * for the specified project.
    */
   public static getFilePathForProject(project: RushConfigurationProject): string {
-    return path.join(project.projectRushTempFolder, RushConstants.projectShrinkwrapFilename);
+    return `${project.projectRushTempFolder}/${RushConstants.projectShrinkwrapFilename}`;
   }
 
   /**

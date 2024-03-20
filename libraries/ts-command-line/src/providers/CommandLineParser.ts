@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as argparse from 'argparse';
-import colors from 'colors';
+import type * as argparse from 'argparse';
+import { Colorize } from '@rushstack/terminal';
 
-import { CommandLineAction } from './CommandLineAction';
-import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
+import type { CommandLineAction } from './CommandLineAction';
+import type { AliasCommandLineAction } from './AliasCommandLineAction';
+import {
+  CommandLineParameterProvider,
+  type IRegisterDefinedParametersState,
+  type ICommandLineParserData
+} from './CommandLineParameterProvider';
 import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 import { TabCompleteAction } from './TabCompletionAction';
 
@@ -73,7 +78,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       addHelp: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
-      epilog: colors.bold(
+      epilog: Colorize.bold(
         this._options.toolEpilog ??
           `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
       )
@@ -156,6 +161,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         // executeWithoutErrorHandling() handles the successful cases,
         // so here we can assume err has a nonzero exit code
         if (err.message) {
+          // eslint-disable-next-line no-console
           console.error(err.message);
         }
         if (!process.exitCode) {
@@ -169,8 +175,10 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
           message = 'Error: ' + message;
         }
 
+        // eslint-disable-next-line no-console
         console.error();
-        console.error(colors.red(message));
+        // eslint-disable-next-line no-console
+        console.error(Colorize.red(message));
 
         if (!process.exitCode) {
           process.exitCode = 1;
@@ -198,41 +206,80 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       this._validateDefinitions();
 
       // Register the parameters before we print help or parse the CLI
-      this._registerDefinedParameters();
+      const initialState: IRegisterDefinedParametersState = {
+        parentParameterNames: new Set()
+      };
+      this._registerDefinedParameters(initialState);
 
       if (!args) {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);
       }
-      if (this.actions.length > 0 && args.length === 0) {
-        // Parsers that use actions should print help when 0 args are provided. Allow
-        // actionless parsers to continue on zero args.
-        this._argumentParser.printHelp();
-        return;
+      if (this.actions.length > 0) {
+        if (args.length === 0) {
+          // Parsers that use actions should print help when 0 args are provided. Allow
+          // actionless parsers to continue on zero args.
+          this._argumentParser.printHelp();
+          return;
+        }
+        // Alias actions may provide a list of default params to add after the action name.
+        // Since we don't know which params are required and which are optional, perform a
+        // manual search for the action name to obtain the default params and insert them if
+        // any are found. We will guess that the action name is the first arg that doesn't
+        // start with a hyphen.
+        const actionNameIndex: number | undefined = args.findIndex((x) => !x.startsWith('-'));
+        if (actionNameIndex !== undefined) {
+          const actionName: string = args[actionNameIndex];
+          const action: CommandLineAction | undefined = this.tryGetAction(actionName);
+          const aliasAction: AliasCommandLineAction | undefined = action as AliasCommandLineAction;
+          if (aliasAction?.defaultParameters?.length) {
+            const insertIndex: number = actionNameIndex + 1;
+            args = args.slice(0, insertIndex).concat(aliasAction.defaultParameters, args.slice(insertIndex));
+          }
+        }
+      }
+
+      const postParse: () => void = () => {
+        this._postParse();
+        for (const action of this.actions) {
+          action._postParse();
+        }
+      };
+
+      function patchFormatUsageForArgumentParser(argumentParser: argparse.ArgumentParser): void {
+        const originalFormatUsage: () => string = argumentParser.formatUsage.bind(argumentParser);
+        argumentParser.formatUsage = () => {
+          postParse();
+          return originalFormatUsage();
+        };
+      }
+
+      this._preParse();
+      patchFormatUsageForArgumentParser(this._argumentParser);
+      for (const action of this.actions) {
+        action._preParse();
+        patchFormatUsageForArgumentParser(action._getArgumentParser());
       }
 
       const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
+      postParse();
       this._processParsedData(this._options, data);
 
-      for (const action of this._actions) {
-        if (action.actionName === data.action) {
-          this.selectedAction = action;
-          action._processParsedData(this._options, data);
-          break;
-        }
-      }
+      this.selectedAction = this.tryGetAction(data.action);
       if (this.actions.length > 0 && !this.selectedAction) {
         const actions: string[] = this.actions.map((x) => x.actionName);
         throw new Error(`An action must be specified (${actions.join(', ')})`);
       }
 
-      return this.onExecute();
+      this.selectedAction?._processParsedData(this._options, data);
+      await this.onExecute();
     } catch (err) {
       if (err instanceof CommandLineParserExitError) {
         if (!err.exitCode) {
           // non-error exit modeled using exception handling
           if (err.message) {
+            // eslint-disable-next-line no-console
             console.log(err.message);
           }
 
@@ -245,10 +292,21 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /** @internal */
-  public _registerDefinedParameters(): void {
-    super._registerDefinedParameters();
+  public _registerDefinedParameters(state: IRegisterDefinedParametersState): void {
+    super._registerDefinedParameters(state);
+
+    const { parentParameterNames } = state;
+    const updatedParentParameterNames: Set<string> = new Set([
+      ...parentParameterNames,
+      ...this._registeredParameterParserKeysByName.keys()
+    ]);
+
+    const parentState: IRegisterDefinedParametersState = {
+      ...state,
+      parentParameterNames: updatedParentParameterNames
+    };
     for (const action of this._actions) {
-      action._registerDefinedParameters();
+      action._registerDefinedParameters(parentState);
     }
   }
 

@@ -2,39 +2,45 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, Import, Enum } from '@rushstack/node-core-library';
+import { type IPackageJson, Enum } from '@rushstack/node-core-library';
 
 import {
-  IVersionPolicyJson,
-  ILockStepVersionJson,
-  IIndividualVersionJson,
+  type IVersionPolicyJson,
+  type ILockStepVersionJson,
+  type IIndividualVersionJson,
   VersionFormatForCommit,
   VersionFormatForPublish,
-  IVersionPolicyDependencyJson
+  type IVersionPolicyDependencyJson
 } from './VersionPolicyConfiguration';
-import { PackageJsonEditor } from './PackageJsonEditor';
-import { RushConfiguration } from './RushConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
+import type { PackageJsonEditor } from './PackageJsonEditor';
+import type { RushConfiguration } from './RushConfiguration';
+import type { RushConfigurationProject } from './RushConfigurationProject';
+import { cloneDeep } from '../utilities/objectUtilities';
 
 /**
  * Type of version bumps
  * @public
+ *
+ * @internalRemarks
+ * This is a copy of the semver ReleaseType enum, but with the `none` value added and
+ * the `premajor` and `prepatch` omitted.
+ * See {@link LockStepVersionPolicy._getReleaseType}.
+ *
+ * TODO: Consider supporting `premajor` and `prepatch` in the future.
  */
 export enum BumpType {
   // No version bump
-  'none',
+  'none' = 0,
   // Prerelease version bump
-  'prerelease',
+  'prerelease' = 1,
   // Patch version bump
-  'patch',
+  'patch' = 2,
   // Preminor version bump
-  'preminor',
+  'preminor' = 3,
   // Minor version bump
-  'minor',
+  'minor' = 4,
   // Major version bump
-  'major'
+  'major' = 5
 }
 
 /**
@@ -326,7 +332,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   }
 
   private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
-    const updatedProject: IPackageJson = lodash.cloneDeep(project);
+    const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
@@ -381,7 +387,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
-        const updatedProject: IPackageJson = lodash.cloneDeep(project);
+        const updatedProject: IPackageJson = cloneDeep(project);
         updatedProject.version = `${this.lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {

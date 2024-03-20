@@ -2,9 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import { CommandLineAction } from '../providers/CommandLineAction';
-import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
+import type { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineParser } from '../providers/CommandLineParser';
-import { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
+import type { IScopedLongNameParseResult } from '../providers/CommandLineParameterProvider';
+
+class GenericCommandLine extends CommandLineParser {
+  public constructor(action: new () => CommandLineAction) {
+    super({
+      toolFilename: 'example',
+      toolDescription: 'An example project'
+    });
+
+    this.addAction(new action());
+  }
+}
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
@@ -53,22 +64,7 @@ class TestAction extends CommandLineAction {
   }
 }
 
-class TestCommandLine extends CommandLineParser {
-  public constructor() {
-    super({
-      toolFilename: 'example',
-      toolDescription: 'An example project'
-    });
-
-    this.addAction(new TestAction());
-  }
-
-  protected onDefineParameters(): void {
-    // no parameters
-  }
-}
-
-class BrokenTestAction extends CommandLineAction {
+class UnscopedDuplicateArgumentTestAction extends CommandLineAction {
   public constructor() {
     super({
       actionName: 'do:the-job',
@@ -98,20 +94,40 @@ class BrokenTestAction extends CommandLineAction {
   }
 }
 
-class BrokenTestCommandLine extends CommandLineParser {
+class ScopedDuplicateArgumentTestAction extends CommandLineAction {
   public constructor() {
     super({
-      toolFilename: 'example',
-      toolDescription: 'An example project'
+      actionName: 'do:the-job',
+      summary: 'does the job',
+      documentation: 'a longer description'
     });
+  }
 
-    this.addAction(new BrokenTestAction());
+  protected async onExecute(): Promise<void> {
+    throw new Error('This action should not be executed');
+  }
+
+  protected onDefineParameters(): void {
+    // Used to validate that conflicting parameters with at least one being unscoped fails
+    this.defineStringParameter({
+      parameterLongName: '--arg',
+      parameterScope: 'scope',
+      argumentName: 'ARG',
+      description: 'The argument'
+    });
+    // Used to validate that conflicting parameters with at least one being unscoped fails
+    this.defineStringParameter({
+      parameterLongName: '--arg',
+      parameterScope: 'scope',
+      argumentName: 'ARG',
+      description: 'The argument'
+    });
   }
 }
 
 describe(`Conflicting ${CommandLineParser.name}`, () => {
   it('executes an action', async () => {
-    const commandLineParser: TestCommandLine = new TestCommandLine();
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
 
     await commandLineParser.execute([
       'do:the-job',
@@ -133,16 +149,8 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
     expect(action.getParameterStringMap()).toMatchSnapshot();
   });
 
-  it('fails to execute an action when some conflicting parameters are unscoped', async () => {
-    const commandLineParser: BrokenTestCommandLine = new BrokenTestCommandLine();
-
-    await expect(
-      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
-    ).rejects.toThrowError(/The parameter "--arg" is defined multiple times with the same long name/);
-  });
-
   it('parses the scope out of a long name correctly', async () => {
-    const commandLineParser: TestCommandLine = new TestCommandLine();
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(TestAction);
 
     let result: IScopedLongNameParseResult = commandLineParser.parseScopedLongName('--scope1:arg');
     expect(result.scope).toEqual('scope1');
@@ -155,5 +163,21 @@ describe(`Conflicting ${CommandLineParser.name}`, () => {
     result = commandLineParser.parseScopedLongName('--my-scope:my-arg');
     expect(result.scope).toEqual('my-scope');
     expect(result.longName).toEqual('--my-arg');
+  });
+
+  it('fails to execute an action when some conflicting parameters are unscoped', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(UnscopedDuplicateArgumentTestAction);
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
+    ).rejects.toThrowError(/The parameter "--arg" is defined multiple times with the same long name/);
+  });
+
+  it('fails to execute an action with conflicting parameters with the same scope', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(ScopedDuplicateArgumentTestAction);
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandling(['do:the-job', '--arg', 'value', '--scope:arg', 'value'])
+    ).rejects.toThrowError(/argument "\-\-scope:arg": Conflicting option string\(s\): \-\-scope:arg/);
   });
 });

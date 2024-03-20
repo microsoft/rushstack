@@ -27,6 +27,13 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
+  if (packageJson.name.startsWith('@radix-ui/')) {
+    if (packageJson.peerDependencies && packageJson.peerDependencies['react']) {
+      packageJson.peerDependencies['@types/react'] = '*';
+      packageJson.peerDependencies['@types/react-dom'] = '*';
+    }
+  }
+
   switch (packageJson.name) {
     case '@jest/test-result': {
       // The `@jest/test-result` package takes undeclared dependencies on `jest-haste-map`

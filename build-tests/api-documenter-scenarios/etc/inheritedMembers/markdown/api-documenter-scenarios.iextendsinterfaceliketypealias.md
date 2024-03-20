@@ -6,19 +6,78 @@
 
 Some interface that extends an interface-like type alias as well as another interface.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IExtendsInterfaceLikeTypeAlias extends IInterfaceLikeTypeAlias, IInterface1 
 ```
-<b>Extends:</b> [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)<!-- -->, [IInterface1](./api-documenter-scenarios.iinterface1.md)
+**Extends:** [IInterfaceLikeTypeAlias](./api-documenter-scenarios.iinterfaceliketypealias.md)<!-- -->, [IInterface1](./api-documenter-scenarios.iinterface1.md)
 
-<i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+_(Some inherited members may not be shown because they are not represented in the documentation.)_
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [secondProp](./api-documenter-scenarios.iinterface1.secondprop.md) |  | boolean \| string | <p>A second prop.</p><p>(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)</p> |
-|  [someProp](./api-documenter-scenarios.iinterface1.someprop.md) |  | number | <p>Some prop.</p><p>(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)</p> |
+<table><thead><tr><th>
 
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[secondProp](./api-documenter-scenarios.iinterface1.secondprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean \| string
+
+
+</td><td>
+
+A second prop.
+
+(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)
+
+
+</td></tr>
+<tr><td>
+
+[someProp](./api-documenter-scenarios.iinterface1.someprop.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+Some prop.
+
+(Inherited from [IInterface1](./api-documenter-scenarios.iinterface1.md)<!-- -->)
+
+
+</td></tr>
+</tbody></table>

@@ -1,11 +1,19 @@
+@use '../../styles/base';
+
 .PackageJsonWrapper {
-  height: 30%;
+  @include base.card;
+  min-height: 400px;
+  flex: 1;
   margin-top: 12px;
 }
 
 .FileContents {
-  height: calc(25vh - 35px);
-  overflow: scroll;
+  height: calc(100% - 46px);
+  padding: 0 12px;
+}
+
+.FileInnerContent {
+  padding-top: 12px;
 }
 
 @mixin SpecWrapper {
@@ -31,7 +39,7 @@
 
 .PackageSpecWrapper {
   h5 {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
   & > * + * {
     margin-top: 8px;

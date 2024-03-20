@@ -14,7 +14,7 @@ const autoprefixer = require('autoprefixer');
  * If the "--production" command-line parameter is specified when invoking Heft, then the
  * "production" function parameter will be true.  You can use this to enable bundling optimizations.
  */
-function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
+function createWebpackConfig({ env, argv, projectRoot, configOverride, extractCssInProduction }) {
   const { production } = env;
 
   const defaultArgs = {
@@ -89,7 +89,7 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
             // CSS into the DOM using multiple <style></style> and works faster."
             //
             // "WARNING: Do not use style-loader and mini-css-extract-plugin together."
-            production
+            production && extractCssInProduction
               ? {
                   loader: MiniCssExtractPlugin.loader
                 }
@@ -205,7 +205,7 @@ function createWebpackConfig({ env, argv, projectRoot, configOverride }) {
         },
 
         {
-          test: /\.(jpeg|jpg|png|gif|svg|ico)$/,
+          test: /\.(jpeg|jpg|png|gif|svg|ico|woff|woff2|ttf|eot)$/,
           // Allows import/require() to be used with an asset file. The file will be copied to the output folder,
           // and the import statement will return its URL.
           // https://webpack.js.org/guides/asset-modules/#resource-assets

@@ -1,22 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import {
   FileSystem,
   NewlineKind,
   InternalError,
   AlreadyReportedError,
-  FileSystemStats
+  type FileSystemStats
 } from '@rushstack/node-core-library';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { Colorize } from '@rushstack/terminal';
 
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 import { Rush } from '../../api/Rush';
 import { assetsFolderPath } from '../../utilities/PathConstants';
+import { RushConstants } from '../../logic/RushConstants';
 
 // Matches a well-formed BEGIN macro starting a block section.
 // Example:  /*[BEGIN "DEMO"]*/
@@ -52,6 +53,7 @@ const ANY_MACRO_REGEXP: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 export class InitAction extends BaseConfiglessRushAction {
   private readonly _overwriteParameter: CommandLineFlagParameter;
   private readonly _rushExampleParameter: CommandLineFlagParameter;
+  private readonly _experimentsParameter: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
@@ -79,6 +81,12 @@ export class InitAction extends BaseConfiglessRushAction {
         'When copying the template config files, this uncomments fragments that are used' +
         ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush' +
         ' features. This option is primarily intended for maintaining that example.'
+    });
+    this._experimentsParameter = this.defineFlagParameter({
+      parameterLongName: '--include-experiments',
+      description:
+        'Include features that may not be complete features, useful for demoing specific future features' +
+        ' or current work in progress features.'
     });
   }
 
@@ -110,9 +118,11 @@ export class InitAction extends BaseConfiglessRushAction {
   // Check whether it's safe to run "rush init" in the current working directory.
   private _validateFolderIsEmpty(initFolder: string): boolean {
     if (this.rushConfiguration !== undefined) {
+      // eslint-disable-next-line no-console
       console.error(
-        colors.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
+        Colorize.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
       );
+      // eslint-disable-next-line no-console
       console.log(
         '\nThe "rush init" command must be run in a new folder without an existing Rush configuration.'
       );
@@ -131,12 +141,16 @@ export class InitAction extends BaseConfiglessRushAction {
       // Ignore any loose files in the current folder, e.g. "README.md"
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
-        console.error(colors.red(`ERROR: Found a subdirectory: "${itemName}"`));
+        // eslint-disable-next-line no-console
+        console.error(Colorize.red(`ERROR: Found a subdirectory: "${itemName}"`));
+        // eslint-disable-next-line no-console
         console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
         return false;
       } else {
         if (itemName.toLowerCase() === 'package.json') {
-          console.error(colors.red(`ERROR: Found a package.json file in this folder`));
+          // eslint-disable-next-line no-console
+          console.error(Colorize.red(`ERROR: Found a package.json file in this folder`));
+          // eslint-disable-next-line no-console
           console.log('\nThe "rush init" command must be run in a new folder with no projects added yet.');
           return false;
         }
@@ -156,19 +170,30 @@ export class InitAction extends BaseConfiglessRushAction {
       'common/config/rush/[dot]npmrc-publish',
       'common/config/rush/artifactory.json',
       'common/config/rush/build-cache.json',
+      'common/config/rush/cobuild.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
+      'common/config/rush/custom-tips.json',
       'common/config/rush/experiments.json',
       'common/config/rush/pnpm-config.json',
       'common/config/rush/rush-plugins.json',
+      'common/config/rush/subspaces.json',
       'common/config/rush/version-policies.json',
 
       'common/git-hooks/commit-msg.sample',
 
       '[dot]gitattributes',
       '[dot]gitignore',
-      'rush.json'
+      RushConstants.rushJsonFilename
     ];
+
+    const experimentalTemplateFilePaths: string[] = [
+      `common/config/rush/${RushConstants.subspacesConfigFilename}`
+    ];
+
+    if (this._experimentsParameter.value) {
+      templateFilePaths.push(...experimentalTemplateFilePaths);
+    }
 
     const assetsSubfolder: string = `${assetsFolderPath}/rush-init`;
 
@@ -224,14 +249,17 @@ export class InitAction extends BaseConfiglessRushAction {
 
     if (!this._overwriteParameter.value) {
       if (destinationFileExists) {
-        console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
+        // eslint-disable-next-line no-console
+        console.log(Colorize.yellow('Not overwriting already existing file: ') + destinationPath);
         return;
       }
     }
 
     if (destinationFileExists) {
-      console.log(colors.yellow(`Overwriting: ${destinationPath}`));
+      // eslint-disable-next-line no-console
+      console.log(Colorize.yellow(`Overwriting: ${destinationPath}`));
     } else {
+      // eslint-disable-next-line no-console
       console.log(`Generating: ${destinationPath}`);
     }
 

@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as semver from 'semver';
+import { Colorize } from '@rushstack/terminal';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+import type { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
-import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
-import { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration';
+import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
+import type { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration';
+import type { Subspace } from '../../api/Subspace';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -113,7 +114,10 @@ export abstract class BaseShrinkwrapFile {
    *
    * @returns a list of orphaned projects.
    */
-  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+  public findOrphanedProjects(
+    rushConfiguration: RushConfiguration,
+    subspace: Subspace
+  ): ReadonlyArray<string> {
     const orphanedProjectNames: string[] = [];
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of this.getTempProjectNames()) {
@@ -139,13 +143,12 @@ export abstract class BaseShrinkwrapFile {
    * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
    *
    * @param project - the Rush project that is being validated against the shrinkwrap
-   * @param variant - the variant that is being validated
    *
    * @virtual
    */
   public abstract isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
-    variant?: string
+    subspace: Subspace
   ): Promise<boolean>;
 
   /** @virtual */
@@ -211,8 +214,9 @@ export abstract class BaseShrinkwrapFile {
         // Only warn once for each versionSpecifier
         if (!this._alreadyWarnedSpecs.has(projectDependency.versionSpecifier)) {
           this._alreadyWarnedSpecs.add(projectDependency.versionSpecifier);
+          // eslint-disable-next-line no-console
           console.log(
-            colors.yellow(
+            Colorize.yellow(
               `WARNING: Not validating ${projectDependency.specifierType}-based` +
                 ` specifier: "${projectDependency.versionSpecifier}"`
             )

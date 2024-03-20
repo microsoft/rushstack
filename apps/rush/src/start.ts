@@ -18,16 +18,11 @@ const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVer
   alreadyReportedNodeTooNewError: false
 });
 
-import colors from 'colors/safe';
 import * as os from 'os';
 import * as semver from 'semver';
 
-import {
-  ConsoleTerminalProvider,
-  Text,
-  PackageJsonLookup,
-  ITerminalProvider
-} from '@rushstack/node-core-library';
+import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
+import { Colorize, ConsoleTerminalProvider, type ITerminalProvider } from '@rushstack/terminal';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -48,7 +43,7 @@ const previewVersion: string | undefined = process.env[EnvironmentVariableNames.
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
     console.error(
-      colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`)
+      Colorize.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`)
     );
     process.exit(1);
   }
@@ -74,7 +69,7 @@ if (previewVersion) {
     `*********************************************************************`
   );
 
-  console.error(lines.map((line) => colors.black(colors.bgYellow(line))).join(os.EOL));
+  console.error(lines.map((line) => Colorize.black(Colorize.yellowBackground(line))).join(os.EOL));
 } else if (configuration) {
   rushVersionToLoad = configuration.rushVersion;
 }
@@ -99,7 +94,7 @@ if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   versionSelector
     .ensureRushVersionInstalledAsync(rushVersionToLoad, configuration, launchOptions)
     .catch((error: Error) => {
-      console.log(colors.red('Error: ' + error.message));
+      console.log(Colorize.red('Error: ' + error.message));
     });
 } else {
   // Otherwise invoke the rush-lib that came with this rush package

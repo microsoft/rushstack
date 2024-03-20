@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "emitDeclarationOnly": true
+  },
+  "include": ["src/index.ts"]
+}

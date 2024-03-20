@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser, type CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { InternalError } from '@rushstack/node-core-library';
+import { Colorize } from '@rushstack/terminal';
 
 import { RunAction } from './RunAction';
 import { InitAction } from './InitAction';
@@ -42,7 +42,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
       if (this._debugParameter.value) {
         console.error(os.EOL + error.stack);
       } else {
-        console.error(os.EOL + colors.red('ERROR: ' + error.message.trim()));
+        console.error(os.EOL + Colorize.red('ERROR: ' + error.message.trim()));
       }
 
       process.exitCode = 1;

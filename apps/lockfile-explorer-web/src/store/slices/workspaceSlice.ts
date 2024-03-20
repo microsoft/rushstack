@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createSlice, PayloadAction, Reducer } from '@reduxjs/toolkit';
-import { ISpecChange } from '../../parsing/compareSpec';
+import { createSlice, type PayloadAction, type Reducer } from '@reduxjs/toolkit';
+import type { ISpecChange } from '../../parsing/compareSpec';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type WorkspaceState = {

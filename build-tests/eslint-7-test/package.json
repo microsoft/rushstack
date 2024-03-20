@@ -7,14 +7,14 @@
   "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
-    "_phase:build": "heft build --clean"
+    "_phase:build": "heft run --only build -- --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "12.20.24",
-    "@typescript-eslint/parser": "~5.38.0",
+    "local-node-rig": "workspace:*",
+    "@types/node": "18.17.15",
+    "@typescript-eslint/parser": "~6.19.0",
     "eslint": "~7.30.0",
-    "typescript": "~4.8.4"
+    "typescript": "~5.4.2"
   }
 }

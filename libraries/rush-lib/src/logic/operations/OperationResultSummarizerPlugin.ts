@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-import { InternalError, ITerminal } from '@rushstack/node-core-library';
-import {
+import { InternalError } from '@rushstack/node-core-library';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
+
+import type {
   ICreateOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
-import { Operation } from './Operation';
+import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
+import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 
 const PLUGIN_NAME: 'OperationResultSummarizerPlugin' = 'OperationResultSummarizerPlugin';
@@ -88,7 +89,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.Skipped,
     operationsByStatus,
-    colors.green,
+    Colorize.green,
     'These operations were already up to date:'
   );
 
@@ -96,7 +97,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.NoOp,
     operationsByStatus,
-    colors.gray,
+    Colorize.gray,
     'These operations did not define any work:'
   );
 
@@ -104,7 +105,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.FromCache,
     operationsByStatus,
-    colors.green,
+    Colorize.green,
     'These operations were restored from the build cache:'
   );
 
@@ -112,7 +113,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.Success,
     operationsByStatus,
-    colors.green,
+    Colorize.green,
     'These operations completed successfully:'
   );
 
@@ -120,7 +121,7 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.SuccessWithWarning,
     operationsByStatus,
-    colors.yellow,
+    Colorize.yellow,
     'WARNING'
   );
 
@@ -128,11 +129,11 @@ export function _printOperationStatus(terminal: ITerminal, result: IExecutionRes
     terminal,
     OperationStatus.Blocked,
     operationsByStatus,
-    colors.white,
+    Colorize.white,
     'These operations were blocked by dependencies that failed:'
   );
 
-  writeDetailedSummary(terminal, OperationStatus.Failure, operationsByStatus, colors.red);
+  writeDetailedSummary(terminal, OperationStatus.Failure, operationsByStatus, Colorize.red);
 
   terminal.writeLine('');
 
@@ -241,9 +242,9 @@ function writeDetailedSummary(
     );
 
     terminal.writeLine(
-      `${colors.gray('--[')} ${headingColor(subheadingText)} ${colors.gray(
+      `${Colorize.gray('--[')} ${headingColor(subheadingText)} ${Colorize.gray(
         `]${'-'.repeat(middlePartLengthMinusTwoBrackets)}[`
-      )} ${colors.white(time)} ${colors.gray(']--')}\n`
+      )} ${Colorize.white(time)} ${Colorize.gray(']--')}\n`
     );
 
     const details: string = operationResult.stdioSummarizer.getReport();
@@ -280,7 +281,7 @@ function writeSummaryHeader(
   // rightPart: "]======================"
 
   terminal.writeLine(
-    `${colors.gray('==[')} ${headingColor(headingText)} ${colors.gray(
+    `${Colorize.gray('==[')} ${headingColor(headingText)} ${Colorize.gray(
       `]${'='.repeat(rightPartLengthMinusBracket)}`
     )}\n`
   );

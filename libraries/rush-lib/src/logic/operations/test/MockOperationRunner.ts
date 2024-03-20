@@ -4,15 +4,14 @@
 import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { OperationStatus } from '../OperationStatus';
-import { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
+import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 
 export class MockOperationRunner implements IOperationRunner {
   private readonly _action: ((terminal: CollatedTerminal) => Promise<OperationStatus>) | undefined;
   public readonly name: string;
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
-  public isSkipAllowed: boolean = false;
-  public isCacheWriteAllowed: boolean = false;
+  public readonly cacheable: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
   public constructor(
@@ -31,5 +30,9 @@ export class MockOperationRunner implements IOperationRunner {
       result = await this._action(context.collatedWriter.terminal);
     }
     return result || OperationStatus.Success;
+  }
+
+  public getConfigHash(): string {
+    return 'mock';
   }
 }

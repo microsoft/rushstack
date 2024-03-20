@@ -2,7 +2,7 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1010,
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -207,6 +207,7 @@
           ],
           "fileUrlPath": "lib/excerptTokens/index.d.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "MyClass",
           "preserveMemberOrder": false,
           "members": [
@@ -271,6 +272,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "someMethod"
             }
           ],

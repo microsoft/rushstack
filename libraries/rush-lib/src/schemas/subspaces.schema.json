@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush subspace config file.",
+  "description": "The configuration file for enabling the subspaces feature in rush. This is an EXPERIMENTAL feature which is not yet fully implemented. To opt into the experiment, simply toggle the 'enabled' property in this file.",
+  "type": "object",
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "subspacesEnabled": {
+      "description": "If true, rush will use the subspaces configuration.",
+      "type": "boolean"
+    },
+    "splitWorkspaceCompatibility": {
+      "description": "(DEPRECATED) Allows individual subspaces to be configured at the package level if that package is the only project in the subspace. Used to help migrate from a split workspace state.",
+      "type": "boolean"
+    },
+    "preventSelectingAllSubspaces": {
+      "description": "If true, requires a selector for a subspace or set of subspaces when installing.",
+      "type": "boolean"
+    },
+    "subspaceNames": {
+      "description": "Individual subspace configurations.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

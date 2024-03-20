@@ -4,12 +4,13 @@
 import type { CommandLineFlagParameter, CommandLineStringListParameter } from '@rushstack/ts-command-line';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type * as PackageJsonUpdaterType from '../../logic/PackageJsonUpdater';
 import type {
   IPackageForRushUpdate,
   IPackageJsonUpdaterRushBaseUpdateOptions
 } from '../../logic/PackageJsonUpdaterTypes';
+import { RushConstants } from '../../logic/RushConstants';
 
 export interface IBasePackageJsonUpdaterRushOptions {
   /**
@@ -65,7 +66,7 @@ export abstract class BaseAddAndRemoveAction extends BaseRushAction {
       if (!currentProject) {
         throw new Error(
           `The rush "${this.actionName}" command must be invoked under a project` +
-            ` folder that is registered in rush.json unless the ${this._allFlag.longName} is used.`
+            ` folder that is registered in ${RushConstants.rushJsonFilename} unless the ${this._allFlag.longName} is used.`
         );
       }
 

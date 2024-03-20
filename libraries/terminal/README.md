@@ -48,6 +48,6 @@ capable of matching substrings that span multiple chunks.
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/libraries/terminal/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://rushstack.io/pages/api/terminal/)
+- [API Reference](https://api.rushstack.io/pages/terminal/)
 
 `@rushstack/terminal` is part of the [Rush Stack](https://rushstack.io/) family of projects.

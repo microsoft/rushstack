@@ -5,7 +5,7 @@ import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
-import { Text, NewlineKind, Encoding } from './Text';
+import { Text, type NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 import { LegacyAdapters } from './LegacyAdapters';
 
@@ -31,7 +31,7 @@ export type FolderItem = fs.Dirent;
 /* eslint-disable no-bitwise */
 
 /**
- * The options for {@link FileSystem.readFolder}
+ * The options for {@link FileSystem.readFolderItems} and {@link FileSystem.readFolderItemNames}.
  * @public
  */
 export interface IFileSystemReadFolderOptions {
@@ -447,9 +447,9 @@ export class FileSystem {
    * @param path - The absolute or relative path to the object that should be updated.
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
-  public static changePosixModeBits(path: string, mode: PosixModeBits): void {
+  public static changePosixModeBits(path: string, modeBits: PosixModeBits): void {
     FileSystem._wrapException(() => {
-      fs.chmodSync(path, mode);
+      fs.chmodSync(path, modeBits);
     });
   }
 
@@ -593,25 +593,6 @@ export class FileSystem {
     await FileSystem._wrapExceptionAsync(() => {
       return fsx.ensureDir(folderPath);
     });
-  }
-
-  /**
-   * @deprecated
-   * Use {@link FileSystem.readFolderItemNames} instead.
-   */
-  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
-    return FileSystem.readFolderItemNames(folderPath, options);
-  }
-
-  /**
-   * @deprecated
-   * Use {@link FileSystem.readFolderItemNamesAsync} instead.
-   */
-  public static async readFolderAsync(
-    folderPath: string,
-    options?: IFileSystemReadFolderOptions
-  ): Promise<string[]> {
-    return await FileSystem.readFolderItemNamesAsync(folderPath, options);
   }
 
   /**
@@ -1062,7 +1043,7 @@ export class FileSystem {
   /**
    * An async version of {@link FileSystem.copyFiles}.
    */
-  public static async copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void> {
+  public static async copyFilesAsync(options: IFileSystemCopyFilesAsyncOptions): Promise<void> {
     options = {
       ...COPY_FILES_DEFAULT_OPTIONS,
       ...options

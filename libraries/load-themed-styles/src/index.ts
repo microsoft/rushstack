@@ -221,7 +221,9 @@ export function flush(): void {
  * register async loadStyles
  */
 function asyncLoadStyles(): number {
-  return setTimeout(() => {
+  // Use "self" to distinguish conflicting global typings for setTimeout() from lib.dom.d.ts vs Jest's @types/node
+  // https://github.com/jestjs/jest/issues/14418
+  return self.setTimeout(() => {
     _themeState.runState.flushTimer = 0;
     flush();
   }, 0);
@@ -334,6 +336,7 @@ function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayRes
           typeof DEBUG !== 'undefined' &&
           DEBUG
         ) {
+          // eslint-disable-next-line no-console
           console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
         }
 

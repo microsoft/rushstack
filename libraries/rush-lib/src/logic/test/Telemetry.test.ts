@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { JsonFile } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
+
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import { Telemetry, ITelemetryData, ITelemetryMachineInfo } from '../Telemetry';
+import { Telemetry, type ITelemetryData, type ITelemetryMachineInfo } from '../Telemetry';
 import { RushSession } from '../../pluginFramework/RushSession';
-import { ConsoleTerminalProvider, JsonFile } from '@rushstack/node-core-library';
 
 interface ITelemetryPrivateMembers extends Omit<Telemetry, '_flushAsyncTasks'> {
   _flushAsyncTasks: Map<symbol, Promise<void>>;

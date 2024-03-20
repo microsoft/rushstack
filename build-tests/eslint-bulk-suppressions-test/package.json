@@ -1,0 +1,21 @@
+{
+  "name": "eslint-bulk-suppressions-test",
+  "description": "Sample code to test eslint bulk suppressions",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "_phase:build": "node build.js"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-bulk": "workspace:*",
+    "@rushstack/eslint-patch": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@typescript-eslint/parser": "~6.19.0",
+    "eslint": "~8.7.0",
+    "eslint-newest": "npm:eslint@~8.23.1",
+    "eslint-oldest": "npm:eslint@8.6.0",
+    "local-node-rig": "workspace:*",
+    "typescript": "~5.4.2"
+  }
+}

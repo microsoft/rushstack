@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-import { PrintUtilities } from '@rushstack/terminal';
+import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import { RushConstants } from '../logic/RushConstants';
 
@@ -54,15 +53,19 @@ export class CommandLineMigrationAdvisor {
   }
 
   private static _reportDeprecated(message: string): void {
+    // eslint-disable-next-line no-console
     console.error(
-      colors.red(
+      Colorize.red(
         PrintUtilities.wrapWords(
           'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
         )
       )
     );
-    console.error(colors.yellow(PrintUtilities.wrapWords(message)));
+    // eslint-disable-next-line no-console
+    console.error(Colorize.yellow(PrintUtilities.wrapWords(message)));
+    // eslint-disable-next-line no-console
     console.error();
+    // eslint-disable-next-line no-console
     console.error(
       PrintUtilities.wrapWords(
         `For command-line help, type "rush -h".  For migration instructions,` +

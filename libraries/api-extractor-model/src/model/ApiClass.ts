@@ -5,26 +5,35 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
-import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { IExcerptTokenRange } from '../mixins/Excerpt';
+import {
+  ApiDeclaredItem,
+  type IApiDeclaredItemOptions,
+  type IApiDeclaredItemJson
+} from '../items/ApiDeclaredItem';
+import { ApiItemContainerMixin, type IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
+import { ApiReleaseTagMixin, type IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import type { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { type IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import {
   ApiTypeParameterListMixin,
-  IApiTypeParameterListMixinOptions,
-  IApiTypeParameterListMixinJson
+  type IApiTypeParameterListMixinOptions,
+  type IApiTypeParameterListMixinJson
 } from '../mixins/ApiTypeParameterListMixin';
-import { DeserializerContext } from './DeserializerContext';
+import type { DeserializerContext } from './DeserializerContext';
 import {
-  IApiExportedMixinJson,
-  IApiExportedMixinOptions,
+  type IApiExportedMixinJson,
+  type IApiExportedMixinOptions,
   ApiExportedMixin
 } from '../mixins/ApiExportedMixin';
+import {
+  ApiAbstractMixin,
+  type IApiAbstractMixinJson,
+  type IApiAbstractMixinOptions
+} from '../mixins/ApiAbstractMixin';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -33,6 +42,7 @@ import {
 export interface IApiClassOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
+    IApiAbstractMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions,
     IApiTypeParameterListMixinOptions,
@@ -43,6 +53,7 @@ export interface IApiClassOptions
 
 export interface IApiClassJson
   extends IApiDeclaredItemJson,
+    IApiAbstractMixinJson,
     IApiTypeParameterListMixinJson,
     IApiExportedMixinJson {
   extendsTokenRange?: IExcerptTokenRange;
@@ -66,7 +77,9 @@ export interface IApiClassJson
  * @public
  */
 export class ApiClass extends ApiItemContainerMixin(
-  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
+  ApiNameMixin(
+    ApiAbstractMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
+  )
 ) {
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.

@@ -2,25 +2,22 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as child_process from 'child_process';
+import type * as child_process from 'child_process';
 import {
   AlreadyReportedError,
-  Colors,
-  ConsoleTerminalProvider,
   Executable,
   FileSystem,
   InternalError,
-  JsonObject,
+  type JsonObject,
   NewlineKind,
-  Terminal,
   Text
 } from '@rushstack/node-core-library';
-import { PrintUtilities } from '@rushstack/terminal';
+import { PrintUtilities, Colorize, ConsoleTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
-import { IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
-import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { type IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
+import { WebClient, type WebClientResponse } from '../../utilities/WebClient';
 import { TerminalInput } from './TerminalInput';
 
 interface IArtifactoryCustomizableMessages {
@@ -111,10 +108,10 @@ export class SetupPackageRegistry {
     }
 
     if (!this._options.syncNpmrcAlreadyCalled) {
-      Utilities.syncNpmrc(
-        this.rushConfiguration.commonRushConfigFolder,
-        this.rushConfiguration.commonTempFolder
-      );
+      Utilities.syncNpmrc({
+        sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
+        targetNpmrcFolder: this.rushConfiguration.commonTempFolder
+      });
     }
 
     // Artifactory does not implement the "npm ping" protocol or any equivalent REST API.
@@ -167,10 +164,11 @@ export class SetupPackageRegistry {
     let jsonOutput: JsonObject;
     try {
       jsonOutput = JSON.parse(jsonContent);
-    } catch (error) {
+    } catch (e) {
       this._terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
       throw new InternalError('The "npm view" command returned an invalid JSON structure');
     }
+
     const errorCode: JsonObject = jsonOutput?.error?.code;
     if (typeof errorCode !== 'string') {
       this._terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');
@@ -239,7 +237,7 @@ export class SetupPackageRegistry {
         this._artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
 
       if (artifactoryWebsiteUrl) {
-        this._terminal.writeLine('  ', Colors.cyan(artifactoryWebsiteUrl));
+        this._terminal.writeLine('  ', Colorize.cyan(artifactoryWebsiteUrl));
         this._terminal.writeLine();
       }
     }
@@ -253,7 +251,7 @@ export class SetupPackageRegistry {
 
     artifactoryUser = artifactoryUser.trim();
     if (artifactoryUser.length === 0) {
-      this._terminal.writeLine(Colors.red('Operation aborted because the input was empty'));
+      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
       this._terminal.writeLine();
       throw new AlreadyReportedError();
     }
@@ -267,7 +265,7 @@ export class SetupPackageRegistry {
 
     artifactoryKey = artifactoryKey.trim();
     if (artifactoryKey.length === 0) {
-      this._terminal.writeLine(Colors.red('Operation aborted because the input was empty'));
+      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
       this._terminal.writeLine();
       throw new AlreadyReportedError();
     }
@@ -304,6 +302,7 @@ export class SetupPackageRegistry {
     try {
       response = await webClient.fetchAsync(queryUrl);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log((e as Error).toString());
       return;
     }
@@ -395,7 +394,7 @@ export class SetupPackageRegistry {
     }
 
     this._terminal.writeLine();
-    this._terminal.writeLine(Colors.green('Adding Artifactory token to: '), npmrcPath);
+    this._terminal.writeLine(Colorize.green('Adding Artifactory token to: '), npmrcPath);
 
     const npmrcLines: string[] = [];
 

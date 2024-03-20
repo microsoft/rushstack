@@ -1,5 +1,3 @@
 {
-  "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
-
-  "testEnvironment": "jest-environment-node"
+  "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json"
 }

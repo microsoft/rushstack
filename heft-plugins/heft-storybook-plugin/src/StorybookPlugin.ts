@@ -1,28 +1,72 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as child_process from 'child_process';
 import * as path from 'path';
+
 import {
   AlreadyExistsBehavior,
   FileSystem,
   Import,
-  IParsedPackageNameOrError,
-  PackageName
+  type IParsedPackageNameOrError,
+  PackageName,
+  SubprocessTerminator,
+  FileConstants,
+  type IPackageJson,
+  InternalError,
+  JsonFile
 } from '@rushstack/node-core-library';
+import { TerminalStreamWritable, type ITerminal, TerminalProviderSeverity } from '@rushstack/terminal';
 import type {
   HeftConfiguration,
-  HeftSession,
-  IBuildStageContext,
-  IBundleSubstage,
-  IHeftPlugin,
-  IHeftFlagParameter,
-  IPreCompileSubstage,
-  ScopedLogger
+  IHeftTaskSession,
+  IScopedLogger,
+  IHeftTaskPlugin,
+  CommandLineFlagParameter,
+  IHeftTaskRunHookOptions
 } from '@rushstack/heft';
-import { StorybookRunner } from './StorybookRunner';
+import type {
+  PluginName as Webpack4PluginName,
+  IWebpackPluginAccessor as IWebpack4PluginAccessor
+} from '@rushstack/heft-webpack4-plugin';
+import type {
+  PluginName as Webpack5PluginName,
+  IWebpackPluginAccessor as IWebpack5PluginAccessor
+} from '@rushstack/heft-webpack5-plugin';
 
-const PLUGIN_NAME: string = 'StorybookPlugin';
-const TASK_NAME: string = 'heft-storybook';
+const PLUGIN_NAME: 'storybook-plugin' = 'storybook-plugin';
+const WEBPACK4_PLUGIN_NAME: typeof Webpack4PluginName = 'webpack4-plugin';
+const WEBPACK5_PLUGIN_NAME: typeof Webpack5PluginName = 'webpack5-plugin';
+
+/**
+ * Storybook CLI build type targets
+ */
+enum StorybookBuildMode {
+  /**
+   * Invoke storybook in watch mode
+   */
+  WATCH = 'watch',
+  /**
+   * Invoke storybook in build mode
+   */
+  BUILD = 'build'
+}
+
+/**
+ * Storybook CLI versions
+ */
+enum StorybookCliVersion {
+  STORYBOOK7 = 'storybook7',
+  STORYBOOK6 = 'storybook6'
+}
+
+/**
+ * Configuration object holding default storybook cli package and command
+ */
+interface IStorybookCliCallingConfig {
+  command: Record<StorybookBuildMode, string[]>;
+  packageName: string;
+}
 
 /**
  * Options for `StorybookPlugin`.
@@ -55,147 +99,254 @@ export interface IStorybookPluginOptions {
   storykitPackageName: string;
 
   /**
-   * The module entry point that Heft should use to launch the Storybook toolchain.  Typically it
-   * is the path loaded the `start-storybook` shell script.
+   * Specify how the Storybook CLI should be invoked.  Possible values:
+   *
+   *  - "storybook6": For a static build, Heft will expect the cliPackageName package
+   *     to define a binary command named "build-storybook". For the dev server mode,
+   *     Heft will expect to find a binary command named "start-storybook". These commands
+   *     must be declared in the "bin" section of package.json since Heft invokes the script directly.
+   *     The output folder will be specified using the "--output-dir" CLI parameter.
+   *
+   * - "storybook7": Heft looks for a single binary command named "sb". It will be invoked as
+   *    "sb build" for static builds, or "sb dev" for dev server mode.
+   *     The output folder will be specified using the "--output-dir" CLI parameter.
+   *
+   *  @defaultValue `storybook7`
+   */
+  cliCallingConvention?: `${StorybookCliVersion}`;
+
+  /**
+   * Specify the NPM package that provides the CLI binary to run.
+   * It will be resolved from the folder of your storykit package.
+   *
+   * @defaultValue
+   *  The default is `@storybook/cli` when `cliCallingConvention` is  `storybook7`
+   *  and `@storybook/react` when `cliCallingConvention` is  `storybook6`
+   */
+  cliPackageName?: string;
+
+  /**
+   * The customized output dir for storybook static build.
+   * If this is empty, then it will use the storybook default output dir.
    *
    * @example
-   * If you are using `@storybook/react`, then the startup path would be:
+   * If you want to change the static build output dir to staticBuildDir, then the static build output dir would be:
    *
-   * `"startupModulePath": "@storybook/react/bin/index.js"`
+   * `"staticBuildOutputFolder": "newStaticBuildDir"`
    */
-  startupModulePath: string;
+  staticBuildOutputFolder?: string;
+
+  /**
+   * Specifies an NPM dependency name that is used as the (cwd) target for the storybook commands
+   * By default the plugin executes the storybook commands in the local package context,
+   * but for distribution purposes it can be useful to split the TS library and storybook exports into two packages.
+   *
+   * @example
+   * If you create a storybook app project "my-ui-storybook-library-app" for the storybook preview distribution,
+   * and your main UI component library is my-ui-storybook-library.
+   *
+   * Your 'app' project is able to compile the 'library' storybook preview using the CWD target:
+   *
+   * `"cwdPackageName": "my-storybook-ui-library"`
+   */
+  cwdPackageName?: string;
+  /**
+   * Specifies whether to capture the webpack stats for the storybook build by adding the `--webpack-stats-json` CLI flag.
+   */
+  captureWebpackStats?: boolean;
 }
 
-/** @public */
-export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
-  public readonly pluginName: string = PLUGIN_NAME;
+interface IRunStorybookOptions {
+  workingDirectory: string;
+  resolvedModulePath: string;
+  outputFolder: string | undefined;
+  moduleDefaultArgs: string[];
+  verbose: boolean;
+}
 
-  private _logger!: ScopedLogger;
-  private _storykitPackageName!: string;
-  private _startupModulePath!: string;
-  private _resolvedStartupModulePath!: string;
+const DEFAULT_STORYBOOK_VERSION: StorybookCliVersion = StorybookCliVersion.STORYBOOK7;
+const DEFAULT_STORYBOOK_CLI_CONFIG: Record<StorybookCliVersion, IStorybookCliCallingConfig> = {
+  [StorybookCliVersion.STORYBOOK6]: {
+    packageName: '@storybook/react',
+    command: {
+      watch: ['start-storybook'],
+      build: ['build-storybook']
+    }
+  },
+  [StorybookCliVersion.STORYBOOK7]: {
+    packageName: '@storybook/cli',
+    command: {
+      watch: ['sb', 'dev'],
+      build: ['sb', 'build']
+    }
+  }
+};
+
+/** @public */
+export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPluginOptions> {
+  private _logger!: IScopedLogger;
+  private _isServeMode: boolean = false;
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
    */
   public apply(
-    heftSession: HeftSession,
+    taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     options: IStorybookPluginOptions
   ): void {
-    this._logger = heftSession.requestScopedLogger(TASK_NAME);
-
-    if (!options.storykitPackageName) {
-      throw new Error(
-        `The ${TASK_NAME} task cannot start because the "storykitPackageName"` +
-          ` plugin option was not specified`
-      );
-    }
+    this._logger = taskSession.logger;
+    const storybookParameter: CommandLineFlagParameter =
+      taskSession.parameters.getFlagParameter('--storybook');
 
     const parseResult: IParsedPackageNameOrError = PackageName.tryParse(options.storykitPackageName);
     if (parseResult.error) {
       throw new Error(
-        `The ${TASK_NAME} task cannot start because the "storykitPackageName"` +
+        `The ${taskSession.taskName} task cannot start because the "storykitPackageName"` +
           ` plugin option is not a valid package name: ` +
           parseResult.error
       );
     }
-    this._storykitPackageName = options.storykitPackageName;
 
-    if (!options.startupModulePath) {
-      throw new Error(
-        `The ${TASK_NAME} task cannot start because the "startupModulePath"` +
-          ` plugin option was not specified`
-      );
-    }
-    this._startupModulePath = options.startupModulePath;
-
-    const storybookParameters: IHeftFlagParameter = heftSession.commandLine.registerFlagParameter({
-      associatedActionNames: ['start'],
-      parameterLongName: '--storybook',
-      description:
-        '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
-    });
-
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      if (!storybookParameters.actionAssociated || !storybookParameters.value) {
-        this._logger.terminal.writeVerboseLine(
-          'The command line does not include "--storybook", so bundling will proceed without Storybook'
+    // Only tap if the --storybook flag is present.
+    if (storybookParameter.value) {
+      const configureWebpackTap: () => Promise<false> = async () => {
+        // Discard Webpack's configuration to prevent Webpack from running
+        this._logger.terminal.writeLine(
+          'The command line includes "--storybook", redirecting Webpack to Storybook'
         );
-        return;
-      }
+        return false;
+      };
 
-      this._logger.terminal.writeVerboseLine(
-        'The command line includes "--storybook", redirecting Webpack to Storybook'
-      );
-
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tapPromise(PLUGIN_NAME, () => {
-          return this._onPreCompileAsync(heftConfiguration);
-        });
-      });
-
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.configureWebpack.tap(
-          { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-          (webpackConfiguration: unknown) => {
-            // Discard Webpack's configuration to prevent Webpack from running
-            return null;
+      taskSession.requestAccessToPluginByName(
+        '@rushstack/heft-webpack4-plugin',
+        WEBPACK4_PLUGIN_NAME,
+        (accessor: IWebpack4PluginAccessor) => {
+          if (accessor.parameters.isServeMode) {
+            this._isServeMode = true;
           }
-        );
+          // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
+        }
+      );
 
-        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._onBundleRunAsync(heftSession, heftConfiguration);
-        });
+      taskSession.requestAccessToPluginByName(
+        '@rushstack/heft-webpack5-plugin',
+        WEBPACK5_PLUGIN_NAME,
+        (accessor: IWebpack5PluginAccessor) => {
+          if (accessor.parameters.isServeMode) {
+            this._isServeMode = true;
+          }
+          // Discard Webpack's configuration to prevent Webpack from running only when performing Storybook build
+          accessor.hooks.onLoadConfiguration.tapPromise(PLUGIN_NAME, configureWebpackTap);
+        }
+      );
+
+      taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
+        const runStorybookOptions: IRunStorybookOptions = await this._prepareStorybookAsync(
+          taskSession,
+          heftConfiguration,
+          options
+        );
+        await this._runStorybookAsync(runStorybookOptions, options);
       });
-    });
+    }
   }
 
-  private async _onPreCompileAsync(heftConfiguration: HeftConfiguration): Promise<void> {
-    this._logger.terminal.writeVerboseLine(`Probing for "${this._storykitPackageName}"`);
+  private async _prepareStorybookAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    options: IStorybookPluginOptions
+  ): Promise<IRunStorybookOptions> {
+    const { storykitPackageName, staticBuildOutputFolder } = options;
+    const storybookCliVersion: `${StorybookCliVersion}` =
+      options.cliCallingConvention ?? DEFAULT_STORYBOOK_VERSION;
+    const storyBookCliConfig: IStorybookCliCallingConfig = DEFAULT_STORYBOOK_CLI_CONFIG[storybookCliVersion];
+    const cliPackageName: string = options.cliPackageName ?? storyBookCliConfig.packageName;
+    const buildMode: StorybookBuildMode = taskSession.parameters.watch
+      ? StorybookBuildMode.WATCH
+      : StorybookBuildMode.BUILD;
 
+    this._logger.terminal.writeVerboseLine(`Probing for "${storykitPackageName}"`);
     // Example: "/path/to/my-project/node_modules/my-storykit"
-    let storykitFolder: string;
+    let storykitFolderPath: string;
     try {
-      storykitFolder = Import.resolvePackage({
-        packageName: this._storykitPackageName,
-        baseFolderPath: heftConfiguration.buildFolder
+      storykitFolderPath = Import.resolvePackage({
+        packageName: storykitPackageName,
+        baseFolderPath: heftConfiguration.buildFolderPath
       });
     } catch (ex) {
-      throw new Error(`The ${TASK_NAME} task cannot start: ` + (ex as Error).message);
+      throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
 
-    this._logger.terminal.writeVerboseLine(`Found "${this._storykitPackageName}" in ` + storykitFolder);
+    this._logger.terminal.writeVerboseLine(`Found "${storykitPackageName}" in ` + storykitFolderPath);
+
+    this._logger.terminal.writeVerboseLine(`Probing for "${cliPackageName}" in "${storykitPackageName}"`);
+    // Example: "/path/to/my-project/node_modules/my-storykit/node_modules/@storybook/cli"
+    let storyBookCliPackage: string;
+    try {
+      storyBookCliPackage = Import.resolvePackage({
+        packageName: cliPackageName,
+        baseFolderPath: storykitFolderPath
+      });
+    } catch (ex) {
+      throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
+    }
+
+    this._logger.terminal.writeVerboseLine(`Found "${cliPackageName}" in ` + storyBookCliPackage);
+
+    const storyBookPackagePackageJsonFile: string = path.join(storyBookCliPackage, FileConstants.PackageJson);
+    const packageJson: IPackageJson = await JsonFile.loadAsync(storyBookPackagePackageJsonFile);
+    if (!packageJson.bin || typeof packageJson.bin === 'string') {
+      throw new Error(
+        `The cli package "${cliPackageName}" does not provide a 'bin' executables in the 'package.json'`
+      );
+    }
+    const [moduleExecutableName, ...moduleDefaultArgs] = storyBookCliConfig.command[buildMode];
+    const modulePath: string | undefined = packageJson.bin[moduleExecutableName];
+    this._logger.terminal.writeVerboseLine(
+      `Found storybook "${modulePath}" for "${buildMode}" mode in "${cliPackageName}"`
+    );
 
     // Example: "/path/to/my-project/node_modules/my-storykit/node_modules"
-    const storykitModuleFolder: string = path.join(storykitFolder, 'node_modules');
-    if (!(await FileSystem.existsAsync(storykitModuleFolder))) {
+    const storykitModuleFolderPath: string = `${storykitFolderPath}/node_modules`;
+    const storykitModuleFolderExists: boolean = await FileSystem.existsAsync(storykitModuleFolderPath);
+    if (!storykitModuleFolderExists) {
       throw new Error(
-        `The ${TASK_NAME} task cannot start because the storykit module folder does not exist:\n` +
-          storykitModuleFolder +
+        `The ${taskSession.taskName} task cannot start because the storykit module folder does not exist:\n` +
+          storykitModuleFolderPath +
           '\nDid you forget to install it?'
       );
     }
 
-    this._logger.terminal.writeVerboseLine(`Resolving startupModulePath "${this._startupModulePath}"`);
+    // We only want to specify a different output dir when operating in build mode
+    const outputFolder: string | undefined =
+      buildMode === StorybookBuildMode.WATCH ? undefined : staticBuildOutputFolder;
+
+    if (!modulePath) {
+      this._logger.terminal.writeVerboseLine(
+        'No matching module path option specified in heft.json, so bundling will proceed without Storybook'
+      );
+    }
+
+    this._logger.terminal.writeVerboseLine(`Resolving modulePath "${modulePath}"`);
+    let resolvedModulePath: string;
     try {
-      this._resolvedStartupModulePath = Import.resolveModule({
-        modulePath: this._startupModulePath,
-        baseFolderPath: storykitModuleFolder
+      resolvedModulePath = Import.resolveModule({
+        modulePath: modulePath,
+        baseFolderPath: storyBookCliPackage
       });
     } catch (ex) {
-      throw new Error(`The ${TASK_NAME} task cannot start: ` + (ex as Error).message);
+      throw new Error(`The ${taskSession.taskName} task cannot start: ` + (ex as Error).message);
     }
-    this._logger.terminal.writeVerboseLine(
-      `Resolved startupModulePath is "${this._resolvedStartupModulePath}"`
-    );
+    this._logger.terminal.writeVerboseLine(`Resolved modulePath is "${resolvedModulePath}"`);
 
     // Example: "/path/to/my-project/.storybook"
-    const dotStorybookFolder: string = path.join(heftConfiguration.buildFolder, '.storybook');
-    await FileSystem.ensureFolderAsync(dotStorybookFolder);
+    const dotStorybookFolderPath: string = `${heftConfiguration.buildFolderPath}/.storybook`;
+    await FileSystem.ensureFolderAsync(dotStorybookFolderPath);
 
     // Example: "/path/to/my-project/.storybook/node_modules"
-    const dotStorybookModuleFolder: string = path.join(dotStorybookFolder, 'node_modules');
+    const dotStorybookModuleFolderPath: string = `${dotStorybookFolderPath}/node_modules`;
 
     // Example:
     //   LINK FROM: "/path/to/my-project/.storybook/node_modules"
@@ -204,32 +355,146 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     // For node_modules links it's standard to use createSymbolicLinkJunction(), which avoids
     // administrator elevation on Windows; on other operating systems it will create a symbolic link.
     await FileSystem.createSymbolicLinkJunctionAsync({
-      newLinkPath: dotStorybookModuleFolder,
-      linkTargetPath: storykitModuleFolder,
+      newLinkPath: dotStorybookModuleFolderPath,
+      linkTargetPath: storykitModuleFolderPath,
       alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
+    });
+
+    return {
+      workingDirectory: heftConfiguration.buildFolderPath,
+      resolvedModulePath,
+      moduleDefaultArgs,
+      outputFolder,
+      verbose: taskSession.parameters.verbose
+    };
+  }
+
+  private async _runStorybookAsync(
+    runStorybookOptions: IRunStorybookOptions,
+    options: IStorybookPluginOptions
+  ): Promise<void> {
+    const { resolvedModulePath, verbose } = runStorybookOptions;
+    let { workingDirectory, outputFolder } = runStorybookOptions;
+    this._logger.terminal.writeLine('Running Storybook compilation');
+    this._logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
+
+    /**
+     * Support \'cwdPackageName\' option
+     * by changing the working directory of the storybook command
+     */
+    if (options.cwdPackageName) {
+      // Map outputFolder to local context.
+      if (outputFolder) {
+        outputFolder = path.resolve(workingDirectory, outputFolder);
+      }
+
+      // Update workingDirectory to target context.
+      workingDirectory = await Import.resolvePackageAsync({
+        packageName: options.cwdPackageName,
+        baseFolderPath: workingDirectory
+      });
+
+      this._logger.terminal.writeVerboseLine(`Changing Storybook working directory to "${workingDirectory}"`);
+    }
+
+    const storybookArgs: string[] = runStorybookOptions.moduleDefaultArgs ?? [];
+
+    if (outputFolder) {
+      storybookArgs.push('--output-dir', outputFolder);
+    }
+    if (options.captureWebpackStats) {
+      storybookArgs.push('--webpack-stats-json');
+    }
+    if (!verbose) {
+      storybookArgs.push('--quiet');
+    }
+
+    if (this._isServeMode) {
+      // Instantiate storybook runner synchronously for incremental builds
+      // this ensure that the process is not killed when heft watcher detects file changes
+      this._invokeSync(resolvedModulePath, storybookArgs);
+    } else {
+      await this._invokeAsSubprocessAsync(resolvedModulePath, storybookArgs, workingDirectory);
+    }
+  }
+
+  /**
+   * Invoke storybook cli in a forked subprocess
+   * @param command - storybook command
+   * @param args - storybook args
+   * @param cwd - working directory
+   * @returns
+   */
+  private async _invokeAsSubprocessAsync(command: string, args: string[], cwd: string): Promise<void> {
+    return await new Promise<void>((resolve, reject) => {
+      const storybookEnv: NodeJS.ProcessEnv = { ...process.env };
+      const forkedProcess: child_process.ChildProcess = child_process.fork(command, args, {
+        execArgv: process.execArgv,
+        cwd,
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        env: storybookEnv,
+        ...SubprocessTerminator.RECOMMENDED_OPTIONS
+      });
+
+      SubprocessTerminator.killProcessTreeOnExit(forkedProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+
+      const childPid: number | undefined = forkedProcess.pid;
+      if (childPid === undefined) {
+        throw new InternalError(`Failed to spawn child process`);
+      }
+      this._logger.terminal.writeVerboseLine(`Started storybook process #${childPid}`);
+
+      // Apply the pipe here instead of doing it in the forked process args due to a bug in Node
+      // We will output stderr to the normal stdout stream since all output is piped through
+      // stdout. We have to rely on the exit code to determine if there was an error.
+      const terminal: ITerminal = this._logger.terminal;
+      const terminalOutStream: TerminalStreamWritable = new TerminalStreamWritable({
+        terminal,
+        severity: TerminalProviderSeverity.log
+      });
+      forkedProcess.stdout!.pipe(terminalOutStream);
+      forkedProcess.stderr!.pipe(terminalOutStream);
+
+      let processFinished: boolean = false;
+      forkedProcess.on('error', (error: Error) => {
+        processFinished = true;
+        reject(new Error(`Storybook returned error: ${error}`));
+      });
+
+      forkedProcess.on('exit', (code: number | null) => {
+        if (processFinished) {
+          return;
+        }
+        processFinished = true;
+        if (code !== 0) {
+          reject(new Error(`Storybook exited with code ${code}`));
+        } else {
+          resolve();
+        }
+      });
     });
   }
 
-  private async _onBundleRunAsync(
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
-  ): Promise<void> {
-    this._logger.terminal.writeLine('Starting Storybook runner...');
+  /**
+   * Invoke storybook cli synchronously within the current process
+   * @param command - storybook command
+   * @param args - storybook args
+   * @param cwd - working directory
+   */
+  private _invokeSync(command: string, args: string[]): void {
+    this._logger.terminal.writeLine('Launching ' + command);
 
-    const storybookRunner: StorybookRunner = new StorybookRunner(
-      heftConfiguration.terminalProvider,
-      {
-        buildFolder: heftConfiguration.buildFolder,
-        resolvedStartupModulePath: this._resolvedStartupModulePath
-      },
-      // TODO: Extract SubprocessRunnerBase into a public API
-      // eslint-disable-next-line
-      heftSession as any
-    );
-    if (heftSession.debugMode) {
-      await storybookRunner.invokeAsync();
-    } else {
-      await storybookRunner.invokeAsSubprocessAsync();
-    }
+    // simulate storybook cli command
+    const originalArgv: string[] = process.argv;
+    const node: string = originalArgv[0];
+    process.argv = [node, command, ...args];
+
+    // invoke command synchronously
+    require(command);
+
+    // restore original heft process argv
+    process.argv = originalArgv;
+
+    this._logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }
 }

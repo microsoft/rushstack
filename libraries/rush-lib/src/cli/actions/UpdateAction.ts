@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import type { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { BaseInstallAction } from './BaseInstallAction';
 import type { IInstallManagerOptions } from '../../logic/base/BaseInstallManagerTypes';
-import { RushCommandLineParser } from '../RushCommandLineParser';
+import type { RushCommandLineParser } from '../RushCommandLineParser';
+import { SelectionParameterSet } from '../parsing/SelectionParameterSet';
 
 export class UpdateAction extends BaseInstallAction {
   private readonly _fullParameter: CommandLineFlagParameter;
@@ -30,6 +31,17 @@ export class UpdateAction extends BaseInstallAction {
         ' -- for details, see the command help for "rush install".',
       parser
     });
+
+    if (this.rushConfiguration?.subspacesFeatureEnabled) {
+      // Partial update is supported only when subspaces is enabled.
+      this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+        // Include lockfile processing since this expands the selection, and we need to select
+        // at least the same projects selected with the same query to "rush build"
+        includeExternalDependencies: true,
+        // Disable filtering because rush-project.json is riggable and therefore may not be available
+        enableFiltering: false
+      });
+    }
 
     this._fullParameter = this.defineFlagParameter({
       parameterLongName: '--full',
@@ -66,18 +78,22 @@ export class UpdateAction extends BaseInstallAction {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
+      bypassPolicyAllowed: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
       recheckShrinkwrap: this._recheckParameter.value!,
+      offline: this._offlineParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,
-      variant: this._variant.value,
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      pnpmFilterArguments: [],
+      // These are derived independently of the selection for command line brevity
+      pnpmFilterArguments:
+        (await this._selectionParameters?.getPnpmFilterArgumentsAsync(this._terminal)) || [],
       checkOnly: false,
+      subspace: this.getTargetSubspace(),
 
       beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
     };

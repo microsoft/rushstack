@@ -56,6 +56,11 @@
             "commandKind": {
               "enum": ["bulk"]
             },
+            "shellCommand": {
+              "title": "Shell Command",
+              "description": "(Optional) If the \"shellCommand\" field is set for a bulk command, Rush will invoke it for each selected project; otherwise, Rush will invoke the package.json \"scripts\" entry matching Rush command name.\n\nThe string is the path to a script that will be invoked using the OS shell. The working directory will be the folder that contains rush.json.  If custom parameters are associated with this command, their values will be appended to the end of this string.",
+              "type": "string"
+            },
             "enableParallelism": {
               "title": "enableParallelism",
               "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
@@ -88,7 +93,7 @@
             },
             "disableBuildCache": {
               "title": "Disable build cache.",
-              "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders.",
+              "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders. If the build cache is not configured, this also disables the legacy skip detection logic.",
               "type": "boolean"
             }
           }
@@ -102,6 +107,7 @@
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
+            "shellCommand": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
@@ -187,6 +193,11 @@
               "items": {
                 "type": "string"
               }
+            },
+            "disableBuildCache": {
+              "title": "Disable build cache.",
+              "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders. If the build cache is not configured, this also disables the legacy skip detection logic.",
+              "type": "boolean"
             },
             "watchOptions": {
               "title": "Watch Options",
@@ -301,6 +312,13 @@
           "title": "Allow Warnings on Success",
           "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.",
           "type": "boolean"
+        },
+
+        "missingScriptBehavior": {
+          "title": "Missing Script Behavior",
+          "description": "What should happen if a project's package.json does not have a \"scripts\" entry matching the phase name, or it is an empty string. Supersedes \"ignoreMissingScript\". Defaults to \"error\".",
+          "type": "string",
+          "enum": ["silent", "log", "error"]
         }
       }
     },

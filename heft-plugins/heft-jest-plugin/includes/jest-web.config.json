@@ -1,0 +1,37 @@
+{
+  "extends": "./jest-shared.config.json",
+
+  "testEnvironment": "jest-environment-jsdom",
+
+  "testEnvironmentOptions": {
+    "url": "http://localhost/",
+
+    // For web projects, we write ESM output (with "import" statements") into the "lib" folder
+    // to be processed by Webpack or other tree-shaking bundlers.
+    // We also write CommonJS output (with "require()" calls") into the "lib-commonjs" folder
+    // to be processed by Jest.  We do this because the Jest requires the --experimental-vm-modules flag
+    // in order to load ESM, and also because the interop story between CommonJS and ESM in NodeJs is
+    // very finicky.
+    //
+    // The jest-environment-jsdom package now sets "customExportConditions" to ["browser"],
+    // which often selects an ESM entry point when resolving packages. This is incorrect for
+    // our setup.  The setting below fixes that.  For details, refer to these docs:
+    // https://nodejs.org/api/packages.html#conditional-exports
+    "customExportConditions": ["require", "node", "umd"]
+  },
+
+  // For web projects, `lib/` is normally ESM, so we route to the CommonJS output in `lib-commonjs/` instead.
+  "roots": ["<rootDir>/lib-commonjs"],
+
+  "testMatch": ["<rootDir>/lib-commonjs/**/*.test.js"],
+
+  "collectCoverageFrom": [
+    "lib-commonjs/**/*.js",
+    "!lib-commonjs/**/*.d.ts",
+    "!lib-commonjs/**/*.test.js",
+    "!lib-commonjs/**/test/**",
+    "!lib-commonjs/**/__tests__/**",
+    "!lib-commonjs/**/__fixtures__/**",
+    "!lib-commonjs/**/__mocks__/**"
+  ]
+}

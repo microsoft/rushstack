@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 type MessageIds = 'expected-typedef' | 'expected-typedef-named';
 type Options = [];
@@ -24,9 +24,7 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
     docs: {
       description:
         'Supplements the "@typescript-eslint/typedef" rule by relaxing the requirements for local variables',
-      // Deprecated in ESLint v8; Keep for backwards compatibility
-      category: 'Stylistic Issues',
-      recommended: 'error',
+      recommended: 'recommended',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
     } as TSESLint.RuleMetaDataDocs
   },
@@ -46,9 +44,19 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
     }
 
     return {
-      VariableDeclarator(node): void {
+      VariableDeclarator(node: TSESTree.VariableDeclarator): void {
         if (node.id.typeAnnotation) {
           // An explicit type declaration was provided
+          return;
+        }
+
+        if (
+          node.init?.type === AST_NODE_TYPES.TSAsExpression &&
+          node.init.typeAnnotation.type === AST_NODE_TYPES.TSTypeReference &&
+          node.init.typeAnnotation.typeName.type === AST_NODE_TYPES.Identifier &&
+          node.init.typeAnnotation.typeName.name === 'const'
+        ) {
+          // An `as const` type declaration was provided
           return;
         }
 
@@ -96,16 +104,19 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
             //     const NODE = 123;
             //   }
             // }
+            // eslint-disable-next-line no-fallthrough
             case AST_NODE_TYPES.MethodDefinition:
 
             // let f = function() {
             //   const NODE = 123;
             // }
+            // eslint-disable-next-line no-fallthrough
             case AST_NODE_TYPES.FunctionExpression:
 
             // let f = () => {
             //   const NODE = 123;
             // }
+            // eslint-disable-next-line no-fallthrough
             case AST_NODE_TYPES.ArrowFunctionExpression:
               // Stop traversing and don't report an error
               return;

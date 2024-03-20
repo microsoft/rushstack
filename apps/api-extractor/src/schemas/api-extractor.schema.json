@@ -24,7 +24,7 @@
     },
 
     "bundledPackages": {
-      "description": "A list of NPM package names whose exports should be treated as part of this package.",
+      "description": "A list of NPM package names whose exports should be treated as part of this package. Also supports glob patterns.",
       "type": "array",
       "items": {
         "type": "string"

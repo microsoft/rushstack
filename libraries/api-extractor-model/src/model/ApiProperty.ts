@@ -5,13 +5,14 @@ import {
   DeclarationReference,
   Meaning,
   Navigation,
-  Component
+  type Component
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiProtectedMixin, IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
-import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiInitializerMixin, IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
-import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
+import { ApiAbstractMixin, type IApiAbstractMixinOptions } from '../mixins/ApiAbstractMixin';
+import { ApiProtectedMixin, type IApiProtectedMixinOptions } from '../mixins/ApiProtectedMixin';
+import { ApiStaticMixin, type IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
+import { ApiInitializerMixin, type IApiInitializerMixinOptions } from '../mixins/ApiInitializerMixin';
+import { ApiPropertyItem, type IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiProperty}.
@@ -19,6 +20,7 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
  */
 export interface IApiPropertyOptions
   extends IApiPropertyItemOptions,
+    IApiAbstractMixinOptions,
     IApiProtectedMixinOptions,
     IApiStaticMixinOptions,
     IApiInitializerMixinOptions {}
@@ -57,7 +59,9 @@ export interface IApiPropertyOptions
  *
  * @public
  */
-export class ApiProperty extends ApiProtectedMixin(ApiStaticMixin(ApiInitializerMixin(ApiPropertyItem))) {
+export class ApiProperty extends ApiAbstractMixin(
+  ApiProtectedMixin(ApiStaticMixin(ApiInitializerMixin(ApiPropertyItem)))
+) {
   public constructor(options: IApiPropertyOptions) {
     super(options);
   }

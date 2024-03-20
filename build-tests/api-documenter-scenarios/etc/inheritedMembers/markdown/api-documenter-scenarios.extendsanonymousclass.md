@@ -6,12 +6,12 @@
 
 Some class that extends an anonymous class.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ExtendsAnonymousClass extends ExtendsAnonymousClass_base 
 ```
-<b>Extends:</b> ExtendsAnonymousClass\_base
+**Extends:** ExtendsAnonymousClass\_base
 
-<i>(Some inherited members may not be shown because they are not represented in the documentation.)</i>
+_(Some inherited members may not be shown because they are not represented in the documentation.)_
 

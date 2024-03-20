@@ -1,15 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonSchema, Import } from '@rushstack/node-core-library';
+import { Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-import { Utilities } from '../utilities/Utilities';
-import { IChangeInfo } from '../api/ChangeManagement';
-import { IChangelog } from '../api/Changelog';
-import { RushConfiguration } from '../api/RushConfiguration';
+import type { IChangeInfo } from '../api/ChangeManagement';
+import type { IChangelog } from '../api/Changelog';
+import type { RushConfiguration } from '../api/RushConfiguration';
 import schemaJson from '../schemas/change-file.schema.json';
-
-const glob: typeof import('glob') = Import.lazy('glob', require);
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -38,6 +35,7 @@ export class ChangeFiles {
 
     const projectsWithChangeDescriptions: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {
+      // eslint-disable-next-line no-console
       console.log(`Found change file: ${filePath}`);
 
       const changeFile: IChangeInfo = JsonFile.loadAndValidate(filePath, schema);
@@ -83,6 +81,7 @@ export class ChangeFiles {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
     newChangeFilePaths.forEach((filePath) => {
+      // eslint-disable-next-line no-console
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
@@ -104,9 +103,10 @@ export class ChangeFiles {
   /**
    * Get the array of absolute paths of change files.
    */
-  public getFiles(): string[] {
+  public async getFilesAsync(): Promise<string[]> {
     if (!this._files) {
-      this._files = glob.sync(`${this._changesPath}/**/*.json`) || [];
+      const { default: glob } = await import('fast-glob');
+      this._files = (await glob('**/*.json', { cwd: this._changesPath, absolute: true })) || [];
     }
 
     return this._files;
@@ -122,7 +122,7 @@ export class ChangeFiles {
   /**
    * Delete all change files
    */
-  public deleteAll(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): number {
+  public async deleteAllAsync(shouldDelete: boolean, updatedChangelogs?: IChangelog[]): Promise<number> {
     if (updatedChangelogs) {
       // Skip changes files if the package's change log is not updated.
       const packagesToInclude: Set<string> = new Set<string>();
@@ -130,35 +130,53 @@ export class ChangeFiles {
         packagesToInclude.add(changelog.name);
       });
 
-      const filesToDelete: string[] = this.getFiles().filter((filePath) => {
-        const changeRequest: IChangeInfo = JsonFile.load(filePath);
-        for (const changeInfo of changeRequest.changes!) {
-          if (!packagesToInclude.has(changeInfo.packageName)) {
-            return false;
+      const files: string[] = await this.getFilesAsync();
+      const filesToDelete: string[] = [];
+      await Async.forEachAsync(
+        files,
+        async (filePath) => {
+          const changeRequest: IChangeInfo = await JsonFile.loadAsync(filePath);
+          let shouldDeleteFile: boolean = true;
+          for (const changeInfo of changeRequest.changes!) {
+            if (!packagesToInclude.has(changeInfo.packageName)) {
+              shouldDeleteFile = false;
+              break;
+            }
           }
-        }
-        return true;
-      });
 
-      return this._deleteFiles(filesToDelete, shouldDelete);
+          if (shouldDeleteFile) {
+            filesToDelete.push(filePath);
+          }
+        },
+        { concurrency: 5 }
+      );
+
+      return await this._deleteFilesAsync(filesToDelete, shouldDelete);
     } else {
       // Delete all change files.
-      return this._deleteFiles(this.getFiles(), shouldDelete);
+      const files: string[] = await this.getFilesAsync();
+      return await this._deleteFilesAsync(files, shouldDelete);
     }
   }
 
-  private _deleteFiles(files: string[], shouldDelete: boolean): number {
+  private async _deleteFilesAsync(files: string[], shouldDelete: boolean): Promise<number> {
     if (files.length) {
+      // eslint-disable-next-line no-console
       console.log(`\n* ${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ${files.length} change file(s).`);
 
-      for (const filePath of files) {
-        console.log(` - ${filePath}`);
-
-        if (shouldDelete) {
-          Utilities.deleteFile(filePath);
-        }
-      }
+      await Async.forEachAsync(
+        files,
+        async (filePath) => {
+          // eslint-disable-next-line no-console
+          console.log(` - ${filePath}`);
+          if (shouldDelete) {
+            await FileSystem.deleteFileAsync(filePath);
+          }
+        },
+        { concurrency: 5 }
+      );
     }
+
     return files.length;
   }
 }

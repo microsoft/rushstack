@@ -2,17 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as nodeJsPath from 'path';
+import { FileSystem, JsonFile, Path, Text } from '@rushstack/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { RigConfig } from '@rushstack/rig-package';
 
 import { ConfigurationFile, PathResolutionMethod, InheritanceType } from '../ConfigurationFile';
-import {
-  FileSystem,
-  JsonFile,
-  Path,
-  StringBufferTerminalProvider,
-  Terminal,
-  Text
-} from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
 
 describe(ConfigurationFile.name, () => {
   const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
@@ -20,7 +14,6 @@ describe(ConfigurationFile.name, () => {
   let terminal: Terminal;
 
   beforeEach(() => {
-    const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
     const formatPathForLogging: (path: string) => string = (path: string) =>
       `<project root>/${Path.convertToSlashes(nodeJsPath.relative(projectRoot, path))}`;
     jest.spyOn(ConfigurationFile, '_formatPathForLogging').mockImplementation(formatPathForLogging);
@@ -472,7 +465,7 @@ describe(ConfigurationFile.name, () => {
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config', 'index.js')
+              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-umd.js')
             )
           }
         ]
@@ -497,7 +490,7 @@ describe(ConfigurationFile.name, () => {
           parentObject: loadedConfigFile.plugins[2],
           propertyName: 'plugin'
         })
-      ).toEqual('@rushstack/eslint-config');
+      ).toEqual('jsonpath-plus');
 
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
         rootConfigFilePath
@@ -553,7 +546,7 @@ describe(ConfigurationFile.name, () => {
           },
           {
             plugin: await FileSystem.getRealPathAsync(
-              nodeJsPath.resolve(projectRoot, 'node_modules', '@rushstack', 'eslint-config', 'index.js')
+              nodeJsPath.resolve(projectRoot, 'node_modules', 'jsonpath-plus', 'dist', 'index-umd.js')
             )
           }
         ]
@@ -578,7 +571,7 @@ describe(ConfigurationFile.name, () => {
           parentObject: loadedConfigFile.plugins[2],
           propertyName: 'plugin'
         })
-      ).toEqual('@rushstack/eslint-config');
+      ).toEqual('jsonpath-plus');
 
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
         rootConfigFilePath

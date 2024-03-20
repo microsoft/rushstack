@@ -1,0 +1,85 @@
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  '@rush-temp/project1':
+    specifier: file:./projects/project1.tgz
+    version: file:projects/project1.tgz
+  '@rush-temp/project2':
+    specifier: file:./projects/project2.tgz
+    version: file:projects/project2.tgz
+  '@rush-temp/project3':
+    specifier: file:./projects/project3.tgz
+    version: file:projects/project3.tgz
+  '@scope/testDep':
+    specifier: example.pkgs.visualstudio.com/@scope/testDep/2.1.0
+    version: 'example.pkgs.visualstudio.com/@scope/testDep/2.1.0'
+  pad-left:
+    specifier: ^1.0.0
+    version: 1.0.0
+
+packages:
+
+  /jquery@1.12.3:
+    resolution: {integrity: sha512-FzM42/Ew+Hb8ha2OlhHRBLgWIZS32gZ0+NvWTf+ZvVvGaIlJkOiXQyb7VBjv4L6fJfmTrRf3EsAmbfsHDhfemw==}
+    dev: false
+
+  /jquery@2.2.4:
+    resolution: {integrity: sha512-lBHj60ezci2u1v2FqnZIraShGgEXq35qCzMv4lITyHGppTnA13rwR0MgwyNJh9TnDs3aXUvd1xjAotfraMHX/Q==}
+    dev: false
+
+  /pad-left@1.0.0:
+    resolution: {integrity: sha512-VIgD7DviaDL6QCj+jEU1jpjXlu0z/sl4yzAmFLmM7YvM3ZRKLaxZAe+sZ1hKHeYUeI4zoZHfMetDpazu/uAwsw==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      repeat-string: 1.6.1
+    dev: false
+
+  /q@1.5.1:
+    resolution: {integrity: sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==}
+    engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
+    dev: false
+
+  /repeat-string@1.6.1:
+    resolution: {integrity: sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==}
+    engines: {node: '>=0.10'}
+    dev: false
+
+  'example.pkgs.visualstudio.com/@scope/testDep/2.1.0':
+    resolution: {tarball: example.pkgs.visualstudio.com/@scope/testDep/2.1.0}
+    name: '@scope/testDep'
+    version: 2.1.0
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      repeat-string: 1.6.1
+    dev: false
+
+  file:projects/project1.tgz:
+    resolution: {integrity: sha512-REmnAQ8v0kz+nQT9p9C8WUnhETgSwn/+XFAI9YFeMErmpGjJHC9bmH3RpOIj/GMEwGfRgNL5irqavrS4na1f3g==, tarball: file:projects/project1.tgz}
+    name: '@rush-temp/project1'
+    version: 0.0.0
+    dependencies:
+      jquery: 1.12.3
+      pad-left: 1.0.0
+    dev: false
+
+  file:projects/project2.tgz:
+    resolution: {integrity: sha512-tfYwAK8GXMMLMJK1K/FvhD9ZZQazg/60GZWkjM4Y/4oslAHWAuqTsPQ3bT8Z6NGarRzC5D4V7r7ftc4ifeuNaw==, tarball: file:projects/project2.tgz}
+    name: '@rush-temp/project2'
+    version: 0.0.0
+    dependencies:
+      jquery: 2.2.4
+      q: 1.5.1
+    dev: false
+
+  file:projects/project3.tgz:
+    resolution: {integrity: sha512-O/1Pan0WVX0t3fctCiRlhv1Lz7WFytgY5YPhBjMPMbh1PwLhF/9UwXrP5n4OC085bmG3JoMqigAtUsI9C8J9Fw==, tarball: file:projects/project3.tgz}
+    name: '@rush-temp/project3'
+    version: 0.0.0
+    dependencies:
+      '@scope/testDep': 'example.pkgs.visualstudio.com/@scope/testDep/2.1.0'
+      q: 1.5.1
+    dev: false
