@@ -146,6 +146,64 @@ function findEslintrcFolderPathForNormalizedFileAbsolutePath(normalizedFilePath:
   }
 }
 
+function validateSuppressionsJson(json: IBulkSuppressionsJson): json is IBulkSuppressionsJson {
+  if (typeof json !== 'object') {
+    throw new Error(`Invalid JSON object: ${JSON.stringify(json, null, 2)}`);
+  }
+
+  if (!json) {
+    throw new Error('JSON object is null.');
+  }
+
+  const EXPECTED_ROOT_PROPERTY_NAMES: Set<keyof IBulkSuppressionsJson> = new Set(['suppressions']);
+
+  for (const propertyName of Object.getOwnPropertyNames(json)) {
+    if (!EXPECTED_ROOT_PROPERTY_NAMES.has(propertyName as keyof IBulkSuppressionsJson)) {
+      throw new Error(`Unexpected property name: ${propertyName}`);
+    }
+  }
+
+  const { suppressions } = json;
+  if (!suppressions) {
+    throw new Error('Missing "suppressions" property.');
+  }
+
+  if (!Array.isArray(suppressions)) {
+    throw new Error('"suppressions" property is not an array.');
+  }
+
+  const EXPECTED_SUPPRESSION_PROPERTY_NAMES: Set<keyof ISuppression> = new Set(['file', 'scopeId', 'rule']);
+  for (const suppression of suppressions) {
+    if (typeof suppression !== 'object') {
+      throw new Error(`Invalid suppression: ${JSON.stringify(suppression, null, 2)}`);
+    }
+
+    if (!suppression) {
+      throw new Error(`Suppression is null: ${JSON.stringify(suppression, null, 2)}`);
+    }
+
+    for (const propertyName of Object.getOwnPropertyNames(suppression)) {
+      if (!EXPECTED_SUPPRESSION_PROPERTY_NAMES.has(propertyName as keyof ISuppression)) {
+        throw new Error(`Unexpected property name: ${propertyName}`);
+      }
+    }
+
+    for (const propertyName of EXPECTED_SUPPRESSION_PROPERTY_NAMES) {
+      if (!suppression.hasOwnProperty(propertyName)) {
+        throw new Error(
+          `Missing "${propertyName}" property in suppression: ${JSON.stringify(suppression, null, 2)}`
+        );
+      } else if (typeof suppression[propertyName] !== 'string') {
+        throw new Error(
+          `"${propertyName}" property in suppression is not a string: ${JSON.stringify(suppression, null, 2)}`
+        );
+      }
+    }
+  }
+
+  return true;
+}
+
 interface ICachedBulkSuppressionsConfig {
   readTime: number;
   suppressionsConfig: IBulkSuppressionsConfig;
@@ -155,16 +213,16 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
   const cachedSuppressionsConfig: ICachedBulkSuppressionsConfig | undefined =
     suppressionsJsonByFolderPath.get(eslintrcFolderPath);
 
-  let shouldReload: boolean;
+  let shouldLoad: boolean;
   let suppressionsConfig: IBulkSuppressionsConfig;
   if (cachedSuppressionsConfig) {
-    shouldReload = IS_RUNNING_IN_VSCODE && cachedSuppressionsConfig.readTime < Date.now() - TEN_SECONDS_MS;
+    shouldLoad = IS_RUNNING_IN_VSCODE && cachedSuppressionsConfig.readTime < Date.now() - TEN_SECONDS_MS;
     suppressionsConfig = cachedSuppressionsConfig.suppressionsConfig;
   } else {
-    shouldReload = true;
+    shouldLoad = true;
   }
 
-  if (shouldReload) {
+  if (shouldLoad) {
     const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
     let rawJsonFile: string | undefined;
     try {
@@ -185,6 +243,8 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
       };
     } else {
       const jsonObject: IBulkSuppressionsJson = JSON.parse(rawJsonFile);
+      validateSuppressionsJson(jsonObject);
+
       const serializedSuppressions: Set<string> = new Set();
       for (const suppression of jsonObject.suppressions) {
         serializedSuppressions.add(serializeSuppression(suppression));
