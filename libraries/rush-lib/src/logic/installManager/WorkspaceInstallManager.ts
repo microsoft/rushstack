@@ -40,6 +40,7 @@ import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
 import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
+import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -619,14 +620,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               const parentDirSep: string[] = `${projectNodeModulesPath}/${filePath}`.split(path.sep);
               parentDirSep.pop();
               const parentDir: string = parentDirSep.join(path.sep);
-              if (!fs.existsSync(parentDir)) {
-                fs.mkdirSync(parentDir, { recursive: true });
-              }
-              fs.symlinkSync(
-                `${tempNodeModulesPath}/${filePath}`,
-                `${projectNodeModulesPath}/${filePath}`,
-                'dir'
-              );
+              await FileSystem.ensureFolderAsync(parentDir);
+              BaseLinkManager._createSymlink({
+                linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
+                newLinkPath: `${projectNodeModulesPath}/${filePath}`,
+                symlinkKind: SymlinkKind.Directory
+              });
             }
           }
         }
