@@ -41,6 +41,11 @@ const ESLINTRC_FILENAMES: string[] = [
 const SUPPRESSION_SYMBOL: unique symbol = Symbol('suppression');
 const IS_RUNNING_IN_VSCODE: boolean = process.env[VSCODE_PID_ENV_VAR_NAME] !== undefined;
 const TEN_SECONDS_MS: number = 10 * 1000;
+const ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE: string | undefined = process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME];
+const SUPPRESS_ALL_RULES: boolean = ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE === '*';
+const RULES_TO_SUPPRESS: Set<string> | undefined = ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE
+  ? new Set(ESLINT_BULK_SUPPRESS_ENV_VAR_VALUE.split(','))
+  : undefined;
 
 interface IProblem {
   [SUPPRESSION_SYMBOL]?: {
@@ -199,20 +204,6 @@ function getSuppressionsConfigForEslintrcFolderPath(eslintrcFolderPath: string):
   return suppressionsConfig!;
 }
 
-function shouldWriteSuppression(suppression: ISuppression): boolean {
-  if (process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME] === undefined) {
-    return false;
-  }
-
-  const rulesToSuppress: string[] = process.env[ESLINT_BULK_SUPPRESS_ENV_VAR_NAME].split(',');
-
-  if (rulesToSuppress.length === 1 && rulesToSuppress[0] === '*') {
-    return true;
-  }
-
-  return rulesToSuppress.includes(suppression.rule);
-}
-
 function compareSuppressions(a: ISuppression, b: ISuppression): -1 | 0 | 1 {
   if (a.file < b.file) {
     return -1;
@@ -269,7 +260,7 @@ export function shouldBulkSuppress(params: {
   const serializedSuppression: string = serializeSuppression(suppression);
   const currentNodeIsSuppressed: boolean = config.serializedSuppressions.has(serializedSuppression);
 
-  if (currentNodeIsSuppressed || shouldWriteSuppression(suppression)) {
+  if (currentNodeIsSuppressed || SUPPRESS_ALL_RULES || RULES_TO_SUPPRESS?.has(suppression.rule)) {
     problem[SUPPRESSION_SYMBOL] = {
       suppression,
       serializedSuppression,
