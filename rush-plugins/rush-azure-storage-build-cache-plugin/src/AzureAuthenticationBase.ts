@@ -262,19 +262,22 @@ export abstract class AzureAuthenticationBase {
     }
 
     let tokenCredential: TokenCredential;
-    if (loginFlow === 'InteractiveBrowser') {
-      tokenCredential = new InteractiveBrowserCredential({
-        ...this._additionalInteractiveCredentialOptions,
-        authorityHost: authorityHost
-      });
-    } else {
-      tokenCredential = new DeviceCodeCredential({
-        ...this._additionalDeviceCodeCredentialOptions,
-        authorityHost: authorityHost,
-        userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
-          PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
-        }
-      });
+    switch (loginFlow) {
+      case 'InteractiveBrowser':
+        tokenCredential = new InteractiveBrowserCredential({
+          ...this._additionalInteractiveCredentialOptions,
+          authorityHost: authorityHost
+        });
+        break;
+      default:
+        tokenCredential = new DeviceCodeCredential({
+          ...this._additionalDeviceCodeCredentialOptions,
+          authorityHost: authorityHost,
+          userPromptCallback: (deviceCodeInfo: DeviceCodeInfo) => {
+            PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
+          }
+        });
+        break;
     }
 
     return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
