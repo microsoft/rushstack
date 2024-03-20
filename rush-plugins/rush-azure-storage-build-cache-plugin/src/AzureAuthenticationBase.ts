@@ -263,13 +263,14 @@ export abstract class AzureAuthenticationBase {
 
     let tokenCredential: TokenCredential;
     switch (loginFlow) {
-      case 'InteractiveBrowser':
+      case 'InteractiveBrowser': {
         tokenCredential = new InteractiveBrowserCredential({
           ...this._additionalInteractiveCredentialOptions,
           authorityHost: authorityHost
         });
         break;
-      default:
+      }
+      case 'DeviceCode': {
         tokenCredential = new DeviceCodeCredential({
           ...this._additionalDeviceCodeCredentialOptions,
           authorityHost: authorityHost,
@@ -278,6 +279,10 @@ export abstract class AzureAuthenticationBase {
           }
         });
         break;
+      }
+      default: {
+        throw new Error(`Unsupported login flow: ${loginFlow}`);
+      }
     }
 
     return await this._getCredentialFromTokenAsync(terminal, tokenCredential);
