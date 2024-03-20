@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 12 Mar 2024 19:15:07 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2024 04:57:57 GMT and should not be manually modified.
+
+## 5.117.10
+Wed, 20 Mar 2024 04:57:57 GMT
+
+### Updates
+
+- Improve the "splitWorkspaceCompatibility" setting to simulate hoisted dependencies when the experimental Rush subspaces feature is enabled
 
 ## 5.117.9
 Tue, 12 Mar 2024 19:15:07 GMT

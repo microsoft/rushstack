@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.117.10",
+      "tag": "@microsoft/rush_v5.117.10",
+      "date": "Wed, 20 Mar 2024 04:57:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the \"splitWorkspaceCompatibility\" setting to simulate hoisted dependencies when the experimental Rush subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.117.9",
       "tag": "@microsoft/rush_v5.117.9",
       "date": "Tue, 12 Mar 2024 19:15:07 GMT",
