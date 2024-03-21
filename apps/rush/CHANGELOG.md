@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 20 Mar 2024 20:45:18 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Mar 2024 16:39:32 GMT and should not be manually modified.
+
+## 5.118.1
+Thu, 21 Mar 2024 16:39:32 GMT
+
+### Updates
+
+- Support PNPM injected installation in Rush subspace feature
 
 ## 5.118.0
 Wed, 20 Mar 2024 20:45:18 GMT
