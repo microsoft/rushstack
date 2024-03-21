@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use pnpm-sync-lib logging APIs to customize the log message for pnpm-sync operations",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
