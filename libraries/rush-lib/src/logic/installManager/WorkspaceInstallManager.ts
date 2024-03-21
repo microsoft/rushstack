@@ -514,7 +514,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const pnpmStorePath: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
-      debugger;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
         storePath: pnpmStorePath,
