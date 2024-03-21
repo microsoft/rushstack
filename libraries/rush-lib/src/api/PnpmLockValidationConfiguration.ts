@@ -39,7 +39,7 @@ export class PnpmLockValidationConfiguration {
       }
     }
 
-    this.pnpmLockValidationRules = configuration?.pnpmLockValidationRules ?? [];
+    this.pnpmLockValidationRules = configuration?.pnpmLockValidationRules;
   }
 
   /**
@@ -51,11 +51,13 @@ export class PnpmLockValidationConfiguration {
     rushConfiguration: RushConfiguration,
     filename: string
   ): void {
-    const lockfileRawContent: string = fs.readFileSync(filename, 'utf-8');
-    const lockfile: Lockfile = yaml.load(lockfileRawContent);
-    this.pnpmLockValidationRules?.forEach(({ ruleName, pattern }) =>
-      this[`_${ruleName}`](terminal, rushConfiguration, lockfile, pattern)
-    );
+    if (this.pnpmLockValidationRules) {
+      const lockfileRawContent: string = fs.readFileSync(filename, 'utf-8');
+      const lockfile: Lockfile = yaml.load(lockfileRawContent);
+      this.pnpmLockValidationRules?.forEach(({ ruleName, pattern }) =>
+        this[`_${ruleName}`](terminal, rushConfiguration, lockfile, pattern)
+      );
+    }
   }
 
   /**
