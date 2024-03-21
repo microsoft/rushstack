@@ -54,7 +54,7 @@ export class PnpmLockValidationConfiguration {
     if (this.pnpmLockValidationRules) {
       const lockfileRawContent: string = fs.readFileSync(filename, 'utf-8');
       const lockfile: Lockfile = yaml.load(lockfileRawContent);
-      this.pnpmLockValidationRules?.forEach(({ ruleName, pattern }) =>
+      this.pnpmLockValidationRules.forEach(({ ruleName, pattern }) =>
         this[`_${ruleName}`](terminal, rushConfiguration, lockfile, pattern)
       );
     }
