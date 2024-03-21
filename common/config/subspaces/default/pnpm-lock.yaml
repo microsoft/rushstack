@@ -3242,6 +3242,9 @@ importers:
       '@pnpm/link-bins':
         specifier: ~5.3.7
         version: 5.3.25
+      '@pnpm/lockfile-types':
+        specifier: ~5.1.5
+        version: 5.1.5
       '@rushstack/heft-config-file':
         specifier: workspace:*
         version: link:../heft-config-file
@@ -3345,9 +3348,6 @@ importers:
         specifier: ~8.3.2
         version: 8.3.2
     devDependencies:
-      '@pnpm/lockfile-types':
-        specifier: ~5.1.5
-        version: 5.1.5
       '@pnpm/logger':
         specifier: 4.0.0
         version: 4.0.0
@@ -9140,7 +9140,6 @@ packages:
     engines: {node: '>=16.14'}
     dependencies:
       '@pnpm/types': 9.4.2
-    dev: true
 
   /@pnpm/logger@4.0.0:
     resolution: {integrity: sha512-SIShw+k556e7S7tLZFVSIHjCdiVog1qWzcKW2RbLEHPItdisAFVNIe34kYd9fMSswTlSRLS/qRjw3ZblzWmJ9Q==}
