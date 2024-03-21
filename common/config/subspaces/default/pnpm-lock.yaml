@@ -1414,6 +1414,9 @@ importers:
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
       eslint:
         specifier: ~8.7.0
         version: 8.7.0(supports-color@8.1.1)
