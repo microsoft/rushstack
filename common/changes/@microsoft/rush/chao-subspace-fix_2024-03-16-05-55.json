@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support PNPM injected installation in Rush subspace feature",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
