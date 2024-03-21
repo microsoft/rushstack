@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for pnpm-lock.yaml file validation mechanism.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
