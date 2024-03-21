@@ -156,6 +156,12 @@ export class RushConstants {
   public static readonly customTipsFilename: 'custom-tips.json' = 'custom-tips.json';
 
   /**
+   * The filename ("pnpm-lock-validation.json") for the file used by Rush to
+   * validate the "pnpm-lock.yaml" file.
+   */
+  public static readonly pnpmLockValidationFilename: string = 'pnpm-lock-validation.json';
+
+  /**
    * The name of the per-project folder where project-specific Rush files are stored. For example,
    * the package-deps files, which are used by commands to determine if a particular project needs to be rebuilt.
    */

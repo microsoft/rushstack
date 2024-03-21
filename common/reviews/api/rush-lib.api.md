@@ -18,6 +18,7 @@ import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/terminal';
 import type { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
+import type { Lockfile } from '@pnpm/lockfile-types';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import type { StdioSummarizer } from '@rushstack/terminal';
 import { SyncHook } from 'tapable';
@@ -151,6 +152,8 @@ export class CredentialCache {
 
 // @beta
 export enum CustomTipId {
+    // (undocumented)
+    TIP_PNPM_FORBID_SHA1_INTEGRITY = "TIP_PNPM_FORBID_SHA1_INTEGRITY",
     // (undocumented)
     TIP_PNPM_INVALID_NODE_VERSION = "TIP_PNPM_INVALID_NODE_VERSION",
     // (undocumented)
@@ -1157,6 +1160,12 @@ export class RushConfiguration {
     // @beta
     readonly packageManagerWrapper: PackageManager;
     readonly packageNameParser: PackageNameParser;
+    // Warning: (ae-forgotten-export) The symbol "PnpmLockValidationConfiguration" needs to be exported by the entry point index.d.ts
+    //
+    // @beta
+    readonly pnpmLockValidationConfiguration: PnpmLockValidationConfiguration;
+    // @beta
+    readonly pnpmLockValidationConfigurationFilePath: string;
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;
@@ -1285,6 +1294,7 @@ export class RushConstants {
     static readonly pnpmfileGlobalFilename: 'global-pnpmfile.cjs';
     static readonly pnpmfileV1Filename: 'pnpmfile.js';
     static readonly pnpmfileV6Filename: '.pnpmfile.cjs';
+    static readonly pnpmLockValidationFilename: string;
     static readonly pnpmModulesFilename: '.modules.yaml';
     static readonly pnpmPatchesCommonFolderName: `pnpm-patches`;
     static readonly pnpmPatchesFolderName: 'patches';

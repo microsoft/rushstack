@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush pnpm-lock-validation.schema.json config file",
+  "description": "This configuration file defines custom validation rules for pnpm-lock.yaml files in Rush projects. Each rule specifies a regular expression pattern that will be used to check the contents of pnpm-lock.yaml for compliance with project standards.",
+  "type": "object",
+  "properties": {
+    "pnpmLockValidationRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ruleName": {
+            "type": "string",
+            "description": "A unique name for the validation rule."
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of what the rule validates."
+          },
+          "pattern": {
+            "type": "string",
+            "description": "The regular expression pattern to use for validation."
+          }
+        },
+        "required": ["ruleName", "pattern"]
+      }
+    }
+  },
+  "required": ["pnpmLockValidationRules"]
+}

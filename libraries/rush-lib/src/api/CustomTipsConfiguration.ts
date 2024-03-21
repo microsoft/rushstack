@@ -58,7 +58,8 @@ export enum CustomTipId {
   TIP_PNPM_OUTDATED_LOCKFILE = 'TIP_PNPM_OUTDATED_LOCKFILE',
   TIP_PNPM_TARBALL_INTEGRITY = 'TIP_PNPM_TARBALL_INTEGRITY',
   TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = 'TIP_PNPM_MISMATCHED_RELEASE_CHANNEL',
-  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION'
+  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION',
+  TIP_PNPM_FORBID_SHA1_INTEGRITY = 'TIP_PNPM_FORBID_SHA1_INTEGRITY'
 }
 
 /**
@@ -206,6 +207,15 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
     isMatch: (str: string) => {
       // Todo: verify this
       return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
+    }
+  },
+
+  [CustomTipId.TIP_PNPM_FORBID_SHA1_INTEGRITY]: {
+    tipId: CustomTipId.TIP_PNPM_FORBID_SHA1_INTEGRITY,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_FORBID_SHA1_INTEGRITY');
     }
   }
 };

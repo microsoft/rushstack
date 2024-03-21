@@ -78,7 +78,8 @@
     "@types/tar": "6.1.1",
     "@types/uuid": "~8.3.4",
     "@types/webpack-env": "1.18.0",
-    "webpack": "~5.82.1"
+    "webpack": "~5.82.1",
+    "@pnpm/lockfile-types": "~5.1.5"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

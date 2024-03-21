@@ -218,8 +218,14 @@ export abstract class BaseInstallManager {
       ]);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+        const targetLockfilePath: string = subspace.getCommittedShrinkwrapFilename();
+        this.rushConfiguration.pnpmLockValidationConfiguration._pnpmLockValidation(
+          this._terminal,
+          this.rushConfiguration,
+          targetLockfilePath
+        );
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), subspace.getCommittedShrinkwrapFilename());
+        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), targetLockfilePath);
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
       }
