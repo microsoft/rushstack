@@ -42,13 +42,22 @@ __webpack_require__.r(__webpack_exports__);
  */
 // create a global _combinedNpmrc for cache purpose
 const _combinedNpmrcMap = new Map();
-function _trimNpmrcFile(sourceNpmrcPath, extraLines = []) {
+function _trimNpmrcFile(options) {
+    const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
     const combinedNpmrcFromCache = _combinedNpmrcMap.get(sourceNpmrcPath);
     if (combinedNpmrcFromCache !== undefined) {
         return combinedNpmrcFromCache;
     }
-    let npmrcFileLines = fs__WEBPACK_IMPORTED_MODULE_0__.readFileSync(sourceNpmrcPath).toString().split('\n');
-    npmrcFileLines.push(...extraLines);
+    let npmrcFileLines = [];
+    if (linesToPrepend) {
+        npmrcFileLines.push(...linesToPrepend);
+    }
+    if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
+        npmrcFileLines.push(...fs__WEBPACK_IMPORTED_MODULE_0__.readFileSync(sourceNpmrcPath).toString().split('\n'));
+    }
+    if (linesToAppend) {
+        npmrcFileLines.push(...linesToAppend);
+    }
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines = [];
     // This finds environment variable tokens that look like "${VAR_NAME}"
@@ -93,51 +102,40 @@ function _trimNpmrcFile(sourceNpmrcPath, extraLines = []) {
     _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
     return combinedNpmrc;
 }
-/**
- * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
- * unusable lines from the .npmrc file.
- *
- * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
- * the .npmrc file to provide different authentication tokens for different registry.
- * However, if the environment variable is undefined, it expands to an empty string, which
- * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
- * we'd prefer to skip that line and continue looking in other places such as the user's
- * home directory.
- *
- * @returns
- * The text of the the .npmrc with lines containing undefined variables commented out.
- */
-function _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath, extraLines) {
+function _copyAndTrimNpmrcFile(options) {
+    const { logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend } = options;
     logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
     logger.info(`  --> "${targetNpmrcPath}"`);
-    const combinedNpmrc = _trimNpmrcFile(sourceNpmrcPath, extraLines);
+    const combinedNpmrc = _trimNpmrcFile({
+        sourceNpmrcPath,
+        linesToPrepend,
+        linesToAppend
+    });
     fs__WEBPACK_IMPORTED_MODULE_0__.writeFileSync(targetNpmrcPath, combinedNpmrc);
     return combinedNpmrc;
 }
-/**
- * syncNpmrc() copies the .npmrc file to the target folder, and also trims unusable lines from the .npmrc file.
- * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
- *
- * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
- *
- * @returns
- * The text of the the synced .npmrc, if one exists. If one does not exist, then undefined is returned.
- */
-function syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder, useNpmrcPublish, logger = {
-    // eslint-disable-next-line no-console
-    info: console.log,
-    // eslint-disable-next-line no-console
-    error: console.error
-}, extraLines) {
+function syncNpmrc(options) {
+    const { sourceNpmrcFolder, targetNpmrcFolder, useNpmrcPublish, logger = {
+        // eslint-disable-next-line no-console
+        info: console.log,
+        // eslint-disable-next-line no-console
+        error: console.error
+    }, createIfMissing = false, linesToAppend, linesToPrepend } = options;
     const sourceNpmrcPath = path__WEBPACK_IMPORTED_MODULE_1__.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
     const targetNpmrcPath = path__WEBPACK_IMPORTED_MODULE_1__.join(targetNpmrcFolder, '.npmrc');
     try {
-        if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
+        if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath) || createIfMissing) {
             // Ensure the target folder exists
             if (!fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(targetNpmrcFolder)) {
                 fs__WEBPACK_IMPORTED_MODULE_0__.mkdirSync(targetNpmrcFolder, { recursive: true });
             }
-            return _copyAndTrimNpmrcFile(logger, sourceNpmrcPath, targetNpmrcPath, extraLines);
+            return _copyAndTrimNpmrcFile({
+                sourceNpmrcPath,
+                targetNpmrcPath,
+                logger,
+                linesToAppend,
+                linesToPrepend
+            });
         }
         else if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(targetNpmrcPath)) {
             // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
@@ -155,7 +153,7 @@ function isVariableSetInNpmrcFile(sourceNpmrcFolder, variableKey) {
     if (!fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
         return false;
     }
-    const trimmedNpmrcFile = _trimNpmrcFile(sourceNpmrcPath);
+    const trimmedNpmrcFile = _trimNpmrcFile({ sourceNpmrcPath });
     const variableKeyRegExp = new RegExp(`^${variableKey}=`, 'm');
     return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
 }
@@ -436,7 +434,11 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
         try {
             const rushTempFolder = _getRushTempFolder(rushCommonFolder);
             const sourceNpmrcFolder = path__WEBPACK_IMPORTED_MODULE_3__.join(rushCommonFolder, 'config', 'rush');
-            (0,_utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)(sourceNpmrcFolder, rushTempFolder, undefined, logger);
+            (0,_utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)({
+                sourceNpmrcFolder,
+                targetNpmrcFolder: rushTempFolder,
+                logger
+            });
             const npmPath = getNpmPath();
             // This returns something that looks like:
             // ```
@@ -634,7 +636,11 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
         // The package isn't already installed
         _cleanInstallFolder(rushTempFolder, packageInstallFolder, lockFilePath);
         const sourceNpmrcFolder = path__WEBPACK_IMPORTED_MODULE_3__.join(rushCommonFolder, 'config', 'rush');
-        (0,_utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)(sourceNpmrcFolder, packageInstallFolder, undefined, logger);
+        (0,_utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)({
+            sourceNpmrcFolder,
+            targetNpmrcFolder: packageInstallFolder,
+            logger
+        });
         _createPackageJson(packageInstallFolder, packageName, packageVersion);
         const command = lockFilePath ? 'ci' : 'install';
         _installPackage(logger, packageInstallFolder, packageName, packageVersion, command);

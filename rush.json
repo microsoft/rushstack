@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.117.0",
+  "rushVersion": "5.118.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -848,25 +848,29 @@
       "packageName": "rush-lib-test",
       "projectFolder": "build-tests-subspace/rush-lib-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "subspaceName": "build-tests-subspace"
     },
     {
       "packageName": "rush-sdk-test",
       "projectFolder": "build-tests-subspace/rush-sdk-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "subspaceName": "build-tests-subspace"
     },
     {
       "packageName": "typescript-newest-test",
       "projectFolder": "build-tests-subspace/typescript-newest-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "subspaceName": "build-tests-subspace"
     },
     {
       "packageName": "typescript-v4-test",
       "projectFolder": "build-tests-subspace/typescript-v4-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "subspaceName": "build-tests-subspace"
     },
     {
       "packageName": "localization-plugin-test-01",
