@@ -222,7 +222,10 @@ export class ProjectChangeAnalyzer {
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
 
-    const mergeCommit: string = this._git.getMergeBase(targetBranchName, terminal, shouldFetch);
+    // if the given targetBranchName is a commit, we assume it is the merge base
+    const mergeCommit: string = this._git.isRefACommit(targetBranchName)
+      ? targetBranchName
+      : this._git.getMergeBase(targetBranchName, terminal, shouldFetch);
 
     const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
 
