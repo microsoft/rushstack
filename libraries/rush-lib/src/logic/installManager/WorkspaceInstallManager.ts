@@ -37,7 +37,7 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
-import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
+import { type ILockfile, pnpmSyncPrepareAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
@@ -513,7 +513,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
-      const pnpmStorePath: string = `${this.rushConfiguration.commonTempFolder}/node_modules/.pnpm`;
+      const pnpmStorePath: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
+      debugger;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
         storePath: pnpmStorePath,
@@ -527,9 +528,30 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             return undefined;
           } else {
             const result: ILockfile = {
+              lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
               importers: Object.fromEntries(wantedPnpmLockfile.importers.entries())
             };
             return result;
+          }
+        },
+        logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) => {
+          const { message, messageKind } = logMessageOptions;
+          switch (messageKind) {
+            case 'error':
+              this._terminal.writeErrorLine(message);
+              break;
+            case 'warning':
+              this._terminal.writeWarningLine(message);
+              break;
+            case 'verbose':
+              if (this.options.debug) {
+                this._terminal.writeLine(message);
+              }
+              break;
+            default:
+              this._terminal.writeLine();
+              this._terminal.writeLine(message);
+              break;
           }
         }
       });

@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async } from '@rushstack/node-core-library';
 import { Colorize, DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
-import { pnpmSyncCopyAsync } from 'pnpm-sync-lib';
+import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
@@ -223,7 +223,30 @@ export class RushXCommandLine {
             pnpmSyncJsonPath,
             ensureFolder: FileSystem.ensureFolderAsync,
             forEachAsyncWithConcurrency: Async.forEachAsync,
-            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync
+            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) => {
+              const { message, messageKind } = logMessageOptions;
+              switch (messageKind) {
+                case 'error':
+                  // eslint-disable-next-line no-console
+                  console.error(Colorize.red(message));
+                  break;
+                case 'warning':
+                  // eslint-disable-next-line no-console
+                  console.error(Colorize.yellow(message));
+                  break;
+                case 'verbose':
+                  if (rushxArguments.isDebug) {
+                    // eslint-disable-next-line no-console
+                    console.error(message);
+                  }
+                  break;
+                default:
+                  // eslint-disable-next-line no-console
+                  console.log(message);
+                  break;
+              }
+            }
           });
         }
       }

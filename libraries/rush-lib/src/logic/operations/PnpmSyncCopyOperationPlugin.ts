@@ -2,16 +2,24 @@
 // See LICENSE in the project root for license information.
 
 import { Async, FileSystem } from '@rushstack/node-core-library';
-import { pnpmSyncCopyAsync } from 'pnpm-sync-lib';
+import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import { OperationStatus } from './OperationStatus';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import type { ITerminal } from '@rushstack/terminal';
 
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
 export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
+  private readonly _terminal: ITerminal;
+  private readonly _isVerbose: boolean;
+
+  public constructor(terminal: ITerminal, isVerbose: boolean) {
+    this._terminal = terminal;
+    this._isVerbose = isVerbose;
+  }
   public apply(hooks: PhasedCommandHooks): void {
     hooks.afterExecuteOperation.tapPromise(
       PLUGIN_NAME,
@@ -42,7 +50,26 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
               pnpmSyncJsonPath,
               ensureFolder: FileSystem.ensureFolderAsync,
               forEachAsyncWithConcurrency: Async.forEachAsync,
-              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync
+              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+              logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) => {
+                const { message, messageKind } = logMessageOptions;
+                switch (messageKind) {
+                  case 'error':
+                    this._terminal.writeErrorLine(message);
+                    break;
+                  case 'warning':
+                    this._terminal.writeWarningLine(message);
+                    break;
+                  case 'verbose':
+                    if (this._isVerbose) {
+                      this._terminal.writeVerboseLine(message);
+                    }
+                    break;
+                  default:
+                    this._terminal.writeLine(message);
+                    break;
+                }
+              }
             });
           }
         }
