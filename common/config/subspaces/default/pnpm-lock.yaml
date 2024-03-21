@@ -3242,9 +3242,6 @@ importers:
       '@pnpm/link-bins':
         specifier: ~5.3.7
         version: 5.3.25
-      '@pnpm/lockfile-types':
-        specifier: ~5.1.5
-        version: 5.1.5
       '@rushstack/heft-config-file':
         specifier: workspace:*
         version: link:../heft-config-file
@@ -3348,6 +3345,9 @@ importers:
         specifier: ~8.3.2
         version: 8.3.2
     devDependencies:
+      '@pnpm/lockfile-types':
+        specifier: ~5.1.5
+        version: 5.1.5
       '@pnpm/logger':
         specifier: 4.0.0
         version: 4.0.0
@@ -3424,6 +3424,9 @@ importers:
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../rush-lib
+      '@pnpm/lockfile-types':
+        specifier: ~5.1.5
+        version: 5.1.5
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
