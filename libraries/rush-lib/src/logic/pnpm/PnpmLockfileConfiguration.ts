@@ -1,10 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import {
-  AlreadyReportedError,
-  Encoding,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { AlreadyReportedError, FileSystem } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 import type { Lockfile } from '@pnpm/lockfile-types';
 import type { ITerminal } from '@rushstack/terminal';
@@ -18,20 +14,29 @@ export class PnpmLockfileConfiguration {
    * Determine whether `pnpm-lock.yaml` complies with the rules specified in `common/config/rush/pnpm-config.schema.json`.
    * @internal
    */
-  public static validateLockfile(
+  public static async validateLockfile(
     terminal: ITerminal,
     rushConfiguration: RushConfiguration,
     filename: string
-  ): void {
+  ): Promise<void> {
     const pnpmLockfilePolicies: PnpmLockfilePolicy[] | undefined =
       rushConfiguration.pnpmOptions.pnpmLockfilePolicies;
 
     if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
-      const lockfileRawContent: string = FileSystem.readFile(filename, { encoding: Encoding.Utf8 });
+      const lockfileRawContent: string = await FileSystem.readFileAsync(filename);
       const lockfile: Lockfile = yaml.load(lockfileRawContent);
 
       for (const policy of pnpmLockfilePolicies) {
-        PnpmLockfileConfiguration[policy](terminal, rushConfiguration, lockfile);
+        switch (policy) {
+          case 'disallowInsecureSha1': {
+            PnpmLockfileConfiguration.disallowInsecureSha1(terminal, rushConfiguration, lockfile);
+            break;
+          }
+
+          default: {
+            throw new Error(`Unknown pnpm lockfile policy "${policy}"`);
+          }
+        }
       }
     }
   }

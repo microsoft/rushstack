@@ -220,7 +220,7 @@ export abstract class BaseInstallManager {
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         const committedShrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilename();
-        PnpmLockfileConfiguration.validateLockfile(
+        await PnpmLockfileConfiguration.validateLockfile(
           this._terminal,
           this.rushConfiguration,
           committedShrinkwrapFilename
