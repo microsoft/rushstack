@@ -45,6 +45,7 @@ import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
+import { PnpmLockfileConfiguration } from '../pnpm/PnpmLockfileConfiguration';
 
 /**
  * Pnpm don't support --ignore-compatibility-db, so use --config.ignoreCompatibilityDb for now.
@@ -218,14 +219,14 @@ export abstract class BaseInstallManager {
       ]);
 
       if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
-        const targetLockfilePath: string = subspace.getCommittedShrinkwrapFilename();
-        this.rushConfiguration.pnpmLockValidationConfiguration._pnpmLockValidation(
+        const committedShrinkwrapFilename: string = subspace.getCommittedShrinkwrapFilename();
+        PnpmLockfileConfiguration.pnpmLockValidation(
           this._terminal,
           this.rushConfiguration,
-          targetLockfilePath
+          committedShrinkwrapFilename
         );
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), targetLockfilePath);
+        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), committedShrinkwrapFilename);
       } else {
         // TODO: Validate whether the package manager updated it in a nontrivial way
       }

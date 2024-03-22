@@ -44,7 +44,6 @@ import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BaseP
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 import { SubspacesConfiguration } from './SubspacesConfiguration';
 import { Subspace } from './Subspace';
-import { PnpmLockValidationConfiguration } from './PnpmLockValidationConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -72,8 +71,7 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.versionPoliciesFilename,
   RushConstants.rushPluginsConfigFilename,
   RushConstants.pnpmConfigFilename,
-  RushConstants.subspacesConfigFilename,
-  RushConstants.pnpmLockValidationFilename
+  RushConstants.subspacesConfigFilename
 ];
 
 /**
@@ -541,18 +539,6 @@ export class RushConfiguration {
   public readonly customTipsConfigurationFilePath: string;
 
   /**
-   * Accesses the pnpm-lock-validation.json configuration.
-   * @beta
-   */
-  public readonly pnpmLockValidationConfiguration: PnpmLockValidationConfiguration;
-
-  /**
-   * The absolute path to the pnpm lock validation configuration file.
-   * @beta
-   */
-  public readonly pnpmLockValidationConfigurationFilePath: string;
-
-  /**
    * This configuration object contains settings repo maintainers have specified to enable
    * and disable experimental Rush features.
    *
@@ -824,14 +810,6 @@ export class RushConfiguration {
       RushConstants.customTipsFilename
     );
     this.customTipsConfiguration = new CustomTipsConfiguration(this.customTipsConfigurationFilePath);
-
-    this.pnpmLockValidationConfigurationFilePath = path.join(
-      this.commonRushConfigFolder,
-      RushConstants.pnpmLockValidationFilename
-    );
-    this.pnpmLockValidationConfiguration = new PnpmLockValidationConfiguration(
-      this.pnpmLockValidationConfigurationFilePath
-    );
 
     this._hasVariantsField = !!rushConfigurationJson.variants;
 
