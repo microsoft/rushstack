@@ -97,9 +97,11 @@ function rewriteRushProjectVersions(
         if (injectedDependenciesSet.has(dependencyName)) {
           workspaceVersionProtocol = 'file:';
         }
-        const relativePath: string = path.normalize(
+        let relativePath: string = path.normalize(
           path.relative(workspaceProject.projectRelativeFolder, workspaceProjectInfo.projectRelativeFolder)
         );
+        // convert path in posix style, otherwise pnpm install will fail in subspace case
+        relativePath = relativePath.split(path.sep).join(path.posix.sep);
         const newVersion: string = workspaceVersionProtocol + relativePath;
         dependencies[dependencyName] = newVersion;
       } else {
