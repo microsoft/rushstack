@@ -60,6 +60,7 @@
     "pnpm-sync-lib": "0.2.0"
   },
   "devDependencies": {
+    "@pnpm/lockfile-types": "~5.1.5",
     "@pnpm/logger": "4.0.0",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
@@ -78,8 +79,7 @@
     "@types/tar": "6.1.1",
     "@types/uuid": "~8.3.4",
     "@types/webpack-env": "1.18.0",
-    "webpack": "~5.82.1",
-    "@pnpm/lockfile-types": "~5.1.5"
+    "webpack": "~5.82.1"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

@@ -30,6 +30,7 @@ export {
 export {
   IPnpmOptionsJson as _IPnpmOptionsJson,
   PnpmStoreLocation,
+  PnpmLockfilePolicy,
   PnpmStoreOptions,
   PnpmOptionsConfiguration,
   PnpmResolutionMode

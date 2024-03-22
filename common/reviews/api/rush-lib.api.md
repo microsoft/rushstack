@@ -676,7 +676,6 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPatchedDependencies?: Record<string, string>;
     // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
-    // Warning: (ae-forgotten-export) The symbol "PnpmLockfilePolicy" needs to be exported by the entry point index.d.ts
     pnpmLockfilePolicies?: PnpmLockfilePolicy[];
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
@@ -1016,6 +1015,9 @@ export class PhasedCommandHooks {
     readonly shutdownAsync: AsyncParallelHook<void>;
     readonly waitingForChanges: SyncHook<void>;
 }
+
+// @public
+export type PnpmLockfilePolicy = 'disallowInsecureSha1';
 
 // @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

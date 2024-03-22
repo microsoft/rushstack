@@ -3424,9 +3424,6 @@ importers:
       '@microsoft/rush-lib':
         specifier: workspace:*
         version: link:../rush-lib
-      '@pnpm/lockfile-types':
-        specifier: ~5.1.5
-        version: 5.1.5
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft

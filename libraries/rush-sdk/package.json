@@ -40,7 +40,6 @@
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@types/semver": "7.5.0",
-    "@types/webpack-env": "1.18.0",
-    "@pnpm/lockfile-types": "~5.1.5"
+    "@types/webpack-env": "1.18.0"
   }
 }

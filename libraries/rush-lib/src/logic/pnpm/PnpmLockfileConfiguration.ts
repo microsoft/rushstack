@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { AlreadyReportedError } from '@rushstack/node-core-library';
-import fs from 'fs';
+import { AlreadyReportedError, Encoding } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 import type { Lockfile } from '@pnpm/lockfile-types';
 import type { ITerminal } from '@rushstack/terminal';
@@ -15,17 +15,21 @@ export class PnpmLockfileConfiguration {
    * Determine whether `pnpm-lock.yaml` complies with the rules specified in `common/config/rush/pnpm-config.schema.json`.
    * @internal
    */
-  public static pnpmLockValidation(
+  public static validateLockfile(
     terminal: ITerminal,
     rushConfiguration: RushConfiguration,
     filename: string
   ): void {
     const pnpmLockfilePolicies: PnpmLockfilePolicy[] | undefined =
       rushConfiguration.pnpmOptions.pnpmLockfilePolicies;
+
     if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
-      const lockfileRawContent: string = fs.readFileSync(filename, 'utf-8');
+      const lockfileRawContent: string = FileSystem.readFile(filename, { encoding: Encoding.Utf8 });
       const lockfile: Lockfile = yaml.load(lockfileRawContent);
-      pnpmLockfilePolicies.forEach((policy) => this[policy](terminal, rushConfiguration, lockfile));
+
+      for (const policy of pnpmLockfilePolicies) {
+        PnpmLockfileConfiguration[policy](terminal, rushConfiguration, lockfile);
+      }
     }
   }
 
@@ -40,7 +44,7 @@ export class PnpmLockfileConfiguration {
   ): void {
     const { packages } = lockfile;
     if (packages) {
-      Object.entries(packages).forEach(([, { resolution }]) => {
+      for (const { resolution } of Object.values(packages)) {
         if ((resolution as { integrity: string }).integrity.startsWith('sha1')) {
           rushConfiguration.customTipsConfiguration._showErrorTip(
             terminal,
@@ -48,7 +52,7 @@ export class PnpmLockfileConfiguration {
           );
           throw new AlreadyReportedError();
         }
-      });
+      }
     }
   }
 }
