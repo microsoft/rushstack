@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix bugs releated to path operation in Windows OS for subspace feature",
+      "comment": "Fix bugs related to path operation in Windows OS for subspace feature",
       "type": "none"
     }
   ],
