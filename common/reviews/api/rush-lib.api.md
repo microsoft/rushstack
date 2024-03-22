@@ -671,10 +671,8 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
     pnpmLockfilePolicies?: PnpmLockfilePolicy[];
     pnpmStore?: PnpmStoreLocation;
@@ -683,6 +681,36 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
+}
+
+// @public (undocumented)
+export interface IPnpmPackageExtension {
+    // (undocumented)
+    dependencies?: Record<string, string>;
+    // (undocumented)
+    optionalDependencies?: Record<string, string>;
+    // (undocumented)
+    peerDependencies?: Record<string, string>;
+    // (undocumented)
+    peerDependenciesMeta?: IPnpmPeerDependenciesMeta;
+}
+
+// @public (undocumented)
+export interface IPnpmPeerDependenciesMeta {
+    // (undocumented)
+    [packageName: string]: {
+        optional?: boolean;
+    };
+}
+
+// @beta (undocumented)
+export interface IPnpmPeerDependencyRules {
+    // (undocumented)
+    allowAny?: string[];
+    // (undocumented)
+    allowedVersions?: Record<string, string>;
+    // (undocumented)
+    ignoreMissing?: string[];
 }
 
 // @beta
@@ -1028,6 +1056,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
+    // Warning: (ae-incompatible-release-tags) The symbol "globalPeerDependencyRules" is marked as @public, but its signature references "IPnpmPeerDependencyRules" which is marked as @beta
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
