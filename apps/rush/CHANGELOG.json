@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.2",
+      "tag": "@microsoft/rush_v5.118.2",
+      "date": "Fri, 22 Mar 2024 17:30:47 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix bugs related to path operation in Windows OS for subspace feature"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.1",
       "tag": "@microsoft/rush_v5.118.1",
       "date": "Thu, 21 Mar 2024 16:39:32 GMT",
