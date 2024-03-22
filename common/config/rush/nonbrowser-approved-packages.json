@@ -909,6 +909,10 @@
     {
       "name": "z-schema",
       "allowedCategories": [ "libraries" ]
-    }
+    },
+    {
+      "name": "@pnpm/lockfile-types",
+      "allowedCategories": [ "libraries" ]
+    },
   ]
 }
