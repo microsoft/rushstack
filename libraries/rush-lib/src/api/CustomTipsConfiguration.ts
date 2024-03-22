@@ -215,7 +215,7 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
     severity: CustomTipSeverity.Error,
     type: CustomTipType.pnpm,
     isMatch: (str: string) => {
-      return str.includes('ERR_PNPM_FORBID_SHA1_INTEGRITY');
+      return str.includes('ERR_PNPM_DISALLOW_INSECURE_SHA1');
     }
   }
 };
