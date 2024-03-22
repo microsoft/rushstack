@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { AlreadyReportedError, Encoding } from '@rushstack/node-core-library';
-import { FileSystem } from '@rushstack/node-core-library';
+import {
+  AlreadyReportedError,
+  Encoding,
+  FileSystem
+} from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
 import type { Lockfile } from '@pnpm/lockfile-types';
 import type { ITerminal } from '@rushstack/terminal';
