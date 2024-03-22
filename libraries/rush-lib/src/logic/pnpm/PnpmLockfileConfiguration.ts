@@ -22,7 +22,7 @@ export class PnpmLockfileConfiguration {
   ): void {
     const pnpmLockfilePolicies: PnpmLockfilePolicy[] | undefined =
       rushConfiguration.pnpmOptions.pnpmLockfilePolicies;
-    if (pnpmLockfilePolicies) {
+    if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
       const lockfileRawContent: string = fs.readFileSync(filename, 'utf-8');
       const lockfile: Lockfile = yaml.load(lockfileRawContent);
       pnpmLockfilePolicies.forEach((policy) => this[policy](terminal, rushConfiguration, lockfile));
