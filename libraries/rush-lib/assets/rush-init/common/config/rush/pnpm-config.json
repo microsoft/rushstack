@@ -252,5 +252,12 @@
     },
     "pnpm": { "futurePnpmFeature": true }
     /*[END "HYPOTHETICAL"]*/
-  }
+  },
+
+  /**
+   * The `pnpmLockfilePolicies` setting defines the policies that govern the `pnpm-lock.yaml` file.
+   * This is a collection of configuration items. For now, it can only support `disallowInsecureSha1`:
+   *  - `disallowInsecureSha1`: Forbid sha1 hashes in `pnpm-lock.yaml`
+   */
+  "pnpmLockfilePolicies": ["disallowInsecureSha1"]
 }
