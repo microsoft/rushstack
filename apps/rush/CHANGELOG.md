@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 21 Mar 2024 16:39:32 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Mar 2024 17:30:47 GMT and should not be manually modified.
+
+## 5.118.2
+Fri, 22 Mar 2024 17:30:47 GMT
+
+### Updates
+
+- Fix bugs related to path operation in Windows OS for subspace feature
 
 ## 5.118.1
 Thu, 21 Mar 2024 16:39:32 GMT

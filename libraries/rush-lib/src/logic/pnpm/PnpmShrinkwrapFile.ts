@@ -918,7 +918,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           } else {
             // TODO: Emit an error message when someone tries to override a version of something in one of their
             // local repo packages.
-            const resolvedVersion: string = this.overrides.get(name) ?? version;
+            let resolvedVersion: string = this.overrides.get(name) ?? version;
+            // convert path in posix style, otherwise pnpm install will fail in subspace case
+            resolvedVersion = Path.convertToSlashes(resolvedVersion);
             if (specifierFromLockfile.specifier !== resolvedVersion && !isDevDepFallThrough && !isOptional) {
               return true;
             }
