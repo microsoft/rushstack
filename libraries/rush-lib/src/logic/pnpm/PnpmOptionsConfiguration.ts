@@ -40,6 +40,7 @@ export type PnpmLockfilePolicy = 'disallowInsecureSha1';
 
 /**
  * @beta
+ * @public
  */
 export interface IPnpmPeerDependencyRules {
   ignoreMissing?: string[];
@@ -47,6 +48,9 @@ export interface IPnpmPeerDependencyRules {
   allowedVersions?: Record<string, string>;
 }
 
+/**
+ * @public
+ */
 export interface IPnpmPeerDependenciesMeta {
   [packageName: string]: {
     optional?: boolean;
