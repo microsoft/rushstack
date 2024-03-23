@@ -7,7 +7,6 @@ import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { CustomTipId } from '../../api/CustomTipsConfiguration';
-import type { PnpmLockfilePolicy } from './PnpmOptionsConfiguration';
 
 export class PnpmLockfileConfiguration {
   /**
@@ -19,22 +18,25 @@ export class PnpmLockfileConfiguration {
     rushConfiguration: RushConfiguration,
     filename: string
   ): Promise<void> {
-    const pnpmLockfilePolicies: PnpmLockfilePolicy[] | undefined =
-      rushConfiguration.pnpmOptions.pnpmLockfilePolicies;
+    const pnpmLockfilePolicies: [string, boolean][] = Object.entries(
+      rushConfiguration.pnpmOptions.pnpmLockfilePolicies ?? {}
+    );
 
     if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
       const lockfileRawContent: string = await FileSystem.readFileAsync(filename);
       const lockfile: Lockfile = yaml.load(lockfileRawContent);
 
-      for (const policy of pnpmLockfilePolicies) {
-        switch (policy) {
-          case 'disallowInsecureSha1': {
-            PnpmLockfileConfiguration.disallowInsecureSha1(terminal, rushConfiguration, lockfile);
-            break;
-          }
+      for (const [policy, enabled] of pnpmLockfilePolicies) {
+        if (enabled) {
+          switch (policy) {
+            case 'disallowInsecureSha1': {
+              PnpmLockfileConfiguration.disallowInsecureSha1(terminal, rushConfiguration, lockfile);
+              break;
+            }
 
-          default: {
-            throw new Error(`Unknown pnpm lockfile policy "${policy}"`);
+            default: {
+              throw new Error(`Unknown pnpm lockfile policy "${policy}"`);
+            }
           }
         }
       }

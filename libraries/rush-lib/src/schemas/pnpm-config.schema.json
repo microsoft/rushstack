@@ -179,10 +179,13 @@
 
     "pnpmLockfilePolicies": {
       "description": "This setting defines the policies that govern the `pnpm-lock.yaml` file.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": ["disallowInsecureSha1"]
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "disallowInsecureSha1": {
+          "description": "Forbid sha1 hashes in `pnpm-lock.yaml`.",
+          "type": "boolean"
+        }
       }
     }
   }

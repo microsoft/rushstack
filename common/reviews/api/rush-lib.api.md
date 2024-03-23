@@ -664,6 +664,12 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
 }
 
+// @public
+export interface IPnpmLockfilePolicies {
+    // (undocumented)
+    disallowInsecureSha1?: boolean;
+}
+
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
@@ -674,7 +680,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
-    pnpmLockfilePolicies?: PnpmLockfilePolicy[];
+    pnpmLockfilePolicies?: IPnpmLockfilePolicies;
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
     resolutionMode?: PnpmResolutionMode;
@@ -703,7 +709,7 @@ export interface IPnpmPeerDependenciesMeta {
     };
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export interface IPnpmPeerDependencyRules {
     // (undocumented)
     allowAny?: string[];
@@ -1045,9 +1051,6 @@ export class PhasedCommandHooks {
 }
 
 // @public
-export type PnpmLockfilePolicy = 'disallowInsecureSha1';
-
-// @public
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     readonly alwaysFullInstall: boolean | undefined;
     readonly autoInstallPeers: boolean | undefined;
@@ -1056,7 +1059,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
-    // Warning: (ae-incompatible-release-tags) The symbol "globalPeerDependencyRules" is marked as @public, but its signature references "IPnpmPeerDependencyRules" which is marked as @beta
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
@@ -1064,7 +1066,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
-    readonly pnpmLockfilePolicies: PnpmLockfilePolicy[] | undefined;
+    readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
     readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;

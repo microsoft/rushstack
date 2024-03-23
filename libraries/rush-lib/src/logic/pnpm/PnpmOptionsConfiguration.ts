@@ -36,7 +36,9 @@ export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
  * Possible values for the `pnpmLockfilePolicies` setting in Rush's pnpm-config.json file.
  * @public
  */
-export type PnpmLockfilePolicy = 'disallowInsecureSha1';
+export interface IPnpmLockfilePolicies {
+  disallowInsecureSha1?: boolean;
+}
 
 /**
  * @beta
@@ -128,7 +130,7 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
   /**
    * {@inheritDoc PnpmOptionsConfiguration.pnpmLockfilePolicies}
    */
-  pnpmLockfilePolicies?: PnpmLockfilePolicy[];
+  pnpmLockfilePolicies?: IPnpmLockfilePolicies;
 }
 
 /**
@@ -332,7 +334,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * Available options:
    *  - disallowInsecureSha1: Forbid sha1 hashes in `pnpm-lock.yaml`
    */
-  public readonly pnpmLockfilePolicies: PnpmLockfilePolicy[] | undefined;
+  public readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
 
   /**
    * (EXPERIMENTAL) If "true", then filtered installs ("rush install --to my-project")
