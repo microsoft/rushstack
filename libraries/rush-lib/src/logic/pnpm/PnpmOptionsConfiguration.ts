@@ -42,7 +42,6 @@ export interface IPnpmLockfilePolicies {
 
 /**
  * @beta
- * @public
  */
 export interface IPnpmPeerDependencyRules {
   ignoreMissing?: string[];
@@ -51,7 +50,7 @@ export interface IPnpmPeerDependencyRules {
 }
 
 /**
- * @public
+ * @beta
  */
 export interface IPnpmPeerDependenciesMeta {
   [packageName: string]: {
@@ -59,6 +58,9 @@ export interface IPnpmPeerDependenciesMeta {
   };
 }
 
+/**
+ * @public
+ */
 export interface IPnpmPackageExtension {
   dependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
