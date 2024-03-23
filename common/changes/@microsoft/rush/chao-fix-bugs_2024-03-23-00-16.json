@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an edge case for computing the PNPM store path when the experimental subspaces feature is enabled",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
