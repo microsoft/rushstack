@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 22 Mar 2024 17:30:47 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Mar 2024 01:41:10 GMT and should not be manually modified.
+
+## 5.118.3
+Sat, 23 Mar 2024 01:41:10 GMT
+
+### Updates
+
+- Fix an edge case for computing the PNPM store path when the experimental subspaces feature is enabled
 
 ## 5.118.2
 Fri, 22 Mar 2024 17:30:47 GMT

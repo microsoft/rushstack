@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.3",
+      "tag": "@microsoft/rush_v5.118.3",
+      "date": "Sat, 23 Mar 2024 01:41:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an edge case for computing the PNPM store path when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.2",
       "tag": "@microsoft/rush_v5.118.2",
       "date": "Fri, 22 Mar 2024 17:30:47 GMT",
