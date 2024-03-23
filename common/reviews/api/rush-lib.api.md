@@ -697,11 +697,13 @@ export interface IPnpmPackageExtension {
     optionalDependencies?: Record<string, string>;
     // (undocumented)
     peerDependencies?: Record<string, string>;
+    // Warning: (ae-incompatible-release-tags) The symbol "peerDependenciesMeta" is marked as @public, but its signature references "IPnpmPeerDependenciesMeta" which is marked as @beta
+    //
     // (undocumented)
     peerDependenciesMeta?: IPnpmPeerDependenciesMeta;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export interface IPnpmPeerDependenciesMeta {
     // (undocumented)
     [packageName: string]: {
@@ -709,7 +711,7 @@ export interface IPnpmPeerDependenciesMeta {
     };
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export interface IPnpmPeerDependencyRules {
     // (undocumented)
     allowAny?: string[];
@@ -1059,6 +1061,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
+    // Warning: (ae-incompatible-release-tags) The symbol "globalPeerDependencyRules" is marked as @public, but its signature references "IPnpmPeerDependencyRules" which is marked as @beta
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
