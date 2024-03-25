@@ -22,6 +22,19 @@ import type { AstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
+/**
+ * Options for {@link ApiReportGenerator.generateReviewFileContent}.
+ */
+export interface IApiReportOptions {
+  /**
+   * The release level with which the report is associated.
+   * Can also be viewed as the minimal release level of items that should be included in the report.
+   *
+   * @defaultValue Include everything. I.e. {@link ReleaseTag.Internal}.
+   */
+  readonly releaseLevel?: Omit<ReleaseTag, ReleaseTag.None>;
+}
+
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
 
@@ -42,9 +55,11 @@ export class ApiReportGenerator {
     return normalizedActual === normalizedExpected;
   }
 
-  public static generateReviewFileContent(collector: Collector): string {
+  public static generateReviewFileContent(collector: Collector, options?: IApiReportOptions): string {
     const writer: IndentedWriter = new IndentedWriter();
     writer.trimLeadingSpaces = true;
+
+    const releaseLevel: ReleaseTag = (options?.releaseLevel as ReleaseTag) ?? ReleaseTag.Internal;
 
     writer.writeLine(
       [
@@ -128,7 +143,7 @@ export class ApiReportGenerator {
             if (apiItemMetadata.isPreapproved) {
               ApiReportGenerator._modifySpanForPreapproved(span);
             } else {
-              ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false);
+              ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false, releaseLevel);
             }
 
             span.writeModifiedText(writer);
@@ -255,11 +270,12 @@ export class ApiReportGenerator {
     span: Span,
     entity: CollectorEntity,
     astDeclaration: AstDeclaration,
-    insideTypeLiteral: boolean
+    insideTypeLiteral: boolean,
+    releaseLevel: ReleaseTag
   ): void {
     // Should we process this declaration at all?
     // eslint-disable-next-line no-bitwise
-    if (!ApiReportGenerator._shouldIncludeInReport(astDeclaration)) {
+    if (!ApiReportGenerator._shouldIncludeInReport(collector, astDeclaration, releaseLevel)) {
       span.modification.skipAll();
       return;
     }
@@ -385,7 +401,8 @@ export class ApiReportGenerator {
               childSpan,
               entity,
               childAstDeclaration,
-              insideTypeLiteral
+              insideTypeLiteral,
+              releaseLevel
             );
           }
         );
@@ -402,7 +419,7 @@ export class ApiReportGenerator {
             astDeclaration
           );
 
-          if (ApiReportGenerator._shouldIncludeInReport(childAstDeclaration)) {
+          if (ApiReportGenerator._shouldIncludeInReport(collector, childAstDeclaration, releaseLevel)) {
             if (sortChildren) {
               span.modification.sortChildren = true;
               child.modification.sortKey = Collector.getSortKeyIgnoringUnderscore(
@@ -426,15 +443,35 @@ export class ApiReportGenerator {
           }
         }
 
-        ApiReportGenerator._modifySpan(collector, child, entity, childAstDeclaration, insideTypeLiteral);
+        ApiReportGenerator._modifySpan(
+          collector,
+          child,
+          entity,
+          childAstDeclaration,
+          insideTypeLiteral,
+          releaseLevel
+        );
       }
     }
   }
 
-  private static _shouldIncludeInReport(astDeclaration: AstDeclaration): boolean {
+  private static _shouldIncludeInReport(
+    collector: Collector,
+    astDeclaration: AstDeclaration,
+    releaseLevel: ReleaseTag
+  ): boolean {
     // Private declarations are not included in the API report
     // eslint-disable-next-line no-bitwise
-    return (astDeclaration.modifierFlags & ts.ModifierFlags.Private) === 0;
+    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
+      return false;
+    }
+
+    const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+    const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+
+    // If the declaration has a release tag that is not in scope, omit it from the report.
+    // No release tag is considered the same as `@public`.
+    return releaseTag === ReleaseTag.Public || releaseTag >= releaseLevel;
   }
 
   /**
