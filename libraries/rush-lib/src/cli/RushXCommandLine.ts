@@ -3,7 +3,15 @@
 
 import * as path from 'path';
 import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async } from '@rushstack/node-core-library';
-import { Colorize, DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
+import {
+  Colorize,
+  ConsoleTerminalProvider,
+  DEFAULT_CONSOLE_WIDTH,
+  type ITerminalProvider,
+  PrintUtilities,
+  Terminal,
+  type ITerminal
+} from '@rushstack/terminal';
 import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import { Utilities } from '../utilities/Utilities';
@@ -16,6 +24,7 @@ import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
+import { logMessageCallback } from '../utilities/PnpmSyncUtilities';
 
 interface IRushXCommandLineArguments {
   /**
@@ -209,6 +218,12 @@ export class RushXCommandLine {
       }
     });
 
+    const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider({
+      debugEnabled: rushxArguments.isDebug,
+      verboseEnabled: rushxArguments.isDebug
+    });
+    const terminal: ITerminal = new Terminal(terminalProvider);
+
     if (rushConfiguration?.packageManager === 'pnpm' && rushConfiguration?.experimentsConfiguration) {
       const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
@@ -224,29 +239,8 @@ export class RushXCommandLine {
             ensureFolder: FileSystem.ensureFolderAsync,
             forEachAsyncWithConcurrency: Async.forEachAsync,
             getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
-            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) => {
-              const { message, messageKind } = logMessageOptions;
-              switch (messageKind) {
-                case 'error':
-                  // eslint-disable-next-line no-console
-                  console.error(Colorize.red(message));
-                  break;
-                case 'warning':
-                  // eslint-disable-next-line no-console
-                  console.error(Colorize.yellow(message));
-                  break;
-                case 'verbose':
-                  if (rushxArguments.isDebug) {
-                    // eslint-disable-next-line no-console
-                    console.error(message);
-                  }
-                  break;
-                default:
-                  // eslint-disable-next-line no-console
-                  console.log(message);
-                  break;
-              }
-            }
+            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+              logMessageCallback(logMessageOptions, terminal)
           });
         }
       }

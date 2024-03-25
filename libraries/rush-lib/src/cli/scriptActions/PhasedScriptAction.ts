@@ -407,11 +407,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         this.rushConfiguration?.packageManager === 'pnpm' &&
         experiments?.usePnpmSyncForInjectedDependencies
       ) {
-        const isVerbose: boolean = !this._verboseParameter.value || this.parser.isDebug;
         const { PnpmSyncCopyOperationPlugin } = await import(
           '../../logic/operations/PnpmSyncCopyOperationPlugin'
         );
-        new PnpmSyncCopyOperationPlugin(terminal, isVerbose).apply(this.hooks);
+        new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
       }
 
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this

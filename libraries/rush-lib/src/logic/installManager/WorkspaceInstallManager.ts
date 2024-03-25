@@ -41,6 +41,7 @@ import { type ILockfile, pnpmSyncPrepareAsync, type ILogMessageCallbackOptions }
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+import { logMessageCallback } from '../../utilities/PnpmSyncUtilities';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -533,26 +534,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             return result;
           }
         },
-        logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) => {
-          const { message, messageKind } = logMessageOptions;
-          switch (messageKind) {
-            case 'error':
-              this._terminal.writeErrorLine(message);
-              break;
-            case 'warning':
-              this._terminal.writeWarningLine(message);
-              break;
-            case 'verbose':
-              if (this.options.debug) {
-                this._terminal.writeLine(message);
-              }
-              break;
-            default:
-              this._terminal.writeLine();
-              this._terminal.writeLine(message);
-              break;
-          }
-        }
+        logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+          logMessageCallback(logMessageOptions, this._terminal)
       });
     }
 
