@@ -1397,7 +1397,7 @@ export class Subspace {
     // @beta
     getPnpmfilePath(): string;
     // @beta
-    getPnpmOptions(): PnpmOptionsConfiguration | undefined;
+    getPnpmOptions(): PnpmOptionsConfiguration;
     // @beta
     getProjects(): RushConfigurationProject[];
     // @beta

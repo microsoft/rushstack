@@ -89,12 +89,14 @@ export class PurgeManager {
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
-      this._rushConfiguration.pnpmOptions.pnpmStore === 'global' &&
-      this._rushConfiguration.pnpmOptions.pnpmStorePath
+      this._rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStore === 'global' &&
+      this._rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath
     ) {
       // eslint-disable-next-line no-console
       console.warn(Colorize.yellow(`Purging the global pnpm-store`));
-      this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.pnpmOptions.pnpmStorePath);
+      this._rushUserFolderRecycler.moveAllItemsInFolder(
+        this._rushConfiguration.defaultSubspace.getPnpmOptions().pnpmStorePath
+      );
     }
   }
 

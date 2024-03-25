@@ -43,9 +43,7 @@ export class Subspace {
 
   private _detail: ISubspaceDetail | undefined;
 
-  private _cachedPnpmOptions: PnpmOptionsConfiguration | undefined = undefined;
-  // If true, then _cachedPnpmOptions has been initialized.
-  private _cachedPnpmOptionsInitialized: boolean = false;
+  private _pnpmOptions: PnpmOptionsConfiguration | undefined;
 
   public constructor(options: ISubspaceOptions) {
     this.subspaceName = options.subspaceName;
@@ -65,24 +63,25 @@ export class Subspace {
    * Returns the parsed contents of the pnpm-config.json config file.
    * @beta
    */
-  public getPnpmOptions(): PnpmOptionsConfiguration | undefined {
-    if (!this._cachedPnpmOptionsInitialized) {
+  public getPnpmOptions(): PnpmOptionsConfiguration {
+    if (!this._pnpmOptions) {
       try {
-        this._cachedPnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
           `${this.getSubspaceConfigFolder()}/${RushConstants.pnpmConfigFilename}`,
           this.getSubspaceTempFolder()
         );
-        this._cachedPnpmOptionsInitialized = true;
       } catch (e) {
         if (FileSystem.isNotExistError(e as Error)) {
-          this._cachedPnpmOptions = undefined;
-          this._cachedPnpmOptionsInitialized = true;
+          this._pnpmOptions = PnpmOptionsConfiguration.loadFromJsonObject(
+            this._rushConfiguration.rushConfigurationJson.pnpmOptions || {},
+            this._rushConfiguration.commonTempFolder
+          );
         } else {
           throw new Error(`The subspace has an invalid pnpm-config.json file: ${this.subspaceName}`);
         }
       }
     }
-    return this._cachedPnpmOptions;
+    return this._pnpmOptions;
   }
 
   private _ensureDetail(): ISubspaceDetail {

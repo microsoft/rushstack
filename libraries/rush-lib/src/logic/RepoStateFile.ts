@@ -145,8 +145,8 @@ export class RepoStateFile {
     // Only support saving the pnpm shrinkwrap hash if it was enabled
     const preventShrinkwrapChanges: boolean =
       rushConfiguration.packageManager === 'pnpm' &&
-      rushConfiguration.pnpmOptions &&
-      rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
+      subspace.getPnpmOptions() &&
+      subspace.getPnpmOptions().preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         subspace.getCommittedShrinkwrapFilename()
@@ -168,8 +168,7 @@ export class RepoStateFile {
     }
 
     // Currently, only support saving the preferred versions hash if using workspaces
-    const useWorkspaces: boolean =
-      rushConfiguration.pnpmOptions && rushConfiguration.pnpmOptions.useWorkspaces;
+    const useWorkspaces: boolean = subspace.getPnpmOptions() && subspace.getPnpmOptions().useWorkspaces;
     if (useWorkspaces) {
       const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions();
       const preferredVersionsHash: string = commonVersions.getPreferredVersionsHash();

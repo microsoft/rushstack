@@ -175,9 +175,9 @@ export class LastInstallFlagFactory {
     };
 
     if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
-      currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
-      if (rushConfiguration.pnpmOptions.useWorkspaces) {
-        currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
+      currentState.storePath = subspace.getPnpmOptions().pnpmStorePath;
+      if (subspace.getPnpmOptions().useWorkspaces) {
+        currentState.workspaces = subspace.getPnpmOptions().useWorkspaces;
       }
     }
 
