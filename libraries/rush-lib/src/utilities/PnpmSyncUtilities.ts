@@ -4,7 +4,7 @@
 import type { ITerminal } from '@rushstack/terminal';
 import type { ILogMessageCallbackOptions } from 'pnpm-sync-lib';
 
-export function logMessageCallback(logMessageOptions: ILogMessageCallbackOptions, terminal: ITerminal): void {
+export function processLogMessage(logMessageOptions: ILogMessageCallbackOptions, terminal: ITerminal): void {
   const { message, messageKind } = logMessageOptions;
   switch (messageKind) {
     case 'error':

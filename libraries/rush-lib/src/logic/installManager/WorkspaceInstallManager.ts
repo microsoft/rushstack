@@ -41,7 +41,7 @@ import { type ILockfile, pnpmSyncPrepareAsync, type ILogMessageCallbackOptions }
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
-import { logMessageCallback } from '../../utilities/PnpmSyncUtilities';
+import { processLogMessage } from '../../utilities/PnpmSyncUtilities';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -535,7 +535,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
         },
         logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-          logMessageCallback(logMessageOptions, this._terminal)
+          processLogMessage(logMessageOptions, this._terminal)
       });
     }
 

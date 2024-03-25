@@ -24,7 +24,7 @@ import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { logMessageCallback } from '../utilities/PnpmSyncUtilities';
+import { processLogMessage } from '../utilities/PnpmSyncUtilities';
 
 interface IRushXCommandLineArguments {
   /**
@@ -240,7 +240,7 @@ export class RushXCommandLine {
             forEachAsyncWithConcurrency: Async.forEachAsync,
             getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
             logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-              logMessageCallback(logMessageOptions, terminal)
+              processLogMessage(logMessageOptions, terminal)
           });
         }
       }
