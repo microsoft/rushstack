@@ -220,14 +220,6 @@ export function updateAssetHashes({
                   if (trueHash !== existingHash) {
                     const newJsFilename: string = jsAssetName.replace(existingHash, trueHash);
 
-                    const existingSourceMapFilename: string | string[] | undefined =
-                      compilation.assetsInfo.get(jsAssetName)?.related?.sourceMap;
-
-                    if (typeof existingSourceMapFilename === 'string') {
-                      const newSourceMapFilename: string = `${newJsFilename}.map`;
-                      compilation.renameAsset(existingSourceMapFilename, newSourceMapFilename);
-                    }
-
                     compilation.renameAsset(jsAssetName, newJsFilename);
 
                     if (locale) {
