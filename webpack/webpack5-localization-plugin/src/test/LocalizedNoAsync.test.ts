@@ -61,6 +61,7 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
   const localizationPlugin: LocalizationPlugin = new LocalizationPlugin(options);
 
   const compiler: Compiler = webpack({
+    devtool: 'hidden-source-map',
     entry: {
       main: '/a/entry.js'
     },

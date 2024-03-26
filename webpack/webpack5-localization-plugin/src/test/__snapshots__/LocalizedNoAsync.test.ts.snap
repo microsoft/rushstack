@@ -3,6 +3,7 @@
 exports[`LocalizationPlugin Handles localized compilation with no async chunks (minified): Content 1`] = `
 Object {
   "/release/localization-stats.json": "{\\"entrypoints\\":{\\"main\\":{\\"localizedAssets\\":{\\"default\\":\\"main-default-83f4ee1ad53822d08923.js\\",\\"LOCALE2\\":\\"main-LOCALE2-53db16ce65a171b2d58d.js\\",\\"LOCALE1\\":\\"main-LOCALE1-d0826e06031981558e87.js\\",\\"qps-ploc\\":\\"main-qps-ploc-d917b232cbcc8f9aec8d.js\\"}}},\\"namedChunkGroups\\":{}}",
+  "/release/main-LOCALE1-3f1378ce57021ce7f26a.js.map": "{\\"version\\":3,\\"file\\":\\"main-LOCALE1-3f1378ce57021ce7f26a.js\\",\\"mappings\\":\\"mBAAsFA,QAAQC,ICAtE,gECAG,gE\\",\\"sources\\":[\\"webpack:///./a/entry.js\\",\\"webpack:///./a/strings1.resjson\\",\\"webpack:///./a/strings2.resjson\\"],\\"sourcesContent\\":[\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\",\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\"],\\"names\\":[\\"console\\",\\"log\\"],\\"sourceRoot\\":\\"\\"}",
   "/release/main-LOCALE1-d0826e06031981558e87.js": "(()=>{\\"use strict\\";console.log(\\"blah\\\\r\\\\n\\\\t\\\\\\\\\\\\u0027\\\\u0022\\",\\"something else\\")})();",
   "/release/main-LOCALE2-53db16ce65a171b2d58d.js": "(()=>{\\"use strict\\";console.log(\\"return:\\\\r,newline:\\\\n,tab:\\\\t,backslash:\\\\\\\\,apos:\\\\u0027,quote:\\\\u0022\\",\\"something else\\")})();",
   "/release/main-default-83f4ee1ad53822d08923.js": "(()=>{\\"use strict\\";console.log(\\"test\\",\\"another\\")})();",
@@ -31,6 +32,7 @@ const strings2_resjson_strings = {\\"another\\":\\"something else\\"};
   console.log(strings1_resjson.test, strings2_resjson.another);
 /******/ })()
 ;",
+  "/release/main-LOCALE1-d5bdd52b62703e94ff43.js.map": "{\\"version\\":3,\\"file\\":\\"main-LOCALE1-d5bdd52b62703e94ff43.js\\",\\"mappings\\":\\";;;;;AAAA,iBAAiB;AACjB,uDAAe,OAAO;;ACDtB,MAAM,wBAAO,IAAI;AACjB,uDAAe,wBAAO;;ACDoB,CAA2C,CAAC,YAAY,qBAAa,EAAE,wBAAgB,E\\",\\"sources\\":[\\"webpack:///./a/strings1.resjson\\",\\"webpack:///./a/strings2.resjson\\",\\"webpack:///./a/entry.js\\"],\\"sourcesContent\\":[\\"const strings = {\\\\\\"test\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_0\\\\\\"};\\\\nexport default strings;\\",\\"const strings = {\\\\\\"another\\\\\\":\\\\\\"_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9_\\\\\\\\\\\\\\\\_A_1\\\\\\"};\\\\nexport default strings;\\",\\"import strings1 from './strings1.resjson'; import strings2 from './strings2.resjson'; console.log(strings1.test, strings2.another);\\"],\\"names\\":[],\\"sourceRoot\\":\\"\\"}",
   "/release/main-LOCALE2-a314aaef0a110988940c.js": "/******/ (() => { // webpackBootstrap
 /******/ 	\\"use strict\\";
 var __webpack_exports__ = {};
