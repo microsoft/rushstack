@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Rename source map assets if renaming normal assets.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}
