@@ -9,13 +9,12 @@ import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import type {
-  ICreateOperationsContext,
+  IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 
@@ -64,23 +63,15 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
     const stateMap: WeakMap<Operation, ILegacySkipRecord> = new WeakMap();
 
-    let projectChangeAnalyzer!: ProjectChangeAnalyzer;
-
     const { terminal, changedProjectsOnly, isIncrementalBuildAllowed, allowWarningsInSuccessfulBuild } =
       this._options;
 
-    hooks.createOperations.tap(
-      PLUGIN_NAME,
-      (operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> => {
-        projectChangeAnalyzer = context.projectChangeAnalyzer;
-
-        return operations;
-      }
-    );
-
     hooks.beforeExecuteOperations.tapPromise(
       PLUGIN_NAME,
-      async (operations: ReadonlyMap<Operation, IOperationExecutionResult>): Promise<void> => {
+      async (
+        operations: ReadonlyMap<Operation, IOperationExecutionResult>,
+        { projectChangeAnalyzer }: IExecuteOperationsContext
+      ): Promise<void> => {
         let logGitWarning: boolean = false;
 
         await Async.forEachAsync(operations.values(), async (record: IOperationExecutionResult) => {
