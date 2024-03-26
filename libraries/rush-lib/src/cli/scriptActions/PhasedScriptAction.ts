@@ -410,7 +410,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         const { PnpmSyncCopyOperationPlugin } = await import(
           '../../logic/operations/PnpmSyncCopyOperationPlugin'
         );
-        new PnpmSyncCopyOperationPlugin().apply(this.hooks);
+        new PnpmSyncCopyOperationPlugin(terminal).apply(this.hooks);
       }
 
       const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = this
