@@ -37,7 +37,12 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
-import { type ILockfile, pnpmSyncPrepareAsync, type ILogMessageCallbackOptions } from 'pnpm-sync-lib';
+import {
+  type ILockfile,
+  pnpmSyncPrepareAsync,
+  type ILogMessageCallbackOptions,
+  type ILockfilePackage
+} from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
@@ -518,6 +523,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
         storePath: pnpmStorePath,
+        ensureFolder: FileSystem.ensureFolderAsync,
         readPnpmLockfile: async (lockfilePath: string) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
             lockfilePath,
@@ -527,10 +533,24 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           if (!wantedPnpmLockfile) {
             return undefined;
           } else {
+            const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
+            for (const versionPath of wantedPnpmLockfile.packages.keys()) {
+              lockfilePackages[versionPath] = {
+                dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
+                  string,
+                  string
+                >,
+                optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
+                  ?.optionalDependencies as Record<string, string>
+              };
+            }
+
             const result: ILockfile = {
               lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
-              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries())
+              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
+              packages: lockfilePackages
             };
+
             return result;
           }
         },

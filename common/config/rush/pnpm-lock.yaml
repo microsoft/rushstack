@@ -3432,8 +3432,8 @@ importers:
         specifier: ~6.1.0
         version: 6.1.1
       pnpm-sync-lib:
-        specifier: 0.1.6
-        version: 0.1.6
+        specifier: 0.1.7
+        version: 0.1.7
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -22414,8 +22414,8 @@ packages:
       - typescript
     dev: true
 
-  /pnpm-sync-lib@0.1.6:
-    resolution: {integrity: sha512-02HUKAk7Aa7VyY8O3tvTSNjScbP5/SS7rCqYDCLJ8RtcjJCcImX9lE9uox2eqqaQe5K9aABfPSsHZSh8FN4EUA==}
+  /pnpm-sync-lib@0.1.7:
+    resolution: {integrity: sha512-KbIH2BwJ2II+MO5WCskI3JkqXFT1KIFSScf2Cn9VwhCGw3NQ52eTm4L62DR5Iebs2JF8meUUh6HA92qqUmenVA==}
 
   /polished@4.3.1:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
@@ -27651,7 +27651,7 @@ packages:
       node-fetch: 2.6.7
       npm-check: 6.0.1
       npm-package-arg: 6.1.1
-      pnpm-sync-lib: 0.1.6
+      pnpm-sync-lib: 0.1.7
       read-package-tree: 5.1.6
       rxjs: 6.6.7
       semver: 7.5.4
