@@ -301,11 +301,11 @@ export class CustomTipsConfiguration {
    *
    * @internal
    */
-  public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
+  public _showTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
-    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
+    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId, defaultMsg);
   }
 
   /**
@@ -313,8 +313,8 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
+  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId, defaultMsg);
   }
 
   /**
@@ -322,8 +322,8 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
+  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId, defaultMsg);
   }
 
   /**
@@ -331,39 +331,46 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
+  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId, defaultMsg);
   }
 
-  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
+  private _writeMessageWithPipes(
+    terminal: ITerminal,
+    severity: CustomTipSeverity,
+    tipId: CustomTipId,
+    defaultMsg?: string
+  ): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
+    let writeFunction:
+      | typeof terminal.writeErrorLine
+      | typeof terminal.writeWarningLine
+      | typeof terminal.writeLine;
+    let prefix: string;
+    switch (severity) {
+      case CustomTipSeverity.Error:
+        writeFunction = terminal.writeErrorLine.bind(terminal);
+        prefix = Colorize.red('| ');
+        break;
+      case CustomTipSeverity.Warning:
+        writeFunction = terminal.writeWarningLine.bind(terminal);
+        prefix = Colorize.yellow('| ');
+        break;
+      default:
+        writeFunction = terminal.writeLine.bind(terminal);
+        prefix = '| ';
+        break;
+    }
     if (customTipJsonItem) {
-      let writeFunction:
-        | typeof terminal.writeErrorLine
-        | typeof terminal.writeWarningLine
-        | typeof terminal.writeLine;
-      let prefix: string;
-      switch (severity) {
-        case CustomTipSeverity.Error:
-          writeFunction = terminal.writeErrorLine.bind(terminal);
-          prefix = Colorize.red('| ');
-          break;
-        case CustomTipSeverity.Warning:
-          writeFunction = terminal.writeWarningLine.bind(terminal);
-          prefix = Colorize.yellow('| ');
-          break;
-        default:
-          writeFunction = terminal.writeLine.bind(terminal);
-          prefix = '| ';
-          break;
-      }
-
       writeFunction(`| Custom Tip (${tipId})`);
       writeFunction('|');
 
       const message: string = customTipJsonItem.message;
       const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, prefix);
       writeFunction(...wrappedAndIndentedMessage, { doNotOverrideSgrCodes: true });
+      terminal.writeLine();
+    } else if (defaultMsg) {
+      writeFunction(defaultMsg);
       terminal.writeLine();
     }
   }

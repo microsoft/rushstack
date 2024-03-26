@@ -58,7 +58,8 @@ export class PnpmLockfileConfiguration {
         if ((resolution as { integrity: string }).integrity.startsWith('sha1')) {
           rushConfiguration.customTipsConfiguration._showErrorTip(
             terminal,
-            CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1
+            CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1,
+            'The `pnpm-lock.yaml` file forbid sha1 hashes.'
           );
           throw new AlreadyReportedError();
         }

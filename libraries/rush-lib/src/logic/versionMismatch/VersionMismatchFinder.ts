@@ -145,17 +145,12 @@ export class VersionMismatchFinder {
         mismatchFinder.print(options.truncateLongPackageNameLists);
 
         if (mismatchFinder.numberOfMismatches > 0) {
-          // eslint-disable-next-line no-console
-          console.log(
-            Colorize.red(
-              `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
-                options.subspace?.subspaceName ? `in subspace: ${options.subspace?.subspaceName}` : ''
-              }`
-            )
-          );
           rushConfiguration.customTipsConfiguration._showErrorTip(
             options.terminal,
-            CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
+            CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
+            `Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies ${
+              options.subspace?.subspaceName ? `in subspace: ${options.subspace?.subspaceName}` : ''
+            }`
           );
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
