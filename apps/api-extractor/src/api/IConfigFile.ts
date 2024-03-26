@@ -107,6 +107,11 @@ export interface IConfigApiReport {
    * @defaultValue `false`
    */
   includeForgottenExports?: boolean;
+
+  // TODO: docs
+  alphaReportFileName?: string;
+  betaReportFileName?: string;
+  publicReportFileName?: string;
 }
 
 /**

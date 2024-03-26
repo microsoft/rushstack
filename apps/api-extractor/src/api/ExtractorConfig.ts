@@ -161,6 +161,11 @@ interface IExtractorConfigParameters {
   reportFilePath: string;
   reportTempFilePath: string;
   apiReportIncludeForgottenExports: boolean;
+
+  alphaReportFilePath?: string;
+  betaReportFilePath?: string;
+  publicReportFilePath?: string;
+
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
@@ -253,6 +258,11 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
 
+  // TODO: docs
+  public readonly alphaReportFilePath?: string;
+  public readonly betaReportFilePath?: string;
+  public readonly publicReportFilePath?: string;
+
   /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
   /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */
@@ -318,6 +328,9 @@ export class ExtractorConfig {
     this.reportFilePath = parameters.reportFilePath;
     this.reportTempFilePath = parameters.reportTempFilePath;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
+    this.alphaReportFilePath = parameters.alphaReportFilePath;
+    this.betaReportFilePath = parameters.betaReportFilePath;
+    this.publicReportFilePath = parameters.publicReportFilePath;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
@@ -860,14 +873,45 @@ export class ExtractorConfig {
       let reportFilePath: string = '';
       let reportTempFilePath: string = '';
       let apiReportIncludeForgottenExports: boolean = false;
+      let alphaReportFilePath: string | undefined;
+      let betaReportFilePath: string | undefined;
+      let publicReportFilePath: string | undefined;
       if (configObject.apiReport) {
         apiReportEnabled = !!configObject.apiReport.enabled;
 
+        // Default "untrimmed" report
         const reportFilename: string = ExtractorConfig._expandStringWithTokens(
           'reportFileName',
           configObject.apiReport.reportFileName || '',
           tokenContext
         );
+
+        const alphaReportFilename: string | undefined =
+          configObject.apiReport.alphaReportFileName === undefined
+            ? undefined
+            : ExtractorConfig._expandStringWithTokens(
+                'alphaReportFileName',
+                configObject.apiReport.alphaReportFileName,
+                tokenContext
+              );
+
+        const betaReportFilename: string | undefined =
+          configObject.apiReport.betaReportFileName === undefined
+            ? undefined
+            : ExtractorConfig._expandStringWithTokens(
+                'betaReportFileName',
+                configObject.apiReport.betaReportFileName,
+                tokenContext
+              );
+
+        const publicReportFilename: string | undefined =
+          configObject.apiReport.publicReportFileName === undefined
+            ? undefined
+            : ExtractorConfig._expandStringWithTokens(
+                'publicReportFileName',
+                configObject.apiReport.publicReportFileName,
+                tokenContext
+              );
 
         if (!reportFilename) {
           // A merged configuration should have this
@@ -890,6 +934,12 @@ export class ExtractorConfig {
         );
 
         reportFilePath = path.join(reportFolder, reportFilename);
+        alphaReportFilePath =
+          alphaReportFilename === undefined ? undefined : path.join(reportFolder, alphaReportFilename);
+        betaReportFilePath =
+          betaReportFilename === undefined ? undefined : path.join(reportFolder, betaReportFilename);
+        publicReportFilePath =
+          publicReportFilename === undefined ? undefined : path.join(reportFolder, publicReportFilename);
         reportTempFilePath = path.join(reportTempFolder, reportFilename);
         apiReportIncludeForgottenExports = !!configObject.apiReport.includeForgottenExports;
       }
@@ -1011,6 +1061,9 @@ export class ExtractorConfig {
         reportFilePath,
         reportTempFilePath,
         apiReportIncludeForgottenExports,
+        alphaReportFilePath,
+        betaReportFilePath,
+        publicReportFilePath,
         docModelEnabled,
         apiJsonFilePath,
         docModelIncludeForgottenExports,
