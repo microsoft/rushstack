@@ -24,7 +24,7 @@ import type { Operation } from './Operation';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
-  ICreateOperationsContext,
+  IExecuteOperationsContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
@@ -90,7 +90,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       PLUGIN_NAME,
       async (
         recordByOperation: Map<Operation, IOperationExecutionResult>,
-        context: ICreateOperationsContext
+        context: IExecuteOperationsContext
       ): Promise<void> => {
         const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
           context;
