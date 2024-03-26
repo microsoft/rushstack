@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Mar 2024 02:39:06 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Mar 2024 19:58:40 GMT and should not be manually modified.
+
+## 5.118.5
+Tue, 26 Mar 2024 19:58:40 GMT
+
+### Updates
+
+- Use pnpm-sync-lib logging APIs to customize the log message for pnpm-sync operations
 
 ## 5.118.4
 Tue, 26 Mar 2024 02:39:06 GMT

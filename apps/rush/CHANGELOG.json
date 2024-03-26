@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.5",
+      "tag": "@microsoft/rush_v5.118.5",
+      "date": "Tue, 26 Mar 2024 19:58:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use pnpm-sync-lib logging APIs to customize the log message for pnpm-sync operations"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.4",
       "tag": "@microsoft/rush_v5.118.4",
       "date": "Tue, 26 Mar 2024 02:39:06 GMT",
