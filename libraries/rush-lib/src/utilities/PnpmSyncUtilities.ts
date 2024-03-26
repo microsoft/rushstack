@@ -10,44 +10,54 @@ import {
   LogMessageKind
 } from 'pnpm-sync-lib';
 
-export function processLogMessage(options: ILogMessageCallbackOptions, terminal: ITerminal): void {
-  const message: string = options.message;
-  const details: LogMessageDetails = options.details;
-
-  // Special formatting for interested messages
-  switch (details.messageIdentifier) {
-    case LogMessageIdentifier.PREPARE_FINISHING:
-      terminal.writeVerboseLine(
-        Colorize.cyan(`pnpm-sync: `) +
-          `Regenerated .pnpm-sync.json in ${Math.round(details.executionTimeInMs)} ms`
-      );
-      return;
-
-    case LogMessageIdentifier.COPY_FINISHING:
-      {
-        const customMessage: string =
-          `Synced ${details.fileCount} ` +
-          (details.fileCount === 1 ? 'file' : 'files') +
-          ` in ${Math.round(details.executionTimeInMs)} ms`;
-
-        terminal.writeVerboseLine(Colorize.cyan(`pnpm-sync: `) + customMessage);
-      }
-      return;
+export class PnpmSyncUtilities {
+  private static _addLinePrefix(message: string): string {
+    return message
+      .split('\n')
+      .map((x) => (x.trim() ? Colorize.cyan(`pnpm-sync: `) + x : x))
+      .join('\n');
   }
 
-  // Default handling for other messages
-  switch (options.messageKind) {
-    case LogMessageKind.ERROR:
-      terminal.writeErrorLine(Colorize.red('ERROR: pnpm-sync: ' + message));
-      throw new AlreadyReportedError();
+  public static processLogMessage(options: ILogMessageCallbackOptions, terminal: ITerminal): void {
+    const message: string = options.message;
+    const details: LogMessageDetails = options.details;
 
-    case LogMessageKind.WARNING:
-      terminal.writeWarningLine(Colorize.yellow('pnpm-sync: ' + message));
-      return;
+    // Special formatting for interested messages
+    switch (details.messageIdentifier) {
+      case LogMessageIdentifier.PREPARE_FINISHING:
+        terminal.writeVerboseLine(
+          PnpmSyncUtilities._addLinePrefix(
+            `Regenerated .pnpm-sync.json in ${Math.round(details.executionTimeInMs)} ms`
+          )
+        );
+        return;
 
-    case LogMessageKind.INFO:
-    case LogMessageKind.VERBOSE:
-      terminal.writeDebugLine(Colorize.cyan(`pnpm-sync: `) + message);
-      return;
+      case LogMessageIdentifier.COPY_FINISHING:
+        {
+          const customMessage: string =
+            `Synced ${details.fileCount} ` +
+            (details.fileCount === 1 ? 'file' : 'files') +
+            ` in ${Math.round(details.executionTimeInMs)} ms`;
+
+          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
+        }
+        return;
+    }
+
+    // Default handling for other messages
+    switch (options.messageKind) {
+      case LogMessageKind.ERROR:
+        terminal.writeErrorLine(Colorize.red('ERROR: pnpm-sync: ' + message));
+        throw new AlreadyReportedError();
+
+      case LogMessageKind.WARNING:
+        terminal.writeWarningLine(Colorize.yellow('pnpm-sync: ' + message));
+        return;
+
+      case LogMessageKind.INFO:
+      case LogMessageKind.VERBOSE:
+        terminal.writeDebugLine(PnpmSyncUtilities._addLinePrefix(message));
+        return;
+    }
   }
 }

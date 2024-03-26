@@ -46,7 +46,7 @@ import {
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
-import { processLogMessage } from '../../utilities/PnpmSyncUtilities';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -555,7 +555,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
         },
         logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-          processLogMessage(logMessageOptions, this._terminal)
+          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
       });
     }
 

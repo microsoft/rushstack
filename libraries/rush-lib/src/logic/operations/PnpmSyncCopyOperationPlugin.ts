@@ -9,7 +9,7 @@ import { OperationStatus } from './OperationStatus';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { processLogMessage } from '../../utilities/PnpmSyncUtilities';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
@@ -51,7 +51,7 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
               forEachAsyncWithConcurrency: Async.forEachAsync,
               getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
               logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-                processLogMessage(logMessageOptions, this._terminal)
+                PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
             });
           }
         }
