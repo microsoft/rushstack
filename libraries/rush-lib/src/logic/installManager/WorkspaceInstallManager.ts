@@ -618,7 +618,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           'bug in the package manager.'
       );
     }
-
     // Hoist any dependencies for this subspace if splitWorkspaceCompatibility is enabled
     if (
       this.rushConfiguration.subspacesFeatureEnabled &&
@@ -630,26 +629,27 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
       const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
 
-      const modulesContent: string = FileSystem.readFile(modulesFilePath);
-      const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
-      const { hoistedDependencies } = yamlContent;
-      const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
-      const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
-      for (const value of Object.values(hoistedDependencies)) {
-        for (const [filePath, type] of Object.entries(value)) {
-          if (type === 'public') {
-            // If we don't already have a symlink for this package, create one
-            if (!fs.existsSync(`${projectNodeModulesPath}/${filePath}`)) {
-              // Ensure origin folder exists
-              const parentDirSep: string[] = `${projectNodeModulesPath}/${filePath}`.split(path.sep);
-              parentDirSep.pop();
-              const parentDir: string = parentDirSep.join(path.sep);
-              await FileSystem.ensureFolderAsync(parentDir);
-              BaseLinkManager._createSymlink({
-                linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
-                newLinkPath: `${projectNodeModulesPath}/${filePath}`,
-                symlinkKind: SymlinkKind.Directory
-              });
+      if (await FileSystem.existsAsync(modulesFilePath)) {
+        const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
+        const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
+        const { hoistedDependencies } = yamlContent;
+        const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
+        const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
+        for (const value of Object.values(hoistedDependencies)) {
+          for (const [filePath, type] of Object.entries(value)) {
+            if (type === 'public') {
+              // If we don't already have a symlink for this package, create one
+              if (!fs.existsSync(`${projectNodeModulesPath}/${filePath}`)) {
+                const parentDir: string = Utilities.trimAfterLastSlash(
+                  `${projectNodeModulesPath}/${filePath}`
+                );
+                await FileSystem.ensureFolderAsync(parentDir);
+                BaseLinkManager._createSymlink({
+                  linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
+                  newLinkPath: `${projectNodeModulesPath}/${filePath}`,
+                  symlinkKind: SymlinkKind.Directory
+                });
+              }
             }
           }
         }

@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.4",
+      "tag": "@microsoft/rush_v5.118.4",
+      "date": "Tue, 26 Mar 2024 02:39:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added warnings if there are .npmrc or .pnpmfile.cjs files in project folders after migrating to subspaces"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.118.3",
+      "tag": "@microsoft/rush_v5.118.3",
+      "date": "Sat, 23 Mar 2024 01:41:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an edge case for computing the PNPM store path when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.2",
       "tag": "@microsoft/rush_v5.118.2",
       "date": "Fri, 22 Mar 2024 17:30:47 GMT",

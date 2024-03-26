@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 22 Mar 2024 17:30:47 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Mar 2024 02:39:06 GMT and should not be manually modified.
+
+## 5.118.4
+Tue, 26 Mar 2024 02:39:06 GMT
+
+### Updates
+
+- Added warnings if there are .npmrc or .pnpmfile.cjs files in project folders after migrating to subspaces
+
+## 5.118.3
+Sat, 23 Mar 2024 01:41:10 GMT
+
+### Updates
+
+- Fix an edge case for computing the PNPM store path when the experimental subspaces feature is enabled
 
 ## 5.118.2
 Fri, 22 Mar 2024 17:30:47 GMT
