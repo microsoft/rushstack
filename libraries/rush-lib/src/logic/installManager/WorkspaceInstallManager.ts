@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fs from 'fs';
 import * as semver from 'semver';
 import yaml from 'js-yaml';
 import {
@@ -621,15 +620,16 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Hoist any dependencies for this subspace if splitWorkspaceCompatibility is enabled
     if (
       this.rushConfiguration.subspacesFeatureEnabled &&
-      this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility &&
-      subspace.subspaceName.startsWith('split_') &&
-      subspace.getProjects().length === 1
+      this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility
     ) {
-      // Find the .modules.yaml file in the subspace temp/node_modules folder
       const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
       const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
-
-      if (await FileSystem.existsAsync(modulesFilePath)) {
+      if (
+        subspace.subspaceName.startsWith('split_') &&
+        subspace.getProjects().length === 1 &&
+        (await FileSystem.existsAsync(modulesFilePath))
+      ) {
+        // Find the .modules.yaml file in the subspace temp/node_modules folder
         const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
         const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
         const { hoistedDependencies } = yamlContent;
@@ -639,7 +639,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           for (const [filePath, type] of Object.entries(value)) {
             if (type === 'public') {
               // If we don't already have a symlink for this package, create one
-              if (!fs.existsSync(`${projectNodeModulesPath}/${filePath}`)) {
+              if (!FileSystem.exists(`${projectNodeModulesPath}/${filePath}`)) {
                 const parentDir: string = Utilities.trimAfterLastSlash(
                   `${projectNodeModulesPath}/${filePath}`
                 );
@@ -654,8 +654,27 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           }
         }
       }
-    }
 
+      // Look for any workspace linked packages anywhere in this subspace, symlink them from the temp node_modules folder.
+      const subspaceDependencyProjects: Set<RushConfigurationProject> = new Set();
+      for (const subspaceProject of subspace.getProjects()) {
+        for (const dependencyProject of subspaceProject.dependencyProjects) {
+          subspaceDependencyProjects.add(dependencyProject);
+        }
+      }
+      for (const dependencyProject of subspaceDependencyProjects) {
+        const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
+        if (!FileSystem.exists(symlinkToCreate)) {
+          const parentDir: string = Utilities.trimAfterLastSlash(symlinkToCreate);
+          await FileSystem.ensureFolderAsync(parentDir);
+          BaseLinkManager._createSymlink({
+            linkTargetPath: dependencyProject.projectFolder,
+            newLinkPath: `${subspace.getSubspaceTempFolder()}/node_modules/${dependencyProject.packageName}`,
+            symlinkKind: SymlinkKind.Directory
+          });
+        }
+      }
+    }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(subspace).create();
   }
