@@ -209,16 +209,16 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
                     asyncImportMap.set(module, (localAsyncImports = new Map()));
                   }
 
-                  const chunkGroup: ChunkGroup = chunkGraph.getBlockChunkGroup(moduleGraph.getParentBlock(dep));
+                  const chunkGroups: ChunkGroup[] = targetModule.blocks.map(chunkGraph.getBlockChunkGroup);
                   const chunkIds: Set<number | string | null> = new Set();
 
-                  for (const { ids } of chunkGroup.chunks) {
-                    for (const id of ids) {
-                      chunkIds.add(id);
+                  for (const chunkGroup of chunkGroups) {
+                    for (const chunk of chunkGroup.chunks) {
+                      chunkIds.add(chunk.id);
                     }
                   }
 
-                  const idString: string = Array.from(chunkIds).sort().join(';');
+                  const idString: string = Array.from(chunkIds).join(';');
 
                   let meta: IAsyncImportMetadata | undefined = asyncImportGroups.get(idString);
                   if (!meta) {
