@@ -24,8 +24,8 @@ const MEMORY_FILE_SYSTEM: Volume = Volume.fromJSON({
       console.log(g, h, i, j);
     }
   );`,
-  '/asnyc.js':
-    '// @license MIT\nimport bar from "bar";\nimport baz from "baz";\nexport function foo() { bar.a(); baz.b(); }console.log("Test character lengths: \ufeff\uffef")',
+  '/async.js':
+    '// @license MIT\nimport bar from "./bar";\nimport baz from "./baz";\nexport function foo() { bar.a(); baz.b(); }console.log("Test character lengths: \ufeff\uffef")',
   '/a.js': `const b = import('./b').then(mod => mod.b); console.log(b);`,
   '/b.js': `export const b = 'b';`,
   '/c.js': `const d = import('./d').then(mod => mod.d); console.log(d);`,
@@ -35,7 +35,9 @@ const MEMORY_FILE_SYSTEM: Volume = Volume.fromJSON({
   '/g.js': `export default 'g';`,
   '/h.js': `import g from './g'; export default g;`,
   '/i.js': `import h from './h'; export default h;`,
-  '/j.js': `import i from './i'; export default i;`
+  '/j.js': `import i from './i'; export default i;`,
+  '/bar.js': `export default { a() { console.log('a'); } };`,
+  '/baz.js': `export default { b() { console.log('b'); } };`
 });
 
 function getDefaultConfig(minifier: IModuleMinifier): webpack.Configuration {

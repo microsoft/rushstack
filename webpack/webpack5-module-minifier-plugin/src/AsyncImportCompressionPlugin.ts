@@ -125,7 +125,7 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
     }
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
-      const { moduleGraph, chunkGraph } = compilation;
+      const { moduleGraph } = compilation;
       asyncImportMap.clear();
       asyncImportGroups.clear();
 
@@ -209,7 +209,10 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
                     asyncImportMap.set(module, (localAsyncImports = new Map()));
                   }
 
-                  const chunkGroups: ChunkGroup[] = targetModule.blocks.map(chunkGraph.getBlockChunkGroup);
+                  const chunkGroups: ChunkGroup[] = targetModule.blocks.map((b) =>
+                    compilation.chunkGraph.getBlockChunkGroup(b)
+                  );
+
                   const chunkIds: Set<number | string | null> = new Set();
 
                   for (const chunkGroup of chunkGroups) {
@@ -282,7 +285,7 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
             const targetModule: Module = moduleGraph.getModule(dep);
 
             if (targetModule) {
-              const moduleId: string | number = chunkGraph.getModuleId(targetModule);
+              const moduleId: string | number = compilation.chunkGraph.getModuleId(targetModule);
               const stringKey: string = `${moduleId}`.replace(/[^A-Za-z0-9_$]/g, '_');
               const key: string = `${ASYNC_IMPORT_PREFIX}${stringKey}`;
               const content: string = `__webpack_require__.ee(${key})`;
