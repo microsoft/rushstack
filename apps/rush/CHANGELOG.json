@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.6",
+      "tag": "@microsoft/rush_v5.118.6",
+      "date": "Wed, 27 Mar 2024 05:31:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Symlinks are now generated for workspace projects in the temp folder when subspaces and splitWorkspaceCompatibility is enabled."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.5",
       "tag": "@microsoft/rush_v5.118.5",
       "date": "Tue, 26 Mar 2024 19:58:40 GMT",

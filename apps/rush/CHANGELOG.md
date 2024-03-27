@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 26 Mar 2024 19:58:40 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Mar 2024 05:31:17 GMT and should not be manually modified.
+
+## 5.118.6
+Wed, 27 Mar 2024 05:31:17 GMT
+
+### Updates
+
+- Symlinks are now generated for workspace projects in the temp folder when subspaces and splitWorkspaceCompatibility is enabled.
 
 ## 5.118.5
 Tue, 26 Mar 2024 19:58:40 GMT
