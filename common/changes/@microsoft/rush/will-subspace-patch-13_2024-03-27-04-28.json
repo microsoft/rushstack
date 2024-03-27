@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Symlinks are now generated for workspace projects in the temp folder when subspaces and splitWorkspaceCompatibility is enabled.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
