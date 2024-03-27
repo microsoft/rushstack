@@ -80,22 +80,13 @@ function getImportTypeExpression(module: Module, originModule: Module, moduleGra
 }
 
 function getImportDependency(compilation: Compilation): typeof WebpackImportDependency {
-  for (const [constructor] of compilation.dependencyFactories) {
+  for (const constructor of compilation.dependencyFactories.keys()) {
     if (constructor.name === 'ImportDependency') {
       return constructor as typeof WebpackImportDependency;
     }
   }
 
   throw new Error('ImportDependency not found');
-}
-
-function needChunkOnDemandLoadingCode(chunk: Chunk): boolean {
-  for (const chunkGroup of chunk.groupsIterable) {
-    if (chunkGroup.getNumberOfChildren() > 0) {
-      return true;
-    }
-  }
-  return false;
 }
 
 export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
@@ -106,11 +97,32 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
   }
 
   public apply(compiler: Compiler): void {
-    const { WebpackError } = compiler.webpack;
     const asyncImportMap: Map<Module, Map<string, ILocalImportMetadata>> = new Map();
     const asyncImportGroups: Map<string, IAsyncImportMetadata> = new Map();
-
     let rankedImportGroups: IAsyncImportMetadata[] | undefined;
+    const { WebpackError, RuntimeModule, RuntimeGlobals } = compiler.webpack;
+    class CompressedAsyncImportRuntimeModule extends RuntimeModule {
+      public constructor() {
+        super('compressed async import');
+      }
+
+      public generate(): string {
+        const requireFn: string = RuntimeGlobals.require;
+        return Template.asString([
+          `var asyncImportChunkGroups = [`,
+          rankedImportGroups
+            ? rankedImportGroups.map((x) => Template.indent(JSON.stringify(x.chunkIds))).join(',\n')
+            : '',
+          `];`,
+          `${requireFn}.ee = function (groupOrId, moduleId, importType) {`,
+          Template.indent([
+            `return Promise.all((Array.isArray(groupOrId) ? groupOrId : asyncImportChunkGroups[groupOrId]).map(function (x) { return ${requireFn}.e(x); }))`,
+            `.then(importType ? ${requireFn}.t.bind(0,moduleId,importType) : ${requireFn}.bind(0,moduleId));`
+          ]),
+          `};`
+        ]);
+      }
+    }
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       const { moduleGraph, chunkGraph } = compilation;
@@ -282,28 +294,6 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
         };
 
         dependencyTemplates.set(ImportDependency, customTemplate);
-      });
-
-      compilation.mainTemplate.hooks.requireExtensions.tap(PLUGIN_NAME, (source, chunk) => {
-        if (!needChunkOnDemandLoadingCode(chunk)) {
-          return source;
-        }
-
-        const { requireFn } = compilation.mainTemplate;
-        return Template.asString([
-          `var asyncImportChunkGroups = [`,
-          rankedImportGroups
-            ? rankedImportGroups.map((x) => Template.indent(JSON.stringify(x.chunkIds))).join(',\n')
-            : '',
-          `];`,
-          `${requireFn}.ee = function (groupOrId, moduleId, importType) {`,
-          Template.indent([
-            `return Promise.all((Array.isArray(groupOrId) ? groupOrId : asyncImportChunkGroups[groupOrId]).map(function (x) { return ${requireFn}.e(x); }))`,
-            `.then(importType ? ${requireFn}.t.bind(0,moduleId,importType) : ${requireFn}.bind(0,moduleId));`
-          ]),
-          `};`,
-          source
-        ]);
       });
     });
   }
