@@ -8,8 +8,8 @@ import {
   AsyncSeriesWaterfallHook,
   SyncHook
 } from 'tapable';
-
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
+
 import type { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import type { IPhase } from '../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../api/RushConfiguration';
@@ -77,10 +77,7 @@ export interface ICreateOperationsContext {
    * The set of phases selected for the current command execution.
    */
   readonly phaseSelection: ReadonlySet<IPhase>;
-  /**
-   * The current state of the repository
-   */
-  readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+
   /**
    * The set of Rush projects selected for the current command execution.
    */
@@ -107,6 +104,19 @@ export interface ICreateOperationsContext {
 }
 
 /**
+ * Context used for executing operations.
+ * @alpha
+ */
+export interface IExecuteOperationsContext extends ICreateOperationsContext {
+  /**
+   * The current state of the repository.
+   *
+   * Note that this is not defined during the initial operation creation.
+   */
+  readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
+}
+
+/**
  * Hooks into the execution process for phased commands
  * @alpha
  */
@@ -123,7 +133,7 @@ export class PhasedCommandHooks {
    * Hook is series for stable output.
    */
   public readonly beforeExecuteOperations: AsyncSeriesHook<
-    [Map<Operation, IOperationExecutionResult>, ICreateOperationsContext]
+    [Map<Operation, IOperationExecutionResult>, IExecuteOperationsContext]
   > = new AsyncSeriesHook(['records', 'context']);
 
   /**
@@ -137,7 +147,7 @@ export class PhasedCommandHooks {
    * Use the context to distinguish between the initial run and phased runs.
    * Hook is series for stable output.
    */
-  public readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]> =
+  public readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, IExecuteOperationsContext]> =
     new AsyncSeriesHook(['results', 'context']);
 
   /**

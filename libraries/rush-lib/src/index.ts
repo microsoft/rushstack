@@ -142,7 +142,11 @@ export {
   RushLifecycleHooks
 } from './pluginFramework/RushLifeCycle';
 
-export { ICreateOperationsContext, PhasedCommandHooks } from './pluginFramework/PhasedCommandHooks';
+export {
+  ICreateOperationsContext,
+  IExecuteOperationsContext,
+  PhasedCommandHooks
+} from './pluginFramework/PhasedCommandHooks';
 
 export { IRushPlugin } from './pluginFramework/IRushPlugin';
 export { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';
