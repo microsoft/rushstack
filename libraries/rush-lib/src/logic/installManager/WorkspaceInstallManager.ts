@@ -617,7 +617,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           'bug in the package manager.'
       );
     }
-    // Hoist any dependencies for this subspace if splitWorkspaceCompatibility is enabled
+
+    // If the splitWorkspaceCompatibility is enabled for subspaces, create symlinks to mimic the behaviour
+    // of having the node_modules folder created directly in the project folder. This requires symlinking two categories:
+    // 1) Symlink any packages that are declared to be publicly hoisted, such as by using public-hoist-pattern in .npmrc.
+    //    This creates a symlink from <project_folder>/node_modules/<dependency> -> temp/<subspace_name>/node_modules/<dependency>
+    // 2) Symlink any workspace packages that are declared in the temp folder, as some packages may expect these packages to exist
+    //    in the node_modules folder.
+    //    This creates a symlink from temp/<subspace_name>/node_modules/<workspace_dependency_name> -> <workspace_dependency_folder>
     if (
       this.rushConfiguration.subspacesFeatureEnabled &&
       this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility
