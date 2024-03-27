@@ -206,7 +206,7 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
                     }
                   }
 
-                  const idString: string = Array.from(chunkIds).join(';');
+                  const idString: string = Array.from(chunkIds).sort().join(';');
 
                   let meta: IAsyncImportMetadata | undefined = asyncImportGroups.get(idString);
                   if (!meta) {
