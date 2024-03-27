@@ -197,7 +197,7 @@ export class AsyncImportCompressionPlugin implements WebpackPluginInstance {
                     asyncImportMap.set(module, (localAsyncImports = new Map()));
                   }
 
-                  const chunkGroups: ChunkGroup[] = targetModule.blocks.map(chunkGraph.getBlockChunkGroup);
+                  const chunkGroup: ChunkGroup = chunkGraph.getBlockChunkGroup(moduleGraph.getParentBlock(dep));
                   const chunkIds: Set<number | string | null> = new Set();
 
                   for (const chunkGroup of chunkGroups) {
