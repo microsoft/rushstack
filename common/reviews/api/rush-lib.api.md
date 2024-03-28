@@ -15,7 +15,7 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 import type { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
@@ -152,6 +152,8 @@ export class CredentialCache {
 // @beta
 export enum CustomTipId {
     // (undocumented)
+    TIP_PNPM_DISALLOW_INSECURE_SHA1 = "TIP_PNPM_DISALLOW_INSECURE_SHA1",
+    // (undocumented)
     TIP_PNPM_INVALID_NODE_VERSION = "TIP_PNPM_INVALID_NODE_VERSION",
     // (undocumented)
     TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = "TIP_PNPM_MISMATCHED_RELEASE_CHANNEL",
@@ -178,13 +180,13 @@ export class CustomTipsConfiguration {
     // (undocumented)
     readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
     // @internal
-    _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
+    _showErrorTip(tipId: CustomTipId, defaultMsg?: string): void;
     // @internal
-    _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
+    _showInfoTip(tipId: CustomTipId, defaultMsg?: string): void;
     // @internal
-    _showTip(terminal: ITerminal, tipId: CustomTipId): void;
+    _showTip(tipId: CustomTipId, defaultMsg?: string): void;
     // @internal
-    _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
+    _showWarningTip(tipId: CustomTipId, defaultMsg?: string): void;
 }
 
 // @beta
@@ -662,6 +664,12 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
 }
 
+// @public
+export interface IPnpmLockfilePolicies {
+    // (undocumented)
+    disallowInsecureSha1?: boolean;
+}
+
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
@@ -669,17 +677,48 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
+    pnpmLockfilePolicies?: IPnpmLockfilePolicies;
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
     resolutionMode?: PnpmResolutionMode;
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
+}
+
+// @public (undocumented)
+export interface IPnpmPackageExtension {
+    // (undocumented)
+    dependencies?: Record<string, string>;
+    // (undocumented)
+    optionalDependencies?: Record<string, string>;
+    // (undocumented)
+    peerDependencies?: Record<string, string>;
+    // Warning: (ae-incompatible-release-tags) The symbol "peerDependenciesMeta" is marked as @public, but its signature references "IPnpmPeerDependenciesMeta" which is marked as @beta
+    //
+    // (undocumented)
+    peerDependenciesMeta?: IPnpmPeerDependenciesMeta;
+}
+
+// @beta (undocumented)
+export interface IPnpmPeerDependenciesMeta {
+    // (undocumented)
+    [packageName: string]: {
+        optional?: boolean;
+    };
+}
+
+// @beta (undocumented)
+export interface IPnpmPeerDependencyRules {
+    // (undocumented)
+    allowAny?: string[];
+    // (undocumented)
+    allowedVersions?: Record<string, string>;
+    // (undocumented)
+    ignoreMissing?: string[];
 }
 
 // @beta
@@ -1022,6 +1061,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
+    // Warning: (ae-incompatible-release-tags) The symbol "globalPeerDependencyRules" is marked as @public, but its signature references "IPnpmPeerDependencyRules" which is marked as @beta
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
@@ -1029,6 +1069,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
+    readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
     readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;

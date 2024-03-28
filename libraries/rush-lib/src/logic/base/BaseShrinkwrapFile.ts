@@ -14,6 +14,7 @@ import type { RushConfigurationProject } from '../../api/RushConfigurationProjec
 import type { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
 import type { PackageManagerOptionsConfigurationBase } from './BasePackageManagerOptionsConfiguration';
 import type { Subspace } from '../../api/Subspace';
+import type { CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -35,6 +36,7 @@ export abstract class BaseShrinkwrapFile {
    * @virtual
    */
   public validate(
+    customTipsConfiguration: CustomTipsConfiguration,
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
     policyOptions: IShrinkwrapFilePolicyValidatorOptions,
     experimentsConfig?: IExperimentsJson

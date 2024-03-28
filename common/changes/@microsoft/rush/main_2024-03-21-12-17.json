@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a policy to forbid sha1 hashes in pnpm-lock.yaml.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
