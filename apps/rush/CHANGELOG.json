@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.118.7",
+      "tag": "@microsoft/rush_v5.118.7",
+      "date": "Thu, 28 Mar 2024 19:55:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where in the previous release, built-in plugins were not included."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.6",
       "tag": "@microsoft/rush_v5.118.6",
       "date": "Wed, 27 Mar 2024 05:31:17 GMT",
