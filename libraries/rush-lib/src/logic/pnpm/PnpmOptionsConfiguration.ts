@@ -41,7 +41,7 @@ export interface IPnpmLockfilePolicies {
 }
 
 /**
- * @beta
+ * @public
  */
 export interface IPnpmPeerDependencyRules {
   ignoreMissing?: string[];
