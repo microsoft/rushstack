@@ -18,7 +18,7 @@ import {
   type IBulkSuppressionsConfig,
   type ISuppression,
   writeSuppressionsJsonToFile,
-  suppressionsJsonByFolderPath
+  getAllBulkSuppressionsConfigsByEslintrcFolderPath
 } from './bulk-suppressions-file';
 
 const ESLINTRC_FILENAMES: string[] = [
@@ -169,7 +169,10 @@ export function shouldBulkSuppress(params: {
 }
 
 export function prune(): void {
-  for (const [eslintrcFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
+  for (const [
+    eslintrcFolderPath,
+    suppressionsConfig
+  ] of getAllBulkSuppressionsConfigsByEslintrcFolderPath()) {
     if (suppressionsConfig) {
       const { newSerializedSuppressions, newJsonObject } = suppressionsConfig;
       const newSuppressionsConfig: IBulkSuppressionsConfig = {
@@ -185,7 +188,10 @@ export function prune(): void {
 }
 
 export function write(): void {
-  for (const [eslintrcFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
+  for (const [
+    eslintrcFolderPath,
+    suppressionsConfig
+  ] of getAllBulkSuppressionsConfigsByEslintrcFolderPath()) {
     if (suppressionsConfig) {
       writeSuppressionsJsonToFile(eslintrcFolderPath, suppressionsConfig);
     }
