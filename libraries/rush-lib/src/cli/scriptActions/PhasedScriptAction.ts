@@ -673,7 +673,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
 
       // Account for consumer relationships
-      const createOperationsContext: IExecuteOperationsContext = {
+      const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
         isInitial: false,
         projectChangeAnalyzer: state,
@@ -685,14 +685,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(
         new Set(),
-        createOperationsContext
+        executeOperationsContext
       );
 
       const executeOptions: IExecutionOperationsOptions = {
-        executeOperationsContext: {
-          ...initialCreateOperationsContext,
-          projectChangeAnalyzer: initialState
-        },
+        executeOperationsContext,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
         operations,
@@ -700,7 +697,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         executionManagerOptions: {
           ...executionManagerOptions,
           beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
-            await this.hooks.beforeExecuteOperations.promise(records, createOperationsContext);
+            await this.hooks.beforeExecuteOperations.promise(records, executeOperationsContext);
           }
         },
         terminal
