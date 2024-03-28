@@ -14,8 +14,8 @@ process.exitCode = 2;
 
 async function handler(message: IModuleMinificationRequest): Promise<void> {
   if (!message) {
-    parentPort?.off('postMessage', handler);
-    parentPort?.close();
+    parentPort!.off('postMessage', handler);
+    parentPort!.close();
     return;
   }
 
