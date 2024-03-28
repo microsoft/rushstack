@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Delete the `.eslint-bulk-suppressions.json` file during pruning if all suppressions have been eliminated.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}

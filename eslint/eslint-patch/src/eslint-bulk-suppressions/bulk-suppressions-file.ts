@@ -25,11 +25,18 @@ const IS_RUNNING_IN_VSCODE: boolean = process.env[VSCODE_PID_ENV_VAR_NAME] !== u
 const TEN_SECONDS_MS: number = 10 * 1000;
 const SUPPRESSIONS_JSON_FILENAME: string = '.eslint-bulk-suppressions.json';
 
+function throwIfAnythingOtherThanNotExistError(e: NodeJS.ErrnoException): void | never {
+  if (e?.code !== 'ENOENT') {
+    // Throw an error if any other error than file not found
+    throw e;
+  }
+}
+
 interface ICachedBulkSuppressionsConfig {
   readTime: number;
   suppressionsConfig: IBulkSuppressionsConfig;
 }
-export const suppressionsJsonByFolderPath: Map<string, ICachedBulkSuppressionsConfig> = new Map();
+const suppressionsJsonByFolderPath: Map<string, ICachedBulkSuppressionsConfig> = new Map();
 export function getSuppressionsConfigForEslintrcFolderPath(
   eslintrcFolderPath: string
 ): IBulkSuppressionsConfig {
@@ -51,10 +58,7 @@ export function getSuppressionsConfigForEslintrcFolderPath(
     try {
       rawJsonFile = fs.readFileSync(suppressionsPath).toString();
     } catch (e) {
-      // Throw an error if any other error than file not found
-      if (e.code !== 'ENOENT') {
-        throw e;
-      }
+      throwIfAnythingOtherThanNotExistError(e);
     }
 
     if (!rawJsonFile) {
@@ -87,14 +91,31 @@ export function getSuppressionsConfigForEslintrcFolderPath(
   return suppressionsConfig!;
 }
 
+export function getAllBulkSuppressionsConfigsByEslintrcFolderPath(): [string, IBulkSuppressionsConfig][] {
+  const result: [string, IBulkSuppressionsConfig][] = [];
+  for (const [eslintrcFolderPath, { suppressionsConfig }] of suppressionsJsonByFolderPath) {
+    result.push([eslintrcFolderPath, suppressionsConfig]);
+  }
+
+  return result;
+}
+
 export function writeSuppressionsJsonToFile(
   eslintrcDirectory: string,
   suppressionsConfig: IBulkSuppressionsConfig
 ): void {
   suppressionsJsonByFolderPath.set(eslintrcDirectory, { readTime: Date.now(), suppressionsConfig });
   const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
-  suppressionsConfig.jsonObject.suppressions.sort(compareSuppressions);
-  fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, undefined, 2));
+  if (suppressionsConfig.jsonObject.suppressions.length === 0) {
+    try {
+      fs.unlinkSync(suppressionsPath);
+    } catch (e) {
+      throwIfAnythingOtherThanNotExistError(e);
+    }
+  } else {
+    suppressionsConfig.jsonObject.suppressions.sort(compareSuppressions);
+    fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, undefined, 2));
+  }
 }
 
 export function serializeSuppression({ file, scopeId, rule }: ISuppression): string {
