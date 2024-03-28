@@ -490,7 +490,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         if (tipIDsToBePrinted.size > 0) {
           this._terminal.writeLine();
           for (const tipID of tipIDsToBePrinted) {
-            this.rushConfiguration.customTipsConfiguration._showTip(this._terminal, tipID);
+            this.rushConfiguration.customTipsConfiguration._showTip(tipID);
           }
         }
       }

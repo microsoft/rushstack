@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import { type ITerminal, PrintUtilities, Colorize } from '@rushstack/terminal';
+import { PrintUtilities, Colorize, Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
 
@@ -58,7 +58,8 @@ export enum CustomTipId {
   TIP_PNPM_OUTDATED_LOCKFILE = 'TIP_PNPM_OUTDATED_LOCKFILE',
   TIP_PNPM_TARBALL_INTEGRITY = 'TIP_PNPM_TARBALL_INTEGRITY',
   TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = 'TIP_PNPM_MISMATCHED_RELEASE_CHANNEL',
-  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION'
+  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION',
+  TIP_PNPM_DISALLOW_INSECURE_SHA1 = 'TIP_PNPM_DISALLOW_INSECURE_SHA1'
 }
 
 /**
@@ -207,6 +208,15 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
       // Todo: verify this
       return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
     }
+  },
+
+  [CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1]: {
+    tipId: CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_DISALLOW_INSECURE_SHA1');
+    }
   }
 };
 
@@ -218,6 +228,7 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
  */
 export class CustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+  private readonly _terminal: Terminal;
 
   public readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
 
@@ -278,6 +289,7 @@ export class CustomTipsConfiguration {
       }
     }
 
+    this._terminal = new Terminal(new ConsoleTerminalProvider());
     this.providedCustomTipsByTipId = providedCustomTips;
   }
 
@@ -291,11 +303,11 @@ export class CustomTipsConfiguration {
    *
    * @internal
    */
-  public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
+  public _showTip(tipId: CustomTipId, defaultMsg?: string): void {
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
-    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
+    this._writeMessageWithPipes(severityOfOriginalMessage, tipId, defaultMsg);
   }
 
   /**
@@ -303,8 +315,8 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
+  public _showInfoTip(tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(CustomTipSeverity.Info, tipId, defaultMsg);
   }
 
   /**
@@ -312,8 +324,8 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
+  public _showWarningTip(tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(CustomTipSeverity.Warning, tipId, defaultMsg);
   }
 
   /**
@@ -321,39 +333,42 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
+  public _showErrorTip(tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(CustomTipSeverity.Error, tipId, defaultMsg);
   }
 
-  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
+  private _writeMessageWithPipes(severity: CustomTipSeverity, tipId: CustomTipId, defaultMsg?: string): void {
+    const terminal: Terminal = this._terminal;
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
+    let writeFunction:
+      | typeof terminal.writeErrorLine
+      | typeof terminal.writeWarningLine
+      | typeof terminal.writeLine;
+    let prefix: string;
+    switch (severity) {
+      case CustomTipSeverity.Error:
+        writeFunction = terminal.writeErrorLine.bind(terminal);
+        prefix = Colorize.red('| ');
+        break;
+      case CustomTipSeverity.Warning:
+        writeFunction = terminal.writeWarningLine.bind(terminal);
+        prefix = Colorize.yellow('| ');
+        break;
+      default:
+        writeFunction = terminal.writeLine.bind(terminal);
+        prefix = '| ';
+        break;
+    }
     if (customTipJsonItem) {
-      let writeFunction:
-        | typeof terminal.writeErrorLine
-        | typeof terminal.writeWarningLine
-        | typeof terminal.writeLine;
-      let prefix: string;
-      switch (severity) {
-        case CustomTipSeverity.Error:
-          writeFunction = terminal.writeErrorLine.bind(terminal);
-          prefix = Colorize.red('| ');
-          break;
-        case CustomTipSeverity.Warning:
-          writeFunction = terminal.writeWarningLine.bind(terminal);
-          prefix = Colorize.yellow('| ');
-          break;
-        default:
-          writeFunction = terminal.writeLine.bind(terminal);
-          prefix = '| ';
-          break;
-      }
-
       writeFunction(`| Custom Tip (${tipId})`);
       writeFunction('|');
 
       const message: string = customTipJsonItem.message;
       const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, prefix);
       writeFunction(...wrappedAndIndentedMessage, { doNotOverrideSgrCodes: true });
+      terminal.writeLine();
+    } else if (defaultMsg) {
+      writeFunction(defaultMsg);
       terminal.writeLine();
     }
   }

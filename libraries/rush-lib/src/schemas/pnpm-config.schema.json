@@ -175,6 +175,18 @@
     "alwaysFullInstall": {
       "description": "(EXPERIMENTAL) If 'true', then filtered installs ('rush install --to my-project') * will be disregarded, instead always performing a full installation of the lockfile.",
       "type": "boolean"
+    },
+
+    "pnpmLockfilePolicies": {
+      "description": "This setting defines the policies that govern the `pnpm-lock.yaml` file.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "disallowInsecureSha1": {
+          "description": "Forbid sha1 hashes in `pnpm-lock.yaml`.",
+          "type": "boolean"
+        }
+      }
     }
   }
 }

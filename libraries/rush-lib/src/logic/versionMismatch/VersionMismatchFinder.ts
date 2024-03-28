@@ -153,10 +153,7 @@ export class VersionMismatchFinder {
               }`
             )
           );
-          rushConfiguration.customTipsConfiguration._showErrorTip(
-            options.terminal,
-            CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS
-          );
+          rushConfiguration.customTipsConfiguration._showErrorTip(CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS);
           if (!options.isRushCheckCommand && options.truncateLongPackageNameLists) {
             // There isn't a --verbose flag in `rush install`/`rush update`, so a long list will always be truncated.
             // eslint-disable-next-line no-console

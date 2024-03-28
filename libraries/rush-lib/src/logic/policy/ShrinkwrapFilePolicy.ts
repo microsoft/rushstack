@@ -7,9 +7,11 @@ import type { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import type { RepoStateFile } from '../RepoStateFile';
 import type { Subspace } from '../../api/Subspace';
+import type { IPnpmLockfilePolicies } from '../pnpm/PnpmOptionsConfiguration';
 
 export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorOptions {
   repoState: RepoStateFile;
+  pnpmLockfilePolicies?: IPnpmLockfilePolicies;
 }
 
 /**
@@ -36,6 +38,7 @@ export function validate(
 
   // Run shrinkwrap-specific validation
   shrinkwrapFile.validate(
+    rushConfiguration.customTipsConfiguration,
     rushConfiguration.packageManagerOptions,
     {
       ...options,
