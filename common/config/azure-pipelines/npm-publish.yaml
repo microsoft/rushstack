@@ -42,6 +42,9 @@ extends:
                   VersionPolicyName: noRush
                   BranchName: $(SourceBranch)
 
+              - script: 'node libraries/rush-lib/scripts/plugins-prepublish.js'
+                displayName: 'Prepublish workaround for rush-lib'
+
               - template: /common/config/azure-pipelines/templates/publish.yaml@self
                 parameters:
                   VersionPolicyName: noRush
