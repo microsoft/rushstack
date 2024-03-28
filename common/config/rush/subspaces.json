@@ -9,7 +9,7 @@
   /**
    * Set this flag to "true" to enable usage of subspaces.
    */
-  "subspacesEnabled": false,
+  "subspacesEnabled": true,
 
   /**
    * (DEPRECATED) This is a temporary workaround for migrating from an earlier prototype
@@ -31,5 +31,5 @@
    * hyphens, for example "my-subspace".  The corresponding config files will have paths
    * such as "common/config/subspaces/my-subspace/package-lock.yaml".
    */
-  "subspaceNames": []
+  "subspaceNames": ["build-tests-subspace"]
 }

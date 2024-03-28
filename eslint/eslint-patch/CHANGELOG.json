@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.9.0",
+      "tag": "@rushstack/eslint-patch_v1.9.0",
+      "date": "Wed, 27 Mar 2024 19:47:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where `eslint-bulk prune` does not work if there are no files to lint in the project root."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.0",
       "tag": "@rushstack/eslint-patch_v1.8.0",
       "date": "Wed, 20 Mar 2024 02:09:14 GMT",

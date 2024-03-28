@@ -3,8 +3,16 @@
 
 import * as path from 'path';
 import { PackageJsonLookup, type IPackageJson, Text, FileSystem, Async } from '@rushstack/node-core-library';
-import { Colorize, DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
-import { pnpmSyncCopyAsync } from 'pnpm-sync-lib';
+import {
+  Colorize,
+  ConsoleTerminalProvider,
+  DEFAULT_CONSOLE_WIDTH,
+  type ITerminalProvider,
+  PrintUtilities,
+  Terminal,
+  type ITerminal
+} from '@rushstack/terminal';
+import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
@@ -16,6 +24,7 @@ import { EventHooksManager } from '../logic/EventHooksManager';
 import { Event } from '../api/EventHooks';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { RushConstants } from '../logic/RushConstants';
+import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 
 interface IRushXCommandLineArguments {
   /**
@@ -209,6 +218,12 @@ export class RushXCommandLine {
       }
     });
 
+    const terminalProvider: ITerminalProvider = new ConsoleTerminalProvider({
+      debugEnabled: rushxArguments.isDebug,
+      verboseEnabled: rushxArguments.isDebug
+    });
+    const terminal: ITerminal = new Terminal(terminalProvider);
+
     if (rushConfiguration?.packageManager === 'pnpm' && rushConfiguration?.experimentsConfiguration) {
       const { configuration: experiments } = rushConfiguration?.experimentsConfiguration;
 
@@ -223,7 +238,9 @@ export class RushXCommandLine {
             pnpmSyncJsonPath,
             ensureFolder: FileSystem.ensureFolderAsync,
             forEachAsyncWithConcurrency: Async.forEachAsync,
-            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync
+            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+              PnpmSyncUtilities.processLogMessage(logMessageOptions, terminal)
           });
         }
       }

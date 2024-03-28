@@ -116,6 +116,18 @@ export class Subspace {
           const project: RushConfigurationProject = this._projects[0];
 
           subspaceConfigFolder = `${project.projectFolder}/subspace/${this.subspaceName}`;
+
+          // Ensure that this project does not have it's own pnpmfile.cjs or .npmrc file
+          if (FileSystem.exists(`${project.projectFolder}/.npmrc`)) {
+            throw new Error(
+              `The project level configuration file ${project.projectFolder}/.npmrc is no longer valid. Please use a ${subspaceConfigFolder}/.npmrc file instead.`
+            );
+          }
+          if (FileSystem.exists(`${project.projectFolder}/.pnpmfile.cjs`)) {
+            throw new Error(
+              `The project level configuration file ${project.projectFolder}/.pnpmfile.cjs is no longer valid. Please use a ${subspaceConfigFolder}/.pnpmfile-subspace.cjs file instead.`
+            );
+          }
         }
 
         if (!FileSystem.exists(subspaceConfigFolder)) {

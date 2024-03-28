@@ -17,13 +17,7 @@ import {
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
-import {
-  PrintUtilities,
-  ConsoleTerminalProvider,
-  Terminal,
-  type ITerminalProvider,
-  Colorize
-} from '@rushstack/terminal';
+import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
@@ -69,8 +63,7 @@ export abstract class BaseInstallManager {
   private _npmSetupValidated: boolean = false;
   private _syncNpmrcAlreadyCalled: boolean = false;
 
-  private readonly _terminalProvider: ITerminalProvider;
-  protected readonly _terminal: Terminal;
+  protected readonly _terminal: ITerminal;
 
   protected readonly rushConfiguration: RushConfiguration;
   protected readonly rushGlobalFolder: RushGlobalFolder;
@@ -85,6 +78,7 @@ export abstract class BaseInstallManager {
     purgeManager: PurgeManager,
     options: IInstallManagerOptions
   ) {
+    this._terminal = options.terminal;
     this.rushConfiguration = rushConfiguration;
     this.rushGlobalFolder = rushGlobalFolder;
     this.installRecycler = purgeManager.commonTempFolderRecycler;
@@ -101,9 +95,6 @@ export abstract class BaseInstallManager {
         );
       }
     }
-
-    this._terminalProvider = new ConsoleTerminalProvider();
-    this._terminal = new Terminal(this._terminalProvider);
   }
 
   public async doInstallAsync(): Promise<void> {

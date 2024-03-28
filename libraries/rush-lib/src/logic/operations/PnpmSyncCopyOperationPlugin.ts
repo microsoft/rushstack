@@ -2,16 +2,23 @@
 // See LICENSE in the project root for license information.
 
 import { Async, FileSystem } from '@rushstack/node-core-library';
-import { pnpmSyncCopyAsync } from 'pnpm-sync-lib';
+import type { ITerminal } from '@rushstack/terminal';
+import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import { OperationStatus } from './OperationStatus';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
 export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
+  private readonly _terminal: ITerminal;
+
+  public constructor(terminal: ITerminal) {
+    this._terminal = terminal;
+  }
   public apply(hooks: PhasedCommandHooks): void {
     hooks.afterExecuteOperation.tapPromise(
       PLUGIN_NAME,
@@ -42,7 +49,9 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
               pnpmSyncJsonPath,
               ensureFolder: FileSystem.ensureFolderAsync,
               forEachAsyncWithConcurrency: Async.forEachAsync,
-              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync
+              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+              logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+                PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
             });
           }
         }

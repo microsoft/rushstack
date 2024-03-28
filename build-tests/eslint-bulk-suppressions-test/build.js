@@ -1,4 +1,5 @@
 const { FileSystem, Executable, Text, Import } = require('@rushstack/node-core-library');
+const path = require('path');
 const {
   ESLINT_PACKAGE_NAME_ENV_VAR_NAME
 } = require('@rushstack/eslint-patch/lib/eslint-bulk-suppressions/constants');
@@ -46,6 +47,21 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
     const referenceSuppressionsJsonPath = `${folderPath}/.eslint-bulk-suppressions-${eslintVersion}.json`;
     const existingSuppressions = tryLoadSuppressions(referenceSuppressionsJsonPath);
 
+    // The eslint-bulk-suppressions patch expects to find "eslint" in the shell PATH.  To ensure deterministic
+    // test behavior, we need to designate an explicit "node_modules/.bin" folder.
+    //
+    // Use the ".bin" folder from @rushstack/eslint-patch as a workaround for this PNPM bug:
+    // https://github.com/pnpm/pnpm/issues/7833
+    const dependencyBinFolder = path.join(
+      __dirname,
+      'node_modules',
+      '@rushstack',
+      'eslint-patch',
+      'node_modules',
+      '.bin'
+    );
+    const shellPathWithEslint = `${dependencyBinFolder}${path.delimiter}${process.env['PATH']}`;
+
     const executableResult = Executable.spawnSync(
       process.argv0,
       [eslintBulkStartPath, 'suppress', '--all', 'src'],
@@ -53,6 +69,7 @@ for (const runFolderPath of RUN_FOLDER_PATHS) {
         currentWorkingDirectory: folderPath,
         environment: {
           ...process.env,
+          PATH: shellPathWithEslint,
           [ESLINT_PACKAGE_NAME_ENV_VAR_NAME]: eslintPackageName
         }
       }

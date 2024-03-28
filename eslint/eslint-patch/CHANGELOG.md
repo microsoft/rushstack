@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Wed, 20 Mar 2024 02:09:14 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Mar 2024 19:47:21 GMT and should not be manually modified.
+
+## 1.9.0
+Wed, 27 Mar 2024 19:47:21 GMT
+
+### Minor changes
+
+- Fix an issue where `eslint-bulk prune` does not work if there are no files to lint in the project root.
 
 ## 1.8.0
 Wed, 20 Mar 2024 02:09:14 GMT

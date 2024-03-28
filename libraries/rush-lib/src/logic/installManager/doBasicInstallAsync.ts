@@ -43,7 +43,8 @@ export async function doBasicInstallAsync(options: IRunInstallOptions): Promise<
       pnpmFilterArguments: [],
       maxInstallAttempts: 1,
       networkConcurrency: undefined,
-      subspace: rushConfiguration.defaultSubspace
+      subspace: rushConfiguration.defaultSubspace,
+      terminal: options.terminal
     }
   );
 

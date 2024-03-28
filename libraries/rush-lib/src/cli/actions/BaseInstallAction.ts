@@ -8,7 +8,7 @@ import type {
   IRequiredCommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, type ITerminal, Terminal, Colorize } from '@rushstack/terminal';
+import { type ITerminal, Colorize } from '@rushstack/terminal';
 
 import { BaseRushAction, type IBaseRushActionOptions } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -47,7 +47,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   public constructor(options: IBaseRushActionOptions) {
     super(options);
 
-    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: options.parser.isDebug }));
+    this._terminal = options.parser.terminal;
 
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',

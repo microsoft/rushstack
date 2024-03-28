@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ConsoleTerminalProvider } from '@rushstack/terminal';
+import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
 import { PurgeManager } from '../PurgeManager';
 import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
@@ -51,11 +51,14 @@ describe('BaseInstallManager Test', () => {
       RushConfiguration.loadFromConfigurationFile(rushJsonFilePnpmV6);
     const rushConfigurationV7: RushConfiguration =
       RushConfiguration.loadFromConfigurationFile(rushJsonFilePnpmV7);
+    const terminal: ITerminal = new Terminal(new ConsoleTerminalProvider());
     const options6: IInstallManagerOptions = {
-      subspace: rushConfigurationV6.defaultSubspace
+      subspace: rushConfigurationV6.defaultSubspace,
+      terminal
     } as IInstallManagerOptions;
     const options7: IInstallManagerOptions = {
-      subspace: rushConfigurationV7.defaultSubspace
+      subspace: rushConfigurationV7.defaultSubspace,
+      terminal
     } as IInstallManagerOptions;
     const purgeManager6: typeof PurgeManager.prototype = new PurgeManager(
       rushConfigurationV6,

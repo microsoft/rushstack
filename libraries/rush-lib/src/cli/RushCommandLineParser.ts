@@ -9,7 +9,13 @@ import {
   CommandLineHelper
 } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, Terminal, PrintUtilities, Colorize } from '@rushstack/terminal';
+import {
+  ConsoleTerminalProvider,
+  Terminal,
+  PrintUtilities,
+  Colorize,
+  type ITerminal
+} from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -163,6 +169,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
   public get isQuiet(): boolean {
     return this._quietParameter.value;
+  }
+
+  public get terminal(): ITerminal {
+    return this._terminal;
   }
 
   /**

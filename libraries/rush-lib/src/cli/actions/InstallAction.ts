@@ -62,7 +62,8 @@ export class InstallAction extends BaseInstallAction {
       pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(this._terminal),
       checkOnly: this._checkOnlyParameter.value,
       subspace: this.getTargetSubspace(),
-      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this)
+      beforeInstallAsync: () => this.rushSession.hooks.beforeInstall.promise(this),
+      terminal: this._terminal
     };
   }
 }
