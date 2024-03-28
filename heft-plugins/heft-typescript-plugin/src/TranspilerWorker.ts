@@ -17,9 +17,13 @@ const typedWorkerData: ITypescriptWorkerData = workerData;
 
 const ts: ExtendedTypeScript = require(typedWorkerData.typeScriptToolPath);
 
+process.exitCode = 1;
+
 function handleMessage(message: ITranspilationRequestMessage | false): void {
   if (!message) {
-    process.exit(0);
+    parentPort!.off('message', handleMessage);
+    parentPort!.close();
+    return;
   }
 
   try {
@@ -116,4 +120,7 @@ function runTranspiler(message: ITranspilationRequestMessage): ITranspilationSuc
   return response;
 }
 
+parentPort!.once('close', () => {
+  process.exitCode = 0;
+});
 parentPort!.on('message', handleMessage);
