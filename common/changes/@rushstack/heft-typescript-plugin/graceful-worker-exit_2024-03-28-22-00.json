@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-typescript-plugin",
       "comment": "Gracefully exit transpile worker instead of using `process.exit(0)`.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-typescript-plugin"
