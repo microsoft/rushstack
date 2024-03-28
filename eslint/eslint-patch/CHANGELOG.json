@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.10.0",
+      "tag": "@rushstack/eslint-patch_v1.10.0",
+      "date": "Thu, 28 Mar 2024 18:11:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with running `eslint-bulk prune` in a project with suppressions that refer to deleted files."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Delete the `.eslint-bulk-suppressions.json` file during pruning if all suppressions have been eliminated."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.9.0",
       "tag": "@rushstack/eslint-patch_v1.9.0",
       "date": "Wed, 27 Mar 2024 19:47:21 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "2.5.3",
+      "tag": "@rushstack/heft-node-rig_v2.5.3",
+      "date": "Thu, 28 Mar 2024 18:11:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `3.6.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.2",
       "tag": "@rushstack/heft-node-rig_v2.5.2",
       "date": "Wed, 27 Mar 2024 19:47:21 GMT",
