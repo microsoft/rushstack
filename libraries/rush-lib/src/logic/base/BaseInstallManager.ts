@@ -224,7 +224,7 @@ export abstract class BaseInstallManager {
           this.rushConfiguration.packageManagerOptions,
           committedShrinkwrapFileName
         );
-        shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration);
+        shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, this._terminal);
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(subspace.getTempShrinkwrapFilename(), committedShrinkwrapFileName);
       } else {

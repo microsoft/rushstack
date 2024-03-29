@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
@@ -34,7 +34,7 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration): void {}
+  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration, terminal: ITerminal): void {}
 
   /**
    * Validate the shrinkwrap using the provided policy options.
