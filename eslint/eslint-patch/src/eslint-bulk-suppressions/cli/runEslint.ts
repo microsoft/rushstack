@@ -5,11 +5,12 @@ import type { ESLint } from 'eslint';
 import { getEslintPath } from './utils/get-eslint-cli';
 
 export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'): Promise<void> {
-  const eslintPath: string = getEslintPath(process.cwd());
+  const cwd: string = process.cwd();
+  const eslintPath: string = getEslintPath(cwd);
   const { ESLint }: typeof import('eslint') = require(eslintPath);
   const eslint: ESLint = new ESLint({
     useEslintrc: true,
-    cwd: process.cwd()
+    cwd
   });
 
   let results: ESLint.LintResult[];
@@ -32,14 +33,14 @@ export async function runEslintAsync(files: string[], mode: 'suppress' | 'prune'
     }
   }
 
-  const stylishFormatter: ESLint.Formatter = await eslint.loadFormatter();
-  const formattedResults: string = stylishFormatter.format(results);
-  if (formattedResults) {
+  if (results.length > 0) {
+    const stylishFormatter: ESLint.Formatter = await eslint.loadFormatter();
+    const formattedResults: string = stylishFormatter.format(results);
     console.log(formattedResults);
-    throw new Error(`@rushstack/eslint-bulk ESLint errors`);
-  } else {
-    console.log(
-      `@rushstack/eslint-bulk: Successfully pruned unused suppressions in all .eslint-bulk-suppressions.json files under directory ${process.cwd()}`
-    );
   }
+
+  console.log(
+    '@rushstack/eslint-bulk: Successfully pruned unused suppressions in all .eslint-bulk-suppressions.json ' +
+      `files under directory ${cwd}`
+  );
 }

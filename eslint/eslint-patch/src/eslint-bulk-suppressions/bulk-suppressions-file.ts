@@ -101,20 +101,29 @@ export function getAllBulkSuppressionsConfigsByEslintrcFolderPath(): [string, IB
 }
 
 export function writeSuppressionsJsonToFile(
-  eslintrcDirectory: string,
+  eslintrcFolderPath: string,
   suppressionsConfig: IBulkSuppressionsConfig
 ): void {
-  suppressionsJsonByFolderPath.set(eslintrcDirectory, { readTime: Date.now(), suppressionsConfig });
-  const suppressionsPath: string = `${eslintrcDirectory}/${SUPPRESSIONS_JSON_FILENAME}`;
+  suppressionsJsonByFolderPath.set(eslintrcFolderPath, { readTime: Date.now(), suppressionsConfig });
+  const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
   if (suppressionsConfig.jsonObject.suppressions.length === 0) {
-    try {
-      fs.unlinkSync(suppressionsPath);
-    } catch (e) {
-      throwIfAnythingOtherThanNotExistError(e);
-    }
+    deleteFile(suppressionsPath);
   } else {
     suppressionsConfig.jsonObject.suppressions.sort(compareSuppressions);
     fs.writeFileSync(suppressionsPath, JSON.stringify(suppressionsConfig.jsonObject, undefined, 2));
+  }
+}
+
+export function deleteBulkSuppressionsFileInEslintrcFolder(eslintrcFolderPath: string): void {
+  const suppressionsPath: string = `${eslintrcFolderPath}/${SUPPRESSIONS_JSON_FILENAME}`;
+  deleteFile(suppressionsPath);
+}
+
+function deleteFile(filePath: string): void {
+  try {
+    fs.unlinkSync(filePath);
+  } catch (e) {
+    throwIfAnythingOtherThanNotExistError(e);
   }
 }
 

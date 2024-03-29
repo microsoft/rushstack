@@ -6,7 +6,10 @@ import fs from 'fs';
 import { printPruneHelp } from './utils/print-help';
 import { runEslintAsync } from './runEslint';
 import { ESLINT_BULK_PRUNE_ENV_VAR_NAME } from '../constants';
-import { getSuppressionsConfigForEslintrcFolderPath } from '../bulk-suppressions-file';
+import {
+  deleteBulkSuppressionsFileInEslintrcFolder,
+  getSuppressionsConfigForEslintrcFolderPath
+} from '../bulk-suppressions-file';
 
 export async function pruneAsync(): Promise<void> {
   const args: string[] = process.argv.slice(3);
@@ -20,16 +23,21 @@ export async function pruneAsync(): Promise<void> {
     throw new Error(`@rushstack/eslint-bulk: Unknown arguments: ${args.join(' ')}`);
   }
 
-  process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] = '1';
-
-  const allFiles: string[] = await getAllFilesWithExistingSuppressionsForCwdAsync();
-  await runEslintAsync(allFiles, 'prune');
+  const normalizedCwd: string = process.cwd().replace(/\\/g, '/');
+  const allFiles: string[] = await getAllFilesWithExistingSuppressionsForCwdAsync(normalizedCwd);
+  if (allFiles.length > 0) {
+    process.env[ESLINT_BULK_PRUNE_ENV_VAR_NAME] = '1';
+    console.log(`Pruning suppressions for ${allFiles.length} files...`);
+    await runEslintAsync(allFiles, 'prune');
+  } else {
+    console.log('No files with existing suppressions found.');
+    deleteBulkSuppressionsFileInEslintrcFolder(normalizedCwd);
+  }
 }
 
-async function getAllFilesWithExistingSuppressionsForCwdAsync(): Promise<string[]> {
-  const { jsonObject: bulkSuppressionsConfigJson } = getSuppressionsConfigForEslintrcFolderPath(
-    process.cwd().replace(/\\/g, '/')
-  );
+async function getAllFilesWithExistingSuppressionsForCwdAsync(normalizedCwd: string): Promise<string[]> {
+  const { jsonObject: bulkSuppressionsConfigJson } =
+    getSuppressionsConfigForEslintrcFolderPath(normalizedCwd);
   const allFiles: Set<string> = new Set();
   for (const { file: filePath } of bulkSuppressionsConfigJson.suppressions) {
     allFiles.add(filePath);
@@ -55,8 +63,6 @@ async function getAllFilesWithExistingSuppressionsForCwdAsync(): Promise<string[
   if (deletedCount > 0) {
     console.log(`${deletedCount} files with suppressions were deleted.`);
   }
-
-  console.log(`Pruning suppressions for ${allExistingFiles.length} files...`);
 
   return allExistingFiles;
 }
