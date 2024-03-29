@@ -341,7 +341,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Determine whether `pnpm-lock.yaml` contains insecure sha1.
    * @internal
    */
-  public disallowInsecureSha1(customTipsConfiguration: CustomTipsConfiguration): boolean {
+  private _disallowInsecureSha1(customTipsConfiguration: CustomTipsConfiguration): boolean {
     const { packages } = this._shrinkwrapJson;
     if (packages) {
       for (const { resolution } of Object.values(packages)) {
@@ -357,6 +357,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return false;
   }
 
+  /** @override */
   public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration): void {
     const pnpmLockfilePolicies: [string, boolean][] = Object.entries(
       rushConfiguration.pnpmOptions.pnpmLockfilePolicies ?? {}
@@ -369,7 +370,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         if (enabled) {
           switch (policy) {
             case 'disallowInsecureSha1': {
-              const isError: boolean = this.disallowInsecureSha1(rushConfiguration.customTipsConfiguration);
+              const isError: boolean = this._disallowInsecureSha1(rushConfiguration.customTipsConfiguration);
               if (isError) {
                 invalidPoliciesCount += 1;
               }
