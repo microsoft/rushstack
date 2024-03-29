@@ -338,7 +338,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * Determine whether `pnpm-lock.yaml` contains insecure sha1.
+   * Determine whether `pnpm-lock.yaml` contains insecure sha1 hashes.
    * @internal
    */
   private _disallowInsecureSha1(customTipsConfiguration: CustomTipsConfiguration): boolean {
