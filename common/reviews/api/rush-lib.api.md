@@ -711,7 +711,7 @@ export interface IPnpmPeerDependenciesMeta {
     };
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export interface IPnpmPeerDependencyRules {
     // (undocumented)
     allowAny?: string[];
@@ -1061,7 +1061,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalOverrides: Record<string, string> | undefined;
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
-    // Warning: (ae-incompatible-release-tags) The symbol "globalPeerDependencyRules" is marked as @public, but its signature references "IPnpmPeerDependencyRules" which is marked as @beta
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
