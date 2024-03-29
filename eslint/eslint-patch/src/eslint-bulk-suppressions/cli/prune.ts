@@ -30,7 +30,7 @@ export async function pruneAsync(): Promise<void> {
     console.log(`Pruning suppressions for ${allFiles.length} files...`);
     await runEslintAsync(allFiles, 'prune');
   } else {
-    console.log('No files with existing suppressions found. Deleting the suppressions file, if one exists.');
+    console.log('No files with existing suppressions found.');
     deleteBulkSuppressionsFileInEslintrcFolder(normalizedCwd);
   }
 }
