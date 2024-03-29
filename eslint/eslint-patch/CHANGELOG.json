@@ -2,6 +2,21 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.10.1",
+      "tag": "@rushstack/eslint-patch_v1.10.1",
+      "date": "Fri, 29 Mar 2024 05:46:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the `eslint-bulk prune` command would crash if a bulk suppressions file exists that speicifies no suppressions."
+          },
+          {
+            "comment": "Exit with success under normal conditions."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.0",
       "tag": "@rushstack/eslint-patch_v1.10.0",
       "date": "Thu, 28 Mar 2024 18:11:12 GMT",

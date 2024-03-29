@@ -1,6 +1,14 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Thu, 28 Mar 2024 18:11:12 GMT and should not be manually modified.
+This log was last generated on Fri, 29 Mar 2024 05:46:41 GMT and should not be manually modified.
+
+## 1.10.1
+Fri, 29 Mar 2024 05:46:41 GMT
+
+### Patches
+
+- Fix an issue where the `eslint-bulk prune` command would crash if a bulk suppressions file exists that speicifies no suppressions.
+- Exit with success under normal conditions.
 
 ## 1.10.0
 Thu, 28 Mar 2024 18:11:12 GMT
