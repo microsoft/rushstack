@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { JsonFile } from '@rushstack/node-core-library';
-import { PrintUtilities, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { PrintUtilities, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { CustomTipId, CustomTipsConfiguration, type ICustomTipsJson } from '../CustomTipsConfiguration';
 import { RushConfiguration } from '../RushConfiguration';
@@ -27,13 +27,11 @@ describe(CustomTipsConfiguration.name, () => {
     describe(`formatting (${testName})`, () => {
       let customTipsConfiguration: CustomTipsConfiguration;
       let terminalProvider: StringBufferTerminalProvider;
-      let terminal: Terminal;
 
       const CUSTOM_TIP_FOR_TESTING: CustomTipId = CustomTipId.TIP_PNPM_INVALID_NODE_VERSION;
 
       beforeEach(() => {
         terminalProvider = new StringBufferTerminalProvider(true);
-        terminal = new Terminal(terminalProvider);
 
         const mockCustomTipsJson: ICustomTipsJson = {
           customTips: [
@@ -77,7 +75,7 @@ describe(CustomTipsConfiguration.name, () => {
 
       for (const printFunction of printFunctions) {
         it(`${printFunction.name} prints an expected message`, () => {
-          printFunction.call(customTipsConfiguration, terminal, CUSTOM_TIP_FOR_TESTING);
+          printFunction.call(customTipsConfiguration, CUSTOM_TIP_FOR_TESTING);
         });
       }
     });

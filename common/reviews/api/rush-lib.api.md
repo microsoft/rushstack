@@ -15,7 +15,7 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import { CommandLineParameterKind } from '@rushstack/ts-command-line';
 import { HookMap } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
-import { ITerminal } from '@rushstack/terminal';
+import type { ITerminal } from '@rushstack/terminal';
 import type { ITerminalProvider } from '@rushstack/terminal';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
@@ -180,13 +180,13 @@ export class CustomTipsConfiguration {
     // (undocumented)
     readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
     // @internal
-    _showErrorTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showErrorTip(tipId: CustomTipId, defaultMsg?: string): void;
     // @internal
-    _showInfoTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showInfoTip(tipId: CustomTipId, defaultMsg?: string): void;
     // @internal
-    _showTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showTip(tipId: CustomTipId, defaultMsg?: string): void;
     // @internal
-    _showWarningTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showWarningTip(tipId: CustomTipId, defaultMsg?: string): void;
 }
 
 // @beta

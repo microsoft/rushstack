@@ -30,6 +30,7 @@ import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackage
 import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
+import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -334,6 +335,58 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       omitImportersFromPreventManualShrinkwrapChanges
     );
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
+  }
+
+  /**
+   * Determine whether `pnpm-lock.yaml` contains insecure sha1.
+   * @internal
+   */
+  public disallowInsecureSha1(customTipsConfiguration: CustomTipsConfiguration): boolean {
+    const { packages } = this._shrinkwrapJson;
+    if (packages) {
+      for (const { resolution } of Object.values(packages)) {
+        if ((resolution as { integrity: string }).integrity.startsWith('sha1')) {
+          customTipsConfiguration._showErrorTip(
+            CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1,
+            'The `pnpm-lock.yaml` file forbid sha1 hashes.'
+          );
+          return true; // Indicates an error was found
+        }
+      }
+    }
+    return false;
+  }
+
+  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration): void {
+    const pnpmLockfilePolicies: [string, boolean][] = Object.entries(
+      rushConfiguration.pnpmOptions.pnpmLockfilePolicies ?? {}
+    );
+
+    if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
+      let invalidPoliciesCount: number = 0;
+
+      for (const [policy, enabled] of pnpmLockfilePolicies) {
+        if (enabled) {
+          switch (policy) {
+            case 'disallowInsecureSha1': {
+              const isError: boolean = this.disallowInsecureSha1(rushConfiguration.customTipsConfiguration);
+              if (isError) {
+                invalidPoliciesCount += 1;
+              }
+              break;
+            }
+
+            default: {
+              throw new Error(`Unknown pnpm lockfile policy "${policy}"`);
+            }
+          }
+        }
+      }
+
+      if (invalidPoliciesCount > 0) {
+        throw new AlreadyReportedError();
+      }
+    }
   }
 
   /** @override */

@@ -3,7 +3,13 @@
 
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
-import { type ITerminal, PrintUtilities, Colorize } from '@rushstack/terminal';
+import {
+  type ITerminal,
+  PrintUtilities,
+  Colorize,
+  Terminal,
+  ConsoleTerminalProvider
+} from '@rushstack/terminal';
 
 import schemaJson from '../schemas/custom-tips.schema.json';
 
@@ -228,6 +234,7 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
  */
 export class CustomTipsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+  private readonly _terminal: Terminal;
 
   public readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
 
@@ -288,6 +295,7 @@ export class CustomTipsConfiguration {
       }
     }
 
+    this._terminal = new Terminal(new ConsoleTerminalProvider());
     this.providedCustomTipsByTipId = providedCustomTips;
   }
 
@@ -301,11 +309,11 @@ export class CustomTipsConfiguration {
    *
    * @internal
    */
-  public _showTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
+  public _showTip(tipId: CustomTipId, defaultMsg?: string): void {
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
-    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId, defaultMsg);
+    this._writeMessageWithPipes(severityOfOriginalMessage, tipId, defaultMsg);
   }
 
   /**
@@ -313,8 +321,8 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId, defaultMsg);
+  public _showInfoTip(tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(CustomTipSeverity.Info, tipId, defaultMsg);
   }
 
   /**
@@ -322,8 +330,8 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId, defaultMsg);
+  public _showWarningTip(tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(CustomTipSeverity.Warning, tipId, defaultMsg);
   }
 
   /**
@@ -331,16 +339,12 @@ export class CustomTipsConfiguration {
    * display the tip on the terminal.
    * @internal
    */
-  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId, defaultMsg);
+  public _showErrorTip(tipId: CustomTipId, defaultMsg?: string): void {
+    this._writeMessageWithPipes(CustomTipSeverity.Error, tipId, defaultMsg);
   }
 
-  private _writeMessageWithPipes(
-    terminal: ITerminal,
-    severity: CustomTipSeverity,
-    tipId: CustomTipId,
-    defaultMsg?: string
-  ): void {
+  private _writeMessageWithPipes(severity: CustomTipSeverity, tipId: CustomTipId, defaultMsg?: string): void {
+    const terminal: ITerminal = this._terminal;
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
     let writeFunction:
       | typeof terminal.writeErrorLine

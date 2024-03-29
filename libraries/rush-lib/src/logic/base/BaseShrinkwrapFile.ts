@@ -30,6 +30,13 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
+   * Determine whether `pnpm-lock.yaml` complies with the rules specified in `common/config/rush/pnpm-config.schema.json`.
+   *
+   * @virtual
+   */
+  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration): void {}
+
+  /**
    * Validate the shrinkwrap using the provided policy options.
    *
    * @virtual
