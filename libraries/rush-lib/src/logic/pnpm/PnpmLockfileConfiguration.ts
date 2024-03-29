@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 import { AlreadyReportedError, FileSystem } from '@rushstack/node-core-library';
 import yaml from 'js-yaml';
-import type { Lockfile } from '@pnpm/lockfile-types';
+import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
@@ -24,7 +24,7 @@ export class PnpmLockfileConfiguration {
 
     if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
       const lockfileRawContent: string = await FileSystem.readFileAsync(filename);
-      const lockfile: Lockfile = yaml.load(lockfileRawContent);
+      const lockfile: IPnpmShrinkwrapYaml = yaml.load(lockfileRawContent);
 
       for (const [policy, enabled] of pnpmLockfilePolicies) {
         if (enabled) {
@@ -50,7 +50,7 @@ export class PnpmLockfileConfiguration {
   public static disallowInsecureSha1(
     terminal: ITerminal,
     rushConfiguration: RushConfiguration,
-    lockfile: Lockfile
+    lockfile: IPnpmShrinkwrapYaml
   ): void {
     const { packages } = lockfile;
     if (packages) {

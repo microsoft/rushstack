@@ -60,7 +60,6 @@
     "pnpm-sync-lib": "0.2.0"
   },
   "devDependencies": {
-    "@pnpm/lockfile-types": "~5.1.5",
     "@pnpm/logger": "4.0.0",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
