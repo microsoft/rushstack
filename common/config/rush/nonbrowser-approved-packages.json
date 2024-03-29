@@ -909,6 +909,6 @@
     {
       "name": "z-schema",
       "allowedCategories": [ "libraries" ]
-    },
+    }
   ]
 }
