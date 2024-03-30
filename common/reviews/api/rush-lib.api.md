@@ -393,7 +393,6 @@ export interface ICreateOperationsContext {
     readonly isWatch: boolean;
     readonly phaseOriginal: ReadonlySet<IPhase>;
     readonly phaseSelection: ReadonlySet<IPhase>;
-    readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
     readonly projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>;
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
@@ -440,6 +439,11 @@ export interface ICustomTipsJson {
 export interface IEnvironmentConfigurationInitializeOptions {
     // (undocumented)
     doNotNormalizePaths?: boolean;
+}
+
+// @alpha
+export interface IExecuteOperationsContext extends ICreateOperationsContext {
+    readonly projectChangeAnalyzer: ProjectChangeAnalyzer;
 }
 
 // @alpha
@@ -998,13 +1002,13 @@ export class PhasedCommandHooks {
     readonly afterExecuteOperation: AsyncSeriesHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ]>;
-    readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, ICreateOperationsContext]>;
+    readonly afterExecuteOperations: AsyncSeriesHook<[IExecutionResult, IExecuteOperationsContext]>;
     readonly beforeExecuteOperation: AsyncSeriesBailHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ], OperationStatus | undefined>;
     readonly beforeExecuteOperations: AsyncSeriesHook<[
     Map<Operation, IOperationExecutionResult>,
-    ICreateOperationsContext
+    IExecuteOperationsContext
     ]>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
     readonly createOperations: AsyncSeriesWaterfallHook<[Set<Operation>, ICreateOperationsContext]>;
@@ -1328,13 +1332,13 @@ export class _RushInternals {
 
 // @beta
 export class RushLifecycleHooks {
-    beforeInstall: AsyncSeriesHook<IGlobalCommand>;
-    flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
-    initialize: AsyncSeriesHook<IRushCommand>;
-    runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
-    runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
-    runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
-    runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
+    readonly beforeInstall: AsyncSeriesHook<IGlobalCommand>;
+    readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]>;
+    readonly initialize: AsyncSeriesHook<IRushCommand>;
+    readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand>;
+    readonly runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand>;
+    readonly runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>>;
+    readonly runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>>;
 }
 
 // @alpha

@@ -12,7 +12,11 @@ import type {
 } from '@rushstack/ts-command-line';
 
 import type { IPhasedCommand } from '../../pluginFramework/RushLifeCycle';
-import { PhasedCommandHooks, type ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
+import {
+  PhasedCommandHooks,
+  type ICreateOperationsContext,
+  type IExecuteOperationsContext
+} from '../../pluginFramework/PhasedCommandHooks';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
@@ -64,15 +68,20 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   watchDebounceMs: number | undefined;
 }
 
-interface IRunPhasesOptions {
+interface IInitialRunPhasesOptions {
+  executionManagerOptions: Omit<IOperationExecutionManagerOptions, 'beforeExecuteOperations'>;
   initialCreateOperationsContext: ICreateOperationsContext;
-  executionManagerOptions: IOperationExecutionManagerOptions;
   stopwatch: Stopwatch;
   terminal: ITerminal;
 }
 
+interface IRunPhasesOptions extends IInitialRunPhasesOptions {
+  initialState: ProjectChangeAnalyzer;
+  executionManagerOptions: IOperationExecutionManagerOptions;
+}
+
 interface IExecutionOperationsOptions {
-  createOperationsContext: ICreateOperationsContext;
+  executeOperationsContext: IExecuteOperationsContext;
   executionManagerOptions: IOperationExecutionManagerOptions;
   ignoreHooks: boolean;
   operations: Set<Operation>;
@@ -418,7 +427,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         ? new Map()
         : await RushProjectConfiguration.tryLoadForProjectsAsync(projectSelection, terminal);
 
-      const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
       const initialCreateOperationsContext: ICreateOperationsContext = {
         buildCacheConfiguration,
         cobuildConfiguration,
@@ -429,13 +437,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         rushConfiguration: this.rushConfiguration,
         phaseOriginal: new Set(this._originalPhases),
         phaseSelection: new Set(this._initialPhases),
-        projectChangeAnalyzer,
         projectSelection,
         projectConfigurations,
         projectsInUnknownState: projectSelection
       };
 
-      const executionManagerOptions: IOperationExecutionManagerOptions = {
+      const executionManagerOptions: Omit<IOperationExecutionManagerOptions, 'beforeExecuteOperations'> = {
         quietMode: isQuietMode,
         debugMode: this.parser.isDebug,
         parallelism,
@@ -446,30 +453,19 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         afterExecuteOperation: async (record: OperationExecutionRecord) => {
           await this.hooks.afterExecuteOperation.promise(record);
         },
-        beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
-          await this.hooks.beforeExecuteOperations.promise(records, initialCreateOperationsContext);
-        },
         onOperationStatusChanged: (record: OperationExecutionRecord) => {
           this.hooks.onOperationStatusChanged.call(record);
         }
       };
 
-      const internalOptions: IRunPhasesOptions = {
+      const initialInternalOptions: IInitialRunPhasesOptions = {
         initialCreateOperationsContext,
         executionManagerOptions,
         stopwatch,
         terminal
       };
 
-      terminal.write('Analyzing repo state... ');
-      const repoStateStopwatch: Stopwatch = new Stopwatch();
-      repoStateStopwatch.start();
-      await projectChangeAnalyzer._ensureInitializedAsync(terminal);
-      repoStateStopwatch.stop();
-      terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
-      terminal.writeLine();
-
-      await this._runInitialPhases(internalOptions);
+      const internalOptions: IRunPhasesOptions = await this._runInitialPhases(initialInternalOptions);
 
       if (isWatch) {
         if (buildCacheConfiguration) {
@@ -484,16 +480,43 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     }
   }
 
-  private async _runInitialPhases(options: IRunPhasesOptions): Promise<void> {
-    const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
+  private async _runInitialPhases(options: IInitialRunPhasesOptions): Promise<IRunPhasesOptions> {
+    const {
+      initialCreateOperationsContext,
+      executionManagerOptions: partialExecutionManagerOptions,
+      stopwatch,
+      terminal
+    } = options;
 
     const operations: Set<Operation> = await this.hooks.createOperations.promise(
       new Set(),
       initialCreateOperationsContext
     );
 
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+
+    terminal.write('Analyzing repo state... ');
+    const repoStateStopwatch: Stopwatch = new Stopwatch();
+    repoStateStopwatch.start();
+    await projectChangeAnalyzer._ensureInitializedAsync(terminal);
+    repoStateStopwatch.stop();
+    terminal.writeLine(`DONE (${repoStateStopwatch.toString()})`);
+    terminal.writeLine();
+
+    const initialExecuteOperationsContext: IExecuteOperationsContext = {
+      ...initialCreateOperationsContext,
+      projectChangeAnalyzer
+    };
+
+    const executionManagerOptions: IOperationExecutionManagerOptions = {
+      ...partialExecutionManagerOptions,
+      beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
+        await this.hooks.beforeExecuteOperations.promise(records, initialExecuteOperationsContext);
+      }
+    };
+
     const initialOptions: IExecutionOperationsOptions = {
-      createOperationsContext: initialCreateOperationsContext,
+      executeOperationsContext: initialExecuteOperationsContext,
       ignoreHooks: false,
       operations,
       stopwatch,
@@ -502,6 +525,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
     };
 
     await this._executeOperations(initialOptions);
+
+    return {
+      ...options,
+      executionManagerOptions,
+      initialState: projectChangeAnalyzer
+    };
   }
 
   private _registerWatchModeInterface(projectWatcher: ProjectWatcher): void {
@@ -575,13 +604,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    * 3) Goto (1)
    */
   private async _runWatchPhases(options: IRunPhasesOptions): Promise<void> {
-    const { initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } = options;
+    const { initialState, initialCreateOperationsContext, executionManagerOptions, stopwatch, terminal } =
+      options;
 
     const phaseOriginal: Set<IPhase> = new Set(this._watchPhases);
     const phaseSelection: Set<IPhase> = new Set(this._watchPhases);
 
-    const { projectChangeAnalyzer: initialState, projectSelection: projectsToWatch } =
-      initialCreateOperationsContext;
+    const { projectSelection: projectsToWatch } = initialCreateOperationsContext;
 
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import(
@@ -644,7 +673,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       }
 
       // Account for consumer relationships
-      const createOperationsContext: ICreateOperationsContext = {
+      const executeOperationsContext: IExecuteOperationsContext = {
         ...initialCreateOperationsContext,
         isInitial: false,
         projectChangeAnalyzer: state,
@@ -656,11 +685,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
 
       const operations: Set<Operation> = await this.hooks.createOperations.promise(
         new Set(),
-        createOperationsContext
+        executeOperationsContext
       );
 
       const executeOptions: IExecutionOperationsOptions = {
-        createOperationsContext,
+        executeOperationsContext,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
         operations,
@@ -668,7 +697,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
         executionManagerOptions: {
           ...executionManagerOptions,
           beforeExecuteOperations: async (records: Map<Operation, OperationExecutionRecord>) => {
-            await this.hooks.beforeExecuteOperations.promise(records, createOperationsContext);
+            await this.hooks.beforeExecuteOperations.promise(records, executeOperationsContext);
           }
         },
         terminal
@@ -697,7 +726,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       executionManagerOptions
     );
 
-    const { isInitial, isWatch } = options.createOperationsContext;
+    const { isInitial, isWatch } = options.executeOperationsContext;
 
     let success: boolean = false;
     let result: IExecutionResult | undefined;
@@ -706,7 +735,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
       result = await executionManager.executeAsync();
       success = result.status === OperationStatus.Success;
 
-      await this.hooks.afterExecuteOperations.promise(result, options.createOperationsContext);
+      await this.hooks.afterExecuteOperations.promise(result, options.executeOperationsContext);
 
       stopwatch.stop();
 
