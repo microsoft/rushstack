@@ -37,6 +37,9 @@ export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
  * @public
  */
 export interface IPnpmLockfilePolicies {
+  /**
+   * Forbid sha1 hashes in `pnpm-lock.yaml`
+   */
   disallowInsecureSha1?: boolean;
 }
 
