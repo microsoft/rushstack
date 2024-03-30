@@ -50,7 +50,11 @@ export interface ICustomTipItemJson {
  * @beta
  */
 export enum CustomTipId {
+  // Events from the Rush process should with "TIP_RUSH_".
   TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
+  TIP_RUSH_DISALLOW_INSECURE_SHA1 = 'TIP_RUSH_DISALLOW_INSECURE_SHA1',
+
+  // Events from a PNPM subprocess should start with "TIP_PNPM_".
   TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
   TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION',
   TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE = 'TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE',
@@ -58,8 +62,7 @@ export enum CustomTipId {
   TIP_PNPM_OUTDATED_LOCKFILE = 'TIP_PNPM_OUTDATED_LOCKFILE',
   TIP_PNPM_TARBALL_INTEGRITY = 'TIP_PNPM_TARBALL_INTEGRITY',
   TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = 'TIP_PNPM_MISMATCHED_RELEASE_CHANNEL',
-  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION',
-  TIP_PNPM_DISALLOW_INSECURE_SHA1 = 'TIP_PNPM_DISALLOW_INSECURE_SHA1'
+  TIP_PNPM_INVALID_NODE_VERSION = 'TIP_PNPM_INVALID_NODE_VERSION'
 }
 
 /**
@@ -123,6 +126,14 @@ export interface ICustomTipInfo {
 }
 
 export const RUSH_CUSTOM_TIPS: Readonly<Record<`TIP_RUSH_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1]: {
+    tipId: CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_DISALLOW_INSECURE_SHA1');
+    }
+  },
   [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
     tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
     severity: CustomTipSeverity.Error,
@@ -207,15 +218,6 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
     isMatch: (str: string) => {
       // Todo: verify this
       return str.includes('ERR_PNPM_INVALID_NODE_VERSION');
-    }
-  },
-
-  [CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1]: {
-    tipId: CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1,
-    severity: CustomTipSeverity.Error,
-    type: CustomTipType.pnpm,
-    isMatch: (str: string) => {
-      return str.includes('ERR_PNPM_DISALLOW_INSECURE_SHA1');
     }
   }
 };

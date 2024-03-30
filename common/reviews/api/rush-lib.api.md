@@ -152,8 +152,6 @@ export class CredentialCache {
 // @beta
 export enum CustomTipId {
     // (undocumented)
-    TIP_PNPM_DISALLOW_INSECURE_SHA1 = "TIP_PNPM_DISALLOW_INSECURE_SHA1",
-    // (undocumented)
     TIP_PNPM_INVALID_NODE_VERSION = "TIP_PNPM_INVALID_NODE_VERSION",
     // (undocumented)
     TIP_PNPM_MISMATCHED_RELEASE_CHANNEL = "TIP_PNPM_MISMATCHED_RELEASE_CHANNEL",
@@ -169,6 +167,8 @@ export enum CustomTipId {
     TIP_PNPM_TARBALL_INTEGRITY = "TIP_PNPM_TARBALL_INTEGRITY",
     // (undocumented)
     TIP_PNPM_UNEXPECTED_STORE = "TIP_PNPM_UNEXPECTED_STORE",
+    // (undocumented)
+    TIP_RUSH_DISALLOW_INSECURE_SHA1 = "TIP_RUSH_DISALLOW_INSECURE_SHA1",
     // (undocumented)
     TIP_RUSH_INCONSISTENT_VERSIONS = "TIP_RUSH_INCONSISTENT_VERSIONS"
 }
@@ -666,7 +666,6 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @public
 export interface IPnpmLockfilePolicies {
-    // (undocumented)
     disallowInsecureSha1?: boolean;
 }
 

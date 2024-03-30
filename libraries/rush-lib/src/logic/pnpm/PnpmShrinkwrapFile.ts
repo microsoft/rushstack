@@ -354,7 +354,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
               ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
           );
 
-          customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1);
+          customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1);
 
           return true; // Indicates an error was found
         }
