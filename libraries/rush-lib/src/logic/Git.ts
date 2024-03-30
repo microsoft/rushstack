@@ -91,40 +91,22 @@ export class Git {
 
   /**
    * If a Git email address is configured and is nonempty, this returns it.
-   * Otherwise, undefined is returned.
-   */
-  public async tryGetGitEmailAsync(): Promise<string | undefined> {
-    const emailResult: IResultOrError<string> = await this._tryGetGitEmailAsync();
-    if (emailResult.result !== undefined && emailResult.result.length > 0) {
-      return emailResult.result;
-    }
-    return undefined;
-  }
-
-  /**
-   * If a Git email address is configured and is nonempty, this returns it.
    * Otherwise, configuration instructions are printed to the console,
    * and AlreadyReportedError is thrown.
    */
   public async getGitEmailAsync(): Promise<string> {
     // Determine the user's account
     // Ex: "bob@example.com"
-    const emailResult: IResultOrError<string> = await this._tryGetGitEmailAsync();
-    if (emailResult.error) {
-      // eslint-disable-next-line no-console
-      console.log(
-        [
-          `Error: ${emailResult.error.message}`,
-          'Unable to determine your Git configuration using this command:',
-          '',
-          '    git config user.email',
-          ''
-        ].join('\n')
-      );
-      throw new AlreadyReportedError();
-    }
+    const emailResult: string | undefined = await this.tryGetGitEmailAsync();
+    return this.validateGitEmail(emailResult);
+  }
 
-    if (emailResult.result === undefined || emailResult.result.length === 0) {
+  /**
+   * If the Git email address is configured and non-empty, this returns it. Otherwise
+   * it prints an error message and throws.
+   */
+  public validateGitEmail(userEmail: string | undefined): string {
+    if (userEmail === undefined || userEmail.length === 0) {
       // eslint-disable-next-line no-console
       console.log(
         [
@@ -139,7 +121,7 @@ export class Git {
       throw new AlreadyReportedError();
     }
 
-    return emailResult.result;
+    return userEmail;
   }
 
   /**
@@ -518,7 +500,11 @@ export class Git {
     return result;
   }
 
-  private async _tryGetGitEmailAsync(): Promise<IResultOrError<string>> {
+  /**
+   * Returns an object containing either the result of the `git config user.email`
+   * command or an error.
+   */
+  public async tryGetGitEmailAsync(): Promise<string | undefined> {
     if (this._gitEmailResult === undefined) {
       const gitPath: string = this.getGitPathOrThrow();
       try {
@@ -534,7 +520,22 @@ export class Git {
       }
     }
 
-    return this._gitEmailResult;
+    const { error, result } = this._gitEmailResult;
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.log(
+        [
+          `Error: ${error.message}`,
+          'Unable to determine your Git configuration using this command:',
+          '',
+          '    git config user.email',
+          ''
+        ].join('\n')
+      );
+      throw new AlreadyReportedError();
+    }
+
+    return result;
   }
 
   private async _tryGetGitHooksPathAsync(): Promise<IResultOrError<string>> {

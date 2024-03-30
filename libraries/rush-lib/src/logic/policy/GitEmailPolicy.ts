@@ -34,10 +34,11 @@ export async function validateAsync(
     return;
   }
 
+  let userEmail: string | undefined = await git.tryGetGitEmailAsync();
   // If there isn't a Git policy, then we don't care whether the person configured
   // a Git email address at all.  This helps people who don't
   if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-    if (git.tryGetGitEmailAsync() === undefined) {
+    if (userEmail === undefined) {
       return;
     }
 
@@ -45,9 +46,8 @@ export async function validateAsync(
     // sanity checks (e.g. no spaces in the address).
   }
 
-  let userEmail: string;
   try {
-    userEmail = await git.getGitEmailAsync();
+    userEmail = git.validateGitEmail(userEmail);
 
     // sanity check; a valid email should not contain any whitespace
     // if this fails, then we have another issue to report
