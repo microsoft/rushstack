@@ -334,10 +334,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
   /**
    * The `pnpmLockfilePolicies` setting defines the policies that govern the `pnpm-lock.yaml` file.
-   *
-   * @remarks
-   * Available options:
-   *  - disallowInsecureSha1: Forbid sha1 hashes in `pnpm-lock.yaml`
    */
   public readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
 
