@@ -255,11 +255,28 @@
   },
 
   /**
-   * The `pnpmLockfilePolicies` setting defines the policies that govern the `pnpm-lock.yaml` file.
-   * This is a collection of configuration items. For now, it can only support `disallowInsecureSha1`:
-   *  - `disallowInsecureSha1`: Forbid sha1 hashes in `pnpm-lock.yaml`
+   * Defines the policies to be checked for the `pnpm-lock.yaml` file.
    */
   "pnpmLockfilePolicies": {
-    "disallowInsecureSha1": true
+
+    /**
+     * This policy will cause "rush update" to report an error if `pnpm-lock.yaml` contains
+     * any SHA1 integrity hashes.
+     *
+     * For each NPM dependency, `pnpm-lock.yaml` normally stores an `integrity` hash.  Although
+     * its main purpose is to detect corrupted or truncated network requests, this hash can also
+     * serve as a security fingerprint to protect against attacks that would substitute a
+     * malicious tarball, for example if a misconfigured .npmrc caused a machine to accidentally
+     * download a matching package name+version from npmjs.com instead of the private NPM registry.
+     * NPM originally used a SHA1 hash; this was insecure because an attacker can too easily craft
+     * a tarball with a matching fingerprint.  For this reason, NPM later deprecated SHA1 and
+     * instead adopted a cryptographically strong SHA512 hash.  Nonetheless, SHA1 hashes can
+     * occasionally reappear during "rush update", for example due to missing metadata fallbacks
+     * (https://github.com/orgs/pnpm/discussions/6194) or an incompletely migrated private registry.
+     * Enable `disallowInsecureSha1` to avoid security/compliance alerts about this issue.
+     *
+     * The default value is false.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "disallowInsecureSha1": true
   }
 }
