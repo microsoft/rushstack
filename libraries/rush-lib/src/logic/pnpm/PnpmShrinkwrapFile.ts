@@ -372,24 +372,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (pnpmLockfilePolicies && pnpmLockfilePolicies.length > 0) {
       let invalidPoliciesCount: number = 0;
 
-      for (const [policy, enabled] of pnpmLockfilePolicies) {
-        if (enabled) {
-          switch (policy) {
-            case 'disallowInsecureSha1': {
-              const isError: boolean = this._disallowInsecureSha1(
-                rushConfiguration.customTipsConfiguration,
-                terminal
-              );
-              if (isError) {
-                invalidPoliciesCount += 1;
-              }
-              break;
-            }
-
-            default: {
-              throw new Error(`Unknown pnpm lockfile policy "${policy}"`);
-            }
-          }
+      if (pnpmLockfilePolicies.disallowInsecureSha1) {
+        const isError: boolean = this._disallowInsecureSha1(
+          rushConfiguration.customTipsConfiguration,
+          terminal
+        );
+        if (isError) {
+          invalidPoliciesCount++;
         }
       }
 
