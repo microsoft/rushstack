@@ -697,13 +697,11 @@ export interface IPnpmPackageExtension {
     optionalDependencies?: Record<string, string>;
     // (undocumented)
     peerDependencies?: Record<string, string>;
-    // Warning: (ae-incompatible-release-tags) The symbol "peerDependenciesMeta" is marked as @public, but its signature references "IPnpmPeerDependenciesMeta" which is marked as @beta
-    //
     // (undocumented)
     peerDependenciesMeta?: IPnpmPeerDependenciesMeta;
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export interface IPnpmPeerDependenciesMeta {
     // (undocumented)
     [packageName: string]: {

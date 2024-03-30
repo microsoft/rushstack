@@ -50,7 +50,7 @@ export interface IPnpmPeerDependencyRules {
 }
 
 /**
- * @beta
+ * @public
  */
 export interface IPnpmPeerDependenciesMeta {
   [packageName: string]: {
