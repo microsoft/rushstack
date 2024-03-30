@@ -346,26 +346,27 @@ export class CustomTipsConfiguration {
 
   private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
-    let writeFunction:
-      | typeof terminal.writeErrorLine
-      | typeof terminal.writeWarningLine
-      | typeof terminal.writeLine;
-    let prefix: string;
-    switch (severity) {
-      case CustomTipSeverity.Error:
-        writeFunction = terminal.writeErrorLine.bind(terminal);
-        prefix = Colorize.red('| ');
-        break;
-      case CustomTipSeverity.Warning:
-        writeFunction = terminal.writeWarningLine.bind(terminal);
-        prefix = Colorize.yellow('| ');
-        break;
-      default:
-        writeFunction = terminal.writeLine.bind(terminal);
-        prefix = '| ';
-        break;
-    }
     if (customTipJsonItem) {
+      let writeFunction:
+        | typeof terminal.writeErrorLine
+        | typeof terminal.writeWarningLine
+        | typeof terminal.writeLine;
+      let prefix: string;
+      switch (severity) {
+        case CustomTipSeverity.Error:
+          writeFunction = terminal.writeErrorLine.bind(terminal);
+          prefix = Colorize.red('| ');
+          break;
+        case CustomTipSeverity.Warning:
+          writeFunction = terminal.writeWarningLine.bind(terminal);
+          prefix = Colorize.yellow('| ');
+          break;
+        default:
+          writeFunction = terminal.writeLine.bind(terminal);
+          prefix = '| ';
+          break;
+      }
+
       writeFunction(`| Custom Tip (${tipId})`);
       writeFunction('|');
 
