@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 28 Mar 2024 19:55:27 GMT and should not be manually modified.
+This log was last generated on Sat, 30 Mar 2024 04:32:31 GMT and should not be manually modified.
+
+## 5.119.0
+Sat, 30 Mar 2024 04:32:31 GMT
+
+### Updates
+
+- Add a policy to forbid sha1 hashes in pnpm-lock.yaml.
+- (BREAKING API CHANGE) Refactor phased action execution to analyze the repo after the initial operations are created. This removes the `projectChangeAnalyzer` property from the context parameter passed to the `createOperations` hook.
 
 ## 5.118.7
 Thu, 28 Mar 2024 19:55:27 GMT
