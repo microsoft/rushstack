@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "(BREAKING API CHANGE) Refactor phased action execution to analyze the repo after the intial operations are created. This removes the `projectChangeAnalyzer` property from the context paramter passed to the `createOperations` hook.",
+      "comment": "(BREAKING API CHANGE) Refactor phased action execution to analyze the repo after the initial operations are created. This removes the `projectChangeAnalyzer` property from the context parameter passed to the `createOperations` hook.",
       "type": "none"
     }
   ],
