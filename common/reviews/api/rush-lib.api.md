@@ -168,6 +168,8 @@ export enum CustomTipId {
     // (undocumented)
     TIP_PNPM_UNEXPECTED_STORE = "TIP_PNPM_UNEXPECTED_STORE",
     // (undocumented)
+    TIP_RUSH_DISALLOW_INSECURE_SHA1 = "TIP_RUSH_DISALLOW_INSECURE_SHA1",
+    // (undocumented)
     TIP_RUSH_INCONSISTENT_VERSIONS = "TIP_RUSH_INCONSISTENT_VERSIONS"
 }
 
@@ -666,6 +668,11 @@ export interface IPhasedCommand extends IRushCommand {
     readonly hooks: PhasedCommandHooks;
 }
 
+// @public
+export interface IPnpmLockfilePolicies {
+    disallowInsecureSha1?: boolean;
+}
+
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     alwaysFullInstall?: boolean;
@@ -673,17 +680,46 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalAllowedDeprecatedVersions?: Record<string, string>;
     globalNeverBuiltDependencies?: string[];
     globalOverrides?: Record<string, string>;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtension" needs to be exported by the entry point index.d.ts
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
-    // Warning: (ae-forgotten-export) The symbol "IPnpmPeerDependencyRules" needs to be exported by the entry point index.d.ts
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
+    pnpmLockfilePolicies?: IPnpmLockfilePolicies;
     pnpmStore?: PnpmStoreLocation;
     preventManualShrinkwrapChanges?: boolean;
     resolutionMode?: PnpmResolutionMode;
     strictPeerDependencies?: boolean;
     unsupportedPackageJsonSettings?: unknown;
     useWorkspaces?: boolean;
+}
+
+// @public (undocumented)
+export interface IPnpmPackageExtension {
+    // (undocumented)
+    dependencies?: Record<string, string>;
+    // (undocumented)
+    optionalDependencies?: Record<string, string>;
+    // (undocumented)
+    peerDependencies?: Record<string, string>;
+    // (undocumented)
+    peerDependenciesMeta?: IPnpmPeerDependenciesMeta;
+}
+
+// @public (undocumented)
+export interface IPnpmPeerDependenciesMeta {
+    // (undocumented)
+    [packageName: string]: {
+        optional?: boolean;
+    };
+}
+
+// @public (undocumented)
+export interface IPnpmPeerDependencyRules {
+    // (undocumented)
+    allowAny?: string[];
+    // (undocumented)
+    allowedVersions?: Record<string, string>;
+    // (undocumented)
+    ignoreMissing?: string[];
 }
 
 // @beta
@@ -1033,6 +1069,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     static loadFromJsonFileOrThrow(jsonFilename: string, commonTempFolder: string): PnpmOptionsConfiguration;
     // @internal (undocumented)
     static loadFromJsonObject(json: _IPnpmOptionsJson, commonTempFolder: string): PnpmOptionsConfiguration;
+    readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
     readonly pnpmStore: PnpmStoreLocation;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;

@@ -50,7 +50,11 @@ export interface ICustomTipItemJson {
  * @beta
  */
 export enum CustomTipId {
+  // Events from the Rush process should with "TIP_RUSH_".
   TIP_RUSH_INCONSISTENT_VERSIONS = 'TIP_RUSH_INCONSISTENT_VERSIONS',
+  TIP_RUSH_DISALLOW_INSECURE_SHA1 = 'TIP_RUSH_DISALLOW_INSECURE_SHA1',
+
+  // Events from a PNPM subprocess should start with "TIP_PNPM_".
   TIP_PNPM_UNEXPECTED_STORE = 'TIP_PNPM_UNEXPECTED_STORE',
   TIP_PNPM_NO_MATCHING_VERSION = 'TIP_PNPM_NO_MATCHING_VERSION',
   TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE = 'TIP_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE',
@@ -122,6 +126,14 @@ export interface ICustomTipInfo {
 }
 
 export const RUSH_CUSTOM_TIPS: Readonly<Record<`TIP_RUSH_${string}` & CustomTipId, ICustomTipInfo>> = {
+  [CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1]: {
+    tipId: CustomTipId.TIP_RUSH_DISALLOW_INSECURE_SHA1,
+    severity: CustomTipSeverity.Error,
+    type: CustomTipType.pnpm,
+    isMatch: (str: string) => {
+      return str.includes('ERR_PNPM_DISALLOW_INSECURE_SHA1');
+    }
+  },
   [CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS]: {
     tipId: CustomTipId.TIP_RUSH_INCONSISTENT_VERSIONS,
     severity: CustomTipSeverity.Error,
@@ -282,12 +294,15 @@ export class CustomTipsConfiguration {
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId,  display the tip on the terminal.
    *
    * @remarks
    * The severity of the tip is defined in ${@link CustomTipsConfiguration.customTipRegistry}.
-   * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration._showErrorTip}.
+   * If you want to change the severity specifically for this call,
+   * use other APIs such as {@link CustomTipsConfiguration._showErrorTip}.
+   *
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    *
    * @internal
    */
@@ -299,8 +314,10 @@ export class CustomTipsConfiguration {
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId, display the tip on the terminal.
+   * @remarks
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    * @internal
    */
   public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
@@ -308,8 +325,10 @@ export class CustomTipsConfiguration {
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId, display the tip on the terminal.
+   * @remarks
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    * @internal
    */
   public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
@@ -317,8 +336,10 @@ export class CustomTipsConfiguration {
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId, display the tip on the terminal.
+   * @remarks
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    * @internal
    */
   public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
