@@ -180,13 +180,13 @@ export class CustomTipsConfiguration {
     // (undocumented)
     readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
     // @internal
-    _showErrorTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void;
     // @internal
-    _showInfoTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void;
     // @internal
-    _showTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showTip(terminal: ITerminal, tipId: CustomTipId): void;
     // @internal
-    _showWarningTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void;
+    _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void;
 }
 
 // @beta

@@ -349,11 +349,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (packages) {
       for (const { resolution } of Object.values(packages)) {
         if ((resolution as { integrity: string }).integrity.startsWith('sha1')) {
-          customTipsConfiguration._showErrorTip(
-            terminal,
-            CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1,
-            'The `pnpm-lock.yaml` file forbid sha1 hashes.'
+          terminal.writeErrorLine(
+            'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
+              ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
           );
+
+          customTipsConfiguration._showErrorTip(terminal, CustomTipId.TIP_PNPM_DISALLOW_INSECURE_SHA1);
+
           return true; // Indicates an error was found
         }
       }

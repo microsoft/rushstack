@@ -292,55 +292,59 @@ export class CustomTipsConfiguration {
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId,  display the tip on the terminal.
    *
    * @remarks
    * The severity of the tip is defined in ${@link CustomTipsConfiguration.customTipRegistry}.
-   * If you want to change the severity specifically for this call, use other API like {@link CustomTipsConfiguration._showErrorTip}.
+   * If you want to change the severity specifically for this call,
+   * use other APIs such as {@link CustomTipsConfiguration._showErrorTip}.
+   *
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    *
    * @internal
    */
-  public _showTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
+  public _showTip(terminal: ITerminal, tipId: CustomTipId): void {
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
-    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId, defaultMsg);
+    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId, display the tip on the terminal.
+   * @remarks
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    * @internal
    */
-  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId, defaultMsg);
+  public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId, display the tip on the terminal.
+   * @remarks
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    * @internal
    */
-  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId, defaultMsg);
+  public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
 
   /**
-   * If custom-tips.json defines a tip for the specified tipId,
-   * display the tip on the terminal.
+   * If custom-tips.json defines a tip for the specified tipId, display the tip on the terminal.
+   * @remarks
+   * Custom tips by design do not replace Rush's standard messaging; instead, they annotate Rush's
+   * output with additional team-specific advice.
    * @internal
    */
-  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId, defaultMsg?: string): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId, defaultMsg);
+  public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
+    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
 
-  private _writeMessageWithPipes(
-    terminal: ITerminal,
-    severity: CustomTipSeverity,
-    tipId: CustomTipId,
-    defaultMsg?: string
-  ): void {
+  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
     let writeFunction:
       | typeof terminal.writeErrorLine
@@ -368,9 +372,6 @@ export class CustomTipsConfiguration {
       const message: string = customTipJsonItem.message;
       const wrappedAndIndentedMessage: string = PrintUtilities.wrapWords(message, undefined, prefix);
       writeFunction(...wrappedAndIndentedMessage, { doNotOverrideSgrCodes: true });
-      terminal.writeLine();
-    } else if (defaultMsg) {
-      writeFunction(defaultMsg);
       terminal.writeLine();
     }
   }
