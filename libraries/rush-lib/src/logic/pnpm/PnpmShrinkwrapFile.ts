@@ -348,7 +348,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const { packages } = this._shrinkwrapJson;
     if (packages) {
       for (const { resolution } of Object.values(packages)) {
-        if ((resolution?.integrity.startsWith('sha1')) {
+        if (resolution?.integrity.startsWith('sha1')) {
           terminal.writeErrorLine(
             'Error: An integrity field with "sha1" was found in pnpm-lock.yaml;' +
               ' this conflicts with the "disallowInsecureSha1" policy from pnpm-config.json.\n'
