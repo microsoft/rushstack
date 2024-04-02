@@ -456,7 +456,7 @@ export class Extractor {
           // For a local build, just copy the file automatically.
           messageRouter.logWarning(
             ConsoleMessageId.ApiReportCopied,
-            'You have changed the API signature for this project.' + ` Updating ${expectedApiReportShortPath}`
+            `You have changed the API signature for this project. Updating ${expectedApiReportShortPath}`
           );
 
           FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
