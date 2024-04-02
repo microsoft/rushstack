@@ -178,27 +178,29 @@ export class ApiReportGenerator {
               messagesToReport.push(message);
             }
 
-            writer.ensureSkippedLine();
-            writer.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
+            if (this._shouldIncludeInReport(collector, astDeclaration, options.releaseLevel)) {
+              writer.ensureSkippedLine();
+              writer.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
-            const span: Span = new Span(astDeclaration.declaration);
+              const span: Span = new Span(astDeclaration.declaration);
 
-            const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
-            if (apiItemMetadata.isPreapproved) {
-              ApiReportGenerator._modifySpanForPreapproved(span);
-            } else {
-              ApiReportGenerator._modifySpan(
-                collector,
-                span,
-                entity,
-                astDeclaration,
-                false,
-                options.releaseLevel
-              );
+              const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
+              if (apiItemMetadata.isPreapproved) {
+                ApiReportGenerator._modifySpanForPreapproved(span);
+              } else {
+                ApiReportGenerator._modifySpan(
+                  collector,
+                  span,
+                  entity,
+                  astDeclaration,
+                  false,
+                  options.releaseLevel
+                );
+              }
+
+              span.writeModifiedText(writer);
+              writer.ensureNewLine();
             }
-
-            span.writeModifiedText(writer);
-            writer.ensureNewLine();
           }
         }
 
