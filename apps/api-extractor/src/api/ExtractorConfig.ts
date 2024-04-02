@@ -934,6 +934,13 @@ export class ExtractorConfig {
           throw new Error('API reports are enabled, but no report files were specified.');
         }
 
+        ExtractorConfig._ensureNoDuplicateReportNames(
+          untrimmedReportFileName,
+          alphaReportFileName,
+          betaReportFileName,
+          publicReportFileName
+        );
+
         if (apiReportConfig.reportFolder) {
           reportDirectoryPath = ExtractorConfig._resolvePathWithTokens(
             'reportFolder',
@@ -1125,6 +1132,27 @@ export class ExtractorConfig {
     }
 
     return new ExtractorConfig({ ...extractorConfigParameters, tsdocConfigFile, tsdocConfiguration });
+  }
+
+  /**
+   * Ensures that expanded API report file names are unique.
+   * @throws Throws an error if a duplicate name is found.
+   * @param reportFileNames - The list of API report file names to check for duplicates.
+   * `undefined` indicates a report that is not configured. Such entries are ignored.
+   */
+  private static _ensureNoDuplicateReportNames(...reportFileNames: (string | undefined)[]): void {
+    const set: Set<string> = new Set<string>();
+    for (const fileName of reportFileNames) {
+      if (fileName === undefined) {
+        continue;
+      }
+      if (set.has(fileName)) {
+        throw new Error(
+          `Multiple API reports are configured with the same output file name: "${fileName}". Please ensure unique file names.`
+        );
+      }
+      set.add(fileName);
+    }
   }
 
   private static _resolvePathWithTokens(
