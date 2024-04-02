@@ -23,16 +23,39 @@ import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationForma
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 /**
+ * Represents the minimum release tag level to be included in an API report.
+ */
+export enum ApiReportReleaseLevel {
+  /**
+   * Include all exports, regardless of release tags.
+   */
+  Untrimmed = 0,
+
+  /**
+   * Include exports tagged with `@alpha`, `@beta`, or `@public`.
+   */
+  Alpha = 1,
+
+  /**
+   * Include exports tagged with `@beta` or `@public`.
+   */
+  Beta = 2,
+
+  /**
+   * Include exports tagged with `@public`.
+   */
+  Public = 3
+}
+
+/**
  * Options for {@link ApiReportGenerator.generateReviewFileContent}.
  */
 export interface IApiReportOptions {
   /**
    * The release level with which the report is associated.
    * Can also be viewed as the minimal release level of items that should be included in the report.
-   *
-   * @defaultValue Include everything. I.e. {@link ReleaseTag.Internal}.
    */
-  readonly releaseLevel?: Omit<ReleaseTag, ReleaseTag.None>;
+  readonly releaseLevel: ApiReportReleaseLevel;
 }
 
 export class ApiReportGenerator {
@@ -55,11 +78,9 @@ export class ApiReportGenerator {
     return normalizedActual === normalizedExpected;
   }
 
-  public static generateReviewFileContent(collector: Collector, options?: IApiReportOptions): string {
+  public static generateReviewFileContent(collector: Collector, options: IApiReportOptions): string {
     const writer: IndentedWriter = new IndentedWriter();
     writer.trimLeadingSpaces = true;
-
-    const releaseLevel: ReleaseTag = (options?.releaseLevel as ReleaseTag) ?? ReleaseTag.Internal;
 
     writer.writeLine(
       [
@@ -143,7 +164,14 @@ export class ApiReportGenerator {
             if (apiItemMetadata.isPreapproved) {
               ApiReportGenerator._modifySpanForPreapproved(span);
             } else {
-              ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false, releaseLevel);
+              ApiReportGenerator._modifySpan(
+                collector,
+                span,
+                entity,
+                astDeclaration,
+                false,
+                options.releaseLevel
+              );
             }
 
             span.writeModifiedText(writer);
@@ -271,7 +299,7 @@ export class ApiReportGenerator {
     entity: CollectorEntity,
     astDeclaration: AstDeclaration,
     insideTypeLiteral: boolean,
-    releaseLevel: ReleaseTag
+    releaseLevel: ApiReportReleaseLevel
   ): void {
     // Should we process this declaration at all?
     // eslint-disable-next-line no-bitwise
@@ -458,7 +486,7 @@ export class ApiReportGenerator {
   private static _shouldIncludeInReport(
     collector: Collector,
     astDeclaration: AstDeclaration,
-    releaseLevel: ReleaseTag
+    releaseLevel: ApiReportReleaseLevel
   ): boolean {
     // Private declarations are not included in the API report
     // eslint-disable-next-line no-bitwise
@@ -467,11 +495,26 @@ export class ApiReportGenerator {
     }
 
     const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
-    const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+
+    // No specified release tag is considered the same as `@public`.
+    const releaseTag: ReleaseTag =
+      apiItemMetadata.effectiveReleaseTag === ReleaseTag.None
+        ? ReleaseTag.Public
+        : apiItemMetadata.effectiveReleaseTag;
 
     // If the declaration has a release tag that is not in scope, omit it from the report.
-    // No release tag is considered the same as `@public`.
-    return releaseTag === ReleaseTag.Public || releaseTag >= releaseLevel;
+    switch (releaseLevel) {
+      case ApiReportReleaseLevel.Untrimmed:
+        return true;
+      case ApiReportReleaseLevel.Alpha:
+        return releaseTag >= ReleaseTag.Alpha;
+      case ApiReportReleaseLevel.Beta:
+        return releaseTag >= ReleaseTag.Beta;
+      case ApiReportReleaseLevel.Public:
+        return releaseTag === ReleaseTag.Public;
+      default:
+        throw new Error(`Unrecognized release level: ${releaseLevel}`);
+    }
   }
 
   /**

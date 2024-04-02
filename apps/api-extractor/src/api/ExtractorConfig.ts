@@ -18,7 +18,7 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import type { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type { IConfigApiReport, IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
@@ -158,14 +158,13 @@ interface IExtractorConfigParameters {
   overrideTsconfig: {} | undefined;
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
-  reportFilePath: string;
-  reportTempFilePath: string;
+  untrimmedReportFileName: string | undefined;
+  alphaReportFileName: string | undefined;
+  betaReportFileName: string | undefined;
+  publicReportFileName: string | undefined;
+  reportDirectoryPath: string;
+  reportTempDirectoryPath: string;
   apiReportIncludeForgottenExports: boolean;
-
-  alphaReportFilePath?: string;
-  betaReportFilePath?: string;
-  publicReportFilePath?: string;
-
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   docModelIncludeForgottenExports: boolean;
@@ -251,17 +250,16 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.enabled} */
   public readonly apiReportEnabled: boolean;
 
-  /** The `reportFolder` path combined with the `reportFileName`. */
-  public readonly reportFilePath: string;
-  /** The `reportTempFolder` path combined with the `reportFileName`. */
-  public readonly reportTempFilePath: string;
+  // TODO: docs
+  public readonly untrimmedReportFileName: string | undefined;
+  public readonly alphaReportFileName: string | undefined;
+  public readonly betaReportFileName: string | undefined;
+  public readonly publicReportFileName: string | undefined;
+  public readonly reportDirectoryPath: string;
+  public readonly reportTempDirectoryPath: string;
+
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
   public readonly apiReportIncludeForgottenExports: boolean;
-
-  // TODO: docs
-  public readonly alphaReportFilePath?: string;
-  public readonly betaReportFilePath?: string;
-  public readonly publicReportFilePath?: string;
 
   /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
@@ -325,12 +323,12 @@ export class ExtractorConfig {
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
-    this.reportFilePath = parameters.reportFilePath;
-    this.reportTempFilePath = parameters.reportTempFilePath;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
-    this.alphaReportFilePath = parameters.alphaReportFilePath;
-    this.betaReportFilePath = parameters.betaReportFilePath;
-    this.publicReportFilePath = parameters.publicReportFilePath;
+    this.alphaReportFileName = parameters.alphaReportFileName;
+    this.betaReportFileName = parameters.betaReportFileName;
+    this.publicReportFileName = parameters.publicReportFileName;
+    this.reportDirectoryPath = parameters.reportDirectoryPath;
+    this.reportTempDirectoryPath = parameters.reportTempDirectoryPath;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.docModelIncludeForgottenExports = parameters.docModelIncludeForgottenExports;
@@ -869,79 +867,85 @@ export class ExtractorConfig {
         }
       }
 
-      let apiReportEnabled: boolean = false;
-      let reportFilePath: string = '';
-      let reportTempFilePath: string = '';
-      let apiReportIncludeForgottenExports: boolean = false;
-      let alphaReportFilePath: string | undefined;
-      let betaReportFilePath: string | undefined;
-      let publicReportFilePath: string | undefined;
-      if (configObject.apiReport) {
-        apiReportEnabled = !!configObject.apiReport.enabled;
+      const apiReportEnabled: boolean = configObject.apiReport?.enabled ?? false;
+      const apiReportIncludeForgottenExports: boolean =
+        configObject.apiReport?.includeForgottenExports ?? false;
+      let reportDirectoryPath: string = tokenContext.projectFolder;
+      let reportTempDirectoryPath: string = tokenContext.projectFolder;
+      let untrimmedReportFileName: string | undefined;
+      let alphaReportFileName: string | undefined;
+      let betaReportFileName: string | undefined;
+      let publicReportFileName: string | undefined;
+      if (apiReportEnabled) {
+        // Null case checked above where we assign `apiReportEnabled`
+        const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
         // Default "untrimmed" report
-        const reportFilename: string = ExtractorConfig._expandStringWithTokens(
-          'reportFileName',
-          configObject.apiReport.reportFileName || '',
-          tokenContext
-        );
+        untrimmedReportFileName =
+          apiReportConfig.reportFileName === undefined
+            ? undefined
+            : ExtractorConfig._expandStringWithTokens(
+                'reportFileName',
+                apiReportConfig.reportFileName || '',
+                tokenContext
+              );
+        validateApiReportFileName('reportFileName', untrimmedReportFileName);
 
-        const alphaReportFilename: string | undefined =
-          configObject.apiReport.alphaReportFileName === undefined
+        alphaReportFileName =
+          apiReportConfig.alphaReportFileName === undefined
             ? undefined
             : ExtractorConfig._expandStringWithTokens(
                 'alphaReportFileName',
-                configObject.apiReport.alphaReportFileName,
+                apiReportConfig.alphaReportFileName,
                 tokenContext
               );
+        validateApiReportFileName('alphaReportFileName', untrimmedReportFileName);
 
-        const betaReportFilename: string | undefined =
-          configObject.apiReport.betaReportFileName === undefined
+        betaReportFileName =
+          apiReportConfig.betaReportFileName === undefined
             ? undefined
             : ExtractorConfig._expandStringWithTokens(
                 'betaReportFileName',
-                configObject.apiReport.betaReportFileName,
+                apiReportConfig.betaReportFileName,
                 tokenContext
               );
+        validateApiReportFileName('betaReportFileName', untrimmedReportFileName);
 
-        const publicReportFilename: string | undefined =
-          configObject.apiReport.publicReportFileName === undefined
+        publicReportFileName =
+          apiReportConfig.publicReportFileName === undefined
             ? undefined
             : ExtractorConfig._expandStringWithTokens(
                 'publicReportFileName',
-                configObject.apiReport.publicReportFileName,
+                apiReportConfig.publicReportFileName,
                 tokenContext
               );
+        validateApiReportFileName('publicReportFileName', untrimmedReportFileName);
 
-        if (!reportFilename) {
-          // A merged configuration should have this
-          throw new Error('The "reportFilename" setting is missing');
+        if (
+          !untrimmedReportFileName &&
+          !alphaReportFileName &&
+          !betaReportFileName &&
+          !publicReportFileName
+        ) {
+          // A merged configuration should have at least 1 report file specified.
+          throw new Error('API reports are enabled, but no report files were specified.');
         }
-        if (reportFilename.indexOf('/') >= 0 || reportFilename.indexOf('\\') >= 0) {
-          // A merged configuration should have this
-          throw new Error(`The "reportFilename" setting contains invalid characters: "${reportFilename}"`);
+
+        if (apiReportConfig.reportFolder) {
+          reportDirectoryPath = ExtractorConfig._resolvePathWithTokens(
+            'reportFolder',
+            apiReportConfig.reportFolder,
+            tokenContext
+          );
         }
 
-        const reportFolder: string = ExtractorConfig._resolvePathWithTokens(
-          'reportFolder',
-          configObject.apiReport.reportFolder,
-          tokenContext
-        );
-        const reportTempFolder: string = ExtractorConfig._resolvePathWithTokens(
-          'reportTempFolder',
-          configObject.apiReport.reportTempFolder,
-          tokenContext
-        );
-
-        reportFilePath = path.join(reportFolder, reportFilename);
-        alphaReportFilePath =
-          alphaReportFilename === undefined ? undefined : path.join(reportFolder, alphaReportFilename);
-        betaReportFilePath =
-          betaReportFilename === undefined ? undefined : path.join(reportFolder, betaReportFilename);
-        publicReportFilePath =
-          publicReportFilename === undefined ? undefined : path.join(reportFolder, publicReportFilename);
-        reportTempFilePath = path.join(reportTempFolder, reportFilename);
-        apiReportIncludeForgottenExports = !!configObject.apiReport.includeForgottenExports;
+        if (apiReportConfig.reportTempFolder) {
+          reportTempDirectoryPath = ExtractorConfig._resolvePathWithTokens(
+            'reportTempFolder',
+            apiReportConfig.reportTempFolder,
+            tokenContext
+          );
+        }
       }
 
       let docModelEnabled: boolean = false;
@@ -1058,12 +1062,13 @@ export class ExtractorConfig {
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,
-        reportFilePath,
-        reportTempFilePath,
+        untrimmedReportFileName,
+        alphaReportFileName,
+        betaReportFileName,
+        publicReportFileName,
+        reportDirectoryPath,
+        reportTempDirectoryPath,
         apiReportIncludeForgottenExports,
-        alphaReportFilePath,
-        betaReportFilePath,
-        publicReportFilePath,
         docModelEnabled,
         apiJsonFilePath,
         docModelIncludeForgottenExports,
@@ -1186,5 +1191,22 @@ export class ExtractorConfig {
       throw new Error(`The "${fieldName}" value contains an unrecognized token "${match[1]}"`);
     }
     throw new Error(`The "${fieldName}" value contains extra token characters ("<" or ">"): ${value}`);
+  }
+}
+
+/**
+ * Validates file name invariants for API report file names.
+ * Throws if any are violated.
+ * @param fieldName - The name of the API-Extractor configuration option with the file name being validated.
+ * @param fileName - The file name to be validated.
+ */
+function validateApiReportFileName(fieldName: string, fileName: string | undefined): void {
+  if (!fileName) {
+    return;
+  }
+
+  if (fileName.indexOf('/') >= 0 || fileName.indexOf('\\') >= 0) {
+    // A merged configuration should have this
+    throw new Error(`The ${fieldName} setting contains invalid characters: "${fileName}"`);
   }
 }

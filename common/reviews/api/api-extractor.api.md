@@ -46,10 +46,14 @@ export class Extractor {
 
 // @public
 export class ExtractorConfig {
+    // (undocumented)
+    readonly alphaReportFileName: string | undefined;
     readonly alphaTrimmedFilePath: string;
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly apiReportIncludeForgottenExports: boolean;
+    // (undocumented)
+    readonly betaReportFileName: string | undefined;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
@@ -73,9 +77,13 @@ export class ExtractorConfig {
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly projectFolder: string;
     readonly projectFolderUrl: string | undefined;
+    // (undocumented)
+    readonly publicReportFileName: string | undefined;
     readonly publicTrimmedFilePath: string;
-    readonly reportFilePath: string;
-    readonly reportTempFilePath: string;
+    // (undocumented)
+    readonly reportDirectoryPath: string;
+    // (undocumented)
+    readonly reportTempDirectoryPath: string;
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
     readonly testMode: boolean;
@@ -88,6 +96,8 @@ export class ExtractorConfig {
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
     readonly untrimmedFilePath: string;
+    // (undocumented)
+    readonly untrimmedReportFileName: string | undefined;
 }
 
 // @public
@@ -171,8 +181,14 @@ export interface ICompilerStateCreateOptions {
 
 // @public
 export interface IConfigApiReport {
+    // (undocumented)
+    alphaReportFileName?: string;
+    // (undocumented)
+    betaReportFileName?: string;
     enabled: boolean;
     includeForgottenExports?: boolean;
+    // (undocumented)
+    publicReportFileName?: string;
     reportFileName?: string;
     reportFolder?: string;
     reportTempFolder?: string;
