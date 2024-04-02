@@ -33,7 +33,18 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 export type PnpmResolutionMode = 'highest' | 'time-based' | 'lowest-direct';
 
 /**
- * @beta
+ * Possible values for the `pnpmLockfilePolicies` setting in Rush's pnpm-config.json file.
+ * @public
+ */
+export interface IPnpmLockfilePolicies {
+  /**
+   * Forbid sha1 hashes in `pnpm-lock.yaml`
+   */
+  disallowInsecureSha1?: boolean;
+}
+
+/**
+ * @public
  */
 export interface IPnpmPeerDependencyRules {
   ignoreMissing?: string[];
@@ -41,12 +52,18 @@ export interface IPnpmPeerDependencyRules {
   allowedVersions?: Record<string, string>;
 }
 
+/**
+ * @public
+ */
 export interface IPnpmPeerDependenciesMeta {
   [packageName: string]: {
     optional?: boolean;
   };
 }
 
+/**
+ * @public
+ */
 export interface IPnpmPackageExtension {
   dependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
@@ -115,6 +132,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.alwaysFullInstall}
    */
   alwaysFullInstall?: boolean;
+  /**
+   * {@inheritDoc PnpmOptionsConfiguration.pnpmLockfilePolicies}
+   */
+  pnpmLockfilePolicies?: IPnpmLockfilePolicies;
 }
 
 /**
@@ -312,6 +333,11 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly jsonFilename: string | undefined;
 
   /**
+   * The `pnpmLockfilePolicies` setting defines the policies that govern the `pnpm-lock.yaml` file.
+   */
+  public readonly pnpmLockfilePolicies: IPnpmLockfilePolicies | undefined;
+
+  /**
    * (EXPERIMENTAL) If "true", then filtered installs ("rush install --to my-project")
    * will be disregarded, instead always performing a full installation of the lockfile.
    * This setting is primarily useful with Rush subspaces which enable filtering across
@@ -361,6 +387,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.resolutionMode = json.resolutionMode;
     this.autoInstallPeers = json.autoInstallPeers;
     this.alwaysFullInstall = json.alwaysFullInstall;
+    this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;
   }
 
   /** @internal */

@@ -2,6 +2,50 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.10.1",
+      "tag": "@rushstack/eslint-patch_v1.10.1",
+      "date": "Fri, 29 Mar 2024 05:46:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the `eslint-bulk prune` command would crash if a bulk suppressions file exists that speicifies no suppressions."
+          },
+          {
+            "comment": "Exit with success under normal conditions."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.0",
+      "tag": "@rushstack/eslint-patch_v1.10.0",
+      "date": "Thu, 28 Mar 2024 18:11:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with running `eslint-bulk prune` in a project with suppressions that refer to deleted files."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Delete the `.eslint-bulk-suppressions.json` file during pruning if all suppressions have been eliminated."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.9.0",
+      "tag": "@rushstack/eslint-patch_v1.9.0",
+      "date": "Wed, 27 Mar 2024 19:47:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where `eslint-bulk prune` does not work if there are no files to lint in the project root."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.0",
       "tag": "@rushstack/eslint-patch_v1.8.0",
       "date": "Wed, 20 Mar 2024 02:09:14 GMT",

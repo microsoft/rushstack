@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Mar 2024 22:42:23 GMT and should not be manually modified.
+
+## 0.5.0
+Thu, 28 Mar 2024 22:42:23 GMT
+
+### Minor changes
+
+- Gracefully exit minifier worker instead of using `process.exit(0)`.
 
 ## 0.4.40
 Tue, 19 Mar 2024 15:10:18 GMT

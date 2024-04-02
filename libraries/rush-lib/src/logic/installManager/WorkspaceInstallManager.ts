@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fs from 'fs';
 import * as semver from 'semver';
 import yaml from 'js-yaml';
 import {
@@ -37,10 +36,16 @@ import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
 import { objectsAreDeepEqual } from '../../utilities/objectUtilities';
-import { type ILockfile, pnpmSyncPrepareAsync } from 'pnpm-sync-lib';
+import {
+  type ILockfile,
+  pnpmSyncPrepareAsync,
+  type ILogMessageCallbackOptions,
+  type ILockfilePackage
+} from 'pnpm-sync-lib';
 import type { Subspace } from '../../api/Subspace';
 import { Colorize, ConsoleTerminalProvider } from '@rushstack/terminal';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
+import { PnpmSyncUtilities } from '../../utilities/PnpmSyncUtilities';
 
 export interface IPnpmModules {
   hoistedDependencies: { [dep in string]: { [depPath in string]: string } };
@@ -513,10 +518,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // the pnpm-sync will generate the pnpm-sync.json based on lockfile
     if (this.rushConfiguration.packageManager === 'pnpm' && experiments?.usePnpmSyncForInjectedDependencies) {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
-      const pnpmStorePath: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
+      const dotPnpmFolder: string = `${subspace.getSubspaceTempFolder()}/node_modules/.pnpm`;
       await pnpmSyncPrepareAsync({
         lockfilePath: pnpmLockfilePath,
-        storePath: pnpmStorePath,
+        dotPnpmFolder,
+        ensureFolder: FileSystem.ensureFolderAsync,
         readPnpmLockfile: async (lockfilePath: string) => {
           const wantedPnpmLockfile: PnpmShrinkwrapFile | undefined = await PnpmShrinkwrapFile.loadFromFile(
             lockfilePath,
@@ -526,12 +532,29 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           if (!wantedPnpmLockfile) {
             return undefined;
           } else {
+            const lockfilePackages: Record<string, ILockfilePackage> = Object.create(null);
+            for (const versionPath of wantedPnpmLockfile.packages.keys()) {
+              lockfilePackages[versionPath] = {
+                dependencies: wantedPnpmLockfile.packages.get(versionPath)?.dependencies as Record<
+                  string,
+                  string
+                >,
+                optionalDependencies: wantedPnpmLockfile.packages.get(versionPath)
+                  ?.optionalDependencies as Record<string, string>
+              };
+            }
+
             const result: ILockfile = {
-              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries())
+              lockfileVersion: wantedPnpmLockfile.shrinkwrapFileMajorVersion,
+              importers: Object.fromEntries(wantedPnpmLockfile.importers.entries()),
+              packages: lockfilePackages
             };
+
             return result;
           }
-        }
+        },
+        logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+          PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
       });
     }
 
@@ -595,43 +618,70 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
-    // Hoist any dependencies for this subspace if splitWorkspaceCompatibility is enabled
+    // If the splitWorkspaceCompatibility is enabled for subspaces, create symlinks to mimic the behaviour
+    // of having the node_modules folder created directly in the project folder. This requires symlinking two categories:
+    // 1) Symlink any packages that are declared to be publicly hoisted, such as by using public-hoist-pattern in .npmrc.
+    //    This creates a symlink from <project_folder>/node_modules/<dependency> -> temp/<subspace_name>/node_modules/<dependency>
+    // 2) Symlink any workspace packages that are declared in the temp folder, as some packages may expect these packages to exist
+    //    in the node_modules folder.
+    //    This creates a symlink from temp/<subspace_name>/node_modules/<workspace_dependency_name> -> <workspace_dependency_folder>
     if (
       this.rushConfiguration.subspacesFeatureEnabled &&
-      this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility &&
-      subspace.subspaceName.startsWith('split_') &&
-      subspace.getProjects().length === 1
+      this.rushConfiguration.subspacesConfiguration?.splitWorkspaceCompatibility
     ) {
-      // Find the .modules.yaml file in the subspace temp/node_modules folder
       const tempNodeModulesPath: string = `${subspace.getSubspaceTempFolder()}/node_modules`;
       const modulesFilePath: string = `${tempNodeModulesPath}/${RushConstants.pnpmModulesFilename}`;
-
-      const modulesContent: string = FileSystem.readFile(modulesFilePath);
-      const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
-      const { hoistedDependencies } = yamlContent;
-      const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
-      const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
-      for (const value of Object.values(hoistedDependencies)) {
-        for (const [filePath, type] of Object.entries(value)) {
-          if (type === 'public') {
-            // If we don't already have a symlink for this package, create one
-            if (!fs.existsSync(`${projectNodeModulesPath}/${filePath}`)) {
-              // Ensure origin folder exists
-              const parentDirSep: string[] = `${projectNodeModulesPath}/${filePath}`.split(path.sep);
-              parentDirSep.pop();
-              const parentDir: string = parentDirSep.join(path.sep);
-              await FileSystem.ensureFolderAsync(parentDir);
-              BaseLinkManager._createSymlink({
-                linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
-                newLinkPath: `${projectNodeModulesPath}/${filePath}`,
-                symlinkKind: SymlinkKind.Directory
-              });
+      if (
+        subspace.subspaceName.startsWith('split_') &&
+        subspace.getProjects().length === 1 &&
+        (await FileSystem.existsAsync(modulesFilePath))
+      ) {
+        // Find the .modules.yaml file in the subspace temp/node_modules folder
+        const modulesContent: string = await FileSystem.readFileAsync(modulesFilePath);
+        const yamlContent: IPnpmModules = yaml.load(modulesContent, { filename: modulesFilePath });
+        const { hoistedDependencies } = yamlContent;
+        const subspaceProject: RushConfigurationProject = subspace.getProjects()[0];
+        const projectNodeModulesPath: string = `${subspaceProject.projectFolder}/node_modules`;
+        for (const value of Object.values(hoistedDependencies)) {
+          for (const [filePath, type] of Object.entries(value)) {
+            if (type === 'public') {
+              // If we don't already have a symlink for this package, create one
+              if (!FileSystem.exists(`${projectNodeModulesPath}/${filePath}`)) {
+                const parentDir: string = Utilities.trimAfterLastSlash(
+                  `${projectNodeModulesPath}/${filePath}`
+                );
+                await FileSystem.ensureFolderAsync(parentDir);
+                BaseLinkManager._createSymlink({
+                  linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
+                  newLinkPath: `${projectNodeModulesPath}/${filePath}`,
+                  symlinkKind: SymlinkKind.Directory
+                });
+              }
             }
           }
         }
       }
-    }
 
+      // Look for any workspace linked packages anywhere in this subspace, symlink them from the temp node_modules folder.
+      const subspaceDependencyProjects: Set<RushConfigurationProject> = new Set();
+      for (const subspaceProject of subspace.getProjects()) {
+        for (const dependencyProject of subspaceProject.dependencyProjects) {
+          subspaceDependencyProjects.add(dependencyProject);
+        }
+      }
+      for (const dependencyProject of subspaceDependencyProjects) {
+        const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
+        if (!FileSystem.exists(symlinkToCreate)) {
+          const parentDir: string = Utilities.trimAfterLastSlash(symlinkToCreate);
+          await FileSystem.ensureFolderAsync(parentDir);
+          BaseLinkManager._createSymlink({
+            linkTargetPath: dependencyProject.projectFolder,
+            newLinkPath: `${subspace.getSubspaceTempFolder()}/node_modules/${dependencyProject.packageName}`,
+            symlinkKind: SymlinkKind.Directory
+          });
+        }
+      }
+    }
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(subspace).create();
   }

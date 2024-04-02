@@ -589,6 +589,14 @@ export class Utilities {
     }
   }
 
+  public static trimAfterLastSlash(filePath: string): string {
+    const indexOfLastSlash: number = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+    if (indexOfLastSlash < 0) {
+      return filePath;
+    }
+    return filePath.substring(0, indexOfLastSlash);
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (

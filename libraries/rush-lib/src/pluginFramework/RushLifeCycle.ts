@@ -46,7 +46,7 @@ export class RushLifecycleHooks {
   /**
    * The hook to run before executing any Rush CLI Command.
    */
-  public initialize: AsyncSeriesHook<IRushCommand> = new AsyncSeriesHook<IRushCommand>(
+  public readonly initialize: AsyncSeriesHook<IRushCommand> = new AsyncSeriesHook<IRushCommand>(
     ['command'],
     'initialize'
   );
@@ -54,22 +54,23 @@ export class RushLifecycleHooks {
   /**
    * The hook to run before executing any global Rush CLI Command (defined in command-line.json).
    */
-  public runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand> = new AsyncSeriesHook<IGlobalCommand>(
-    ['command'],
-    'runAnyGlobalCustomCommand'
-  );
+  public readonly runAnyGlobalCustomCommand: AsyncSeriesHook<IGlobalCommand> =
+    new AsyncSeriesHook<IGlobalCommand>(['command'], 'runAnyGlobalCustomCommand');
 
   /**
    * A hook map to allow plugins to hook specific named global commands (defined in command-line.json) before execution.
    */
-  public runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>> = new HookMap((key: string) => {
-    return new AsyncSeriesHook<IGlobalCommand>(['command'], key);
-  }, 'runGlobalCustomCommand');
+  public readonly runGlobalCustomCommand: HookMap<AsyncSeriesHook<IGlobalCommand>> = new HookMap(
+    (key: string) => {
+      return new AsyncSeriesHook<IGlobalCommand>(['command'], key);
+    },
+    'runGlobalCustomCommand'
+  );
 
   /**
    * The hook to run before executing any phased Rush CLI Command (defined in command-line.json, or the default "build" or "rebuild").
    */
-  public runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand> = new AsyncSeriesHook<IPhasedCommand>(
+  public readonly runAnyPhasedCommand: AsyncSeriesHook<IPhasedCommand> = new AsyncSeriesHook<IPhasedCommand>(
     ['command'],
     'runAnyPhasedCommand'
   );
@@ -77,14 +78,14 @@ export class RushLifecycleHooks {
   /**
    * A hook map to allow plugins to hook specific named phased commands (defined in command-line.json) before execution.
    */
-  public runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>> = new HookMap((key: string) => {
+  public readonly runPhasedCommand: HookMap<AsyncSeriesHook<IPhasedCommand>> = new HookMap((key: string) => {
     return new AsyncSeriesHook<IPhasedCommand>(['command'], key);
   }, 'runPhasedCommand');
 
   /**
    * The hook to run between preparing the common/temp folder and invoking the package manager during "rush install" or "rush update".
    */
-  public beforeInstall: AsyncSeriesHook<IGlobalCommand> = new AsyncSeriesHook<IGlobalCommand>(
+  public readonly beforeInstall: AsyncSeriesHook<IGlobalCommand> = new AsyncSeriesHook<IGlobalCommand>(
     ['command'],
     'beforeInstall'
   );
@@ -92,7 +93,7 @@ export class RushLifecycleHooks {
   /**
    * A hook to allow plugins to hook custom logic to process telemetry data.
    */
-  public flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]> = new AsyncParallelHook(
+  public readonly flushTelemetry: AsyncParallelHook<[ReadonlyArray<ITelemetryData>]> = new AsyncParallelHook(
     ['telemetryData'],
     'flushTelemetry'
   );

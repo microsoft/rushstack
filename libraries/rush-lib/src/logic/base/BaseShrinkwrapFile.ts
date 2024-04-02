@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { type DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
@@ -28,6 +28,13 @@ export abstract class BaseShrinkwrapFile {
     }
     return undefined;
   }
+
+  /**
+   * Determine whether `pnpm-lock.yaml` complies with the rules specified in `common/config/rush/pnpm-config.schema.json`.
+   *
+   * @virtual
+   */
+  public validateShrinkwrapAfterUpdate(rushConfiguration: RushConfiguration, terminal: ITerminal): void {}
 
   /**
    * Validate the shrinkwrap using the provided policy options.

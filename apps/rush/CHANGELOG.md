@@ -1,6 +1,42 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 23 Mar 2024 01:41:10 GMT and should not be manually modified.
+This log was last generated on Sat, 30 Mar 2024 04:32:31 GMT and should not be manually modified.
+
+## 5.119.0
+Sat, 30 Mar 2024 04:32:31 GMT
+
+### Updates
+
+- Add a policy to forbid sha1 hashes in pnpm-lock.yaml.
+- (BREAKING API CHANGE) Refactor phased action execution to analyze the repo after the initial operations are created. This removes the `projectChangeAnalyzer` property from the context parameter passed to the `createOperations` hook.
+
+## 5.118.7
+Thu, 28 Mar 2024 19:55:27 GMT
+
+### Updates
+
+- Fix an issue where in the previous release, built-in plugins were not included.
+
+## 5.118.6
+Wed, 27 Mar 2024 05:31:17 GMT
+
+### Updates
+
+- Symlinks are now generated for workspace projects in the temp folder when subspaces and splitWorkspaceCompatibility is enabled.
+
+## 5.118.5
+Tue, 26 Mar 2024 19:58:40 GMT
+
+### Updates
+
+- Use pnpm-sync-lib logging APIs to customize the log message for pnpm-sync operations
+
+## 5.118.4
+Tue, 26 Mar 2024 02:39:06 GMT
+
+### Updates
+
+- Added warnings if there are .npmrc or .pnpmfile.cjs files in project folders after migrating to subspaces
 
 ## 5.118.3
 Sat, 23 Mar 2024 01:41:10 GMT

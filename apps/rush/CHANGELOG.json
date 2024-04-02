@@ -2,6 +2,69 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.119.0",
+      "tag": "@microsoft/rush_v5.119.0",
+      "date": "Sat, 30 Mar 2024 04:32:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a policy to forbid sha1 hashes in pnpm-lock.yaml."
+          },
+          {
+            "comment": "(BREAKING API CHANGE) Refactor phased action execution to analyze the repo after the initial operations are created. This removes the `projectChangeAnalyzer` property from the context parameter passed to the `createOperations` hook."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.118.7",
+      "tag": "@microsoft/rush_v5.118.7",
+      "date": "Thu, 28 Mar 2024 19:55:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where in the previous release, built-in plugins were not included."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.118.6",
+      "tag": "@microsoft/rush_v5.118.6",
+      "date": "Wed, 27 Mar 2024 05:31:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Symlinks are now generated for workspace projects in the temp folder when subspaces and splitWorkspaceCompatibility is enabled."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.118.5",
+      "tag": "@microsoft/rush_v5.118.5",
+      "date": "Tue, 26 Mar 2024 19:58:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use pnpm-sync-lib logging APIs to customize the log message for pnpm-sync operations"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.118.4",
+      "tag": "@microsoft/rush_v5.118.4",
+      "date": "Tue, 26 Mar 2024 02:39:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added warnings if there are .npmrc or .pnpmfile.cjs files in project folders after migrating to subspaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.118.3",
       "tag": "@microsoft/rush_v5.118.3",
       "date": "Sat, 23 Mar 2024 01:41:10 GMT",

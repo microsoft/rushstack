@@ -292,7 +292,8 @@ export class PackageJsonUpdater {
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
       checkOnly: false,
-      subspace: subspace
+      subspace: subspace,
+      terminal: this._terminal
     };
 
     const installManager: BaseInstallManager = await InstallManagerFactory.getInstallManagerAsync(

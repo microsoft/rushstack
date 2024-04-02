@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { ITerminal } from '@rushstack/terminal';
 import type { Subspace } from '../../api/Subspace';
 
 export interface IInstallManagerOptions {
@@ -94,4 +95,9 @@ export interface IInstallManagerOptions {
    * The specific subspace to install.
    */
   subspace: Subspace;
+
+  /**
+   * The terminal where output should be printed.
+   */
+  terminal: ITerminal;
 }
