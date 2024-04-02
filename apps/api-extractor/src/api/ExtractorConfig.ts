@@ -324,6 +324,7 @@ export class ExtractorConfig {
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
+    this.untrimmedReportFileName = parameters.untrimmedReportFileName;
     this.alphaReportFileName = parameters.alphaReportFileName;
     this.betaReportFileName = parameters.betaReportFileName;
     this.publicReportFileName = parameters.publicReportFileName;
@@ -901,7 +902,7 @@ export class ExtractorConfig {
                 apiReportConfig.alphaReportFileName,
                 tokenContext
               );
-        validateApiReportFileName('alphaReportFileName', untrimmedReportFileName);
+        validateApiReportFileName('alphaReportFileName', alphaReportFileName);
 
         betaReportFileName =
           apiReportConfig.betaReportFileName === undefined
@@ -911,7 +912,7 @@ export class ExtractorConfig {
                 apiReportConfig.betaReportFileName,
                 tokenContext
               );
-        validateApiReportFileName('betaReportFileName', untrimmedReportFileName);
+        validateApiReportFileName('betaReportFileName', betaReportFileName);
 
         publicReportFileName =
           apiReportConfig.publicReportFileName === undefined
@@ -921,7 +922,7 @@ export class ExtractorConfig {
                 apiReportConfig.publicReportFileName,
                 tokenContext
               );
-        validateApiReportFileName('publicReportFileName', untrimmedReportFileName);
+        validateApiReportFileName('publicReportFileName', publicReportFileName);
 
         if (
           !untrimmedReportFileName &&

@@ -18,8 +18,12 @@ import { ExtractorConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
-import { type ApiPackage, ReleaseTag } from '@microsoft/api-extractor-model';
-import { ApiReportGenerator, ApiReportReleaseLevel } from '../generators/ApiReportGenerator';
+import type { ApiPackage } from '@microsoft/api-extractor-model';
+import {
+  ApiReportGenerator,
+  ApiReportReleaseLevel,
+  releaseLevelToString
+} from '../generators/ApiReportGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
 import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
@@ -557,23 +561,5 @@ export class Extractor {
       );
       DtsRollupGenerator.writeTypingsFile(collector, outputPath, dtsKind, newlineKind);
     }
-  }
-}
-
-/**
- * {@link ApiReportReleaseLevel} toString conversion for logging.
- */
-function releaseLevelToString(releaseLevel: ApiReportReleaseLevel): string {
-  switch (releaseLevel) {
-    case ApiReportReleaseLevel.Untrimmed:
-      return 'untrimmed';
-    case ApiReportReleaseLevel.Alpha:
-      return 'alpha';
-    case ApiReportReleaseLevel.Beta:
-      return 'beta';
-    case ApiReportReleaseLevel.Public:
-      return 'public';
-    default:
-      throw new Error(`Unrecognized release level: ${releaseLevel}`);
   }
 }
