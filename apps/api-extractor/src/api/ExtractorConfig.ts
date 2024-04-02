@@ -881,12 +881,14 @@ export class ExtractorConfig {
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
         // Default "untrimmed" report
+        // Note: for backwards compatibility, `undefined` here means use the default value ("<unscopedPackageName>.api.md").
+        // `null` was added as an option to explicitly opt out of "untrimmed" report generation.
         untrimmedReportFileName =
-          apiReportConfig.reportFileName === undefined
+          apiReportConfig.reportFileName === null
             ? undefined
             : ExtractorConfig._expandStringWithTokens(
                 'reportFileName',
-                apiReportConfig.reportFileName || '',
+                apiReportConfig.reportFileName ?? '<unscopedPackageName>.api.md',
                 tokenContext
               );
         validateApiReportFileName('reportFileName', untrimmedReportFileName);

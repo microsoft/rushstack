@@ -181,15 +181,12 @@ export interface ICompilerStateCreateOptions {
 
 // @public
 export interface IConfigApiReport {
-    // (undocumented)
     alphaReportFileName?: string;
-    // (undocumented)
     betaReportFileName?: string;
     enabled: boolean;
     includeForgottenExports?: boolean;
-    // (undocumented)
     publicReportFileName?: string;
-    reportFileName?: string;
+    reportFileName?: string | null;
     reportFolder?: string;
     reportTempFolder?: string;
 }

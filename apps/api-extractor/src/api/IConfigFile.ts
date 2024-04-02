@@ -63,13 +63,60 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The filename for the API report files.  It will be combined with `reportFolder` or `reportTempFolder` to produce
-   * a full output filename.
+   * The filename for the "untrimmed" API report file, which will encompass all API items, regardless of release tag.
    *
    * @remarks
+   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
+   * produce a full output filename.
+   *
    * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
+   *
+   * To opt out of generating the untrimmed report, set this to `null`.
+   *
+   * @defaultValue `<unscopedPackageName>.api.md`
    */
-  reportFileName?: string;
+  // eslint-disable-next-line @rushstack/no-new-null
+  reportFileName?: string | null;
+
+  /**
+   * The filename for the "alpha" API report file, which will encompass all API items tagged as `@alpha`, `@beta`, or
+   * `@public`.
+   *
+   * @remarks
+   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
+   * produce a full output filename.
+   *
+   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
+   *
+   * @defaultValue No alpha report will be generated.
+   */
+  alphaReportFileName?: string;
+
+  /**
+   * The filename for the "alpha" API report file, which will encompass all API items tagged as `@beta` or `@public`.
+   *
+   * @remarks
+   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
+   * produce a full output filename.
+   *
+   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
+   *
+   * @defaultValue No beta report will be generated.
+   */
+  betaReportFileName?: string;
+
+  /**
+   * The filename for the "alpha" API report file, which will encompass only API items tagged as `@public`.
+   *
+   * @remarks
+   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
+   * produce a full output filename.
+   *
+   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
+   *
+   * @defaultValue No public report will be generated.
+   */
+  publicReportFileName?: string;
 
   /**
    * Specifies the folder where the API report file is written.  The file name portion is determined by
@@ -109,9 +156,6 @@ export interface IConfigApiReport {
   includeForgottenExports?: boolean;
 
   // TODO: docs
-  alphaReportFileName?: string;
-  betaReportFileName?: string;
-  publicReportFileName?: string;
 }
 
 /**
