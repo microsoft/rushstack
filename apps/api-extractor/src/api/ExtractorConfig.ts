@@ -877,7 +877,7 @@ export class ExtractorConfig {
       let betaReportFileName: string | undefined;
       let publicReportFileName: string | undefined;
       if (apiReportEnabled) {
-        // Null case checked above where we assign `apiReportEnabled`
+        // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
         // Default "untrimmed" report
