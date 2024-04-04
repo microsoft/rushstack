@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Handle optional dependencies in transitive injected install",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
