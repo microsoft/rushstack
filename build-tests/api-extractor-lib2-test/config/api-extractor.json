@@ -5,9 +5,8 @@
 
   "apiReport": {
     "enabled": true,
-    "alphaReportFileName": "<unscopedPackageName>.alpha.api.md",
-    "betaReportFileName": "<unscopedPackageName>.beta.api.md",
-    "publicReportFileName": "<unscopedPackageName>.public.api.md"
+    "reportFileName": "<unscopedPackageName>.api.md",
+    "reportVariants": ["alpha", "public", "complete"]
   },
 
   "docModel": {

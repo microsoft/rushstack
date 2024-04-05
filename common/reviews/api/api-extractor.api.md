@@ -46,14 +46,10 @@ export class Extractor {
 
 // @public
 export class ExtractorConfig {
-    // (undocumented)
-    readonly alphaReportFileName: string | undefined;
     readonly alphaTrimmedFilePath: string;
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly apiReportIncludeForgottenExports: boolean;
-    // (undocumented)
-    readonly betaReportFileName: string | undefined;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
@@ -77,12 +73,9 @@ export class ExtractorConfig {
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly projectFolder: string;
     readonly projectFolderUrl: string | undefined;
-    // (undocumented)
-    readonly publicReportFileName: string | undefined;
     readonly publicTrimmedFilePath: string;
-    // (undocumented)
+    readonly reportConfigs: readonly IApiReportConfig[];
     readonly reportDirectoryPath: string;
-    // (undocumented)
     readonly reportTempDirectoryPath: string;
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
@@ -96,8 +89,6 @@ export class ExtractorConfig {
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
     readonly untrimmedFilePath: string;
-    // (undocumented)
-    readonly untrimmedReportFileName: string | undefined;
 }
 
 // @public
@@ -174,6 +165,13 @@ export class ExtractorResult {
 }
 
 // @public
+export interface IApiReportConfig {
+    fileName: string;
+    // Warning: (ae-forgotten-export) The symbol "ApiReportVariant" needs to be exported by the entry point index.d.ts
+    variant: ApiReportVariant;
+}
+
+// @public
 export interface ICompilerStateCreateOptions {
     additionalEntryPoints?: string[];
     typescriptCompilerFolder?: string;
@@ -181,14 +179,12 @@ export interface ICompilerStateCreateOptions {
 
 // @public
 export interface IConfigApiReport {
-    alphaReportFileName?: string;
-    betaReportFileName?: string;
     enabled: boolean;
     includeForgottenExports?: boolean;
-    publicReportFileName?: string;
-    reportFileName?: string | null;
+    reportFileName?: string;
     reportFolder?: string;
     reportTempFolder?: string;
+    reportVariants?: ApiReportVariant[];
 }
 
 // @public

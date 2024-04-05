@@ -21,49 +21,7 @@ import type { AstEntity } from '../analyzer/AstEntity';
 import type { AstModuleExportInfo } from '../analyzer/AstModule';
 import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
-
-/**
- * Represents the minimum release tag level to be included in an API report.
- */
-export enum ApiReportReleaseLevel {
-  /**
-   * Include all exports, regardless of release tags.
-   */
-  Untrimmed = 0,
-
-  /**
-   * Include exports tagged with `@alpha`, `@beta`, or `@public`.
-   */
-  Alpha = 1,
-
-  /**
-   * Include exports tagged with `@beta` or `@public`.
-   */
-  Beta = 2,
-
-  /**
-   * Include exports tagged with `@public`.
-   */
-  Public = 3
-}
-
-/**
- * {@link ApiReportReleaseLevel} toString conversion for logging.
- */
-export function releaseLevelToString(releaseLevel: ApiReportReleaseLevel): string {
-  switch (releaseLevel) {
-    case ApiReportReleaseLevel.Untrimmed:
-      return 'Untrimmed';
-    case ApiReportReleaseLevel.Alpha:
-      return 'Alpha';
-    case ApiReportReleaseLevel.Beta:
-      return 'Beta';
-    case ApiReportReleaseLevel.Public:
-      return 'Public';
-    default:
-      throw new Error(`Unrecognized release level: ${releaseLevel}`);
-  }
-}
+import type { ApiReportVariant } from '../api/IConfigFile';
 
 /**
  * Options for {@link ApiReportGenerator.generateReviewFileContent}.
@@ -73,7 +31,7 @@ export interface IApiReportOptions {
    * The release level with which the report is associated.
    * Can also be viewed as the minimal release level of items that should be included in the report.
    */
-  readonly releaseLevel: ApiReportReleaseLevel;
+  readonly reportVariant: ApiReportVariant;
 }
 
 export class ApiReportGenerator {
@@ -100,11 +58,9 @@ export class ApiReportGenerator {
     const writer: IndentedWriter = new IndentedWriter();
     writer.trimLeadingSpaces = true;
 
-    // For backwards compatibility, don't emit "Untrimmed" in report text for untrimmed reports.
+    // For backwards compatibility, don't emit "complete" in report text for untrimmed reports.
     const releaseLevelPrefix: string =
-      options.releaseLevel === ApiReportReleaseLevel.Untrimmed
-        ? ''
-        : `${releaseLevelToString(options.releaseLevel)} `;
+      options.reportVariant === 'complete' ? '' : `${options.reportVariant.toLocaleUpperCase()} `;
     writer.writeLine(
       [
         `## ${releaseLevelPrefix}API Report File for "${collector.workingPackage.name}"`,
@@ -178,7 +134,7 @@ export class ApiReportGenerator {
               messagesToReport.push(message);
             }
 
-            if (this._shouldIncludeInReport(collector, astDeclaration, options.releaseLevel)) {
+            if (this._shouldIncludeInReport(collector, astDeclaration, options.reportVariant)) {
               writer.ensureSkippedLine();
               writer.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
@@ -194,7 +150,7 @@ export class ApiReportGenerator {
                   entity,
                   astDeclaration,
                   false,
-                  options.releaseLevel
+                  options.reportVariant
                 );
               }
 
@@ -324,11 +280,11 @@ export class ApiReportGenerator {
     entity: CollectorEntity,
     astDeclaration: AstDeclaration,
     insideTypeLiteral: boolean,
-    releaseLevel: ApiReportReleaseLevel
+    reportVariant: ApiReportVariant
   ): void {
     // Should we process this declaration at all?
     // eslint-disable-next-line no-bitwise
-    if (!ApiReportGenerator._shouldIncludeInReport(collector, astDeclaration, releaseLevel)) {
+    if (!ApiReportGenerator._shouldIncludeInReport(collector, astDeclaration, reportVariant)) {
       span.modification.skipAll();
       return;
     }
@@ -455,7 +411,7 @@ export class ApiReportGenerator {
               entity,
               childAstDeclaration,
               insideTypeLiteral,
-              releaseLevel
+              reportVariant
             );
           }
         );
@@ -472,7 +428,7 @@ export class ApiReportGenerator {
             astDeclaration
           );
 
-          if (ApiReportGenerator._shouldIncludeInReport(collector, childAstDeclaration, releaseLevel)) {
+          if (ApiReportGenerator._shouldIncludeInReport(collector, childAstDeclaration, reportVariant)) {
             if (sortChildren) {
               span.modification.sortChildren = true;
               child.modification.sortKey = Collector.getSortKeyIgnoringUnderscore(
@@ -502,7 +458,7 @@ export class ApiReportGenerator {
           entity,
           childAstDeclaration,
           insideTypeLiteral,
-          releaseLevel
+          reportVariant
         );
       }
     }
@@ -511,7 +467,7 @@ export class ApiReportGenerator {
   private static _shouldIncludeInReport(
     collector: Collector,
     astDeclaration: AstDeclaration,
-    releaseLevel: ApiReportReleaseLevel
+    reportVariant: ApiReportVariant
   ): boolean {
     // Private declarations are not included in the API report
     // eslint-disable-next-line no-bitwise
@@ -528,17 +484,17 @@ export class ApiReportGenerator {
         : apiItemMetadata.effectiveReleaseTag;
 
     // If the declaration has a release tag that is not in scope, omit it from the report.
-    switch (releaseLevel) {
-      case ApiReportReleaseLevel.Untrimmed:
+    switch (reportVariant) {
+      case 'complete':
         return true;
-      case ApiReportReleaseLevel.Alpha:
+      case 'alpha':
         return releaseTag >= ReleaseTag.Alpha;
-      case ApiReportReleaseLevel.Beta:
+      case 'beta':
         return releaseTag >= ReleaseTag.Beta;
-      case ApiReportReleaseLevel.Public:
+      case 'public':
         return releaseTag === ReleaseTag.Public;
       default:
-        throw new Error(`Unrecognized release level: ${releaseLevel}`);
+        throw new Error(`Unrecognized release level: ${reportVariant}`);
     }
   }
 

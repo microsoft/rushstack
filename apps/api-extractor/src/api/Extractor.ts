@@ -19,11 +19,7 @@ import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import type { ApiPackage } from '@microsoft/api-extractor-model';
-import {
-  ApiReportGenerator,
-  ApiReportReleaseLevel,
-  releaseLevelToString
-} from '../generators/ApiReportGenerator';
+import { ApiReportGenerator } from '../generators/ApiReportGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
 import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
@@ -33,6 +29,7 @@ import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { SourceMapper } from '../collector/SourceMapper';
+import { ApiReportVariant } from './IConfigFile';
 
 /**
  * Runtime options for Extractor.
@@ -289,7 +286,7 @@ export class Extractor {
       });
     }
 
-    function writeApiReport(reportFileName: string, releaseLevel: ApiReportReleaseLevel): boolean {
+    function writeApiReport(reportFileName: string, reportVariant: ApiReportVariant): boolean {
       return Extractor._writeApiReport(
         collector,
         extractorConfig,
@@ -297,38 +294,17 @@ export class Extractor {
         extractorConfig.reportDirectoryPath,
         extractorConfig.reportTempDirectoryPath,
         reportFileName,
-        releaseLevel,
+        reportVariant,
         localBuild
       );
     }
 
-    let untrimmedReportChanged: boolean = false;
-    let alphaReportChanged: boolean = false;
-    let betaReportChanged: boolean = false;
-    let publicReportChanged: boolean = false;
+    let anyReportChanged: boolean = false;
     if (extractorConfig.apiReportEnabled) {
-      if (extractorConfig.untrimmedReportFileName) {
-        untrimmedReportChanged = writeApiReport(
-          extractorConfig.untrimmedReportFileName,
-          ApiReportReleaseLevel.Untrimmed
-        );
-      }
-      if (extractorConfig.alphaReportFileName) {
-        alphaReportChanged = writeApiReport(extractorConfig.alphaReportFileName, ApiReportReleaseLevel.Alpha);
-      }
-      if (extractorConfig.betaReportFileName) {
-        betaReportChanged = writeApiReport(extractorConfig.betaReportFileName, ApiReportReleaseLevel.Beta);
-      }
-      if (extractorConfig.publicReportFileName) {
-        publicReportChanged = writeApiReport(
-          extractorConfig.publicReportFileName,
-          ApiReportReleaseLevel.Public
-        );
+      for (const reportConfig of extractorConfig.reportConfigs) {
+        anyReportChanged = writeApiReport(reportConfig.fileName, reportConfig.variant) || anyReportChanged;
       }
     }
-
-    const anyApiReportChanged: boolean =
-      untrimmedReportChanged || alphaReportChanged || betaReportChanged || publicReportChanged;
 
     if (extractorConfig.rollupEnabled) {
       Extractor._generateRollupDtsFile(
@@ -382,7 +358,7 @@ export class Extractor {
       compilerState,
       extractorConfig,
       succeeded,
-      apiReportChanged: anyApiReportChanged,
+      apiReportChanged: anyReportChanged,
       errorCount: messageRouter.errorCount,
       warningCount: messageRouter.warningCount
     });
@@ -396,8 +372,7 @@ export class Extractor {
    * to comparison with an existing report.
    * @param reportDirectoryPath - The path to the directory under which the existing report file is located, and to
    * which the new report will be written post-comparison.
-   * @param releaseLevel - The release level for the report. Determines which API members will be included in the
-   * report, based on their release tags.
+   * @param reportVariant - Determines which API members will be included in the report, based on their tagged release levels.
    *
    * @returns Whether or not the newly generated report differs from the existing report (if one exists).
    */
@@ -408,7 +383,7 @@ export class Extractor {
     reportTempDirectoryPath: string,
     reportDirectoryPath: string,
     reportFileName: string,
-    releaseLevel: ApiReportReleaseLevel,
+    reportVariant: ApiReportVariant,
     localBuild: boolean
   ): boolean {
     let apiReportChanged: boolean = false;
@@ -421,11 +396,11 @@ export class Extractor {
 
     collector.messageRouter.logVerbose(
       ConsoleMessageId.WritingDtsRollup,
-      `Generating ${releaseLevelToString(releaseLevel)} API report : ${expectedApiReportPath}`
+      `Generating ${reportVariant} API report : ${expectedApiReportPath}`
     );
 
     const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(collector, {
-      releaseLevel
+      reportVariant: reportVariant
     });
 
     // Write the actual file

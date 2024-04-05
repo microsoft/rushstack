@@ -49,6 +49,11 @@ export interface IConfigCompiler {
 }
 
 /**
+ * The allowed variations of API reports.
+ */
+export type ApiReportVariant = 'public' | 'beta' | 'alpha' | 'complete';
+
+/**
  * Configures how the API report files (*.api.md) will be generated.
  *
  * @remarks
@@ -71,52 +76,20 @@ export interface IConfigApiReport {
    *
    * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
    *
-   * To opt out of generating the untrimmed report, set this to `null`.
-   *
    * @defaultValue `<unscopedPackageName>.api.md`
    */
   // eslint-disable-next-line @rushstack/no-new-null
-  reportFileName?: string | null;
+  reportFileName?: string;
 
   /**
-   * The filename for the "alpha" API report file, which will encompass all API items tagged as `@alpha`, `@beta`, or
-   * `@public`.
+   * TODO
+   * Notes:
+   * * Name will end in `<variant>.api.md` - for this config, users don't specify `api.md`.
+   * *
    *
-   * @remarks
-   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
-   * produce a full output filename.
-   *
-   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
-   *
-   * @defaultValue No alpha report will be generated.
+   * @defaultValue `['complete']`
    */
-  alphaReportFileName?: string;
-
-  /**
-   * The filename for the "alpha" API report file, which will encompass all API items tagged as `@beta` or `@public`.
-   *
-   * @remarks
-   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
-   * produce a full output filename.
-   *
-   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
-   *
-   * @defaultValue No beta report will be generated.
-   */
-  betaReportFileName?: string;
-
-  /**
-   * The filename for the "alpha" API report file, which will encompass only API items tagged as `@public`.
-   *
-   * @remarks
-   * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
-   * produce a full output filename.
-   *
-   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
-   *
-   * @defaultValue No public report will be generated.
-   */
-  publicReportFileName?: string;
+  reportVariants?: ApiReportVariant[];
 
   /**
    * Specifies the folder where the API report file is written.  The file name portion is determined by

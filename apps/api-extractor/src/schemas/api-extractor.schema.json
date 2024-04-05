@@ -72,19 +72,13 @@
           "type": ["string", "null"]
         },
 
-        "alphaReportFileName": {
-          "description": "The filename for the alpha API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
-          "type": "string"
-        },
-
-        "betaReportFileName": {
-          "description": "The filename for the beta API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
-          "type": "string"
-        },
-
-        "publicReportFileName": {
-          "description": "The filename for the public API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
-          "type": "string"
+        "reportVariants": {
+          "description": "TODO. Default: complete",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["public", "beta", "alpha", "complete"]
+          }
         },
 
         "reportFolder": {

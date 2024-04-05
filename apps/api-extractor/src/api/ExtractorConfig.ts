@@ -18,7 +18,12 @@ import {
 } from '@rushstack/node-core-library';
 import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
-import type { IConfigApiReport, IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
+import type {
+  ApiReportVariant,
+  IConfigApiReport,
+  IConfigFile,
+  IExtractorMessagesConfig
+} from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 import { EnumMemberOrder } from '@microsoft/api-extractor-model';
@@ -148,6 +153,25 @@ export interface IExtractorConfigPrepareOptions {
   ignoreMissingEntryPoint?: boolean;
 }
 
+/**
+ * Configuration for a single API report, including its {@link IApiReportConfig.variant}.
+ *
+ * @public
+ */
+export interface IApiReportConfig {
+  /**
+   * Report variant.
+   * Determines which API items will be included in the report output, based on their tagged release levels.
+   */
+  variant: ApiReportVariant;
+
+  /**
+   * Name of the output report file.
+   * @remarks Relative to the configured report directory path.
+   */
+  fileName: string;
+}
+
 interface IExtractorConfigParameters {
   projectFolder: string;
   packageJson: INodePackageJson | undefined;
@@ -158,10 +182,7 @@ interface IExtractorConfigParameters {
   overrideTsconfig: {} | undefined;
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
-  untrimmedReportFileName: string | undefined;
-  alphaReportFileName: string | undefined;
-  betaReportFileName: string | undefined;
-  publicReportFileName: string | undefined;
+  reportConfigs: readonly IApiReportConfig[];
   reportDirectoryPath: string;
   reportTempDirectoryPath: string;
   apiReportIncludeForgottenExports: boolean;
@@ -250,12 +271,14 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigApiReport.enabled} */
   public readonly apiReportEnabled: boolean;
 
-  // TODO: docs
-  public readonly untrimmedReportFileName: string | undefined;
-  public readonly alphaReportFileName: string | undefined;
-  public readonly betaReportFileName: string | undefined;
-  public readonly publicReportFileName: string | undefined;
+  /**
+   * List of configurations for report files to be generated.
+   * @remarks Derived from {@link IConfigApiReport.reportFileName} and {@link IConfigApiReport.reportVariants}.
+   */
+  public readonly reportConfigs: readonly IApiReportConfig[];
+  /** {@inheritDoc IConfigApiReport.reportFolder} */
   public readonly reportDirectoryPath: string;
+  /** {@inheritDoc IConfigApiReport.reportTempFolder} */
   public readonly reportTempDirectoryPath: string;
 
   /** {@inheritDoc IConfigApiReport.includeForgottenExports} */
@@ -324,10 +347,7 @@ export class ExtractorConfig {
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.apiReportIncludeForgottenExports = parameters.apiReportIncludeForgottenExports;
-    this.untrimmedReportFileName = parameters.untrimmedReportFileName;
-    this.alphaReportFileName = parameters.alphaReportFileName;
-    this.betaReportFileName = parameters.betaReportFileName;
-    this.publicReportFileName = parameters.publicReportFileName;
+    this.reportConfigs = parameters.reportConfigs;
     this.reportDirectoryPath = parameters.reportDirectoryPath;
     this.reportTempDirectoryPath = parameters.reportTempDirectoryPath;
     this.docModelEnabled = parameters.docModelEnabled;
@@ -873,73 +893,55 @@ export class ExtractorConfig {
         configObject.apiReport?.includeForgottenExports ?? false;
       let reportDirectoryPath: string = tokenContext.projectFolder;
       let reportTempDirectoryPath: string = tokenContext.projectFolder;
-      let untrimmedReportFileName: string | undefined;
-      let alphaReportFileName: string | undefined;
-      let betaReportFileName: string | undefined;
-      let publicReportFileName: string | undefined;
+      const reportConfigs: IApiReportConfig[] = [];
       if (apiReportEnabled) {
         // Undefined case checked above where we assign `apiReportEnabled`
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
-        // Default "untrimmed" report
-        // Note: for backwards compatibility, `undefined` here means use the default value ("<unscopedPackageName>.api.md").
-        // `null` was added as an option to explicitly opt out of "untrimmed" report generation.
-        untrimmedReportFileName =
-          apiReportConfig.reportFileName === null
-            ? undefined
-            : ExtractorConfig._expandStringWithTokens(
-                'reportFileName',
-                apiReportConfig.reportFileName ?? '<unscopedPackageName>.api.md',
-                tokenContext
-              );
-        validateApiReportFileName('reportFileName', untrimmedReportFileName);
-
-        alphaReportFileName =
-          apiReportConfig.alphaReportFileName === undefined
-            ? undefined
-            : ExtractorConfig._expandStringWithTokens(
-                'alphaReportFileName',
-                apiReportConfig.alphaReportFileName,
-                tokenContext
-              );
-        validateApiReportFileName('alphaReportFileName', alphaReportFileName);
-
-        betaReportFileName =
-          apiReportConfig.betaReportFileName === undefined
-            ? undefined
-            : ExtractorConfig._expandStringWithTokens(
-                'betaReportFileName',
-                apiReportConfig.betaReportFileName,
-                tokenContext
-              );
-        validateApiReportFileName('betaReportFileName', betaReportFileName);
-
-        publicReportFileName =
-          apiReportConfig.publicReportFileName === undefined
-            ? undefined
-            : ExtractorConfig._expandStringWithTokens(
-                'publicReportFileName',
-                apiReportConfig.publicReportFileName,
-                tokenContext
-              );
-        validateApiReportFileName('publicReportFileName', publicReportFileName);
-
-        if (
-          !untrimmedReportFileName &&
-          !alphaReportFileName &&
-          !betaReportFileName &&
-          !publicReportFileName
-        ) {
-          // A merged configuration should have at least 1 report file specified.
-          throw new Error('API reports are enabled, but no report files were specified.');
+        let reportFileNameBase: string;
+        if (apiReportConfig.reportFileName) {
+          if (apiReportConfig.reportFileName.endsWith('.api.md')) {
+            // If the user configured the report file name with the ".api.md" postfix, strip it so we can create derived
+            // report names for each report variant. We will re-add the postfix to each.
+            // This is mostly for backwards compaibility. Ideally we would have users not specify the postfix extension
+            // at all, and add it for them. But the previous versions of the spec spec explicitly calls for the postfix
+            // to be specified, so we must allow for it.
+            reportFileNameBase = apiReportConfig.reportFileName.split('.api.md')[0];
+          } else if (apiReportConfig.reportFileName.endsWith('.md')) {
+            // If the user specified the `.md` file extension, but did not satisfy the `.api.md` postfix requirement,
+            // throw an error.
+            throw new Error(
+              'Report file names must either not specify a file extension, or they must end in ".api.md"'
+            );
+          } else {
+            // No extension was specified. Use the provided name and append `.api.md` later.
+            reportFileNameBase = apiReportConfig.reportFileName;
+          }
+        } else {
+          // Default value
+          reportFileNameBase = '<unscopedPackageName>';
         }
 
-        ExtractorConfig._ensureNoDuplicateReportNames(
-          untrimmedReportFileName,
-          alphaReportFileName,
-          betaReportFileName,
-          publicReportFileName
-        );
+        validateApiReportFileName('reportFileName', reportFileNameBase);
+
+        const reportVariantKinds: ApiReportVariant[] = apiReportConfig.reportVariants ?? ['complete'];
+
+        for (const reportVariantKind of reportVariantKinds) {
+          // Omit the variant kind from the "complete" report file name for simplicity and for backwards compatibility.
+          const fileNameWithTokens: string = `${reportFileNameBase}${
+            reportVariantKind === 'complete' ? '' : `.${reportVariantKind}`
+          }.api.md`;
+          const normalizedFileName: string = ExtractorConfig._expandStringWithTokens(
+            'reportFileName',
+            fileNameWithTokens,
+            tokenContext
+          );
+
+          reportConfigs.push({
+            fileName: normalizedFileName,
+            variant: reportVariantKind
+          });
+        }
 
         if (apiReportConfig.reportFolder) {
           reportDirectoryPath = ExtractorConfig._resolvePathWithTokens(
@@ -1072,10 +1074,7 @@ export class ExtractorConfig {
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,
-        untrimmedReportFileName,
-        alphaReportFileName,
-        betaReportFileName,
-        publicReportFileName,
+        reportConfigs,
         reportDirectoryPath,
         reportTempDirectoryPath,
         apiReportIncludeForgottenExports,
@@ -1132,27 +1131,6 @@ export class ExtractorConfig {
     }
 
     return new ExtractorConfig({ ...extractorConfigParameters, tsdocConfigFile, tsdocConfiguration });
-  }
-
-  /**
-   * Ensures that expanded API report file names are unique.
-   * @throws Throws an error if a duplicate name is found.
-   * @param reportFileNames - The list of API report file names to check for duplicates.
-   * `undefined` indicates a report that is not configured. Such entries are ignored.
-   */
-  private static _ensureNoDuplicateReportNames(...reportFileNames: (string | undefined)[]): void {
-    const set: Set<string> = new Set<string>();
-    for (const fileName of reportFileNames) {
-      if (fileName === undefined) {
-        continue;
-      }
-      if (set.has(fileName)) {
-        throw new Error(
-          `Multiple API reports are configured with the same output file name: "${fileName}". Please ensure unique file names.`
-        );
-      }
-      set.add(fileName);
-    }
   }
 
   private static _resolvePathWithTokens(
