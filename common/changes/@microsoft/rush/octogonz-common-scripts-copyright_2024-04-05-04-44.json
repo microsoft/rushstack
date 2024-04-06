@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Clarify the copyright notice emitted in common/scripts/*.js",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
