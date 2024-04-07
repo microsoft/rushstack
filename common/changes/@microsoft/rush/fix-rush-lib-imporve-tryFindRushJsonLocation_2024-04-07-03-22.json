@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "refactor tryFindRushJsonLocation with a specific way to reliably detect when reaching the root on NTFS vs Unix filesystems",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
