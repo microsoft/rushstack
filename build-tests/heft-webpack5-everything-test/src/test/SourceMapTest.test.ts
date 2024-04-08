@@ -40,7 +40,7 @@ describe('Source Maps', () => {
     expect(testBMapText).toBeTruthy();
   });
 
-  it('Test-A Map has indexA.ts file', () => {
+  it('Test-X Map has indexX.ts file', () => {
     expect(testAMapObject.sources).toContain(/indexA.ts$/);
     expect(testBMapObject.sources).toContain(/indexB.ts$/);
   });
