@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Handle optional dependencies in transitive injected install",
+      "comment": "Add support for `optionalDependencies` in transitive injected install in the Subspaces feature.",
       "type": "none"
     }
   ],
