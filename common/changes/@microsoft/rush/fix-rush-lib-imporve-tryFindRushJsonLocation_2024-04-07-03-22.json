@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "refactor tryFindRushJsonLocation with a specific way to reliably detect when reaching the root on NTFS vs Unix filesystems",
+      "comment": "Remove a restriction where the repo root would not be found if the CWD is >10 directory levels deep.",
       "type": "none"
     }
   ],
