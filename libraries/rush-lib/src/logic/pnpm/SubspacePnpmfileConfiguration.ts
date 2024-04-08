@@ -138,8 +138,8 @@ export class SubspacePnpmfileConfiguration {
       const currentProject: RushConfigurationProject | undefined =
         processTransitiveInjectedInstallQueue.shift();
       const dependencies: Record<string, string> | undefined = currentProject?.packageJson?.dependencies;
-      const devDependencies: Record<string, string> | undefined =
-        currentProject?.packageJson?.devDependencies;
+      const optionalDependencies: Record<string, string> | undefined =
+        currentProject?.packageJson?.optionalDependencies;
       if (currentProject) {
         if (dependencies) {
           SubspacePnpmfileConfiguration._processDependenciesForTransitiveInjectedInstall(
@@ -150,12 +150,11 @@ export class SubspacePnpmfileConfiguration {
             rushConfiguration
           );
         }
-
-        if (devDependencies) {
+        if (optionalDependencies) {
           SubspacePnpmfileConfiguration._processDependenciesForTransitiveInjectedInstall(
             projectNameToInjectedDependenciesMap,
             processTransitiveInjectedInstallQueue,
-            devDependencies,
+            optionalDependencies,
             currentProject,
             rushConfiguration
           );
