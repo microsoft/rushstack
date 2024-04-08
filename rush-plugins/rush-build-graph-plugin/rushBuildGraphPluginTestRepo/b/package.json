@@ -1,0 +1,11 @@
+{
+  "name": "b",
+  "version": "1.0.0",
+  "description": "Test package b",
+  "dependencies": {
+    "a": "1.0.0"
+  },
+  "scripts": {
+    "_phase:build": "heft run fake build command"
+  }
+}

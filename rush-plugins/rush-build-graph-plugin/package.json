@@ -1,0 +1,28 @@
+{
+  "name": "@rushstack/rush-build-graph-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plugin for providing access to Rush build graph.",
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean",
+    "clean": "heft clean",
+    "start": "heft build --clean --watch",
+    "test-watch": "heft test-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:build-incremental": "heft run --only build --",
+    "_phase:test": "heft run --only test -- --clean",
+    "_phase:depscan": "heft depscan"
+  },
+  "author": "xFun",
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "local-node-rig": "workspace:*",
+    "@microsoft/rush-lib": "workspace:*",
+    "eslint": "~8.7.0"
+  },
+  "sideEffects": false
+}

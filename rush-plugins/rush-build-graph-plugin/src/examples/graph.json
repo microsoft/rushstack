@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    {
+      "id": "a#_phase:build",
+      "task": "_phase:build",
+      "package": "a",
+      "dependencies": [],
+      "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
+      "command": "heft run fake build command "
+    },
+    {
+      "id": "b#_phase:build",
+      "task": "_phase:build",
+      "package": "b",
+      "dependencies": ["a#_phase:build"],
+      "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+      "command": "heft run fake build command "
+    }
+  ],
+  "repoSettings": {
+    "commonTempFolder": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/common/temp"
+  }
+}
