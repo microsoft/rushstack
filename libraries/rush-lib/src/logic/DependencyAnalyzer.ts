@@ -6,7 +6,7 @@ import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfigura
 import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Subspace } from '../api/Subspace';
+import type { Subspace } from '../api/Subspace';
 
 export interface IDependencyAnalysis {
   /**
@@ -54,7 +54,7 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(subspace?: Subspace | undefined): IDependencyAnalysis {
+  public getAnalysis(subspace?: Subspace): IDependencyAnalysis {
     if (!this._analysis) {
       this._analysis = this._getAnalysisInternal(subspace || this._rushConfiguration.defaultSubspace);
     }
