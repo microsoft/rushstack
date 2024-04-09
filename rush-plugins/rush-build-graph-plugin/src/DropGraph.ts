@@ -46,7 +46,7 @@ export async function _dropGraph(parameters: IDropGraphParameters): Promise<bool
       };
       const debugPathOut: string = join(dirname(dropGraphPath), 'debug-' + basename(dropGraphPath));
 
-      await FileSystem.writeFileAsync(debugPathOut, JSON.stringify(debugOutput, undefined, 2));
+      await JsonFile.saveAsync(debugOutput, debugPathOut, { ensureFolderExists: true });
     }
   }
 
@@ -57,6 +57,6 @@ export async function _dropGraph(parameters: IDropGraphParameters): Promise<bool
     }
   };
 
-  await FileSystem.writeFileAsync(dropGraphPath, JSON.stringify(buildXLGraph, undefined, 2));
+  await JsonFile.saveAsync(buildXLGraph, dropGraphPath, { ensureFolderExists: true });
   return graphParser.validateGraph(buildXLGraph.nodes);
 }
