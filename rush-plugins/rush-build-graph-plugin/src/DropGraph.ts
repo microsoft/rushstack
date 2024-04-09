@@ -4,7 +4,7 @@
 import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
 import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
 import { type IGraphNode, GraphParser } from './GraphParser';
-import { FileSystem } from '@rushstack/node-core-library/lib/FileSystem';
+import { FileSystem } from '@rushstack/node-core-library';
 import { filterObjectForDebug, filterObjectForTesting } from './GraphDebugHelpers';
 import { join, dirname, basename } from 'path';
 

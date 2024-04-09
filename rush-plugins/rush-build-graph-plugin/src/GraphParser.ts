@@ -3,7 +3,7 @@
 
 import type { Operation, IOperationRunner, ILogger } from '@rushstack/rush-sdk';
 
-import { Colorize } from '@rushstack/terminal/lib/Colorize';
+import { Colorize } from '@rushstack/terminal';
 import { filterObjectForDebug } from './GraphDebugHelpers';
 
 /**
