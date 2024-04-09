@@ -831,21 +831,22 @@ export class FileSystem {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
         while (toCopy.length) {
-          let bytesToSkip: number = fsx.writevSync(fd, toCopy);
-          let buffersToSkip: number = 0;
-          while (buffersToSkip < toCopy.length) {
-            const bytesInCurrentBuffer: number = toCopy[buffersToSkip].byteLength;
-            if (bytesToSkip < bytesInCurrentBuffer) {
-              toCopy[buffersToSkip] = toCopy[buffersToSkip].subarray(bytesToSkip);
+          let bytesWritten: number = fsx.writevSync(fd, toCopy);
+          let buffersWritten: number = 0;
+          while (buffersWritten < toCopy.length) {
+            const bytesInCurrentBuffer: number = toCopy[buffersWritten].byteLength;
+            if (bytesWritten < bytesInCurrentBuffer) {
+              // This buffer was partially written.
+              toCopy[buffersWritten] = toCopy[buffersWritten].subarray(bytesWritten);
               break;
             }
-            bytesToSkip -= toCopy[buffersToSkip].byteLength;
-            buffersToSkip++;
+            bytesWritten -= bytesInCurrentBuffer;
+            buffersWritten++;
           }
 
-          if (buffersToSkip > 0) {
+          if (buffersWritten > 0) {
             // Avoid cost of shifting the array more than needed.
-            toCopy.splice(0, buffersToSkip);
+            toCopy.splice(0, buffersWritten);
           }
         }
       } finally {
@@ -920,21 +921,22 @@ export class FileSystem {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
         while (toCopy.length) {
-          let bytesToSkip: number = (await handle.writev(toCopy)).bytesWritten;
-          let buffersToSkip: number = 0;
-          while (buffersToSkip < toCopy.length) {
-            const bytesInCurrentBuffer: number = toCopy[buffersToSkip].byteLength;
-            if (bytesToSkip < bytesInCurrentBuffer) {
-              toCopy[buffersToSkip] = toCopy[buffersToSkip].subarray(bytesToSkip);
+          let bytesWritten: number = (await handle.writev(toCopy)).bytesWritten;
+          let buffersWritten: number = 0;
+          while (buffersWritten < toCopy.length) {
+            const bytesInCurrentBuffer: number = toCopy[buffersWritten].byteLength;
+            if (bytesWritten < bytesInCurrentBuffer) {
+              // This buffer was partially written.
+              toCopy[buffersWritten] = toCopy[buffersWritten].subarray(bytesWritten);
               break;
             }
-            bytesToSkip -= toCopy[buffersToSkip].byteLength;
-            buffersToSkip++;
+            bytesWritten -= bytesInCurrentBuffer;
+            buffersWritten++;
           }
 
-          if (buffersToSkip > 0) {
+          if (buffersWritten > 0) {
             // Avoid cost of shifting the array more than needed.
-            toCopy.splice(0, buffersToSkip);
+            toCopy.splice(0, buffersWritten);
           }
         }
       } finally {
