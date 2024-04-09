@@ -838,7 +838,7 @@ export class FileSystem {
             position = 0;
           }
           position += fsx.writevSync(fd, toCopy);
-          while (buffersToSkip < toCopy.length && position > toCopy[buffersToSkip].byteLength) {
+          while (buffersToSkip < toCopy.length && position >= toCopy[buffersToSkip].byteLength) {
             position -= toCopy[buffersToSkip].byteLength;
             buffersToSkip++;
           }
@@ -846,6 +846,7 @@ export class FileSystem {
           if (buffersToSkip > 0) {
             // Avoid cost of shifting the array more than needed.
             toCopy.splice(0, buffersToSkip);
+            buffersToSkip = 0;
           }
         }
       } finally {
@@ -927,7 +928,7 @@ export class FileSystem {
             position = 0;
           }
           position += (await handle.writev(toCopy)).bytesWritten;
-          while (buffersToSkip < toCopy.length && position > toCopy[buffersToSkip].byteLength) {
+          while (buffersToSkip < toCopy.length && position >= toCopy[buffersToSkip].byteLength) {
             position -= toCopy[buffersToSkip].byteLength;
             buffersToSkip++;
           }
@@ -935,6 +936,7 @@ export class FileSystem {
           if (buffersToSkip > 0) {
             // Avoid cost of shifting the array more than needed.
             toCopy.splice(0, buffersToSkip);
+            buffersToSkip = 0;
           }
         }
       } finally {
