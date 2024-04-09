@@ -2,6 +2,15 @@
   "name": "@rushstack/rush-build-graph-plugin",
   "version": "0.1.0",
   "description": "Plugin for providing access to Rush build graph.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack",
+    "directory": "rush-plugins/rush-build-graph-plugin"
+  },
+  "homepage": "https://rushjs.io",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "MIT",
   "scripts": {
     "build": "heft build --clean",
     "test": "heft test --clean",
