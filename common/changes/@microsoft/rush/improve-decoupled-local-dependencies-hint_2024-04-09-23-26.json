@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve the error message when explicit versions are used for monorepo packages",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
