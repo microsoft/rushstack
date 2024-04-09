@@ -148,12 +148,14 @@ export class GraphParser {
       return nonEmptyDependencies;
     }
 
-    return Array.from(inputNodeMap.values())
-      .filter((node) => node.command)
-      .map((node) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return { ...node, dependencies: Array.from(getNonEmptyDependencies(node)), command: node.command! };
-      });
+    const result: IGraphNode[] = [];
+    for (const node of inputNodeMap.values()) {
+      if (node.command) {
+        result.push({ ...node, dependencies: Array.from(getNonEmptyDependencies(node)), command: node.command });
+      }
+    }
+    
+    return result;
   }
 
   /*
