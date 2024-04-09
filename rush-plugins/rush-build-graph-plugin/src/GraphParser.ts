@@ -58,7 +58,7 @@ export class GraphParser {
   /*
    * Convert the operationMap into an array of graph nodes with empty commands pruned
    */
-  public processOperations(operations: Set<Operation>): IGraphNode[] {
+  public processOperations(operations: Iterable<Operation>): IGraphNode[] {
     const result: INodeMapInternal = new Map(
       Array.from(operations, (operation) => {
         const entry: IGraphNodeInternal = this._operationAsHashedEntry(operation);
