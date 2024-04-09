@@ -20,7 +20,7 @@ const graphParser: GraphParser = new GraphParser({
   terminal: { writeErrorLine: jest.fn(), writeLine: jest.fn() }
 } as unknown as ILogger);
 
-describe('GraphParser', () => {
+describe(GraphParser.name, () => {
   it('should process debug-graph.json into graph.json', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let prunedGraph: IGraphNode[] = graphParser.processOperations(new Set(debugGraph.OperationMap as any));
