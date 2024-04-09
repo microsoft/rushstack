@@ -160,11 +160,16 @@ export class GraphParser {
    * Convert an operation into a graph node
    */
   private _operationAsHashedEntry(operation: Operation): IGraphNodeInternal {
+    const dependencies: Set<string> = new Set();
+    for (const dep of operation.dependencies.values()) {
+      dependencies.add(this.getOperationId(dep));
+    }
+
     const node: Partial<IGraphNodeInternal> = {
       id: tryGetOperationId(operation),
       task: operation.associatedPhase?.name,
       package: operation.associatedProject?.packageName,
-      dependencies: new Set(Array.from(operation.dependencies.values(), (dep) => this.getOperationId(dep))),
+      dependencies,
       workingDirectory: operation.associatedProject?.projectFolder,
       // _commandToRun does not exist in the type definition of IOperationRunner,
       //    but it's defined in subclasss ShellOperationRunner
