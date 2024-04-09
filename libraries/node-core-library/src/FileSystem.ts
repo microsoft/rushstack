@@ -827,19 +827,19 @@ export class FileSystem {
         fd = fsx.openSync(filePath, 'w');
       }
 
-      let position: number = 0;
       try {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
         while (toCopy.length) {
-          if (position > 0) {
-            toCopy[0] = toCopy[0].subarray(position);
-            position = 0;
-          }
-          position += fsx.writevSync(fd, toCopy);
+          let bytesToSkip: number = fsx.writevSync(fd, toCopy);
           let buffersToSkip: number = 0;
-          while (buffersToSkip < toCopy.length && position >= toCopy[buffersToSkip].byteLength) {
-            position -= toCopy[buffersToSkip].byteLength;
+          while (buffersToSkip < toCopy.length) {
+            const bytesInCurrentBuffer: number = toCopy[buffersToSkip].byteLength;
+            if (bytesToSkip < bytesInCurrentBuffer) {
+              toCopy[buffersToSkip] = toCopy[buffersToSkip].subarray(bytesToSkip);
+              break;
+            }
+            bytesToSkip -= toCopy[buffersToSkip].byteLength;
             buffersToSkip++;
           }
 
@@ -916,20 +916,19 @@ export class FileSystem {
         handle = await fs.promises.open(filePath, 'w');
       }
 
-      let position: number = 0;
       try {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
         while (toCopy.length) {
-          if (position > 0) {
-            toCopy[0] = toCopy[0].subarray(position);
-            position = 0;
-          }
-          position += (await handle.writev(toCopy)).bytesWritten;
-
+          let bytesToSkip: number = (await handle.writev(toCopy)).bytesWritten;
           let buffersToSkip: number = 0;
-          while (buffersToSkip < toCopy.length && position >= toCopy[buffersToSkip].byteLength) {
-            position -= toCopy[buffersToSkip].byteLength;
+          while (buffersToSkip < toCopy.length) {
+            const bytesInCurrentBuffer: number = toCopy[buffersToSkip].byteLength;
+            if (bytesToSkip < bytesInCurrentBuffer) {
+              toCopy[buffersToSkip] = toCopy[buffersToSkip].subarray(bytesToSkip);
+              break;
+            }
+            bytesToSkip -= toCopy[buffersToSkip].byteLength;
             buffersToSkip++;
           }
 
