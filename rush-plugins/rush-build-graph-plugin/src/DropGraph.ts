@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { JsonFile } from '@rushstack/node-core-library';
 import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
+import { basename, dirname } from 'path';
 import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
-import { type IGraphNode, GraphParser } from './GraphParser';
-import { FileSystem } from '@rushstack/node-core-library';
 import { filterObjectForDebug, filterObjectForTesting } from './GraphDebugHelpers';
-import { join, dirname, basename } from 'path';
+import { GraphParser, type IGraphNode } from './GraphParser';
 
 export interface IDropGraphParameters {
   operations: Set<Operation>;
