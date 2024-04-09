@@ -59,12 +59,12 @@ export class GraphParser {
    * Convert the operationMap into an array of graph nodes with empty commands pruned
    */
   public processOperations(operations: Iterable<Operation>): IGraphNode[] {
-    const result: INodeMapInternal = new Map(
-      Array.from(operations, (operation) => {
-        const entry: IGraphNodeInternal = this._operationAsHashedEntry(operation);
-        return [entry.id, entry];
-      })
-    );
+    const result: INodeMapInternal = new Map();
+    for (const operation of operations) {
+      const entry: IGraphNodeInternal = this._operationAsHashedEntry(operation);
+      result.set(entry.id, entry);
+    }
+
     return this._pruneNoOps(result);
   }
 
