@@ -73,36 +73,39 @@ export class GraphParser {
    * Validate that all nodes have a non-empty command
    * Print a message to the logger, and return true if the graph is valid
    */
-  public validateGraph(entries: readonly Readonly<IGraphNode>[]): boolean {
-    const entryIDs: Set<string> = new Set(entries.map((entry) => entry.id));
+  public validateGraph(entries: Iterable<Readonly<IGraphNode>>): boolean {
+    const entryById: Map<string, IGraphNode> = new Set(Array.from(entries, (entry) => [entry.id, entry]));
+    const { terminal } = this._logger;
+    let totalEdges: number = 0;
     let isValid: boolean = true;
-    for (const entry of entries) {
+    for (const [id, entry] of entries) {
       for (const depId of entry.dependencies) {
         if (!entryIDs.has(depId)) {
-          this._logger.terminal.writeErrorLine(
-            `${entry.id} has a dependency on ${depId} which does not exist`
+          terminal.writeErrorLine(
+            `${id} has a dependency on ${depId} which does not exist`
           );
           isValid = false;
         }
       }
+      
+      totalEdges += entry.dependencies.length;
 
-      if (!entry.id) {
-        this._logger.terminal.writeErrorLine(`An entry id is missing or empty`);
+      if (!id) {
+        terminal.writeErrorLine(`An entry id is missing or empty`);
         isValid = false;
       }
 
       if (!entry.command) {
-        this._logger.terminal.writeErrorLine(`There is an empty command in ${entry.id} `);
+        terminal.writeErrorLine(`There is an empty command in ${entry.id} `);
         isValid = false;
       }
     }
     if (isValid) {
-      this._logger.terminal.writeLine(
+      terminal.writeLine(
         Colorize.green('All nodes have non-empty commands and dependencies which exist')
       );
     }
-    const totalEdges: number = entries.reduce((acc, entry) => acc + entry.dependencies.length, 0);
-    this._logger.terminal.writeLine(`Graph has ${entries.length} nodes, ${totalEdges} edges`);
+    terminal.writeLine(`Graph has ${entries.length} nodes, ${totalEdges} edges`);
     return isValid;
   }
 
