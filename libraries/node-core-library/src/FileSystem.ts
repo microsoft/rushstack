@@ -794,8 +794,10 @@ export class FileSystem {
   /**
    * Writes the contents of multiple Uint8Arrays to a file on disk, overwriting the file if it already exists.
    * Behind the scenes it uses `fs.writevSync()`.
+   *
    * This API is useful for writing large files efficiently, especially if the input is being concatenated from
    * multiple sources.
+   *
    * @remarks
    * Throws an error if the folder doesn't exist, unless ensureFolder=true.
    * @param filePath - The absolute or relative path of the file.
@@ -804,10 +806,12 @@ export class FileSystem {
    */
   public static writeBuffersToFile(
     filePath: string,
-    contents: Iterable<Uint8Array>,
+    contents: ReadonlyArray<Uint8Array>,
     options?: IFileSystemWriteBinaryFileOptions
   ): void {
     FileSystem._wrapException(() => {
+      // Need a mutable copy of the iterable to handle incomplete writes,
+      // since writev() doesn't take an argument for where to start writing.
       const toCopy: Uint8Array[] = [...contents];
 
       let fd: number | undefined;
@@ -824,6 +828,7 @@ export class FileSystem {
       }
 
       let position: number = 0;
+      let buffersToSkip: number = 0;
       try {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
@@ -833,9 +838,14 @@ export class FileSystem {
             position = 0;
           }
           position += fsx.writevSync(fd, toCopy);
-          while (toCopy.length && position >= toCopy[0].byteLength) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            position -= toCopy.shift()!.byteLength;
+          while (buffersToSkip < toCopy.length && position > toCopy[buffersToSkip].byteLength) {
+            position -= toCopy[buffersToSkip].byteLength;
+            buffersToSkip++;
+          }
+
+          if (buffersToSkip > 0) {
+            // Avoid cost of shifting the array more than needed.
+            toCopy.splice(0, buffersToSkip);
           }
         }
       } finally {
@@ -885,10 +895,12 @@ export class FileSystem {
    */
   public static async writeBuffersToFileAsync(
     filePath: string,
-    contents: Iterable<Uint8Array>,
+    contents: ReadonlyArray<Uint8Array>,
     options?: IFileSystemWriteBinaryFileOptions
   ): Promise<void> {
     await FileSystem._wrapExceptionAsync(async () => {
+      // Need a mutable copy of the iterable to handle incomplete writes,
+      // since writev() doesn't take an argument for where to start writing.
       const toCopy: Uint8Array[] = [...contents];
 
       let handle: fs.promises.FileHandle | undefined;
@@ -905,6 +917,7 @@ export class FileSystem {
       }
 
       let position: number = 0;
+      let buffersToSkip: number = 0;
       try {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
@@ -914,9 +927,14 @@ export class FileSystem {
             position = 0;
           }
           position += (await handle.writev(toCopy)).bytesWritten;
-          while (toCopy.length && position >= toCopy[0].byteLength) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            position -= toCopy.shift()!.byteLength;
+          while (buffersToSkip < toCopy.length && position > toCopy[buffersToSkip].byteLength) {
+            position -= toCopy[buffersToSkip].byteLength;
+            buffersToSkip++;
+          }
+
+          if (buffersToSkip > 0) {
+            // Avoid cost of shifting the array more than needed.
+            toCopy.splice(0, buffersToSkip);
           }
         }
       } finally {
