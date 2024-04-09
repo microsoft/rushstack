@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-bulk",
+      "comment": "Attempt to resolve eslint as a dependency of the current project before falling back to a globally-installed copy.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-bulk"
+}

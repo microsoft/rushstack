@@ -4,7 +4,6 @@
 import { execSync } from 'child_process';
 import * as process from 'process';
 import * as fs from 'fs';
-import * as path from 'path';
 
 interface IEslintBulkConfigurationJson {
   /**
@@ -18,12 +17,16 @@ interface IEslintBulkConfigurationJson {
 }
 
 function findPatchPath(): string {
-  let eslintrcPath: string;
-  if (fs.existsSync(path.join(process.cwd(), '.eslintrc.js'))) {
-    eslintrcPath = '.eslintrc.js';
-  } else if (fs.existsSync(path.join(process.cwd(), '.eslintrc.cjs'))) {
-    eslintrcPath = '.eslintrc.cjs';
-  } else {
+  const candidatePaths: string[] = [`${process.cwd()}/.eslintrc.js`, `${process.cwd()}/.eslintrc.cjs`];
+  let eslintrcPath: string | undefined;
+  for (const candidatePath of candidatePaths) {
+    if (fs.existsSync(candidatePath)) {
+      eslintrcPath = candidatePath;
+      break;
+    }
+  }
+
+  if (!eslintrcPath) {
     console.error(
       '@rushstack/eslint-bulk: Please run this command from the directory that contains .eslintrc.js or .eslintrc.cjs'
     );
@@ -32,9 +35,51 @@ function findPatchPath(): string {
 
   const env: NodeJS.ProcessEnv = { ...process.env, _RUSHSTACK_ESLINT_BULK_DETECT: 'true' };
 
+  let eslintPackageJsonPath: string | undefined;
+  try {
+    eslintPackageJsonPath = require.resolve('eslint/package.json', { paths: [process.cwd()] });
+  } catch (e) {
+    if (e.code !== 'MODULE_NOT_FOUND') {
+      throw e;
+    }
+  }
+
+  let eslintBinPath: string | undefined;
+  if (eslintPackageJsonPath) {
+    eslintPackageJsonPath = eslintPackageJsonPath.replace(/\\/g, '/');
+    const packagePath: string = eslintPackageJsonPath.substring(0, eslintPackageJsonPath.lastIndexOf('/'));
+    const {
+      bin: { eslint: relativeEslintBinPath } = {}
+    }: { bin?: Record<string, string> } = require(eslintPackageJsonPath);
+    if (relativeEslintBinPath) {
+      eslintBinPath = `${packagePath}/${relativeEslintBinPath}`;
+    } else {
+      console.warn(
+        `@rushstack/eslint-bulk: The eslint package resolved at "${packagePath}" does not contain an eslint bin path. ` +
+          'Attempting to use a globally-installed eslint instead.'
+      );
+    }
+  } else {
+    console.log(
+      '@rushstack/eslint-bulk: Unable to resolve the eslint package as a dependency of the current project. ' +
+        'Attempting to use a globally-installed eslint instead.'
+    );
+  }
+
+  let eslintBinCommand: string;
+  if (eslintBinPath) {
+    eslintBinCommand = `${process.argv0} ${eslintBinPath}`;
+  } else {
+    eslintBinCommand = 'eslint'; // Try to use a globally-installed eslint if a local package was not found
+  }
+
   let stdout: Buffer;
   try {
-    stdout = execSync(`eslint --stdin --config ${eslintrcPath}`, { env, input: '', stdio: 'pipe' });
+    stdout = execSync(`${eslintBinCommand} --stdin --config ${eslintrcPath}`, {
+      env,
+      input: '',
+      stdio: 'pipe'
+    });
   } catch (e) {
     console.error('@rushstack/eslint-bulk: Error finding patch path: ' + e.message);
     process.exit(1);
