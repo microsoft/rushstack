@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Load implicit versions correctly for subspaces.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -6,6 +6,7 @@ import type { CommonVersionsConfiguration } from '../api/CommonVersionsConfigura
 import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEditor';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { Subspace } from '../api/Subspace';
 
 export interface IDependencyAnalysis {
   /**
@@ -53,9 +54,9 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(): IDependencyAnalysis {
+  public getAnalysis(subspace?: Subspace | undefined): IDependencyAnalysis {
     if (!this._analysis) {
-      this._analysis = this._getAnalysisInternal();
+      this._analysis = this._getAnalysisInternal(subspace || this._rushConfiguration.defaultSubspace);
     }
 
     return this._analysis;
@@ -67,9 +68,8 @@ export class DependencyAnalyzer {
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(): IDependencyAnalysis {
-    const commonVersionsConfiguration: CommonVersionsConfiguration =
-      this._rushConfiguration.getCommonVersions();
+  private _getAnalysisInternal(subspace: Subspace): IDependencyAnalysis {
+    const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();
     const allowedAlternativeVersions: Map<
       string,

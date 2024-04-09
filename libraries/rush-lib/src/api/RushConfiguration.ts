@@ -1370,14 +1370,14 @@ export class RushConfiguration {
    *
    * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
    */
-  public getImplicitlyPreferredVersions(): Map<string, string> {
+  public getImplicitlyPreferredVersions(subspace: Subspace): Map<string, string> {
     // TODO: During the next major release of Rush, replace this `require` call with a dynamic import, and
     // change this function to be async.
     const DependencyAnalyzerModule: typeof DependencyAnalyzerModuleType = require('../logic/DependencyAnalyzer');
     const dependencyAnalyzer: DependencyAnalyzerModuleType.DependencyAnalyzer =
       DependencyAnalyzerModule.DependencyAnalyzer.forRushConfiguration(this);
     const dependencyAnalysis: DependencyAnalyzerModuleType.IDependencyAnalysis =
-      dependencyAnalyzer.getAnalysis();
+      dependencyAnalyzer.getAnalysis(subspace);
     return dependencyAnalysis.implicitlyPreferredVersionByPackageName;
   }
 
