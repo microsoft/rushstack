@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-bulk
 
-This log was last generated on Tue, 19 Mar 2024 15:10:18 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Apr 2024 18:08:23 GMT and should not be manually modified.
+
+## 0.1.30
+Tue, 09 Apr 2024 18:08:23 GMT
+
+### Patches
+
+- Attempt to resolve eslint as a dependency of the current project before falling back to a globally-installed copy.
 
 ## 0.1.29
 Tue, 19 Mar 2024 15:10:18 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-bulk",
   "entries": [
     {
+      "version": "0.1.30",
+      "tag": "@rushstack/eslint-bulk_v0.1.30",
+      "date": "Tue, 09 Apr 2024 18:08:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Attempt to resolve eslint as a dependency of the current project before falling back to a globally-installed copy."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.29",
       "tag": "@rushstack/eslint-bulk_v0.1.29",
       "date": "Tue, 19 Mar 2024 15:10:18 GMT",
