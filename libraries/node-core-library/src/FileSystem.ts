@@ -828,7 +828,6 @@ export class FileSystem {
       }
 
       let position: number = 0;
-      let buffersToSkip: number = 0;
       try {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
@@ -838,6 +837,7 @@ export class FileSystem {
             position = 0;
           }
           position += fsx.writevSync(fd, toCopy);
+          let buffersToSkip: number = 0;
           while (buffersToSkip < toCopy.length && position >= toCopy[buffersToSkip].byteLength) {
             position -= toCopy[buffersToSkip].byteLength;
             buffersToSkip++;
@@ -846,7 +846,6 @@ export class FileSystem {
           if (buffersToSkip > 0) {
             // Avoid cost of shifting the array more than needed.
             toCopy.splice(0, buffersToSkip);
-            buffersToSkip = 0;
           }
         }
       } finally {
@@ -918,7 +917,6 @@ export class FileSystem {
       }
 
       let position: number = 0;
-      let buffersToSkip: number = 0;
       try {
         // In practice this loop will have exactly 1 iteration, but the spec allows
         // for a writev call to write fewer bytes than requested
@@ -928,6 +926,8 @@ export class FileSystem {
             position = 0;
           }
           position += (await handle.writev(toCopy)).bytesWritten;
+
+          let buffersToSkip: number = 0;
           while (buffersToSkip < toCopy.length && position >= toCopy[buffersToSkip].byteLength) {
             position -= toCopy[buffersToSkip].byteLength;
             buffersToSkip++;
@@ -936,7 +936,6 @@ export class FileSystem {
           if (buffersToSkip > 0) {
             // Avoid cost of shifting the array more than needed.
             toCopy.splice(0, buffersToSkip);
-            buffersToSkip = 0;
           }
         }
       } finally {
