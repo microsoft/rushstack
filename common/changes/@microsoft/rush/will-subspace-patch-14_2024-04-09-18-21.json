@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Load implicit versions correctly for subspaces.",
+      "comment": "Fix an issue with loading of implicitly preferred versions when the experimental subspaces feature is enabled",
       "type": "none"
     }
   ],
