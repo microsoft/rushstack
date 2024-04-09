@@ -44,7 +44,7 @@ export async function _dropGraph(parameters: IDropGraphParameters): Promise<bool
         OperationMap: graphOut,
         ICreateOperationsContext: filterFn(context)
       };
-      const debugPathOut: string = join(dirname(dropGraphPath), 'debug-' + basename(dropGraphPath));
+      const debugPathOut: string = `${dirname(dropGraphPath){/debug-${basename(dropGraphPath)}`;
 
       await JsonFile.saveAsync(debugOutput, debugPathOut, { ensureFolderExists: true });
     }
