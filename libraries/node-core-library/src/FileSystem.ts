@@ -43,16 +43,22 @@ export interface IFileSystemReadFolderOptions {
 }
 
 /**
- * The options for {@link FileSystem.writeFile}
+ * The options for {@link FileSystem.writeBuffersToFile}
  * @public
  */
-export interface IFileSystemWriteFileOptions {
+export interface IFileSystemWriteBinaryFileOptions {
   /**
    * If true, will ensure the folder is created before writing the file.
    * @defaultValue false
    */
   ensureFolderExists?: boolean;
+}
 
+/**
+ * The options for {@link FileSystem.writeFile}
+ * @public
+ */
+export interface IFileSystemWriteFileOptions extends IFileSystemWriteBinaryFileOptions {
   /**
    * If specified, will normalize line endings to the specified style of newline.
    * @defaultValue `undefined` which means no conversion will be performed
@@ -786,6 +792,59 @@ export class FileSystem {
   }
 
   /**
+   * Writes the contents of multiple Uint8Arrays to a file on disk, overwriting the file if it already exists.
+   * Behind the scenes it uses `fs.writevSync()`.
+   * This API is useful for writing large files efficiently, especially if the input is being concatenated from
+   * multiple sources.
+   * @remarks
+   * Throws an error if the folder doesn't exist, unless ensureFolder=true.
+   * @param filePath - The absolute or relative path of the file.
+   * @param contents - The content that should be written to the file.
+   * @param options - Optional settings that can change the behavior.
+   */
+  public static writeBuffersToFile(
+    filePath: string,
+    contents: Iterable<Uint8Array>,
+    options?: IFileSystemWriteBinaryFileOptions
+  ): void {
+    FileSystem._wrapException(() => {
+      const toCopy: Uint8Array[] = [...contents];
+
+      let fd: number | undefined;
+      try {
+        fd = fsx.openSync(filePath, 'w');
+      } catch (error) {
+        if (!options?.ensureFolderExists || !FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
+
+        const folderPath: string = nodeJsPath.dirname(filePath);
+        FileSystem.ensureFolder(folderPath);
+        fd = fsx.openSync(filePath, 'w');
+      }
+
+      let position: number = 0;
+      try {
+        // In practice this loop will have exactly 1 iteration, but the spec allows
+        // for a writev call to write fewer bytes than requested
+        while (toCopy.length) {
+          if (position > 0) {
+            toCopy[0] = toCopy[0].subarray(position);
+            position = 0;
+          }
+          position += fsx.writevSync(fd, toCopy);
+          while (toCopy.length && position >= toCopy[0].byteLength) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            position -= toCopy.shift()!.byteLength;
+          }
+        }
+      } finally {
+        fsx.closeSync(fd);
+      }
+    });
+  }
+
+  /**
    * An async version of {@link FileSystem.writeFile}.
    */
   public static async writeFileAsync(
@@ -817,6 +876,51 @@ export class FileSystem {
         } else {
           throw error;
         }
+      }
+    });
+  }
+
+  /**
+   * An async version of {@link FileSystem.writeBuffersToFile}.
+   */
+  public static async writeBuffersToFileAsync(
+    filePath: string,
+    contents: Iterable<Uint8Array>,
+    options?: IFileSystemWriteBinaryFileOptions
+  ): Promise<void> {
+    await FileSystem._wrapExceptionAsync(async () => {
+      const toCopy: Uint8Array[] = [...contents];
+
+      let handle: fs.promises.FileHandle | undefined;
+      try {
+        handle = await fs.promises.open(filePath, 'w');
+      } catch (error) {
+        if (!options?.ensureFolderExists || !FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
+
+        const folderPath: string = nodeJsPath.dirname(filePath);
+        await FileSystem.ensureFolderAsync(folderPath);
+        handle = await fs.promises.open(filePath, 'w');
+      }
+
+      let position: number = 0;
+      try {
+        // In practice this loop will have exactly 1 iteration, but the spec allows
+        // for a writev call to write fewer bytes than requested
+        while (toCopy.length) {
+          if (position > 0) {
+            toCopy[0] = toCopy[0].subarray(position);
+            position = 0;
+          }
+          position += (await handle.writev(toCopy)).bytesWritten;
+          while (toCopy.length && position >= toCopy[0].byteLength) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            position -= toCopy.shift()!.byteLength;
+          }
+        }
+      } finally {
+        await handle.close();
       }
     });
   }
