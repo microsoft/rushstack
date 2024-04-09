@@ -10,7 +10,7 @@ import type {
   RushSession
 } from '@rushstack/rush-sdk';
 import type { IGraphNode } from './GraphParser';
-import type { IDropGraphParameters } from './DropGraph';
+import type { IDropGraphOptions } from './DropGraph';
 
 const PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
 
@@ -48,8 +48,8 @@ export class DropBuildGraphPlugin implements IRushPlugin {
           stage: Number.MAX_SAFE_INTEGER // Run this after other plugins have created all operations
         },
         async (operations: Set<Operation>, context: ICreateOperationsContext) => {
-          const { _dropGraph } = await import('./DropGraph');
-          const parameters: IDropGraphParameters = {
+          const { _dropGraphAsync: _dropGraph } = await import('./DropGraph');
+          const parameters: IDropGraphOptions = {
             operations,
             context,
             dropGraphPath,

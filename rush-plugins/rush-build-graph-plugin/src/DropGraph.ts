@@ -8,7 +8,7 @@ import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
 import { filterObjectForDebug, filterObjectForTesting } from './GraphDebugHelpers';
 import { GraphParser, type IGraphNode } from './GraphParser';
 
-export interface IDropGraphParameters {
+export interface IDropGraphOptions {
   operations: Set<Operation>;
   context: ICreateOperationsContext;
   dropGraphPath: string;
@@ -16,7 +16,7 @@ export interface IDropGraphParameters {
   logger: ILogger;
 }
 
-export async function _dropGraph(parameters: IDropGraphParameters): Promise<boolean> {
+export async function _dropGraphAsync(parameters: IDropGraphOptions): Promise<boolean> {
   const { operations, context, dropGraphPath, configuration, logger } = parameters;
 
   const graphParser: GraphParser = new GraphParser(logger);
