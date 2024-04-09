@@ -11,10 +11,11 @@ import type {
 } from '@rushstack/rush-sdk';
 import type { IGraphNode } from './GraphParser';
 import type { IDropGraphParameters } from './DropGraph';
+
 const PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
 
 /**
- * This is the type that represents the schema of the drop file
+ * The graph JSON object
  * @beta
  */
 export interface IBuildXLRushGraph {
