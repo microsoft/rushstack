@@ -350,7 +350,7 @@ export class PackageJsonUpdater {
 
       dependenciesToAddOrUpdate[packageName] = version;
       this._terminal.writeLine(
-        Colorize.green('Updating projects to use'),
+        Colorize.green('Updating projects to use '),
         `${packageName}@`,
         Colorize.cyan(version)
       );
