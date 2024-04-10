@@ -42,6 +42,26 @@ export class PnpmSyncUtilities {
           terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
         }
         return;
+
+      case LogMessageIdentifier.PREPARE_REPLACING_FILE:
+        {
+          const customMessage: string =
+            `excepted .pnpm-sync.json version: ${details.expectedVersion}; ` +
+            `actual .pnpm-sync.json version: ${details.actualVersion}; `;
+
+          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(message));
+          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
+        }
+        return;
+
+      // don't return this error case, pass to default handler
+      case LogMessageIdentifier.COPY_ERROR_INCOMPATIBLE_SYNC_FILE: {
+        const customMessage: string =
+          `excepted .pnpm-sync.json version: ${details.expectedVersion}; ` +
+          `actual .pnpm-sync.json version: ${details.actualVersion}; `;
+
+        terminal.writeErrorLine(PnpmSyncUtilities._addLinePrefix(customMessage));
+      }
     }
 
     // Default handling for other messages
