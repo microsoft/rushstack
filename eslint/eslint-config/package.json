@@ -40,7 +40,7 @@
     "eslint-plugin-tsdoc": "~0.2.16"
   },
   "devDependencies": {
-    "eslint": "~8.7.0",
+    "eslint": "~8.57.0",
     "typescript": "~5.4.2"
   }
 }

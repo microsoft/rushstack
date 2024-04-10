@@ -23,7 +23,7 @@
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.18.0",
-    "eslint": "~8.7.0",
+    "eslint": "~8.57.0",
     "html-webpack-plugin": "~5.5.0",
     "source-map-loader": "~3.0.1",
     "tslint": "~5.20.1",
