@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update dependency: pnpm-sync-lib@0.2.2",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
