@@ -26,7 +26,6 @@ jest.mock('../Text', () => {
   };
 });
 
-import { getRandomValues } from 'node:crypto';
 import fs from 'node:fs';
 
 jest.spyOn(fs, 'promises', 'get').mockImplementation(() => {
@@ -43,9 +42,18 @@ describe('FileSystem', () => {
   beforeAll(async () => {
     FileSystem = (await import('../FileSystem')).FileSystem;
     totalBytes = 0;
+    let nextValue = 37;
     for (let i = 0; i < 10; i++) {
-      content[i] = getRandomValues(new Uint8Array(i + 1));
-      totalBytes += content[i].length;
+      const arr: Uint8Array = new Uint8Array(i + 1);
+      content[i] = arr;
+      for (let j = 0; j < arr.length; j++) {
+        arr[j] = nextValue;
+        // 256 and 11 are coprime, so this sequence will cover all 256 values.
+        // These are deliberately not the ordinal index just to ensure that an index isn't accidentally being written to the file.
+        // eslint-disable-next-line no-bitwise
+        nextValue = (nextValue + 11) & 0xff;
+      }
+      totalBytes += arr.length;
     }
   });
 
