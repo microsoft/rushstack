@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add 'writeBuffersToFile' and 'writeBuffersToFileAsync' methods to FileSystem for efficient writing of concatenated files.",
+      "comment": "Add `writeBuffersToFile` and `writeBuffersToFileAsync` methods to `FileSystem` for efficient writing of concatenated files.",
       "type": "minor"
     }
   ],
