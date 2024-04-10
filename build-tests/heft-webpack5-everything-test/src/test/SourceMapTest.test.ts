@@ -10,38 +10,111 @@ interface IMap {
   names?: string[];
 }
 
-let testAMapText: string = '';
-let testAMapObject: IMap = {};
-let testBMapText: string = '';
-let testBMapObject: IMap = {};
+interface IMapValue {
+  mapFileName: string;
+  mapObject: IMap;
+}
+
+interface IMapTestEntry {
+  name: string;
+  mapRegex: RegExp;
+  sourceFileRegex: RegExp;
+  map: IMapValue | undefined;
+}
+
+const mapTests: IMapTestEntry[] = [
+  {
+    name: 'Test-A',
+    mapRegex: /^heft-test-A_[\w\d]*\.js.map$/,
+    sourceFileRegex: /indexA\.ts$/,
+    map: undefined
+  },
+  {
+    name: 'Test-B',
+    mapRegex: /^heft-test-B_[\w\d]*\.js.map$/,
+    sourceFileRegex: /indexB\.ts$/,
+    map: undefined
+  },
+  {
+    name: 'Chunk',
+    mapRegex: /^[\w\d\.]*chunk_[\w\d]*\.js.map$/,
+    sourceFileRegex: /ChunkClass\.ts$/,
+    map: undefined
+  }
+];
+
+const lookup: PackageJsonLookup = new PackageJsonLookup();
+lookup.tryGetPackageFolderFor(__dirname);
+const thisProjectFolder: string | undefined = lookup.tryGetPackageFolderFor(__dirname);
+if (!thisProjectFolder) {
+  throw new Error('Cannot find project folder');
+}
+const distEntries: string[] = FileSystem.readFolderItemNames(thisProjectFolder + '/dist');
+for (const distEntry of distEntries) {
+  for (const test of mapTests) {
+    if (test.mapRegex.test(distEntry)) {
+      const mapText: string = FileSystem.readFile(`${thisProjectFolder}/dist/${distEntry}`);
+      const mapObject: IMap = JSON.parse(mapText);
+      test.map = {
+        mapFileName: distEntry,
+        mapObject
+      };
+    }
+  }
+}
 
 describe('Source Maps', () => {
-  beforeAll(() => {
-    const lookup = new PackageJsonLookup();
-    lookup.tryGetPackageFolderFor(__dirname);
-    const thisProjectFolder = lookup.tryGetPackageFolderFor(__dirname);
-    if (!thisProjectFolder) {
-      throw new Error('Cannot find project folder');
-    }
-    const distEntries = FileSystem.readFolderItemNames(thisProjectFolder + '/dist');
-    for (const distEntry of distEntries) {
-      if (/^heft-test-A_[\w\d]*\.js.map/.test(distEntry)) {
-        testAMapText = FileSystem.readFile(`${thisProjectFolder}/dist/${distEntry}`);
-        testAMapObject = JSON.parse(testAMapText);
-      }
-      if (/^heft-test-B_[\w\d]*\.js.map/.test(distEntry)) {
-        testBMapText = FileSystem.readFile(`${thisProjectFolder}/dist/${distEntry}`);
-        testBMapObject = JSON.parse(testBMapText);
-      }
-    }
-  });
-  it('Maps exist', () => {
-    expect(testAMapText).toBeTruthy();
-    expect(testBMapText).toBeTruthy();
+  for (const test of mapTests) {
+    mapValueCheck(test);
+  }
+});
+
+function mapValueCheck(entry: IMapTestEntry): void {
+  it(`${entry.name} has map value`, () => {
+    expect(entry.map).toBeTruthy();
   });
 
-  it('Test-X Map has indexX.ts file', () => {
-    expect(testAMapObject.sources).toContain(/indexA.ts$/);
-    expect(testBMapObject.sources).toContain(/indexB.ts$/);
+  if (!entry.map) {
+    return;
+  }
+
+  const map: IMapValue = entry.map;
+
+  it(`${entry.name} has filename matching file attribute`, () => {
+    if (map.mapObject.file) {
+      expect(map.mapFileName).toMatch(`${map.mapObject.file}.map`);
+    }
   });
-});
+
+  const properties: (keyof IMap)[] = ['sources', 'file', 'sourcesContent', 'names'];
+  for (const property of properties) {
+    it(`${map.mapFileName} has ${property} property`, () => {
+      expect(map.mapObject[property]).toBeTruthy();
+    });
+  }
+
+  it(`${entry.name} has sources and sourcesContent arrays of the same length`, () => {
+    if (map.mapObject.sourcesContent && map.mapObject.sources) {
+      let numSrcs: number = 0;
+      for (const source of map.mapObject.sources) {
+        if (source) {
+          numSrcs++;
+        }
+      }
+
+      let numContents: number = 0;
+      for (const content of map.mapObject.sourcesContent) {
+        if (content) {
+          numContents++;
+        }
+      }
+      expect(numSrcs).toEqual(numContents);
+    }
+  });
+
+  it(`${entry.name} has a source that matches the sourceFileRegex`, () => {
+    if (map.mapObject.sources) {
+      expect(map.mapObject.sources).toContainEqual(expect.stringMatching(entry.sourceFileRegex));
+    }
+  });
+}
