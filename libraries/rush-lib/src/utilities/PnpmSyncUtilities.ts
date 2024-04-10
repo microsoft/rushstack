@@ -49,7 +49,7 @@ export class PnpmSyncUtilities {
             `excepted .pnpm-sync.json version: ${details.expectedVersion}; ` +
             `actual .pnpm-sync.json version: ${details.actualVersion}; `;
 
-          terminal.writeDebugLine(PnpmSyncUtilities._addLinePrefix(message));
+          terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(message));
           terminal.writeVerboseLine(PnpmSyncUtilities._addLinePrefix(customMessage));
         }
         return;
