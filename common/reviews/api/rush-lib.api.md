@@ -1162,7 +1162,7 @@ export class RushConfiguration {
     getCommonVersions(subspace?: Subspace): CommonVersionsConfiguration;
     // @deprecated (undocumented)
     getCommonVersionsFilePath(subspace?: Subspace): string;
-    getImplicitlyPreferredVersions(): Map<string, string>;
+    getImplicitlyPreferredVersions(subspace?: Subspace): Map<string, string>;
     // @deprecated (undocumented)
     getPnpmfilePath(subspace?: Subspace): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
