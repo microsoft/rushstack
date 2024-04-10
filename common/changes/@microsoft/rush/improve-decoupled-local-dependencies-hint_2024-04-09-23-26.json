@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Improve the error message when explicit versions are used for monorepo packages",
+      "comment": "Improve the error message that is printed in a repo using PNPM workspaces when a non-`workspace:` version is used for a project inside the repo.",
       "type": "none"
     }
   ],
