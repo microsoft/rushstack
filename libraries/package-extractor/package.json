@@ -34,7 +34,7 @@
     "@types/glob": "7.1.1",
     "@types/minimatch": "3.0.5",
     "@types/npm-packlist": "~1.1.1",
-    "eslint": "~8.7.0",
+    "eslint": "~8.57.0",
     "webpack": "~5.82.1",
     "@types/semver": "7.5.0"
   }
