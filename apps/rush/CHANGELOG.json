@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.120.0",
+      "tag": "@microsoft/rush_v5.120.0",
+      "date": "Wed, 10 Apr 2024 21:59:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Bump express."
+          },
+          {
+            "comment": "Add support for `optionalDependencies` in transitive injected install in the Subspaces feature."
+          },
+          {
+            "comment": "Update dependency: pnpm-sync-lib@0.2.2"
+          },
+          {
+            "comment": "Remove a restriction where the repo root would not be found if the CWD is >10 directory levels deep."
+          },
+          {
+            "comment": "Improve the error message that is printed in a repo using PNPM workspaces when a non-`workspace:` version is used for a project inside the repo."
+          },
+          {
+            "comment": "Include a missing space in a logging message printed when running `rush add`."
+          },
+          {
+            "comment": "Clarify the copyright notice emitted in common/scripts/*.js"
+          },
+          {
+            "comment": "Fix an issue with loading of implicitly preferred versions when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.119.0",
       "tag": "@microsoft/rush_v5.119.0",
       "date": "Sat, 30 Mar 2024 04:32:31 GMT",

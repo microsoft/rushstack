@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 30 Mar 2024 04:32:31 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Apr 2024 21:59:57 GMT and should not be manually modified.
+
+## 5.120.0
+Wed, 10 Apr 2024 21:59:57 GMT
+
+### Updates
+
+- Bump express.
+- Add support for `optionalDependencies` in transitive injected install in the Subspaces feature.
+- Update dependency: pnpm-sync-lib@0.2.2
+- Remove a restriction where the repo root would not be found if the CWD is >10 directory levels deep.
+- Improve the error message that is printed in a repo using PNPM workspaces when a non-`workspace:` version is used for a project inside the repo.
+- Include a missing space in a logging message printed when running `rush add`.
+- Clarify the copyright notice emitted in common/scripts/*.js
+- Fix an issue with loading of implicitly preferred versions when the experimental subspaces feature is enabled
 
 ## 5.119.0
 Sat, 30 Mar 2024 04:32:31 GMT
