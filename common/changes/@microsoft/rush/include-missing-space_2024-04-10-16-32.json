@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Include a missing space in a logging message printed when running `rush add`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
