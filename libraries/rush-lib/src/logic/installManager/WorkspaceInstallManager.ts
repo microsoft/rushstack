@@ -233,7 +233,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
             console.log(
               Colorize.red(
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
-                  'the workspace. Run "rush update" to update workspace references for this package.'
+                  'the workspace. Run "rush update" to update workspace references for this package. ' +
+                  `If package "${name}" is intentionally expected to be installed from an external package feed, ` +
+                  `list package "${name}" in the "decoupledLocalDependencies" field in the `+
+                  `"${rushProject.packageName}" entry in rush.json to suppress this error.`
               )
             );
             throw new AlreadyReportedError();
