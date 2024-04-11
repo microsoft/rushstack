@@ -64,7 +64,7 @@
       "parameterKind": "string",
       "description": "Drops the build graph to the specified file",
       "argumentName": "FILE_PATH",
-      "associatedCommands": ["build"]
+      "associatedCommands": ["build", "test"]
     }
   ]
 }

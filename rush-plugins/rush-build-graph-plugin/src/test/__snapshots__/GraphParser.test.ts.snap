@@ -3,21 +3,31 @@
 exports[`--drop-graph integration process Should produce consistent output graph 1`] = `
 Array [
   Object {
-    "command": "heft run fake build command ",
+    "command": "heft run build command ",
     "dependencies": Array [],
-    "id": "a#_phase:build",
-    "package": "a",
+    "id": "package-a#_phase:build",
+    "package": "package-a",
     "task": "_phase:build",
     "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
   },
   Object {
-    "command": "heft run fake build command ",
+    "command": "heft run a different build command ",
     "dependencies": Array [
-      "a#_phase:build",
+      "package-a#_phase:build",
     ],
-    "id": "b#_phase:build",
-    "package": "b",
+    "id": "package-b#_phase:build",
+    "package": "package-b",
     "task": "_phase:build",
+    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+  },
+  Object {
+    "command": "heft run a test command ",
+    "dependencies": Array [
+      "package-b#_phase:build",
+    ],
+    "id": "package-b#_phase:test",
+    "package": "package-b",
+    "task": "_phase:test",
     "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
   },
 ]
@@ -34,27 +44,4 @@ exports[`GraphParser should fail if the input schema is invalid 1`] = `
     \\"packageName\\": \\"incorrectProject\\"
   }
 }"
-`;
-
-exports[`GraphParser should process debug-graph.json into graph.json 1`] = `
-Array [
-  Object {
-    "command": "heft run fake build command ",
-    "dependencies": Array [],
-    "id": "a#_phase:build",
-    "package": "a",
-    "task": "_phase:build",
-    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
-  },
-  Object {
-    "command": "heft run fake build command ",
-    "dependencies": Array [
-      "a#_phase:build",
-    ],
-    "id": "b#_phase:build",
-    "package": "b",
-    "task": "_phase:build",
-    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
-  },
-]
 `;
