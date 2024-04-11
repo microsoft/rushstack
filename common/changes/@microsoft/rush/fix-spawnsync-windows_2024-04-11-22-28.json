@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "childprocess.spawnSync on windows must set shell: true",
+      "comment": "childprocess.spawnSync on windows must set shell: true when invoking a .CMD file",
       "type": "none"
     }
   ],
