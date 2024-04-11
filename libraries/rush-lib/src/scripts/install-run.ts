@@ -53,7 +53,7 @@ let _npmPath: string | undefined = undefined;
 export function getNpmPath(): string {
   if (!_npmPath) {
     try {
-      if (os.platform() === 'win32') {
+      if (isWindows()) {
         // We're on Windows
         const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
         const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
@@ -191,13 +191,17 @@ function _resolvePackageVersion(
       // ```
       //
       // if only a single version matches.
-      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
+
+      const spawnSyncOptions: childProcess.SpawnSyncOptions = {
+        cwd: rushTempFolder,
+        stdio: [],
+        shell: isWindows() ? true : undefined
+      };
+
+      const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = childProcess.spawnSync(
         npmPath,
         ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
-        {
-          cwd: rushTempFolder,
-          stdio: []
-        }
+        spawnSyncOptions
       );
 
       if (npmVersionSpawnResult.status !== 0) {
@@ -375,8 +379,12 @@ function _installPackage(
  */
 function _getBinPath(packageInstallFolder: string, binName: string): string {
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const resolvedBinName: string = os.platform() === 'win32' ? `${binName}.cmd` : binName;
+  const resolvedBinName: string = isWindows() ? `${binName}.cmd` : binName;
   return path.resolve(binFolderPath, resolvedBinName);
+}
+
+function isWindows(): boolean {
+  return os.platform() === 'win32';
 }
 
 /**
@@ -439,7 +447,7 @@ export function installAndRun(
   try {
     // Node.js on Windows can not spawn a file when the path has a space on it
     // unless the path gets wrapped in a cmd friendly way and shell mode is used
-    const shouldUseShell: boolean = binPath.includes(' ') && os.platform() === 'win32';
+    const shouldUseShell: boolean = binPath.includes(' ') && isWindows();
     const platformBinPath: string = shouldUseShell ? `"${binPath}"` : binPath;
 
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
