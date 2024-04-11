@@ -4,9 +4,9 @@
 import { JsonFile } from '@rushstack/node-core-library';
 import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
 import { basename, dirname } from 'path';
-import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
+import type { IRushGraph, IGraphNode } from './DropBuildGraphPlugin';
 import { filterObjectForDebug, filterObjectForTesting } from './GraphDebugHelpers';
-import { GraphParser, type IGraphNode } from './GraphParser';
+import { GraphParser } from './GraphParser';
 
 export interface IDropGraphOptions {
   operations: Set<Operation>;
@@ -21,9 +21,9 @@ export async function _dropGraphAsync(parameters: IDropGraphOptions): Promise<bo
 
   const graphParser: GraphParser = new GraphParser(logger);
   const graph: IGraphNode[] = graphParser.processOperations(operations);
-  /* eslint-disable @typescript-eslint/no-explicit-any */
 
   if (process.env.DEBUG_RUSH_BUILD_GRAPH) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let filterFn: ((obj: any, depth?: number) => any) | undefined;
     switch (process.env.DEBUG_RUSH_BUILD_GRAPH) {
       case 'test':
@@ -36,10 +36,12 @@ export async function _dropGraphAsync(parameters: IDropGraphOptions): Promise<bo
         logger.terminal.writeWarningLine("ignoring DEBUG_RUSH_BUILD_GRAPH, not set to 'test' or 'full'");
     }
     if (filterFn) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graphOut: any = [];
       for (const operation of operations.keys()) {
         graphOut.push(filterFn(operation));
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const debugOutput: any = {
         OperationMap: graphOut,
         ICreateOperationsContext: filterFn(context)
@@ -50,13 +52,13 @@ export async function _dropGraphAsync(parameters: IDropGraphOptions): Promise<bo
     }
   }
 
-  const buildXLGraph: IBuildXLRushGraph = {
+  const dropGraphOutput: IRushGraph = {
     nodes: graph,
     repoSettings: {
       commonTempFolder: configuration.commonTempFolder
     }
   };
 
-  await JsonFile.saveAsync(buildXLGraph, dropGraphPath, { ensureFolderExists: true });
-  return graphParser.validateGraph(buildXLGraph.nodes);
+  await JsonFile.saveAsync(dropGraphOutput, dropGraphPath, { ensureFolderExists: true });
+  return graphParser.validateGraph(dropGraphOutput.nodes);
 }

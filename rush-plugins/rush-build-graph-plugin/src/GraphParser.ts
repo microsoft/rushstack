@@ -5,39 +5,13 @@ import type { Operation, IOperationRunner, ILogger } from '@rushstack/rush-sdk';
 
 import { Colorize } from '@rushstack/terminal';
 import { filterObjectForDebug } from './GraphDebugHelpers';
-
-/**
- * This is the schema of a graph node
- * @beta
- */
-export interface IGraphNode {
-  id: string;
-  command: string;
-  workingDirectory: string;
-  package: string;
-  task: string;
-  dependencies: string[];
-}
+import type { IGraphNode } from './DropBuildGraphPlugin';
 
 type IGraphNodeInternal = Readonly<Omit<IGraphNode, 'dependencies' | 'command'>> & {
   dependencies: ReadonlySet<string>;
   command: string | undefined;
 };
 type INodeMapInternal = ReadonlyMap<string, IGraphNodeInternal>;
-
-/* Example of a graph node
-  {
-    "id": "@1js/ui-meeting-transcript#build:storybook",
-    "command": [heft run --only build -- --clean --production"
-    ],
-    "dependencies": [
-        "@1js/ui-meeting-transcript#build"
-    ],
-    "workingDirectory": "packages/ui-meeting-transcript",
-    "package": "@1js/ui-meeting-transcript",
-    "task": "build:storybook"
-  }
-*/
 
 /*
  * Try to get the operation id, return undefined if it fails

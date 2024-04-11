@@ -9,29 +9,44 @@ import type {
   RushConfiguration,
   RushSession
 } from '@rushstack/rush-sdk';
-import type { IGraphNode } from './GraphParser';
 import type { IDropGraphOptions } from './DropGraph';
 
-const PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
+const DEFAULT_PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
 
 /**
  * The graph JSON object
  * @beta
  */
-export interface IBuildXLRushGraph {
+export interface IRushGraph {
   nodes: IGraphNode[];
   repoSettings: {
     commonTempFolder: string;
   };
 }
-export type { IGraphNode };
+
+/**
+ * This is the schema of a graph node
+ * @beta
+ */
+export interface IGraphNode {
+  id: string;
+  command: string;
+  workingDirectory: string;
+  package: string;
+  task: string;
+  dependencies: string[];
+}
 
 /**
  * This plugin is used to drop the build graph to a file for BuildXL to consume.
  * @beta
  */
 export class DropBuildGraphPlugin implements IRushPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
+  private readonly _pluginName: string = DEFAULT_PLUGIN_NAME;
+
+  public constructor(pluginName: string = DEFAULT_PLUGIN_NAME) {
+    this._pluginName = pluginName;
+  }
 
   public apply(session: RushSession, configuration: RushConfiguration): void {
     const dropIndex: number = process.argv.indexOf('--drop-graph');
@@ -41,10 +56,10 @@ export class DropBuildGraphPlugin implements IRushPlugin {
       return;
     }
 
-    session.hooks.runAnyPhasedCommand.tap(this.pluginName, (command: IPhasedCommand) => {
+    session.hooks.runAnyPhasedCommand.tap(this._pluginName, (command: IPhasedCommand) => {
       command.hooks.createOperations.tapPromise(
         {
-          name: this.pluginName,
+          name: this._pluginName,
           stage: Number.MAX_SAFE_INTEGER // Run this after other plugins have created all operations
         },
         async (operations: Set<Operation>, context: ICreateOperationsContext) => {
@@ -54,7 +69,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
             context,
             dropGraphPath,
             configuration,
-            logger: session.getLogger(PLUGIN_NAME)
+            logger: session.getLogger(this._pluginName)
           };
           const isValid: boolean = await _dropGraph(parameters);
           if (isValid) {

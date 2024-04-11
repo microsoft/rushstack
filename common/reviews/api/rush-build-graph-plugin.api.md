@@ -10,10 +10,9 @@ import type { RushSession } from '@rushstack/rush-sdk';
 
 // @beta
 class DropBuildGraphPlugin implements IRushPlugin {
+    constructor(pluginName?: string);
     // (undocumented)
     apply(session: RushSession, configuration: RushConfiguration): void;
-    // (undocumented)
-    readonly pluginName: string;
 }
 export default DropBuildGraphPlugin;
 
