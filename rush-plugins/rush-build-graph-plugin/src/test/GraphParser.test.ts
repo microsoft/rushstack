@@ -5,50 +5,75 @@
 
 import type { Operation, ILogger } from '@rushstack/rush-sdk';
 
+import { PackageJsonLookup, JsonFile } from '@rushstack/node-core-library';
+
 import { GraphParser, type IGraphNode } from '../GraphParser';
 
-// to update the examples folder, run the following command from rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo
-// export DEBUG_RUSH_BUILD_GRAPH="test" && rush build --drop-graph ../src/examples/graph.json
-import graph from '../examples/graph.json';
-import debugGraph from '../examples/debug-graph.json';
+import * as child_process from 'child_process';
+
+import testData from './test-operation-map.json';
+
+const lookup: PackageJsonLookup = new PackageJsonLookup();
+lookup.tryGetPackageFolderFor(__dirname);
+const thisProjectFolder: string | undefined = lookup.tryGetPackageFolderFor(__dirname);
+if (!thisProjectFolder) {
+  throw new Error('Cannot find project folder');
+}
+
+const testRepoLocation: string = `${thisProjectFolder}/rushBuildGraphPluginTestRepo`;
+const graphLocation: string = `${thisProjectFolder}/examples/graph.json`;
+
+const procOut: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
+  'rush',
+  ['build', '--drop-graph', graphLocation],
+  { encoding: 'utf8', stdio: 'ignore', cwd: testRepoLocation, timeout: 60000 }
+);
+
+const graph = JsonFile.load(graphLocation);
 
 const exampleGraph: readonly IGraphNode[] = Array.from(graph.nodes as IGraphNode[]).sort((a, b) =>
-  a.id.localeCompare(b.id)
+  a.id > b.id ? 1 : -1
 ) as readonly IGraphNode[];
 
 const graphParser: GraphParser = new GraphParser({
   terminal: { writeErrorLine: jest.fn(), writeLine: jest.fn() }
 } as unknown as ILogger);
 
-describe(GraphParser.name, () => {
-  it('should process debug-graph.json into graph.json', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let prunedGraph: IGraphNode[] = graphParser.processOperations(new Set(debugGraph.OperationMap as any));
+describe('--drop-graph integration process', () => {
+  beforeAll(async () => {
+    if (procOut.error) {
+      throw procOut.error;
+    }
 
-    prunedGraph = prunedGraph.sort((a, b) => a.id.localeCompare(b.id));
-    expect(prunedGraph).toEqual(exampleGraph);
+    if (procOut.status !== 0) {
+      throw new Error(`Failed to build graph: ${procOut.status}`);
+    }
   });
+  it('Should produce consistent output graph', () => {
+    expect(exampleGraph).toMatchSnapshot();
+  });
+});
 
+describe(GraphParser.name, () => {
   it('should fail if the input schema is invalid', () => {
-    const operations = new Set(JSON.parse(JSON.stringify(debugGraph.OperationMap)));
+    const operations = JSON.parse(JSON.stringify(testData.OperationMap));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (operations.values().next().value.dependencies as Array<any>).push({
+    (operations[0].dependencies as Array<any>).push({
       incorrectPhase: { name: 'incorrectPhase' },
       incorrectProject: { packageName: 'incorrectProject' }
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(() => graphParser.processOperations(operations as any)).toThrow();
+    expect(() => graphParser.processOperations(new Set(operations))).toThrowErrorMatchingSnapshot();
   });
 
   it('should fail if isNoOp mismatches a command', () => {
-    const operations = new Set(JSON.parse(JSON.stringify(debugGraph.OperationMap)));
-    const firstOperation: Operation = operations.values().next().value;
+    const operations = JSON.parse(JSON.stringify(testData.OperationMap));
+    const firstOperation: Operation = operations[0];
     // @ts-ignore, isNoOp is a readonly property
     firstOperation.runner!.isNoOp = true;
     // @ts-ignore, _commandToRun doesn't exist on IOperationRunner
     firstOperation.runner!._commandToRun = 'echo "hello world"';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(() => graphParser.processOperations(operations as any)).toThrow();
+    expect(() => graphParser.processOperations(new Set(operations as any))).toThrowErrorMatchingSnapshot();
   });
 });
 

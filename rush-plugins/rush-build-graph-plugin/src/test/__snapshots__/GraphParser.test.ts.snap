@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`--drop-graph integration process Should produce consistent output graph 1`] = `
+Array [
+  Object {
+    "command": "heft run fake build command ",
+    "dependencies": Array [],
+    "id": "a#_phase:build",
+    "package": "a",
+    "task": "_phase:build",
+    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
+  },
+  Object {
+    "command": "heft run fake build command ",
+    "dependencies": Array [
+      "a#_phase:build",
+    ],
+    "id": "b#_phase:build",
+    "package": "b",
+    "task": "_phase:build",
+    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+  },
+]
+`;
+
+exports[`GraphParser should fail if isNoOp mismatches a command 1`] = `"a#_phase:build: Operation runner isNoOp does not match _commandToRun existence"`;
+
+exports[`GraphParser should fail if the input schema is invalid 1`] = `
+"Operation does not have a name: {
+  \\"incorrectPhase\\": {
+    \\"name\\": \\"incorrectPhase\\"
+  },
+  \\"incorrectProject\\": {
+    \\"packageName\\": \\"incorrectProject\\"
+  }
+}"
+`;
+
+exports[`GraphParser should process debug-graph.json into graph.json 1`] = `
+Array [
+  Object {
+    "command": "heft run fake build command ",
+    "dependencies": Array [],
+    "id": "a#_phase:build",
+    "package": "a",
+    "task": "_phase:build",
+    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
+  },
+  Object {
+    "command": "heft run fake build command ",
+    "dependencies": Array [
+      "a#_phase:build",
+    ],
+    "id": "b#_phase:build",
+    "package": "b",
+    "task": "_phase:build",
+    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+  },
+]
+`;
