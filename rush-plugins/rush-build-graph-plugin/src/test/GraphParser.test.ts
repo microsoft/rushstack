@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// GraphParser.test.ts
+import { JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
+import type { ILogger, Operation } from '@rushstack/rush-sdk';
 
-import type { Operation, ILogger } from '@rushstack/rush-sdk';
-
-import { PackageJsonLookup, JsonFile } from '@rushstack/node-core-library';
-
-import { GraphParser, type IGraphNode } from '../GraphParser';
+import type { IGraphNode } from '../DropBuildGraphPlugin';
+import { GraphParser } from '../GraphParser';
 
 import * as child_process from 'child_process';
 
@@ -23,9 +21,11 @@ if (!thisProjectFolder) {
 const testRepoLocation: string = `${thisProjectFolder}/rushBuildGraphPluginTestRepo`;
 const graphLocation: string = `${thisProjectFolder}/examples/graph.json`;
 
+// Build the graph and ouput it to graphLocation
+// We want to check in the graph for the sake of documentation
 const procOut: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
   'rush',
-  ['build', '--drop-graph', graphLocation],
+  ['test', '--drop-graph', graphLocation],
   { encoding: 'utf8', stdio: 'ignore', cwd: testRepoLocation, timeout: 60000 }
 );
 
