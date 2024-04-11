@@ -14,7 +14,7 @@
     "experimentalDecorators": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "types": ["heft-jest", "webpack-env"],
+    "types": ["heft-jest", "webpack-env", "node"],
 
     "module": "esnext",
     "moduleResolution": "node",

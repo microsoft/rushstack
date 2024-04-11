@@ -1884,6 +1884,15 @@ importers:
       '@rushstack/heft-webpack4-plugin':
         specifier: workspace:*
         version: link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/module-minifier':
+        specifier: workspace:*
+        version: link:../../libraries/module-minifier
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/webpack4-module-minifier-plugin':
+        specifier: workspace:*
+        version: link:../../webpack/webpack4-module-minifier-plugin
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
@@ -1899,6 +1908,9 @@ importers:
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
+      source-map-loader:
+        specifier: ~1.1.3
+        version: 1.1.3(webpack@4.47.0)
       tslint:
         specifier: ~5.20.1
         version: 5.20.1(typescript@5.4.2)
@@ -1935,12 +1947,21 @@ importers:
       '@rushstack/module-minifier':
         specifier: workspace:*
         version: link:../../libraries/module-minifier
+      '@rushstack/node-core-library':
+        specifier: workspace:*
+        version: link:../../libraries/node-core-library
+      '@rushstack/rush-sdk':
+        specifier: workspace:*
+        version: link:../../libraries/rush-sdk
       '@rushstack/webpack5-module-minifier-plugin':
         specifier: workspace:*
         version: link:../../webpack/webpack5-module-minifier-plugin
       '@types/heft-jest':
         specifier: 1.0.1
         version: 1.0.1
+      '@types/node':
+        specifier: 18.17.15
+        version: 18.17.15
       '@types/webpack-env':
         specifier: 1.18.0
         version: 1.18.0

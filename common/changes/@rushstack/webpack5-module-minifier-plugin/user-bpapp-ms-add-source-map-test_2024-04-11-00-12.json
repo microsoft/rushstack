@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-module-minifier-plugin",
+      "comment": "Fixes bug where maps would only map back to minification chunk code",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-module-minifier-plugin"
+}
