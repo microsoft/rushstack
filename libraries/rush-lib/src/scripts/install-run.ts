@@ -195,7 +195,7 @@ function _resolvePackageVersion(
       const spawnSyncOptions: childProcess.SpawnSyncOptions = {
         cwd: rushTempFolder,
         stdio: [],
-        shell: isWindows() ? true : undefined
+        shell: isWindows()
       };
 
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = childProcess.spawnSync(
@@ -361,7 +361,8 @@ function _installPackage(
     const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(npmPath, [command], {
       stdio: 'inherit',
       cwd: packageInstallFolder,
-      env: process.env
+      env: process.env,
+      shell: isWindows()
     });
 
     if (result.status !== 0) {
@@ -447,7 +448,7 @@ export function installAndRun(
   try {
     // Node.js on Windows can not spawn a file when the path has a space on it
     // unless the path gets wrapped in a cmd friendly way and shell mode is used
-    const shouldUseShell: boolean = binPath.includes(' ') && isWindows();
+    const shouldUseShell: boolean = isWindows();
     const platformBinPath: string = shouldUseShell ? `"${binPath}"` : binPath;
 
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
