@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "childprocess.spawnSync on windows must set shell: true",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
