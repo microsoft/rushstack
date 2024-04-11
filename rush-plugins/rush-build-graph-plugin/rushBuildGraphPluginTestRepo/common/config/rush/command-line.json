@@ -21,6 +21,17 @@
         "alwaysWatch": false,
         "watchPhases": ["_phase:build"]
       }
+    },
+    {
+      "commandKind": "phased",
+      "name": "test",
+      "summary": "run build and test phases",
+      "enableParallelism": false,
+      "phases": ["_phase:build", "_phase:test"],
+      "watchOptions": {
+        "alwaysWatch": false,
+        "watchPhases": ["_phase:build", "_phase:test"]
+      }
     }
   ],
 
@@ -29,6 +40,14 @@
       "name": "_phase:build",
       "dependencies": {
         "upstream": ["_phase:build"]
+      },
+      // Enforcing this script exists is handled via static validation pipeline
+      "missingScriptBehavior": "silent"
+    },
+    {
+      "name": "_phase:test",
+      "dependencies": {
+        "self": ["_phase:build"]
       },
       // Enforcing this script exists is handled via static validation pipeline
       "missingScriptBehavior": "silent"
