@@ -446,8 +446,8 @@ export function installAndRun(
   const originalEnvPath: string = process.env.PATH || '';
   let result: childProcess.SpawnSyncReturns<Buffer>;
   try {
-    // Node.js on Windows can not spawn a file when the path has a space on it
-    // unless the path gets wrapped in a cmd friendly way and shell mode is used
+    // `npm` bin stubs on Windows are `.cmd` files
+    // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
     const shouldUseShell: boolean = isWindows();
     const platformBinPath: string = shouldUseShell ? `"${binPath}"` : binPath;
 
