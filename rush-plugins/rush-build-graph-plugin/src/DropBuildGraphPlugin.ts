@@ -11,7 +11,7 @@ import type {
 } from '@rushstack/rush-sdk';
 import type { IDropGraphOptions } from './DropGraph';
 
-const DEFAULT_PLUGIN_NAME: 'DropBuildGraphPlugin' = 'DropBuildGraphPlugin';
+const PLUGIN_NAME: 'RushDropBuildGraphPlugin' = 'RushDropBuildGraphPlugin';
 
 /**
  * The graph JSON object
@@ -42,11 +42,7 @@ export interface IGraphNode {
  * @beta
  */
 export class DropBuildGraphPlugin implements IRushPlugin {
-  private readonly _pluginName: string = DEFAULT_PLUGIN_NAME;
-
-  public constructor(pluginName: string = DEFAULT_PLUGIN_NAME) {
-    this._pluginName = pluginName;
-  }
+  private readonly _pluginName: string = PLUGIN_NAME;
 
   public apply(session: RushSession, configuration: RushConfiguration): void {
     const dropIndex: number = process.argv.indexOf('--drop-graph');
