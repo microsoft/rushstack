@@ -3,6 +3,7 @@
 
 import { JsonFile, PackageJsonLookup } from '@rushstack/node-core-library';
 import type { ILogger, Operation } from '@rushstack/rush-sdk';
+import { RushConfiguration } from '@rushstack/rush-sdk';
 
 import type { IGraphNode } from '../DropBuildGraphPlugin';
 import { GraphParser } from '../GraphParser';
@@ -16,6 +17,11 @@ lookup.tryGetPackageFolderFor(__dirname);
 const thisProjectFolder: string | undefined = lookup.tryGetPackageFolderFor(__dirname);
 if (!thisProjectFolder) {
   throw new Error('Cannot find project folder');
+}
+
+const rushJsonFolder: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+if (!rushJsonFolder) {
+  throw new Error('Cannot find rush.json folder');
 }
 
 const testRepoLocation: string = `${thisProjectFolder}/rushBuildGraphPluginTestRepo`;
@@ -35,9 +41,12 @@ const exampleGraph: readonly IGraphNode[] = Array.from(graph.nodes as IGraphNode
   a.id > b.id ? 1 : -1
 ) as readonly IGraphNode[];
 
-const graphParser: GraphParser = new GraphParser({
-  terminal: { writeErrorLine: jest.fn(), writeLine: jest.fn() }
-} as unknown as ILogger);
+const graphParser: GraphParser = new GraphParser(
+  {
+    terminal: { writeErrorLine: jest.fn(), writeLine: jest.fn() }
+  } as unknown as ILogger,
+  rushJsonFolder
+);
 
 // This checks the test repo output to ensure that the command succeeds and the graph is built correctly
 describe('--drop-graph integration process', () => {

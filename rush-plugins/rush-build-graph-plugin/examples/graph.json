@@ -5,7 +5,7 @@
       "task": "_phase:build",
       "package": "package-a",
       "dependencies": [],
-      "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
+      "workingDirectory": "a",
       "command": "heft run build command "
     },
     {
@@ -13,7 +13,7 @@
       "task": "_phase:build",
       "package": "package-b",
       "dependencies": ["package-a#_phase:build"],
-      "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+      "workingDirectory": "b",
       "command": "heft run a different build command "
     },
     {
@@ -21,11 +21,11 @@
       "task": "_phase:test",
       "package": "package-b",
       "dependencies": ["package-b#_phase:build"],
-      "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+      "workingDirectory": "b",
       "command": "heft run a test command "
     }
   ],
   "repoSettings": {
-    "commonTempFolder": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/common/temp"
+    "commonTempFolder": "common/temp"
   }
 }

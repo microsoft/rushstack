@@ -8,7 +8,7 @@ Array [
     "id": "package-a#_phase:build",
     "package": "package-a",
     "task": "_phase:build",
-    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/a",
+    "workingDirectory": "a",
   },
   Object {
     "command": "heft run a different build command ",
@@ -18,7 +18,7 @@ Array [
     "id": "package-b#_phase:build",
     "package": "package-b",
     "task": "_phase:build",
-    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+    "workingDirectory": "b",
   },
   Object {
     "command": "heft run a test command ",
@@ -28,7 +28,7 @@ Array [
     "id": "package-b#_phase:test",
     "package": "package-b",
     "task": "_phase:test",
-    "workingDirectory": "/workspaces/rushstack/rush-plugins/rush-build-graph-plugin/rushBuildGraphPluginTestRepo/b",
+    "workingDirectory": "b",
   },
 ]
 `;

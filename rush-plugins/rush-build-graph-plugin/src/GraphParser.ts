@@ -5,6 +5,7 @@ import type { Operation, IOperationRunner, ILogger } from '@rushstack/rush-sdk';
 
 import { Colorize } from '@rushstack/terminal';
 import { filterObjectForDebug } from './GraphDebugHelpers';
+import { Path } from '@rushstack/node-core-library';
 import type { IGraphNode } from './DropBuildGraphPlugin';
 
 type IGraphNodeInternal = Readonly<Omit<IGraphNode, 'dependencies' | 'command'>> & {
@@ -24,9 +25,14 @@ export function tryGetOperationId(operation: Partial<Operation>): string | undef
 
 export class GraphParser {
   private _logger: ILogger;
+  private _rushJsonFolder: string;
 
-  public constructor(logger: ILogger) {
+  public constructor(logger: ILogger, rushJsonFolder: string) {
     this._logger = logger;
+    this._rushJsonFolder = Path.convertToSlashes(rushJsonFolder);
+    if (!this._rushJsonFolder.endsWith('/')) {
+      this._rushJsonFolder += '/';
+    }
   }
 
   /*
@@ -150,12 +156,17 @@ export class GraphParser {
       dependencies.add(this.getOperationId(dep));
     }
 
+    let workingDirectory: string | undefined = operation.associatedProject?.projectFolder;
+    if (workingDirectory && workingDirectory.startsWith(this._rushJsonFolder)) {
+      workingDirectory = workingDirectory.replace(this._rushJsonFolder, '');
+    }
+
     const node: Partial<IGraphNodeInternal> = {
       id: tryGetOperationId(operation),
       task: operation.associatedPhase?.name,
       package: operation.associatedProject?.packageName,
       dependencies,
-      workingDirectory: operation.associatedProject?.projectFolder,
+      workingDirectory,
       // _commandToRun does not exist in the type definition of IOperationRunner,
       //    but it's defined in subclasss ShellOperationRunner
       command: (operation.runner as IOperationRunner & { _commandToRun: string })?._commandToRun

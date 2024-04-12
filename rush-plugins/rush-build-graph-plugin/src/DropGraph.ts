@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { JsonFile, Path } from '@rushstack/node-core-library';
 import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
 import { basename, dirname } from 'path';
 import type { IRushGraph, IGraphNode } from './DropBuildGraphPlugin';
@@ -19,7 +19,7 @@ export interface IDropGraphOptions {
 export async function _dropGraphAsync(parameters: IDropGraphOptions): Promise<boolean> {
   const { operations, context, dropGraphPath, configuration, logger } = parameters;
 
-  const graphParser: GraphParser = new GraphParser(logger);
+  const graphParser: GraphParser = new GraphParser(logger, configuration.rushJsonFolder);
   const graph: IGraphNode[] = graphParser.processOperations(operations);
 
   if (process.env.DEBUG_RUSH_BUILD_GRAPH) {
@@ -51,11 +51,20 @@ export async function _dropGraphAsync(parameters: IDropGraphOptions): Promise<bo
       await JsonFile.saveAsync(debugOutput, debugPathOut, { ensureFolderExists: true });
     }
   }
+  let rushJsonFolder: string = Path.convertToSlashes(configuration.rushJsonFolder);
+  if (!rushJsonFolder.endsWith('/')) {
+    rushJsonFolder += '/';
+  }
+
+  let commonTempFolder: string | undefined = configuration.commonTempFolder;
+  if (commonTempFolder && commonTempFolder.startsWith(rushJsonFolder)) {
+    commonTempFolder = commonTempFolder.replace(rushJsonFolder, '');
+  }
 
   const dropGraphOutput: IRushGraph = {
     nodes: graph,
     repoSettings: {
-      commonTempFolder: configuration.commonTempFolder
+      commonTempFolder
     }
   };
 
