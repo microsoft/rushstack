@@ -53,7 +53,7 @@ let _npmPath: string | undefined = undefined;
 export function getNpmPath(): string {
   if (!_npmPath) {
     try {
-      if (isWindows()) {
+      if (_isWindows()) {
         // We're on Windows
         const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
         const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
@@ -195,11 +195,11 @@ function _resolvePackageVersion(
       const spawnSyncOptions: childProcess.SpawnSyncOptions = {
         cwd: rushTempFolder,
         stdio: [],
-        shell: isWindows()
+        shell: _isWindows()
       };
-
+      const platformNpmPath: string = _getPlatformPath(npmPath);
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer | string> = childProcess.spawnSync(
-        npmPath,
+        platformNpmPath,
         ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'],
         spawnSyncOptions
       );
@@ -358,11 +358,12 @@ function _installPackage(
   try {
     logger.info(`Installing ${name}...`);
     const npmPath: string = getNpmPath();
-    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(npmPath, [command], {
+    const platformNpmPath: string = _getPlatformPath(npmPath);
+    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(platformNpmPath, [command], {
       stdio: 'inherit',
       cwd: packageInstallFolder,
       env: process.env,
-      shell: isWindows()
+      shell: _isWindows()
     });
 
     if (result.status !== 0) {
@@ -380,11 +381,18 @@ function _installPackage(
  */
 function _getBinPath(packageInstallFolder: string, binName: string): string {
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const resolvedBinName: string = isWindows() ? `${binName}.cmd` : binName;
+  const resolvedBinName: string = _isWindows() ? `${binName}.cmd` : binName;
   return path.resolve(binFolderPath, resolvedBinName);
 }
 
-function isWindows(): boolean {
+/**
+ * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
+ */
+function _getPlatformPath(platformPath: string): string {
+  return _isWindows() && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
+}
+
+function _isWindows(): boolean {
   return os.platform() === 'win32';
 }
 
@@ -448,14 +456,13 @@ export function installAndRun(
   try {
     // `npm` bin stubs on Windows are `.cmd` files
     // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
-    const shouldUseShell: boolean = isWindows();
-    const platformBinPath: string = shouldUseShell ? `"${binPath}"` : binPath;
+    const platformBinPath: string = _getPlatformPath(binPath);
 
     process.env.PATH = [binFolderPath, originalEnvPath].join(path.delimiter);
     result = childProcess.spawnSync(platformBinPath, packageBinArgs, {
       stdio: 'inherit',
       windowsVerbatimArguments: false,
-      shell: shouldUseShell,
+      shell: _isWindows(),
       cwd: process.cwd(),
       env: process.env
     });
