@@ -27,6 +27,12 @@
                   "destinationFolders": [
                     "rushBuildGraphPluginTestRepo/common/autoinstallers/plugins/node_modules/@rushstack/rush-build-graph-plugin/"
                   ]
+                },
+                {
+                  "sourcePath": "rushBuildGraphPluginTestRepo/node_modules_mock/",
+                  "destinationFolders": [
+                    "rushBuildGraphPluginTestRepo/common/autoinstallers/plugins/node_modules/"
+                  ]
                 }
               ]
             }
