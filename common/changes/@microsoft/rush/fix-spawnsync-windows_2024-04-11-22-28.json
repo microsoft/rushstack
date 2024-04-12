@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "childprocess.spawnSync on windows must set shell: true when invoking a .CMD file",
+      "comment": "Adapt to Node.js behavior change when invoking a .CMD file via `child_process.spawn`. On Windows this requires setting `shell: true`.",
       "type": "none"
     }
   ],
