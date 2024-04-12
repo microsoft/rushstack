@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Wed, 10 Apr 2024 15:10:09 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Apr 2024 00:12:46 GMT and should not be manually modified.
+
+## 5.5.43
+Fri, 12 Apr 2024 00:12:46 GMT
+
+### Patches
+
+- Fixes bug where maps would only map back to minification chunk code
 
 ## 5.5.42
 Wed, 10 Apr 2024 15:10:09 GMT
