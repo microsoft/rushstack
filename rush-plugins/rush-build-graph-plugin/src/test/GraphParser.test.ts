@@ -32,7 +32,7 @@ const graphLocation: string = `${thisProjectFolder}/examples/graph.json`;
 const procOut: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
   'rush',
   ['test', '--drop-graph', graphLocation],
-  { encoding: 'utf8', stdio: 'ignore', cwd: testRepoLocation, timeout: 60000 }
+  { encoding: 'utf8', stdio: 'inherit', cwd: testRepoLocation, timeout: 60000 }
 );
 
 const graph = JsonFile.load(graphLocation);
