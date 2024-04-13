@@ -76,7 +76,7 @@ export class DependencyAnalyzer {
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
-    for (const project of this._rushConfiguration.projects) {
+    for (const project of subspace.getProjects()) {
       const dependencies: PackageJsonDependency[] = [
         ...project.packageJsonEditor.dependencyList,
         ...project.packageJsonEditor.devDependencyList
