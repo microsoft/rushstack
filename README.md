@@ -166,7 +166,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-parameter-plugin](./build-tests/heft-parameter-plugin/) | This project contains a Heft plugin that adds a custom parameter to built-in actions |
 | [/build-tests/heft-parameter-plugin-test](./build-tests/heft-parameter-plugin-test/) | This project exercises a built-in Heft action with a custom parameter |
 | [/build-tests/heft-sass-test](./build-tests/heft-sass-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
-| [/build-tests/heft-typescript-composite-test](./build-tests/heft-typescript-composite-test/) | Building this project tests behavior of Heft when the tsconfig.json file uses project references. |
+| [/build-tests/heft-typescript-composite-test](./build-tests/heft-typescript-composite-test/) | Building this project tests the behavior of Heft when the tsconfig.json file uses project references. |
 | [/build-tests/heft-typescript-v2-test](./build-tests/heft-typescript-v2-test/) | Building this project tests building with TypeScript v2 |
 | [/build-tests/heft-typescript-v3-test](./build-tests/heft-typescript-v3-test/) | Building this project tests building with TypeScript v3 |
 | [/build-tests/heft-typescript-v4-test](./build-tests/heft-typescript-v4-test/) | Building this project tests building with TypeScript v4 |
@@ -184,7 +184,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-lib-declaration-paths-test](./build-tests/rush-lib-declaration-paths-test/) | This project ensures all of the paths in rush-lib/lib/... have imports that resolve correctly. If this project builds, all `lib/**/*.d.ts` files in the `@microsoft/rush-lib` package are valid. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
-| [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-webpack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
+| [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-web pack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
 | [/build-tests/ts-command-line-test](./build-tests/ts-command-line-test/) | Building this project is a regression test for ts-command-line |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
 | [/libraries/rush-themed-ui](./libraries/rush-themed-ui/) | Rush Component Library: a set of themed components for rush projects |
