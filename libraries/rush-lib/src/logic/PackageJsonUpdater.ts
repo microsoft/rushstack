@@ -315,7 +315,7 @@ export class PackageJsonUpdater {
   private async _doRushAddAsync(
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+    const { projects } = options;
 
     const { DependencyAnalyzer } = await import(
       /* webpackChunkName: 'DependencyAnalyzer' */
@@ -324,11 +324,34 @@ export class PackageJsonUpdater {
     const dependencyAnalyzer: DependencyAnalyzer = DependencyAnalyzer.forRushConfiguration(
       this._rushConfiguration
     );
+
+    const allPackageUpdates: IUpdateProjectOptions[] = [];
+    const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
+      new Set(projects)
+    );
+    for (const subspace of subspaceSet) {
+      // Projects for this subspace
+      allPackageUpdates.push(...(await this._updateProjects(subspace, dependencyAnalyzer, options)));
+    }
+
+    return allPackageUpdates;
+  }
+
+  private async _updateProjects(
+    subspace: Subspace,
+    dependencyAnalyzer: DependencyAnalyzer,
+    options: IPackageJsonUpdaterRushAddOptions
+  ): Promise<IUpdateProjectOptions[]> {
+    const { packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+
+    // Get projects for this subspace
+    const projects: RushConfigurationProject[] = subspace.getProjects();
+
     const {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis();
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace);
 
     this._terminal.writeLine();
     const dependenciesToAddOrUpdate: Record<string, string> = {};

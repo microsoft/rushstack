@@ -282,10 +282,14 @@ export class Subspace {
   public getPnpmfilePath(): string {
     const subspaceConfigFolderPath: string = this.getSubspaceConfigFolder();
 
-    return path.join(
-      subspaceConfigFolderPath,
-      (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-    );
+    let pnpmFilename: string = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
+      .pnpmfileFilename;
+    if (this._rushConfiguration.subspacesFeatureEnabled) {
+      pnpmFilename = (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager)
+        .subspacePnpmfileFilename;
+    }
+
+    return path.join(subspaceConfigFolderPath, pnpmFilename);
   }
 
   /**
