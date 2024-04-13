@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 10 Apr 2024 21:59:57 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Apr 2024 18:31:00 GMT and should not be manually modified.
+
+## 5.120.1
+Sat, 13 Apr 2024 18:31:00 GMT
+
+### Updates
+
+- Fix an issue where install-run-rush.js sometimes incorrectly invoked .cmd files on Windows OS due to a recent Node.js behavior change.
+- Fix an issue with the skip install logic when the experimental subspaces feature is enabled
 
 ## 5.120.0
 Wed, 10 Apr 2024 21:59:57 GMT
