@@ -235,7 +235,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
                 `"${rushProject.packageName}" depends on package "${name}" (${version}) which exists within ` +
                   'the workspace. Run "rush update" to update workspace references for this package. ' +
                   `If package "${name}" is intentionally expected to be installed from an external package feed, ` +
-                  `list package "${name}" in the "decoupledLocalDependencies" field in the `+
+                  `list package "${name}" in the "decoupledLocalDependencies" field in the ` +
                   `"${rushProject.packageName}" entry in rush.json to suppress this error.`
               )
             );
@@ -353,10 +353,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // files
     // Example: [ "C:\MyRepo\projects\projectA\node_modules", "C:\MyRepo\projects\projectA\package.json" ]
     potentiallyChangedFiles.push(
-      ...this.rushConfiguration.projects.map((project) => {
+      ...subspace.getProjects().map((project) => {
         return path.join(project.projectFolder, RushConstants.nodeModulesFolderName);
       }),
-      ...this.rushConfiguration.projects.map((project) => {
+      ...subspace.getProjects().map((project) => {
         return path.join(project.projectFolder, FileConstants.PackageJson);
       })
     );
