@@ -54,9 +54,12 @@ export class DependencyAnalyzer {
     return analyzer;
   }
 
-  public getAnalysis(subspace?: Subspace): IDependencyAnalysis {
+  public getAnalysis(subspace?: Subspace, addAction?: boolean): IDependencyAnalysis {
     if (!this._analysis) {
-      this._analysis = this._getAnalysisInternal(subspace || this._rushConfiguration.defaultSubspace);
+      this._analysis = this._getAnalysisInternal(
+        subspace || this._rushConfiguration.defaultSubspace,
+        addAction
+      );
     }
 
     return this._analysis;
@@ -68,7 +71,7 @@ export class DependencyAnalyzer {
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(subspace: Subspace): IDependencyAnalysis {
+  private _getAnalysisInternal(subspace: Subspace, addAction?: boolean): IDependencyAnalysis {
     const commonVersionsConfiguration: CommonVersionsConfiguration = subspace.getCommonVersions();
     const allVersionsByPackageName: Map<string, Set<string>> = new Map();
     const allowedAlternativeVersions: Map<
@@ -76,7 +79,12 @@ export class DependencyAnalyzer {
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
-    for (const project of subspace.getProjects()) {
+    let projectsToProcess = this._rushConfiguration.projects;
+    if (addAction && this._rushConfiguration.subspacesFeatureEnabled) {
+      projectsToProcess = subspace.getProjects();
+    }
+
+    for (const project of projectsToProcess) {
       const dependencies: PackageJsonDependency[] = [
         ...project.packageJsonEditor.dependencyList,
         ...project.packageJsonEditor.devDependencyList

@@ -351,7 +351,7 @@ export class PackageJsonUpdater {
       allVersionsByPackageName,
       implicitlyPreferredVersionByPackageName,
       commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace);
+    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace, true);
 
     this._terminal.writeLine();
     const dependenciesToAddOrUpdate: Record<string, string> = {};
