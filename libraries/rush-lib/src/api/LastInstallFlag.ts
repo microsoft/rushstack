@@ -1,16 +1,61 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
-import { FileSystem, JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
-
+import { JsonFile, type JsonObject, Path, type IPackageJson } from '@rushstack/node-core-library';
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
 import { objectsAreDeepEqual } from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
+import { Selection } from '../logic/Selection';
+import { BaseFlag } from './base/BaseFlag';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
+
+/**
+ * This represents the JSON data structure for the "last-install.flag" file.
+ * @internal
+ */
+export interface ILastInstallFlagJson {
+  /**
+   * Current node version
+   */
+  node: string;
+  /**
+   * Current package manager name
+   */
+  packageManager: PackageManagerName;
+  /**
+   * Current package manager version
+   */
+  packageManagerVersion: string;
+  /**
+   * Current rush json folder
+   */
+  rushJsonFolder: string;
+  /**
+   * The content of package.json, used in the flag file of autoinstaller
+   */
+  packageJson?: IPackageJson;
+  /**
+   * Same with pnpmOptions.pnpmStorePath in rush.json
+   */
+  storePath?: string;
+  /**
+   * True when "useWorkspaces" is true in rush.json
+   */
+  workspaces?: true;
+  /**
+   * True when user explicitly specify "--ignore-scripts" CLI parameter or deferredInstallationScripts
+   */
+  ignoreScripts?: true;
+  /**
+   * When specified, it is a list of selected projects during partial install
+   * It is undefined when full install
+   */
+  selectedProjectNames?: string[];
+
+  [key: string]: unknown;
+}
 
 /**
  * @internal
@@ -27,25 +72,9 @@ export interface ILockfileValidityCheckOptions {
  * it can invalidate the last install.
  * @internal
  */
-export class LastInstallFlag {
-  private _state: JsonObject;
-
+export class LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
   /**
-   * Returns the full path to the flag file
-   */
-  public readonly path: string;
-
-  /**
-   * Creates a new LastInstall flag
-   * @param folderPath - the folder that this flag is managing
-   * @param state - optional, the state that should be managed or compared
-   */
-  public constructor(folderPath: string, state: JsonObject = {}) {
-    this.path = path.join(folderPath, this.flagName);
-    this._state = state;
-  }
-
-  /**
+   * @override
    * Returns true if the file exists and the contents match the current state.
    */
   public async isValidAsync(options?: ILockfileValidityCheckOptions): Promise<boolean> {
@@ -83,7 +112,7 @@ export class LastInstallFlag {
       return false;
     }
 
-    const newState: JsonObject = { ...this._state };
+    const newState: ILastInstallFlagJson = this._state;
 
     if (statePropertiesToIgnore) {
       for (const optionToIgnore of statePropertiesToIgnore) {
@@ -118,28 +147,25 @@ export class LastInstallFlag {
               );
             }
           }
+          // check whether new selected projects are installed
+          if (newState.selectedProjectNames) {
+            if (!oldState.selectedProjectNames) {
+              // used to be a full install
+              return true;
+            } else if (
+              Selection.union(newState.selectedProjectNames, oldState.selectedProjectNames).size ===
+              oldState.selectedProjectNames.length
+            ) {
+              // current selected projects are included in old selected projects
+              return true;
+            }
+          }
         }
       }
       return false;
     }
 
     return true;
-  }
-
-  /**
-   * Writes the flag file to disk with the current state
-   */
-  public async createAsync(): Promise<void> {
-    await JsonFile.saveAsync(this._state, this.path, {
-      ensureFolderExists: true
-    });
-  }
-
-  /**
-   * Removes the flag file
-   */
-  public async clearAsync(): Promise<void> {
-    await FileSystem.deleteFileAsync(this.path);
   }
 
   /**
@@ -169,7 +195,7 @@ export class LastInstallFlagFactory {
     subspace: Subspace,
     extraState: Record<string, string> = {}
   ): LastInstallFlag {
-    const currentState: JsonObject = {
+    const currentState: ILastInstallFlagJson = {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion,
