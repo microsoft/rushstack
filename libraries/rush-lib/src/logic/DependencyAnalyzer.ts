@@ -79,7 +79,7 @@ export class DependencyAnalyzer {
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
-    let projectsToProcess = this._rushConfiguration.projects;
+    let projectsToProcess: RushConfigurationProject[] = this._rushConfiguration.projects;
     if (addAction && this._rushConfiguration.subspacesFeatureEnabled) {
       projectsToProcess = subspace.getProjects();
     }
