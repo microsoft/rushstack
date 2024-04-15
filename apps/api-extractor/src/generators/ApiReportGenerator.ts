@@ -53,9 +53,13 @@ export class ApiReportGenerator {
     const writer: IndentedWriter = new IndentedWriter();
     writer.trimLeadingSpaces = true;
 
+    function capitalizeFirstLetter(input: string): string {
+      return input === '' ? '' : `${input[0].toLocaleUpperCase()}${input.slice(1)}`;
+    }
+
     // For backwards compatibility, don't emit "complete" in report text for untrimmed reports.
     const releaseLevelPrefix: string =
-      reportVariant === 'complete' ? '' : `${reportVariant.toLocaleUpperCase()} `;
+      reportVariant === 'complete' ? '' : `${capitalizeFirstLetter(reportVariant)} `;
     writer.writeLine(
       [
         `## ${releaseLevelPrefix}API Report File for "${collector.workingPackage.name}"`,
