@@ -852,17 +852,17 @@ export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
     ignoreEngines?: boolean;
 }
 
+// Warning: (ae-forgotten-export) The symbol "BaseFlag" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ILastInstallFlagJson" needs to be exported by the entry point index.d.ts
+//
 // @internal
-export class _LastInstallFlag {
-    constructor(folderPath: string, state?: JsonObject);
+export class _LastInstallFlag extends BaseFlag<ILastInstallFlagJson> {
     checkValidAndReportStoreIssues(options: _ILockfileValidityCheckOptions & {
         rushVerb: string;
     }): boolean;
-    clear(): void;
-    create(): void;
     protected get flagName(): string;
+    // @override
     isValid(options?: _ILockfileValidityCheckOptions): boolean;
-    readonly path: string;
 }
 
 // @public

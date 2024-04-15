@@ -160,16 +160,23 @@ export abstract class BaseInstallManager {
       subspace,
       { npmrcHash: npmrcHash || '<NO NPMRC>' }
     );
+    if (isFilteredInstall) {
+      // Get the projects involved in this filtered install
+      const selectedProjectNames: string[] = this.options.pnpmFilterArguments.filter(
+        (filterArg) => filterArg !== '--filter'
+      );
+      commonTempInstallFlag.mergeFromObject({
+        selectedProjectNames: selectedProjectNames
+      });
+    }
     const optionsToIgnore: string[] | undefined = !this.rushConfiguration.experimentsConfiguration
       .configuration.cleanInstallAfterNpmrcChanges
       ? ['npmrcHash'] // If the "cleanInstallAfterNpmrcChanges" experiment is disabled, ignore the npmrcHash
       : undefined;
-    const cleanInstall: boolean =
-      isFilteredInstall ||
-      !commonTempInstallFlag.checkValidAndReportStoreIssues({
-        rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
-        statePropertiesToIgnore: optionsToIgnore
-      });
+    const cleanInstall: boolean = !commonTempInstallFlag.checkValidAndReportStoreIssues({
+      rushVerb: allowShrinkwrapUpdates ? 'update' : 'install',
+      statePropertiesToIgnore: optionsToIgnore
+    });
 
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
@@ -242,14 +249,11 @@ export abstract class BaseInstallManager {
           );
         }
       }
+      // Create the marker file to indicate a successful install
+      commonTempInstallFlag.create();
     } else {
       // eslint-disable-next-line no-console
       console.log('Installation is already up-to-date.');
-    }
-
-    // Create the marker file to indicate a successful install if it's not a filtered install
-    if (!isFilteredInstall) {
-      commonTempInstallFlag.create();
     }
 
     // Perform any post-install work the install manager requires
@@ -294,6 +298,7 @@ export abstract class BaseInstallManager {
       }
     }
 
+    console.log('potentially changed files: ', potentiallyChangedFiles);
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
@@ -474,7 +479,10 @@ export abstract class BaseInstallManager {
         this.prepareCommonTempAsync(subspace, shrinkwrapFile),
         projectImpactGraphGenerator?.validateAsync()
       ]);
+
+    console.log('shrinkwrap up to date 1: ', shrinkwrapIsUpToDate);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
+    console.log('shrinkwrap up to date 2: ', shrinkwrapIsUpToDate);
 
     this._syncTempShrinkwrap(subspace, shrinkwrapFile);
 
