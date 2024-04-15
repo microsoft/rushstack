@@ -922,7 +922,7 @@ export class ExtractorConfig {
           reportFileNameBase = '<unscopedPackageName>';
         }
 
-        validateApiReportFileName('reportFileName', reportFileNameBase);
+        ExtractorConfig._validateApiReportFileName('reportFileName', reportFileNameBase);
 
         const reportVariantKinds: ApiReportVariant[] = apiReportConfig.reportVariants ?? ['complete'];
 
@@ -1201,21 +1201,21 @@ export class ExtractorConfig {
     }
     throw new Error(`The "${fieldName}" value contains extra token characters ("<" or ">"): ${value}`);
   }
-}
 
-/**
- * Validates file name invariants for API report file names.
- * Throws if any are violated.
- * @param fieldName - The name of the API-Extractor configuration option with the file name being validated.
- * @param fileName - The file name to be validated.
- */
-function validateApiReportFileName(fieldName: string, fileName: string | undefined): void {
-  if (!fileName) {
-    return;
-  }
+  /**
+   * Validates file name invariants for API report file names.
+   * Throws if any are violated.
+   * @param fieldName - The name of the API-Extractor configuration option with the file name being validated.
+   * @param fileName - The file name to be validated.
+   */
+  private static _validateApiReportFileName(fieldName: string, fileName: string | undefined): void {
+    if (!fileName) {
+      return;
+    }
 
-  if (fileName.indexOf('/') >= 0 || fileName.indexOf('\\') >= 0) {
-    // A merged configuration should have this
-    throw new Error(`The ${fieldName} setting contains invalid characters: "${fileName}"`);
+    if (fileName.indexOf('/') >= 0 || fileName.indexOf('\\') >= 0) {
+      // A merged configuration should have this
+      throw new Error(`The ${fieldName} setting contains invalid characters: "${fileName}"`);
+    }
   }
 }
