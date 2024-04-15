@@ -74,8 +74,7 @@ export interface IConfigApiReport {
    * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
    * produce a full output filename.
    *
-   * The file extension is optional, but if provided it should be ".api.md".
-   * If not specified, the resulting file name will be `<reportFileName>.api.md`.
+   * The file extension is optional. If not specified, the resulting file name will end with `.api.md`.
    *
    * The string must not contain a path separator such as `\` or `/`.
    *
