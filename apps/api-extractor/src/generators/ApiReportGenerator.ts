@@ -23,16 +23,6 @@ import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationForma
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import type { ApiReportVariant } from '../api/IConfigFile';
 
-/**
- * Options for {@link ApiReportGenerator.generateReviewFileContent}.
- */
-export interface IApiReportOptions {
-  /**
-   *
-   */
-  readonly reportVariant: ApiReportVariant;
-}
-
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
 

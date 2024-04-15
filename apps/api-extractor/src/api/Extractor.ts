@@ -29,7 +29,7 @@ import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
 import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { SourceMapper } from '../collector/SourceMapper';
-import { ApiReportVariant } from './IConfigFile';
+import type { ApiReportVariant } from './IConfigFile';
 
 /**
  * Runtime options for Extractor.
