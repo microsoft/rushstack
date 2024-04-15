@@ -23,5 +23,6 @@
     "webpack-cli": "~4.1.0",
     "webpack-dev-server": "~5.0.0",
     "webpack": "~5.76.0"
-  }
+  rush update
+ }
 }
