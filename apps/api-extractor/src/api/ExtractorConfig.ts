@@ -899,23 +899,21 @@ export class ExtractorConfig {
         const apiReportConfig: IConfigApiReport = configObject.apiReport!;
 
         let reportFileNameBase: string;
+
+        // The config spec allows the user to optionally include an extension postfix in the report file name.
+        // We will implicitly add `.api.md` if the user does not specify an extension, but will otherwise preserve the
+        // provided extension.
+        let reportFileNameSuffix: string = '.api.md';
         if (apiReportConfig.reportFileName) {
-          if (apiReportConfig.reportFileName.endsWith('.api.md')) {
-            // If the user configured the report file name with the ".api.md" postfix, strip it so we can create derived
-            // report names for each report variant. We will re-add the postfix to each.
-            // This is mostly for backwards compaibility. Ideally we would have users not specify the postfix extension
-            // at all, and add it for them. But the previous versions of the spec spec explicitly calls for the postfix
-            // to be specified, so we must allow for it.
-            reportFileNameBase = apiReportConfig.reportFileName.split('.api.md')[0];
-          } else if (apiReportConfig.reportFileName.endsWith('.md')) {
-            // If the user specified the `.md` file extension, but did not satisfy the `.api.md` postfix requirement,
-            // throw an error.
-            throw new Error(
-              'Report file names must either not specify a file extension, or they must end in ".api.md"'
-            );
-          } else {
-            // No extension was specified. Use the provided name and append `.api.md` later.
+          const iSuffix: number = apiReportConfig.reportFileName.indexOf('.');
+          if (iSuffix < 0) {
+            // No extension specified. Use provided file name as the base, and use `.api.md` as the extension suffix.
             reportFileNameBase = apiReportConfig.reportFileName;
+          } else {
+            // The user provided an extension suffix. We will preserve it, but prepend the appropriate variant string to
+            // each report file.
+            reportFileNameBase = apiReportConfig.reportFileName.slice(0, iSuffix);
+            reportFileNameSuffix = apiReportConfig.reportFileName.slice(iSuffix);
           }
         } else {
           // Default value
@@ -930,7 +928,7 @@ export class ExtractorConfig {
           // Omit the variant kind from the "complete" report file name for simplicity and for backwards compatibility.
           const fileNameWithTokens: string = `${reportFileNameBase}${
             reportVariantKind === 'complete' ? '' : `.${reportVariantKind}`
-          }.api.md`;
+          }${reportFileNameSuffix}`;
           const normalizedFileName: string = ExtractorConfig._expandStringWithTokens(
             'reportFileName',
             fileNameWithTokens,
