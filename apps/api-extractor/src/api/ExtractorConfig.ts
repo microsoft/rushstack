@@ -905,6 +905,15 @@ export class ExtractorConfig {
         // provided extension.
         let reportFileNameSuffix: string = '.api.md';
         if (apiReportConfig.reportFileName) {
+          if (
+            apiReportConfig.reportFileName.indexOf('/') >= 0 ||
+            apiReportConfig.reportFileName.indexOf('\\') >= 0
+          ) {
+            throw new Error(
+              `The "reportFileName" setting contains invalid characters: "${apiReportConfig.reportFileName}"`
+            );
+          }
+
           const iSuffix: number = apiReportConfig.reportFileName.indexOf('.');
           if (iSuffix < 0) {
             // No extension specified. Use provided file name as the base, and use `.api.md` as the extension suffix.
@@ -919,8 +928,6 @@ export class ExtractorConfig {
           // Default value
           reportFileNameBase = '<unscopedPackageName>';
         }
-
-        ExtractorConfig._validateApiReportFileName('reportFileName', reportFileNameBase);
 
         const reportVariantKinds: ApiReportVariant[] = apiReportConfig.reportVariants ?? ['complete'];
 
@@ -1198,22 +1205,5 @@ export class ExtractorConfig {
       throw new Error(`The "${fieldName}" value contains an unrecognized token "${match[1]}"`);
     }
     throw new Error(`The "${fieldName}" value contains extra token characters ("<" or ">"): ${value}`);
-  }
-
-  /**
-   * Validates file name invariants for API report file names.
-   * Throws if any are violated.
-   * @param fieldName - The name of the API-Extractor configuration option with the file name being validated.
-   * @param fileName - The file name to be validated.
-   */
-  private static _validateApiReportFileName(fieldName: string, fileName: string | undefined): void {
-    if (!fileName) {
-      return;
-    }
-
-    if (fileName.indexOf('/') >= 0 || fileName.indexOf('\\') >= 0) {
-      // A merged configuration should have this
-      throw new Error(`The ${fieldName} setting contains invalid characters: "${fileName}"`);
-    }
   }
 }
