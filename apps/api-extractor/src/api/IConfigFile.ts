@@ -68,13 +68,16 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The filename for the "untrimmed" API report file, which will encompass all API items, regardless of release tag.
+   * The filename for the "complete" API report file, which will encompass all API items, regardless of release tag.
    *
    * @remarks
    * It will be combined with {@link IConfigApiReport.reportFolder} and {@link IConfigApiReport.reportTempFolder} to
    * produce a full output filename.
    *
-   * The file extension should be ".api.md", and the string should not contain a path separator such as `\` or `/`.
+   * The file extension is optional, but if provided it should be ".api.md".
+   * If not specified, the resulting file name will be `<reportFileName>.api.md`.
+   *
+   * The string must not contain a path separator such as `\` or `/`.
    *
    * @defaultValue `<unscopedPackageName>.api.md`
    */
@@ -82,10 +85,14 @@ export interface IConfigApiReport {
   reportFileName?: string;
 
   /**
-   * TODO
-   * Notes:
-   * * Name will end in `<variant>.api.md` - for this config, users don't specify `api.md`.
-   * *
+   * The set of report variants to generate.
+   *
+   * @remarks
+   * Each variant corresponds to a minimal release level, denoted by release tag in the TSDoc comment for each API item.
+   * E.g., the `beta` report variant will include all API items tagged `@beta` or higher (i.e. `@beta` and `@public`).
+   *
+   * The resulting API report file names will be derived from the {@link IConfigApiReport.reportFileName}.
+   * E.g., `foo.beta.api.md`.
    *
    * @defaultValue `['complete']`
    */
@@ -127,8 +134,6 @@ export interface IConfigApiReport {
    * @defaultValue `false`
    */
   includeForgottenExports?: boolean;
-
-  // TODO: docs
 }
 
 /**

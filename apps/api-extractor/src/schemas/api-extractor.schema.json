@@ -73,7 +73,7 @@
         },
 
         "reportVariants": {
-          "description": "TODO. Default: complete",
+          "description": "The set of report variants to generate. Default: [\"complete\"]",
           "type": "array",
           "items": {
             "type": "string",
