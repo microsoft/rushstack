@@ -399,9 +399,10 @@ export class Extractor {
       `Generating ${reportVariant} API report : ${expectedApiReportPath}`
     );
 
-    const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(collector, {
-      reportVariant: reportVariant
-    });
+    const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(
+      collector,
+      reportVariant
+    );
 
     // Write the actual file
     FileSystem.writeFile(actualApiReportPath, actualApiReportContent, {

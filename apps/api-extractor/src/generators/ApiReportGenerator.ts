@@ -28,8 +28,7 @@ import type { ApiReportVariant } from '../api/IConfigFile';
  */
 export interface IApiReportOptions {
   /**
-   * The release level with which the report is associated.
-   * Can also be viewed as the minimal release level of items that should be included in the report.
+   *
    */
   readonly reportVariant: ApiReportVariant;
 }
@@ -54,13 +53,19 @@ export class ApiReportGenerator {
     return normalizedActual === normalizedExpected;
   }
 
-  public static generateReviewFileContent(collector: Collector, options: IApiReportOptions): string {
+  /**
+   * Generates and returns the API report contents as a string.
+   *
+   * @param reportVariant - The release level with which the report is associated.
+   * Can also be viewed as the minimal release level of items that should be included in the report.
+   */
+  public static generateReviewFileContent(collector: Collector, reportVariant: ApiReportVariant): string {
     const writer: IndentedWriter = new IndentedWriter();
     writer.trimLeadingSpaces = true;
 
     // For backwards compatibility, don't emit "complete" in report text for untrimmed reports.
     const releaseLevelPrefix: string =
-      options.reportVariant === 'complete' ? '' : `${options.reportVariant.toLocaleUpperCase()} `;
+      reportVariant === 'complete' ? '' : `${reportVariant.toLocaleUpperCase()} `;
     writer.writeLine(
       [
         `## ${releaseLevelPrefix}API Report File for "${collector.workingPackage.name}"`,
@@ -134,7 +139,7 @@ export class ApiReportGenerator {
               messagesToReport.push(message);
             }
 
-            if (this._shouldIncludeInReport(collector, astDeclaration, options.reportVariant)) {
+            if (this._shouldIncludeInReport(collector, astDeclaration, reportVariant)) {
               writer.ensureSkippedLine();
               writer.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
@@ -144,14 +149,7 @@ export class ApiReportGenerator {
               if (apiItemMetadata.isPreapproved) {
                 ApiReportGenerator._modifySpanForPreapproved(span);
               } else {
-                ApiReportGenerator._modifySpan(
-                  collector,
-                  span,
-                  entity,
-                  astDeclaration,
-                  false,
-                  options.reportVariant
-                );
+                ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false, reportVariant);
               }
 
               span.writeModifiedText(writer);
