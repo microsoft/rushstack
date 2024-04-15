@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.120.2",
+      "tag": "@microsoft/rush_v5.120.2",
+      "date": "Mon, 15 Apr 2024 00:25:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes an issue where rush install fails in monorepos with subspaces enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.120.1",
       "tag": "@microsoft/rush_v5.120.1",
       "date": "Sat, 13 Apr 2024 18:31:00 GMT",

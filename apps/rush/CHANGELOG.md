@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 13 Apr 2024 18:31:00 GMT and should not be manually modified.
+This log was last generated on Mon, 15 Apr 2024 00:25:04 GMT and should not be manually modified.
+
+## 5.120.2
+Mon, 15 Apr 2024 00:25:04 GMT
+
+### Updates
+
+- Fixes an issue where rush install fails in monorepos with subspaces enabled
 
 ## 5.120.1
 Sat, 13 Apr 2024 18:31:00 GMT
