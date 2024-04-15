@@ -93,6 +93,9 @@ export interface IConfigApiReport {
    *
    * The resulting API report file names will be derived from the {@link IConfigApiReport.reportFileName}.
    * E.g., `foo.beta.api.md`.
+   * The only exception to this is the `complete` variant.
+   * This variant name will not be contained in the corresponding file name.
+   * I.e., `foo.api.md`.
    *
    * @defaultValue `['complete']`
    */
