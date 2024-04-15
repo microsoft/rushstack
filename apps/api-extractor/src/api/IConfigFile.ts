@@ -81,7 +81,6 @@ export interface IConfigApiReport {
    *
    * @defaultValue `<unscopedPackageName>.api.md`
    */
-  // eslint-disable-next-line @rushstack/no-new-null
   reportFileName?: string;
 
   /**
