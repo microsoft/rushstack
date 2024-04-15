@@ -33,6 +33,7 @@ export {
 export { ExtractorMessageId } from './api/ExtractorMessageId';
 
 export {
+  ApiReportVariant,
   IConfigCompiler,
   IConfigApiReport,
   IConfigDocModel,

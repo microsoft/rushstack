@@ -15,6 +15,9 @@ import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 
 // @public
+export type ApiReportVariant = 'public' | 'beta' | 'alpha' | 'complete';
+
+// @public
 export class CompilerState {
     static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
     readonly program: unknown;
@@ -167,7 +170,6 @@ export class ExtractorResult {
 // @public
 export interface IApiReportConfig {
     fileName: string;
-    // Warning: (ae-forgotten-export) The symbol "ApiReportVariant" needs to be exported by the entry point index.d.ts
     variant: ApiReportVariant;
 }
 
