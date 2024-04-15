@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade node-tar to 6.2.1",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
