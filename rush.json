@@ -748,6 +748,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-jest-shards-test",
+      "projectFolder": "build-tests/heft-jest-shards-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-fastify-test",
       "projectFolder": "build-tests/heft-fastify-test",
       "reviewCategory": "tests",

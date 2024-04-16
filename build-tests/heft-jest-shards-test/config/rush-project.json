@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../libraries/rush-lib/src/schemas/rush-project.schema.json",
+
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["lib", "dist"]
+    },
+    {
+      "operationName": "_phase:test",
+      "outputFolderNames": ["coverage", "temp/coverage"],
+      "shards": 6
+    }
+  ]
+}
