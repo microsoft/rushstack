@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.120.4",
+      "tag": "@microsoft/rush_v5.120.4",
+      "date": "Tue, 16 Apr 2024 20:04:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.120.3",
       "tag": "@microsoft/rush_v5.120.3",
       "date": "Tue, 16 Apr 2024 02:59:48 GMT",

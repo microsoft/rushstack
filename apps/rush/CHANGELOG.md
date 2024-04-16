@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Apr 2024 02:59:48 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2024 20:04:25 GMT and should not be manually modified.
+
+## 5.120.4
+Tue, 16 Apr 2024 20:04:25 GMT
+
+### Updates
+
+- Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled
 
 ## 5.120.3
 Tue, 16 Apr 2024 02:59:48 GMT
