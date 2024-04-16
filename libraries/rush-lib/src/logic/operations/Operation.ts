@@ -26,7 +26,7 @@ export interface IOperationOptions {
 
   shard?: {
     current: number;
-    max: number;
+    total: number;
   };
 }
 
@@ -53,7 +53,7 @@ export class Operation {
   public readonly shard:
     | {
         current: number;
-        max: number;
+        total: number;
       }
     | undefined;
 

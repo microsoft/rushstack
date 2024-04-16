@@ -52,6 +52,8 @@ export interface IOperationBuildCacheContext {
   cacheDisabledReason: string | undefined;
   operationSettings: IOperationSettings | undefined;
 
+  shard: { current: number; total: number } | undefined;
+
   cobuildLock: CobuildLock | undefined;
 
   // The id of the cluster contains the operation, used when acquiring cobuild lock
@@ -142,6 +144,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               projectBuildCache: undefined,
               projectChangeAnalyzer,
               operationSettings,
+              shard: operation.shard,
               cacheDisabledReason,
               cobuildLock: undefined,
               cobuildClusterId: undefined,
@@ -257,7 +260,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           buildCacheContext.buildCacheTerminal = buildCacheTerminal;
 
           const configHash: string = runner.getConfigHash() || '';
-          console.log(configHash);
 
           let projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync({
             buildCacheContext,
@@ -603,16 +605,24 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         return;
       }
 
-      const { operationSettings, projectChangeAnalyzer } = buildCacheContext;
+      const { operationSettings, projectChangeAnalyzer, shard } = buildCacheContext;
       if (!operationSettings || !buildCacheConfiguration) {
         // Unreachable, since this will have set `cacheDisabledReason`.
         return;
       }
 
-      const projectOutputFolderNames: ReadonlyArray<string> = operationSettings.outputFolderNames || [];
+      const projectOutputFolderNames: ReadonlyArray<string> = [
+        ...(operationSettings.outputFolderNames || [])
+      ];
       const additionalProjectOutputFilePaths: ReadonlyArray<string> =
         operationMetadataManager?.relativeFilepaths || [];
       const additionalContext: Record<string, string> = {};
+
+      if (shard) {
+        additionalContext.shard = `${shard.current}`;
+        (projectOutputFolderNames as string[]).splice(0, projectOutputFolderNames.length);
+        (projectOutputFolderNames as string[]).push(`.shards/shard-${shard.current}`);
+      }
 
       await updateAdditionalContextAsync({
         operationSettings,

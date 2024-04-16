@@ -581,7 +581,7 @@ export interface IOperationOptions {
     // (undocumented)
     shard?: {
         current: number;
-        max: number;
+        total: number;
     };
 }
 
@@ -882,7 +882,7 @@ export class Operation {
     // (undocumented)
     readonly shard: {
         current: number;
-        max: number;
+        total: number;
     } | undefined;
     weight: number;
 }

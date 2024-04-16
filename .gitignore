@@ -81,7 +81,7 @@ common/autoinstallers/*/.npmrc
 # Heft temporary files
 .cache
 .heft
-
+.shards
 
 # Common toolchain intermediate files
 temp

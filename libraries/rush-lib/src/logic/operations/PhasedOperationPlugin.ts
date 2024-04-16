@@ -14,7 +14,6 @@ import type {
 } from '../../pluginFramework/PhasedCommandHooks';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { ITerminal } from '@rushstack/terminal';
-import { IOperationRunner } from './IOperationRunner';
 
 const PLUGIN_NAME: 'PhasedOperationPlugin' = 'PhasedOperationPlugin';
 
@@ -85,73 +84,9 @@ async function createOperations(
       operations = [];
       const shards = await getShards(phase, project, terminal!);
       if (shards && shards > 1) {
-        const dependencies = [];
-        const dependents = [];
-
-        const buildCacheRestoreOperation = new Operation({
-          project,
-          phase
-        });
-
-        const sharedConfig = {
-          cacheable: true,
-          reportTiming: false,
-          warningsAreAllowed: false,
-          silent: true
-        };
-
-        buildCacheRestoreOperation.runner = {
-          ...sharedConfig,
-          name: 'buildCacheRestore',
-          getConfigHash: () => '',
-          executeAsync: async () => OperationStatus.Success
-        };
-
-        const buildCacheSaveOperation = new Operation({
-          project,
-          phase
-        });
-        buildCacheSaveOperation.runner = {
-          ...sharedConfig,
-          name: 'buildCacheSave',
-          getConfigHash: () => '',
-          executeAsync: async () => OperationStatus.Success
-        };
-
-        dependencies.push(buildCacheRestoreOperation);
-        dependents.push(buildCacheSaveOperation);
-        operations.push(...dependencies, ...dependents);
-        operationsWithWork.add(buildCacheRestoreOperation);
-        operationsWithWork.add(buildCacheSaveOperation);
-        existingOperations.add(buildCacheSaveOperation);
-        existingOperations.add(buildCacheRestoreOperation);
-
         const {
           dependencies: { self, upstream }
         } = phase;
-
-        for (const depPhase of self) {
-          for (const dependency of dependencies) {
-            (await getOrCreateOperations(depPhase, project)).forEach((operation) =>
-              dependency.addDependency(operation)
-            );
-          }
-        }
-
-        if (upstream.size) {
-          const { dependencyProjects } = project;
-          if (dependencyProjects.size) {
-            for (const depPhase of upstream) {
-              for (const dependencyProject of dependencyProjects) {
-                for (const dependent of dependents) {
-                  (await getOrCreateOperations(depPhase, dependencyProject)).forEach((operation) =>
-                    dependent.addDependency(operation)
-                  );
-                }
-              }
-            }
-          }
-        }
 
         for (const shard of Array.from({ length: shards }, (_, index) => index + 1)) {
           let shardOperation = new Operation({
@@ -159,11 +94,27 @@ async function createOperations(
             phase,
             shard: {
               current: shard,
-              max: shards
+              total: shards
             }
           });
-          dependencies.forEach((dependency) => shardOperation.addDependency(dependency));
-          dependents.forEach((dependent) => dependent.addDependency(shardOperation));
+
+          for (const depPhase of self) {
+            (await getOrCreateOperations(depPhase, project)).forEach((operation) =>
+              shardOperation.addDependency(operation)
+            );
+          }
+          if (upstream.size) {
+            const { dependencyProjects } = project;
+            if (dependencyProjects.size) {
+              for (const depPhase of upstream) {
+                for (const dependencyProject of dependencyProjects) {
+                  (await getOrCreateOperations(depPhase, dependencyProject)).forEach((operation) =>
+                    operation.addDependency(shardOperation)
+                  );
+                }
+              }
+            }
+          }
           operationsWithWork.add(shardOperation);
           existingOperations.add(shardOperation);
           operations.push(shardOperation);

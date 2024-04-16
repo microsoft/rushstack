@@ -45,7 +45,7 @@ function createShellOperations(
       if (operation.shard) {
         customParameterValues = [
           ...customParameterValues,
-          `--shard=${operation.shard.current}/${operation.shard.max}`
+          `--shard=${operation.shard.current}/${operation.shard.total}`
         ];
       }
 

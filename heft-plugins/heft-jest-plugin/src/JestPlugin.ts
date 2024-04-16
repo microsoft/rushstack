@@ -680,7 +680,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
 
     if (jestConfig.collectCoverage && shard) {
-      jestConfig.coverageDirectory = path.join('<rootDir>/temp/coverage', `shard-${shard.split('/')[0]}`);
+      jestConfig.coverageDirectory = path.join('<rootDir>', '.shards', `shard-${shard.split('/')[0]}`);
     }
 
     // Stringify the config and pass it into Jest directly
