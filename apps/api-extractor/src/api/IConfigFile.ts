@@ -50,6 +50,8 @@ export interface IConfigCompiler {
 
 /**
  * The allowed variations of API reports.
+ *
+ * @public
  */
 export type ApiReportVariant = 'public' | 'beta' | 'alpha' | 'complete';
 
