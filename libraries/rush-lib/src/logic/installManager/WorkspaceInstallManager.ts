@@ -648,7 +648,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const value of Object.values(hoistedDependencies)) {
           for (const [filePath, type] of Object.entries(value)) {
             if (type === 'public') {
-              if (BaseLinkManager._symlinkExists(`${projectNodeModulesPath}/${filePath}`)) {
+              if (Utilities.existsOrIsSymlink(`${projectNodeModulesPath}/${filePath}`)) {
                 await FileSystem.deleteFolderAsync(`${projectNodeModulesPath}/${filePath}`);
               }
               // If we don't already have a symlink for this package, create one
@@ -673,7 +673,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
       for (const dependencyProject of subspaceDependencyProjects) {
         const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
-        if (!BaseLinkManager._symlinkExists(symlinkToCreate)) {
+        if (!Utilities.existsOrIsSymlink(symlinkToCreate)) {
           const parentFolder: string = Utilities.trimAfterLastSlash(symlinkToCreate);
           await FileSystem.ensureFolderAsync(parentFolder);
           BaseLinkManager._createSymlink({
