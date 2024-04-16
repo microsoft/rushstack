@@ -149,7 +149,11 @@ export class DeployAction extends BaseRushAction {
 
     const rushConfigurationProject: RushConfigurationProject | undefined =
       this.rushConfiguration.getProjectByName(mainProjectName);
-    const subspace: Subspace = rushConfigurationProject?.subspace || this.rushConfiguration.defaultSubspace;
+     if (!rushConfigurationProject) { 
+       throw new Error(`The specified deployment project "${mainProjectName}" was not found in rush.json`); 
+     } 
+
+    const subspace: Subspace = rushConfigurationProject.subspace;
 
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
