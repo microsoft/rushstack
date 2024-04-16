@@ -1,0 +1,13 @@
+{
+  "operationSettings": [
+    {
+      "operationName": "_phase:build",
+      "outputFolderNames": ["dist"],
+      "shards": 3
+    },
+    {
+      "operationName": "cobuild",
+      "outputFolderNames": ["dist"]
+    }
+  ]
+}
