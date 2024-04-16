@@ -81,15 +81,6 @@ export abstract class BaseLinkManager {
     }
   }
 
-  public static _symlinkExists(linkPath: string): boolean {
-    try {
-      lstatSync(linkPath);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
   /**
    * For a Package object that represents a top-level Rush project folder
    * (i.e. with source code that we will be building), this clears out its
