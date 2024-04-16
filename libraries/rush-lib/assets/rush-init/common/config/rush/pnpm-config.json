@@ -144,7 +144,10 @@
      *
      * The default value is false.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "disallowInsecureSha1": true
+    /*[LINE "HYPOTHETICAL"]*/ "disallowInsecureSha1": {
+      "enabled": true,
+      "skipCheckPackages": {}
+    }
   },
 
   /**

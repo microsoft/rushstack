@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Support skipping validation for a specific package during the check of the pnpm-lock.yaml file.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
