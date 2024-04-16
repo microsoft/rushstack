@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixes an issue related to rush deploy detecting the correct temp folder when subspaces is enabled",
+      "comment": "Fix an issue where `rush deploy` sometimes used an incorrect temp folder when the experimental subspaces feature is enabled",
       "type": "none"
     }
   ],
