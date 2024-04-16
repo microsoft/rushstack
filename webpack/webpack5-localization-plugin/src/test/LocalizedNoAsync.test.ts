@@ -70,7 +70,8 @@ async function testLocalizedNoAsyncInner(minimize: boolean): Promise<void> {
       filename: '[name]-[locale]-[contenthash].js',
       devtoolModuleFilenameTemplate: (info: { resourcePath: string }) => {
         // On Windows the path contains backslashes because webpack doesn't normalize to platform agnostic paths.
-        return `source:///${info.resourcePath?.replace(/\\/g, '/')}`;
+        // Also strangely we get `/` instead of `./` at the start of the path.
+        return `source:///${info.resourcePath?.replace(/\\/g, '/').replace(/^\//, './')}`;
       }
     },
     module: {
