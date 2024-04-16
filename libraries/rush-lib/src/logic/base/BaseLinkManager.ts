@@ -86,7 +86,6 @@ export abstract class BaseLinkManager {
       lstatSync(linkPath);
       return true;
     } catch (err) {
-      if (err.code !== 'EEXIST') throw err;
       return false;
     }
   }
