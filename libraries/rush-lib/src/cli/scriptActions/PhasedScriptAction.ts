@@ -692,9 +692,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> {
    */
   private async _executeOperations(options: IExecutionOperationsOptions): Promise<void> {
     const { executionManagerOptions, ignoreHooks, operations, stopwatch, terminal } = options;
-    terminal.writeLine('DEBUG');
-
-    terminal.writeLine([...operations.keys()].join('WHAT'));
 
     const executionManager: OperationExecutionManager = new OperationExecutionManager(
       operations,

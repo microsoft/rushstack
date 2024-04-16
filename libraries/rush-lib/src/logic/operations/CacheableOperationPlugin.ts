@@ -94,7 +94,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         recordByOperation: Map<Operation, IOperationExecutionResult>,
         context: ICreateOperationsContext
       ): Promise<void> => {
-        console.log([...recordByOperation.keys()].map((e) => e.name));
         const { isIncrementalBuildAllowed, projectChangeAnalyzer, projectConfigurations, isInitial } =
           context;
 
@@ -106,7 +105,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           recordByOperation.keys(),
           async (operation: Operation) => {
             const { associatedProject, associatedPhase, runner } = operation;
-            console.log(operation.name, !associatedProject, !associatedPhase, !runner);
             if (!associatedProject || !associatedPhase || !runner) {
               return;
             }
@@ -538,21 +536,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
         }
 
-        console.log(
-          'build cache',
-          buildCacheContext?.isCacheWriteAllowed,
-          blockCacheWrite,
-          record.status,
-          record.operation.name
-        );
-
         // Apply status changes to direct dependents
         if (blockCacheWrite) {
           for (const consumer of operation.consumers) {
             const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
               this._getBuildCacheContextByOperation(consumer);
             if (consumerBuildCacheContext) {
-              console.log('disabling build cache for', consumer.name);
               consumerBuildCacheContext.isCacheWriteAllowed = false;
             }
           }
