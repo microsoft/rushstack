@@ -3,7 +3,7 @@
 
 describe('index.test', () => {
   it.each(new Array(100).fill(0))('should succeed', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 10));
     expect(1 + 1).toEqual(2);
   });
 });
