@@ -158,11 +158,7 @@ export class DeployAction extends BaseRushAction {
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
       if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-        if (subspace) {
-          pnpmInstallFolder = subspace.getSubspaceTempFolder();
-        } else {
-          pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
-        }
+        pnpmInstallFolder = subspace.getSubspaceTempFolder();
       }
     }
 
