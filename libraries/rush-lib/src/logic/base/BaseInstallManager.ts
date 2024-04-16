@@ -298,7 +298,6 @@ export abstract class BaseInstallManager {
       }
     }
 
-    console.log('potentially changed files: ', potentiallyChangedFiles);
     return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
   }
 
@@ -480,9 +479,7 @@ export abstract class BaseInstallManager {
         projectImpactGraphGenerator?.validateAsync()
       ]);
 
-    console.log('shrinkwrap up to date 1: ', shrinkwrapIsUpToDate);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
-    console.log('shrinkwrap up to date 2: ', shrinkwrapIsUpToDate);
 
     this._syncTempShrinkwrap(subspace, shrinkwrapFile);
 
