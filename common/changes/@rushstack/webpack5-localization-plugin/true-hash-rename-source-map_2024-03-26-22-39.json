@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Perform localization before devtool runs instead of after. This is more expensive but ensures source maps are correct.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}
