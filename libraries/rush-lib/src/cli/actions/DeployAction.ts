@@ -146,25 +146,29 @@ export class DeployAction extends BaseRushAction {
 
     let transformPackageJson: ((packageJson: IPackageJson) => IPackageJson) | undefined;
     let pnpmInstallFolder: string | undefined;
+
+    const rushConfigurationProject: RushConfigurationProject | undefined =
+      this.rushConfiguration.getProjectByName(mainProjectName);
+    const subspace: Subspace = rushConfigurationProject?.subspace || this.rushConfiguration.defaultSubspace;
+
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
         this.rushConfiguration,
-        this.rushConfiguration.defaultSubspace
+        subspace
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
-      if (this.rushConfiguration.subspacesFeatureEnabled) {
-        const rushConfigurationProject: RushConfigurationProject | undefined =
-          this.rushConfiguration.getProjectByName(mainProjectName);
-        const subspace: Subspace | undefined = rushConfigurationProject?.subspace;
-        if (subspace) pnpmInstallFolder = subspace.getSubspaceTempFolder();
-      } else if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-        pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
+      if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
+        if (subspace) {
+          pnpmInstallFolder = subspace.getSubspaceTempFolder();
+        } else {
+          pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
+        }
       }
     }
 
     // Construct the project list for the deployer
     const projectConfigurations: IExtractorProjectConfiguration[] = [];
-    for (const project of this.rushConfiguration.projects) {
+    for (const project of subspace.getProjects()) {
       const scenarioProjectJson: IDeployScenarioProjectJson | undefined =
         scenarioConfiguration.projectJsonsByName.get(project.packageName);
       projectConfigurations.push({
