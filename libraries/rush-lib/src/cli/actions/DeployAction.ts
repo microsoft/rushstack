@@ -14,6 +14,8 @@ import type {
   DeployScenarioConfiguration,
   IDeployScenarioProjectJson
 } from '../../logic/deploy/DeployScenarioConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 export class DeployAction extends BaseRushAction {
   private readonly _logger: ILogger;
@@ -144,20 +146,29 @@ export class DeployAction extends BaseRushAction {
 
     let transformPackageJson: ((packageJson: IPackageJson) => IPackageJson) | undefined;
     let pnpmInstallFolder: string | undefined;
+
+    const rushConfigurationProject: RushConfigurationProject | undefined =
+      this.rushConfiguration.getProjectByName(mainProjectName);
+     if (!rushConfigurationProject) { 
+       throw new Error(`The specified deployment project "${mainProjectName}" was not found in rush.json`); 
+     } 
+
+    const subspace: Subspace = rushConfigurationProject.subspace;
+
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
         this.rushConfiguration,
-        this.rushConfiguration.defaultSubspace
+        subspace
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
       if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
-        pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
+        pnpmInstallFolder = subspace.getSubspaceTempFolder();
       }
     }
 
     // Construct the project list for the deployer
     const projectConfigurations: IExtractorProjectConfiguration[] = [];
-    for (const project of this.rushConfiguration.projects) {
+    for (const project of subspace.getProjects()) {
       const scenarioProjectJson: IDeployScenarioProjectJson | undefined =
         scenarioConfiguration.projectJsonsByName.get(project.packageName);
       projectConfigurations.push({
