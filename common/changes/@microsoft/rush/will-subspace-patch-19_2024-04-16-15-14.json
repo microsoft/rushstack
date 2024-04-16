@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes an issue related to rush deploy detecting the correct temp folder when subspaces is enabled",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
