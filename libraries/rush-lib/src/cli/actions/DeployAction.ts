@@ -150,7 +150,11 @@ export class DeployAction extends BaseRushAction {
         this.rushConfiguration.defaultSubspace
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
-      if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
+      if (this.rushConfiguration.subspacesFeatureEnabled) {
+        const rushConfigurationProject = this.rushConfiguration.getProjectByName(mainProjectName);
+        const subspace = rushConfigurationProject?.subspace;
+        if (subspace) pnpmInstallFolder = subspace.getSubspaceTempFolder();
+      } else if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
         pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
       }
     }
