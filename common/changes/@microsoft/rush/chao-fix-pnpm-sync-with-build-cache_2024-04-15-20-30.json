@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `pnpm-sync copy` was skipped when a build is restored from build cache.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

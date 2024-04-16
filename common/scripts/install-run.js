@@ -8,6 +8,9 @@
 //    node common/scripts/install-run.js qrcode@1.2.2 qrcode https://rushjs.io
 //
 // For more information, see: https://rushjs.io/pages/maintainer/setup_new_repo/
+//
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See the @microsoft/rush package's LICENSE file for details.
 
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
@@ -338,7 +341,7 @@ let _npmPath = undefined;
 function getNpmPath() {
     if (!_npmPath) {
         try {
-            if (os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32') {
+            if (_isWindows()) {
                 // We're on Windows
                 const whereOutput = child_process__WEBPACK_IMPORTED_MODULE_0__.execSync('where npm', { stdio: [] }).toString();
                 const lines = whereOutput.split(os__WEBPACK_IMPORTED_MODULE_2__.EOL).filter((line) => !!line);
@@ -457,10 +460,13 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
             // ```
             //
             // if only a single version matches.
-            const npmVersionSpawnResult = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(npmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], {
+            const spawnSyncOptions = {
                 cwd: rushTempFolder,
-                stdio: []
-            });
+                stdio: [],
+                shell: _isWindows()
+            };
+            const platformNpmPath = _getPlatformPath(npmPath);
+            const npmVersionSpawnResult = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], spawnSyncOptions);
             if (npmVersionSpawnResult.status !== 0) {
                 throw new Error(`"npm view" returned error code ${npmVersionSpawnResult.status}`);
             }
@@ -593,10 +599,12 @@ function _installPackage(logger, packageInstallFolder, name, version, command) {
     try {
         logger.info(`Installing ${name}...`);
         const npmPath = getNpmPath();
-        const result = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(npmPath, [command], {
+        const platformNpmPath = _getPlatformPath(npmPath);
+        const result = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, [command], {
             stdio: 'inherit',
             cwd: packageInstallFolder,
-            env: process.env
+            env: process.env,
+            shell: _isWindows()
         });
         if (result.status !== 0) {
             throw new Error(`"npm ${command}" encountered an error`);
@@ -612,8 +620,17 @@ function _installPackage(logger, packageInstallFolder, name, version, command) {
  */
 function _getBinPath(packageInstallFolder, binName) {
     const binFolderPath = path__WEBPACK_IMPORTED_MODULE_3__.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-    const resolvedBinName = os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32' ? `${binName}.cmd` : binName;
+    const resolvedBinName = _isWindows() ? `${binName}.cmd` : binName;
     return path__WEBPACK_IMPORTED_MODULE_3__.resolve(binFolderPath, resolvedBinName);
+}
+/**
+ * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
+ */
+function _getPlatformPath(platformPath) {
+    return _isWindows() && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
+}
+function _isWindows() {
+    return os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32';
 }
 /**
  * Write a flag file to the package's install directory, signifying that the install was successful.
@@ -656,15 +673,14 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
     const originalEnvPath = process.env.PATH || '';
     let result;
     try {
-        // Node.js on Windows can not spawn a file when the path has a space on it
-        // unless the path gets wrapped in a cmd friendly way and shell mode is used
-        const shouldUseShell = binPath.includes(' ') && os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32';
-        const platformBinPath = shouldUseShell ? `"${binPath}"` : binPath;
+        // `npm` bin stubs on Windows are `.cmd` files
+        // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
+        const platformBinPath = _getPlatformPath(binPath);
         process.env.PATH = [binFolderPath, originalEnvPath].join(path__WEBPACK_IMPORTED_MODULE_3__.delimiter);
         result = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformBinPath, packageBinArgs, {
             stdio: 'inherit',
             windowsVerbatimArguments: false,
-            shell: shouldUseShell,
+            shell: _isWindows(),
             cwd: process.cwd(),
             env: process.env
         });

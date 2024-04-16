@@ -29,12 +29,8 @@ export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
           operation: { associatedProject: project }
         } = record;
 
-        //skip if the phase is skipped, from cache or no operation
-        if (
-          status === OperationStatus.Skipped ||
-          status === OperationStatus.FromCache ||
-          status === OperationStatus.NoOp
-        ) {
+        //skip if the phase is skipped or no operation
+        if (status === OperationStatus.Skipped || status === OperationStatus.NoOp) {
           return;
         }
 
