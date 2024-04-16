@@ -145,6 +145,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext {
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
     if (!this._collatedWriter) {
+      console.log(this.name);
       this._collatedWriter = this._context.streamCollator.registerTask(this.name);
     }
     return this._collatedWriter;

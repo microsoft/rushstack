@@ -92,6 +92,8 @@ export interface IOperationSettings {
    * calculating final hash value when reading and writing the build cache
    */
   dependsOnAdditionalFiles?: string[];
+
+  shards?: number;
 }
 
 interface IOldRushProjectJson {
@@ -429,6 +431,7 @@ export class RushProjectConfiguration {
         rigConfig
       );
     } catch (e1) {
+      console.log(e1);
       // Detect if the project is using the old rush-project.json schema
       let oldRushProjectJson: IOldRushProjectJson | undefined;
       try {

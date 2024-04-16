@@ -23,6 +23,11 @@ export interface IOperationOptions {
    * running the operation.
    */
   runner?: IOperationRunner | undefined;
+
+  shard?: {
+    current: number;
+    max: number;
+  };
 }
 
 /**
@@ -44,6 +49,13 @@ export class Operation {
    * The Rush project associated with this Operation, if any
    */
   public readonly associatedProject: RushConfigurationProject | undefined;
+
+  public readonly shard:
+    | {
+        current: number;
+        max: number;
+      }
+    | undefined;
 
   /**
    * A set of all operations which depend on this operation.
@@ -78,6 +90,7 @@ export class Operation {
     this.associatedPhase = options?.phase;
     this.associatedProject = options?.project;
     this.runner = options?.runner;
+    this.shard = options?.shard;
   }
 
   /**

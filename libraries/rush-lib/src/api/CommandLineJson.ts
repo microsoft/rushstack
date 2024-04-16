@@ -106,6 +106,8 @@ export interface IPhaseJson {
    * By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.
    */
   allowWarningsOnSuccess?: boolean;
+
+  shards?: number;
 }
 
 /**

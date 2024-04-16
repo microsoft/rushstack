@@ -25,6 +25,7 @@ import type { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import type { IOperationRunnerContext } from '../logic/operations/IOperationRunner';
 import type { ITelemetryData } from '../logic/Telemetry';
 import type { OperationStatus } from '../logic/operations/OperationStatus';
+import { ITerminal } from '@rushstack/terminal';
 
 /**
  * A plugin that interacts with a phased commands.
@@ -104,6 +105,8 @@ export interface ICreateOperationsContext {
    * @param reason - The reason for invalidating the operation
    */
   readonly invalidateOperation?: ((operation: Operation, reason: string) => void) | undefined;
+
+  readonly terminal?: ITerminal;
 }
 
 /**

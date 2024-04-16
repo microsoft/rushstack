@@ -106,6 +106,7 @@ export interface IJestPluginOptions {
   testTimeout?: number;
   updateSnapshots?: boolean;
   logHeapUsage?: boolean;
+  shard?: string;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -197,6 +198,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     );
     const testPathPatternParameter: CommandLineStringParameter =
       parameters.getStringParameter('--test-path-pattern');
+    const shard: CommandLineStringParameter = parameters.getStringParameter('--shard');
 
     // String lists
     const findRelatedTestsParameter: CommandLineStringListParameter =
@@ -228,8 +230,16 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       enableNodeEnvManagement: pluginOptions?.enableNodeEnvManagement ?? true
     };
 
+    const additionalOptions: Record<string, string> = {};
+    if (shard.value) {
+      additionalOptions.shard = shard.value;
+    }
+
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runJestAsync(taskSession, heftConfiguration, options);
+      await this._runJestAsync(taskSession, heftConfiguration, {
+        ...options,
+        ...additionalOptions
+      });
     });
 
     taskSession.hooks.runIncremental.tapPromise(
@@ -581,6 +591,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       jestConfig.displayName = heftConfiguration.projectPackageJson.name;
     }
 
+    let shard: string | undefined;
     let silent: boolean | undefined;
     if (taskSession.parameters.verbose || taskSession.parameters.debug) {
       // If Heft's "--verbose" or "--debug" parameters were used, then we're debugging Jest problems,
@@ -591,9 +602,12 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     } else {
       // If "silent" is specified via IJestPluginOptions, that takes precedence over jest.config.json
       silent = options.silent ?? jestConfig.silent ?? false;
+      shard = options.shard;
     }
 
     const jestArgv: Config.Argv = {
+      shard,
+
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: taskSession.parameters.debug,
       debug: taskSession.parameters.debug,
@@ -663,6 +677,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     if (options.disableCodeCoverage) {
       jestConfig.collectCoverage = false;
+    }
+
+    if (jestConfig.collectCoverage && shard) {
+      jestConfig.coverageDirectory = path.join('<rootDir>/temp/coverage', `shard-${shard.split('/')[0]}`);
     }
 
     // Stringify the config and pass it into Jest directly

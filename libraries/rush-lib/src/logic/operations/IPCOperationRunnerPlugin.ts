@@ -58,7 +58,7 @@ export class IPCOperationRunnerPlugin implements IPhasedCommandPlugin {
 
           const commandToRun: string = formatCommand(rawScript, getCustomParameterValuesForPhase(phase));
 
-          const operationName: string = getDisplayName(phase, project);
+          const operationName: string = getDisplayName(phase, project, operation);
           let maybeIpcOperationRunner: IPCOperationRunner | undefined = runnerCache.get(operationName);
           if (!maybeIpcOperationRunner) {
             const ipcOperationRunner: IPCOperationRunner = (maybeIpcOperationRunner = new IPCOperationRunner({

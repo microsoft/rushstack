@@ -40,13 +40,21 @@ function createShellOperations(
     if (phase && project && !operation.runner) {
       // This is a shell command. In the future, may consider having a property on the initial operation
       // to specify a runner type requested in rush-project.json
-      const customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+      let customParameterValues: ReadonlyArray<string> = getCustomParameterValuesForPhase(phase);
+
+      if (operation.shard) {
+        customParameterValues = [
+          ...customParameterValues,
+          `--shard=${operation.shard.current}/${operation.shard.max}`
+        ];
+      }
 
       const commandToRun: string | undefined = getScriptToRun(
         project,
         phase.name,
         customParameterValues,
-        phase.shellCommand
+        phase.shellCommand,
+        operation
       );
 
       if (commandToRun === undefined && phase.missingScriptBehavior === 'error') {
@@ -55,7 +63,7 @@ function createShellOperations(
         );
       }
 
-      const displayName: string = getDisplayName(phase, project);
+      const displayName: string = getDisplayName(phase, project, operation);
 
       if (commandToRun) {
         const shellOperationRunner: ShellOperationRunner = new ShellOperationRunner({
@@ -84,7 +92,8 @@ function getScriptToRun(
   rushProject: RushConfigurationProject,
   commandToRun: string,
   customParameterValues: ReadonlyArray<string>,
-  shellCommand: string | undefined
+  shellCommand: string | undefined,
+  operation: Operation
 ): string | undefined {
   const { scripts } = rushProject.packageJson;
 
@@ -130,12 +139,18 @@ export function formatCommand(rawCommand: string, customParameterValues: Readonl
   }
 }
 
-export function getDisplayName(phase: IPhase, project: RushConfigurationProject): string {
+export function getDisplayName(
+  phase: IPhase,
+  project: RushConfigurationProject,
+  operation: Operation
+): string {
   if (phase.isSynthetic) {
     // Because this is a synthetic phase, just use the project name because there aren't any other phases
     return project.packageName;
   } else {
     const phaseNameWithoutPrefix: string = phase.name.slice(RushConstants.phaseNamePrefix.length);
-    return `${project.packageName} (${phaseNameWithoutPrefix})`;
+    return `${project.packageName} (${phaseNameWithoutPrefix})${
+      operation.shard ? ` - shard ${operation.shard.current}` : ''
+    }`;
   }
 }

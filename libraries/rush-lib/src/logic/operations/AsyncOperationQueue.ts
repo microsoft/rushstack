@@ -45,6 +45,10 @@ export class AsyncOperationQueue
    */
   public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
     this._queue = computeTopologyAndSort(operations, sortFn);
+    console.log(
+      'operations',
+      this._queue.map((operation) => operation.name)
+    );
     this._pendingIterators = [];
     this._totalOperations = this._queue.length;
     this._isDone = false;

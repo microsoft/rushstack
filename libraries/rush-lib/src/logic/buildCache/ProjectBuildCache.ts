@@ -92,6 +92,7 @@ export class ProjectBuildCache {
 
   public async tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
     const cacheId: string | undefined = specifiedCacheId || this._cacheId;
+    console.log(cacheId);
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
@@ -177,6 +178,7 @@ export class ProjectBuildCache {
   public async trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
     if (!this._cacheWriteEnabled) {
       // Skip writing local and cloud build caches, without any noise
+      terminal.writeLine("Skipping cache write because it's disabled.");
       return true;
     }
 
@@ -187,6 +189,7 @@ export class ProjectBuildCache {
     }
 
     const filesToCache: IPathsToCache | undefined = await this._tryCollectPathsToCacheAsync(terminal);
+    console.log('caching', filesToCache);
     if (!filesToCache) {
       return false;
     }

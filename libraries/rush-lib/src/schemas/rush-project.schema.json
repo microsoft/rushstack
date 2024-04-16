@@ -72,6 +72,11 @@
           "disableBuildCacheForOperation": {
             "description": "Disable caching for this operation. The operation will never be restored from cache. This may be useful if this operation affects state outside of its folder.",
             "type": "boolean"
+          },
+
+          "shards": {
+            "type": "integer",
+            "description": "If specified, the operation will be split into multiple shards. Each shard will be executed in parallel. The value specifies the number of shards to create."
           }
         }
       }

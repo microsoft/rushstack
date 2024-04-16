@@ -398,6 +398,8 @@ export interface ICreateOperationsContext {
     readonly projectSelection: ReadonlySet<RushConfigurationProject>;
     readonly projectsInUnknownState: ReadonlySet<RushConfigurationProject>;
     readonly rushConfiguration: RushConfiguration;
+    // (undocumented)
+    readonly terminal?: ITerminal;
 }
 
 // @beta (undocumented)
@@ -576,6 +578,11 @@ export interface IOperationOptions {
     phase?: IPhase | undefined;
     project?: RushConfigurationProject | undefined;
     runner?: IOperationRunner | undefined;
+    // (undocumented)
+    shard?: {
+        current: number;
+        max: number;
+    };
 }
 
 // @beta
@@ -613,6 +620,8 @@ export interface IOperationSettings {
     disableBuildCacheForOperation?: boolean;
     operationName: string;
     outputFolderNames?: string[];
+    // (undocumented)
+    shards?: number;
 }
 
 // @internal (undocumented)
@@ -870,6 +879,11 @@ export class Operation {
     readonly dependencies: ReadonlySet<Operation>;
     get name(): string | undefined;
     runner: IOperationRunner | undefined;
+    // (undocumented)
+    readonly shard: {
+        current: number;
+        max: number;
+    } | undefined;
     weight: number;
 }
 

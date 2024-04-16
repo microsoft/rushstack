@@ -82,6 +82,12 @@
           "shortName": "-u",
           "parameterKind": "flag",
           "description": "Update Jest snapshots while running the tests.  This corresponds to the \"--updateSnapshots\" parameter in Jest."
+        },
+        {
+          "longName": "--shard",
+          "argumentName": "SHARD_INDEX",
+          "parameterKind": "string",
+          "description": "If specified, Jest will run tests in parallel using the specified shard number.  This corresponds to the \"--shard\" parameter in Jest's documentation."
         }
       ]
     }
