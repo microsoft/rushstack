@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 15 Apr 2024 00:25:04 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2024 02:59:48 GMT and should not be manually modified.
+
+## 5.120.3
+Tue, 16 Apr 2024 02:59:48 GMT
+
+### Updates
+
+- Fix an issue where `pnpm-sync copy` was skipped when a build is restored from build cache.
+- Upgrade `tar` dependency to 6.2.1
 
 ## 5.120.2
 Mon, 15 Apr 2024 00:25:04 GMT

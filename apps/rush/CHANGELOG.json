@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.120.3",
+      "tag": "@microsoft/rush_v5.120.3",
+      "date": "Tue, 16 Apr 2024 02:59:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where `pnpm-sync copy` was skipped when a build is restored from build cache."
+          },
+          {
+            "comment": "Upgrade `tar` dependency to 6.2.1"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.120.2",
       "tag": "@microsoft/rush_v5.120.2",
       "date": "Mon, 15 Apr 2024 00:25:04 GMT",
