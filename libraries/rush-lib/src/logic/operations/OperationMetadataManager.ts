@@ -11,6 +11,7 @@ import { RushConstants } from '../RushConstants';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IOperationStateJson } from './OperationStateFile';
+import { Operation } from './Operation';
 
 /**
  * @internal
@@ -18,6 +19,7 @@ import type { IOperationStateJson } from './OperationStateFile';
 export interface IOperationMetadataManagerOptions {
   rushProject: RushConfigurationProject;
   phase: IPhase;
+  operation: Operation;
 }
 
 /**
@@ -45,19 +47,22 @@ export class OperationMetadataManager {
   private _relativeErrorLogPath: string;
 
   public constructor(options: IOperationMetadataManagerOptions) {
-    const { rushProject, phase } = options;
+    const { rushProject, phase, operation } = options;
     const { projectFolder } = rushProject;
 
     const identifier: string = phase.logFilenameIdentifier;
-    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${identifier}`;
+
+    const operationPath = operation.shard ? `${operation.name}_${operation.shard.current}` : operation.name;
+    this._metadataFolder = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/${operationPath}/${identifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,
       metadataFolder: this._metadataFolder
     });
 
-    this._relativeLogPath = `${this._metadataFolder}/all.log`;
-    this._relativeErrorLogPath = `${this._metadataFolder}/error.log`;
+    const operationName = `${operation.name}${operation.shard ? `_${operation.shard.current}` : ''}`;
+    this._relativeLogPath = `${this._metadataFolder}/${operationName}/all.log`;
+    this._relativeErrorLogPath = `${this._metadataFolder}/${operationName}/error.log`;
     this._logPath = `${projectFolder}/${this._relativeLogPath}`;
     this._errorLogPath = `${projectFolder}/${this._relativeErrorLogPath}`;
   }

@@ -568,6 +568,8 @@ export interface _IOperationMetadata {
 // @internal (undocumented)
 export interface _IOperationMetadataManagerOptions {
     // (undocumented)
+    operation: Operation;
+    // (undocumented)
     phase: IPhase;
     // (undocumented)
     rushProject: RushConfigurationProject;

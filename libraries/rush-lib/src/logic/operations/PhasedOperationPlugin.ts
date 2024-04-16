@@ -108,8 +108,8 @@ async function createOperations(
             if (dependencyProjects.size) {
               for (const depPhase of upstream) {
                 for (const dependencyProject of dependencyProjects) {
-                  (await getOrCreateOperations(depPhase, dependencyProject)).forEach((operation) =>
-                    operation.addDependency(shardOperation)
+                  (await getOrCreateOperations(depPhase, dependencyProject)).forEach((dependency) =>
+                    shardOperation.addDependency(dependency)
                   );
                 }
               }
