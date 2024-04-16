@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { lstatSync } from 'fs';
 
 import {
   FileSystem,
@@ -77,6 +78,16 @@ export abstract class BaseLinkManager {
           newLinkPath: options.newLinkPath
         });
       }
+    }
+  }
+
+  public static _symlinkExists(linkPath: string): boolean {
+    try {
+      lstatSync(linkPath);
+      return true;
+    } catch (err) {
+      if (err.code !== 'EEXIST') throw err;
+      return false;
     }
   }
 

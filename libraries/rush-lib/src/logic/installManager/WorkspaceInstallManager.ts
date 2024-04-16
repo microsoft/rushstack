@@ -648,18 +648,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const value of Object.values(hoistedDependencies)) {
           for (const [filePath, type] of Object.entries(value)) {
             if (type === 'public') {
-              // If we don't already have a symlink for this package, create one
-              if (!FileSystem.exists(`${projectNodeModulesPath}/${filePath}`)) {
-                const parentDir: string = Utilities.trimAfterLastSlash(
-                  `${projectNodeModulesPath}/${filePath}`
-                );
-                await FileSystem.ensureFolderAsync(parentDir);
-                BaseLinkManager._createSymlink({
-                  linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
-                  newLinkPath: `${projectNodeModulesPath}/${filePath}`,
-                  symlinkKind: SymlinkKind.Directory
-                });
+              if (BaseLinkManager._symlinkExists(`${projectNodeModulesPath}/${filePath}`)) {
+                await FileSystem.deleteFolderAsync(`${projectNodeModulesPath}/${filePath}`);
               }
+              // If we don't already have a symlink for this package, create one
+              const parentDir: string = Utilities.trimAfterLastSlash(`${projectNodeModulesPath}/${filePath}`);
+              await FileSystem.ensureFolderAsync(parentDir);
+              BaseLinkManager._createSymlink({
+                linkTargetPath: `${tempNodeModulesPath}/${filePath}`,
+                newLinkPath: `${projectNodeModulesPath}/${filePath}`,
+                symlinkKind: SymlinkKind.Directory
+              });
             }
           }
         }
@@ -674,12 +673,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
       for (const dependencyProject of subspaceDependencyProjects) {
         const symlinkToCreate: string = `${tempNodeModulesPath}/${dependencyProject.packageName}`;
-        if (!FileSystem.exists(symlinkToCreate)) {
+        if (!BaseLinkManager._symlinkExists(symlinkToCreate)) {
           const parentDir: string = Utilities.trimAfterLastSlash(symlinkToCreate);
           await FileSystem.ensureFolderAsync(parentDir);
           BaseLinkManager._createSymlink({
             linkTargetPath: dependencyProject.projectFolder,
-            newLinkPath: `${subspace.getSubspaceTempFolder()}/node_modules/${dependencyProject.packageName}`,
+            newLinkPath: symlinkToCreate,
             symlinkKind: SymlinkKind.Directory
           });
         }

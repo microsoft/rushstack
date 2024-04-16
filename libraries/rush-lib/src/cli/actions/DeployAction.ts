@@ -14,6 +14,8 @@ import type {
   DeployScenarioConfiguration,
   IDeployScenarioProjectJson
 } from '../../logic/deploy/DeployScenarioConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { Subspace } from '../../api/Subspace';
 
 export class DeployAction extends BaseRushAction {
   private readonly _logger: ILogger;
@@ -150,7 +152,12 @@ export class DeployAction extends BaseRushAction {
         this.rushConfiguration.defaultSubspace
       );
       transformPackageJson = pnpmfileConfiguration.transform.bind(pnpmfileConfiguration);
-      if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
+      if (this.rushConfiguration.subspacesFeatureEnabled) {
+        const rushConfigurationProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(mainProjectName);
+        const subspace: Subspace | undefined = rushConfigurationProject?.subspace;
+        if (subspace) pnpmInstallFolder = subspace.getSubspaceTempFolder();
+      } else if (!scenarioConfiguration.json.omitPnpmWorkaroundLinks) {
         pnpmInstallFolder = this.rushConfiguration.commonTempFolder;
       }
     }
