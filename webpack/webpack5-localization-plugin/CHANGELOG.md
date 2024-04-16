@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-localization-plugin
 
-This log was last generated on Wed, 10 Apr 2024 15:10:09 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2024 22:49:20 GMT and should not be manually modified.
+
+## 0.10.0
+Tue, 16 Apr 2024 22:49:20 GMT
+
+### Minor changes
+
+- Perform localization before devtool runs instead of after. This is more expensive but ensures source maps are correct.
 
 ## 0.9.15
 Wed, 10 Apr 2024 15:10:09 GMT
