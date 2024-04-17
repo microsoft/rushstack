@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixes an issue where rush add affects all packages in a subspace",
+      "comment": "Fix an issue where rush add affects all packages in a subspace",
       "type": "none"
     }
   ],
