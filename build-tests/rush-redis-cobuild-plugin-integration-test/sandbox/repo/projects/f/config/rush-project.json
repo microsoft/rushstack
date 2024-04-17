@@ -8,10 +8,6 @@
     {
       "operationName": "cobuild",
       "outputFolderNames": ["dist"]
-    },
-    {
-      "operationName": "_phase:build",
-      "outputFolderNames": ["dist"]
     }
   ]
 }
