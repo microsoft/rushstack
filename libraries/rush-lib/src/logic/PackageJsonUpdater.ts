@@ -325,7 +325,6 @@ export class PackageJsonUpdater {
       this._rushConfiguration
     );
 
-    // console.log('adding project, updating projects: ', projects);
     const allPackageUpdates: IUpdateProjectOptions[] = [];
     const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
       new Set(projects)
