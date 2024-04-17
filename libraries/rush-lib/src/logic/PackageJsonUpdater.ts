@@ -331,7 +331,6 @@ export class PackageJsonUpdater {
       new Set(projects)
     );
     for (const subspace of subspaceSet) {
-      console.log('updating subspace: ', subspace.subspaceName);
       // Projects for this subspace
       allPackageUpdates.push(...(await this._updateProjects(subspace, dependencyAnalyzer, options)));
     }
