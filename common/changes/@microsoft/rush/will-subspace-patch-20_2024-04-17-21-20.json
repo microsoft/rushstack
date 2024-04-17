@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes an issue where rush add affects all packages in a subspace",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
