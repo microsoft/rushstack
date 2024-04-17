@@ -325,11 +325,13 @@ export class PackageJsonUpdater {
       this._rushConfiguration
     );
 
+    // console.log('adding project, updating projects: ', projects);
     const allPackageUpdates: IUpdateProjectOptions[] = [];
     const subspaceSet: ReadonlySet<Subspace> = this._rushConfiguration.getSubspacesForProjects(
       new Set(projects)
     );
     for (const subspace of subspaceSet) {
+      console.log('updating subspace: ', subspace.subspaceName);
       // Projects for this subspace
       allPackageUpdates.push(...(await this._updateProjects(subspace, dependencyAnalyzer, options)));
     }
@@ -342,10 +344,12 @@ export class PackageJsonUpdater {
     dependencyAnalyzer: DependencyAnalyzer,
     options: IPackageJsonUpdaterRushAddOptions
   ): Promise<IUpdateProjectOptions[]> {
-    const { packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
+    const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages } = options;
 
     // Get projects for this subspace
-    const projects: RushConfigurationProject[] = subspace.getProjects();
+    const subspaceProjects: RushConfigurationProject[] = projects.filter(
+      (project) => project.subspace === subspace
+    );
 
     const {
       allVersionsByPackageName,
@@ -363,7 +367,7 @@ export class PackageJsonUpdater {
         commonVersionsConfiguration.preferredVersions.get(packageName);
 
       const version: string = await this._getNormalizedVersionSpec(
-        projects,
+        subspaceProjects,
         packageName,
         initialVersion,
         implicitlyPreferredVersion,
@@ -400,7 +404,7 @@ export class PackageJsonUpdater {
 
     const allPackageUpdates: IUpdateProjectOptions[] = [];
 
-    for (const project of projects) {
+    for (const project of subspaceProjects) {
       const currentProjectUpdate: IUpdateProjectOptions = {
         project: new VersionMismatchFinderProject(project),
         dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,
