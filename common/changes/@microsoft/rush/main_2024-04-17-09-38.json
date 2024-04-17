@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "refactor package-extractor to support subspace",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -33,12 +33,11 @@ export interface IExtractorOptions {
     linkCreation?: 'default' | 'script' | 'none';
     mainProjectName: string;
     overwriteExisting: boolean;
-    pnpmInstallFolder?: string;
     projectConfigurations: IExtractorProjectConfiguration[];
     sourceRootFolder: string;
+    subspaces?: IExtractorSubspace[];
     targetRootFolder: string;
     terminal: ITerminal;
-    transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
 }
 
 // @public
@@ -50,6 +49,16 @@ export interface IExtractorProjectConfiguration {
     patternsToInclude?: string[];
     projectFolder: string;
     projectName: string;
+}
+
+// @public
+export interface IExtractorSubspace {
+    // (undocumented)
+    pnpmInstallFolder?: string;
+    // (undocumented)
+    subspaceName: string;
+    // (undocumented)
+    transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
 }
 
 // @public

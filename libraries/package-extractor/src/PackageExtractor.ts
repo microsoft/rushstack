@@ -72,6 +72,28 @@ export interface IExtractorMetadataJson {
   links: ILinkInfo[];
 }
 
+/**
+ * The extractor subspace configurations
+ *
+ * @public
+ */
+export interface IExtractorSubspace {
+  /**
+   * The subspace name
+   */
+  subspaceName: string;
+  /**
+   * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
+   * to the PNPM virtual store.
+   */
+  pnpmInstallFolder?: string;
+  /**
+   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * transform the package.json prior to extraction.
+   */
+  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson;
+}
+
 interface IExtractorState {
   foldersToCopy: Set<string>;
   packageJsonByPath: Map<string, IPackageJson>;
@@ -193,12 +215,6 @@ export interface IExtractorOptions {
   createArchiveOnly?: boolean;
 
   /**
-   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
-   * transform the package.json prior to extraction.
-   */
-  transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
-
-  /**
    * If dependencies from the "devDependencies" package.json field should be included in the extraction.
    */
   includeDevDependencies?: boolean;
@@ -209,10 +225,10 @@ export interface IExtractorOptions {
   includeNpmIgnoreFiles?: boolean;
 
   /**
-   * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
-   * to the PNPM virtual store.
+   * The subspace list to will be performed while extracting
+   *
    */
-  pnpmInstallFolder?: string;
+  subspaces?: IExtractorSubspace[];
 
   /**
    * The link creation mode to use.
@@ -463,7 +479,7 @@ export class PackageExtractor {
     options: IExtractorOptions,
     state: IExtractorState
   ): Promise<void> {
-    const { terminal, pnpmInstallFolder, transformPackageJson } = options;
+    const { terminal, subspaces } = options;
     const { projectConfigurationsByPath } = state;
 
     const packageJsonFolderPathQueue: AsyncQueue<string> = new AsyncQueue([packageJsonFolder]);
@@ -483,8 +499,13 @@ export class PackageExtractor {
           path.join(packageJsonRealFolderPath, 'package.json')
         );
 
+        const targetSubspace: IExtractorSubspace | undefined = subspaces?.find(
+          (p) => p.pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, p.pnpmInstallFolder)
+        );
+
         // Transform packageJson using the provided transformer, if requested
-        const packageJson: IPackageJson = transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
+        const packageJson: IPackageJson =
+          targetSubspace?.transformPackageJson?.(originalPackageJson) ?? originalPackageJson;
 
         state.packageJsonByPath.set(packageJsonRealFolderPath, packageJson);
         // Union of keys from regular dependencies, peerDependencies, optionalDependencies
@@ -554,12 +575,16 @@ export class PackageExtractor {
         // Replicate the links to the virtual store. Note that if the package has not been hoisted by
         // PNPM, the package will not be resolvable from here.
         // Only apply this logic for packages that were actually installed under the common/temp folder.
-        if (pnpmInstallFolder && Path.isUnder(packageJsonFolderPath, pnpmInstallFolder)) {
+        if (targetSubspace) {
           try {
             // The PNPM virtual store links are created in this folder.  We will resolve the current package
             // from that location and collect any additional links encountered along the way.
             // TODO: This can be configured via NPMRC. We should support that.
-            const pnpmDotFolderPath: string = path.join(pnpmInstallFolder, 'node_modules', '.pnpm');
+            const pnpmDotFolderPath: string = path.join(
+              targetSubspace.pnpmInstallFolder!,
+              'node_modules',
+              '.pnpm'
+            );
 
             // TODO: Investigate how package aliases are handled by PNPM in this case.  For example:
             //
