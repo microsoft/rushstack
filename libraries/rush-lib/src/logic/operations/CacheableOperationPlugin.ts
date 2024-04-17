@@ -126,7 +126,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const operationSettings: IOperationSettings | undefined =
               projectConfiguration?.operationSettingsByOperationName.get(phaseName);
             const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName)
+              ? projectConfiguration.getCacheDisabledReason(operation, fileHashes.keys(), phaseName)
               : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
                 'or one provided by a rig, so it does not support caching.';
 
@@ -180,6 +180,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }
             }
           }
+
+          logCobuildBuildPlan(disjointSet, terminal, this._buildCacheContextByOperation);
 
           for (const operationSet of disjointSet.getAllSets()) {
             if (cobuildConfiguration?.cobuildFeatureEnabled && cobuildConfiguration.cobuildContextId) {
@@ -897,4 +899,112 @@ async function updateAdditionalContextAsync({
       additionalContext['file://' + filePath] = fileHash;
     }
   }
+}
+
+/**
+ * Log the cobuild build plan by cluster. This is intended to help debug situations where cobuilds aren't
+ *  utilizing multiple agents correctly.
+ */
+function logCobuildBuildPlan(
+  disjointSet: DisjointSet<Operation>,
+  terminal: ITerminal,
+  buildCacheByOperation: Map<Operation, IOperationBuildCacheContext>
+): void {
+  const operationToClusterMap: Map<Operation, Set<Operation>> = new Map<Operation, Set<Operation>>();
+
+  function doesClusterDependOnOtherCluster(cluster: Set<Operation>, otherCluster: Set<Operation>): boolean {
+    for (const operation of cluster) {
+      for (const dependent of operation.consumers) {
+        if (otherCluster.has(dependent)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function getDependenciesForCluster(
+    cluster: Set<Operation>,
+    ignoreClusterDependencies: boolean = true
+  ): Set<Operation> {
+    const dependencies: Set<Operation> = new Set<Operation>();
+    for (const operation of cluster) {
+      for (const dependent of operation.dependencies) {
+        if (ignoreClusterDependencies || (!ignoreClusterDependencies && !cluster.has(dependent))) {
+          dependencies.add(dependent);
+        }
+      }
+    }
+    return dependencies;
+  }
+
+  function dedupeShards(operations: Set<Operation>): string[] {
+    const dedupedOperations: Set<string> = new Set<string>();
+    for (const operation of operations) {
+      dedupedOperations.add(
+        `${operation.associatedProject?.packageName ?? ''} (${operation.associatedPhase?.name})`
+      );
+    }
+    return [...dedupedOperations];
+  }
+
+  const clusters: Set<Operation>[] = [...disjointSet.getAllSets()];
+
+  for (const cluster of clusters) {
+    for (const operation of cluster) {
+      operationToClusterMap.set(operation, cluster);
+    }
+  }
+
+  clusters.sort((a, b) => {
+    if (doesClusterDependOnOtherCluster(a, b)) {
+      return -1;
+    }
+    if (doesClusterDependOnOtherCluster(b, a)) {
+      return 1;
+    }
+    return 0;
+  });
+
+  terminal.writeLine('##################################################');
+  const spacingMap: Map<Set<Operation>, number> = new Map<Set<Operation>, number>();
+  for (let clusterIndex: number = 0; clusterIndex < clusters.length; clusterIndex++) {
+    const cluster: Set<Operation> = clusters[clusterIndex];
+    const previousCluster: Set<Operation> | undefined =
+      clusterIndex >= 0 ? clusters[clusterIndex - 1] : undefined;
+    let spacing: number = previousCluster
+      ? [...cluster]
+          .flatMap((e) => [...e.dependencies])
+          .reduce((acc, curr) => {
+            const dependencySpacing: number | undefined = spacingMap.get(operationToClusterMap.get(curr)!);
+            return Math.max(dependencySpacing ? dependencySpacing + 1 : 0, acc);
+          }, 0) ?? 0
+      : 0;
+
+    terminal.writeLine(`Build Graph for Cluster ${clusterIndex}`);
+    terminal.writeLine(
+      `- Dependencies: ${dedupeShards(getDependenciesForCluster(cluster, false)).join(', ') || 'none'}`
+    );
+    terminal.writeLine(
+      `- Clustered by: \n${
+        [...getDependenciesForCluster(cluster)]
+          .filter((e) => buildCacheByOperation.get(e)?.cacheDisabledReason)
+          .map((e) => `  - (${e.runner?.name}) "${buildCacheByOperation.get(e)?.cacheDisabledReason ?? ''}"`)
+          .join('\n') || '  - none'
+      }`
+    );
+    terminal.writeLine('--------------------------------------------------');
+    let previousOperation: Operation | undefined = undefined;
+    for (const operation of cluster) {
+      if (previousOperation && operation.dependencies.has(previousOperation)) {
+        spacing += 1;
+      }
+      const tabs: string = '  '.repeat(spacing);
+      terminal.writeLine(`${tabs}->${operation.name}`);
+      previousOperation = operation;
+    }
+    spacingMap.set(cluster, spacing);
+    terminal.writeLine();
+  }
+  terminal.writeLine('##################################################');
 }
