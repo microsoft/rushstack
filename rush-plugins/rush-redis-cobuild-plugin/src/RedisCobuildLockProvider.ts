@@ -123,7 +123,7 @@ export class RedisCobuildLockProvider implements ICobuildLockProvider {
         EX: lockExpireTimeInSeconds
         // Do not specify GET here since using NX ane GET together requires Redis@7.
       });
-      // Just read the value by lock key to see wether it equals current runner id
+      // Just read the value by lock key to see whether it equals current runner id
       const value: string | null = await this._redisClient.get(lockKey);
       if (value === null) {
         // This should not happen.
