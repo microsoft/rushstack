@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Apr 2024 20:04:25 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Apr 2024 21:58:17 GMT and should not be manually modified.
+
+## 5.120.5
+Wed, 17 Apr 2024 21:58:17 GMT
+
+### Updates
+
+- Fix an issue where rush add affects all packages in a subspace
 
 ## 5.120.4
 Tue, 16 Apr 2024 20:04:25 GMT

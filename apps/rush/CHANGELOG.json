@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.120.5",
+      "tag": "@microsoft/rush_v5.120.5",
+      "date": "Wed, 17 Apr 2024 21:58:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush add affects all packages in a subspace"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.120.4",
       "tag": "@microsoft/rush_v5.120.4",
       "date": "Tue, 16 Apr 2024 20:04:25 GMT",
