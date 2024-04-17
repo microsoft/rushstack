@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes a bug where no-op operations were treated as having build cache disabled.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
