@@ -173,7 +173,7 @@ export class DeployAction extends BaseRushAction {
       throw new Error(`The specified deployment project "${mainProjectName}" was not found in rush.json`);
     }
 
-    const projects = this._getDependencyProjects(rushConfigurationProject);
+    const projects: Set<RushConfigurationProject> = this._getDependencyProjects(rushConfigurationProject);
     if (this.rushConfiguration.packageManager === 'pnpm') {
       for (const project of projects) {
         const pnpmfileConfiguration: PnpmfileConfiguration = await PnpmfileConfiguration.initializeAsync(
