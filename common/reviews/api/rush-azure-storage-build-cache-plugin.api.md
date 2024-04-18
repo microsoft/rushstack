@@ -127,7 +127,7 @@ export interface ITryGetCachedCredentialOptionsThrow extends ITryGetCachedCreden
 }
 
 // @public (undocumented)
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser';
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'ado-codespaces-auth';
 
 // @public (undocumented)
 class RushAzureStorageBuildCachePlugin implements IRushPlugin {

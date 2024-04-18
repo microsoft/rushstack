@@ -17,6 +17,7 @@ import { CredentialCache } from '@rushstack/rush-sdk';
 // See https://github.com/microsoft/rushstack/issues/3432
 import type { ICredentialCacheEntry } from '@rushstack/rush-sdk';
 import { PrintUtilities } from '@rushstack/terminal';
+import { AdoCodespacesAuthCredential } from './AdoCodespacesAuthCredential';
 
 /**
  * @public
@@ -79,7 +80,7 @@ export type AzureEnvironmentName = keyof typeof AzureAuthorityHosts;
 /**
  * @public
  */
-export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser';
+export type LoginFlowType = 'DeviceCode' | 'InteractiveBrowser' | 'ado-codespaces-auth';
 
 /**
  * @public
@@ -274,6 +275,10 @@ export abstract class AzureAuthenticationBase {
     };
 
     switch (loginFlow) {
+      case 'ado-codespaces-auth': {
+        tokenCredential = new AdoCodespacesAuthCredential();
+        break;
+      }
       case 'InteractiveBrowser': {
         tokenCredential = new InteractiveBrowserCredential(interactiveCredentialOptions);
         break;
