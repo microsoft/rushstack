@@ -999,8 +999,10 @@ function logCobuildBuildPlan(
 
   for (let clusterIndex: number = 0; clusterIndex < clusters.length; clusterIndex++) {
     const cluster: Set<Operation> = clusters[clusterIndex];
-    const allClusterDependencies = getDependenciesForCluster(cluster);
-    const outOfClusterDependencies = new Set([...allClusterDependencies].filter((e) => !cluster.has(e)));
+    const allClusterDependencies: Set<Operation> = getDependenciesForCluster(cluster);
+    const outOfClusterDependencies: Set<Operation> = new Set(
+      [...allClusterDependencies].filter((e) => !cluster.has(e))
+    );
 
     terminal.writeLine(`Cluster ${clusterIndex}:`);
     terminal.writeLine(`- Dependencies: ${dedupeShards(outOfClusterDependencies).join(', ') || 'none'}`);
