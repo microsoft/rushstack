@@ -215,10 +215,13 @@ export interface IExtractorOptions {
   createArchiveOnly?: boolean;
 
   /**
-   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * The pnpmfile configuration if using PNPM, otherwise `undefined`. The configuration will be used to
    * transform the package.json prior to extraction.
-   * Can't be used with subspaces, if subspaces field is specified, we will use transformPackageJson configured
-   * for each subspace and ignore this.
+   *
+   * @remarks
+   * When Rush subspaces are enabled, this setting applies to `default` subspace only.  To configure
+   * each subspace, use the {@link IExtractorOptions.subspaces} array instead.  The two approaches
+   * cannot be combined.
    */
   transformPackageJson?: (packageJson: IPackageJson) => IPackageJson | undefined;
 
@@ -235,8 +238,11 @@ export interface IExtractorOptions {
   /**
    * The folder where the PNPM "node_modules" folder is located. This is used to resolve packages linked
    * to the PNPM virtual store.
-   * Can't be used with subspaces, if subspaces field is specified, we will use pnpmInstallFolder configured
-   * for each subspace and ignore this.
+   *
+   * @remarks
+   * When Rush subspaces are enabled, this setting applies to `default` subspace only.  To configure
+   * each subspace, use the {@link IExtractorOptions.subspaces} array instead.  The two approaches
+   * cannot be combined.
    */
   pnpmInstallFolder?: string;
 
@@ -266,8 +272,12 @@ export interface IExtractorOptions {
   dependencyConfigurations?: IExtractorDependencyConfiguration[];
 
   /**
-   * The subspace list that will be performed while extracting
+   * When using Rush subspaces, this setting can be used to provide configuration information for each
+   * individual subspace.
    *
+   * @remarks
+   * To avoid confusion, if this setting is used, then the {@link IExtractorOptions.transformPackageJson} and
+   * {@link IExtractorOptions.pnpmInstallFolder} settings must not be used.
    */
   subspaces?: IExtractorSubspace[];
 }
