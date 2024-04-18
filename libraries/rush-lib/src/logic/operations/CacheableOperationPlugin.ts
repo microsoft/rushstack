@@ -927,18 +927,6 @@ function logCobuildBuildPlan(
     }
   }
 
-  const operationToDepthMap: Map<Operation, number> = new Map<Operation, number>();
-  for (const rootOperation of rootOperations) {
-    const queue: [Operation, number][] = [[rootOperation, 0]];
-    while (queue.length > 0) {
-      const [operation, depth]: [Operation, number] = queue.shift()!;
-      operationToDepthMap.set(operation, depth);
-      for (const consumer of operation.consumers) {
-        queue.push([consumer, depth + 1]);
-      }
-    }
-  }
-
   const queue: Operation[] = [...rootOperations];
   const seen: Set<Operation> = new Set<Operation>();
   while (queue.length > 0) {
@@ -951,10 +939,14 @@ function logCobuildBuildPlan(
     queue.push(...consumers);
   }
 
+  // Get the maximum name length for left padding.
   const maxOperationNameLength: number = Math.max(
     ...executionPlan.map((e) => e.runner?.name?.length ?? 0),
     1
   );
+
+  // This is a lazy way of getting the waterfall chart, basically check for the latest
+  //  dependency and put this operation after that finishes.
   const spacingByDependencyMap: Map<Operation, number> = new Map<Operation, number>();
   for (let index: number = 0; index < executionPlan.length; index++) {
     const operation: Operation = executionPlan[index];
@@ -985,16 +977,11 @@ function logCobuildBuildPlan(
   }
   terminal.writeLine('##################################################');
 
-  function getDependenciesForCluster(
-    cluster: Set<Operation>,
-    ignoreClusterDependencies: boolean = true
-  ): Set<Operation> {
+  function getDependenciesForCluster(cluster: Set<Operation>): Set<Operation> {
     const dependencies: Set<Operation> = new Set<Operation>();
     for (const operation of cluster) {
       for (const dependent of operation.dependencies) {
-        if (ignoreClusterDependencies || (!ignoreClusterDependencies && !cluster.has(dependent))) {
-          dependencies.add(dependent);
-        }
+        dependencies.add(dependent);
       }
     }
     return dependencies;
@@ -1012,14 +999,14 @@ function logCobuildBuildPlan(
 
   for (let clusterIndex: number = 0; clusterIndex < clusters.length; clusterIndex++) {
     const cluster: Set<Operation> = clusters[clusterIndex];
+    const allClusterDependencies = getDependenciesForCluster(cluster);
+    const outOfClusterDependencies = new Set([...allClusterDependencies].filter((e) => !cluster.has(e)));
 
     terminal.writeLine(`Cluster ${clusterIndex}:`);
-    terminal.writeLine(
-      `- Dependencies: ${dedupeShards(getDependenciesForCluster(cluster, false)).join(', ') || 'none'}`
-    );
+    terminal.writeLine(`- Dependencies: ${dedupeShards(outOfClusterDependencies).join(', ') || 'none'}`);
     terminal.writeLine(
       `- Clustered by: \n${
-        [...getDependenciesForCluster(cluster)]
+        [...allClusterDependencies]
           .filter((e) => buildCacheByOperation.get(e)?.cacheDisabledReason)
           .map((e) => `  - (${e.runner?.name}) "${buildCacheByOperation.get(e)?.cacheDisabledReason ?? ''}"`)
           .join('\n') || '  - none'
