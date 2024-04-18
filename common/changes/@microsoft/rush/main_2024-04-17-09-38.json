@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "refactor package-extractor to support subspace",
+      "comment": "Fix an issue where \"rush deploy\" did not correctly deploy build outputs combining multiple Rush subspaces",
       "type": "none"
     }
   ],

@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/package-extractor",
-      "comment": "refactor package-extractor to support subspace",
-      "type": "patch"
+      "comment": "Add support for Rush subspaces",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/package-extractor"
